@@ -86,7 +86,7 @@ void CGameFramework::CreateSwapChain()
 
 	//스왑체인을 생성한다. 
 	m_pdxgiFactory->CreateSwapChainForHwnd(m_pd3dCommandQueue.Get(), m_hWnd, &dxgiSwapChainDesc, &dxgiSwapChainFullScreenDesc, NULL, (IDXGISwapChain1**)m_pdxgiSwapChain.GetAddressOf());
-	
+
 	//“Alt+Enter” 키의 동작을 비활성화한다. 
 	m_pdxgiFactory->MakeWindowAssociation(m_hWnd, DXGI_MWA_NO_ALT_ENTER);
 
@@ -293,6 +293,7 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 		case VK_F8:
 			break;
 		case VK_F9:
+			ChangeSwapChainState();
 			break;
 		default:
 			break;
@@ -427,4 +428,33 @@ void CGameFramework::FrameAdvance()
 	m_pdxgiSwapChain->Present1(1, 0, &dxgiPresentParameters);
 	
 	m_nSwapChainBufferIndex = m_pdxgiSwapChain->GetCurrentBackBufferIndex();
+}
+
+void CGameFramework::ChangeSwapChainState()
+{
+	WaitForGpuComplete();
+
+	// 현재 전체화면 상태인지 확인하고 ! 연산으로 현재 상태의 반대로 전환한다.
+	BOOL bFullScreenState = FALSE;
+	m_pdxgiSwapChain->GetFullscreenState(&bFullScreenState, NULL);
+	m_pdxgiSwapChain->SetFullscreenState(!bFullScreenState, NULL);
+
+	DXGI_MODE_DESC dxgiTargetParameters;
+	dxgiTargetParameters.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+	dxgiTargetParameters.Width = m_nWndClientWidth;
+	dxgiTargetParameters.Height = m_nWndClientHeight;
+	dxgiTargetParameters.RefreshRate.Numerator = 60;
+	dxgiTargetParameters.RefreshRate.Denominator = 1;
+	dxgiTargetParameters.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
+	dxgiTargetParameters.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
+	m_pdxgiSwapChain->ResizeTarget(&dxgiTargetParameters);
+
+	for (int i = 0; i < m_nSwapChainBuffers; i++) if (m_ppd3dRenderTargetBuffers[i]) m_ppd3dRenderTargetBuffers[i].Reset();
+
+	DXGI_SWAP_CHAIN_DESC dxgiSwapChainDesc;
+	m_pdxgiSwapChain->GetDesc(&dxgiSwapChainDesc);
+	m_pdxgiSwapChain->ResizeBuffers(0, 0, 0, DXGI_FORMAT_UNKNOWN, 0);
+
+	m_nSwapChainBufferIndex = m_pdxgiSwapChain->GetCurrentBackBufferIndex();
+	CreateRenderTargetViews();
 }
