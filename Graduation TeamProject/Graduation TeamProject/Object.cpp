@@ -1,16 +1,10 @@
 #include "stdafx.cpp"
 #include "Object.h"
 
-void CGameObject::AddRef()
-{
-}
-
-void CGameObject::Release()
-{
-}
 
 CGameObject::CGameObject()
 {
+	
 }
 
 CGameObject::~CGameObject()

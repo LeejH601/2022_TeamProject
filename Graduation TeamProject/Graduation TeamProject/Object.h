@@ -11,13 +11,6 @@ class CCamera;
 
 class CGameObject
 {
-private:
-	int m_nReferences = 0; // 오브젝트의 참초 횟수를 기억하는 변수
-
-public:
-	void AddRef();
-	void Release();
-
 public:
 	CGameObject();
 	virtual ~CGameObject();
