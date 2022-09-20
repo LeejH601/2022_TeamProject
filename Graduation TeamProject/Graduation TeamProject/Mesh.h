@@ -25,3 +25,12 @@ public:
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, int nSubSet) { }
 };
 
+class CMeshLoadInfo
+{
+public:
+	CMeshLoadInfo();
+	virtual ~CMeshLoadInfo();
+
+public:
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, int nSubSet);
+};
