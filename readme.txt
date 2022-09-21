@@ -1,4 +1,5 @@
 stdafx.cpp 파일은 미리 컴파일된 헤더로 사용하시면 컴파일 시간을 단축할 수 있습니다.
+미리 컴파일된 헤더로 사용하는 방법: Visual Studio에서 Graduation TeamProject 우클릭 -> 속성 -> C/C++ -> 미리 컴파일된 헤더 옵션 사용 선택
 
 루트시그니쳐 레지스터 번호
 CBV
