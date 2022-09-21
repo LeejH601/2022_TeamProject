@@ -5,7 +5,7 @@ CBV
 	b0 : Player - 상수버퍼로 루트시그니처에 직접 할당
 	b1 : Camera - 상수버퍼로 루트시그니처에 직접 할당
 	b2 : GameObject - Range를 통해 디스크립터 테이블로 연결
-	b3 : Light - Range를 통해 디스크립터 테이블로 연결
+	b3 : Light - CBV 뷰로 연결
 
 SRV
 	t0~MAX_SRV_COUNT : 텍스쳐용 SRV 디스크립터 배열. 바인드리스 리소스 구현을 위한 조치
