@@ -1,2 +1,2 @@
-#include "stdafx.cpp"
+#include "stdafx.h"
 #include "Mesh.h"

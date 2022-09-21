@@ -1,4 +1,4 @@
-#include "stdafx.cpp"
+#include "stdafx.h"
 #include "Scene.h"
 
 #define MAX_SRV_COUNT 32

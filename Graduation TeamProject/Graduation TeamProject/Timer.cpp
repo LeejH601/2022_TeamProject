@@ -1,4 +1,4 @@
-#include "stdafx.cpp"
+#include "stdafx.h"
 #include "Timer.h"
 
 CGameTimer::CGameTimer()

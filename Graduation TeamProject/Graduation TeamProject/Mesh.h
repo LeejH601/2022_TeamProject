@@ -1,5 +1,5 @@
 #pragma once
-
+#include "stdafx.h"
 //----------------------------------------------------------------------------
 // 22/09/20 CMesh 클래스 추가 - Leejh
 //----------------------------------------------------------------------------
@@ -101,15 +101,11 @@ protected:
 	UINT                            m_nSlot = 0;
 	UINT                            m_nStride = 0;
 	UINT                            m_nOffset = 0;
-
 	UINT                            m_nStartIndex = 0;
-	int                                m_nBaseVertex = 0;
-
-	BoundingBox                        m_xmBoundingBox;
-
+	int                             m_nBaseVertex = 0;
+	BoundingBox                     m_xmBoundingBox;
 public:
 	UINT                            m_nSubsets = 0;
-
 	CMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, char* pstrFileName = NULL);
 	virtual ~CMesh();
 	void ReleaseUploadBuffers();
