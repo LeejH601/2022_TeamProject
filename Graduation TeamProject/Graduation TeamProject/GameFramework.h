@@ -1,4 +1,6 @@
 #pragma once
+#include "Timer.h"
+
 class CGameFramework
 {
 private:
@@ -50,6 +52,10 @@ private:
 	//뷰포트와 씨저 사각형이다. 
 	D3D12_VIEWPORT m_d3dViewport;
 	D3D12_RECT m_d3dScissorRect;
+
+	CGameTimer					m_GameTimer;
+
+	_TCHAR						m_pszFrameRate[50];
 public:
 	CGameFramework();
 	~CGameFramework();

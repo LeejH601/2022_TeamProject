@@ -11,9 +11,19 @@ class CCamera;
 
 class CGameObject
 {
+private:
+	int								m_nReferences = 0;
+
 public:
 	CGameObject();
 	virtual ~CGameObject();
+
+	void AddRef() { m_nReferences++; }
+	unsigned long Release() { 
+		if (--m_nReferences <= 0) 
+			delete this; 
+		return 1;
+	}
 
 public:
 	char m_pstrFrameName[MAX_FRAMENAME];

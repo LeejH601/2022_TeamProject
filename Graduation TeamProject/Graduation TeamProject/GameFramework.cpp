@@ -9,6 +9,8 @@ CGameFramework::CGameFramework()
 	m_nFenceValue = 0;
 	m_nWndClientWidth = FRAME_BUFFER_WIDTH;
 	m_nWndClientHeight = FRAME_BUFFER_HEIGHT;
+
+	_tcscpy_s(m_pszFrameRate, _T("Graduation Proj ("));
 }
 
 CGameFramework::~CGameFramework()
@@ -255,6 +257,7 @@ void CGameFramework::CreateDepthStencilView()
 
 void CGameFramework::BuildObjects()
 {
+	m_GameTimer.Reset();
 }
 
 void CGameFramework::ReleaseObjects()
@@ -308,6 +311,14 @@ LRESULT CALLBACK CGameFramework::OnProcessingWindowMessage(HWND hWnd, UINT nMess
 {
 	switch (nMessageID)
 	{
+	case WM_ACTIVATE:
+	{
+		if (LOWORD(wParam) == WA_INACTIVE)
+			m_GameTimer.Stop();
+		else
+			m_GameTimer.Start();
+		break;
+	}
 	case WM_SIZE:
 	{
 		m_nWndClientWidth = LOWORD(lParam);
@@ -356,6 +367,8 @@ void CGameFramework::WaitForGpuComplete()
 
 void CGameFramework::FrameAdvance()
 {
+	m_GameTimer.Tick(0.0f);
+
 	ProcessInput();
 	AnimateObjects();
 
@@ -428,6 +441,9 @@ void CGameFramework::FrameAdvance()
 	m_pdxgiSwapChain->Present1(1, 0, &dxgiPresentParameters);
 	
 	m_nSwapChainBufferIndex = m_pdxgiSwapChain->GetCurrentBackBufferIndex();
+
+	m_GameTimer.GetFrameRate(m_pszFrameRate + 17, 37);
+	::SetWindowText(m_hWnd, m_pszFrameRate);
 }
 
 void CGameFramework::ChangeSwapChainState()

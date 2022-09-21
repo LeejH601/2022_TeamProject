@@ -85,7 +85,7 @@ void CGameTimer::Stop()
 void CGameTimer::Reset()
 {
 	__int64 nPerformanceCounter;
-	::QueryPerformanceCounter((LARGE_INTEGER*)nPerformanceCounter);
+	::QueryPerformanceCounter((LARGE_INTEGER*)&nPerformanceCounter);
 
 	m_nBasePerformanceCounter = nPerformanceCounter;
 	m_nLastPerformanceCounter = nPerformanceCounter;

@@ -6,9 +6,19 @@
 
 class CMesh
 {
+private:
+	int								m_nReferences = 0;
+
 public:
 	CMesh() {};
 	virtual ~CMesh() {};
+
+	void AddRef() { m_nReferences++; }
+	unsigned long Release() {
+		if (--m_nReferences <= 0)
+			delete this;
+		return 1;
+	}
 
 protected:
 	D3D12_PRIMITIVE_TOPOLOGY m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;

@@ -29,6 +29,6 @@ private:
 
 	float m_fElapsedTime = 0.0f;
 
-	ComPtr<XMFLOAT4> m_pfClearColor = nullptr;
+	XMFLOAT4 m_fClearColor = {0.0f, 0.0f, 0.0f, 0.0f};
 };
 
