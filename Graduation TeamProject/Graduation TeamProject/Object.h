@@ -11,19 +11,10 @@ class CCamera;
 
 class CGameObject
 {
-private:
-	int								m_nReferences = 0;
-
 public:
 	CGameObject();
 	virtual ~CGameObject();
 
-	void AddRef() { m_nReferences++; }
-	unsigned long Release() { 
-		if (--m_nReferences <= 0) 
-			delete this; 
-		return 1;
-	}
 
 public:
 	char m_pstrFrameName[MAX_FRAMENAME];
@@ -31,9 +22,9 @@ public:
 	XMFLOAT4X4 m_xmf4x4Transform;
 	XMFLOAT4X4 m_xmf4x4World;
 
-	ComPtr<CGameObject> m_pParent = nullptr;
-	ComPtr<CGameObject> m_pChild = nullptr;
-	ComPtr<CGameObject> m_pSibling = nullptr;
+	std::shared_ptr<CGameObject> m_pParent = nullptr;
+	std::shared_ptr<CGameObject> m_pChild = nullptr;
+	std::shared_ptr<CGameObject> m_pSibling = nullptr;
 
 	BoundingOrientedBox m_xmOOBB;
 
@@ -56,9 +47,8 @@ public:
 	void SetPosition(XMFLOAT3 xmf3Position);
 	void SetScale(float x, float y, float z);
 
-	CGameObject* GetParent() { return(m_pParent.Get()); }
+	CGameObject* GetParent() { return(m_pParent.get()); }
 
 	void UpdateTransform(XMFLOAT4X4* pxmf4x4Parent = NULL);
 	CGameObject* FindFrame(char* pstrFrameName);
 };
-

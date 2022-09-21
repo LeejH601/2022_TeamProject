@@ -14,6 +14,9 @@
 #include <memory.h>
 #include <tchar.h>
 
+#include <memory>
+#include <vector>
+
 // Direct3D와 관련있는 헤더 파일들입니다.
 #include <string>
 #include <wrl.h>
