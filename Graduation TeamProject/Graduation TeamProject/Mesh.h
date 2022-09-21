@@ -98,13 +98,13 @@ protected:
 
 	D3D12_PRIMITIVE_TOPOLOGY        m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 	UINT                            m_nSlot = 0;
+	UINT                            m_nSubsets = 0;
 	UINT                            m_nStride = 0;
 	UINT                            m_nOffset = 0;
 	UINT                            m_nStartIndex = 0;
 	int                             m_nBaseVertex = 0;
 	BoundingBox                     m_xmBoundingBox;
 public:
-	UINT                            m_nSubsets = 0;
 	CMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, char* pstrFileName = NULL);
 	virtual ~CMesh();
 	void ReleaseUploadBuffers();
