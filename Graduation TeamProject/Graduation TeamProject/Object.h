@@ -21,9 +21,9 @@ public:
 	XMFLOAT4X4 m_xmf4x4Transform;
 	XMFLOAT4X4 m_xmf4x4World;
 
-	std::shared_ptr<CGameObject> m_pParent = nullptr;
-	std::shared_ptr<CGameObject> m_pChild = nullptr;
-	std::shared_ptr<CGameObject> m_pSibling = nullptr;
+	CGameObject* m_pParent = nullptr;
+	CGameObject* m_pChild = nullptr;
+	CGameObject* m_pSibling = nullptr;
 
 	BoundingOrientedBox m_xmOOBB;
 
@@ -46,7 +46,7 @@ public:
 	void SetPosition(XMFLOAT3 xmf3Position);
 	void SetScale(float x, float y, float z);
 
-	CGameObject* GetParent() { return(m_pParent.get()); }
+	CGameObject* GetParent() { return (m_pParent); }
 
 	void UpdateTransform(XMFLOAT4X4* pxmf4x4Parent = NULL);
 	CGameObject* FindFrame(char* pstrFrameName);
