@@ -25,6 +25,8 @@ public:
 	CGameObject* m_pChild = nullptr;
 	CGameObject* m_pSibling = nullptr;
 
+	std::shared_ptr<CMesh> m_pMesh;
+
 	BoundingOrientedBox m_xmOOBB;
 
 	//----------------------------------------------------------------------------

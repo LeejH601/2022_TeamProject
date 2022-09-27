@@ -1,31 +1,8 @@
-<<<<<<< Updated upstream
 #include "stdafx.h"
 #include "State.h"
-
-CState::CState()
-{
-}
-
-CState::~CState()
-{
-}
-
-void CState::Excute(CGameObject* obj, float fTimeElapsed)
-{
-}
-
-void CState::Enter(CGameObject* obj, float fTimeElapsed)
-{
-}
-
-void CState::Exit(CGameObject* ojb, float fTimeElapsed)
-{
-=======
-#include "State.h"
-#include "stdafx.h"
 
 template<class Entity>
-CStateMachine<Entity>::CStateMachine()
+inline CStateMachine<Entity>::CStateMachine()
 {
 }
 
@@ -79,5 +56,4 @@ void CStateMachine<Entity>::ChangeState(Entity* entity, CState<Entity>* pNewStat
 	PushState(pNewState);
 
 	m_pStates.top()->Enter(entity, fElapsedTime);
->>>>>>> Stashed changes
 }
