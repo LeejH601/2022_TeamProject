@@ -1,5 +1,9 @@
 #pragma once
 #include "Timer.h"
+#include "Object.h"
+#include "Shader.h"
+#include "Mesh.h"
+#include "Scene.h"
 
 class CGameFramework
 {
