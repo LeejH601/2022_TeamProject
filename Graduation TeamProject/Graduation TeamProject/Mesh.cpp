@@ -8,6 +8,7 @@
 // Mesh 생성자
 CMesh::CMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, char* pstrFileName)
 {
+	// pstrFileName에 파일의 이름이 인자로 넘어오면 pstrFileName으로 LoadMeshFromFile을 호출
 	if (pstrFileName) LoadMeshFromFile(pd3dDevice, pd3dCommandList, pstrFileName);
 }
 
@@ -17,6 +18,8 @@ CMesh::~CMesh()
 
 void CMesh::ReleaseUploadBuffers()
 {
+	// UploadBuffer를 Default힙에 내용을 전달한 후 불려지는 함수
+	// 오브젝트를 생성한 뒤 필요없어진 UploadBuffer들을 Release() 하는 함수
 	if (m_pd3dPositionUploadBuffer) m_pd3dPositionUploadBuffer.Reset();
 	if (m_pd3dNormalUploadBuffer) m_pd3dNormalUploadBuffer.Reset();
 	if (m_ppd3dIndexUploadBuffers.data())
@@ -28,12 +31,17 @@ void CMesh::ReleaseUploadBuffers()
 
 void CMesh::OnPreRender(ID3D12GraphicsCommandList* pd3dCommandList)
 {
+	// 기본도형 위상구조를 삼각형리스트로 설정
 	pd3dCommandList->IASetPrimitiveTopology(m_d3dPrimitiveTopology);
+
+	// 정점 버퍼 뷰를 파이프라인의 입력 슬롯에 binding 한다.
+	// 첫번째 인자는 입력 슬롯, 두번째는 정점 뷰의 개수, 세번째는 정점 버퍼 뷰의 첫 원소를 가르키는 포인터이다.
 	pd3dCommandList->IASetVertexBuffers(m_nSlot, m_nVertexBufferViews, m_pd3dVertexBufferViews.data());
 }
 
 void CMesh::Render(ID3D12GraphicsCommandList* pd3dCommandList, UINT nSubset)
 {
+	// 메쉬를 렌더링하는 함수이다.
 	if (m_nSubsets > 0)
 	{
 		pd3dCommandList->IASetIndexBuffer(&m_pd3dIndexBufferViews[nSubset]);
