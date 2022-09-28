@@ -27,7 +27,8 @@ void CGameObject::ReleaseShaderVariables()
 void CGameObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	XMStoreFloat4x4(&m_pcbMappedGameObject->m_xmf4x4World, XMMatrixTranspose(XMLoadFloat4x4(&m_xmf4x4World)));
-
+	D3D12_GPU_VIRTUAL_ADDRESS d3dGpuVirtualAddress = m_pd3dcbGameObject->GetGPUVirtualAddress();
+	pd3dCommandList->SetGraphicsRootConstantBufferView(0, d3dGpuVirtualAddress);
 	// 추가적으로 ResourceIndexInfo를 설정해야함
 }
 
@@ -42,12 +43,15 @@ void CGameObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pC
 	if (m_pMesh)
 	{
 		// CGameObject의 정보를 넘길 버퍼가 있고, 해당 버퍼에 대한 CPU 포인터가 있으면 UpdateShaderVariables 함수를 호출한다.
-		if (m_pd3dcbGameObject && m_pcbMappedGameObject) UpdateShaderVariables(pd3dCommandList);
+		UpdateShaderVariables(pd3dCommandList);
 
 		// 여기서 메쉬의 렌더를 한다.
 		m_pMesh->OnPreRender(pd3dCommandList);
 		m_pMesh->Render(pd3dCommandList, 0);
 	}
+
+	if (m_pChild) m_pChild->Render(pd3dCommandList, pCamera);
+	if (m_pSibling) m_pSibling->Render(pd3dCommandList, pCamera);
 }
 
 XMFLOAT3 CGameObject::GetPosition()

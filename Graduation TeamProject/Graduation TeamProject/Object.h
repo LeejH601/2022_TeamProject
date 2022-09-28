@@ -9,16 +9,10 @@
 class CMesh;
 class CCamera;
 
-struct ResourceIndexInfo {
-	int Texture_base_index;
-	int Texture_normal_map_index;
-	int Material_index;
-};
 
 struct CB_GAMEOBJECT_INFO
 {
 	XMFLOAT4X4 m_xmf4x4World;
-	ResourceIndexInfo ResourceInfo;
 };
 
 class CGameObject
@@ -62,6 +56,8 @@ public:
 	void SetPosition(float x, float y, float z);
 	void SetPosition(XMFLOAT3 xmf3Position);
 	void SetScale(float x, float y, float z);
+
+	void SetMesh(std::shared_ptr<CMesh> target) { m_pMesh = target; }
 
 	CGameObject* GetParent() { return (m_pParent); }
 

@@ -149,17 +149,6 @@ void CGameFramework::CreateDirect3DDevice()
 	/*펜스와 동기화를 위한 이벤트 객체를 생성한다(이벤트 객체의 초기값을 FALSE이다). 이벤트가 실행되면(Signal) 이
 	벤트의 값을 자동적으로 FALSE가 되도록 생성한다.*/
 	m_hFenceEvent = ::CreateEvent(NULL, FALSE, FALSE, NULL);
-
-	//뷰포트를 주 윈도우의 클라이언트 영역 전체로 설정한다. 
-	m_d3dViewport.TopLeftX = 0;
-	m_d3dViewport.TopLeftY = 0;
-	m_d3dViewport.Width = static_cast<float>(m_nWndClientWidth);
-	m_d3dViewport.Height = static_cast<float>(m_nWndClientHeight);
-	m_d3dViewport.MinDepth = 0.0f;
-	m_d3dViewport.MaxDepth = 1.0f;
-
-	//씨저 사각형을 주 윈도우의 클라이언트 영역 전체로 설정한다. 
-	m_d3dScissorRect = { 0, 0, m_nWndClientWidth, m_nWndClientHeight };
 }
 
 void CGameFramework::CreateCommandQueueAndList()
@@ -257,6 +246,35 @@ void CGameFramework::CreateDepthStencilView()
 
 void CGameFramework::BuildObjects()
 {
+	m_pd3dCommandList->Reset(m_pd3dCommandAllocator.Get(), NULL);
+
+	m_pCamera = std::make_unique<CCamera>();
+	m_pCamera->SetViewport(0, 0, m_nWndClientWidth, m_nWndClientHeight, 0.0f, 1.0f);
+	m_pCamera->SetScissorRect(0, 0, m_nWndClientWidth, m_nWndClientHeight);
+	m_pCamera->GenerateProjectionMatrix(1.0f, 500.0f, float(m_nWndClientWidth) / float(m_nWndClientHeight), 90.0f);
+	m_pCamera->GenerateViewMatrix(XMFLOAT3(0.0f, 15.0f, -25.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 1.0f, 0.0f));
+	m_pCamera->CreateShaderVariables(m_pd3dDevice.Get(), m_pd3dCommandList.Get());
+
+	m_pScene = std::make_unique<CScene>();
+	m_pScene->BuildObjects(m_pd3dDevice.Get(), m_pd3dCommandList.Get());
+
+	m_pShader = std::make_unique<CShader>();
+	m_pShader->CreateShader(m_pd3dDevice.Get(), m_pScene->GetGraphicsRootSignature());
+	m_pShader->CreateShaderVariables(m_pd3dDevice.Get(), m_pd3dCommandList.Get());
+
+	std::shared_ptr<CCubeMeshDiffused> pMesh = std::make_shared<CCubeMeshDiffused>(m_pd3dDevice.Get(), m_pd3dCommandList.Get(), 12.0f, 12.0f, 12.0f);
+
+	m_pObject = std::make_unique<CGameObject>();
+	m_pObject->SetMesh(pMesh);
+	m_pObject->CreateShaderVariables(m_pd3dDevice.Get(), m_pd3dCommandList.Get());
+
+	//씬 객체를 생성하기 위하여 필요한 그래픽 명령 리스트들을 명령 큐에 추가한다. 
+	m_pd3dCommandList->Close();
+	ComPtr<ID3D12CommandList> ppd3dCommandLists[] = { m_pd3dCommandList };
+	m_pd3dCommandQueue->ExecuteCommandLists(1, ppd3dCommandLists->GetAddressOf());
+
+	WaitForGpuComplete();
+
 	m_GameTimer.Reset();
 }
 
@@ -390,10 +408,6 @@ void CGameFramework::FrameAdvance()
 	m_pd3dCommandList->ResourceBarrier(1, &d3dResourceBarrier);
 
 
-	//뷰포트와 씨저 사각형을 설정한다.
-	m_pd3dCommandList->RSSetViewports(1, &m_d3dViewport);
-	m_pd3dCommandList->RSSetScissorRects(1, &m_d3dScissorRect);
-
 	//현재의 렌더 타겟에 해당하는 서술자의 CPU 주소(핸들)를 계산한다. 
 	D3D12_CPU_DESCRIPTOR_HANDLE d3dRtvCPUDescriptorHandle = m_pd3dRtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
 	d3dRtvCPUDescriptorHandle.ptr += (m_nSwapChainBufferIndex * m_nRtvDescriptorIncrementSize);
@@ -413,6 +427,9 @@ void CGameFramework::FrameAdvance()
 	m_pd3dCommandList->OMSetRenderTargets(1, &d3dRtvCPUDescriptorHandle, TRUE, &d3dDsvCPUDescriptorHandle);
 
 	//렌더링 코드는 여기에 추가될 것이다. 
+	m_pScene->Render(m_pd3dCommandList.Get(), m_pCamera.get());
+	m_pShader->Render(m_pd3dCommandList.Get());
+	m_pObject->Render(m_pd3dCommandList.Get(), m_pCamera.get());
 
 	/*현재 렌더 타겟에 대한 렌더링이 끝나기를 기다린다. GPU가 렌더 타겟(버퍼)을 더 이상 사용하지 않으면 렌더 타겟
 	의 상태는 프리젠트 상태(D3D12_RESOURCE_STATE_PRESENT)로 바뀔 것이다.*/

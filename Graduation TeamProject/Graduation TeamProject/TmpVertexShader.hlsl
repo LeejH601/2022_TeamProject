@@ -1,27 +1,12 @@
-struct ResourceIndexInfo {
-	int Texture_base_index;
-	int Texture_normal_map_index;
-	int Material_index;
-};
-
-cbuffer cbPlayerInfo : register(b0)
+cbuffer cbGameObjectInfo : register(b0)
 {
-	matrix gmtxPlayerWorld : packoffset(c0);
-	ResourceIndexInfo textureInfo : packoffset(c4);
+	matrix gmtxGameObject : packoffset(c0);
 }
 
-//----------------------------------------------------------------------------
 cbuffer cbCameraInfo : register(b1)
 {
 	matrix gmtxView : packoffset(c0);
 	matrix gmtxProjection : packoffset(c4);
-	float3 gvCameraPosition : packoffset(c8);
-}
-
-cbuffer cbGameObjectInfo : register(b2)
-{
-	matrix gmtxGameObject : packoffset(c0);
-	ResourceIndexInfo ResourceInfo : packoffset(c4);
 }
 
 struct VS_INPUT
