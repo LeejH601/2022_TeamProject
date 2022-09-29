@@ -262,11 +262,12 @@ void CGameFramework::BuildObjects()
 	m_pShader->CreateShader(m_pd3dDevice.Get(), m_pScene->GetGraphicsRootSignature());
 	m_pShader->CreateShaderVariables(m_pd3dDevice.Get(), m_pd3dCommandList.Get());
 
-	std::shared_ptr<CCubeMeshDiffused> pMesh = std::make_shared<CCubeMeshDiffused>(m_pd3dDevice.Get(), m_pd3dCommandList.Get(), 12.0f, 12.0f, 12.0f);
+	std::shared_ptr<CCubeMeshDiffused> pMesh = std::make_shared<CCubeMeshDiffused>(m_pd3dDevice.Get(), m_pd3dCommandList.Get(), 10.0f, 10.0f, 10.0f);
 
 	m_pObject = std::make_unique<CGameObject>();
 	m_pObject->SetMesh(pMesh);
 	m_pObject->CreateShaderVariables(m_pd3dDevice.Get(), m_pd3dCommandList.Get());
+	m_pObject->SetPosition(XMFLOAT3(0.0f, 0.0f, 0.0f));
 
 	//씬 객체를 생성하기 위하여 필요한 그래픽 명령 리스트들을 명령 큐에 추가한다. 
 	m_pd3dCommandList->Close();
@@ -429,7 +430,7 @@ void CGameFramework::FrameAdvance()
 	//렌더링 코드는 여기에 추가될 것이다. 
 	m_pScene->Render(m_pd3dCommandList.Get(), m_pCamera.get());
 	m_pShader->Render(m_pd3dCommandList.Get());
-	m_pObject->Render(m_pd3dCommandList.Get(), m_pCamera.get());
+	m_pObject->Render(m_pd3dCommandList.Get());
 
 	/*현재 렌더 타겟에 대한 렌더링이 끝나기를 기다린다. GPU가 렌더 타겟(버퍼)을 더 이상 사용하지 않으면 렌더 타겟
 	의 상태는 프리젠트 상태(D3D12_RESOURCE_STATE_PRESENT)로 바뀔 것이다.*/
