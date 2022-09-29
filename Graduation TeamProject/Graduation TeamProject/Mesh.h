@@ -93,7 +93,6 @@ protected:
 
 	std::vector<ComPtr<ID3D12Resource>> m_ppd3dIndexBuffers;
 	std::vector<ComPtr<ID3D12Resource>> m_ppd3dIndexUploadBuffers;
-
 	std::vector<D3D12_INDEX_BUFFER_VIEW> m_pd3dIndexBufferViews;
 
 	D3D12_PRIMITIVE_TOPOLOGY        m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
@@ -113,4 +112,13 @@ public:
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, UINT nSubset);
 
 	void LoadMeshFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, char* pstrFileName);
+};
+
+class CCubeMeshDiffused : public CMesh
+{
+private:
+	std::vector<XMFLOAT4> m_pxmf3Colors;
+public:
+	CCubeMeshDiffused(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fWidth = 2.0f, float fHeight = 2.0f, float fDepth = 2.0f);
+	virtual ~CCubeMeshDiffused();
 };

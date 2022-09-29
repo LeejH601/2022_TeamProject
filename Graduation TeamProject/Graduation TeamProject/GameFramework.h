@@ -1,5 +1,10 @@
 #pragma once
 #include "Timer.h"
+#include "Object.h"
+#include "Shader.h"
+#include "Mesh.h"
+#include "Scene.h"
+#include "Camera.h"
 
 class CGameFramework
 {
@@ -49,9 +54,10 @@ private:
 	UINT64 m_nFenceValue;
 	HANDLE m_hFenceEvent;
 
-	//뷰포트와 씨저 사각형이다. 
-	D3D12_VIEWPORT m_d3dViewport;
-	D3D12_RECT m_d3dScissorRect;
+	std::unique_ptr<CScene> m_pScene = NULL;
+	std::unique_ptr<CGameObject> m_pObject = NULL;
+	std::unique_ptr<CShader> m_pShader = NULL;
+	std::unique_ptr<CCamera> m_pCamera = NULL;
 
 	CGameTimer					m_GameTimer;
 

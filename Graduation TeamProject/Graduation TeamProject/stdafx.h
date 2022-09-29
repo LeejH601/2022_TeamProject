@@ -16,7 +16,7 @@
 
 #include <memory>
 #include <vector>
-#include <stack>
+#include <fstream>
 
 // Direct3D와 관련있는 헤더 파일들입니다.
 #include <string>

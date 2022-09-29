@@ -4,12 +4,33 @@
 
 CGameObject::CGameObject()
 {
+	m_xmf4x4World = Matrix4x4::Identity();
 }
 
 CGameObject::~CGameObject()
 {
-	if (m_pChild) delete m_pChild;
-	if (m_pSibling) delete m_pSibling;
+	ReleaseShaderVariables();
+}
+
+void CGameObject::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	UINT ncbElementBytes = ((sizeof(CB_GAMEOBJECT_INFO) + 255) & ~255);
+	m_pd3dcbGameObject = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, ncbElementBytes, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
+	m_pd3dcbGameObject->Map(0, NULL, (void**)&m_pcbMappedGameObject);
+}
+
+void CGameObject::ReleaseShaderVariables()
+{
+	if (m_pd3dcbGameObject)
+		m_pd3dcbGameObject->Unmap(0, NULL);
+}
+
+void CGameObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	XMStoreFloat4x4(&m_pcbMappedGameObject->m_xmf4x4World, XMMatrixTranspose(XMLoadFloat4x4(&m_xmf4x4World)));
+	D3D12_GPU_VIRTUAL_ADDRESS d3dGpuVirtualAddress = m_pd3dcbGameObject->GetGPUVirtualAddress();
+	pd3dCommandList->SetGraphicsRootConstantBufferView(0, d3dGpuVirtualAddress);
+	// 추가적으로 ResourceIndexInfo를 설정해야함
 }
 
 void CGameObject::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
@@ -22,8 +43,16 @@ void CGameObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pC
 {
 	if (m_pMesh)
 	{
+		// CGameObject의 정보를 넘길 버퍼가 있고, 해당 버퍼에 대한 CPU 포인터가 있으면 UpdateShaderVariables 함수를 호출한다.
+		UpdateShaderVariables(pd3dCommandList);
+
 		// 여기서 메쉬의 렌더를 한다.
+		m_pMesh->OnPreRender(pd3dCommandList);
+		m_pMesh->Render(pd3dCommandList, 0);
 	}
+
+	if (m_pChild) m_pChild->Render(pd3dCommandList, pCamera);
+	if (m_pSibling) m_pSibling->Render(pd3dCommandList, pCamera);
 }
 
 XMFLOAT3 CGameObject::GetPosition()
@@ -33,20 +62,17 @@ XMFLOAT3 CGameObject::GetPosition()
 
 XMFLOAT3 CGameObject::GetLook()
 {
-	// Normalize 해서 넘겨주는 것 필요할지도..?
-	return XMFLOAT3(m_xmf4x4Transform._31, m_xmf4x4Transform._32, m_xmf4x4Transform._33);
+	return Vector3::Normalize(XMFLOAT3(m_xmf4x4Transform._31, m_xmf4x4Transform._32, m_xmf4x4Transform._33));
 }
 
 XMFLOAT3 CGameObject::GetUp()
 {
-	// Normalize 해서 넘겨주는 것 필요할지도..?
-	return XMFLOAT3(m_xmf4x4Transform._21, m_xmf4x4Transform._22, m_xmf4x4Transform._23);
+	return Vector3::Normalize(XMFLOAT3(m_xmf4x4Transform._21, m_xmf4x4Transform._22, m_xmf4x4Transform._23));
 }
 
 XMFLOAT3 CGameObject::GetRight()
 {
-	// Normalize 해서 넘겨주는 것 필요할지도..?
-	return XMFLOAT3(m_xmf4x4Transform._11, m_xmf4x4Transform._12, m_xmf4x4Transform._13);
+	return Vector3::Normalize(XMFLOAT3(m_xmf4x4Transform._11, m_xmf4x4Transform._12, m_xmf4x4Transform._13));
 }
 
 void CGameObject::SetPosition(float x, float y, float z)

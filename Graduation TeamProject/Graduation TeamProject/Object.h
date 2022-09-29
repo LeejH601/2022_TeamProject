@@ -1,5 +1,6 @@
 #pragma once
 #include "stdafx.h"
+#include "Mesh.h"
 //----------------------------------------------------------------------------
 // 22/09/20 CGameObject 클래스 추가 - Leejh
 //----------------------------------------------------------------------------
@@ -8,28 +9,36 @@
 class CMesh;
 class CCamera;
 
+
+struct CB_GAMEOBJECT_INFO
+{
+	XMFLOAT4X4 m_xmf4x4World;
+};
+
 class CGameObject
 {
-public:
-	CGameObject();
-	virtual ~CGameObject();
-
-
-public:
+private:
 	char m_pstrFrameName[MAX_FRAMENAME];
 
 	XMFLOAT4X4 m_xmf4x4Transform;
 	XMFLOAT4X4 m_xmf4x4World;
 
 	CGameObject* m_pParent = nullptr;
-	CGameObject* m_pChild = nullptr;
-	CGameObject* m_pSibling = nullptr;
+	std::shared_ptr<CGameObject> m_pChild = nullptr;
+	std::shared_ptr<CGameObject> m_pSibling = nullptr;
 
 	std::shared_ptr<CMesh> m_pMesh;
-
 	BoundingOrientedBox m_xmOOBB;
 
-	//----------------------------------------------------------------------------
+	ComPtr<ID3D12Resource> m_pd3dcbGameObject = NULL;
+	CB_GAMEOBJECT_INFO* m_pcbMappedGameObject = NULL;
+public:
+	CGameObject();
+	virtual ~CGameObject();
+
+	void CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+	void ReleaseShaderVariables();
+	void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList);
 
 	void SetChild(CGameObject* pChild, bool bReferenceUpdate = false);
 
@@ -47,6 +56,8 @@ public:
 	void SetPosition(float x, float y, float z);
 	void SetPosition(XMFLOAT3 xmf3Position);
 	void SetScale(float x, float y, float z);
+
+	void SetMesh(std::shared_ptr<CMesh> target) { m_pMesh = target; }
 
 	CGameObject* GetParent() { return (m_pParent); }
 
