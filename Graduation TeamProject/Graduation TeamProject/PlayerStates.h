@@ -1,13 +1,13 @@
 #pragma once
 #include "State.h"
+#include "Player.h"
 
-class CPlayer;
 
 class IdleState : public CState<CPlayer>
 {
 public:
 	IdleState();
-	~IdleState();
+	virtual ~IdleState();
 
 	virtual void Enter(CPlayer* entity, float fElapsedTime);
 	virtual void Execute(CPlayer* entity, float fElapsedTime);
@@ -18,8 +18,9 @@ public:
 
 class WalkState : public CState<CPlayer>
 {
+public:
 	WalkState();
-	~WalkState();
+	virtual ~WalkState();
 
 	virtual void Enter(CPlayer* entity, float fElapsedTime);
 	virtual void Execute(CPlayer* entity, float fElapsedTime);
@@ -30,9 +31,9 @@ class WalkState : public CState<CPlayer>
 
 class RunState : public CState<CPlayer>
 {
-
+public:
 	RunState();
-	~RunState();
+	virtual ~RunState();
 
 	virtual void Enter(CPlayer* entity, float fElapsedTime);
 	virtual void Execute(CPlayer* entity, float fElapsedTime);
@@ -43,8 +44,9 @@ class RunState : public CState<CPlayer>
 
 class EvasionState : public CState<CPlayer>
 {
+public:
 	EvasionState();
-	~EvasionState();
+	virtual ~EvasionState();
 
 	virtual void Enter(CPlayer* entity, float fElapsedTime);
 	virtual void Execute(CPlayer* entity, float fElapsedTime);
@@ -53,3 +55,35 @@ class EvasionState : public CState<CPlayer>
 	virtual bool OnMessage(CPlayer* entitiy, const Telegram&);
 };
 
+class CPlayerstate_manager
+{
+private:
+	std::unique_ptr<CState<CPlayer>> idle;
+	std::unique_ptr<CState<CPlayer>> walk;
+	std::unique_ptr<CState<CPlayer>> run;
+	std::unique_ptr<CState<CPlayer>> evasion;
+
+public:
+	CPlayerstate_manager() {
+		idle = std::make_unique<IdleState>();
+		walk = std::make_unique<WalkState>();
+		run = std::make_unique<RunState>();
+		evasion = std::make_unique<EvasionState>();
+	}
+
+	CState<CPlayer>* Get_state(PLAYERSTATE_TYPE type) {
+		switch (type)
+		{
+		case PLAYERSTATE_TYPE::IDLE:
+			return idle.get();
+		case PLAYERSTATE_TYPE::WALK:
+			return walk.get();
+		case PLAYERSTATE_TYPE::RUN:
+			return run.get();
+		case PLAYERSTATE_TYPE::EVASION:
+			return evasion.get();
+		default:
+			return nullptr;
+		}
+	}
+};

@@ -17,6 +17,7 @@
 #include <memory>
 #include <vector>
 #include <fstream>
+#include <stack>
 
 // Direct3D와 관련있는 헤더 파일들입니다.
 #include <string>
@@ -32,6 +33,7 @@
 #include <DirectXCollision.h>
 #include <DXGIDebug.h>
 
+
 using namespace DirectX;
 using namespace DirectX::PackedVector;
 using Microsoft::WRL::ComPtr;
@@ -45,6 +47,14 @@ using Microsoft::WRL::ComPtr;
 // 주 윈도우 클라이언트 영역의 크기를 표현하는 상수들입니다.
 #define FRAME_BUFFER_WIDTH 800
 #define FRAME_BUFFER_HEIGHT 600
+
+enum class PLAYERSTATE_TYPE
+{
+	IDLE,
+	WALK,
+	RUN,
+	EVASION
+};
 
 //----------------------------------------------------------------------------
 // 22/09/21 CreateBufferResource 함수 정의 - ChoiHS

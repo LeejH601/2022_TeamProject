@@ -3,6 +3,7 @@
 
 #include "stdafx.h"
 #include "GameFramework.h"
+#include "Locator.h"
 #include "Graduation TeamProject.h"
 
 #define MAX_LOADSTRING 100
@@ -11,6 +12,8 @@
 HINSTANCE hInst;                                // 현재 인스턴스입니다.
 WCHAR szTitle[MAX_LOADSTRING];                  // 제목 표시줄 텍스트입니다.
 WCHAR szWindowClass[MAX_LOADSTRING];            // 기본 창 클래스 이름입니다.
+
+CLocator Locator;                               // 중개자 객체
 
 // 게임 프로그램의 골격을 나타내는 CGameFramework 클래스 객체
 CGameFramework gGameFramework;
