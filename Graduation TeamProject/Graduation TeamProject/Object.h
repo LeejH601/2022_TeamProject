@@ -57,6 +57,9 @@ public:
 	void SetPosition(XMFLOAT3 xmf3Position);
 	void SetScale(float x, float y, float z);
 
+	void Rotate(float fPitch = 10.0f, float fYaw = 10.0f, float fRoll = 10.0f);
+	void Rotate(XMFLOAT3* pxmf3Axis, float fAngle);
+
 	void SetMesh(std::shared_ptr<CMesh> target) { m_pMesh = target; }
 
 	CGameObject* GetParent() { return (m_pParent); }

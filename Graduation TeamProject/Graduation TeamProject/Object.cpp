@@ -5,6 +5,7 @@
 CGameObject::CGameObject()
 {
 	m_xmf4x4World = Matrix4x4::Identity();
+	m_xmf4x4Transform = Matrix4x4::Identity();
 }
 
 CGameObject::~CGameObject()
@@ -35,6 +36,11 @@ void CGameObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandLi
 
 void CGameObject::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
 {
+	XMFLOAT3 m_xmf3RevolutionAxis{ 0.0f, 1.0f, 0.0f };
+	float  m_fRotationSpeed = 30.0f;
+
+	Rotate(&m_xmf3RevolutionAxis, m_fRotationSpeed * fTimeElapsed);
+
 	if (m_pChild) m_pChild->Animate(fTimeElapsed, &m_xmf4x4Transform);
 	if (m_pSibling) m_pSibling->Animate(fTimeElapsed, pxmf4x4Parent);
 }
@@ -80,6 +86,8 @@ void CGameObject::SetPosition(float x, float y, float z)
 	m_xmf4x4Transform._41 = x;
 	m_xmf4x4Transform._42 = y;
 	m_xmf4x4Transform._43 = z;
+
+	UpdateTransform(NULL);
 }
 
 void CGameObject::SetPosition(XMFLOAT3 xmf3Position)
@@ -89,6 +97,22 @@ void CGameObject::SetPosition(XMFLOAT3 xmf3Position)
 
 void CGameObject::SetScale(float x, float y, float z)
 {
+}
+
+void CGameObject::Rotate(float fPitch, float fYaw, float fRoll)
+{
+	XMMATRIX mtxRotate = XMMatrixRotationRollPitchYaw(XMConvertToRadians(fPitch), XMConvertToRadians(fYaw), XMConvertToRadians(fRoll));
+	m_xmf4x4Transform = Matrix4x4::Multiply(mtxRotate, m_xmf4x4Transform);
+
+	UpdateTransform(NULL);
+}
+
+void CGameObject::Rotate(XMFLOAT3* pxmf3Axis, float fAngle)
+{
+	XMMATRIX mtxRotate = XMMatrixRotationAxis(XMLoadFloat3(pxmf3Axis), XMConvertToRadians(fAngle));
+	m_xmf4x4Transform = Matrix4x4::Multiply(mtxRotate, m_xmf4x4Transform);
+
+	UpdateTransform(NULL);
 }
 
 void CGameObject::UpdateTransform(XMFLOAT4X4* pxmf4x4Parent)
