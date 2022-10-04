@@ -1,3 +1,4 @@
-Graduation TeamProject/.vs/
-Graduation TeamProject/x64
-Graduation TeamProject/Graduation TeamProject/x64/
+.vs
+debug
+x64
+*.cso
