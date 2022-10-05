@@ -3,9 +3,7 @@
 //#include "stdafx.h"
 #include "State.h"
 
-class Telegram {
-	int a = 0;
-};
+class CTelegram;
 
 template <class Entity>
 class CState
@@ -18,7 +16,7 @@ public:
 	virtual void Execute(Entity* entity, float fElapsedTime) = 0;
 	virtual void Exit(Entity* entitiy, float fElapsedTime) = 0;
 
-	virtual bool OnMessage(Entity* entitiy, const Telegram&) = 0;
+	virtual bool OnMessage(Entity* entitiy, const CTelegram&) = 0;
 };
 
 
@@ -27,7 +25,7 @@ template <class Entity>
 class CStateMachine
 {
 private:
-	std::stack<CState<Entity>*> m_pStates;
+	std::vector<CState<Entity>*> m_pStates;
 	std::shared_ptr<CState<Entity>> m_pGlobalState = nullptr;
 
 public:
@@ -39,7 +37,7 @@ public:
 	CState<Entity>* PopState();
 
 	void Update(Entity* entity, float fElapsedTime);
-	bool HandleMessage(Entity* entity, const Telegram& msg) const;
+	bool HandleMessage(Entity* entity, const CTelegram& msg) const;
 
 	void ChangeState(Entity* entity, CState<Entity>* pNewState, float fElapsedTime, bool is_popPrevious);
 	void processingKeyEvent(Entity* entity, char* key, float fElapsedTime);
@@ -80,7 +78,7 @@ CStateMachine<Entity>::~CStateMachine()
 template<class Entity>
 void CStateMachine<Entity>::PushState(CState<Entity>* state)
 {
-	m_pStates.push(state);
+	m_pStates.push_back(state);
 }
 
 template<class Entity>
@@ -93,8 +91,8 @@ template<class Entity>
 CState<Entity>* CStateMachine<Entity>::PopState()
 {
 	if (!m_pStates.empty()) {
-		CState<Entity>* state = m_pStates.top();
-		m_pStates.pop();
+		CState<Entity>* state = m_pStates.back();
+		m_pStates.pop_back();
 		return state;
 	}
 	return nullptr;
@@ -104,7 +102,7 @@ template<class Entity>
 void CStateMachine<Entity>::Update(Entity* entity, float fElapsedTime)
 {
 	if (!m_pStates.empty()) {
-		m_pStates.top()->Execute(entity, fElapsedTime);
+		m_pStates.back()->Execute(entity, fElapsedTime);
 	}
 
 	if (m_pGlobalState) {
@@ -113,27 +111,32 @@ void CStateMachine<Entity>::Update(Entity* entity, float fElapsedTime)
 }
 
 template<class Entity>
-bool CStateMachine<Entity>::HandleMessage(Entity* entity, const Telegram& msg) const
+bool CStateMachine<Entity>::HandleMessage(Entity* entity, const CTelegram& msg) const
 {
-	return m_pStates->OnMessage(entity, msg);
+	bool flag = false;
+	for (auto state : m_pStates) {
+		if (state->OnMessage(entity, msg))
+			flag = true;
+	}
+	return flag;
 }
 
 template<class Entity>
 void CStateMachine<Entity>::ChangeState(Entity* entity, CState<Entity>* pNewState, float fElapsedTime, bool is_popPrevious)
 {
 	if (!m_pStates.empty())
-		m_pStates.top()->Exit(entity, fElapsedTime);
+		m_pStates.back()->Exit(entity, fElapsedTime);
 
 	if (is_popPrevious) PopState();
 	if (pNewState)
 		PushState(pNewState);
 
-	m_pStates.top()->Enter(entity, fElapsedTime);
+	m_pStates.back()->Enter(entity, fElapsedTime);
 	return;
 }
 
 template<class Entity>
 inline void CStateMachine<Entity>::processingKeyEvent(Entity* entity, char* key, float fElapsedTime)
 {
-	m_pStates.top();
+	m_pStates.back();
 }
