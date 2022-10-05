@@ -2,3 +2,4 @@
 debug
 x64
 *.cso
+*.vcxproj
