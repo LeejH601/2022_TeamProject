@@ -32,7 +32,7 @@ void IdleState::Exit(CPlayer* entitiy, float fElapsedTime)
 	printf("this is IdleState Exit\n");
 }
 
-bool IdleState::OnMessage(CPlayer* entitiy, const Telegram&)
+bool IdleState::OnMessage(CPlayer* entitiy, const CTelegram&)
 {
 	return false;
 }
@@ -66,7 +66,7 @@ void WalkState::Exit(CPlayer* entitiy, float fElapsedTime)
 	printf("this is WalkState Exit\n");
 }
 
-bool WalkState::OnMessage(CPlayer* entitiy, const Telegram&)
+bool WalkState::OnMessage(CPlayer* entitiy, const CTelegram&)
 {
 	return false;
 }
@@ -100,7 +100,7 @@ void RunState::Exit(CPlayer* entitiy, float fElapsedTime)
 	printf("this is RunState Exit\n");
 }
 
-bool RunState::OnMessage(CPlayer* entitiy, const Telegram&)
+bool RunState::OnMessage(CPlayer* entitiy, const CTelegram&)
 {
 	return false;
 }
@@ -128,7 +128,7 @@ void EvasionState::Exit(CPlayer* entitiy, float fElapsedTime)
 	printf("this is EvasionState Exit\n");
 }
 
-bool EvasionState::OnMessage(CPlayer* entitiy, const Telegram&)
+bool EvasionState::OnMessage(CPlayer* entitiy, const CTelegram&)
 {
 	return false;
 }

@@ -13,7 +13,7 @@ public:
 	virtual void Execute(CPlayer* entity, float fElapsedTime);
 	virtual void Exit(CPlayer* entitiy, float fElapsedTime);
 
-	virtual bool OnMessage(CPlayer* entitiy, const Telegram&);
+	virtual bool OnMessage(CPlayer* entitiy, const CTelegram&);
 };
 
 class WalkState : public CState<CPlayer>
@@ -26,7 +26,7 @@ public:
 	virtual void Execute(CPlayer* entity, float fElapsedTime);
 	virtual void Exit(CPlayer* entitiy, float fElapsedTime);
 
-	virtual bool OnMessage(CPlayer* entitiy, const Telegram&);
+	virtual bool OnMessage(CPlayer* entitiy, const CTelegram&);
 };
 
 class RunState : public CState<CPlayer>
@@ -39,7 +39,7 @@ public:
 	virtual void Execute(CPlayer* entity, float fElapsedTime);
 	virtual void Exit(CPlayer* entitiy, float fElapsedTime);
 
-	virtual bool OnMessage(CPlayer* entitiy, const Telegram&);
+	virtual bool OnMessage(CPlayer* entitiy, const CTelegram&);
 };
 
 class EvasionState : public CState<CPlayer>
@@ -52,7 +52,7 @@ public:
 	virtual void Execute(CPlayer* entity, float fElapsedTime);
 	virtual void Exit(CPlayer* entitiy, float fElapsedTime);
 
-	virtual bool OnMessage(CPlayer* entitiy, const Telegram&);
+	virtual bool OnMessage(CPlayer* entitiy, const CTelegram&);
 };
 
 class CPlayerstate_manager

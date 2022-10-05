@@ -56,6 +56,14 @@ enum class PLAYERSTATE_TYPE
 	EVASION
 };
 
+enum class MESSAGE_TYPE
+{
+	Msg_Key_Down_Evasion,
+	Msg_Key_Up_Evasion,
+	Msg_Key_Down_Run,
+	Msg_Key_Up_Run,
+	Msg_None,
+};
 //----------------------------------------------------------------------------
 // 22/09/21 CreateBufferResource 함수 정의 - ChoiHS
 //----------------------------------------------------------------------------

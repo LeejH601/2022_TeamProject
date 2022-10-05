@@ -1,8 +1,12 @@
 #pragma once
 #include "State.h"
+#include "Telegram.h"
 
 class CPlayer {
 	std::unique_ptr<CStateMachine<CPlayer>> m_pStateMachine;
+
+	bool m_bIsDownEvasion;
+	bool m_bIsDownRun;
 
 public:
 	CPlayer() {
@@ -15,7 +19,6 @@ public:
 
 	CStateMachine<CPlayer>* Get_FSM() { return m_pStateMachine.get(); };
 
-	void processingKeyEvent(char key) {
-		//m_pStateMachine
-	};
+	bool OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
+	bool OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
 };
