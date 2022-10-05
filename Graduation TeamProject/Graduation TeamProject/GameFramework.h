@@ -5,6 +5,7 @@
 #include "Mesh.h"
 #include "Scene.h"
 #include "Camera.h"
+#include "Texture.h"
 
 class CGameFramework
 {

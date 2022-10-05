@@ -181,31 +181,74 @@ void CMesh::LoadMeshFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 CCubeMeshDiffused::CCubeMeshDiffused(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fWidth, float fHeight, float fDepth) : CMesh(pd3dDevice, pd3dCommandList)
 {
 	//직육면체는 꼭지점(정점)이 8개이다. 
-	m_nVertices = 8;
+	m_nVertices = 24;
 	m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 	float fx = fWidth * 0.5f, fy = fHeight * 0.5f, fz = fDepth * 0.5f;
 
-	//정점 버퍼는 직육면체의 꼭지점 8개에 대한 정점 데이터를 가진다. 
-	m_pxmf3Positions.push_back(XMFLOAT3(-fx, +fy, -fz));
-	m_pxmf3Positions.push_back(XMFLOAT3(+fx, +fy, -fz));
+	//정점 버퍼는 직육면체의 꼭지점 24개에 대한 정점 데이터를 가진다. 
+	m_pxmf3Positions.push_back(XMFLOAT3(+fx, -fy, +fz));
 	m_pxmf3Positions.push_back(XMFLOAT3(+fx, +fy, +fz));
 	m_pxmf3Positions.push_back(XMFLOAT3(-fx, +fy, +fz));
+	m_pxmf3Positions.push_back(XMFLOAT3(-fx, -fy, +fz));
+
+	m_pxmf3Positions.push_back(XMFLOAT3(-fx, +fy, -fz));
+	m_pxmf3Positions.push_back(XMFLOAT3(+fx, +fy, -fz));
+	m_pxmf3Positions.push_back(XMFLOAT3(+fx, -fy, -fz));
 	m_pxmf3Positions.push_back(XMFLOAT3(-fx, -fy, -fz));
+
+	m_pxmf3Positions.push_back(XMFLOAT3(-fx, +fy, +fz));
+	m_pxmf3Positions.push_back(XMFLOAT3(+fx, +fy, +fz));
+	m_pxmf3Positions.push_back(XMFLOAT3(+fx, +fy, -fz));
+	m_pxmf3Positions.push_back(XMFLOAT3(-fx, +fy, -fz));
+
 	m_pxmf3Positions.push_back(XMFLOAT3(+fx, -fy, -fz));
 	m_pxmf3Positions.push_back(XMFLOAT3(+fx, -fy, +fz));
 	m_pxmf3Positions.push_back(XMFLOAT3(-fx, -fy, +fz));
+	m_pxmf3Positions.push_back(XMFLOAT3(-fx, -fy, -fz));
 
-	m_pxmf3Colors.push_back(XMFLOAT4(rand() / float(RAND_MAX), rand() / float(RAND_MAX), rand() / float(RAND_MAX), rand() / float(RAND_MAX)));
-	m_pxmf3Colors.push_back(XMFLOAT4(rand() / float(RAND_MAX), rand() / float(RAND_MAX), rand() / float(RAND_MAX), rand() / float(RAND_MAX)));
-	m_pxmf3Colors.push_back(XMFLOAT4(rand() / float(RAND_MAX), rand() / float(RAND_MAX), rand() / float(RAND_MAX), rand() / float(RAND_MAX)));
-	m_pxmf3Colors.push_back(XMFLOAT4(rand() / float(RAND_MAX), rand() / float(RAND_MAX), rand() / float(RAND_MAX), rand() / float(RAND_MAX)));
-	m_pxmf3Colors.push_back(XMFLOAT4(rand() / float(RAND_MAX), rand() / float(RAND_MAX), rand() / float(RAND_MAX), rand() / float(RAND_MAX)));
-	m_pxmf3Colors.push_back(XMFLOAT4(rand() / float(RAND_MAX), rand() / float(RAND_MAX), rand() / float(RAND_MAX), rand() / float(RAND_MAX)));
-	m_pxmf3Colors.push_back(XMFLOAT4(rand() / float(RAND_MAX), rand() / float(RAND_MAX), rand() / float(RAND_MAX), rand() / float(RAND_MAX)));
-	m_pxmf3Colors.push_back(XMFLOAT4(rand() / float(RAND_MAX), rand() / float(RAND_MAX), rand() / float(RAND_MAX), rand() / float(RAND_MAX)));
+	m_pxmf3Positions.push_back(XMFLOAT3(-fx, +fy, +fz));
+	m_pxmf3Positions.push_back(XMFLOAT3(-fx, +fy, -fz));
+	m_pxmf3Positions.push_back(XMFLOAT3(-fx, -fy, -fz));
+	m_pxmf3Positions.push_back(XMFLOAT3(-fx, -fy, +fz));
+
+	m_pxmf3Positions.push_back(XMFLOAT3(+fx, +fy, -fz));
+	m_pxmf3Positions.push_back(XMFLOAT3(+fx, +fy, +fz));
+	m_pxmf3Positions.push_back(XMFLOAT3(+fx, -fy, +fz));
+	m_pxmf3Positions.push_back(XMFLOAT3(+fx, -fy, -fz));
+
+
+	m_pxmf2Texcoords.push_back(XMFLOAT2(0.0f, 1.0f));
+	m_pxmf2Texcoords.push_back(XMFLOAT2(0.0f, 0.0f));
+	m_pxmf2Texcoords.push_back(XMFLOAT2(1.0f, 0.0f));
+	m_pxmf2Texcoords.push_back(XMFLOAT2(1.0f, 1.0f));
+
+	m_pxmf2Texcoords.push_back(XMFLOAT2(0.0f, 0.0f));
+	m_pxmf2Texcoords.push_back(XMFLOAT2(1.0f, 0.0f));
+	m_pxmf2Texcoords.push_back(XMFLOAT2(1.0f, 1.0f));
+	m_pxmf2Texcoords.push_back(XMFLOAT2(0.0f, 1.0f));
+
+	m_pxmf2Texcoords.push_back(XMFLOAT2(0.0f, 0.0f));
+	m_pxmf2Texcoords.push_back(XMFLOAT2(1.0f, 0.0f));
+	m_pxmf2Texcoords.push_back(XMFLOAT2(0.0f, 1.0f));
+	m_pxmf2Texcoords.push_back(XMFLOAT2(1.0f, 1.0f));
+
+	m_pxmf2Texcoords.push_back(XMFLOAT2(0.0f, 0.0f));
+	m_pxmf2Texcoords.push_back(XMFLOAT2(0.0f, 1.0f));
+	m_pxmf2Texcoords.push_back(XMFLOAT2(1.0f, 1.0f));
+	m_pxmf2Texcoords.push_back(XMFLOAT2(1.0f, 0.0f));
+
+	m_pxmf2Texcoords.push_back(XMFLOAT2(0.0f, 0.0f));
+	m_pxmf2Texcoords.push_back(XMFLOAT2(1.0f, 0.0f));
+	m_pxmf2Texcoords.push_back(XMFLOAT2(1.0f, 1.0f));
+	m_pxmf2Texcoords.push_back(XMFLOAT2(0.0f, 1.0f));
+
+	m_pxmf2Texcoords.push_back(XMFLOAT2(0.0f, 0.0f));
+	m_pxmf2Texcoords.push_back(XMFLOAT2(1.0f, 0.0f));
+	m_pxmf2Texcoords.push_back(XMFLOAT2(1.0f, 1.0f));
+	m_pxmf2Texcoords.push_back(XMFLOAT2(0.0f, 1.0f));
 
 	m_pd3dPositionBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, m_pxmf3Positions.data(), sizeof(XMFLOAT3) * m_nVertices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dPositionUploadBuffer);
-	m_pd3dNormalBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, m_pxmf3Colors.data(), sizeof(XMFLOAT4) * m_nVertices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dNormalUploadBuffer);
+	m_pd3dNormalBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, m_pxmf2Texcoords.data(), sizeof(XMFLOAT2) * m_nVertices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dNormalUploadBuffer);
 
 	m_nSubsets = 1;
 	m_nVertexBufferViews = 2;
@@ -216,35 +259,29 @@ CCubeMeshDiffused::CCubeMeshDiffused(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 	m_pd3dVertexBufferViews[0].SizeInBytes = sizeof(XMFLOAT3) * m_nVertices;
 
 	m_pd3dVertexBufferViews[1].BufferLocation = m_pd3dNormalBuffer->GetGPUVirtualAddress();
-	m_pd3dVertexBufferViews[1].StrideInBytes = sizeof(XMFLOAT4);
-	m_pd3dVertexBufferViews[1].SizeInBytes = sizeof(XMFLOAT4) * m_nVertices;
+	m_pd3dVertexBufferViews[1].StrideInBytes = sizeof(XMFLOAT2);
+	m_pd3dVertexBufferViews[1].SizeInBytes = sizeof(XMFLOAT2) * m_nVertices;
 
 	m_nIndices = 36;
-
-	//ⓐ 앞면(Front) 사각형의 위쪽 삼각형
-	m_pnIndices.push_back(3); m_pnIndices.push_back(1); m_pnIndices.push_back(0);
-	//ⓑ 앞면(Front) 사각형의 아래쪽 삼각형
-	m_pnIndices.push_back(2); m_pnIndices.push_back(1); m_pnIndices.push_back(3);
-	//ⓒ 윗면(Top) 사각형의 위쪽 삼각형
-	m_pnIndices.push_back(0); m_pnIndices.push_back(5); m_pnIndices.push_back(4);
-	//ⓓ 윗면(Top) 사각형의 아래쪽 삼각형
-	m_pnIndices.push_back(1); m_pnIndices.push_back(5); m_pnIndices.push_back(0);
-	//ⓔ 뒷면(Back) 사각형의 위쪽 삼각형
-	m_pnIndices.push_back(3); m_pnIndices.push_back(4); m_pnIndices.push_back(7);
-	//ⓕ 뒷면(Back) 사각형의 아래쪽 삼각형
-	m_pnIndices.push_back(0); m_pnIndices.push_back(4); m_pnIndices.push_back(3);
-	//ⓖ 아래면(Bottom) 사각형의 위쪽 삼각형
-	m_pnIndices.push_back(1); m_pnIndices.push_back(6); m_pnIndices.push_back(5);
-	//ⓗ 아래면(Bottom) 사각형의 아래쪽 삼각형
-	m_pnIndices.push_back(2); m_pnIndices.push_back(6); m_pnIndices.push_back(1);
-	//ⓘ 옆면(Left) 사각형의 위쪽 삼각형
-	m_pnIndices.push_back(2); m_pnIndices.push_back(7); m_pnIndices.push_back(6);
-	//ⓙ 옆면(Left) 사각형의 아래쪽 삼각형
-	m_pnIndices.push_back(3); m_pnIndices.push_back(7); m_pnIndices.push_back(2);
-	//ⓚ 옆면(Right) 사각형의 위쪽 삼각형
-	m_pnIndices.push_back(6); m_pnIndices.push_back(4); m_pnIndices.push_back(5);
-	//ⓛ 옆면(Right) 사각형의 아래쪽 삼각형
-	m_pnIndices.push_back(7); m_pnIndices.push_back(4); m_pnIndices.push_back(6);
+	m_pnIndices.resize(m_nIndices);
+	//Back
+	m_pnIndices[0] = 0; m_pnIndices[1] = 1; m_pnIndices[2] = 2;
+	m_pnIndices[3] = 0; m_pnIndices[4] = 2; m_pnIndices[5] = 3;
+	//Front
+	m_pnIndices[6] = 4; m_pnIndices[7] = 5; m_pnIndices[8] = 6;
+	m_pnIndices[9] = 4; m_pnIndices[10] = 6; m_pnIndices[11] = 7;
+	//Top
+	m_pnIndices[12] = 8; m_pnIndices[13] = 9; m_pnIndices[14] = 10;
+	m_pnIndices[15] = 8; m_pnIndices[16] = 10; m_pnIndices[17] = 11;
+	//Bottom
+	m_pnIndices[18] = 12; m_pnIndices[19] = 13; m_pnIndices[20] = 14;
+	m_pnIndices[21] = 12; m_pnIndices[22] = 14; m_pnIndices[23] = 15;
+	//Left
+	m_pnIndices[24] = 16; m_pnIndices[25] = 17; m_pnIndices[26] = 18;
+	m_pnIndices[27] = 16; m_pnIndices[28] = 18; m_pnIndices[29] = 19;
+	//Right
+	m_pnIndices[30] = 20; m_pnIndices[31] = 21; m_pnIndices[32] = 22;
+	m_pnIndices[33] = 20; m_pnIndices[34] = 22; m_pnIndices[35] = 23;
 
 	m_nSubsets = 1;
 

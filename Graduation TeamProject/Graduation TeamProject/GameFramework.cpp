@@ -248,6 +248,7 @@ void CGameFramework::BuildObjects()
 {
 	m_pd3dCommandList->Reset(m_pd3dCommandAllocator.Get(), NULL);
 
+	// 카메라 설정
 	m_pCamera = std::make_unique<CCamera>();
 	m_pCamera->SetViewport(0, 0, m_nWndClientWidth, m_nWndClientHeight, 0.0f, 1.0f);
 	m_pCamera->SetScissorRect(0, 0, m_nWndClientWidth, m_nWndClientHeight);
@@ -255,19 +256,30 @@ void CGameFramework::BuildObjects()
 	m_pCamera->GenerateViewMatrix(XMFLOAT3(0.0f, 22.5f, -37.5f), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 1.0f, 0.0f));
 	m_pCamera->CreateShaderVariables(m_pd3dDevice.Get(), m_pd3dCommandList.Get());
 
+	// CScene 생성(RootSignature 생성)
 	m_pScene = std::make_unique<CScene>();
 	m_pScene->BuildObjects(m_pd3dDevice.Get(), m_pd3dCommandList.Get());
 
+	// Shader 생성
 	m_pShader = std::make_unique<CShader>();
 	m_pShader->CreateShader(m_pd3dDevice.Get(), m_pScene->GetGraphicsRootSignature());
 	m_pShader->CreateShaderVariables(m_pd3dDevice.Get(), m_pd3dCommandList.Get());
 
+	// Mesh 생성
 	std::shared_ptr<CCubeMeshDiffused> pMesh = std::make_shared<CCubeMeshDiffused>(m_pd3dDevice.Get(), m_pd3dCommandList.Get(), 10.0f, 10.0f, 10.0f);
+	CTexture* tmpTexture = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
 
+	// Texture 생성
+	tmpTexture->LoadTextureFromDDSFile(m_pd3dDevice.Get(), m_pd3dCommandList.Get(), L"Image/Lava(Diffuse).dds", RESOURCE_TEXTURE2D, 0);
+	tmpTexture->CreateSrvDescriptorHeaps(m_pd3dDevice.Get(), 1);
+	tmpTexture->CreateShaderResourceViews(m_pd3dDevice.Get(), 0, 2);
+
+	// Object 생성
 	m_pObject = std::make_unique<CGameObject>();
 	m_pObject->SetMesh(pMesh);
 	m_pObject->CreateShaderVariables(m_pd3dDevice.Get(), m_pd3dCommandList.Get());
 	m_pObject->SetPosition(XMFLOAT3(0.0f, 0.0f, 0.0f));
+	m_pObject->SetTexture(tmpTexture);
 
 	//씬 객체를 생성하기 위하여 필요한 그래픽 명령 리스트들을 명령 큐에 추가한다. 
 	m_pd3dCommandList->Close();
@@ -276,6 +288,9 @@ void CGameFramework::BuildObjects()
 
 	WaitForGpuComplete();
 
+	m_pShader->ReleaseUploadBuffers();
+	m_pObject->ReleaseUploadBuffers();
+	tmpTexture->ReleaseUploadBuffers();
 	m_GameTimer.Reset();
 }
 

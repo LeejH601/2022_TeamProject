@@ -117,7 +117,7 @@ public:
 class CCubeMeshDiffused : public CMesh
 {
 private:
-	std::vector<XMFLOAT4> m_pxmf3Colors;
+	std::vector<XMFLOAT2> m_pxmf2Texcoords;
 public:
 	CCubeMeshDiffused(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fWidth = 2.0f, float fHeight = 2.0f, float fDepth = 2.0f);
 	virtual ~CCubeMeshDiffused();

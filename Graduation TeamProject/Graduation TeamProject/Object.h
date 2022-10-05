@@ -1,6 +1,7 @@
 #pragma once
 #include "stdafx.h"
 #include "Mesh.h"
+#include "Texture.h"
 //----------------------------------------------------------------------------
 // 22/09/20 CGameObject 클래스 추가 - Leejh
 //----------------------------------------------------------------------------
@@ -8,7 +9,7 @@
 
 class CMesh;
 class CCamera;
-
+class CTexture;
 
 struct CB_GAMEOBJECT_INFO
 {
@@ -30,6 +31,8 @@ private:
 	std::shared_ptr<CMesh> m_pMesh;
 	BoundingOrientedBox m_xmOOBB;
 
+	CTexture* m_pTexture = NULL;
+
 	ComPtr<ID3D12Resource> m_pd3dcbGameObject = NULL;
 	CB_GAMEOBJECT_INFO* m_pcbMappedGameObject = NULL;
 public:
@@ -39,8 +42,10 @@ public:
 	void CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	void ReleaseShaderVariables();
 	void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList);
+	void ReleaseUploadBuffers();
 
 	void SetChild(CGameObject* pChild, bool bReferenceUpdate = false);
+	void SetTexture(CTexture* pTexture) { m_pTexture = pTexture; }
 
 	virtual void OnInitialize() { }
 	virtual void Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent = NULL);
