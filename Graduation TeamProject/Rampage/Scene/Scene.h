@@ -4,7 +4,7 @@
 class CCamera;
 class CScene 
 {
-private:
+protected:
 	ComPtr<ID3D12RootSignature> m_pd3dGraphicsRootSignature = nullptr;
 public:
 	CScene() {}
@@ -26,8 +26,6 @@ public:
 };
 class CMainTMPScene : public CScene
 {
-private:
-	std::unique_ptr<CCamera> m_pCamera;
 public:
 	CMainTMPScene() {}
 	virtual ~CMainTMPScene() {}

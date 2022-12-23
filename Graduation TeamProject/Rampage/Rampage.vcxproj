@@ -144,8 +144,13 @@
     <ClCompile Include="Global\GameFramework.cpp" />
     <ClCompile Include="Global\stdafx.cpp" />
     <ClCompile Include="Global\Timer.cpp" />
+    <ClCompile Include="Object\Mesh.cpp" />
+    <ClCompile Include="Object\Object.cpp" />
+    <ClCompile Include="Object\Texture.cpp" />
     <ClCompile Include="Rampage.cpp" />
     <ClCompile Include="Scene\Scene.cpp" />
+    <ClCompile Include="Shader\CModeledTextureShader.cpp" />
+    <ClCompile Include="Shader\Shader.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Global\Camera.h" />
@@ -154,7 +159,26 @@
     <ClInclude Include="Global\GameFramework.h" />
     <ClInclude Include="Global\stdafx.h" />
     <ClInclude Include="Global\Timer.h" />
+    <ClInclude Include="Object\Mesh.h" />
+    <ClInclude Include="Object\Object.h" />
+    <ClInclude Include="Object\Texture.h" />
     <ClInclude Include="Scene\Scene.h" />
+    <ClInclude Include="Shader\CModeledTextureShader.h" />
+    <ClInclude Include="Shader\Shader.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="Shader\PlayerPixelShader.hlsl">
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">PS_Player</EntryPointName>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.1</ShaderModel>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(Filename).cso</ObjectFileOutput>
+    </FxCompile>
+    <FxCompile Include="Shader\PlayerVertexShader.hlsl">
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">VS_Player</EntryPointName>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.1</ShaderModel>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(Filename).cso</ObjectFileOutput>
+    </FxCompile>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

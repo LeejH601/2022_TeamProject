@@ -1,5 +1,8 @@
 #include "GameFramework.h"
 #include "..\Scene\Scene.h"
+#include "..\Global\Camera.h"
+#include "..\Object\Object.h"
+#include "..\Shader\CModeledTextureShader.h"
 
 CGameFramework::CGameFramework()
 {
@@ -225,7 +228,29 @@ void CGameFramework::BuildObjects()
 	m_pScene = std::make_unique<CMainTMPScene>();
 	m_pScene->BuildObjects(m_pd3dDevice.Get(), m_pd3dCommandList.Get());
 
-	//CLaplacianEdgeShader::Instance()->CreateShader(m_pd3dDevice.Get(), m_pScene->GetGraphicsRootSignature(), 1, 0, NULL);
+	m_pCamera = std::make_unique<CCamera>();
+	m_pCamera->SetViewport(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f, 1.0f);
+	m_pCamera->SetScissorRect(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
+	m_pCamera->GenerateProjectionMatrix(1.0f, 500.0f, float(FRAME_BUFFER_WIDTH) / float(FRAME_BUFFER_HEIGHT), 90.0f);
+	m_pCamera->GenerateViewMatrix(XMFLOAT3(0.0f, 22.5f, -37.5f), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 1.0f, 0.0f));
+	m_pCamera->CreateShaderVariables(m_pd3dDevice.Get(), m_pd3dCommandList.Get());
+
+	DXGI_FORMAT pdxgiObjectRtvFormats = DXGI_FORMAT_R8G8B8A8_UNORM;
+
+	// Shader 생성
+	m_pShader = std::make_unique<CModeledTexturedShader>();
+	m_pShader->CreateShader(m_pd3dDevice.Get(), m_pScene->GetGraphicsRootSignature(), 1, &pdxgiObjectRtvFormats, 0);
+	m_pShader->CreateShaderVariables(m_pd3dDevice.Get(), m_pd3dCommandList.Get());
+	m_pShader->CreateCbvSrvDescriptorHeaps(m_pd3dDevice.Get(), 0, 2);
+
+	m_pObject = std::make_unique<CGameObject>();
+
+	// Mesh 생성
+	std::shared_ptr<CGameObject> SuperCobraObject = std::make_shared<CGameObject>();
+	SuperCobraObject = SuperCobraObject->LoadGeometryFromFile(m_pd3dDevice.Get(), m_pd3dCommandList.Get(), m_pScene->GetGraphicsRootSignature(), "Object/Mi24.bin", m_pShader.get());
+	m_pObject->SetChild(SuperCobraObject);
+	m_pObject->SetPosition(XMFLOAT3(0.0f, 0.0f, 0.0f));
+	m_pObject->UpdateTransform();
 
 	//씬 객체를 생성하기 위하여 필요한 그래픽 명령 리스트들을 명령 큐에 추가한다. 
 	m_pd3dCommandList->Close();
@@ -358,8 +383,10 @@ void CGameFramework::FrameAdvance()
 	
 	OnPrepareRenderTarget();
 
-	m_pScene->Render(m_pd3dCommandList.Get());
-
+	m_pScene->Render(m_pd3dCommandList.Get(), m_pCamera.get());
+	
+	m_pShader->Render(m_pd3dCommandList.Get(), 0);
+	m_pObject->Render(m_pd3dCommandList.Get());
 	OnPostRenderTarget();
 
 	::SynchronizeResourceTransition(m_pd3dCommandList.Get(), m_ppd3dRenderTargetBuffers[m_nSwapChainBufferIndex].Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);

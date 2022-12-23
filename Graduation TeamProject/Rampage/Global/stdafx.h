@@ -31,6 +31,7 @@
 #include <DXGIDebug.h>
 
 //--------------------------
+#include <fstream>
 #include <vector>
 
 using namespace DirectX;

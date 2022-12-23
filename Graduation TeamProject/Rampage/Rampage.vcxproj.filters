@@ -15,6 +15,12 @@
     <Filter Include="Scene">
       <UniqueIdentifier>{631c9f1c-cf1b-45b4-8c16-84e0b9a75af4}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Object">
+      <UniqueIdentifier>{a8a54105-fd31-4105-a66f-06fca8c9900e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shader">
+      <UniqueIdentifier>{7f934215-91c8-4eeb-b1af-c097984d5c62}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Global\stdafx.cpp">
@@ -37,6 +43,21 @@
     </ClCompile>
     <ClCompile Include="Global\DDSTextureLoader12.cpp">
       <Filter>Global</Filter>
+    </ClCompile>
+    <ClCompile Include="Object\Object.cpp">
+      <Filter>Object</Filter>
+    </ClCompile>
+    <ClCompile Include="Object\Texture.cpp">
+      <Filter>Object</Filter>
+    </ClCompile>
+    <ClCompile Include="Shader\Shader.cpp">
+      <Filter>Shader</Filter>
+    </ClCompile>
+    <ClCompile Include="Object\Mesh.cpp">
+      <Filter>Object</Filter>
+    </ClCompile>
+    <ClCompile Include="Shader\CModeledTextureShader.cpp">
+      <Filter>Shader</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -61,5 +82,24 @@
     <ClInclude Include="Global\DDSTextureLoader12.h">
       <Filter>Global</Filter>
     </ClInclude>
+    <ClInclude Include="Object\Object.h">
+      <Filter>Object</Filter>
+    </ClInclude>
+    <ClInclude Include="Object\Texture.h">
+      <Filter>Object</Filter>
+    </ClInclude>
+    <ClInclude Include="Shader\Shader.h">
+      <Filter>Shader</Filter>
+    </ClInclude>
+    <ClInclude Include="Object\Mesh.h">
+      <Filter>Object</Filter>
+    </ClInclude>
+    <ClInclude Include="Shader\CModeledTextureShader.h">
+      <Filter>Shader</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="Shader\PlayerPixelShader.hlsl" />
+    <FxCompile Include="Shader\PlayerVertexShader.hlsl" />
   </ItemGroup>
 </Project>
