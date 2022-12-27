@@ -33,6 +33,9 @@
 //--------------------------
 #include <fstream>
 #include <vector>
+#include "..\ImGui\imgui.h"
+#include "..\ImGui\imgui_impl_dx12.h"
+#include "..\ImGui\imgui_impl_win32.h"
 
 using namespace DirectX;
 using namespace DirectX::PackedVector;
@@ -42,8 +45,8 @@ using Microsoft::WRL::ComPtr;
 #define ROOTSIGNATUREINDEX_CAMERA		1
 
 // 주 윈도우 클라이언트 영역의 크기를 표현하는 상수들입니다.
-#define FRAME_BUFFER_WIDTH 800
-#define FRAME_BUFFER_HEIGHT 600
+#define FRAME_BUFFER_WIDTH 1400
+#define FRAME_BUFFER_HEIGHT 800
 
 #define RESOURCE_TEXTURE1D			0x01
 #define RESOURCE_TEXTURE2D			0x02
@@ -52,6 +55,14 @@ using Microsoft::WRL::ComPtr;
 #define RESOURCE_TEXTURE_CUBE		0x05
 #define RESOURCE_BUFFER				0x06
 #define RESOURCE_STRUCTURED_BUFFER	0x07
+
+#define DECLARE_SINGLE(MYType)\
+public:\
+	static MYType* GetInst()\
+	{\
+		static MYType m_pInst;\
+		return &m_pInst;\
+	}
 
 extern UINT	gnCbvSrvDescriptorIncrementSize;
 extern UINT gnRtvDescriptorIncrementSize;
@@ -62,6 +73,9 @@ extern ComPtr<ID3D12Resource> CreateTextureResourceFromDDSFile(ID3D12Device* pd3
 extern ComPtr<ID3D12Resource> CreateTexture2DResource(ID3D12Device* pd3dDevice, UINT nWidth, UINT nHeight, UINT nElements, UINT nMipLevels, DXGI_FORMAT dxgiFormat, D3D12_RESOURCE_FLAGS d3dResourceFlags, D3D12_RESOURCE_STATES d3dResourceStates, D3D12_CLEAR_VALUE* pd3dClearValue);
 extern void SynchronizeResourceTransition(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Resource* pd3dResource, D3D12_RESOURCE_STATES d3dStateBefore, D3D12_RESOURCE_STATES d3dStateAfter);
 extern void SwapResourcePointer(ID3D12Resource** ppd3dResourceA, ID3D12Resource** ppd3dResourceB);
+
+// Forward declare message handler from imgui_impl_win32.cpp
+extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 namespace Vector3
 {

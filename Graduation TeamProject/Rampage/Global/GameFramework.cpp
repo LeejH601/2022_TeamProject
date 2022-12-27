@@ -2,6 +2,7 @@
 #include "..\Scene\Scene.h"
 #include "..\Global\Camera.h"
 #include "..\Object\Object.h"
+#include "..\ImGui\ImGuiManager.h"
 #include "..\Shader\CModeledTextureShader.h"
 
 CGameFramework::CGameFramework()
@@ -30,8 +31,11 @@ bool CGameFramework::OnCreate(HINSTANCE hInstance, HWND hMainWnd)
 	CreateRenderTargetViews();
 	CreateDepthStencilView();
 
-	////렌더링할 게임 객체를 생성한다.
+	//렌더링할 게임 객체를 생성한다.
 	BuildObjects();
+
+	//ImGui 렌더링을 위한 세팅을 합니다.
+	CImGuiManager::GetInst()->Init(m_hWnd, m_pd3dDevice.Get());
 
 	return(true);
 }
@@ -345,7 +349,10 @@ void CGameFramework::AnimateObjects()
 }
 void CGameFramework::OnPrepareRenderTarget()
 {
-	m_pd3dCommandList->ClearRenderTargetView(m_pd3dSwapRTVCPUHandles[m_nSwapChainBufferIndex], Colors::Black, 0, NULL);
+	ImVec4 clear_color = CImGuiManager::GetInst()->GetColor();
+	const float clear_color_with_alpha[4] = { clear_color.x * clear_color.w, clear_color.y * clear_color.w, clear_color.z * clear_color.w, clear_color.w };
+
+	m_pd3dCommandList->ClearRenderTargetView(m_pd3dSwapRTVCPUHandles[m_nSwapChainBufferIndex], clear_color_with_alpha, 0, NULL);
 	m_pd3dCommandList->OMSetRenderTargets(1, &m_pd3dSwapRTVCPUHandles[m_nSwapChainBufferIndex], FALSE, &m_d3dDsvDescriptorCPUHandle);
 }
 void CGameFramework::OnPostRenderTarget()
@@ -375,6 +382,8 @@ void CGameFramework::FrameAdvance()
 	HRESULT hResult = m_pd3dCommandAllocator->Reset();
 	hResult = m_pd3dCommandList->Reset(m_pd3dCommandAllocator.Get(), NULL);
 
+	CImGuiManager::GetInst()->OnPreRender();
+
 	::SynchronizeResourceTransition(m_pd3dCommandList.Get(), m_ppd3dRenderTargetBuffers[m_nSwapChainBufferIndex].Get(), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
 
 	if (m_pScene) m_pScene->OnPrepareRender(m_pd3dCommandList.Get());
@@ -387,6 +396,9 @@ void CGameFramework::FrameAdvance()
 	
 	m_pShader->Render(m_pd3dCommandList.Get(), 0);
 	m_pObject->Render(m_pd3dCommandList.Get());
+	
+	CImGuiManager::GetInst()->Render(m_pd3dCommandList.Get());
+
 	OnPostRenderTarget();
 
 	::SynchronizeResourceTransition(m_pd3dCommandList.Get(), m_ppd3dRenderTargetBuffers[m_nSwapChainBufferIndex].Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
