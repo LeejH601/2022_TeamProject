@@ -37,15 +37,15 @@ bool CGameFramework::OnCreate(HINSTANCE hInstance, HWND hMainWnd)
 }
 void CGameFramework::OnDestroy()
 {
-	////GPU가 모든 명령 리스트를 실행할 때 까지 기다린다. 
-	//::WaitForGpuComplete(m_pd3dCommandQueue.Get(), m_pd3dFence.Get(), ++m_nFenceValues[m_nSwapChainBufferIndex], m_hFenceEvent);
+	//GPU가 모든 명령 리스트를 실행할 때 까지 기다린다. 
+	::WaitForGpuComplete(m_pd3dCommandQueue.Get(), m_pd3dFence.Get(), ++m_nFenceValues[m_nSwapChainBufferIndex], m_hFenceEvent);
 
-	////게임 객체(게임 월드 객체)를 소멸한다. 
-	//ReleaseObjects();
+	//게임 객체(게임 월드 객체)를 소멸한다. 
+	ReleaseObjects();
 
-	//::CloseHandle(m_hFenceEvent);
+	::CloseHandle(m_hFenceEvent);
 
-	//m_pdxgiSwapChain->SetFullscreenState(FALSE, NULL);
+	m_pdxgiSwapChain->SetFullscreenState(FALSE, NULL);
 }
 void CGameFramework::CreateSwapChain()
 {
