@@ -142,7 +142,6 @@
     <ClCompile Include="Global\Camera.cpp" />
     <ClCompile Include="Global\DDSTextureLoader12.cpp" />
     <ClCompile Include="Global\GameFramework.cpp" />
-    <ClCompile Include="Global\imgui_impl_dx12.cpp" />
     <ClCompile Include="Global\stdafx.cpp" />
     <ClCompile Include="Global\Timer.cpp" />
     <ClCompile Include="ImGui\imgui.cpp" />
@@ -157,6 +156,7 @@
     <ClCompile Include="Object\Object.cpp" />
     <ClCompile Include="Object\Texture.cpp" />
     <ClCompile Include="Rampage.cpp" />
+    <ClCompile Include="Scene\MainScene.cpp" />
     <ClCompile Include="Scene\Scene.cpp" />
     <ClCompile Include="Shader\CModeledTextureShader.cpp" />
     <ClCompile Include="Shader\Shader.cpp" />
@@ -166,7 +166,6 @@
     <ClInclude Include="Global\d3dx12.h" />
     <ClInclude Include="Global\DDSTextureLoader12.h" />
     <ClInclude Include="Global\GameFramework.h" />
-    <ClInclude Include="Global\imgui_impl_dx12.h" />
     <ClInclude Include="Global\stdafx.h" />
     <ClInclude Include="Global\Timer.h" />
     <ClInclude Include="ImGui\imconfig.h" />
@@ -181,6 +180,7 @@
     <ClInclude Include="Object\Mesh.h" />
     <ClInclude Include="Object\Object.h" />
     <ClInclude Include="Object\Texture.h" />
+    <ClInclude Include="Scene\MainScene.h" />
     <ClInclude Include="Scene\Scene.h" />
     <ClInclude Include="Shader\CModeledTextureShader.h" />
     <ClInclude Include="Shader\Shader.h" />

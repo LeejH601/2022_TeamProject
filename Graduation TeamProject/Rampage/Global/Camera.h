@@ -9,7 +9,6 @@ struct VS_CB_CAMERA_INFO
 	XMFLOAT4X4 m_xmf4x4Projection;
 	XMFLOAT4X4 m_xmf4x4InverseProjection;
 };
-
 class CCamera
 {
 protected:
@@ -39,6 +38,9 @@ protected:
 public:
 	CCamera();
 	virtual ~CCamera();
+
+	void Init(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+	void OnPrepareRender(ID3D12GraphicsCommandList* pd3dCommandList);
 
 	void GenerateViewMatrix();
 	void GenerateViewMatrix(XMFLOAT3 xmf3Position, XMFLOAT3 xmf3LookAt, XMFLOAT3 xmf3Up);

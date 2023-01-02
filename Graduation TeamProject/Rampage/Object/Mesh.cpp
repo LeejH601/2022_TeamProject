@@ -21,7 +21,6 @@ void CMesh::ReleaseUploadBuffers()
 		std::vector<ComPtr<ID3D12Resource>>().swap(m_ppd3dIndexUploadBuffers);
 	}
 };
-
 void CMesh::OnPreRender(ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	// 기본도형 위상구조를 삼각형리스트로 설정
@@ -165,6 +164,29 @@ void CMesh::LoadMeshFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 		m_pd3dIndexBufferViews[i].BufferLocation = m_ppd3dIndexBuffers[i]->GetGPUVirtualAddress();
 		m_pd3dIndexBufferViews[i].Format = DXGI_FORMAT_R32_UINT;
 		m_pd3dIndexBufferViews[i].SizeInBytes = sizeof(UINT) * m_pnSubSetIndices[i];
+	}
+}
+void CTexturedModelingMesh::OnPreRender(ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	// 기본도형 위상구조를 삼각형리스트로 설정
+	pd3dCommandList->IASetPrimitiveTopology(m_d3dPrimitiveTopology);
+
+	// 정점 버퍼 뷰를 파이프라인의 입력 슬롯에 binding 한다.
+	// 첫번째 인자는 입력 슬롯, 두번째는 정점 뷰의 개수, 세번째는 정점 버퍼 뷰의 첫 원소를 가르키는 포인터이다.
+	pd3dCommandList->IASetVertexBuffers(m_nSlot, m_pd3dVertexBufferViews.size(), m_pd3dVertexBufferViews.data());
+}
+void CTexturedModelingMesh::Render(ID3D12GraphicsCommandList* pd3dCommandList, UINT nSubset)
+{
+	// 메쉬를 렌더링하는 함수이다.
+	if ((m_nSubMeshes > 0) && (nSubset < m_nSubMeshes))
+	{
+		pd3dCommandList->IASetIndexBuffer(&m_pd3dIndexBufferViews[nSubset]);
+		pd3dCommandList->DrawIndexedInstanced(m_pnSubSetIndices[nSubset], 1, 0, 0, 0);
+	}
+	else
+	{
+
+		pd3dCommandList->DrawInstanced(m_nVertices, 1, m_nOffset, 0);
 	}
 }
 void CTexturedModelingMesh::LoadTexturedMeshFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, FILE* pInFile)

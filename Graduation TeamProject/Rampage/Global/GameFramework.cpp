@@ -1,5 +1,5 @@
 #include "GameFramework.h"
-#include "..\Scene\Scene.h"
+#include "..\Scene\MainScene.h"
 #include "..\Global\Camera.h"
 #include "..\Object\Object.h"
 #include "..\ImGui\ImGuiManager.h"
@@ -233,11 +233,7 @@ void CGameFramework::BuildObjects()
 	m_pScene->BuildObjects(m_pd3dDevice.Get(), m_pd3dCommandList.Get());
 
 	m_pCamera = std::make_unique<CCamera>();
-	m_pCamera->SetViewport(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f, 1.0f);
-	m_pCamera->SetScissorRect(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
-	m_pCamera->GenerateProjectionMatrix(1.0f, 500.0f, float(FRAME_BUFFER_WIDTH) / float(FRAME_BUFFER_HEIGHT), 90.0f);
-	m_pCamera->GenerateViewMatrix(XMFLOAT3(0.0f, 22.5f, -37.5f), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 1.0f, 0.0f));
-	m_pCamera->CreateShaderVariables(m_pd3dDevice.Get(), m_pd3dCommandList.Get());
+	m_pCamera->Init(m_pd3dDevice.Get(), m_pd3dCommandList.Get());
 
 	DXGI_FORMAT pdxgiObjectRtvFormats = DXGI_FORMAT_R8G8B8A8_UNORM;
 
@@ -391,6 +387,8 @@ void CGameFramework::FrameAdvance()
 	m_pd3dCommandList->ClearDepthStencilView(m_d3dDsvDescriptorCPUHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
 	
 	OnPrepareRenderTarget();
+	m_pScene->OnPrepareRender(m_pd3dCommandList.Get());
+	m_pCamera->OnPrepareRender(m_pd3dCommandList.Get());
 
 	m_pScene->Render(m_pd3dCommandList.Get(), m_pCamera.get());
 	

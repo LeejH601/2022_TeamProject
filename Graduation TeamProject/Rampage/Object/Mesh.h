@@ -50,7 +50,7 @@ public:
 	virtual ~CMesh();
 	virtual void ReleaseUploadBuffers();
 
-	void OnPreRender(ID3D12GraphicsCommandList* pd3dCommandList);
+	virtual void OnPreRender(ID3D12GraphicsCommandList* pd3dCommandList);
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, UINT nSubset);
 
 	void LoadMeshFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, char* pstrFileName);
@@ -83,6 +83,8 @@ public:
 	CTexturedModelingMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList) {};
 	virtual ~CTexturedModelingMesh() {};
 
+	virtual void OnPreRender(ID3D12GraphicsCommandList* pd3dCommandList);
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, UINT nSubset);
 	virtual void ReleaseUploadBuffers() {};
 	void LoadTexturedMeshFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, FILE* pInFile);
 };
