@@ -6,6 +6,7 @@ class CScene;
 class CCamera;
 class CShader;
 class CGameObject;
+class CLight;
 class CGameFramework
 {
 private:
@@ -59,6 +60,7 @@ private:
 
 	std::unique_ptr<CShader> m_pShader = NULL;
 	std::unique_ptr<CGameObject> m_pObject = NULL;
+	std::unique_ptr<CLight> m_pLight = NULL;
 
 	CGameTimer					m_GameTimer;
 	POINT						m_ptOldCursorPos;

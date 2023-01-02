@@ -144,6 +144,7 @@
     <ClCompile Include="Global\GameFramework.cpp" />
     <ClCompile Include="Global\stdafx.cpp" />
     <ClCompile Include="Global\Timer.cpp" />
+    <ClCompile Include="Object\Light.cpp" />
     <ClCompile Include="Object\Mesh.cpp" />
     <ClCompile Include="Object\Object.cpp" />
     <ClCompile Include="Object\Texture.cpp" />
@@ -159,6 +160,7 @@
     <ClInclude Include="Global\GameFramework.h" />
     <ClInclude Include="Global\stdafx.h" />
     <ClInclude Include="Global\Timer.h" />
+    <ClInclude Include="Object\Light.h" />
     <ClInclude Include="Object\Mesh.h" />
     <ClInclude Include="Object\Object.h" />
     <ClInclude Include="Object\Texture.h" />
@@ -167,6 +169,9 @@
     <ClInclude Include="Shader\Shader.h" />
   </ItemGroup>
   <ItemGroup>
+    <FxCompile Include="Shader\Light.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </FxCompile>
     <FxCompile Include="Shader\PlayerPixelShader.hlsl">
       <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">PS_Player</EntryPointName>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>

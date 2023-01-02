@@ -3,7 +3,7 @@
 #include "..\Global\Camera.h"
 #include "..\Object\Object.h"
 #include "..\Shader\CModeledTextureShader.h"
-
+#include "..\Object\Light.h"
 CGameFramework::CGameFramework()
 {
 	m_nSwapChainBufferIndex = 0;
@@ -252,6 +252,9 @@ void CGameFramework::BuildObjects()
 	m_pObject->SetPosition(XMFLOAT3(0.0f, 0.0f, 0.0f));
 	m_pObject->UpdateTransform();
 
+	// Light 생성
+	m_pLight = std::make_unique<CLight>();
+	m_pLight->CreateLightVariables(m_pd3dDevice.Get(), m_pd3dCommandList.Get());
 	//씬 객체를 생성하기 위하여 필요한 그래픽 명령 리스트들을 명령 큐에 추가한다. 
 	m_pd3dCommandList->Close();
 	ComPtr<ID3D12CommandList> ppd3dCommandLists[] = { m_pd3dCommandList };
@@ -385,7 +388,9 @@ void CGameFramework::FrameAdvance()
 
 	m_pScene->Render(m_pd3dCommandList.Get(), m_pCamera.get());
 	
+
 	m_pShader->Render(m_pd3dCommandList.Get(), 0);
+	m_pLight->Render((m_pd3dCommandList.Get()));
 	m_pObject->Render(m_pd3dCommandList.Get());
 	OnPostRenderTarget();
 

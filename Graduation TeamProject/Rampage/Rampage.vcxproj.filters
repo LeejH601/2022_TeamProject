@@ -59,6 +59,9 @@
     <ClCompile Include="Shader\CModeledTextureShader.cpp">
       <Filter>Shader</Filter>
     </ClCompile>
+    <ClCompile Include="Object\Light.cpp">
+      <Filter>Object</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Global\stdafx.h">
@@ -97,9 +100,13 @@
     <ClInclude Include="Shader\CModeledTextureShader.h">
       <Filter>Shader</Filter>
     </ClInclude>
+    <ClInclude Include="Object\Light.h">
+      <Filter>Object</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shader\PlayerPixelShader.hlsl" />
     <FxCompile Include="Shader\PlayerVertexShader.hlsl" />
+    <FxCompile Include="Shader\Light.hlsl" />
   </ItemGroup>
 </Project>
