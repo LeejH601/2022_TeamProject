@@ -55,7 +55,7 @@
     <ClCompile Include="Object\Mesh.cpp">
       <Filter>Object</Filter>
     </ClCompile>
-    <ClCompile Include="Shader\CModeledTextureShader.cpp">
+    <ClCompile Include="Shader\ModelShader.cpp">
       <Filter>Shader</Filter>
     </ClCompile>
     <ClCompile Include="ImGui\imgui.cpp">
@@ -84,6 +84,12 @@
     </ClCompile>
     <ClCompile Include="Scene\MainScene.cpp">
       <Filter>Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="Object\Animation.cpp">
+      <Filter>Object</Filter>
+    </ClCompile>
+    <ClCompile Include="Object\ModelManager.cpp">
+      <Filter>Object</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -120,7 +126,7 @@
     <ClInclude Include="Object\Mesh.h">
       <Filter>Object</Filter>
     </ClInclude>
-    <ClInclude Include="Shader\CModeledTextureShader.h">
+    <ClInclude Include="Shader\ModelShader.h">
       <Filter>Shader</Filter>
     </ClInclude>
     <ClInclude Include="ImGui\imconfig.h">
@@ -152,6 +158,12 @@
     </ClInclude>
     <ClInclude Include="Scene\MainScene.h">
       <Filter>Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Object\Animation.h">
+      <Filter>Object</Filter>
+    </ClInclude>
+    <ClInclude Include="Object\ModelManager.h">
+      <Filter>Object</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

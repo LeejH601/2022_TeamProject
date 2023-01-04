@@ -7,12 +7,17 @@
 #define VERTEXT_TANGENT					0x08
 #define VERTEXT_TEXTURE_COORD0			0x10
 #define VERTEXT_TEXTURE_COORD1			0x20
-
+#define VERTEXT_BONE_INDEX_WEIGHT		0x1000
+class CGameObject;
 class CMesh
 {
+public:
+	char m_pstrMeshName[64] = { 0 };
 protected:
 	UINT m_nType = 0x00;
 	UINT m_nVertices = 0;
+	XMFLOAT3 m_xmf3AABBCenter = XMFLOAT3(0.0f, 0.0f, 0.0f);
+	XMFLOAT3 m_xmf3AABBExtents = XMFLOAT3(0.0f, 0.0f, 0.0f);
 
 	std::vector<XMFLOAT3> m_pxmf3Positions;
 	ComPtr<ID3D12Resource> m_pd3dPositionBuffer = NULL;
@@ -46,14 +51,13 @@ protected:
 	BoundingBox                     m_xmBoundingBox;
 public:
 	CMesh() {};
-	CMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, char* pstrFileName = NULL);
 	virtual ~CMesh();
 	virtual void ReleaseUploadBuffers();
 
 	virtual void OnPreRender(ID3D12GraphicsCommandList* pd3dCommandList);
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, UINT nSubset);
 
-	void LoadMeshFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, char* pstrFileName);
+	virtual void LoadMeshFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, FILE* pInFile);
 	UINT GetType() { return(m_nType); }
 };
 class CTexturedModelingMesh : public CMesh
@@ -80,11 +84,57 @@ protected:
 	ComPtr<ID3D12Resource> m_pd3dBiTangentBuffer = NULL;
 	ComPtr<ID3D12Resource> m_pd3dBiTangentUploadBuffer = NULL;
 public:
-	CTexturedModelingMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList) {};
-	virtual ~CTexturedModelingMesh() {};
+	CTexturedModelingMesh() {}
+	CTexturedModelingMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList) {}
+	virtual ~CTexturedModelingMesh() {}
 
+	virtual void CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList) {}
+	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList) {}
 	virtual void OnPreRender(ID3D12GraphicsCommandList* pd3dCommandList);
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, UINT nSubset);
+	virtual void ReleaseUploadBuffers() {}
+	virtual void LoadMeshFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, FILE* pInFile);
+};
+
+#define SKINNED_ANIMATION_BONES		128
+class CSkinnedMesh : public CTexturedModelingMesh
+{
+public:
+	int	m_nBonesPerVertex = 4;
+	
+	std::vector<XMINT4> m_pxmn4BoneIndices;
+	std::vector<XMFLOAT4> m_pxmf4BoneWeights;
+
+	ComPtr<ID3D12Resource> m_pd3dBoneIndexBuffer = NULL;
+	ComPtr<ID3D12Resource> m_pd3dBoneIndexUploadBuffer = NULL;
+	D3D12_VERTEX_BUFFER_VIEW m_d3dBoneIndexBufferView;
+
+	ComPtr<ID3D12Resource> m_pd3dBoneWeightBuffer = NULL;
+	ComPtr<ID3D12Resource> m_pd3dBoneWeightUploadBuffer = NULL;
+	D3D12_VERTEX_BUFFER_VIEW m_d3dBoneWeightBufferView;
+
+	int	m_nSkinningBones = 0;
+
+	std::vector<std::string> m_ppstrSkinningBoneNames;
+	std::vector<CGameObject*> m_ppSkinningBoneFrameCaches; //[m_nSkinningBones]
+
+	std::vector<XMFLOAT4X4> m_pxmf4x4BindPoseBoneOffsets; //Transposed
+
+	ComPtr<ID3D12Resource> m_pd3dcbBindPoseBoneOffsets = NULL;
+	XMFLOAT4X4* m_pcbxmf4x4MappedBindPoseBoneOffsets = NULL;
+
+	ComPtr<ID3D12Resource> m_pd3dcbSkinningBoneTransforms = NULL; //Pointer Only
+	XMFLOAT4X4* m_pcbxmf4x4MappedSkinningBoneTransforms = NULL;
+public:
+	CSkinnedMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList) {}
+	virtual ~CSkinnedMesh() {};
+
+	void PrepareSkinning(CGameObject* pModelRootObject);
+	virtual void OnPreRender(ID3D12GraphicsCommandList* pd3dCommandList);
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, UINT nSubset);
+	virtual void CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList);
 	virtual void ReleaseUploadBuffers() {};
-	void LoadTexturedMeshFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, FILE* pInFile);
+	virtual void LoadMeshFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, FILE* pInFile);
+	void LoadSkinInfoFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, FILE* pInFile);
 };

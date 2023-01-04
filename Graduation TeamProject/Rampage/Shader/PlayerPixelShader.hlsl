@@ -30,6 +30,8 @@ struct VS_OUTPUT
 	float4 position : SV_POSITION;
 	float3 positionW : POSITION;
 	float3 normalW : NORMAL;
+	float3 tangentW : TANGENT;
+	float3 bitangentW : BITANGENT;
 	float2 uv : TEXCOORD;
 };
 
@@ -49,6 +51,5 @@ float4 PS_Player(VS_OUTPUT input) : SV_TARGET
 	if (gnTexturesMask & MATERIAL_EMISSION_MAP) cEmissionColor = gtxMappedTexture[4].Sample(gSamplerState, input.uv);
 
 	float4 cColor = cAlbedoColor + cSpecularColor + cEmissionColor;
-	cColor.a = cAlbedoColor.a + 0.3f;
 	return cColor;
 }

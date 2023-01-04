@@ -1,5 +1,6 @@
 #pragma once
 #include "..\Global\stdafx.h"
+#include "Animation.h"
 
 #define MAX_FRAMENAME 64
 
@@ -21,11 +22,28 @@ struct MATERIAL
 
 class CMesh;
 class CCamera;
+class CShader;
 class CTexture;
 class CMaterial;
+class CSkinnedMesh;
+class CLoadedModelInfo
+{
+public:
+	CLoadedModelInfo() { }
+	~CLoadedModelInfo();
+
+	std::shared_ptr<CGameObject> m_pModelRootObject = NULL;
+
+	int m_nSkinnedMeshes = 0;
+	std::vector<CSkinnedMesh*> m_ppSkinnedMeshes; //[SkinnedMeshes], Skinned Mesh Cache
+
+	CAnimationSets* m_pAnimationSets = NULL;
+public:
+	void PrepareSkinning();
+};
 class CGameObject
 {
-protected:
+public:
 	char m_pstrFrameName[MAX_FRAMENAME];
 
 	XMFLOAT4X4 m_xmf4x4Transform;
@@ -42,6 +60,8 @@ protected:
 	std::shared_ptr<CGameObject> m_pChild = nullptr;
 	std::shared_ptr<CGameObject> m_pSibling = nullptr;
 public:
+	std::unique_ptr<CAnimationController> m_pSkinnedAnimationController;
+
 	CGameObject();
 	virtual ~CGameObject();
 
@@ -77,10 +97,25 @@ public:
 	virtual void ReleaseUploadBuffers();
 
 	virtual void PrepareAnimate() {}
+	virtual void Animate(float fTimeElapsed);
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = NULL);
 
-	void LoadFrameHierarchyFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CGameObject* pParent, FILE* pInFile, CShader* pShader);
-	std::shared_ptr<CGameObject> LoadGeometryFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, const char* pstrFileName, CShader* pShader);
-	void LoadMaterialsFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CGameObject* pParent, FILE* pInFile, CShader* pShader);
+	void FindAndSetSkinnedMesh(CSkinnedMesh** ppSkinnedMeshes, int* pnSkinnedMesh);
+
+	static void LoadAnimationFromFile(FILE* pInFile, CLoadedModelInfo* pLoadedModel);
+	void LoadFrameHierarchyFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CGameObject* pParent, FILE* pInFile);
+	void LoadFrameHierarchyFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CGameObject* pParent, FILE* pInFile, int* pnSkinnedMeshes);
+	std::shared_ptr<CGameObject> LoadGeometryFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, const char* pstrFileName);
+	static std::shared_ptr<CLoadedModelInfo> LoadGeometryAndAnimationFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, const char* pstrFileName);
+	void LoadMaterialsFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CGameObject* pParent, FILE* pInFile);
 	int FindReplicatedTexture(_TCHAR* pstrTextureName, D3D12_GPU_DESCRIPTOR_HANDLE* pd3dSrvGpuDescriptorHandle);
+};
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+class CAngrybotObject : public CGameObject
+{
+public:
+	CAngrybotObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, std::shared_ptr<CLoadedModelInfo> pModel, int nAnimationTracks);
+	virtual ~CAngrybotObject();
 };

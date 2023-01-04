@@ -126,14 +126,14 @@ int CTexture::LoadTextureFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 		strcpy_s(pstrFilePath + 16 + ((bDuplicated) ? (nStrLength - 1) : nStrLength), 64 - 16 - ((bDuplicated) ? (nStrLength - 1) : nStrLength), ".dds");
 
 		size_t nConverted = 0;
-		mbstowcs_s(&nConverted, m_ppstrTextureNames[nIndex].data(), 64, pstrFilePath, _TRUNCATE);
+		mbstowcs_s(&nConverted, const_cast<wchar_t*>(m_ppstrTextureNames[nIndex].data()), 64, pstrFilePath, _TRUNCATE);
 
 #define _WITH_DISPLAY_TEXTURE_NAME
 
 #ifdef _WITH_DISPLAY_TEXTURE_NAME
 		static int nTextures = 0, nRepeatedTextures = 0;
 		TCHAR pstrDebug[256] = { 0 };
-		_stprintf_s(pstrDebug, 256, _T("Texture Name: %d %c %s\n"), (pstrTextureName[0] == '@') ? nRepeatedTextures++ : nTextures++, (pstrTextureName[0] == '@') ? '@' : ' ', m_ppstrTextureNames[nIndex]);
+		_stprintf_s(pstrDebug, 256, _T("Texture Name: %d %c %s\n"), (pstrTextureName[0] == '@') ? nRepeatedTextures++ : nTextures++, (pstrTextureName[0] == '@') ? '@' : ' ', m_ppstrTextureNames[nIndex].c_str());
 		OutputDebugString(pstrDebug);
 #endif
 		if (!bDuplicated)
@@ -152,7 +152,7 @@ int CTexture::LoadTextureFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 					pRootGameObject = pRootGameObject->GetParent();
 				}
 				D3D12_GPU_DESCRIPTOR_HANDLE d3dSrvGpuDescriptorHandle;
-				int nParameterIndex = pRootGameObject->FindReplicatedTexture(m_ppstrTextureNames[nIndex].data(), &d3dSrvGpuDescriptorHandle);
+				int nParameterIndex = pRootGameObject->FindReplicatedTexture(const_cast<wchar_t*>(m_ppstrTextureNames[nIndex].data()), &d3dSrvGpuDescriptorHandle);
 				if (nParameterIndex >= 0)
 				{
 					m_pd3dSrvGpuDescriptorHandles[nIndex] = d3dSrvGpuDescriptorHandle;
