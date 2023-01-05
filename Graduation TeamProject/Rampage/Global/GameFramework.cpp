@@ -240,12 +240,14 @@ void CGameFramework::BuildObjects()
 
 	CModelShader::GetInst()->CreateShader(m_pd3dDevice.Get(), m_pScene->GetGraphicsRootSignature(), 1, &pdxgiObjectRtvFormats, 0);
 	CModelShader::GetInst()->CreateShaderVariables(m_pd3dDevice.Get(), m_pd3dCommandList.Get());
-	CModelShader::GetInst()->CreateCbvSrvDescriptorHeaps(m_pd3dDevice.Get(), 0, 30);
+	CModelShader::GetInst()->CreateCbvSrvDescriptorHeaps(m_pd3dDevice.Get(), 0, 100);
 
-	CModelManager::GetInst();
-	std::shared_ptr<CLoadedModelInfo> pAngrybotModel = CGameObject::LoadGeometryAndAnimationFromFile(m_pd3dDevice.Get(), m_pd3dCommandList.Get(), m_pScene->GetGraphicsRootSignature(), "Object/Angrybot.bin");
-	m_pObject = std::make_unique<CAngrybotObject>(m_pd3dDevice.Get(), m_pd3dCommandList.Get(), m_pScene->GetGraphicsRootSignature(), pAngrybotModel, 1);
-	m_pObject->SetPosition(XMFLOAT3(0.0f, 0.0f, 0.0f));
+	CModelManager::GetInst()->LoadModel(m_pd3dDevice.Get(), m_pd3dCommandList.Get(), "Object/Angrybot.bin");;
+	CModelManager::GetInst()->LoadModel(m_pd3dDevice.Get(), m_pd3dCommandList.Get(), "Object/Eagle.bin");;
+
+	m_pObject = std::make_unique<CEagleObject>(m_pd3dDevice.Get(), m_pd3dCommandList.Get(), 1);
+	m_pObject->SetPosition(XMFLOAT3(0.0f, 12.0f, 100.0f));
+	m_pObject->Rotate(0.0f, 180.0f, 0.0f);
 	m_pObject->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
 
 	// Mesh »ý¼º

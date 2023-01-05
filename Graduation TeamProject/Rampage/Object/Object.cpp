@@ -1,6 +1,7 @@
 #include "Texture.h"
 #include "Mesh.h"
 #include "Object.h"
+#include "ModelManager.h"
 #include "..\Shader\Shader.h"
 #include "..\Shader\ModelShader.h"
 
@@ -13,11 +14,9 @@ CGameObject::CGameObject()
 CGameObject::~CGameObject()
 {
 }
-
 void CGameObject::ReleaseShaderVariables()
 {
 }
-
 void CGameObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	XMFLOAT4X4 xmf4x4World;
@@ -29,7 +28,6 @@ void CGameObject::ReleaseUploadBuffers()
 	if (m_pMesh)
 		m_pMesh->ReleaseUploadBuffers();
 }
-
 void CGameObject::SetChild(std::shared_ptr<CGameObject> pChild, bool bReferenceUpdate)
 {
 	if (m_pChild)
@@ -63,7 +61,6 @@ void CGameObject::SetMaterial(int nMaterial, std::shared_ptr<CMaterial> pMateria
 {
 	m_ppMaterials[nMaterial] = pMaterial;
 }
-
 void CGameObject::SetTexture(std::shared_ptr<CTexture> pTexture)
 {
 	if (!m_ppMaterials.data())
@@ -106,7 +103,6 @@ void CGameObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pC
 	if (m_pChild) m_pChild->Render(pd3dCommandList, pCamera);
 	if (m_pSibling) m_pSibling->Render(pd3dCommandList, pCamera);
 }
-
 XMFLOAT3 CGameObject::GetPosition()
 {
 	return XMFLOAT3(m_xmf4x4Transform._41, m_xmf4x4Transform._42, m_xmf4x4Transform._43);
@@ -131,7 +127,6 @@ UINT CGameObject::GetMeshType()
 { 
 	return((m_pMesh) ? m_pMesh->GetType() : 0x00); 
 }
-
 void CGameObject::SetPosition(float x, float y, float z)
 {
 	m_xmf4x4Transform._41 = x;
@@ -151,7 +146,6 @@ void CGameObject::SetScale(float x, float y, float z)
 
 	UpdateTransform(NULL);
 }
-
 void CGameObject::Rotate(float fPitch, float fYaw, float fRoll)
 {
 	XMMATRIX mtxRotate = XMMatrixRotationRollPitchYaw(XMConvertToRadians(fPitch), XMConvertToRadians(fYaw), XMConvertToRadians(fRoll));
@@ -166,7 +160,6 @@ void CGameObject::Rotate(XMFLOAT3* pxmf3Axis, float fAngle)
 
 	UpdateTransform(NULL);
 }
-
 void CGameObject::UpdateTransform(XMFLOAT4X4* pxmf4x4Parent)
 {
 	m_xmf4x4World = (pxmf4x4Parent) ? Matrix4x4::Multiply(m_xmf4x4Transform, *pxmf4x4Parent) : m_xmf4x4Transform;
@@ -184,145 +177,7 @@ CGameObject* CGameObject::FindFrame(const char* pstrFrameName)
 
 	return(NULL);
 }
-
-void CGameObject::LoadAnimationFromFile(FILE* pInFile, CLoadedModelInfo* pLoadedModel)
-{
-	char pstrToken[64] = { '\0' };
-	UINT nReads = 0;
-
-	int nAnimationSets = 0;
-
-	for (; ; )
-	{
-		::ReadStringFromFile(pInFile, pstrToken);
-		if (!strcmp(pstrToken, "<AnimationSets>:"))
-		{
-			nAnimationSets = ::ReadIntegerFromFile(pInFile);
-			pLoadedModel->m_pAnimationSets = new CAnimationSets(nAnimationSets);
-		}
-		else if (!strcmp(pstrToken, "<FrameNames>:"))
-		{
-			pLoadedModel->m_pAnimationSets->m_nAnimatedBoneFrames = ::ReadIntegerFromFile(pInFile);
-			pLoadedModel->m_pAnimationSets->m_ppAnimatedBoneFrameCaches.resize(pLoadedModel->m_pAnimationSets->m_nAnimatedBoneFrames);
-
-			for (int j = 0; j < pLoadedModel->m_pAnimationSets->m_nAnimatedBoneFrames; j++)
-			{
-				::ReadStringFromFile(pInFile, pstrToken);
-				pLoadedModel->m_pAnimationSets->m_ppAnimatedBoneFrameCaches[j] = pLoadedModel->m_pModelRootObject->FindFrame(pstrToken);
-
-#ifdef _WITH_DEBUG_SKINNING_BONE
-				TCHAR pstrDebug[256] = { 0 };
-				TCHAR pwstrAnimationBoneName[64] = { 0 };
-				TCHAR pwstrBoneCacheName[64] = { 0 };
-				size_t nConverted = 0;
-				mbstowcs_s(&nConverted, pwstrAnimationBoneName, 64, pstrToken, _TRUNCATE);
-				mbstowcs_s(&nConverted, pwstrBoneCacheName, 64, pLoadedModel->m_ppAnimatedBoneFrameCaches[j]->m_pstrFrameName, _TRUNCATE);
-				_stprintf_s(pstrDebug, 256, _T("AnimationBoneFrame:: Cache(%s) AnimationBone(%s)\n"), pwstrBoneCacheName, pwstrAnimationBoneName);
-				OutputDebugString(pstrDebug);
-#endif
-			}
-		}
-		else if (!strcmp(pstrToken, "<AnimationSet>:"))
-		{
-			int nAnimationSet = ::ReadIntegerFromFile(pInFile);
-
-			::ReadStringFromFile(pInFile, pstrToken); //Animation Set Name
-
-			float fLength = ::ReadFloatFromFile(pInFile);
-			int nFramesPerSecond = ::ReadIntegerFromFile(pInFile);
-			int nKeyFrames = ::ReadIntegerFromFile(pInFile);
-
-			pLoadedModel->m_pAnimationSets->m_pAnimationSets[nAnimationSet] = new CAnimationSet(fLength, nFramesPerSecond, nKeyFrames, pLoadedModel->m_pAnimationSets->m_nAnimatedBoneFrames, pstrToken);
-
-			for (int i = 0; i < nKeyFrames; i++)
-			{
-				::ReadStringFromFile(pInFile, pstrToken);
-				if (!strcmp(pstrToken, "<Transforms>:"))
-				{
-					int nKey = ::ReadIntegerFromFile(pInFile); //i
-					float fKeyTime = ::ReadFloatFromFile(pInFile);
-
-					CAnimationSet* pAnimationSet = pLoadedModel->m_pAnimationSets->m_pAnimationSets[nAnimationSet];
-					pAnimationSet->m_pfKeyFrameTimes[i] = fKeyTime;
-					nReads = (UINT)::fread(pAnimationSet->m_ppxmf4x4KeyFrameTransforms[i], sizeof(XMFLOAT4X4), pLoadedModel->m_pAnimationSets->m_nAnimatedBoneFrames, pInFile);
-				}
-			}
-		}
-		else if (!strcmp(pstrToken, "</AnimationSets>"))
-		{
-			break;
-		}
-	}
-}
-
-void CGameObject::LoadFrameHierarchyFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CGameObject* pParent, FILE* pInFile)
-{
-	char pstrToken[64] = { '\0' };
-
-	BYTE nStrLength = 0;
-	UINT nReads = 0;
-
-	int nFrame = 0, nTextures = 0;
-
-	for (; ; )
-	{
-		nReads = (UINT)::fread(&nStrLength, sizeof(BYTE), 1, pInFile);
-		nReads = (UINT)::fread(pstrToken, sizeof(char), nStrLength, pInFile);
-		pstrToken[nStrLength] = '\0';
-
-		if (!strcmp(pstrToken, "<Frame>:"))
-		{
-			nReads = (UINT)::fread(&nFrame, sizeof(int), 1, pInFile);
-			nReads = (UINT)::fread(&nTextures, sizeof(int), 1, pInFile);
-
-			nReads = (UINT)::fread(&nStrLength, sizeof(BYTE), 1, pInFile);
-			nReads = (UINT)::fread(m_pstrFrameName, sizeof(char), nStrLength, pInFile);
-			m_pstrFrameName[nStrLength] = '\0';
-		}
-		else if (!strcmp(pstrToken, "<Transform>:"))
-		{
-			XMFLOAT3 xmf3Position, xmf3Rotation, xmf3Scale;
-			XMFLOAT4 xmf4Rotation;
-			nReads = (UINT)::fread(&xmf3Position, sizeof(float), 3, pInFile);
-			nReads = (UINT)::fread(&xmf3Rotation, sizeof(float), 3, pInFile); //Euler Angle
-			nReads = (UINT)::fread(&xmf3Scale, sizeof(float), 3, pInFile);
-			nReads = (UINT)::fread(&xmf4Rotation, sizeof(float), 4, pInFile); //Quaternion
-		}
-		else if (!strcmp(pstrToken, "<TransformMatrix>:"))
-		{
-			nReads = (UINT)::fread(&m_xmf4x4Transform, sizeof(float), 16, pInFile);
-		}
-		else if (!strcmp(pstrToken, "<Mesh>:"))
-		{
-			std::shared_ptr<CTexturedModelingMesh> pMesh = std::make_shared<CTexturedModelingMesh>(pd3dDevice, pd3dCommandList);
-			pMesh->LoadMeshFromFile(pd3dDevice, pd3dCommandList, pInFile);
-			SetMesh(pMesh);
-		}
-		else if (!strcmp(pstrToken, "<Materials>:"))
-		{
-			LoadMaterialsFromFile(pd3dDevice, pd3dCommandList, pParent, pInFile);
-		}
-		else if (!strcmp(pstrToken, "<Children>:"))
-		{
-			int nChilds = 0;
-			nReads = (UINT)::fread(&nChilds, sizeof(int), 1, pInFile);
-			if (nChilds > 0)
-			{
-				for (int i = 0; i < nChilds; i++)
-				{
-					std::shared_ptr<CGameObject> pChild = std::make_shared<CGameObject>();
-					pChild->LoadFrameHierarchyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, this, pInFile);
-					if (pChild) SetChild(pChild);
-				}
-			}
-		}
-		else if (!strcmp(pstrToken, "</Frame>"))
-		{
-			break;
-		}
-	}
-}
-void CGameObject::LoadFrameHierarchyFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CGameObject* pParent, FILE* pInFile, int* pnSkinnedMeshes)
+void CGameObject::LoadFrameHierarchyFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CGameObject* pParent, FILE* pInFile, int* pnSkinnedMeshes)
 {
 	char pstrToken[64] = { '\0' };
 	UINT nReads = 0;
@@ -382,7 +237,7 @@ void CGameObject::LoadFrameHierarchyFromFile(ID3D12Device* pd3dDevice, ID3D12Gra
 				for (int i = 0; i < nChilds; i++)
 				{
 					std::shared_ptr<CGameObject> pChild = std::make_shared<CGameObject>();
-					pChild->LoadFrameHierarchyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, this, pInFile, pnSkinnedMeshes);
+					pChild->LoadFrameHierarchyFromFile(pd3dDevice, pd3dCommandList, this, pInFile, pnSkinnedMeshes);
 					if (pChild) SetChild(pChild);
 #ifdef _WITH_DEBUG_FRAME_HIERARCHY
 					TCHAR pstrDebug[256] = { 0 };
@@ -397,64 +252,6 @@ void CGameObject::LoadFrameHierarchyFromFile(ID3D12Device* pd3dDevice, ID3D12Gra
 			break;
 		}
 	}
-}
-std::shared_ptr<CGameObject> CGameObject::LoadGeometryFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, const char* pstrFileName)
-{
-	FILE* pInFile = NULL;
-	::fopen_s(&pInFile, pstrFileName, "rb");
-	::rewind(pInFile);
-
-	std::shared_ptr<CGameObject> pGameObject = std::make_shared<CGameObject>();
-	pGameObject->LoadFrameHierarchyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, NULL, pInFile);
-#define _WITH_DEBUG_FRAME_HIERARCHY
-#ifdef _WITH_DEBUG_FRAME_HIERARCHY
-	TCHAR pstrDebug[256] = { 0 };
-	_stprintf_s(pstrDebug, 256, _T("Frame Hierarchy\n"));
-	OutputDebugString(pstrDebug);
-
-	CGameObject::PrintFrameInfo(pGameObject.get(), NULL);
-#endif
-
-	return(pGameObject);
-}
-std::shared_ptr<CLoadedModelInfo> CGameObject::LoadGeometryAndAnimationFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, const char* pstrFileName)
-{
-	FILE* pInFile = NULL;
-	::fopen_s(&pInFile, pstrFileName, "rb");
-	::rewind(pInFile);
-
-	std::shared_ptr<CLoadedModelInfo> pLoadedModel = std::make_shared<CLoadedModelInfo>();
-
-	pLoadedModel->m_pModelRootObject = std::make_shared<CGameObject>();
-
-	char pstrToken[64] = { '\0' };
-
-	for (; ; )
-	{
-		if (::ReadStringFromFile(pInFile, pstrToken))
-		{
-			if (!strcmp(pstrToken, "<Hierarchy>:"))
-			{
-				pLoadedModel->m_pModelRootObject->LoadFrameHierarchyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, NULL, pInFile, &pLoadedModel->m_nSkinnedMeshes);
-				::ReadStringFromFile(pInFile, pstrToken); //"</Hierarchy>"
-			}
-			else if (!strcmp(pstrToken, "<Animation>:"))
-			{
-				LoadAnimationFromFile(pInFile, pLoadedModel.get());
-				pLoadedModel->PrepareSkinning();
-			}
-			else if (!strcmp(pstrToken, "</Animation>:"))
-			{
-				break;
-			}
-		}
-		else
-		{
-			break;
-		}
-	}
-
-	return (pLoadedModel);
 }
 void CGameObject::PrintFrameInfo(CGameObject* pGameObject, CGameObject* pParent)
 {
@@ -591,7 +388,6 @@ int CGameObject::FindReplicatedTexture(_TCHAR* pstrTextureName, D3D12_GPU_DESCRI
 
 	return(nParameterIndex);
 }
-
 void CGameObject::FindAndSetSkinnedMesh(CSkinnedMesh** ppSkinnedMeshes, int* pnSkinnedMesh)
 {
 	if (m_pMesh && (m_pMesh->GetType() & VERTEXT_BONE_INDEX_WEIGHT)) ppSkinnedMeshes[(*pnSkinnedMesh)++] = (CSkinnedMesh*)(m_pMesh.get());
@@ -599,31 +395,37 @@ void CGameObject::FindAndSetSkinnedMesh(CSkinnedMesh** ppSkinnedMeshes, int* pnS
 	if (m_pSibling) m_pSibling->FindAndSetSkinnedMesh(ppSkinnedMeshes, pnSkinnedMesh);
 	if (m_pChild) m_pChild->FindAndSetSkinnedMesh(ppSkinnedMeshes, pnSkinnedMesh);
 }
-
-CLoadedModelInfo::~CLoadedModelInfo()
-{
-}
-
-void CLoadedModelInfo::PrepareSkinning()
-{
-	int nSkinnedMesh = 0;
-	m_ppSkinnedMeshes.resize(m_nSkinnedMeshes);
-	m_pModelRootObject->FindAndSetSkinnedMesh(m_ppSkinnedMeshes.data(), &nSkinnedMesh);
-
-	for (int i = 0; i < m_nSkinnedMeshes; i++) m_ppSkinnedMeshes[i]->PrepareSkinning(m_pModelRootObject.get());
-}
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
-CAngrybotObject::CAngrybotObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, std::shared_ptr<CLoadedModelInfo> pModel, int nAnimationTracks)
+CAngrybotObject::CAngrybotObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks)
 {
-	std::shared_ptr<CLoadedModelInfo> pAngrybotModel = pModel;
-	if (!pAngrybotModel) pAngrybotModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Player.bin");
+	CLoadedModelInfo* pAngrybotModel = CModelManager::GetInst()->GetModelInfo("Object/Angrybot.bin");
+	if (!pAngrybotModel) pAngrybotModel = CModelManager::GetInst()->LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, "Model/Player.bin");
 
 	SetChild(pAngrybotModel->m_pModelRootObject, true);
-	m_pSkinnedAnimationController = std::make_unique<CAnimationController>(pd3dDevice, pd3dCommandList, nAnimationTracks, pAngrybotModel.get());
+	m_pSkinnedAnimationController = std::make_unique<CAnimationController>(pd3dDevice, pd3dCommandList, nAnimationTracks, pAngrybotModel);
 }
-
 CAngrybotObject::~CAngrybotObject()
 {
+}
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+CEagleObject::CEagleObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks)
+{
+	CLoadedModelInfo* pEagleModel = CModelManager::GetInst()->GetModelInfo("Object/Eagle.bin");;
+	if (!pEagleModel) pEagleModel = CModelManager::GetInst()->LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, "Model/Eagle.bin");
+
+	SetChild(pEagleModel->m_pModelRootObject, true);
+	m_pSkinnedAnimationController = std::make_unique<CAnimationController>(pd3dDevice, pd3dCommandList, nAnimationTracks, pEagleModel);
+}
+CEagleObject::~CEagleObject()
+{
+}
+void CEagleObject::Animate(float fTimeElapsed)
+{
+	XMFLOAT3 xmf3Position = GetPosition();
+	xmf3Position.z -= 20.0f * fTimeElapsed;
+	Rotate(0.0f, 0.0f, 0.0f);
+	SetPosition(xmf3Position);
+	CGameObject::Animate(fTimeElapsed);
 }

@@ -1,6 +1,7 @@
 #include "Animation.h"
 #include "Object.h"
 #include "Mesh.h"
+#include "ModelManager.h"
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 CAnimationSet::CAnimationSet(float fLength, int nFramesPerSecond, int nKeyFrames, int nAnimatedBones, char* pstrName)
