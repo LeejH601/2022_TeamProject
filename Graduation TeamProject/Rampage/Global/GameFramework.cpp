@@ -270,8 +270,8 @@ void CGameFramework::BuildObjects()
 	XMFLOAT3 xmf3Scale(18.0f, 6.0f, 18.0f);
 	XMFLOAT4 xmf4Color(0.0f, 0.5f, 0.0f, 0.0f);
 	m_pTerrain = std::make_unique<CHeightMapTerrain>(m_pd3dDevice.Get(), m_pd3dCommandList.Get(), m_pScene->GetGraphicsRootSignature(), _T("Image/HeightMap.raw"), 257, 257, 257, 257, xmf3Scale, xmf4Color, m_pTerrainShader.get());
-	//m_pTerrain->SetPosition(XMFLOAT3(-800.f, -750.f, -800.f));
-	m_pTerrain->SetPosition(XMFLOAT3(0.f, 0.f, 0.f));
+	m_pTerrain->SetPosition(XMFLOAT3(-800.f, -750.f, -800.f));
+	//m_pTerrain->SetPosition(XMFLOAT3(0.f, 0.f, 0.f));
 
 
 
