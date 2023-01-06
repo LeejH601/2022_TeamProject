@@ -43,6 +43,7 @@ protected:
 	std::shared_ptr<CGameObject> m_pSibling = nullptr;
 public:
 	CGameObject();
+	CGameObject(int nMaterials);
 	virtual ~CGameObject();
 
 	char* GetFrameName() { return m_pstrFrameName; }

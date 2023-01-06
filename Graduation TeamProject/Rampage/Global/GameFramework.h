@@ -5,8 +5,10 @@
 class CScene;
 class CCamera;
 class CShader;
+class CTerrainShader;
 class CGameObject;
 class CLight;
+class CHeightMapTerrain;
 class CGameFramework
 {
 private:
@@ -61,6 +63,9 @@ private:
 	std::unique_ptr<CShader> m_pShader = NULL;
 	std::unique_ptr<CGameObject> m_pObject = NULL;
 	std::unique_ptr<CLight> m_pLight = NULL;
+
+	std::unique_ptr<CTerrainShader> m_pTerrainShader = NULL;
+	std::unique_ptr<CHeightMapTerrain> m_pTerrain = NULL;
 
 	CGameTimer					m_GameTimer;
 	POINT						m_ptOldCursorPos;

@@ -6,7 +6,7 @@
 #define MATERIAL_DETAIL_ALBEDO_MAP	0x20
 #define MATERIAL_DETAIL_NORMAL_MAP	0x40
 
-#include "Light.hlsl"
+
 
 cbuffer cbGameObjectInfo : register(b0)
 {
@@ -46,6 +46,8 @@ struct PS_MULTIPLE_RENDER_TARGETS_OUTPUT
 	float4 f4CameraNormal : SV_TARGET6;
 };
 
+#include "Light.hlsl"
+
 [earlydepthstencil]
 PS_MULTIPLE_RENDER_TARGETS_OUTPUT PS_Player(VS_OUTPUT input) : SV_TARGET
 {
@@ -63,12 +65,15 @@ PS_MULTIPLE_RENDER_TARGETS_OUTPUT PS_Player(VS_OUTPUT input) : SV_TARGET
 	if (gnTexturesMask & MATERIAL_METALLIC_MAP) cMetallicColor = gtxMappedTexture[3].Sample(gSamplerState, input.uv);
 	if (gnTexturesMask & MATERIAL_EMISSION_MAP) cEmissionColor = gtxMappedTexture[4].Sample(gSamplerState, input.uv);
 
-	float4 cIllumination = float4(1.0f, 1.0f, 1.0f, 1.0f);
+
 	float4 cColor = cAlbedoColor + cSpecularColor + cEmissionColor;
 	cColor.a = cAlbedoColor.a + 0.3f;
-	cColor = lerp(cColor, cIllumination, 0.3f);
+
+	float3 normalW = normalize(input.normalW);
+	float4 cIllumination = Lighting(input.positionW, normalW);
+	cColor = lerp(cColor, cIllumination, 0.2f);
 	output.f4Scene = output.f4Color = cColor;
-	cIllumination = Lighting(input.positionW, cNormalColor) * cAlbedoColor;
+	
 	
 	return output;
 
