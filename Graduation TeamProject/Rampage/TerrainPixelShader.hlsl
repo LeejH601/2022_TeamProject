@@ -1,11 +1,8 @@
-
-Texture2D gtxtTerrainTexture : register(t7);
-Texture2D gtxtDetailTexture : register(t8);
-Texture2D gtxtAlphaTexture : register(t9);
+Texture2D gtxtTerrainTexture : register(t0);
+Texture2D gtxtDetailTexture : register(t1);
+Texture2D gtxtAlphaTexture : register(t2);
 
 SamplerState gSamplerState : register(s0);
-
-
 
 struct VS_TERRAIN_OUTPUT
 {

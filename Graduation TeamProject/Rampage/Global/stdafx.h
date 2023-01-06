@@ -43,6 +43,8 @@ using Microsoft::WRL::ComPtr;
 
 // 루트 시그니쳐 번호를 표현하는 상수들입니다.
 #define ROOTSIGNATUREINDEX_CAMERA		1
+#define ROOTSIGNATUREINDEX_LIGHT		5
+
 
 // 주 윈도우 클라이언트 영역의 크기를 표현하는 상수들입니다.
 #define FRAME_BUFFER_WIDTH 1400

@@ -58,7 +58,6 @@ public:
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, UINT nSubset);
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList);
 
-	virtual void LoadMeshFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, FILE* pInFile);
 	UINT GetType() { return(m_nType); }
 };
 class CTexturedModelingMesh : public CMesh
@@ -136,6 +135,8 @@ public:
 	virtual void CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList);
 	virtual void ReleaseUploadBuffers() {};
+	void LoadMeshFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, FILE* pInFile);
+	void LoadSkinInfoFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, FILE* pInFile);
 };
 class CRawFormatImage
 {
