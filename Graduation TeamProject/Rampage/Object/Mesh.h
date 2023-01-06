@@ -56,6 +56,7 @@ public:
 
 	virtual void OnPreRender(ID3D12GraphicsCommandList* pd3dCommandList);
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, UINT nSubset);
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList);
 
 	virtual void LoadMeshFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, FILE* pInFile);
 	UINT GetType() { return(m_nType); }
@@ -135,6 +136,74 @@ public:
 	virtual void CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList);
 	virtual void ReleaseUploadBuffers() {};
-	virtual void LoadMeshFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, FILE* pInFile);
-	void LoadSkinInfoFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, FILE* pInFile);
+};
+class CRawFormatImage
+{
+protected:
+	BYTE* m_pRawImagePixels = NULL;
+
+	int							m_nWidth;
+	int							m_nLength;
+
+public:
+	CRawFormatImage(LPCTSTR pFileName, int nWidth, int nLength, bool bFlipY = false);
+	~CRawFormatImage(void);
+
+	BYTE GetRawImagePixel(int x, int z) { return(m_pRawImagePixels[x + (z * m_nWidth)]); }
+	void SetRawImagePixel(int x, int z, BYTE nPixel) { m_pRawImagePixels[x + (z * m_nWidth)] = nPixel; }
+
+	BYTE* GetRawImagePixels() { return(m_pRawImagePixels); }
+
+	int GetRawImageWidth() { return(m_nWidth); }
+	int GetRawImageLength() { return(m_nLength); }
+};
+class CHeightMapImage : public CRawFormatImage
+{
+protected:
+	XMFLOAT3					m_xmf3Scale;
+
+public:
+	CHeightMapImage(LPCTSTR pFileName, int nWidth, int nLength, XMFLOAT3 xmf3Scale);
+	~CHeightMapImage(void);
+
+	XMFLOAT3 GetScale() { return(m_xmf3Scale); }
+	float GetHeight(float x, float z, bool bReverseQuad = false);
+	XMFLOAT3 GetHeightMapNormal(int x, int z);
+};
+class CHeightMapGridMesh : public CMesh
+{
+protected:
+	int								m_nWidth;
+	int								m_nLength;
+	XMFLOAT3						m_xmf3Scale;
+
+protected:
+
+	std::vector<XMFLOAT4> m_pxmf4Colors;
+	std::vector<XMFLOAT2> m_pxmf2TextureCoords0;
+	std::vector<XMFLOAT2> m_pxmf2TextureCoords1;
+
+
+	ComPtr<ID3D12Resource> m_pd3dColorBuffer = NULL;
+	ComPtr<ID3D12Resource> m_pd3dColorUploadBuffer = NULL;
+
+	ComPtr<ID3D12Resource> m_pd3dTextureCoord0Buffer = NULL;
+	ComPtr<ID3D12Resource> m_pd3dTextureCoord0UploadBuffer = NULL;
+
+	ComPtr<ID3D12Resource> m_pd3dTextureCoord1Buffer = NULL;
+	ComPtr<ID3D12Resource> m_pd3dTextureCoord1UploadBuffer = NULL;
+
+public:
+	CHeightMapGridMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int xStart, int zStart, int nWidth, int nLength, XMFLOAT3 xmf3Scale = XMFLOAT3(1.0f, 1.0f, 1.0f), XMFLOAT4 xmf4Color = XMFLOAT4(1.0f, 1.0f, 0.0f, 0.0f), void* pContext = NULL);
+	virtual ~CHeightMapGridMesh();
+
+	virtual void ReleaseUploadBuffers();
+	//virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, int nSubSet);
+
+	XMFLOAT3 GetScale() { return(m_xmf3Scale); }
+	int GetWidth() { return(m_nWidth); }
+	int GetLength() { return(m_nLength); }
+
+	virtual float OnGetHeight(int x, int z, void* pContext);
+	virtual XMFLOAT4 OnGetColor(int x, int z, void* pContext);
 };

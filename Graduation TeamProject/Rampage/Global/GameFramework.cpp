@@ -6,6 +6,9 @@
 #include "..\ImGui\ImGuiManager.h"
 #include "..\Shader\ModelShader.h"
 
+#include "..\Shader\TerrainShader.h"
+#include "..\Object\Light.h"
+#include "..\Object\Terrain.h"
 CGameFramework::CGameFramework()
 {
 	m_nSwapChainBufferIndex = 0;
@@ -242,6 +245,8 @@ void CGameFramework::BuildObjects()
 	CModelShader::GetInst()->CreateShaderVariables(m_pd3dDevice.Get(), m_pd3dCommandList.Get());
 	CModelShader::GetInst()->CreateCbvSrvDescriptorHeaps(m_pd3dDevice.Get(), 0, 100);
 
+	DXGI_FORMAT pdxgiObjectRtvFormats = DXGI_FORMAT_R8G8B8A8_UNORM;
+
 	CModelManager::GetInst()->LoadModel(m_pd3dDevice.Get(), m_pd3dCommandList.Get(), "Object/Angrybot.bin");;
 	CModelManager::GetInst()->LoadModel(m_pd3dDevice.Get(), m_pd3dCommandList.Get(), "Object/Eagle.bin");;
 
@@ -250,17 +255,29 @@ void CGameFramework::BuildObjects()
 	m_pObject->Rotate(0.0f, 180.0f, 0.0f);
 	m_pObject->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
 
-	// Mesh 생성
-	/*std::shared_ptr<CGameObject> SuperCobraObject = std::make_shared<CGameObject>();
-	SuperCobraObject = SuperCobraObject->LoadGeometryFromFile(m_pd3dDevice.Get(), m_pd3dCommandList.Get(), m_pScene->GetGraphicsRootSignature(), "Object/Mi24.bin", m_pShader.get());
-	m_pObject->SetChild(SuperCobraObject);
-	m_pObject->SetPosition(XMFLOAT3(0.0f, 0.0f, 0.0f));
-	m_pObject->UpdateTransform();*/
+	// Light 생성
+	m_pLight = std::make_unique<CLight>();
+	m_pLight->CreateLightVariables(m_pd3dDevice.Get(), m_pd3dCommandList.Get());
+
+	// Terrain Shader 생성
+	m_pTerrainShader = std::make_unique<CTerrainShader>();
+	m_pTerrainShader->CreateShader(m_pd3dDevice.Get(), m_pScene->GetGraphicsRootSignature(), 1, &pdxgiObjectRtvFormats, 0);
+	m_pTerrainShader->CreateCbvSrvDescriptorHeaps(m_pd3dDevice.Get(), 0, 3);
+	m_pTerrainShader->CreateShaderVariables(m_pd3dDevice.Get(), m_pd3dCommandList.Get());
+
+
+	// Terrain 생성
+	XMFLOAT3 xmf3Scale(18.0f, 6.0f, 18.0f);
+	XMFLOAT4 xmf4Color(0.0f, 0.5f, 0.0f, 0.0f);
+	m_pTerrain = std::make_unique<CHeightMapTerrain>(m_pd3dDevice.Get(), m_pd3dCommandList.Get(), m_pScene->GetGraphicsRootSignature(), _T("Image/HeightMap.raw"), 257, 257, 257, 257, xmf3Scale, xmf4Color, m_pTerrainShader.get());
+	m_pTerrain->SetPosition(XMFLOAT3(-800.f, -750.f, -800.f));
+	//m_pTerrain->SetPosition(XMFLOAT3(0.f, 0.f, 0.f));
 
 	//씬 객체를 생성하기 위하여 필요한 그래픽 명령 리스트들을 명령 큐에 추가한다. 
 	m_pd3dCommandList->Close();
 	ComPtr<ID3D12CommandList> ppd3dCommandLists[] = { m_pd3dCommandList };
 	m_pd3dCommandQueue->ExecuteCommandLists(1, ppd3dCommandLists->GetAddressOf());
+
 
 	::WaitForGpuComplete(m_pd3dCommandQueue.Get(), m_pd3dFence.Get(), ++m_nFenceValues[m_nSwapChainBufferIndex], m_hFenceEvent);
 	m_GameTimer.Reset();
@@ -396,13 +413,17 @@ void CGameFramework::FrameAdvance()
 	m_pCamera->OnPrepareRender(m_pd3dCommandList.Get());
 
 	m_pScene->Render(m_pd3dCommandList.Get(), m_pCamera.get());
-	
+	m_pLight->Render((m_pd3dCommandList.Get()));
+
 	CModelShader::GetInst()->Render(m_pd3dCommandList.Get(), 0);
 
 	m_pObject->Animate(m_GameTimer.GetFrameTimeElapsed());
 	if (!m_pObject->m_pSkinnedAnimationController) m_pObject->UpdateTransform(NULL);
 	m_pObject->Render(m_pd3dCommandList.Get());
 	
+	m_pTerrainShader->Render(m_pd3dCommandList.Get(), 0);
+	m_pTerrain->Render(m_pd3dCommandList.Get());
+
 	CImGuiManager::GetInst()->Render(m_pd3dCommandList.Get());
 
 	OnPostRenderTarget();

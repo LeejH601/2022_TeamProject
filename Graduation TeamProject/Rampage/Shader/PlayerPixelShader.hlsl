@@ -6,6 +6,8 @@
 #define MATERIAL_DETAIL_ALBEDO_MAP	0x20
 #define MATERIAL_DETAIL_NORMAL_MAP	0x40
 
+
+
 cbuffer cbGameObjectInfo : register(b0)
 {
 	matrix gmtxGameObject : packoffset(c0);
@@ -35,6 +37,8 @@ struct VS_OUTPUT
 	float2 uv : TEXCOORD;
 };
 
+#include "Light.hlsl"
+
 [earlydepthstencil]
 float4 PS_Player(VS_OUTPUT input) : SV_TARGET
 {
@@ -50,6 +54,11 @@ float4 PS_Player(VS_OUTPUT input) : SV_TARGET
 	if (gnTexturesMask & MATERIAL_METALLIC_MAP) cMetallicColor = gtxMappedTexture[3].Sample(gSamplerState, input.uv);
 	if (gnTexturesMask & MATERIAL_EMISSION_MAP) cEmissionColor = gtxMappedTexture[4].Sample(gSamplerState, input.uv);
 
+
 	float4 cColor = cAlbedoColor + cSpecularColor + cEmissionColor;
+	float3 normalW = normalize(input.normalW);
+	float4 cIllumination = Lighting(input.positionW, normalW);
+	cColor = lerp(cColor, cIllumination, 0.2f);
+	
 	return cColor;
 }

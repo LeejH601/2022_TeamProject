@@ -20,13 +20,17 @@
     <Filter Include="ImGui">
       <UniqueIdentifier>{004ed374-4344-4b49-ba42-1bd5a35cf8a2}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Shader\소스 파일">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Global\stdafx.cpp">
       <Filter>Global</Filter>
     </ClCompile>
     <ClCompile Include="Rampage.cpp">
-      <Filter>소스 파일</Filter>
+      <Filter>Shader\소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="Global\GameFramework.cpp">
       <Filter>Global</Filter>
@@ -90,6 +94,15 @@
     </ClCompile>
     <ClCompile Include="Object\ModelManager.cpp">
       <Filter>Object</Filter>
+    </ClCompile>
+    <ClCompile Include="Object\Light.cpp">
+      <Filter>Object</Filter>
+    </ClCompile>
+    <ClCompile Include="Object\Terrain.cpp">
+      <Filter>Object</Filter>
+    </ClCompile>
+    <ClCompile Include="Shader\TerrainShader.cpp">
+      <Filter>Shader</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -165,9 +178,21 @@
     <ClInclude Include="Object\ModelManager.h">
       <Filter>Object</Filter>
     </ClInclude>
+    <ClInclude Include="Object\Light.h">
+      <Filter>Object</Filter>
+    </ClInclude>
+    <ClInclude Include="Object\Terrain.h">
+      <Filter>Object</Filter>
+    </ClInclude>
+    <ClInclude Include="Shader\TerrainShader.h">
+      <Filter>Shader</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shader\PlayerPixelShader.hlsl" />
     <FxCompile Include="Shader\PlayerVertexShader.hlsl" />
+    <FxCompile Include="Shader\Light.hlsl" />
+    <FxCompile Include="TerrainPixelShader.hlsl" />
+    <FxCompile Include="TerrainVertexShader.hlsl" />
   </ItemGroup>
 </Project>

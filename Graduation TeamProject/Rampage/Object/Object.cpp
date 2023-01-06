@@ -11,6 +11,15 @@ CGameObject::CGameObject()
 	m_xmf4x4Transform = Matrix4x4::Identity();
 	m_xmf4x4Texture = Matrix4x4::Identity();
 }
+CGameObject::CGameObject(int nMaterials)
+{
+	m_nMaterials = nMaterials;
+	if (m_nMaterials > 0)
+	{
+		m_ppMaterials.resize(m_nMaterials);
+		for (int i = 0; i < m_nMaterials; i++) m_ppMaterials[i] = NULL;
+	}
+}
 CGameObject::~CGameObject()
 {
 }

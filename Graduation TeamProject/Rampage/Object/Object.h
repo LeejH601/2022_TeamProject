@@ -48,6 +48,7 @@ public:
 	std::unique_ptr<CAnimationController> m_pSkinnedAnimationController;
 
 	CGameObject();
+	CGameObject(int nMaterials);
 	virtual ~CGameObject();
 
 	char* GetFrameName() { return m_pstrFrameName; }
