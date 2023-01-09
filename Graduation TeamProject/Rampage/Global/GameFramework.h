@@ -9,6 +9,8 @@ class CTerrainShader;
 class CGameObject;
 class CLight;
 class CHeightMapTerrain;
+class CTexture;
+
 class CGameFramework
 {
 private:
@@ -108,4 +110,5 @@ public:
 
 	//전체화면 모드 <-> 윈도우 모드의 전환을 구현하는 함수이다.
 	void ChangeSwapChainState();
+	void ExecuteCommandLists();
 };

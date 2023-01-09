@@ -5,10 +5,11 @@
 #include "..\Object\ModelManager.h"
 #include "..\ImGui\ImGuiManager.h"
 #include "..\Shader\ModelShader.h"
-
 #include "..\Shader\TerrainShader.h"
 #include "..\Object\Light.h"
 #include "..\Object\Terrain.h"
+#include "..\Object\Texture.h"
+
 CGameFramework::CGameFramework()
 {
 	m_nSwapChainBufferIndex = 0;
@@ -39,8 +40,10 @@ bool CGameFramework::OnCreate(HINSTANCE hInstance, HWND hMainWnd)
 	BuildObjects();
 
 	//ImGui 렌더링을 위한 세팅을 합니다.
-	CImGuiManager::GetInst()->Init(m_hWnd, m_pd3dDevice.Get());
+	CImGuiManager::GetInst()->Init(m_hWnd, m_pd3dDevice.Get(), m_pd3dCommandList.Get());
 
+	//CommandList를 실행하고 GPU 연산이 완료될 때까지 기다립니다.
+	ExecuteCommandLists();
 	return(true);
 }
 void CGameFramework::OnDestroy()
@@ -240,13 +243,12 @@ void CGameFramework::BuildObjects()
 	m_pCamera->Init(m_pd3dDevice.Get(), m_pd3dCommandList.Get());
 
 	DXGI_FORMAT pdxgiObjectRtvFormats = DXGI_FORMAT_R8G8B8A8_UNORM;
-
 	CModelShader::GetInst()->CreateShader(m_pd3dDevice.Get(), m_pScene->GetGraphicsRootSignature(), 1, &pdxgiObjectRtvFormats, 0);
 	CModelShader::GetInst()->CreateShaderVariables(m_pd3dDevice.Get(), m_pd3dCommandList.Get());
 	CModelShader::GetInst()->CreateCbvSrvDescriptorHeaps(m_pd3dDevice.Get(), 0, 100);
 
 	CModelManager::GetInst()->LoadModel(m_pd3dDevice.Get(), m_pd3dCommandList.Get(), "Object/Angrybot.bin");;
-	CModelManager::GetInst()->LoadModel(m_pd3dDevice.Get(), m_pd3dCommandList.Get(), "Object/Eagle.bin");;
+	CModelManager::GetInst()->LoadModel(m_pd3dDevice.Get(), m_pd3dCommandList.Get(), "Object/Eagle.bin");
 
 	m_pObject = std::make_unique<CAngrybotObject>(m_pd3dDevice.Get(), m_pd3dCommandList.Get(), 1);
 	m_pObject->SetPosition(XMFLOAT3(0.0f, 0.0f, 0.0f));
@@ -262,22 +264,12 @@ void CGameFramework::BuildObjects()
 	m_pTerrainShader->CreateCbvSrvDescriptorHeaps(m_pd3dDevice.Get(), 0, 3);
 	m_pTerrainShader->CreateShaderVariables(m_pd3dDevice.Get(), m_pd3dCommandList.Get());
 
-
 	// Terrain 생성
 	XMFLOAT3 xmf3Scale(18.0f, 6.0f, 18.0f);
 	XMFLOAT4 xmf4Color(0.0f, 0.5f, 0.0f, 0.0f);
 	m_pTerrain = std::make_unique<CHeightMapTerrain>(m_pd3dDevice.Get(), m_pd3dCommandList.Get(), m_pScene->GetGraphicsRootSignature(), _T("Image/HeightMap.raw"), 257, 257, 257, 257, xmf3Scale, xmf4Color, m_pTerrainShader.get());
 	m_pTerrain->SetPosition(XMFLOAT3(-800.f, -750.f, -800.f));
 	//m_pTerrain->SetPosition(XMFLOAT3(0.f, 0.f, 0.f));
-
-	//씬 객체를 생성하기 위하여 필요한 그래픽 명령 리스트들을 명령 큐에 추가한다. 
-	m_pd3dCommandList->Close();
-	ComPtr<ID3D12CommandList> ppd3dCommandLists[] = { m_pd3dCommandList };
-	m_pd3dCommandQueue->ExecuteCommandLists(1, ppd3dCommandLists->GetAddressOf());
-
-
-	::WaitForGpuComplete(m_pd3dCommandQueue.Get(), m_pd3dFence.Get(), ++m_nFenceValues[m_nSwapChainBufferIndex], m_hFenceEvent);
-	m_GameTimer.Reset();
 }
 void CGameFramework::ReleaseObjects()
 {
@@ -473,4 +465,14 @@ void CGameFramework::ChangeSwapChainState()
 
 	m_nSwapChainBufferIndex = m_pdxgiSwapChain->GetCurrentBackBufferIndex();
 	CreateRenderTargetViews();
+}
+void CGameFramework::ExecuteCommandLists()
+{
+	//씬 객체를 생성하기 위하여 필요한 그래픽 명령 리스트들을 명령 큐에 추가한다. 
+	m_pd3dCommandList->Close();
+	ComPtr<ID3D12CommandList> ppd3dCommandLists[] = { m_pd3dCommandList };
+	m_pd3dCommandQueue->ExecuteCommandLists(1, ppd3dCommandLists->GetAddressOf());
+
+	::WaitForGpuComplete(m_pd3dCommandQueue.Get(), m_pd3dFence.Get(), ++m_nFenceValues[m_nSwapChainBufferIndex], m_hFenceEvent);
+	m_GameTimer.Reset();
 }

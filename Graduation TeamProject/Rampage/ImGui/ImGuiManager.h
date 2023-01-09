@@ -1,6 +1,7 @@
 #pragma once
 #include "..\Global\stdafx.h"
 
+class CTexture;
 class CImGuiManager
 {
 private:
@@ -12,14 +13,23 @@ private:
 	bool show_another_window = false;
 	bool show_my_window = true;
 
+	std::shared_ptr<CTexture> m_pTexture;
+
 	ComPtr<ID3D12DescriptorHeap> m_pd3dSrvDescHeap = NULL;
+
+	D3D12_CPU_DESCRIPTOR_HANDLE	m_d3dSrvCPUDescriptorStartHandle;
+	D3D12_GPU_DESCRIPTOR_HANDLE	m_d3dSrvGPUDescriptorStartHandle;
+
+	D3D12_CPU_DESCRIPTOR_HANDLE	m_d3dSrvCPUDescriptorNextHandle;
+	D3D12_GPU_DESCRIPTOR_HANDLE	m_d3dSrvGPUDescriptorNextHandle;
 public:
 	DECLARE_SINGLE(CImGuiManager);
 	
 	CImGuiManager();
 	~CImGuiManager();
 	void CreateSrvDescriptorHeaps(ID3D12Device* pd3dDevice);
-	void Init(HWND hWnd, ID3D12Device* pd3dDevice);
+	void CreateShaderResourceViews(ID3D12Device* pd3dDevice, CTexture* pTexture, UINT nDescriptorHeapIndex);
+	void Init(HWND hWnd, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 
 	void OnPreRender();
 	void Render(ID3D12GraphicsCommandList* pd3dCommandList);
