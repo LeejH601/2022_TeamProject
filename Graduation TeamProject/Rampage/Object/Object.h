@@ -112,3 +112,36 @@ public:
 
 	virtual void Animate(float fTimeElapsed);
 };
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+class CKnightObject : public CGameObject
+{
+public:
+	CKnightObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks);
+	virtual ~CKnightObject();
+
+	virtual void Animate(float fTimeElapsed);
+};
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+class COrcObject : public CGameObject
+{
+public:
+	COrcObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks);
+	virtual ~COrcObject();
+
+	virtual void Animate(float fTimeElapsed);
+};
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+class CGoblinObject : public CGameObject
+{
+public:
+	CGoblinObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks);
+	virtual ~CGoblinObject();
+
+	virtual void Animate(float fTimeElapsed);
+};

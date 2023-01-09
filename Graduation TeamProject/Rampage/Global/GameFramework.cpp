@@ -236,7 +236,7 @@ void CGameFramework::BuildObjects()
 	m_pScene = std::make_unique<CMainTMPScene>();
 	m_pScene->BuildObjects(m_pd3dDevice.Get(), m_pd3dCommandList.Get());
 
-	m_pCamera = std::make_unique<CCamera>();
+	m_pCamera = std::make_unique<CFirstPersonCamera>();
 	m_pCamera->Init(m_pd3dDevice.Get(), m_pd3dCommandList.Get());
 
 	DXGI_FORMAT pdxgiObjectRtvFormats = DXGI_FORMAT_R8G8B8A8_UNORM;
@@ -247,10 +247,28 @@ void CGameFramework::BuildObjects()
 
 	CModelManager::GetInst()->LoadModel(m_pd3dDevice.Get(), m_pd3dCommandList.Get(), "Object/Angrybot.bin");;
 	CModelManager::GetInst()->LoadModel(m_pd3dDevice.Get(), m_pd3dCommandList.Get(), "Object/Eagle.bin");;
+	CModelManager::GetInst()->LoadModel(m_pd3dDevice.Get(), m_pd3dCommandList.Get(), "Object/SK_FKnight_WeaponB_01.bin");;
+	CModelManager::GetInst()->LoadModel(m_pd3dDevice.Get(), m_pd3dCommandList.Get(), "Object/SK_Goblin.bin");;
+	CModelManager::GetInst()->LoadModel(m_pd3dDevice.Get(), m_pd3dCommandList.Get(), "Object/SK_Orc.bin");;
 
-	m_pObject = std::make_unique<CAngrybotObject>(m_pd3dDevice.Get(), m_pd3dCommandList.Get(), 1);
+	/*m_pObject = std::make_unique<CAngrybotObject>(m_pd3dDevice.Get(), m_pd3dCommandList.Get(), 1);
 	m_pObject->SetPosition(XMFLOAT3(0.0f, 0.0f, 0.0f));
+	m_pObject->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);*/
+
+	/*m_pObject = std::make_unique<CKnightObject>(m_pd3dDevice.Get(), m_pd3dCommandList.Get(), 1);
+	m_pObject->SetPosition(XMFLOAT3(0.0f, 0.0f, 0.0f));
+	m_pObject->SetScale(8.0f, 8.0f, 8.0f);
+	m_pObject->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);*/
+
+	m_pObject = std::make_unique<COrcObject>(m_pd3dDevice.Get(), m_pd3dCommandList.Get(), 1);
+	m_pObject->SetPosition(XMFLOAT3(0.0f, 0.0f, 0.0f));
+	m_pObject->SetScale(8.0f, 8.0f, 8.0f);
 	m_pObject->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
+
+	/*m_pObject = std::make_unique<CGoblinObject>(m_pd3dDevice.Get(), m_pd3dCommandList.Get(), 1);
+	m_pObject->SetPosition(XMFLOAT3(0.0f, 0.0f, 0.0f));
+	m_pObject->SetScale(8.0f, 8.0f, 8.0f);
+	m_pObject->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);*/
 
 	// Light 생성
 	m_pLight = std::make_unique<CLight>();
@@ -309,6 +327,30 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 	case WM_KEYDOWN:
 		switch (wParam)
 		{
+		case 'w':
+		case 'W':
+			if (wParam == 'w' || wParam == 'W') dwDirection |= DIR_FORWARD;
+			break;
+		case 's':
+		case 'S':
+			if (wParam == 's' || wParam == 'S') dwDirection |= DIR_BACKWARD;
+			break;
+		case 'a':
+		case 'A':
+			if (wParam == 'a' || wParam == 'A') dwDirection |= DIR_LEFT;
+			break;
+		case 'd':
+		case 'D':
+			if (wParam == 'd' || wParam == 'D') dwDirection |= DIR_RIGHT;
+			break;
+		case 'q':
+		case 'Q':
+			if (wParam == 'q' || wParam == 'Q')dwDirection |= DIR_DOWN;
+			break;
+		case 'e':
+		case 'E':
+			if (wParam == 'e' || wParam == 'E') dwDirection |= DIR_UP;
+			break;
 		case VK_ESCAPE:
 			::PostQuitMessage(0);
 			break;
@@ -318,6 +360,35 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 			break;
 		}
 		break;
+	case WM_KEYUP:
+		switch (wParam)
+		{
+		case 'w':
+		case 'W':
+			if (wParam == 'w' || wParam == 'W') dwDirection &= (~DIR_FORWARD);
+			break;
+		case 's':
+		case 'S':
+			if (wParam == 's' || wParam == 'S') dwDirection &= (~DIR_BACKWARD);
+			break;
+		case 'a':
+		case 'A':
+			if (wParam == 'a' || wParam == 'A') dwDirection &= (~DIR_LEFT);
+			break;
+		case 'd':
+		case 'D':
+			if (wParam == 'd' || wParam == 'D') dwDirection &= (~DIR_RIGHT);
+			break;
+		case 'q':
+		case 'Q':
+			if (wParam == 'q' || wParam == 'Q')dwDirection &= (~DIR_DOWN);
+			break;
+		case 'e':
+		case 'E':
+			if (wParam == 'e' || wParam == 'E') dwDirection &= (~DIR_UP);
+			break;
+		break;
+		}
 	default:
 		break;
 	}
@@ -357,10 +428,56 @@ LRESULT CALLBACK CGameFramework::OnProcessingWindowMessage(HWND hWnd, UINT nMess
 void CGameFramework::ProcessInput()
 {
 	static UCHAR pKeysBuffer[256];
+
+	GetKeyboardState(pKeysBuffer);
+
+	float cxDelta = 0.0f, cyDelta = 0.0f;
+	POINT ptCursorPos;
+	if (GetCapture() == m_hWnd)
+	{
+		SetCursor(NULL);
+		GetCursorPos(&ptCursorPos);
+		cxDelta = (float)(ptCursorPos.x - m_ptOldCursorPos.x) / 3.0f;
+		cyDelta = (float)(ptCursorPos.y - m_ptOldCursorPos.y) / 3.0f;
+		SetCursorPos(m_ptOldCursorPos.x, m_ptOldCursorPos.y);
+	}
+
+	if (cxDelta || cyDelta)
+	{
+		if (pKeysBuffer[VK_RBUTTON] & 0xF0)
+			m_pCamera->Rotate(cyDelta, 0.0f, -cxDelta);
+		else
+			m_pCamera->Rotate(cyDelta, cxDelta, 0.0f);
+	}
+
+	m_pCamera->RegenerateViewMatrix();
+
+	if (dwDirection) {
+		if (dwDirection)
+		{
+			XMFLOAT3 xmf3Shift = XMFLOAT3(0, 0, 0);
+			float fDistance = 40.0f * m_GameTimer.GetFrameTimeElapsed();
+			if (dwDirection & DIR_FORWARD) xmf3Shift = Vector3::Add(xmf3Shift, m_pCamera->GetLookVector(), fDistance);
+			if (dwDirection & DIR_BACKWARD) xmf3Shift = Vector3::Add(xmf3Shift, m_pCamera->GetLookVector(), -fDistance);
+			if (dwDirection & DIR_RIGHT) xmf3Shift = Vector3::Add(xmf3Shift, m_pCamera->GetRightVector(), fDistance);
+			if (dwDirection & DIR_LEFT) xmf3Shift = Vector3::Add(xmf3Shift, m_pCamera->GetRightVector(), -fDistance);
+			if (dwDirection & DIR_UP) xmf3Shift = Vector3::Add(xmf3Shift, m_pCamera->GetUpVector(), fDistance);
+			if (dwDirection & DIR_DOWN) xmf3Shift = Vector3::Add(xmf3Shift, m_pCamera->GetUpVector(), -fDistance);
+
+			m_pCamera->Move(xmf3Shift);
+		}
+	}
+	
+
+
+	/*TCHAR pstrDebug[256] = { 0 };
+	_stprintf_s(pstrDebug, 256, _T("%f, %f, %f \n"), m_pCamera->GetLookVector().x, m_pCamera->GetLookVector().y, m_pCamera->GetLookVector().z);
+	OutputDebugString(pstrDebug);*/
 }
 void CGameFramework::AnimateObjects()
 {
 	// Object들의 애니메이션을 수행한다.
+
 }
 void CGameFramework::OnPrepareRenderTarget()
 {
@@ -404,7 +521,7 @@ void CGameFramework::FrameAdvance()
 	if (m_pScene) m_pScene->OnPrepareRender(m_pd3dCommandList.Get());
 
 	m_pd3dCommandList->ClearDepthStencilView(m_d3dDsvDescriptorCPUHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
-	
+
 	OnPrepareRenderTarget();
 	m_pScene->OnPrepareRender(m_pd3dCommandList.Get());
 	m_pCamera->OnPrepareRender(m_pd3dCommandList.Get());
@@ -414,10 +531,16 @@ void CGameFramework::FrameAdvance()
 
 	CModelShader::GetInst()->Render(m_pd3dCommandList.Get(), 0);
 
+	if (m_pObject) {
+		int Anim_num = CImGuiManager::GetInst()->GetAnimationNum();
+		Anim_num %= m_pObject->m_pSkinnedAnimationController->m_pAnimationSets->m_nAnimationSets;
+		m_pObject->m_pSkinnedAnimationController->SetTrackAnimationSet(0, Anim_num);
+	}
+
 	m_pObject->Animate(m_GameTimer.GetFrameTimeElapsed());
 	if (!m_pObject->m_pSkinnedAnimationController) m_pObject->UpdateTransform(NULL);
 	m_pObject->Render(m_pd3dCommandList.Get());
-	
+
 	m_pTerrainShader->Render(m_pd3dCommandList.Get(), 0);
 	m_pTerrain->Render(m_pd3dCommandList.Get());
 

@@ -438,3 +438,59 @@ void CEagleObject::Animate(float fTimeElapsed)
 	SetPosition(xmf3Position);
 	CGameObject::Animate(fTimeElapsed);
 }
+
+CKnightObject::CKnightObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks)
+{
+	CLoadedModelInfo* pKnightModel = CModelManager::GetInst()->GetModelInfo("Object/SK_FKnight_WeaponB_01.bin");;
+	if (!pKnightModel) pKnightModel = CModelManager::GetInst()->LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, "Model/SK_FKnight_WeaponB_01.bin");
+
+	SetChild(pKnightModel->m_pModelRootObject, true);
+	m_pSkinnedAnimationController = std::make_unique<CAnimationController>(pd3dDevice, pd3dCommandList, nAnimationTracks, pKnightModel);
+}
+
+CKnightObject::~CKnightObject()
+{
+}
+
+void CKnightObject::Animate(float fTimeElapsed)
+{
+	CGameObject::Animate(fTimeElapsed);
+
+
+}
+
+COrcObject::COrcObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks)
+{
+	CLoadedModelInfo* pKnightModel = CModelManager::GetInst()->GetModelInfo("Object/SK_Orc.bin");;
+	if (!pKnightModel) pKnightModel = CModelManager::GetInst()->LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, "Model/SK_Orc.bin");
+
+	SetChild(pKnightModel->m_pModelRootObject, true);
+	m_pSkinnedAnimationController = std::make_unique<CAnimationController>(pd3dDevice, pd3dCommandList, nAnimationTracks, pKnightModel);
+}
+
+COrcObject::~COrcObject()
+{
+}
+
+void COrcObject::Animate(float fTimeElapsed)
+{
+	CGameObject::Animate(fTimeElapsed);
+}
+
+CGoblinObject::CGoblinObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks)
+{
+	CLoadedModelInfo* pKnightModel = CModelManager::GetInst()->GetModelInfo("Object/SK_Goblin.bin");;
+	if (!pKnightModel) pKnightModel = CModelManager::GetInst()->LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, "Model/SK_Goblin.bin");
+
+	SetChild(pKnightModel->m_pModelRootObject, true);
+	m_pSkinnedAnimationController = std::make_unique<CAnimationController>(pd3dDevice, pd3dCommandList, nAnimationTracks, pKnightModel);
+}
+
+CGoblinObject::~CGoblinObject()
+{
+}
+
+void CGoblinObject::Animate(float fTimeElapsed)
+{
+	CGameObject::Animate(fTimeElapsed);
+}

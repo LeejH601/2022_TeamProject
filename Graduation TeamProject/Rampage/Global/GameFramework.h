@@ -69,6 +69,10 @@ private:
 	CGameTimer					m_GameTimer;
 	POINT						m_ptOldCursorPos;
 	_TCHAR						m_pszFrameRate[50];
+
+	DWORD dwDirection;
+
+
 public:
 	CGameFramework();
 	~CGameFramework();

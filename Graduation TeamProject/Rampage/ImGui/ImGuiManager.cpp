@@ -98,6 +98,11 @@ void CImGuiManager::OnPreRender()
         ImGui::SetNextItemWidth(225.f);
         ImGui::SetCursorPosX(855.f);
         ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
+
+        ImGui::SetNextItemWidth(180.f);
+        ImGui::SetCursorPosX(855.f);
+        ImGui::InputInt("Animation Set Num", &Player_Animation_Number, 1, 1, 0);
+
         //ImGui::ColorEdit3("clear color", (float*)&clear_color, ImGuiColorEditFlags_NoInputs);
         //ImGui::ColorEdit3("clear color", (float*)&clear_color, ImGuiColorEditFlags_NoLabel);
         ImVec2 curpos = ImGui::GetCursorPos();
