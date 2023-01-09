@@ -17,7 +17,7 @@ CImGuiManager::~CImGuiManager()
 void CImGuiManager::CreateSrvDescriptorHeaps(ID3D12Device* pd3dDevice)
 {
     D3D12_DESCRIPTOR_HEAP_DESC d3dDescriptorHeapDesc;
-    d3dDescriptorHeapDesc.NumDescriptors = 2;
+    d3dDescriptorHeapDesc.NumDescriptors = 3;
     d3dDescriptorHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
     d3dDescriptorHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
     d3dDescriptorHeapDesc.NodeMask = 0;
@@ -46,7 +46,8 @@ void CImGuiManager::CreateShaderResourceViews(ID3D12Device* pd3dDevice, CTexture
         m_d3dSrvGPUDescriptorNextHandle.ptr += ::gnCbvSrvDescriptorIncrementSize;
     }
 }
-void CImGuiManager::Init(HWND hWnd, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+ID3D12Resource* CImGuiManager::GetRTTextureResource() { return m_pRTTexture->GetResource(0); }
+void CImGuiManager::Init(HWND hWnd, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, D3D12_CPU_DESCRIPTOR_HANDLE d3dRtvCPUDescriptorHandle)
 {
     CreateSrvDescriptorHeaps(pd3dDevice);
 
@@ -68,9 +69,25 @@ void CImGuiManager::Init(HWND hWnd, ID3D12Device* pd3dDevice, ID3D12GraphicsComm
         m_pd3dSrvDescHeap->GetCPUDescriptorHandleForHeapStart(),
         m_pd3dSrvDescHeap->GetGPUDescriptorHandleForHeapStart());
 
-    m_pTexture = std::make_shared<CTexture>(1, RESOURCE_TEXTURE2D, 0, 1);
+    m_pTexture = std::make_unique<CTexture>(1, RESOURCE_TEXTURE2D, 0, 1);
     m_pTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/Base_Texture.dds", RESOURCE_TEXTURE2D, 0);
     CreateShaderResourceViews(pd3dDevice, m_pTexture.get(), 1);
+
+    m_pRTTexture = std::make_unique<CTexture>(1, RESOURCE_TEXTURE2D, 0, 1);
+    D3D12_CLEAR_VALUE d3dClearValue = { DXGI_FORMAT_R8G8B8A8_UNORM, { 0.0f, 0.0f, 0.0f, 1.0f } };
+    m_pRTTexture->CreateTexture(pd3dDevice, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, DXGI_FORMAT_R8G8B8A8_UNORM, D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET, D3D12_RESOURCE_STATE_COMMON, &d3dClearValue, RESOURCE_TEXTURE2D, 0);
+    CreateShaderResourceViews(pd3dDevice, m_pRTTexture.get(), 0);
+
+    D3D12_RENDER_TARGET_VIEW_DESC d3dRenderTargetViewDesc;
+    d3dRenderTargetViewDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+    d3dRenderTargetViewDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
+    d3dRenderTargetViewDesc.Texture2D.MipSlice = 0;
+    d3dRenderTargetViewDesc.Texture2D.PlaneSlice = 0;
+
+    ID3D12Resource* pd3dTextureResource = m_pRTTexture->GetResource(0);
+    pd3dDevice->CreateRenderTargetView(pd3dTextureResource, &d3dRenderTargetViewDesc, d3dRtvCPUDescriptorHandle);
+    m_pd3dRtvCPUDescriptorHandles = d3dRtvCPUDescriptorHandle;
+
 }
 void CImGuiManager::OnPreRender()
 {
@@ -130,12 +147,12 @@ void CImGuiManager::OnPreRender()
         ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);       
 
         {
-            int my_image_width = 256;
-            int my_image_height = 256;
+            int my_image_width = 700;
+            int my_image_height = 400;
 
             ImGui::Text("GPU handle = %p", m_pTexture->m_pd3dSrvGpuDescriptorHandles[0].ptr);
             ImGui::Text("size = %d x %d", my_image_width, my_image_height);
-            ImGui::Image((ImTextureID)m_pTexture->m_pd3dSrvGpuDescriptorHandles[0].ptr, ImVec2((float)my_image_width, (float)my_image_height));
+            ImGui::Image((ImTextureID)m_pRTTexture->m_pd3dSrvGpuDescriptorHandles[0].ptr, ImVec2((float)my_image_width, (float)my_image_height));
         }
         ImGui::End();
     }

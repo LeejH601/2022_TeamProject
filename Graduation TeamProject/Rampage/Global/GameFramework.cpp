@@ -40,7 +40,9 @@ bool CGameFramework::OnCreate(HINSTANCE hInstance, HWND hMainWnd)
 	BuildObjects();
 
 	//ImGui 렌더링을 위한 세팅을 합니다.
-	CImGuiManager::GetInst()->Init(m_hWnd, m_pd3dDevice.Get(), m_pd3dCommandList.Get());
+	D3D12_CPU_DESCRIPTOR_HANDLE d3dRtvCPUDescriptorHandle = m_pd3dRtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
+	d3dRtvCPUDescriptorHandle.ptr += (::gnRtvDescriptorIncrementSize * m_nSwapChainBuffers);
+	CImGuiManager::GetInst()->Init(m_hWnd, m_pd3dDevice.Get(), m_pd3dCommandList.Get(), d3dRtvCPUDescriptorHandle);
 
 	//CommandList를 실행하고 GPU 연산이 완료될 때까지 기다립니다.
 	ExecuteCommandLists();
@@ -163,7 +165,7 @@ void CGameFramework::CreateRtvAndDsvDescriptorHeaps()
 {
 	D3D12_DESCRIPTOR_HEAP_DESC d3dDescriptorHeapDesc;
 	::ZeroMemory(&d3dDescriptorHeapDesc, sizeof(D3D12_DESCRIPTOR_HEAP_DESC));
-	d3dDescriptorHeapDesc.NumDescriptors = m_nSwapChainBuffers;
+	d3dDescriptorHeapDesc.NumDescriptors = m_nSwapChainBuffers + 1;
 	d3dDescriptorHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
 	d3dDescriptorHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
 	d3dDescriptorHeapDesc.NodeMask = 0;
@@ -242,8 +244,9 @@ void CGameFramework::BuildObjects()
 	m_pCamera = std::make_unique<CCamera>();
 	m_pCamera->Init(m_pd3dDevice.Get(), m_pd3dCommandList.Get());
 
-	DXGI_FORMAT pdxgiObjectRtvFormats = DXGI_FORMAT_R8G8B8A8_UNORM;
-	CModelShader::GetInst()->CreateShader(m_pd3dDevice.Get(), m_pScene->GetGraphicsRootSignature(), 1, &pdxgiObjectRtvFormats, 0);
+	DXGI_FORMAT pdxgiObjectRtvFormats[2] = {DXGI_FORMAT_R8G8B8A8_UNORM, DXGI_FORMAT_R8G8B8A8_UNORM};
+
+	CModelShader::GetInst()->CreateShader(m_pd3dDevice.Get(), m_pScene->GetGraphicsRootSignature(), 2, pdxgiObjectRtvFormats, 0);
 	CModelShader::GetInst()->CreateShaderVariables(m_pd3dDevice.Get(), m_pd3dCommandList.Get());
 	CModelShader::GetInst()->CreateCbvSrvDescriptorHeaps(m_pd3dDevice.Get(), 0, 100);
 
@@ -260,7 +263,7 @@ void CGameFramework::BuildObjects()
 
 	// Terrain Shader 생성
 	m_pTerrainShader = std::make_unique<CTerrainShader>();
-	m_pTerrainShader->CreateShader(m_pd3dDevice.Get(), m_pScene->GetGraphicsRootSignature(), 1, &pdxgiObjectRtvFormats, 0);
+	m_pTerrainShader->CreateShader(m_pd3dDevice.Get(), m_pScene->GetGraphicsRootSignature(), 2, pdxgiObjectRtvFormats, 0);
 	m_pTerrainShader->CreateCbvSrvDescriptorHeaps(m_pd3dDevice.Get(), 0, 3);
 	m_pTerrainShader->CreateShaderVariables(m_pd3dDevice.Get(), m_pd3dCommandList.Get());
 
@@ -358,12 +361,29 @@ void CGameFramework::OnPrepareRenderTarget()
 {
 	ImVec4 clear_color = CImGuiManager::GetInst()->GetColor();
 	const float clear_color_with_alpha[4] = { clear_color.x * clear_color.w, clear_color.y * clear_color.w, clear_color.z * clear_color.w, clear_color.w };
+	FLOAT pfDefaultClearColor[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
 
+	D3D12_CPU_DESCRIPTOR_HANDLE* pd3dAllRtvCPUHandles = new D3D12_CPU_DESCRIPTOR_HANDLE[2];
+	
+	pd3dAllRtvCPUHandles[0] = m_pd3dSwapRTVCPUHandles[m_nSwapChainBufferIndex];
 	m_pd3dCommandList->ClearRenderTargetView(m_pd3dSwapRTVCPUHandles[m_nSwapChainBufferIndex], clear_color_with_alpha, 0, NULL);
-	m_pd3dCommandList->OMSetRenderTargets(1, &m_pd3dSwapRTVCPUHandles[m_nSwapChainBufferIndex], FALSE, &m_d3dDsvDescriptorCPUHandle);
+
+	::SynchronizeResourceTransition(m_pd3dCommandList.Get(), CImGuiManager::GetInst()->GetRTTextureResource(), D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_RENDER_TARGET);
+
+	D3D12_CPU_DESCRIPTOR_HANDLE d3dRtvCPUDescriptorHandle = CImGuiManager::GetInst()->GetRtvCPUDescriptorHandle();
+	m_pd3dCommandList->ClearRenderTargetView(d3dRtvCPUDescriptorHandle, pfDefaultClearColor, 0, NULL);
+	pd3dAllRtvCPUHandles[1] = d3dRtvCPUDescriptorHandle;
+	
+	m_pd3dCommandList->OMSetRenderTargets(2, pd3dAllRtvCPUHandles, FALSE, &m_d3dDsvDescriptorCPUHandle);
+
+	if (pd3dAllRtvCPUHandles) delete[] pd3dAllRtvCPUHandles;
+	
+	/*m_pd3dCommandList->ClearRenderTargetView(m_pd3dSwapRTVCPUHandles[m_nSwapChainBufferIndex], clear_color_with_alpha, 0, NULL);
+	m_pd3dCommandList->OMSetRenderTargets(1, &m_pd3dSwapRTVCPUHandles[m_nSwapChainBufferIndex], FALSE, &m_d3dDsvDescriptorCPUHandle);*/
 }
 void CGameFramework::OnPostRenderTarget()
 {
+	::SynchronizeResourceTransition(m_pd3dCommandList.Get(), CImGuiManager::GetInst()->GetRTTextureResource(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_COMMON);
 }
 void CGameFramework::MoveToNextFrame()
 {

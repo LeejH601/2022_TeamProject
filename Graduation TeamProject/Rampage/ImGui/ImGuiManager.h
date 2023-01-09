@@ -13,7 +13,10 @@ private:
 	bool show_another_window = false;
 	bool show_my_window = true;
 
-	std::shared_ptr<CTexture> m_pTexture;
+	std::unique_ptr<CTexture> m_pTexture;
+
+	std::unique_ptr<CTexture> m_pRTTexture;
+	D3D12_CPU_DESCRIPTOR_HANDLE m_pd3dRtvCPUDescriptorHandles;
 
 	ComPtr<ID3D12DescriptorHeap> m_pd3dSrvDescHeap = NULL;
 
@@ -29,7 +32,13 @@ public:
 	~CImGuiManager();
 	void CreateSrvDescriptorHeaps(ID3D12Device* pd3dDevice);
 	void CreateShaderResourceViews(ID3D12Device* pd3dDevice, CTexture* pTexture, UINT nDescriptorHeapIndex);
-	void Init(HWND hWnd, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+
+	D3D12_CPU_DESCRIPTOR_HANDLE GetRtvCPUDescriptorHandle() {
+		return m_pd3dRtvCPUDescriptorHandles;
+	}
+	ID3D12Resource* GetRTTextureResource(); 
+
+	void Init(HWND hWnd, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, D3D12_CPU_DESCRIPTOR_HANDLE d3dRtvCPUDescriptorHandle);
 
 	void OnPreRender();
 	void Render(ID3D12GraphicsCommandList* pd3dCommandList);

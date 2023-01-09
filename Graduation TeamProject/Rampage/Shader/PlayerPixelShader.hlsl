@@ -37,9 +37,17 @@ struct VS_OUTPUT
 
 #include "Light.hlsl"
 
-[earlydepthstencil]
-float4 PS_Player(VS_OUTPUT input) : SV_TARGET
+struct PS_MULTIPLE_RENDER_TARGETS_OUTPUT
 {
+	float4 f4Scene : SV_TARGET0; //Swap Chain Back Buffer
+	float4 f4ImGui : SV_TARGET1;
+};
+
+[earlydepthstencil]
+PS_MULTIPLE_RENDER_TARGETS_OUTPUT PS_Player(VS_OUTPUT input) : SV_TARGET
+{
+	PS_MULTIPLE_RENDER_TARGETS_OUTPUT output;
+
 	float4 cAlbedoColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
 	float4 cSpecularColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
 	float4 cNormalColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
@@ -57,6 +65,8 @@ float4 PS_Player(VS_OUTPUT input) : SV_TARGET
 	float3 normalW = normalize(input.normalW);
 	float4 cIllumination = Lighting(input.positionW, normalW);
 	cColor = lerp(cColor, cIllumination, 0.2f);
-	
-	return cColor;
+
+	output.f4Scene = cColor;
+	output.f4ImGui = cColor;
+	return output;
 }
