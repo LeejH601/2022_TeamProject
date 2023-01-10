@@ -112,3 +112,14 @@ public:
 
 	virtual void Animate(float fTimeElapsed);
 };
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+class CLionObject : public CGameObject
+{
+public:
+	CLionObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks);
+	virtual ~CLionObject();
+
+	virtual void Animate(float fTimeElapsed);
+};
