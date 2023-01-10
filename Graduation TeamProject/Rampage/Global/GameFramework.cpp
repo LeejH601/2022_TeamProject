@@ -252,10 +252,25 @@ void CGameFramework::BuildObjects()
 
 	CModelManager::GetInst()->LoadModel(m_pd3dDevice.Get(), m_pd3dCommandList.Get(), "Object/Angrybot.bin");;
 	CModelManager::GetInst()->LoadModel(m_pd3dDevice.Get(), m_pd3dCommandList.Get(), "Object/Eagle.bin");
+	CModelManager::GetInst()->LoadModel(m_pd3dDevice.Get(), m_pd3dCommandList.Get(), "Object/Lion.bin");
 
-	m_pObject = std::make_unique<CAngrybotObject>(m_pd3dDevice.Get(), m_pd3dCommandList.Get(), 1);
+	std::unique_ptr<CLionObject> m_pObject = std::make_unique<CLionObject>(m_pd3dDevice.Get(), m_pd3dCommandList.Get(), 1);
 	m_pObject->SetPosition(XMFLOAT3(0.0f, 0.0f, 0.0f));
-	m_pObject->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
+	m_pObject->Rotate(0.0f, 180.0f, 0.0f);
+	m_pObject->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 2);
+	m_pObjects.push_back(std::move(m_pObject));
+
+	m_pObject = std::make_unique<CLionObject>(m_pd3dDevice.Get(), m_pd3dCommandList.Get(), 1);
+	m_pObject->SetPosition(XMFLOAT3(-15.0f, 0.0f, 0.0f));
+	m_pObject->Rotate(0.0f, 180.0f, 0.0f);
+	m_pObject->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 2);
+	m_pObjects.push_back(std::move(m_pObject));
+
+	m_pObject = std::make_unique<CLionObject>(m_pd3dDevice.Get(), m_pd3dCommandList.Get(), 1);
+	m_pObject->SetPosition(XMFLOAT3(15.0f, 0.0f, 0.0f));
+	m_pObject->Rotate(0.0f, 180.0f, 0.0f);
+	m_pObject->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 2);
+	m_pObjects.push_back(std::move(m_pObject));
 
 	// Light »ý¼º
 	m_pLight = std::make_unique<CLight>();
@@ -426,10 +441,13 @@ void CGameFramework::FrameAdvance()
 
 	CModelShader::GetInst()->Render(m_pd3dCommandList.Get(), 0);
 
-	m_pObject->Animate(m_GameTimer.GetFrameTimeElapsed());
-	if (!m_pObject->m_pSkinnedAnimationController) m_pObject->UpdateTransform(NULL);
-	m_pObject->Render(m_pd3dCommandList.Get());
-	
+	for (int i = 0; i < m_pObjects.size(); ++i)
+	{
+		m_pObjects[i]->Animate(m_GameTimer.GetFrameTimeElapsed() * (i + 1));
+		if (!m_pObjects[i]->m_pSkinnedAnimationController) m_pObjects[i]->UpdateTransform(NULL);
+		m_pObjects[i]->Render(m_pd3dCommandList.Get());
+	}
+
 	m_pTerrainShader->Render(m_pd3dCommandList.Get(), 0);
 	m_pTerrain->Render(m_pd3dCommandList.Get());
 

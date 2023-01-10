@@ -438,3 +438,21 @@ void CEagleObject::Animate(float fTimeElapsed)
 	SetPosition(xmf3Position);
 	CGameObject::Animate(fTimeElapsed);
 }
+
+CLionObject::CLionObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks)
+{
+	CLoadedModelInfo* pLionModel = CModelManager::GetInst()->GetModelInfo("Object/Lion.bin");;
+	if (!pLionModel) pLionModel = CModelManager::GetInst()->LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, "Model/Lion.bin");
+
+	SetChild(pLionModel->m_pModelRootObject, true);
+	m_pSkinnedAnimationController = std::make_unique<CAnimationController>(pd3dDevice, pd3dCommandList, nAnimationTracks, pLionModel);
+}
+
+CLionObject::~CLionObject()
+{
+}
+
+void CLionObject::Animate(float fTimeElapsed)
+{
+	CGameObject::Animate(fTimeElapsed);
+}

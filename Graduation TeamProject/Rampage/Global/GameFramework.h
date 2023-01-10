@@ -62,7 +62,7 @@ private:
 	std::unique_ptr<CScene> m_pScene = NULL;
 	std::unique_ptr<CCamera> m_pCamera = NULL;
 
-	std::unique_ptr<CGameObject> m_pObject = NULL;
+	std::vector<std::unique_ptr<CGameObject>> m_pObjects;
 	std::unique_ptr<CLight> m_pLight = NULL;
 
 	std::unique_ptr<CTerrainShader> m_pTerrainShader = NULL;
