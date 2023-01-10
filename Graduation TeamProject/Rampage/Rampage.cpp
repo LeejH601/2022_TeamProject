@@ -102,7 +102,7 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 
 	AdjustWindowRect(&rc, dwStyle, FALSE);
 
-	HWND hMainWnd = CreateWindow(TEXT("Rampage"), TEXT("Rampage"), dwStyle, CW_USEDEFAULT, CW_USEDEFAULT,
+	HWND hMainWnd = CreateWindow(TEXT("Rampage"), TEXT("Rampage"), dwStyle, FIRST_WINDOW_POS_WIDTH, FIRST_WINDOW_POS_HEIGHT,
 		rc.right - rc.left, rc.bottom - rc.top, NULL, NULL, hInstance, NULL);
 
 	if (!hMainWnd) return(FALSE);

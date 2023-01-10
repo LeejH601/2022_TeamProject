@@ -89,7 +89,7 @@ void CImGuiManager::Init(HWND hWnd, ID3D12Device* pd3dDevice, ID3D12GraphicsComm
     m_pd3dRtvCPUDescriptorHandles = d3dRtvCPUDescriptorHandle;
 
 }
-void CImGuiManager::OnPreRender()
+void CImGuiManager::DemoRendering()
 {
     // Start the Dear ImGui frame
     ImGui_ImplDX12_NewFrame();
@@ -97,7 +97,7 @@ void CImGuiManager::OnPreRender()
     ImGui::NewFrame();
     if (show_demo_window)
         ImGui::ShowDemoWindow(&show_demo_window);
-    // 2. Show a simple window that we create ourselves. We use a Begin/End pair to create a named window.
+    //2. Show a simple window that we create ourselves. We use a Begin/End pair to create a named window.
     {
         static float f = 0.0f;
         static int counter = 0;
@@ -107,7 +107,7 @@ void CImGuiManager::OnPreRender()
         ImGui::Text("This is some useful text.");               // Display some text (you can use a format strings too)
         ImGui::Checkbox("Demo Window", &show_demo_window);      // Edit bools storing our window open/close state
         ImGui::Checkbox("Another Window", &show_another_window);
-        
+
         ImGui::SliderFloat("float", &f, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
         ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
 
@@ -120,39 +120,187 @@ void CImGuiManager::OnPreRender()
         ImGui::End();
     }
 
-    //// 3. Show another simple window.
-    //if (show_another_window)
-    //{
-    //    ImGui::Begin("Another Window", &show_another_window);   // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
-    //    ImGui::Text("Hello from another window!");
-    //    if (ImGui::Button("Close Me"))
-    //        show_another_window = false;
-    //    ImGui::End();
-    //}
-
+    // 3. Show another simple window.
+    if (show_another_window)
+    {
+        ImGui::Begin("Another Window", &show_another_window);   // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
+        ImGui::Text("Hello from another window!");
+        if (ImGui::Button("Close Me"))
+            show_another_window = false;
+        ImGui::End();
+    }
+}
+void CImGuiManager::OnPreRender()
+{
+    // Start the Dear ImGui frame
+    ImGui_ImplDX12_NewFrame();
+    ImGui_ImplWin32_NewFrame();
+    ImGui::NewFrame();
+    
     // Show my window.
     {
+        ImGuiWindowFlags my_window_flags = 0;
+        bool* p_open = NULL;
+        my_window_flags |= ImGuiWindowFlags_NoResize;
+
         const ImGuiViewport* main_viewport = ImGui::GetMainViewport();
         ImGui::SetNextWindowPos(ImVec2(main_viewport->WorkPos.x + 25, main_viewport->WorkPos.y + 25));
-        ImGui::SetNextWindowSize(ImVec2(1280, 680), ImGuiCond_FirstUseEver);
-        ImGui::Begin("My Window");   // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
-        ImGui::Text("Start My Window!");
-        ImGui::SetNextItemWidth(225.f);
-        ImGui::SetCursorPosX(855.f);
-        ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
-        //ImGui::ColorEdit3("clear color", (float*)&clear_color, ImGuiColorEditFlags_NoInputs);
-        //ImGui::ColorEdit3("clear color", (float*)&clear_color, ImGuiColorEditFlags_NoLabel);
-        ImVec2 curpos = ImGui::GetCursorPos();
-        ImGui::SetCursorPosY(curpos.y - 25.f);
-        ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);       
-
+        ImGui::SetNextWindowSize(ImVec2(FRAME_BUFFER_WIDTH - 50, FRAME_BUFFER_HEIGHT - 105), ImGuiCond_None);
+        ImGui::Begin("Simulator", p_open, my_window_flags);   // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
+        ImVec2 initial_curpos = ImGui::GetCursorPos();
         {
-            int my_image_width = 700;
-            int my_image_height = 400;
-
-            ImGui::Text("GPU handle = %p", m_pTexture->m_pd3dSrvGpuDescriptorHandles[0].ptr);
-            ImGui::Text("size = %d x %d", my_image_width, my_image_height);
+            int my_image_width = 1050;
+            int my_image_height = 600;
             ImGui::Image((ImTextureID)m_pRTTexture->m_pd3dSrvGpuDescriptorHandles[0].ptr, ImVec2((float)my_image_width, (float)my_image_height));
+        }
+        ImVec2 button_pos = ImGui::GetCursorPos();
+
+        // Menu Bar
+        initial_curpos.x += 1055.f;
+        ImGui::SetCursorPos(initial_curpos);
+
+        if (ImGui::CollapsingHeader("Impact Effect"))
+        {
+            initial_curpos.y += 25.f;
+            ImGui::SetCursorPos(initial_curpos);
+            ImGui::SetNextItemWidth(190.f);
+            ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
+        }
+
+        initial_curpos.y += 25.f;
+        ImGui::SetCursorPos(initial_curpos);
+
+        if (ImGui::CollapsingHeader("Particle Effect"))
+        {
+            initial_curpos.y += 25.f;
+            ImGui::SetCursorPos(initial_curpos);
+            ImGui::SetNextItemWidth(190.f);
+            ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
+        }
+
+        initial_curpos.y += 25.f;
+        ImGui::SetCursorPos(initial_curpos);
+
+        if (ImGui::CollapsingHeader("Afterimage Effect"))
+        {
+            initial_curpos.y += 25.f;
+            ImGui::SetCursorPos(initial_curpos);
+            ImGui::SetNextItemWidth(190.f);
+            ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
+        }
+
+        initial_curpos.y += 25.f;
+        ImGui::SetCursorPos(initial_curpos);
+
+        if (ImGui::CollapsingHeader("Damage Animation"))
+        {
+            initial_curpos.y += 25.f;
+            ImGui::SetCursorPos(initial_curpos);
+            ImGui::SetNextItemWidth(190.f);
+            ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
+        }
+
+        initial_curpos.y += 25.f;
+        ImGui::SetCursorPos(initial_curpos);
+
+        if (ImGui::CollapsingHeader("Shake Animation"))
+        {
+            initial_curpos.y += 25.f;
+            ImGui::SetCursorPos(initial_curpos);
+            ImGui::SetNextItemWidth(190.f);
+            ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
+        }
+
+        initial_curpos.y += 25.f;
+        ImGui::SetCursorPos(initial_curpos);
+
+        if (ImGui::CollapsingHeader("Rigid Animation"))
+        {
+            initial_curpos.y += 25.f;
+            ImGui::SetCursorPos(initial_curpos);
+            ImGui::SetNextItemWidth(190.f);
+            ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
+        }
+
+        initial_curpos.y += 25.f;
+        ImGui::SetCursorPos(initial_curpos);
+
+        if (ImGui::CollapsingHeader("Camera Move"))
+        {
+            initial_curpos.y += 25.f;
+            ImGui::SetCursorPos(initial_curpos);
+            ImGui::SetNextItemWidth(190.f);
+            ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
+        }
+
+        initial_curpos.y += 25.f;
+        ImGui::SetCursorPos(initial_curpos);
+
+        if (ImGui::CollapsingHeader("Camera Shake"))
+        {
+            initial_curpos.y += 25.f;
+            ImGui::SetCursorPos(initial_curpos);
+            ImGui::SetNextItemWidth(190.f);
+            ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
+        }
+
+        initial_curpos.y += 25.f;
+        ImGui::SetCursorPos(initial_curpos);
+
+        if (ImGui::CollapsingHeader("Camera ZoomIn/ZoomOut"))
+        {
+            initial_curpos.y += 25.f;
+            ImGui::SetCursorPos(initial_curpos);
+            ImGui::SetNextItemWidth(190.f);
+            ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
+        }
+
+        initial_curpos.y += 25.f;
+        ImGui::SetCursorPos(initial_curpos);
+
+        if (ImGui::CollapsingHeader("Shock Sound Effect"))
+        {
+            initial_curpos.y += 25.f;
+            ImGui::SetCursorPos(initial_curpos);
+            ImGui::SetNextItemWidth(190.f);
+            ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
+        }
+
+        initial_curpos.y += 25.f;
+        ImGui::SetCursorPos(initial_curpos);
+
+        if (ImGui::CollapsingHeader("Shooting Sound Effect"))
+        {
+            initial_curpos.y += 25.f;
+            ImGui::SetCursorPos(initial_curpos);
+            ImGui::SetNextItemWidth(190.f);
+            ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
+        }
+
+        initial_curpos.y += 25.f;
+        ImGui::SetCursorPos(initial_curpos);
+
+        if (ImGui::CollapsingHeader("Damage Moan Sound Effect"))
+        {
+            initial_curpos.y += 25.f;
+            ImGui::SetCursorPos(initial_curpos);
+            ImGui::SetNextItemWidth(190.f);
+            ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
+        }
+
+        button_pos.y += 5.f;
+        ImGui::SetCursorPos(button_pos);
+
+        if (ImGui::Button("Animation1", ImVec2(175.f, 45.f))) // Buttons return true when clicked (most widgets return true when edited/activated)
+        {
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("Animation2", ImVec2(175.f, 45.f))) // Buttons return true when clicked (most widgets return true when edited/activated)
+        {
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("Animation3", ImVec2(175.f, 45.f))) // Buttons return true when clicked (most widgets return true when edited/activated)
+        {
         }
         ImGui::End();
     }
