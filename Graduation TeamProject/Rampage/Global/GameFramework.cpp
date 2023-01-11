@@ -45,7 +45,7 @@ bool CGameFramework::OnCreate(HINSTANCE hInstance, HWND hMainWnd)
 	CImGuiManager::GetInst()->Init(m_hWnd, m_pd3dDevice.Get(), m_pd3dCommandList.Get(), d3dRtvCPUDescriptorHandle);
 
 	//CommandList를 실행하고 GPU 연산이 완료될 때까지 기다립니다.
-	ExecuteCommandLists();
+	//ExecuteCommandLists();
 	return(true);
 }
 void CGameFramework::OnDestroy()
@@ -241,7 +241,7 @@ void CGameFramework::BuildObjects()
 	m_pScene = std::make_unique<CMainTMPScene>();
 	m_pScene->BuildObjects(m_pd3dDevice.Get(), m_pd3dCommandList.Get());
 
-	m_pCamera = std::make_unique<CCamera>();
+	m_pCamera = std::make_unique<CFirstPersonCamera>();
 	m_pCamera->Init(m_pd3dDevice.Get(), m_pd3dCommandList.Get());
 
 	DXGI_FORMAT pdxgiObjectRtvFormats[2] = {DXGI_FORMAT_R8G8B8A8_UNORM, DXGI_FORMAT_R8G8B8A8_UNORM};

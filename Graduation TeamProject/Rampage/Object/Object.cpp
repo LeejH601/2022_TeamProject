@@ -496,7 +496,6 @@ void CGoblinObject::Animate(float fTimeElapsed)
 {
 	CGameObject::Animate(fTimeElapsed);
 }
-}
 
 CLionObject::CLionObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks)
 {
