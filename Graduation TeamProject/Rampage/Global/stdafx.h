@@ -47,6 +47,8 @@ using Microsoft::WRL::ComPtr;
 
 
 // 주 윈도우 클라이언트 영역의 크기를 표현하는 상수들입니다.
+#define FIRST_WINDOW_POS_WIDTH 50
+#define FIRST_WINDOW_POS_HEIGHT 50
 #define FRAME_BUFFER_WIDTH 1400
 #define FRAME_BUFFER_HEIGHT 800
 #define SKINNED_ANIMATION_BONES		128

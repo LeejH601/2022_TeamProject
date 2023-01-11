@@ -23,6 +23,7 @@ private:
 
 	int	m_nRootParameters = 0;		// 루트파라미터 번호
 	std::vector<int> m_pnRootParameterIndices;		// 루트파라미터 인덱스
+public:
 	std::vector<D3D12_GPU_DESCRIPTOR_HANDLE> m_pd3dSrvGpuDescriptorHandles;	// Srv 디스크립터 핸들
 public:
 	int GetTextures() { return(m_nTextures); }

@@ -179,8 +179,10 @@ void CGameObject::UpdateTransform(XMFLOAT4X4* pxmf4x4Parent)
 CGameObject* CGameObject::FindFrame(const char* pstrFrameName)
 {
 	CGameObject* pFrameObject = NULL;
-	if (!strncmp(m_pstrFrameName, pstrFrameName, strlen(pstrFrameName))) return(this);
-
+	if ((!strncmp(m_pstrFrameName, pstrFrameName, strlen(pstrFrameName))) && strlen(m_pstrFrameName) == strlen(pstrFrameName))
+	{
+		return(this);
+	}
 	if (m_pSibling) if (pFrameObject = m_pSibling->FindFrame(pstrFrameName)) return(pFrameObject);
 	if (m_pChild) if (pFrameObject = m_pChild->FindFrame(pstrFrameName)) return(pFrameObject);
 
@@ -491,6 +493,25 @@ CGoblinObject::~CGoblinObject()
 }
 
 void CGoblinObject::Animate(float fTimeElapsed)
+{
+	CGameObject::Animate(fTimeElapsed);
+}
+}
+
+CLionObject::CLionObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks)
+{
+	CLoadedModelInfo* pLionModel = CModelManager::GetInst()->GetModelInfo("Object/SK_FKnight_WeaponB_01.bin");;
+	if (!pLionModel) pLionModel = CModelManager::GetInst()->LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, "Object/SK_FKnight_WeaponB_01.bin");
+
+	SetChild(pLionModel->m_pModelRootObject, true);
+	m_pSkinnedAnimationController = std::make_unique<CAnimationController>(pd3dDevice, pd3dCommandList, nAnimationTracks, pLionModel);
+}
+
+CLionObject::~CLionObject()
+{
+}
+
+void CLionObject::Animate(float fTimeElapsed)
 {
 	CGameObject::Animate(fTimeElapsed);
 }

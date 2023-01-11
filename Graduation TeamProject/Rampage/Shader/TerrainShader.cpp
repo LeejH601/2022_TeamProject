@@ -47,11 +47,11 @@ D3D12_RASTERIZER_DESC CTerrainShader::CreateRasterizerState(int nPipelineState)
 }
 D3D12_SHADER_BYTECODE CTerrainShader::CreateVertexShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
 {
-	return(CShader::CompileShaderFromFile(L"TerrainVertexShader.hlsl", "VSTerrain", "vs_5_1", ppd3dShaderBlob));
+	return(CShader::ReadCompiledShaderFile(L"TerrainVertexShader.cso", ppd3dShaderBlob));
 }
 D3D12_SHADER_BYTECODE CTerrainShader::CreatePixelShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
 {
-	return(CShader::CompileShaderFromFile(L"TerrainPixelShader.hlsl", "PSTerrain", "ps_5_1", ppd3dShaderBlob));
+	return(CShader::ReadCompiledShaderFile(L"TerrainPixelShader.cso", ppd3dShaderBlob));
 }
 D3D12_INPUT_LAYOUT_DESC CTerrainShader::CreateInputLayout(int nPipelineState)
 {

@@ -36,8 +36,8 @@ public:
 	int								m_nFramesPerSecond = 0; //m_fTicksPerSecond
 
 	int								m_nKeyFrames = 0;
-	std::vector<float> m_pfKeyFrameTimes;
-	std::vector<XMFLOAT4X4*> m_ppxmf4x4KeyFrameTransforms;
+	std::vector<float>				m_pfKeyFrameTimes;
+	std::vector<XMFLOAT4X4*>		m_ppxmf4x4KeyFrameTransforms;
 
 #ifdef _WITH_ANIMATION_SRT
 	int								m_nKeyFrameScales = 0;
@@ -50,25 +50,8 @@ public:
 	float* m_pfKeyFrameTranslationTimes = NULL;
 	XMFLOAT3** m_ppxmf3KeyFrameTranslations = NULL;
 #endif
-
-	float 							m_fPosition = 0.0f;
-	int 							m_nType = ANIMATION_TYPE_LOOP; //Once, Loop, PingPong
-
-	int 							m_nCallbackKeys = 0;
-	std::vector<CALLBACKKEY>		m_pCallbackKeys;
-
-	CAnimationCallbackHandler*		m_pAnimationCallbackHandler;
-
 public:
-	void SetPosition(float fTrackPosition);
-
-	XMFLOAT4X4 GetSRT(int nBone);
-
-	void SetCallbackKeys(int nCallbackKeys);
-	void SetCallbackKey(int nKeyIndex, float fTime, void* pData);
-	void SetAnimationCallbackHandler(CAnimationCallbackHandler* pCallbackHandler);
-
-	void HandleCallback();
+	XMFLOAT4X4 GetSRT(int nBone, float fPosition);
 };
 
 class CAnimationSets
@@ -90,11 +73,6 @@ public:
 
 	int								m_nAnimatedBoneFrames = 0;
 	std::vector<CGameObject*>		m_ppAnimatedBoneFrameCaches; //[m_nAnimatedBoneFrames]
-
-public:
-	void SetCallbackKeys(int nAnimationSet, int nCallbackKeys);
-	void SetCallbackKey(int nAnimationSet, int nKeyIndex, float fTime, void* pData);
-	void SetAnimationCallbackHandler(int nAnimationSet, CAnimationCallbackHandler* pCallbackHandler);
 };
 
 class CAnimationTrack
@@ -111,6 +89,12 @@ public:
 
 	int 							m_nAnimationSet = 0;
 
+	int 							m_nType = ANIMATION_TYPE_LOOP; //Once, Loop, PingPong
+
+	int 							m_nCallbackKeys = 0;
+	std::vector<CALLBACKKEY>		m_pCallbackKeys;
+
+	CAnimationCallbackHandler*		m_pAnimationCallbackHandler = NULL;
 public:
 	void SetAnimationSet(int nAnimationSet) { m_nAnimationSet = nAnimationSet; }
 
@@ -118,6 +102,13 @@ public:
 	void SetSpeed(float fSpeed) { m_fSpeed = fSpeed; }
 	void SetWeight(float fWeight) { m_fWeight = fWeight; }
 	void SetPosition(float fPosition) { m_fPosition = fPosition; }
+	float UpdatePosition(float fTrackPosition, float fElapsedTime, float fAnimationLength);
+
+	void SetCallbackKeys(int nCallbackKeys);
+	void SetCallbackKey(int nKeyIndex, float fTime, void* pData);
+	void SetAnimationCallbackHandler(CAnimationCallbackHandler* pCallbackHandler);
+
+	void HandleCallback();
 };
 
 class CAnimationController
@@ -150,9 +141,9 @@ public:
 	void SetTrackSpeed(int nAnimationTrack, float fSpeed);
 	void SetTrackWeight(int nAnimationTrack, float fWeight);
 
-	void SetCallbackKeys(int nAnimationSet, int nCallbackKeys);
-	void SetCallbackKey(int nAnimationSet, int nKeyIndex, float fTime, void* pData);
-	void SetAnimationCallbackHandler(int nAnimationSet, CAnimationCallbackHandler* pCallbackHandler);
+	void SetCallbackKeys(int nAnimationTrack, int nCallbackKeys);
+	void SetCallbackKey(int nAnimationTrack, int nKeyIndex, float fTime, void* pData);
+	void SetAnimationCallbackHandler(int nAnimationTrack, CAnimationCallbackHandler* pCallbackHandler);
 
 	void AdvanceTime(float fElapsedTime, CGameObject* pRootGameObject);
 };
