@@ -5,10 +5,11 @@
 class CHeightMapTerrain : public CGameObject
 {
 public:
+	CHeightMapTerrain() {};
 	CHeightMapTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, LPCTSTR pFileName, int nWidth, int nLength, int nBlockWidth, int nBlockLength, XMFLOAT3 xmf3Scale, XMFLOAT4 xmf4Color, CShader* pTerrainShader);
 	virtual ~CHeightMapTerrain();
 
-private:
+protected:
 	CHeightMapImage* m_pHeightMapImage;
 
 	int								m_nWidth;
@@ -34,4 +35,26 @@ public:
 	float GetLength() { return(m_nLength * m_xmf3Scale.z); }
 
 	//virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = NULL);
+};
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+class CTerrainLayer
+{
+	D3D12_GPU_DESCRIPTOR_HANDLE m_d3dSrvBaseTexture;
+	D3D12_GPU_DESCRIPTOR_HANDLE m_d3dSrvAlphaBlendTexture;
+
+	XMMATRIX					m_xmmtxTexture;
+};
+
+class CSplatTerrain : public CHeightMapTerrain
+{
+public:
+	CSplatTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, LPCTSTR pFileName, int nWidth, int nLength, int nBlockWidth, int nBlockLength, XMFLOAT3 xmf3Scale, XMFLOAT4 xmf4Color, CShader* pTerrainShader);
+	virtual ~CSplatTerrain();
+
+private:
+	int m_nTerrainLayers;
+	std::vector<CTerrainLayer> m_vTerrainLayers;
 };

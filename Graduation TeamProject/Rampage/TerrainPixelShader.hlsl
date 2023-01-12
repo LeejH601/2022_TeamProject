@@ -2,6 +2,11 @@ Texture2D gtxtTerrainTexture : register(t0);
 Texture2D gtxtDetailTexture : register(t1);
 Texture2D gtxtAlphaTexture : register(t2);
 
+Texture2D gtxTerrainBaseTextures[4] : register(t10);
+Texture2D gtxtTerrainNormalTextures[4] : register(t20);
+Texture2D gtxtTerrainAlphaTexture : register(t25);
+
+
 SamplerState gSamplerState : register(s0);
 
 struct VS_TERRAIN_OUTPUT
@@ -34,3 +39,5 @@ PS_MULTIPLE_RENDER_TARGETS_OUTPUT PSTerrain(VS_TERRAIN_OUTPUT input) : SV_TARGET
 
 	return(output);
 }
+
+

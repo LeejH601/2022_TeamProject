@@ -195,6 +195,7 @@ protected:
 	ComPtr<ID3D12Resource> m_pd3dTextureCoord1UploadBuffer = NULL;
 
 public:
+	CHeightMapGridMesh() : CMesh() {};
 	CHeightMapGridMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int xStart, int zStart, int nWidth, int nLength, XMFLOAT3 xmf3Scale = XMFLOAT3(1.0f, 1.0f, 1.0f), XMFLOAT4 xmf4Color = XMFLOAT4(1.0f, 1.0f, 0.0f, 0.0f), void* pContext = NULL);
 	virtual ~CHeightMapGridMesh();
 
@@ -207,4 +208,11 @@ public:
 
 	virtual float OnGetHeight(int x, int z, void* pContext);
 	virtual XMFLOAT4 OnGetColor(int x, int z, void* pContext);
+};
+
+class CSplatGridMesh : public CHeightMapGridMesh
+{
+public:
+	CSplatGridMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int xStart, int zStart, int nWidth, int nLength, XMFLOAT3 xmf3Scale = XMFLOAT3(1.0f, 1.0f, 1.0f), XMFLOAT4 xmf4Color = XMFLOAT4(1.0f, 1.0f, 0.0f, 0.0f), void* pContext = NULL);
+	virtual ~CSplatGridMesh();
 };

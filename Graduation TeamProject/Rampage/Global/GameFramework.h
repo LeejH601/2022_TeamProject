@@ -6,9 +6,11 @@ class CScene;
 class CCamera;
 class CShader;
 class CTerrainShader;
+class CSplatTerrainShader;
 class CGameObject;
 class CLight;
 class CHeightMapTerrain;
+class CSplatTerrain;;
 class CTexture;
 
 class CGameFramework
@@ -66,6 +68,7 @@ private:
 	std::unique_ptr<CLight> m_pLight = NULL;
 
 	std::unique_ptr<CTerrainShader> m_pTerrainShader = NULL;
+	std::unique_ptr<CSplatTerrainShader> m_pSplatTerrainShader = NULL;
 	std::unique_ptr<CHeightMapTerrain> m_pTerrain = NULL;
 
 	CGameTimer					m_GameTimer;
@@ -73,6 +76,7 @@ private:
 	_TCHAR						m_pszFrameRate[50];
 
 	DWORD dwDirection;
+	bool m_bIsSprint = false;
 
 
 public:

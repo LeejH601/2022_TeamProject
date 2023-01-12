@@ -287,10 +287,15 @@ void CGameFramework::BuildObjects()
 	m_pTerrainShader->CreateCbvSrvDescriptorHeaps(m_pd3dDevice.Get(), 0, 3);
 	m_pTerrainShader->CreateShaderVariables(m_pd3dDevice.Get(), m_pd3dCommandList.Get());
 
+	m_pSplatTerrainShader = std::make_unique<CSplatTerrainShader>();
+	m_pSplatTerrainShader->CreateShader(m_pd3dDevice.Get(), m_pScene->GetGraphicsRootSignature(), 2, pdxgiObjectRtvFormats, 0);
+	m_pSplatTerrainShader->CreateCbvSrvDescriptorHeaps(m_pd3dDevice.Get(), 0, 9);
+	m_pSplatTerrainShader->CreateShaderVariables(m_pd3dDevice.Get(), m_pd3dCommandList.Get());
+
 	// Terrain »ý¼º
 	XMFLOAT3 xmf3Scale(18.0f, 6.0f, 18.0f);
 	XMFLOAT4 xmf4Color(0.0f, 0.5f, 0.0f, 0.0f);
-	m_pTerrain = std::make_unique<CHeightMapTerrain>(m_pd3dDevice.Get(), m_pd3dCommandList.Get(), m_pScene->GetGraphicsRootSignature(), _T("Image/HeightMap.raw"), 257, 257, 257, 257, xmf3Scale, xmf4Color, m_pTerrainShader.get());
+	m_pTerrain = std::make_unique<CSplatTerrain>(m_pd3dDevice.Get(), m_pd3dCommandList.Get(), m_pScene->GetGraphicsRootSignature(), _T("Terrain/terrainHeightMap257.raw"), 257, 257, 257, 257, xmf3Scale, xmf4Color, m_pSplatTerrainShader.get());
 	m_pTerrain->SetPosition(XMFLOAT3(-800.f, -750.f, -800.f));
 	//m_pTerrain->SetPosition(XMFLOAT3(0.f, 0.f, 0.f));
 }
@@ -441,29 +446,37 @@ void CGameFramework::ProcessInput()
 
 	if (cxDelta || cyDelta)
 	{
-		if (pKeysBuffer[VK_RBUTTON] & 0xF0)
+		/*if (pKeysBuffer[VK_RBUTTON] & 0xF0)
 			m_pCamera->Rotate(cyDelta, 0.0f, -cxDelta);
 		else
+			m_pCamera->Rotate(cyDelta, cxDelta, 0.0f);*/
+
+		if (pKeysBuffer[VK_RBUTTON] & 0xF0)
 			m_pCamera->Rotate(cyDelta, cxDelta, 0.0f);
 	}
 
 	m_pCamera->RegenerateViewMatrix();
 
-	if (dwDirection) {
-		if (dwDirection)
-		{
-			XMFLOAT3 xmf3Shift = XMFLOAT3(0, 0, 0);
-			float fDistance = 40.0f * m_GameTimer.GetFrameTimeElapsed();
-			if (dwDirection & DIR_FORWARD) xmf3Shift = Vector3::Add(xmf3Shift, m_pCamera->GetLookVector(), fDistance);
-			if (dwDirection & DIR_BACKWARD) xmf3Shift = Vector3::Add(xmf3Shift, m_pCamera->GetLookVector(), -fDistance);
-			if (dwDirection & DIR_RIGHT) xmf3Shift = Vector3::Add(xmf3Shift, m_pCamera->GetRightVector(), fDistance);
-			if (dwDirection & DIR_LEFT) xmf3Shift = Vector3::Add(xmf3Shift, m_pCamera->GetRightVector(), -fDistance);
-			if (dwDirection & DIR_UP) xmf3Shift = Vector3::Add(xmf3Shift, m_pCamera->GetUpVector(), fDistance);
-			if (dwDirection & DIR_DOWN) xmf3Shift = Vector3::Add(xmf3Shift, m_pCamera->GetUpVector(), -fDistance);
+	if (pKeysBuffer[VK_RBUTTON] & 0xF0) {
+		if (dwDirection) {
+			if (dwDirection)
+			{
+				XMFLOAT3 xmf3Shift = XMFLOAT3(0, 0, 0);
+				float fDistance = 40.0f * m_GameTimer.GetFrameTimeElapsed();
+				if (pKeysBuffer[VK_SHIFT] & 0xF0)
+					fDistance *= 10.0f;
+				if (dwDirection & DIR_FORWARD) xmf3Shift = Vector3::Add(xmf3Shift, m_pCamera->GetLookVector(), fDistance);
+				if (dwDirection & DIR_BACKWARD) xmf3Shift = Vector3::Add(xmf3Shift, m_pCamera->GetLookVector(), -fDistance);
+				if (dwDirection & DIR_RIGHT) xmf3Shift = Vector3::Add(xmf3Shift, m_pCamera->GetRightVector(), fDistance);
+				if (dwDirection & DIR_LEFT) xmf3Shift = Vector3::Add(xmf3Shift, m_pCamera->GetRightVector(), -fDistance);
+				if (dwDirection & DIR_UP) xmf3Shift = Vector3::Add(xmf3Shift, m_pCamera->GetUpVector(), fDistance);
+				if (dwDirection & DIR_DOWN) xmf3Shift = Vector3::Add(xmf3Shift, m_pCamera->GetUpVector(), -fDistance);
 
-			m_pCamera->Move(xmf3Shift);
+				m_pCamera->Move(xmf3Shift);
+			}
 		}
 	}
+	
 	
 
 
@@ -553,7 +566,8 @@ void CGameFramework::FrameAdvance()
 		m_pObjects[i]->Render(m_pd3dCommandList.Get());
 	}
 
-	m_pTerrainShader->Render(m_pd3dCommandList.Get(), 0);
+	//m_pTerrainShader->Render(m_pd3dCommandList.Get(), 0);
+	m_pSplatTerrainShader->Render(m_pd3dCommandList.Get(), 0);
 	m_pTerrain->Render(m_pd3dCommandList.Get());
 
 	CImGuiManager::GetInst()->Render(m_pd3dCommandList.Get());
