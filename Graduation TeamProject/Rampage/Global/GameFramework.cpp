@@ -277,9 +277,11 @@ void CGameFramework::BuildObjects()
 	m_pObject->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 2);
 	m_pObjects.push_back(std::move(m_pObject));
 
-	// Light 생성
-	m_pLight = std::make_unique<CLight>();
-	m_pLight->CreateLightVariables(m_pd3dDevice.Get(), m_pd3dCommandList.Get());
+	// LightManager 생성
+	CLightManager::GetInst()->CreateLightVariables(m_pd3dDevice.Get(), m_pd3dCommandList.Get());
+
+	// Light 추가
+	CLightManager::GetInst()->Add_Light(LIGHT(LIGHT_TYPE::POINT_LIGHT, 500.f, XMFLOAT4(0.5f, 0.0f, 0.0f, 1.0f), XMFLOAT4(1.f, 0.f, 0.f, 1.0f), XMFLOAT4(0.5f, 0.5f, 0.5f, 0.5f), XMFLOAT3(0.F, 30.0f, 4.f), XMFLOAT3(0.0f, 0.f, 0.0f), XMFLOAT3(1.0f, 0.00001f, 0.0001f)));
 
 	// Terrain Shader 생성
 	m_pTerrainShader = std::make_unique<CTerrainShader>();
@@ -296,6 +298,7 @@ void CGameFramework::BuildObjects()
 }
 void CGameFramework::ReleaseObjects()
 {
+	CLightManager::GetInst()->ReleaseLightVariables();
 	// 메모리 해제가 필요한 객체들의 메모리를 해제해준다.
 }
 void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
@@ -540,7 +543,7 @@ void CGameFramework::FrameAdvance()
 	OnPrepareRenderTarget();
 	m_pScene->OnPrepareRender(m_pd3dCommandList.Get());
 	m_pCamera->OnPrepareRender(m_pd3dCommandList.Get());
-	m_pLight->Render((m_pd3dCommandList.Get()));
+	CLightManager::GetInst()->OnPrepareRender(m_pd3dCommandList.Get());
 
 	m_pScene->Render(m_pd3dCommandList.Get(), m_pCamera.get());
 
