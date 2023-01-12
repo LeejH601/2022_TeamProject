@@ -4,6 +4,7 @@
 #include "..\Object\Object.h"
 #include "..\Object\ModelManager.h"
 #include "..\ImGui\ImGuiManager.h"
+#include "..\Sound\SoundManager.h"
 #include "..\Shader\ModelShader.h"
 #include "..\Shader\TerrainShader.h"
 #include "..\Object\Light.h"
@@ -22,6 +23,8 @@ CGameFramework::CGameFramework()
 }
 CGameFramework::~CGameFramework()
 {
+	// Release Fmod Llibrary
+	CSoundManager::GetInst()->Release();
 }
 bool CGameFramework::OnCreate(HINSTANCE hInstance, HWND hMainWnd)
 {
@@ -36,6 +39,9 @@ bool CGameFramework::OnCreate(HINSTANCE hInstance, HWND hMainWnd)
 	CreateRenderTargetViews();
 	CreateDepthStencilView();
 
+	//Init FMOD
+	CSoundManager::GetInst()->Init();
+
 	//렌더링할 게임 객체를 생성한다.
 	BuildObjects();
 
@@ -45,7 +51,8 @@ bool CGameFramework::OnCreate(HINSTANCE hInstance, HWND hMainWnd)
 	CImGuiManager::GetInst()->Init(m_hWnd, m_pd3dDevice.Get(), m_pd3dCommandList.Get(), d3dRtvCPUDescriptorHandle);
 
 	//CommandList를 실행하고 GPU 연산이 완료될 때까지 기다립니다.
-	//ExecuteCommandLists();
+	ExecuteCommandLists();
+	
 	return(true);
 }
 void CGameFramework::OnDestroy()
@@ -255,6 +262,8 @@ void CGameFramework::BuildObjects()
 	CModelManager::GetInst()->LoadModel(m_pd3dDevice.Get(), m_pd3dCommandList.Get(), "Object/Lion.bin");
 	CModelManager::GetInst()->LoadModel(m_pd3dDevice.Get(), m_pd3dCommandList.Get(), "Object/SK_FKnight_WeaponB_01.bin");
 
+	CSoundManager::GetInst()->RegisterSound("Sound/mp3/David Bowie - Starman.mp3", false);
+	CSoundManager::GetInst()->PlaySound("Sound/mp3/David Bowie - Starman.mp3");
 
 	std::unique_ptr<CGoblinObject> m_pObject = std::make_unique<CGoblinObject>(m_pd3dDevice.Get(), m_pd3dCommandList.Get(), 1);
 	m_pObject->SetPosition(XMFLOAT3(0.0f, 0.0f, 0.0f));
