@@ -333,6 +333,19 @@ void CSkinnedMesh::LoadMeshFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 
 				m_pd3dPositionBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, m_pxmf3Positions.data(), sizeof(XMFLOAT3) * m_nVertices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dPositionUploadBuffer);
 
+				if (m_pd3dVertexBufferViews.size() < 2)
+				{
+					m_d3dBoneIndexBufferView.BufferLocation = NULL;
+					m_d3dBoneIndexBufferView.StrideInBytes = sizeof(XMINT4);
+					m_d3dBoneIndexBufferView.SizeInBytes = 0;
+					m_pd3dVertexBufferViews.push_back(m_d3dBoneIndexBufferView);
+
+					m_d3dBoneWeightBufferView.BufferLocation = NULL;
+					m_d3dBoneWeightBufferView.StrideInBytes = sizeof(XMFLOAT4);
+					m_d3dBoneWeightBufferView.SizeInBytes = 0;
+					m_pd3dVertexBufferViews.push_back(m_d3dBoneWeightBufferView);
+				}
+
 				D3D12_VERTEX_BUFFER_VIEW m_d3dPositionBufferView;
 				m_d3dPositionBufferView.BufferLocation = m_pd3dPositionBuffer->GetGPUVirtualAddress();
 				m_d3dPositionBufferView.StrideInBytes = sizeof(XMFLOAT3);
