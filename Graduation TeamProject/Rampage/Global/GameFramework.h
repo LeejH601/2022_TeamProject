@@ -13,6 +13,13 @@ class CHeightMapTerrain;
 class CSplatTerrain;;
 class CTexture;
 
+struct CB_Parallax_Info
+{
+	float m_fParallaxScale;
+	float m_fParallaxBias;
+	int m_iMappingMode;
+};
+
 class CGameFramework
 {
 private:
@@ -78,6 +85,9 @@ private:
 	DWORD dwDirection;
 	bool m_bIsSprint = false;
 
+	ComPtr<ID3D12Resource> m_pd3dcbParallax = NULL;
+	CB_Parallax_Info* m_pcbMappedParallax = NULL;
+
 
 public:
 	CGameFramework();
@@ -92,6 +102,9 @@ public:
 	void CreateRtvAndDsvDescriptorHeaps();
 	void CreateDirect3DDevice();
 	void CreateCommandQueueAndList();
+	void CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+
+	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList);
 
 	// 렌더타겟을 렌더링하기 위한 준비를 하는 함수이다.
 	void OnPrepareRenderTarget();

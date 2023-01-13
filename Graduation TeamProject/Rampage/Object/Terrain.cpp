@@ -99,7 +99,7 @@ CSplatTerrain::CSplatTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
-	std::shared_ptr<CTexture> pTerrainTextures = std::make_shared<CTexture>(9, RESOURCE_TEXTURE2D, 0, 1);
+	std::shared_ptr<CTexture> pTerrainTextures = std::make_shared<CTexture>(13, RESOURCE_TEXTURE2D, 0, 1);
 
 	pTerrainTextures->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Terrain/Grass.dds", RESOURCE_TEXTURE2D, 0);
 	pTerrainTextures->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Terrain/Sand.dds", RESOURCE_TEXTURE2D, 1);
@@ -109,7 +109,11 @@ CSplatTerrain::CSplatTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 	pTerrainTextures->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Terrain/BaseGrass_normals.dds", RESOURCE_TEXTURE2D, 5);
 	pTerrainTextures->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Terrain/Pebbles_normals.dds", RESOURCE_TEXTURE2D, 6);
 	pTerrainTextures->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Terrain/Rockwall_Normal.dds", RESOURCE_TEXTURE2D, 7);
-	pTerrainTextures->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Terrain/Alphatexture.dds", RESOURCE_TEXTURE2D, 8);
+	pTerrainTextures->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Terrain/BaseGrass_Heights.dds", RESOURCE_TEXTURE2D, 8);
+	pTerrainTextures->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Terrain/BaseGrass_Heights.dds", RESOURCE_TEXTURE2D, 9);
+	pTerrainTextures->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Terrain/Pebbles_Heights.dds", RESOURCE_TEXTURE2D, 10);
+	pTerrainTextures->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Terrain/Rockwall_Heights.dds", RESOURCE_TEXTURE2D, 11);
+	pTerrainTextures->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Terrain/Alphatexture.dds", RESOURCE_TEXTURE2D, 12);
 
 	pTerrainShader->CreateShaderResourceViews(pd3dDevice, pTerrainTextures.get(), 0, 6);
 

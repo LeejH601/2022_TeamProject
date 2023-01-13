@@ -196,5 +196,6 @@
     <FxCompile Include="TerrainVertexShader.hlsl" />
     <FxCompile Include="Shader\TerrainSplatPixelShader.hlsl" />
     <FxCompile Include="Shader\TerrainParallaxVertexShader.hlsl" />
+    <FxCompile Include="Shader\TerrainParallaxPixelShader.hlsl" />
   </ItemGroup>
 </Project>

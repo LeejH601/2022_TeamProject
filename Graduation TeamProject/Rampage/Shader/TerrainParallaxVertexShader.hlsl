@@ -15,8 +15,7 @@ struct VS_TERRAIN_OUTPUT
 	float2 uv0 : TEXCOORD0;
 	float2 uv1 : TEXCOORD1;
 	float3 normal : NORMAL;
-	float3 toLight : TEXCOORD2;
-	float3 toCamera : TEXCOORD3;
+	float3 toCamera : TEXCOORD2;
 };
 
 
@@ -53,10 +52,12 @@ VS_TERRAIN_OUTPUT VSParallaxTerrain(VS_TERRAIN_INPUT input)
 
 	float3x3 mtxTangentToWorld;
 	mtxTangentToWorld[0] = mul(input.tangent, gmtxGameObject);
-	mtxTangentToWorld[0] = mul(input.normal, gmtxGameObject);
-	mtxTangentToWorld[0] = mul(cross(input.tangent, input.normal), gmtxGameObject);
+	mtxTangentToWorld[2] = mul(input.normal, gmtxGameObject);
+	mtxTangentToWorld[1] = mul(cross(input.tangent, input.normal), gmtxGameObject);
 
 	//output.toLight = normalize(mul(mtxTangentToWorld, ))
+	output.toCamera = normalize(mul(mtxTangentToWorld, (gf3CameraPosition - positionW.xyz)));
+	output.normal = normalize(mul(mtxTangentToWorld, normalW));
 
 	return(output);
 }

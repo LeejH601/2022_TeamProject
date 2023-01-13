@@ -11,6 +11,7 @@ struct VS_TERRAIN_INPUT
 struct VS_TERRAIN_OUTPUT
 {
 	float4 position : SV_POSITION;
+	float3 positionW : POSITIONl;
 	float4 color : COLOR;
 	float2 uv0 : TEXCOORD0;
 	float2 uv1 : TEXCOORD1;
@@ -40,7 +41,10 @@ VS_TERRAIN_OUTPUT VSTerrain(VS_TERRAIN_INPUT input)
 {
 	VS_TERRAIN_OUTPUT output;
 
-	output.position = mul(mul(mul(float4(input.position, 1.0f), gmtxGameObject), gmtxView), gmtxProjection);
+	float4 positionW = mul(float4(input.position, 1.0f), gmtxGameObject);
+
+	output.positionW = positionW.xyz;
+	output.position = mul(mul(positionW, gmtxView), gmtxProjection);
 	output.color = input.color;
 	output.uv0 = input.uv0;
 	output.uv1 = input.uv1;

@@ -120,12 +120,14 @@ D3D12_RASTERIZER_DESC CSplatTerrainShader::CreateRasterizerState(int nPipelineSt
 
 D3D12_SHADER_BYTECODE CSplatTerrainShader::CreateVertexShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
 {
-	return(CShader::ReadCompiledShaderFile(L"TerrainVertexShader.cso", ppd3dShaderBlob));
+	return(CShader::ReadCompiledShaderFile(L"TerrainParallaxVertexShader.cso", ppd3dShaderBlob));
+	//return(CShader::ReadCompiledShaderFile(L"TerrainVertexShader.cso", ppd3dShaderBlob));
 }
 
 D3D12_SHADER_BYTECODE CSplatTerrainShader::CreatePixelShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
 {
-	return(CShader::ReadCompiledShaderFile(L"TerrainSplatPixelShader.cso", ppd3dShaderBlob));
+	return(CShader::ReadCompiledShaderFile(L"TerrainParallaxPixelShader.cso", ppd3dShaderBlob));
+	//return(CShader::ReadCompiledShaderFile(L"TerrainSplatPixelShader.cso", ppd3dShaderBlob));
 }
 
 D3D12_INPUT_LAYOUT_DESC CSplatTerrainShader::CreateInputLayout(int nPipelineState)

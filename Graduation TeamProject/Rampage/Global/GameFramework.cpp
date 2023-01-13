@@ -289,7 +289,7 @@ void CGameFramework::BuildObjects()
 
 	m_pSplatTerrainShader = std::make_unique<CSplatTerrainShader>();
 	m_pSplatTerrainShader->CreateShader(m_pd3dDevice.Get(), m_pScene->GetGraphicsRootSignature(), 2, pdxgiObjectRtvFormats, 0);
-	m_pSplatTerrainShader->CreateCbvSrvDescriptorHeaps(m_pd3dDevice.Get(), 0, 9);
+	m_pSplatTerrainShader->CreateCbvSrvDescriptorHeaps(m_pd3dDevice.Get(), 0, 13);
 	m_pSplatTerrainShader->CreateShaderVariables(m_pd3dDevice.Get(), m_pd3dCommandList.Get());
 
 	// Terrain 생성
@@ -298,6 +298,8 @@ void CGameFramework::BuildObjects()
 	m_pTerrain = std::make_unique<CSplatTerrain>(m_pd3dDevice.Get(), m_pd3dCommandList.Get(), m_pScene->GetGraphicsRootSignature(), _T("Terrain/terrainHeightMap257.raw"), 257, 257, 257, 257, xmf3Scale, xmf4Color, m_pSplatTerrainShader.get());
 	m_pTerrain->SetPosition(XMFLOAT3(-800.f, -750.f, -800.f));
 	//m_pTerrain->SetPosition(XMFLOAT3(0.f, 0.f, 0.f));
+
+	CreateShaderVariables(m_pd3dDevice.Get(), m_pd3dCommandList.Get());
 }
 void CGameFramework::ReleaseObjects()
 {
@@ -489,6 +491,15 @@ void CGameFramework::AnimateObjects()
 	// Object들의 애니메이션을 수행한다.
 
 }
+
+void CGameFramework::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	UINT ncbElementBytes = ((sizeof(CB_Parallax_Info) + 255) & ~255); //256의 배수
+	m_pd3dcbParallax = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, ncbElementBytes, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
+
+	m_pd3dcbParallax->Map(0, NULL, (void**)&m_pcbMappedParallax);
+}
+
 void CGameFramework::OnPrepareRenderTarget()
 {
 	ImVec4 clear_color = CImGuiManager::GetInst()->GetColor();
@@ -530,6 +541,16 @@ void CGameFramework::MoveToNextFrame()
 		::WaitForSingleObject(m_hFenceEvent, INFINITE);
 	}
 }
+void CGameFramework::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	m_pcbMappedParallax->m_fParallaxScale = CImGuiManager::GetInst()->GetParallaxScale();
+	m_pcbMappedParallax->m_fParallaxBias = CImGuiManager::GetInst()->GetParallaxBias();
+	m_pcbMappedParallax->m_iMappingMode = CImGuiManager::GetInst()->GetTerrainMappingMode() % 3;
+	if (m_pcbMappedParallax->m_iMappingMode < 0) m_pcbMappedParallax->m_iMappingMode = 0;
+
+	D3D12_GPU_VIRTUAL_ADDRESS d3dGpuVirtualAddress = m_pd3dcbParallax->GetGPUVirtualAddress();
+	pd3dCommandList->SetGraphicsRootConstantBufferView(7, d3dGpuVirtualAddress);
+}
 void CGameFramework::FrameAdvance()
 {
 	m_GameTimer.Tick(0.0f);
@@ -551,6 +572,7 @@ void CGameFramework::FrameAdvance()
 	m_pd3dCommandList->ClearDepthStencilView(m_d3dDsvDescriptorCPUHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
 
 	OnPrepareRenderTarget();
+	UpdateShaderVariables(m_pd3dCommandList.Get());
 	m_pScene->OnPrepareRender(m_pd3dCommandList.Get());
 	m_pCamera->OnPrepareRender(m_pd3dCommandList.Get());
 	m_pLight->Render((m_pd3dCommandList.Get()));
