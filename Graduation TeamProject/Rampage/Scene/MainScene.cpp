@@ -1,4 +1,10 @@
 #include "MainScene.h"
+#include "..\Global\Timer.h"
+#include "..\Object\Texture.h"
+#include "..\Object\ModelManager.h"
+#include "..\Shader\ModelShader.h"
+#include "..\Shader\ModelShader.h"
+#include "..\Sound\SoundManager.h"
 
 void CMainTMPScene::OnPrepareRender(ID3D12GraphicsCommandList* pd3dCommandList)
 {
@@ -82,9 +88,78 @@ void CMainTMPScene::CreateGraphicsRootSignature(ID3D12Device* pd3dDevice)
 void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	CreateGraphicsRootSignature(pd3dDevice);
+
+	DXGI_FORMAT pdxgiObjectRtvFormats[2] = { DXGI_FORMAT_R8G8B8A8_UNORM, DXGI_FORMAT_R8G8B8A8_UNORM };
+
+	CModelShader::GetInst()->CreateShader(pd3dDevice, GetGraphicsRootSignature(), 2, pdxgiObjectRtvFormats, 0);
+	CModelShader::GetInst()->CreateShaderVariables(pd3dDevice,pd3dCommandList);
+	CModelShader::GetInst()->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 100);
+
+	CModelManager::GetInst()->LoadModel(pd3dDevice,pd3dCommandList, "Object/Angrybot.bin");;
+	CModelManager::GetInst()->LoadModel(pd3dDevice,pd3dCommandList, "Object/Eagle.bin");
+	CModelManager::GetInst()->LoadModel(pd3dDevice,pd3dCommandList, "Object/Lion.bin");
+	CModelManager::GetInst()->LoadModel(pd3dDevice,pd3dCommandList, "Object/SK_FKnight_WeaponB_01.bin");
+
+	CSoundManager::GetInst()->RegisterSound("Sound/mp3/David Bowie - Starman.mp3", false);
+	CSoundManager::GetInst()->PlaySound("Sound/mp3/David Bowie - Starman.mp3");
+
+	std::unique_ptr<CGoblinObject> m_pObject = std::make_unique<CGoblinObject>(pd3dDevice, pd3dCommandList, 1);
+	m_pObject->SetPosition(XMFLOAT3(0.0f, 0.0f, 0.0f));
+	m_pObject->SetScale(5.0f, 5.0f, 5.0f);
+	m_pObject->Rotate(0.0f, 180.0f, 0.0f);
+	m_pObject->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 2);
+	m_pObjects.push_back(std::move(m_pObject));
+
+	m_pObject = std::make_unique<CGoblinObject>(pd3dDevice, pd3dCommandList, 1);
+	m_pObject->SetPosition(XMFLOAT3(-15.0f, 0.0f, 0.0f));
+	m_pObject->SetScale(5.0f, 5.0f, 5.0f);
+	m_pObject->Rotate(0.0f, 180.0f, 0.0f);
+	m_pObject->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 2);
+	m_pObjects.push_back(std::move(m_pObject));
+
+	m_pObject = std::make_unique<CGoblinObject>(pd3dDevice, pd3dCommandList, 1);
+	m_pObject->SetPosition(XMFLOAT3(15.0f, 0.0f, 0.0f));
+	m_pObject->SetScale(5.0f, 5.0f, 5.0f);
+	m_pObject->Rotate(0.0f, 180.0f, 0.0f);
+	m_pObject->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 2);
+	m_pObjects.push_back(std::move(m_pObject));
+
+	// Light 持失
+	m_pLight = std::make_unique<CLight>();
+	m_pLight->CreateLightVariables(pd3dDevice, pd3dCommandList);
+
+	// Terrain Shader 持失
+	m_pTerrainShader = std::make_unique<CTerrainShader>();
+	m_pTerrainShader->CreateShader(pd3dDevice, GetGraphicsRootSignature(), 2, pdxgiObjectRtvFormats, 0);
+	m_pTerrainShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 3);
+	m_pTerrainShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
+
+	// Terrain 持失
+	XMFLOAT3 xmf3Scale(18.0f, 6.0f, 18.0f);
+	XMFLOAT4 xmf4Color(0.0f, 0.5f, 0.0f, 0.0f);
+	m_pTerrain = std::make_unique<CHeightMapTerrain>(pd3dDevice, pd3dCommandList, GetGraphicsRootSignature(), _T("Image/HeightMap.raw"), 257, 257, 257, 257, xmf3Scale, xmf4Color, m_pTerrainShader.get());
+	m_pTerrain->SetPosition(XMFLOAT3(-800.f, -750.f, -800.f));
+	//m_pTerrain->SetPosition(XMFLOAT3(0.f, 0.f, 0.f));
 }
-void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
+void CMainTMPScene::AnimateObjects(float fTimeElapsed)
 {
+	
+}
+void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed)
+{
+	m_pLight->Render(pd3dCommandList);
+
+	CModelShader::GetInst()->Render(pd3dCommandList, 0);
+
+	for (int i = 0; i < m_pObjects.size(); ++i)
+	{
+		m_pObjects[i]->Animate(fTimeElapsed * (i + 1));
+		if (!m_pObjects[i]->m_pSkinnedAnimationController) m_pObjects[i]->UpdateTransform(NULL);
+		m_pObjects[i]->Render(pd3dCommandList);
+	}
+
+	m_pTerrainShader->Render(pd3dCommandList, 0);
+	m_pTerrain->Render(pd3dCommandList);
 }
 
 

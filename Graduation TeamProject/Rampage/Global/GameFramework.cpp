@@ -1,15 +1,8 @@
 #include "GameFramework.h"
-#include "..\Scene\MainScene.h"
 #include "..\Global\Camera.h"
-#include "..\Object\Object.h"
-#include "..\Object\ModelManager.h"
+#include "..\Scene\MainScene.h"
 #include "..\ImGui\ImGuiManager.h"
 #include "..\Sound\SoundManager.h"
-#include "..\Shader\ModelShader.h"
-#include "..\Shader\TerrainShader.h"
-#include "..\Object\Light.h"
-#include "..\Object\Terrain.h"
-#include "..\Object\Texture.h"
 
 CGameFramework::CGameFramework()
 {
@@ -250,58 +243,6 @@ void CGameFramework::BuildObjects()
 
 	m_pCamera = std::make_unique<CFirstPersonCamera>();
 	m_pCamera->Init(m_pd3dDevice.Get(), m_pd3dCommandList.Get());
-
-	DXGI_FORMAT pdxgiObjectRtvFormats[2] = {DXGI_FORMAT_R8G8B8A8_UNORM, DXGI_FORMAT_R8G8B8A8_UNORM};
-
-	CModelShader::GetInst()->CreateShader(m_pd3dDevice.Get(), m_pScene->GetGraphicsRootSignature(), 2, pdxgiObjectRtvFormats, 0);
-	CModelShader::GetInst()->CreateShaderVariables(m_pd3dDevice.Get(), m_pd3dCommandList.Get());
-	CModelShader::GetInst()->CreateCbvSrvDescriptorHeaps(m_pd3dDevice.Get(), 0, 100);
-
-	CModelManager::GetInst()->LoadModel(m_pd3dDevice.Get(), m_pd3dCommandList.Get(), "Object/Angrybot.bin");;
-	CModelManager::GetInst()->LoadModel(m_pd3dDevice.Get(), m_pd3dCommandList.Get(), "Object/Eagle.bin");
-	CModelManager::GetInst()->LoadModel(m_pd3dDevice.Get(), m_pd3dCommandList.Get(), "Object/Lion.bin");
-	CModelManager::GetInst()->LoadModel(m_pd3dDevice.Get(), m_pd3dCommandList.Get(), "Object/SK_FKnight_WeaponB_01.bin");
-
-	CSoundManager::GetInst()->RegisterSound("Sound/mp3/David Bowie - Starman.mp3", false);
-	CSoundManager::GetInst()->PlaySound("Sound/mp3/David Bowie - Starman.mp3");
-
-	std::unique_ptr<CGoblinObject> m_pObject = std::make_unique<CGoblinObject>(m_pd3dDevice.Get(), m_pd3dCommandList.Get(), 1);
-	m_pObject->SetPosition(XMFLOAT3(0.0f, 0.0f, 0.0f));
-	m_pObject->SetScale(5.0f, 5.0f, 5.0f);
-	m_pObject->Rotate(0.0f, 180.0f, 0.0f);
-	m_pObject->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 2);
-	m_pObjects.push_back(std::move(m_pObject));
-
-	m_pObject = std::make_unique<CGoblinObject>(m_pd3dDevice.Get(), m_pd3dCommandList.Get(), 1);
-	m_pObject->SetPosition(XMFLOAT3(-15.0f, 0.0f, 0.0f));
-	m_pObject->SetScale(5.0f, 5.0f, 5.0f);
-	m_pObject->Rotate(0.0f, 180.0f, 0.0f);
-	m_pObject->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 2);
-	m_pObjects.push_back(std::move(m_pObject));
-
-	m_pObject = std::make_unique<CGoblinObject>(m_pd3dDevice.Get(), m_pd3dCommandList.Get(), 1);
-	m_pObject->SetPosition(XMFLOAT3(15.0f, 0.0f, 0.0f));
-	m_pObject->SetScale(5.0f, 5.0f, 5.0f);
-	m_pObject->Rotate(0.0f, 180.0f, 0.0f);
-	m_pObject->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 2);
-	m_pObjects.push_back(std::move(m_pObject));
-
-	// Light 积己
-	m_pLight = std::make_unique<CLight>();
-	m_pLight->CreateLightVariables(m_pd3dDevice.Get(), m_pd3dCommandList.Get());
-
-	// Terrain Shader 积己
-	m_pTerrainShader = std::make_unique<CTerrainShader>();
-	m_pTerrainShader->CreateShader(m_pd3dDevice.Get(), m_pScene->GetGraphicsRootSignature(), 2, pdxgiObjectRtvFormats, 0);
-	m_pTerrainShader->CreateCbvSrvDescriptorHeaps(m_pd3dDevice.Get(), 0, 3);
-	m_pTerrainShader->CreateShaderVariables(m_pd3dDevice.Get(), m_pd3dCommandList.Get());
-
-	// Terrain 积己
-	XMFLOAT3 xmf3Scale(18.0f, 6.0f, 18.0f);
-	XMFLOAT4 xmf4Color(0.0f, 0.5f, 0.0f, 0.0f);
-	m_pTerrain = std::make_unique<CHeightMapTerrain>(m_pd3dDevice.Get(), m_pd3dCommandList.Get(), m_pScene->GetGraphicsRootSignature(), _T("Image/HeightMap.raw"), 257, 257, 257, 257, xmf3Scale, xmf4Color, m_pTerrainShader.get());
-	m_pTerrain->SetPosition(XMFLOAT3(-800.f, -750.f, -800.f));
-	//m_pTerrain->SetPosition(XMFLOAT3(0.f, 0.f, 0.f));
 }
 void CGameFramework::ReleaseObjects()
 {
@@ -483,6 +424,7 @@ void CGameFramework::ProcessInput()
 void CGameFramework::AnimateObjects()
 {
 	// Object甸狼 局聪皋捞记阑 荐青茄促.
+	m_pScene->AnimateObjects(m_GameTimer.GetFrameTimeElapsed());
 
 }
 void CGameFramework::OnPrepareRenderTarget()
@@ -526,7 +468,7 @@ void CGameFramework::MoveToNextFrame()
 		::WaitForSingleObject(m_hFenceEvent, INFINITE);
 	}
 }
-void CGameFramework::FrameAdvance()
+void CGameFramework::FrameAdvance() 
 {
 	m_GameTimer.Tick(0.0f);
 
@@ -549,21 +491,8 @@ void CGameFramework::FrameAdvance()
 	OnPrepareRenderTarget();
 	m_pScene->OnPrepareRender(m_pd3dCommandList.Get());
 	m_pCamera->OnPrepareRender(m_pd3dCommandList.Get());
-	m_pLight->Render((m_pd3dCommandList.Get()));
 
-	m_pScene->Render(m_pd3dCommandList.Get(), m_pCamera.get());
-
-	CModelShader::GetInst()->Render(m_pd3dCommandList.Get(), 0);
-
-	for (int i = 0; i < m_pObjects.size(); ++i)
-	{
-		m_pObjects[i]->Animate(m_GameTimer.GetFrameTimeElapsed() * (i + 1));
-		if (!m_pObjects[i]->m_pSkinnedAnimationController) m_pObjects[i]->UpdateTransform(NULL);
-		m_pObjects[i]->Render(m_pd3dCommandList.Get());
-	}
-
-	m_pTerrainShader->Render(m_pd3dCommandList.Get(), 0);
-	m_pTerrain->Render(m_pd3dCommandList.Get());
+	m_pScene->Render(m_pd3dCommandList.Get(), m_GameTimer.GetFrameTimeElapsed());
 
 	CImGuiManager::GetInst()->Render(m_pd3dCommandList.Get());
 

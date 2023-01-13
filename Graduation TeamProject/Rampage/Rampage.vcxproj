@@ -165,6 +165,7 @@
     <ClCompile Include="Rampage.cpp" />
     <ClCompile Include="Scene\MainScene.cpp" />
     <ClCompile Include="Scene\Scene.cpp" />
+    <ClCompile Include="Scene\SimulatorScene.cpp" />
     <ClCompile Include="Shader\ModelShader.cpp" />
     <ClCompile Include="Shader\Shader.cpp" />
     <ClCompile Include="Shader\TerrainShader.cpp" />
@@ -196,6 +197,7 @@
     <ClInclude Include="Object\Texture.h" />
     <ClInclude Include="Scene\MainScene.h" />
     <ClInclude Include="Scene\Scene.h" />
+    <ClInclude Include="Scene\SimulatorScene.h" />
     <ClInclude Include="Shader\ModelShader.h" />
     <ClInclude Include="Shader\Shader.h" />
     <ClInclude Include="Shader\TerrainShader.h" />
