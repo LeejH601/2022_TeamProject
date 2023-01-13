@@ -361,7 +361,7 @@ void CSkinnedMesh::LoadMeshFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 				nReads = (UINT)::fread(m_pxmf2TextureCoords0.data(), sizeof(XMFLOAT2), nTextureCoords, pInFile);
 
 				m_pd3dTextureCoord0Buffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, m_pxmf2TextureCoords0.data(), sizeof(XMFLOAT2) * m_nVertices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dTextureCoord0UploadBuffer);
-				
+
 				D3D12_VERTEX_BUFFER_VIEW m_d3dTextureCoord0BufferView;
 				m_d3dTextureCoord0BufferView.BufferLocation = m_pd3dTextureCoord0Buffer->GetGPUVirtualAddress();
 				m_d3dTextureCoord0BufferView.StrideInBytes = sizeof(XMFLOAT2);
@@ -638,6 +638,24 @@ XMFLOAT3 CHeightMapImage::GetHeightMapNormal(int x, int z)
 
 	return(xmf3Normal);
 }
+
+TangentEdges CHeightMapImage::GetHeightMapTangent(int x, int z)
+{
+	//if ((x < 0.0f) || (z < 0.0f) || (x >= m_nWidth) || (z >= m_nLength)) return(XMFLOAT3(0.0f, 1.0f, 0.0f));
+
+	int nHeightMapIndex = x + (z * m_nWidth);
+	int xHeightMapAdd = (x < (m_nWidth - 1)) ? 1 : -1;
+	int zHeightMapAdd = (z < (m_nLength - 1)) ? m_nWidth : -m_nWidth;
+	float y1 = (float)m_pRawImagePixels[nHeightMapIndex] * m_xmf3Scale.y;
+	float y2 = (float)m_pRawImagePixels[nHeightMapIndex + xHeightMapAdd] * m_xmf3Scale.y;
+	float y3 = (float)m_pRawImagePixels[nHeightMapIndex + zHeightMapAdd] * m_xmf3Scale.y;
+	XMFLOAT3 xmf3Edge1 = XMFLOAT3(0.0f, y3 - y1, m_xmf3Scale.z);
+	XMFLOAT3 xmf3Edge2 = XMFLOAT3(m_xmf3Scale.x, y2 - y1, 0.0f);
+
+	TangentEdges edges = { xmf3Edge1, xmf3Edge2 };
+	return edges;
+}
+
 #define _WITH_APPROXIMATE_OPPOSITE_CORNER
 float CHeightMapImage::GetHeight(float fx, float fz, bool bReverseQuad)
 {
@@ -690,7 +708,7 @@ CHeightMapGridMesh::CHeightMapGridMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 	CHeightMapImage* pHeightMapImage = (CHeightMapImage*)pContext;
 	int cxHeightMap = pHeightMapImage->GetRawImageWidth();
 	int czHeightMap = pHeightMapImage->GetRawImageLength();
-	
+
 
 	m_pxmf3Positions.resize(m_nVertices);
 	m_pxmf4Colors.resize(m_nVertices);
@@ -719,7 +737,7 @@ CHeightMapGridMesh::CHeightMapGridMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 	m_pd3dVertexBufferViews[0].BufferLocation = m_pd3dPositionBuffer->GetGPUVirtualAddress();
 	m_pd3dVertexBufferViews[0].StrideInBytes = sizeof(XMFLOAT3);;
 	m_pd3dVertexBufferViews[0].SizeInBytes = sizeof(XMFLOAT3) * m_nVertices;
-	
+
 	m_pd3dColorBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, m_pxmf4Colors.data(), sizeof(XMFLOAT4) * m_nVertices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dColorUploadBuffer);
 	m_pd3dVertexBufferViews[1].BufferLocation = m_pd3dColorBuffer->GetGPUVirtualAddress();
 	m_pd3dVertexBufferViews[1].StrideInBytes = sizeof(XMFLOAT4);
@@ -856,7 +874,48 @@ CSplatGridMesh::CSplatGridMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 		}
 	}
 
-	m_nVertexBufferViews = 4;
+	m_pxmf3Normals.resize(m_nVertices);
+	m_pxmf3Tangents.resize(m_nVertices);
+
+	for (int i = 0, z = zStart; z < (zStart + nLength); z++)
+	{
+		for (int x = xStart; x < (xStart + nWidth); x++, i++)
+		{
+			m_pxmf3Normals[i] = pHeightMapImage->GetHeightMapNormal(x, z);
+
+			TangentEdges edges = pHeightMapImage->GetHeightMapTangent(x, z);
+
+			int nHeightMapIndex = x + (z * m_nWidth);
+			int xHeightMapAdd = (x < (m_nWidth - 1)) ? 1 : -1;
+			int zHeightMapAdd = (z < (m_nLength - 1)) ? m_nWidth : -m_nWidth;
+
+			XMFLOAT2 uv0 = m_pxmf2TextureCoords0[nHeightMapIndex];
+			XMFLOAT2 uv1 = m_pxmf2TextureCoords0[nHeightMapIndex + zHeightMapAdd];
+			XMFLOAT2 uv2 = m_pxmf2TextureCoords0[nHeightMapIndex + xHeightMapAdd];
+
+			XMFLOAT4X4 uvMatrix = Matrix4x4::Identity();
+			uvMatrix._11 = (uv1.x - uv0.x);
+			uvMatrix._12 = (uv1.y - uv0.y);
+			uvMatrix._21 = (uv2.x - uv0.x);
+			uvMatrix._22 = (uv2.y - uv0.y);
+
+			uvMatrix = Matrix4x4::Inverse(uvMatrix);
+
+			XMFLOAT4X4 edgeMatrix = Matrix4x4::Identity();
+			edgeMatrix._11 = edges.e0.x;
+			edgeMatrix._12 = edges.e0.y;
+			edgeMatrix._13 = edges.e0.z;
+			edgeMatrix._21 = edges.e1.x;
+			edgeMatrix._22 = edges.e1.y;
+			edgeMatrix._23 = edges.e1.z;
+
+			XMFLOAT4X4 result = Matrix4x4::Multiply(uvMatrix, edgeMatrix);
+
+			m_pxmf3Tangents[i] = XMFLOAT3(result._11, result._12, result._13);
+		}
+	}
+
+	m_nVertexBufferViews = 6;
 	m_pd3dVertexBufferViews.resize(m_nVertexBufferViews);
 	m_pd3dPositionBuffer = CreateBufferResource(pd3dDevice, pd3dCommandList, m_pxmf3Positions.data(), sizeof(XMFLOAT3) * m_nVertices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dPositionUploadBuffer);
 
@@ -878,6 +937,16 @@ CSplatGridMesh::CSplatGridMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 	m_pd3dVertexBufferViews[3].BufferLocation = m_pd3dTextureCoord1Buffer->GetGPUVirtualAddress();
 	m_pd3dVertexBufferViews[3].StrideInBytes = sizeof(XMFLOAT2);
 	m_pd3dVertexBufferViews[3].SizeInBytes = sizeof(XMFLOAT2) * m_nVertices;
+
+	m_pd3dNormalBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, m_pxmf3Normals.data(), sizeof(XMFLOAT3) * m_nVertices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dNormalUploadBuffer);
+	m_pd3dVertexBufferViews[4].BufferLocation = m_pd3dNormalBuffer->GetGPUVirtualAddress();
+	m_pd3dVertexBufferViews[4].StrideInBytes = sizeof(XMFLOAT3);
+	m_pd3dVertexBufferViews[4].SizeInBytes = sizeof(XMFLOAT3) * m_nVertices;
+
+	m_pd3dTangentBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, m_pxmf3Tangents.data(), sizeof(XMFLOAT3) * m_nVertices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dTangentUploadBuffer);
+	m_pd3dVertexBufferViews[5].BufferLocation = m_pd3dTangentBuffer->GetGPUVirtualAddress();
+	m_pd3dVertexBufferViews[5].StrideInBytes = sizeof(XMFLOAT3);
+	m_pd3dVertexBufferViews[5].SizeInBytes = sizeof(XMFLOAT3) * m_nVertices;
 
 	m_nSubMeshes = 1;
 	m_pnSubSetIndices.resize(m_nSubMeshes);

@@ -14,8 +14,9 @@ struct VS_TERRAIN_OUTPUT
 	float4 color : COLOR;
 	float2 uv0 : TEXCOORD0;
 	float2 uv1 : TEXCOORD1;
-	float3 normalW : NORMAL;
-	float3 tangentW : TANGENT;
+	float3 normal : NORMAL;
+	float3 toLight : TEXCOORD2;
+	float3 toCamera : TEXCOORD3;
 };
 
 
@@ -36,16 +37,26 @@ cbuffer cbCameraInfo : register(b1)
 	float3 gf3CameraDirection : packoffset(c13);
 };
 
-VS_TERRAIN_OUTPUT VSTerrain(VS_TERRAIN_INPUT input)
+
+VS_TERRAIN_OUTPUT VSParallaxTerrain(VS_TERRAIN_INPUT input)
 {
 	VS_TERRAIN_OUTPUT output;
 
-	output.position = mul(mul(mul(float4(input.position, 1.0f), gmtxGameObject), gmtxView), gmtxProjection);
 	output.color = input.color;
 	output.uv0 = input.uv0;
 	output.uv1 = input.uv1;
-	output.normalW = mul(input.normal, (float3x3)gmtxGameObject).xyz;
-	output.tangentW = mul(input.tangent, (float3x3)gmtxGameObject).xyz;
+
+	float4 positionW = mul(float4(input.position, 1.0f), gmtxGameObject);
+	float3 normalW = mul(float4(input.normal, 1.0f), gmtxGameObject).xyz;
+
+	output.position = mul(mul(positionW, gmtxView), gmtxProjection);
+
+	float3x3 mtxTangentToWorld;
+	mtxTangentToWorld[0] = mul(input.tangent, gmtxGameObject);
+	mtxTangentToWorld[0] = mul(input.normal, gmtxGameObject);
+	mtxTangentToWorld[0] = mul(cross(input.tangent, input.normal), gmtxGameObject);
+
+	//output.toLight = normalize(mul(mtxTangentToWorld, ))
 
 	return(output);
 }

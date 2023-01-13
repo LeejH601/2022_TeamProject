@@ -138,6 +138,13 @@ public:
 	void LoadMeshFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, FILE* pInFile);
 	void LoadSkinInfoFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, FILE* pInFile);
 };
+
+struct TangentEdges
+{
+	XMFLOAT3 e0;
+	XMFLOAT3 e1;
+};
+
 class CRawFormatImage
 {
 protected:
@@ -170,6 +177,7 @@ public:
 	XMFLOAT3 GetScale() { return(m_xmf3Scale); }
 	float GetHeight(float x, float z, bool bReverseQuad = false);
 	XMFLOAT3 GetHeightMapNormal(int x, int z);
+	TangentEdges GetHeightMapTangent(int x, int z);
 };
 class CHeightMapGridMesh : public CMesh
 {
@@ -212,6 +220,15 @@ public:
 
 class CSplatGridMesh : public CHeightMapGridMesh
 {
+protected:
+	std::vector<XMFLOAT3> m_pxmf3Normals;
+	ComPtr<ID3D12Resource> m_pd3dNormalBuffer = NULL;
+	ComPtr<ID3D12Resource> m_pd3dNormalUploadBuffer = NULL;
+
+	std::vector<XMFLOAT3> m_pxmf3Tangents;
+	ComPtr<ID3D12Resource> m_pd3dTangentBuffer = NULL;
+	ComPtr<ID3D12Resource> m_pd3dTangentUploadBuffer = NULL;
+
 public:
 	CSplatGridMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int xStart, int zStart, int nWidth, int nLength, XMFLOAT3 xmf3Scale = XMFLOAT3(1.0f, 1.0f, 1.0f), XMFLOAT4 xmf4Color = XMFLOAT4(1.0f, 1.0f, 0.0f, 0.0f), void* pContext = NULL);
 	virtual ~CSplatGridMesh();

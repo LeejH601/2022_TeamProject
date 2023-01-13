@@ -194,6 +194,7 @@
     <FxCompile Include="Shader\Light.hlsl" />
     <FxCompile Include="TerrainPixelShader.hlsl" />
     <FxCompile Include="TerrainVertexShader.hlsl" />
-    <FxCompile Include="TerrainSplatPixelShader.hlsl" />
+    <FxCompile Include="Shader\TerrainSplatPixelShader.hlsl" />
+    <FxCompile Include="Shader\TerrainParallaxVertexShader.hlsl" />
   </ItemGroup>
 </Project>

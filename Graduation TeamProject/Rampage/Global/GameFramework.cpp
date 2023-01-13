@@ -282,10 +282,10 @@ void CGameFramework::BuildObjects()
 	m_pLight->CreateLightVariables(m_pd3dDevice.Get(), m_pd3dCommandList.Get());
 
 	// Terrain Shader »ý¼º
-	m_pTerrainShader = std::make_unique<CTerrainShader>();
+	/*m_pTerrainShader = std::make_unique<CTerrainShader>();
 	m_pTerrainShader->CreateShader(m_pd3dDevice.Get(), m_pScene->GetGraphicsRootSignature(), 2, pdxgiObjectRtvFormats, 0);
 	m_pTerrainShader->CreateCbvSrvDescriptorHeaps(m_pd3dDevice.Get(), 0, 3);
-	m_pTerrainShader->CreateShaderVariables(m_pd3dDevice.Get(), m_pd3dCommandList.Get());
+	m_pTerrainShader->CreateShaderVariables(m_pd3dDevice.Get(), m_pd3dCommandList.Get());*/
 
 	m_pSplatTerrainShader = std::make_unique<CSplatTerrainShader>();
 	m_pSplatTerrainShader->CreateShader(m_pd3dDevice.Get(), m_pScene->GetGraphicsRootSignature(), 2, pdxgiObjectRtvFormats, 0);
