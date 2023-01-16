@@ -115,6 +115,15 @@ public:
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
+class CKightRootRollBackAnimationController : public CAnimationController
+{
+public:
+	CKightRootRollBackAnimationController(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks, CLoadedModelInfo* pModel);
+	virtual ~CKightRootRollBackAnimationController();
+
+	virtual void OnRootMotion(CGameObject* pRootGameObject);
+};
+
 class CKnightObject : public CGameObject
 {
 public:

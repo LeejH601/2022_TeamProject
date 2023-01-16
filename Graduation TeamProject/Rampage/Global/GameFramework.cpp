@@ -256,26 +256,26 @@ void CGameFramework::BuildObjects()
 	CModelManager::GetInst()->LoadModel(m_pd3dDevice.Get(), m_pd3dCommandList.Get(), "Object/SK_FKnight_WeaponB_01.bin");
 
 
-	std::unique_ptr<CLionObject> m_pObject = std::make_unique<CLionObject>(m_pd3dDevice.Get(), m_pd3dCommandList.Get(), 1);
+	std::unique_ptr<CKnightObject> m_pObject = std::make_unique<CKnightObject>(m_pd3dDevice.Get(), m_pd3dCommandList.Get(), 1);
 	m_pObject->SetPosition(XMFLOAT3(0.0f, 0.0f, 0.0f));
 	m_pObject->SetScale(5.0f, 5.0f, 5.0f);
 	m_pObject->Rotate(0.0f, 180.0f, 0.0f);
-	m_pObject->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 2);
+	m_pObject->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 15);
 	m_pObjects.push_back(std::move(m_pObject));
 
-	m_pObject = std::make_unique<CLionObject>(m_pd3dDevice.Get(), m_pd3dCommandList.Get(), 1);
+	/*m_pObject = std::make_unique<CKnightObject>(m_pd3dDevice.Get(), m_pd3dCommandList.Get(), 1);
 	m_pObject->SetPosition(XMFLOAT3(-15.0f, 0.0f, 0.0f));
 	m_pObject->SetScale(5.0f, 5.0f, 5.0f);
 	m_pObject->Rotate(0.0f, 180.0f, 0.0f);
-	m_pObject->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 2);
+	m_pObject->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 16);
 	m_pObjects.push_back(std::move(m_pObject));
 
-	m_pObject = std::make_unique<CLionObject>(m_pd3dDevice.Get(), m_pd3dCommandList.Get(), 1);
+	m_pObject = std::make_unique<CKnightObject>(m_pd3dDevice.Get(), m_pd3dCommandList.Get(), 1);
 	m_pObject->SetPosition(XMFLOAT3(15.0f, 0.0f, 0.0f));
 	m_pObject->SetScale(5.0f, 5.0f, 5.0f);
 	m_pObject->Rotate(0.0f, 180.0f, 0.0f);
-	m_pObject->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 2);
-	m_pObjects.push_back(std::move(m_pObject));
+	m_pObject->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 17);
+	m_pObjects.push_back(std::move(m_pObject));*/
 
 	// Light »ý¼º
 	m_pLight = std::make_unique<CLight>();

@@ -115,7 +115,7 @@ class CAnimationController
 {
 public:
 	CAnimationController(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks, CLoadedModelInfo* pModel);
-	~CAnimationController();
+	virtual ~CAnimationController();
 
 public:
 	float 							m_fTime = 0.0f;
@@ -146,4 +146,18 @@ public:
 	void SetAnimationCallbackHandler(int nAnimationTrack, CAnimationCallbackHandler* pCallbackHandler);
 
 	void AdvanceTime(float fElapsedTime, CGameObject* pRootGameObject);
+
+
+public:
+	bool							m_bRootMotion = false;
+	CGameObject* m_pModelRootObject = NULL;
+
+	CGameObject* m_pRootMotionObject = NULL;
+	XMFLOAT3						m_xmf3FirstRootMotionPosition = XMFLOAT3(0.0f, 0.0f, 0.0f);
+	XMFLOAT3						m_xmf3RootObjectScale;
+
+	void SetRootMotion(bool bRootMotion) { m_bRootMotion = bRootMotion; }
+
+	virtual void OnRootMotion(CGameObject* pRootGameObject) { }
+	virtual void OnAnimationIK(CGameObject* pRootGameObject) { }
 };
