@@ -99,17 +99,17 @@ void CSimulatorScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 	m_pDummyEnemy->Rotate(0.0f, -90.0f, 0.0f);
 	m_pDummyEnemy->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 5);
 
-	
+	// 3->IDLE
 	// 28->Attack
 	m_pMainCharacter = std::make_unique<CKnightObject>(pd3dDevice, pd3dCommandList, 1);
 	m_pMainCharacter->SetPosition(XMFLOAT3(-8.0f, 0.0f, 0.0f));
 	m_pMainCharacter->SetScale(8.0f, 8.0f, 8.0f);
 	m_pMainCharacter->Rotate(0.0f, 90.0f, 0.0f);
-	m_pMainCharacter->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 28);
+	m_pMainCharacter->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 3);
 
-	/*int nAnimationSets = m_pMainCharacter->m_pSkinnedAnimationController->m_pAnimationSets->m_nAnimationSets;
+	int nAnimationSets = m_pMainCharacter->m_pSkinnedAnimationController->m_pAnimationSets->m_nAnimationSets;
 
-	for (int i = 0; i < nAnimationSets; ++i)
+	/*for (int i = 0; i < nAnimationSets; ++i)
 	{
 		std::unique_ptr<CGameObject> pCharater = std::make_unique<CKnightObject>(pd3dDevice, pd3dCommandList, 1);
 		pCharater->SetPosition(XMFLOAT3(5.0f * i, 0.0f, 0.0f));
@@ -142,5 +142,11 @@ void CSimulatorScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float f
 		m_pMainCharacters[i]->Render(pd3dCommandList);
 	}*/
 }
+void CSimulatorScene::SetPlayerAnimationSet(int nSet)
+{
+	m_pMainCharacter->m_pSkinnedAnimationController->SetTrackAnimationSet(0, nSet);
+	m_pMainCharacter->m_pSkinnedAnimationController->m_fTime = 0.0f;
+}
+
 
 
