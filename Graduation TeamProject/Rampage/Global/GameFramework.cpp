@@ -1,6 +1,7 @@
 #include "GameFramework.h"
 #include "..\Global\Camera.h"
 #include "..\Scene\MainScene.h"
+#include "..\Scene\SimulatorScene.h"
 #include "..\ImGui\ImGuiManager.h"
 #include "..\Sound\SoundManager.h"
 
@@ -241,6 +242,8 @@ void CGameFramework::BuildObjects()
 	m_pScene = std::make_unique<CMainTMPScene>();
 	m_pScene->BuildObjects(m_pd3dDevice.Get(), m_pd3dCommandList.Get());
 
+	CSimulatorScene::GetInst()->BuildObjects(m_pd3dDevice.Get(), m_pd3dCommandList.Get());
+
 	m_pCamera = std::make_unique<CFirstPersonCamera>();
 	m_pCamera->Init(m_pd3dDevice.Get(), m_pd3dCommandList.Get());
 }
@@ -425,13 +428,14 @@ void CGameFramework::AnimateObjects()
 {
 	// Object들의 애니메이션을 수행한다.
 	m_pScene->AnimateObjects(m_GameTimer.GetFrameTimeElapsed());
-
+	CSimulatorScene::GetInst()->AnimateObjects(m_GameTimer.GetFrameTimeElapsed());
 }
 void CGameFramework::OnPrepareRenderTarget()
 {
 	ImVec4 clear_color = CImGuiManager::GetInst()->GetColor();
 	const float clear_color_with_alpha[4] = { clear_color.x * clear_color.w, clear_color.y * clear_color.w, clear_color.z * clear_color.w, clear_color.w };
-	FLOAT pfDefaultClearColor[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
+	
+	/*FLOAT pfDefaultClearColor[4] = {0.0f, 0.0f, 0.0f, 1.0f};
 
 	D3D12_CPU_DESCRIPTOR_HANDLE* pd3dAllRtvCPUHandles = new D3D12_CPU_DESCRIPTOR_HANDLE[2];
 	
@@ -446,10 +450,28 @@ void CGameFramework::OnPrepareRenderTarget()
 	
 	m_pd3dCommandList->OMSetRenderTargets(2, pd3dAllRtvCPUHandles, FALSE, &m_d3dDsvDescriptorCPUHandle);
 
-	if (pd3dAllRtvCPUHandles) delete[] pd3dAllRtvCPUHandles;
+	if (pd3dAllRtvCPUHandles) delete[] pd3dAllRtvCPUHandles;*/
 	
-	/*m_pd3dCommandList->ClearRenderTargetView(m_pd3dSwapRTVCPUHandles[m_nSwapChainBufferIndex], clear_color_with_alpha, 0, NULL);
-	m_pd3dCommandList->OMSetRenderTargets(1, &m_pd3dSwapRTVCPUHandles[m_nSwapChainBufferIndex], FALSE, &m_d3dDsvDescriptorCPUHandle);*/
+	m_pd3dCommandList->ClearRenderTargetView(m_pd3dSwapRTVCPUHandles[m_nSwapChainBufferIndex], clear_color_with_alpha, 0, NULL);
+	m_pd3dCommandList->OMSetRenderTargets(1, &m_pd3dSwapRTVCPUHandles[m_nSwapChainBufferIndex], FALSE, &m_d3dDsvDescriptorCPUHandle);
+}
+void CGameFramework::OnPrepareImGui()
+{
+	//명령 할당자와 명령 리스트를 리셋한다.
+	HRESULT hResult = m_pd3dCommandAllocator->Reset();
+	hResult = m_pd3dCommandList->Reset(m_pd3dCommandAllocator.Get(), NULL);
+
+	CImGuiManager::GetInst()->OnPrepareRender(m_pd3dCommandList.Get(), &m_d3dDsvDescriptorCPUHandle, m_GameTimer.GetFrameTimeElapsed(), m_pCamera.get());
+
+	//명령 리스트를 닫힌 상태로 만든다. 
+	hResult = m_pd3dCommandList->Close();
+
+	//명령 리스트를 명령 큐에 추가하여 실행한다.
+	ID3D12CommandList* CommandLists[] = { m_pd3dCommandList.Get() };
+	m_pd3dCommandQueue->ExecuteCommandLists(1, CommandLists);
+
+	//GPU가 모든 명령 리스트를 실행할 때 까지 기다린다.
+	::WaitForGpuComplete(m_pd3dCommandQueue.Get(), m_pd3dFence.Get(), ++m_nFenceValues[m_nSwapChainBufferIndex], m_hFenceEvent);
 }
 void CGameFramework::OnPostRenderTarget()
 {
@@ -474,24 +496,21 @@ void CGameFramework::FrameAdvance()
 
 	ProcessInput();
 	AnimateObjects();
+	OnPrepareImGui();
 
 	//명령 할당자와 명령 리스트를 리셋한다.
 	HRESULT hResult = m_pd3dCommandAllocator->Reset();
 	hResult = m_pd3dCommandList->Reset(m_pd3dCommandAllocator.Get(), NULL);
 
 	//CImGuiManager::GetInst()->DemoRendering();
-	CImGuiManager::GetInst()->OnPreRender();
+	CImGuiManager::GetInst()->SetUI();
 
 	::SynchronizeResourceTransition(m_pd3dCommandList.Get(), m_ppd3dRenderTargetBuffers[m_nSwapChainBufferIndex].Get(), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
 
-	if (m_pScene) m_pScene->OnPrepareRender(m_pd3dCommandList.Get());
-
-	m_pd3dCommandList->ClearDepthStencilView(m_d3dDsvDescriptorCPUHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
-
-	OnPrepareRenderTarget();
 	m_pScene->OnPrepareRender(m_pd3dCommandList.Get());
+	m_pd3dCommandList->ClearDepthStencilView(m_d3dDsvDescriptorCPUHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
+	OnPrepareRenderTarget();
 	m_pCamera->OnPrepareRender(m_pd3dCommandList.Get());
-
 	m_pScene->Render(m_pd3dCommandList.Get(), m_GameTimer.GetFrameTimeElapsed());
 
 	CImGuiManager::GetInst()->Render(m_pd3dCommandList.Get());

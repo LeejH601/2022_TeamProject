@@ -1,4 +1,4 @@
-#include "MainScene.h"
+#include "SimulatorScene.h"
 #include "..\Global\Timer.h"
 #include "..\Object\Texture.h"
 #include "..\Object\ModelManager.h"
@@ -6,11 +6,11 @@
 #include "..\Shader\ModelShader.h"
 #include "..\Sound\SoundManager.h"
 
-void CMainTMPScene::OnPrepareRender(ID3D12GraphicsCommandList* pd3dCommandList)
+void CSimulatorScene::OnPrepareRender(ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	pd3dCommandList->SetGraphicsRootSignature(m_pd3dGraphicsRootSignature.Get());
 }
-void CMainTMPScene::CreateGraphicsRootSignature(ID3D12Device* pd3dDevice)
+void CSimulatorScene::CreateGraphicsRootSignature(ID3D12Device* pd3dDevice)
 {
 	D3D12_DESCRIPTOR_RANGE pd3dDescriptorRanges;
 	pd3dDescriptorRanges.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
@@ -85,81 +85,62 @@ void CMainTMPScene::CreateGraphicsRootSignature(ID3D12Device* pd3dDevice)
 	if (pd3dSignatureBlob) pd3dSignatureBlob->Release();
 	if (pd3dErrorBlob) pd3dErrorBlob->Release();
 }
-void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+void CSimulatorScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	CreateGraphicsRootSignature(pd3dDevice);
 
 	DXGI_FORMAT pdxgiObjectRtvFormats[2] = { DXGI_FORMAT_R8G8B8A8_UNORM, DXGI_FORMAT_R8G8B8A8_UNORM };
 
-	CModelShader::GetInst()->CreateShader(pd3dDevice, GetGraphicsRootSignature(), 2, pdxgiObjectRtvFormats, 0);
-	CModelShader::GetInst()->CreateShaderVariables(pd3dDevice,pd3dCommandList);
-	CModelShader::GetInst()->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 100);
+	// 4->HIT
+	// 5->IDLE
+	m_pDummyEnemy = std::make_unique<CGoblinObject>(pd3dDevice, pd3dCommandList, 1);
+	m_pDummyEnemy->SetPosition(XMFLOAT3(8.0f, 0.0f, 0.0f));
+	m_pDummyEnemy->SetScale(8.0f, 8.0f, 8.0f);
+	m_pDummyEnemy->Rotate(0.0f, -90.0f, 0.0f);
+	m_pDummyEnemy->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 5);
 
-	CModelManager::GetInst()->LoadModel(pd3dDevice,pd3dCommandList, "Object/Angrybot.bin");;
-	CModelManager::GetInst()->LoadModel(pd3dDevice,pd3dCommandList, "Object/Eagle.bin");
-	CModelManager::GetInst()->LoadModel(pd3dDevice,pd3dCommandList, "Object/Lion.bin");
-	CModelManager::GetInst()->LoadModel(pd3dDevice,pd3dCommandList, "Object/SK_FKnight_WeaponB_01.bin");
-
-	CSoundManager::GetInst()->RegisterSound("Sound/mp3/David Bowie - Starman.mp3", false);
-	//CSoundManager::GetInst()->PlaySound("Sound/mp3/David Bowie - Starman.mp3");
-
-	std::unique_ptr<CGoblinObject> m_pObject = std::make_unique<CGoblinObject>(pd3dDevice, pd3dCommandList, 1);
-	m_pObject->SetPosition(XMFLOAT3(0.0f, 0.0f, 0.0f));
-	m_pObject->SetScale(5.0f, 5.0f, 5.0f);
-	m_pObject->Rotate(0.0f, 180.0f, 0.0f);
-	m_pObject->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 2);
-	m_pObjects.push_back(std::move(m_pObject));
-
-	m_pObject = std::make_unique<CGoblinObject>(pd3dDevice, pd3dCommandList, 1);
-	m_pObject->SetPosition(XMFLOAT3(-15.0f, 0.0f, 0.0f));
-	m_pObject->SetScale(5.0f, 5.0f, 5.0f);
-	m_pObject->Rotate(0.0f, 180.0f, 0.0f);
-	m_pObject->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 2);
-	m_pObjects.push_back(std::move(m_pObject));
-
-	m_pObject = std::make_unique<CGoblinObject>(pd3dDevice, pd3dCommandList, 1);
-	m_pObject->SetPosition(XMFLOAT3(15.0f, 0.0f, 0.0f));
-	m_pObject->SetScale(5.0f, 5.0f, 5.0f);
-	m_pObject->Rotate(0.0f, 180.0f, 0.0f);
-	m_pObject->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 2);
-	m_pObjects.push_back(std::move(m_pObject));
-
-	// Light 持失
-	m_pLight = std::make_unique<CLight>();
-	m_pLight->CreateLightVariables(pd3dDevice, pd3dCommandList);
-
-	// Terrain Shader 持失
-	m_pTerrainShader = std::make_unique<CTerrainShader>();
-	m_pTerrainShader->CreateShader(pd3dDevice, GetGraphicsRootSignature(), 2, pdxgiObjectRtvFormats, 0);
-	m_pTerrainShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 3);
-	m_pTerrainShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
-
-	// Terrain 持失
-	XMFLOAT3 xmf3Scale(18.0f, 6.0f, 18.0f);
-	XMFLOAT4 xmf4Color(0.0f, 0.5f, 0.0f, 0.0f);
-	m_pTerrain = std::make_unique<CHeightMapTerrain>(pd3dDevice, pd3dCommandList, GetGraphicsRootSignature(), _T("Image/HeightMap.raw"), 257, 257, 257, 257, xmf3Scale, xmf4Color, m_pTerrainShader.get());
-	m_pTerrain->SetPosition(XMFLOAT3(-800.f, -750.f, -800.f));
-	//m_pTerrain->SetPosition(XMFLOAT3(0.f, 0.f, 0.f));
-}
-void CMainTMPScene::AnimateObjects(float fTimeElapsed)
-{
 	
-}
-void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed)
-{
-	m_pLight->Render(pd3dCommandList);
+	// 28->Attack
+	m_pMainCharacter = std::make_unique<CKnightObject>(pd3dDevice, pd3dCommandList, 1);
+	m_pMainCharacter->SetPosition(XMFLOAT3(-8.0f, 0.0f, 0.0f));
+	m_pMainCharacter->SetScale(8.0f, 8.0f, 8.0f);
+	m_pMainCharacter->Rotate(0.0f, 90.0f, 0.0f);
+	m_pMainCharacter->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 28);
 
+	/*int nAnimationSets = m_pMainCharacter->m_pSkinnedAnimationController->m_pAnimationSets->m_nAnimationSets;
+
+	for (int i = 0; i < nAnimationSets; ++i)
+	{
+		std::unique_ptr<CGameObject> pCharater = std::make_unique<CKnightObject>(pd3dDevice, pd3dCommandList, 1);
+		pCharater->SetPosition(XMFLOAT3(5.0f * i, 0.0f, 0.0f));
+		pCharater->SetScale(5.0f, 5.0f, 5.0f);
+		pCharater->Rotate(0.0f, -90.0f, 0.0f);
+		pCharater->m_pSkinnedAnimationController->SetTrackAnimationSet(0, i);
+		m_pMainCharacters.push_back(std::move(pCharater));
+	}*/
+}
+void CSimulatorScene::AnimateObjects(float fTimeElapsed)
+{
+
+}
+void CSimulatorScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed)
+{
 	CModelShader::GetInst()->Render(pd3dCommandList, 0);
 
-	for (int i = 0; i < m_pObjects.size(); ++i)
-	{
-		m_pObjects[i]->Animate(fTimeElapsed * (i + 1));
-		if (!m_pObjects[i]->m_pSkinnedAnimationController) m_pObjects[i]->UpdateTransform(NULL);
-		m_pObjects[i]->Render(pd3dCommandList);
-	}
+	m_pDummyEnemy->Animate(fTimeElapsed);
+	if (!m_pDummyEnemy->m_pSkinnedAnimationController) m_pDummyEnemy->UpdateTransform(NULL);
+	m_pDummyEnemy->Render(pd3dCommandList);
 
-	m_pTerrainShader->Render(pd3dCommandList, 0);
-	m_pTerrain->Render(pd3dCommandList);
+	m_pMainCharacter->Animate(fTimeElapsed);
+	if (!m_pDummyEnemy->m_pSkinnedAnimationController) m_pMainCharacter->UpdateTransform(NULL);
+	m_pMainCharacter->Render(pd3dCommandList);
+
+	/*for (int i = 0; i < m_pMainCharacters.size(); ++i)
+	{
+		m_pMainCharacters[i]->Animate(fTimeElapsed);
+		if (!m_pDummyEnemy->m_pSkinnedAnimationController) m_pMainCharacters[i]->UpdateTransform(NULL);
+		m_pMainCharacters[i]->Render(pd3dCommandList);
+	}*/
 }
 
 

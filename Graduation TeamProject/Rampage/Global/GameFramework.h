@@ -79,6 +79,7 @@ public:
 
 	// 렌더타겟을 렌더링하기 위한 준비를 하는 함수이다.
 	void OnPrepareRenderTarget();
+	void OnPrepareImGui();
 	void OnPostRenderTarget();
 
 	//렌더 타겟 뷰와 깊이-스텐실 뷰를 생성하는 함수이다. 

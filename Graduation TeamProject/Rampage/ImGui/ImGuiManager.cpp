@@ -1,4 +1,7 @@
 #include "ImGuiManager.h"
+#include "..\Global\Timer.h"
+#include "..\Global\Camera.h"
+#include "..\Scene\SimulatorScene.h"
 #include "..\Object\Texture.h"
 #include "..\Global\GameFramework.h"
 
@@ -87,7 +90,6 @@ void CImGuiManager::Init(HWND hWnd, ID3D12Device* pd3dDevice, ID3D12GraphicsComm
     ID3D12Resource* pd3dTextureResource = m_pRTTexture->GetResource(0);
     pd3dDevice->CreateRenderTargetView(pd3dTextureResource, &d3dRenderTargetViewDesc, d3dRtvCPUDescriptorHandle);
     m_pd3dRtvCPUDescriptorHandles = d3dRtvCPUDescriptorHandle;
-
 }
 void CImGuiManager::DemoRendering()
 {
@@ -130,7 +132,7 @@ void CImGuiManager::DemoRendering()
         ImGui::End();
     }
 }
-void CImGuiManager::OnPreRender()
+void CImGuiManager::SetUI()
 {
     // Start the Dear ImGui frame
     ImGui_ImplDX12_NewFrame();
@@ -304,6 +306,21 @@ void CImGuiManager::OnPreRender()
         }
         ImGui::End();
     }
+}
+void CImGuiManager::OnPrepareRender(ID3D12GraphicsCommandList* pd3dCommandList, D3D12_CPU_DESCRIPTOR_HANDLE* d3dDsvDescriptorCPUHandle, float fTimeElapsed, CCamera* pCamera)
+{
+    PrepareRenderTarget(pd3dCommandList, d3dDsvDescriptorCPUHandle);
+    CSimulatorScene::GetInst()->OnPrepareRender(pd3dCommandList);
+    if (pCamera)
+        pCamera->OnPrepareRender(pd3dCommandList);
+    CSimulatorScene::GetInst()->Render(pd3dCommandList, fTimeElapsed);
+}
+void CImGuiManager::PrepareRenderTarget(ID3D12GraphicsCommandList* pd3dCommandList, D3D12_CPU_DESCRIPTOR_HANDLE* d3dDsvDescriptorCPUHandle)
+{
+    FLOAT pfDefaultClearColor[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
+    pd3dCommandList->ClearDepthStencilView(*d3dDsvDescriptorCPUHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
+    pd3dCommandList->ClearRenderTargetView(m_pd3dRtvCPUDescriptorHandles, pfDefaultClearColor, 0, NULL);
+    pd3dCommandList->OMSetRenderTargets(1, &m_pd3dRtvCPUDescriptorHandles, FALSE, d3dDsvDescriptorCPUHandle);
 }
 void CImGuiManager::Render(ID3D12GraphicsCommandList* pd3dCommandList)
 {
