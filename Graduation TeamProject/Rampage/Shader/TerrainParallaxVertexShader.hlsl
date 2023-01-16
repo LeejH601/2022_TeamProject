@@ -11,6 +11,7 @@ struct VS_TERRAIN_INPUT
 struct VS_TERRAIN_OUTPUT
 {
 	float4 position : SV_POSITION;
+	float4 positionW : POSITION;
 	float4 color : COLOR;
 	float2 uv0 : TEXCOORD0;
 	float2 uv1 : TEXCOORD1;
@@ -49,6 +50,7 @@ VS_TERRAIN_OUTPUT VSParallaxTerrain(VS_TERRAIN_INPUT input)
 	float3 normalW = mul(float4(input.normal, 1.0f), gmtxGameObject).xyz;
 
 	output.position = mul(mul(positionW, gmtxView), gmtxProjection);
+	output.positionW = positionW;
 
 	float3x3 mtxTangentToWorld;
 	mtxTangentToWorld[0] = mul(input.tangent, gmtxGameObject);

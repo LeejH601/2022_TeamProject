@@ -38,6 +38,7 @@ SamplerState gSamplerState : register(s0);
 struct VS_TERRAIN_OUTPUT
 {
 	float4 position : SV_POSITION;
+	float4 positionW : POSITION;
 	float4 color : COLOR;
 	float2 uv0 : TEXCOORD0;
 	float2 uv1 : TEXCOORD1;
@@ -51,9 +52,9 @@ struct PS_MULTIPLE_RENDER_TARGETS_OUTPUT
 	float4 f4ImGui : SV_TARGET1;
 };
 
-static int gnMaxSamples = 20;
+static int gnMaxSamples = 10;
 static int gnMinSamples = 4;
-static float gfscale = 0.0004f;
+static float gfscale = 0.0001f;
 
 PS_MULTIPLE_RENDER_TARGETS_OUTPUT PSParallaxTerrain(VS_TERRAIN_OUTPUT input)
 {
@@ -87,7 +88,7 @@ PS_MULTIPLE_RENDER_TARGETS_OUTPUT PSParallaxTerrain(VS_TERRAIN_OUTPUT input)
 	float4 cHeightColor[4];
 	float4 FHeightColor;
 
-
+	[unroll(20)]
 	while (nCurrSample < nSamples) {
 		for (int i = 0; i < 4; ++i) {
 			cHeightColor[i] = gtxTerrainTextures[8 + i].SampleGrad(gSamplerState, input.uv0 + vCurrOffset, dx, dy);
@@ -150,8 +151,10 @@ PS_MULTIPLE_RENDER_TARGETS_OUTPUT PSParallaxTerrain(VS_TERRAIN_OUTPUT input)
 	}
 	vFinalNormal = vFinalNormal * 2.0f - 1.0f;
 	float3 toLight = float3(0.0f, 1.0f, 0.0f);
-	float3 vDiffuse = vFinalColor.rgb * max(0.0f, dot(toLight, vFinalNormal.xyz)) * 0.5f;
-	float3 vAmbient = vFinalColor.rgb * 0.8f;
+	/*float4 cIllumination = Lighting(input.positionW, input.normal);
+	float3 vDiffuse = (lerp(vFinalColor, cIllumination, 0.2f).xyz);*/
+	float3 vDiffuse = vFinalColor.rgb * max(0.0f, dot(toLight, vFinalNormal.xyz)) * 0.8f;
+	float3 vAmbient = vFinalColor.rgb * 1.0f;
 	vFinalColor.rgb = vAmbient + vDiffuse;
 	
 	output.f4Scene = vFinalColor;
