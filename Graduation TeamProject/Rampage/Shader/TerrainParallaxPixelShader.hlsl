@@ -44,6 +44,7 @@ struct VS_TERRAIN_OUTPUT
 	float2 uv1 : TEXCOORD1;
 	float3 normal : NORMAL;
 	float3 toCamera : TEXCOORD2;
+	float3 toLight : TEXCOORD3;
 };
 
 struct PS_MULTIPLE_RENDER_TARGETS_OUTPUT
@@ -52,7 +53,7 @@ struct PS_MULTIPLE_RENDER_TARGETS_OUTPUT
 	float4 f4ImGui : SV_TARGET1;
 };
 
-static int gnMaxSamples = 10;
+static int gnMaxSamples = 20;
 static int gnMinSamples = 4;
 static float gfscale = 0.0001f;
 
@@ -153,7 +154,7 @@ PS_MULTIPLE_RENDER_TARGETS_OUTPUT PSParallaxTerrain(VS_TERRAIN_OUTPUT input)
 	float3 toLight = float3(0.0f, 1.0f, 0.0f);
 	/*float4 cIllumination = Lighting(input.positionW, input.normal);
 	float3 vDiffuse = (lerp(vFinalColor, cIllumination, 0.2f).xyz);*/
-	float3 vDiffuse = vFinalColor.rgb * max(0.0f, dot(toLight, vFinalNormal.xyz)) * 0.8f;
+	float3 vDiffuse = vFinalColor.rgb * max(0.0f, dot(input.toLight, vFinalNormal.xyz)) * 0.5;
 	float3 vAmbient = vFinalColor.rgb * 1.0f;
 	vFinalColor.rgb = vAmbient + vDiffuse;
 	

@@ -17,6 +17,7 @@ struct VS_TERRAIN_OUTPUT
 	float2 uv1 : TEXCOORD1;
 	float3 normal : NORMAL;
 	float3 toCamera : TEXCOORD2;
+	float3 toLight : TEXCOORD3;
 };
 
 
@@ -36,6 +37,8 @@ cbuffer cbCameraInfo : register(b1)
 	float3 gf3CameraPosition : packoffset(c12);
 	float3 gf3CameraDirection : packoffset(c13);
 };
+
+#include "Light.hlsl"
 
 
 VS_TERRAIN_OUTPUT VSParallaxTerrain(VS_TERRAIN_INPUT input)
@@ -57,7 +60,20 @@ VS_TERRAIN_OUTPUT VSParallaxTerrain(VS_TERRAIN_INPUT input)
 	mtxTangentToWorld[2] = mul(input.normal, gmtxGameObject);
 	mtxTangentToWorld[1] = mul(cross(input.tangent, input.normal), gmtxGameObject);
 
-	//output.toLight = normalize(mul(mtxTangentToWorld, ))
+	float3 toLight = float3(0.0f, 1.0f, 0.0f);
+	[unroll(MAX_LIGHTS)] for (int i = 0; i < gnLights; i++)
+	{
+		if (gLights[i].m_bEnable)
+		{
+			if (gLights[i].m_nType == DIRECTIONAL_LIGHT)
+			{
+				toLight = normalize(mul(mtxTangentToWorld, gLights[i].m_vDirection));
+				break;
+			}
+		}
+	}
+
+	output.toLight = toLight;
 	output.toCamera = normalize(mul(mtxTangentToWorld, (gf3CameraPosition - positionW.xyz)));
 	output.normal = normalize(mul(mtxTangentToWorld, normalW));
 
