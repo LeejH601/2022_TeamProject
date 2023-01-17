@@ -35,7 +35,6 @@ public:
 	XMFLOAT4X4 m_xmf4x4World;
 	XMFLOAT4X4 m_xmf4x4Texture;
 
-	BoundingOrientedBox m_xmOOBB;
 	std::shared_ptr<CMesh> m_pMesh;
 	
 	int	m_nMaterials = 0;
@@ -93,6 +92,17 @@ public:
 	void FindAndSetSkinnedMesh(CSkinnedMesh** ppSkinnedMeshes, int* pnSkinnedMesh);
 };
 
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+class CBoundingBoxObject : public CGameObject
+{
+public:
+	CBoundingBoxObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, XMFLOAT3 xmf3AABBCenter, XMFLOAT3 xmf3AABBExtents);
+	virtual ~CBoundingBoxObject();
+
+	void PrepareRender();
+	void SetParent(CGameObject* pObject) { m_pParent = pObject; }
+};
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 class CAngrybotObject : public CGameObject

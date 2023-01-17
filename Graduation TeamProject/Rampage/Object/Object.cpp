@@ -4,6 +4,7 @@
 #include "ModelManager.h"
 #include "..\Shader\Shader.h"
 #include "..\Shader\ModelShader.h"
+#include "..\Shader\BoundingBoxShader.h"
 
 CGameObject::CGameObject()
 {
@@ -231,6 +232,11 @@ void CGameObject::LoadFrameHierarchyFromFile(ID3D12Device* pd3dDevice, ID3D12Gra
 			std::shared_ptr<CSkinnedMesh> pSkinnedMesh = std::make_shared<CSkinnedMesh>(pd3dDevice, pd3dCommandList);
 			pSkinnedMesh->LoadSkinInfoFromFile(pd3dDevice, pd3dCommandList, pInFile);
 
+			if (pSkinnedMesh->GetIsBoundLoaded())
+			{
+				CBoundingBoxShader::GetInst()->AddBoundingObject(pd3dDevice, pd3dCommandList, this, pSkinnedMesh->GetBoundingCenter(), pSkinnedMesh->GetBoundingExtent());
+			}
+
 			::ReadStringFromFile(pInFile, pstrToken); //<Mesh>:
 			if (!strcmp(pstrToken, "<Mesh>:")) pSkinnedMesh->LoadMeshFromFile(pd3dDevice, pd3dCommandList, pInFile);
 
@@ -408,6 +414,28 @@ void CGameObject::FindAndSetSkinnedMesh(CSkinnedMesh** ppSkinnedMeshes, int* pnS
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
+CBoundingBoxObject::CBoundingBoxObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, XMFLOAT3 xmf3AABBCenter, XMFLOAT3 xmf3AABBExtents)
+{
+	m_nMaterials = 1;
+	m_ppMaterials.resize(m_nMaterials);
+	std::shared_ptr<CMaterial> pMaterial = std::make_shared<CMaterial>();
+	m_ppMaterials[0] = pMaterial;
+
+	m_xmf4x4World = Matrix4x4::Identity();
+	m_xmf4x4Transform = Matrix4x4::Identity();
+
+	std::shared_ptr<CBoundingBoxMesh> pMesh = std::make_shared<CBoundingBoxMesh>(pd3dDevice, pd3dCommandList, xmf3AABBCenter, xmf3AABBExtents);
+	m_pMesh = pMesh;
+}
+CBoundingBoxObject::~CBoundingBoxObject()
+{
+}
+void CBoundingBoxObject::PrepareRender()
+{
+	m_xmf4x4Transform = m_pParent->GetTransform();
+}
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//
 CAngrybotObject::CAngrybotObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks)
 {
 	CLoadedModelInfo* pAngrybotModel = CModelManager::GetInst()->GetModelInfo("Object/Angrybot.bin");
@@ -440,7 +468,8 @@ void CEagleObject::Animate(float fTimeElapsed)
 	SetPosition(xmf3Position);
 	CGameObject::Animate(fTimeElapsed);
 }
-
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//
 CKnightObject::CKnightObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks)
 {
 	CLoadedModelInfo* pKnightModel = CModelManager::GetInst()->GetModelInfo("Object/SK_FKnight_WeaponB_01.bin");;
@@ -449,18 +478,17 @@ CKnightObject::CKnightObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 	SetChild(pKnightModel->m_pModelRootObject, true);
 	m_pSkinnedAnimationController = std::make_unique<CAnimationController>(pd3dDevice, pd3dCommandList, nAnimationTracks, pKnightModel);
 }
-
 CKnightObject::~CKnightObject()
 {
 }
-
 void CKnightObject::Animate(float fTimeElapsed)
 {
 	CGameObject::Animate(fTimeElapsed);
 
 
 }
-
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//
 COrcObject::COrcObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks)
 {
 	CLoadedModelInfo* pKnightModel = CModelManager::GetInst()->GetModelInfo("Object/SK_Orc.bin");;
@@ -469,16 +497,15 @@ COrcObject::COrcObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3d
 	SetChild(pKnightModel->m_pModelRootObject, true);
 	m_pSkinnedAnimationController = std::make_unique<CAnimationController>(pd3dDevice, pd3dCommandList, nAnimationTracks, pKnightModel);
 }
-
 COrcObject::~COrcObject()
 {
 }
-
 void COrcObject::Animate(float fTimeElapsed)
 {
 	CGameObject::Animate(fTimeElapsed);
 }
-
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//
 CGoblinObject::CGoblinObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks)
 {
 	CLoadedModelInfo* pKnightModel = CModelManager::GetInst()->GetModelInfo("Object/SK_Goblin.bin");;
@@ -487,16 +514,15 @@ CGoblinObject::CGoblinObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 	SetChild(pKnightModel->m_pModelRootObject, true);
 	m_pSkinnedAnimationController = std::make_unique<CAnimationController>(pd3dDevice, pd3dCommandList, nAnimationTracks, pKnightModel);
 }
-
 CGoblinObject::~CGoblinObject()
 {
 }
-
 void CGoblinObject::Animate(float fTimeElapsed)
 {
 	CGameObject::Animate(fTimeElapsed);
 }
-
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//
 CLionObject::CLionObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks)
 {
 	CLoadedModelInfo* pLionModel = CModelManager::GetInst()->GetModelInfo("Object/SK_FKnight_WeaponB_01.bin");;
@@ -505,11 +531,9 @@ CLionObject::CLionObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd
 	SetChild(pLionModel->m_pModelRootObject, true);
 	m_pSkinnedAnimationController = std::make_unique<CAnimationController>(pd3dDevice, pd3dCommandList, nAnimationTracks, pLionModel);
 }
-
 CLionObject::~CLionObject()
 {
 }
-
 void CLionObject::Animate(float fTimeElapsed)
 {
 	CGameObject::Animate(fTimeElapsed);

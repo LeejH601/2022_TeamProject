@@ -1,19 +1,3 @@
-struct VS_TERRAIN_INPUT
-{
-	float3 position : POSITION;
-	float4 color : COLOR;
-	float2 uv0 : TEXCOORD0;
-	float2 uv1 : TEXCOORD1;
-};
-
-struct VS_TERRAIN_OUTPUT
-{
-	float4 position : SV_POSITION;
-	float4 color : COLOR;
-	float2 uv0 : TEXCOORD0;
-	float2 uv1 : TEXCOORD1;
-};
-
 cbuffer cbGameObjectInfo : register(b0)
 {
 	matrix gmtxGameObject : packoffset(c0);
@@ -30,14 +14,21 @@ cbuffer cbCameraInfo : register(b1)
 	float3 gf3CameraDirection : packoffset(c13);
 };
 
-VS_TERRAIN_OUTPUT VSTerrain(VS_TERRAIN_INPUT input)
+struct VS_INPUT
 {
-	VS_TERRAIN_OUTPUT output;
+	float3 position : POSITION;
+};
+
+struct VS_OUTPUT
+{
+	float4 position : SV_POSITION;
+};
+
+VS_OUTPUT VS_Bound(VS_INPUT input)
+{
+	VS_OUTPUT output;
 
 	output.position = mul(mul(mul(float4(input.position, 1.0f), gmtxGameObject), gmtxView), gmtxProjection);
-	output.color = input.color;
-	output.uv0 = input.uv0;
-	output.uv1 = input.uv1;
 
 	return(output);
 }

@@ -16,6 +16,8 @@ public:
 protected:
 	UINT m_nType = 0x00;
 	UINT m_nVertices = 0;
+
+	bool IsBoundLoaded = false;
 	XMFLOAT3 m_xmf3AABBCenter = XMFLOAT3(0.0f, 0.0f, 0.0f);
 	XMFLOAT3 m_xmf3AABBExtents = XMFLOAT3(0.0f, 0.0f, 0.0f);
 
@@ -59,14 +61,14 @@ public:
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList);
 
 	UINT GetType() { return(m_nType); }
+	bool GetIsBoundLoaded() { return (IsBoundLoaded); }
+	XMFLOAT3 GetBoundingCenter() { return(m_xmf3AABBCenter); }
+	XMFLOAT3 GetBoundingExtent() { return(m_xmf3AABBExtents); }
 };
 class CTexturedModelingMesh : public CMesh
 {
 protected:
 	char m_pstrMeshName[256] = { 0 };
-
-	XMFLOAT3 m_xmf3AABBCenter = XMFLOAT3(0.0f, 0.0f, 0.0f);
-	XMFLOAT3 m_xmf3AABBExtents = XMFLOAT3(0.0f, 0.0f, 0.0f);
 
 	std::vector<XMFLOAT2> m_pxmf2TextureCoords0;
 	ComPtr<ID3D12Resource> m_pd3dTextureCoord0Buffer = NULL;
@@ -137,7 +139,7 @@ public:
 	void LoadMeshFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, FILE* pInFile);
 	void LoadSkinInfoFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, FILE* pInFile);
 };
-
+//-------------------------------------------------------------------
 class CRawFormatImage
 {
 protected:
@@ -207,4 +209,12 @@ public:
 
 	virtual float OnGetHeight(int x, int z, void* pContext);
 	virtual XMFLOAT4 OnGetColor(int x, int z, void* pContext);
+};
+//-------------------------------------------------------------------
+class CBoundingBoxMesh : public CMesh
+{
+public:
+	CBoundingBoxMesh() {};
+	CBoundingBoxMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, XMFLOAT3 xmf3AABBCenter, XMFLOAT3 xmf3AABBExtents);
+	virtual ~CBoundingBoxMesh();
 };
