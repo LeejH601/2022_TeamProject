@@ -440,20 +440,22 @@ void CEagleObject::Animate(float fTimeElapsed)
 	SetPosition(xmf3Position);
 	CGameObject::Animate(fTimeElapsed);
 }
-
+//#define KNIGHT_ROOT_MOTION
 CKnightObject::CKnightObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks)
 {
-	CLoadedModelInfo* pKnightModel = CModelManager::GetInst()->GetModelInfo("Object/SK_FKnight_WeaponB_01.bin");;
-	if (!pKnightModel) pKnightModel = CModelManager::GetInst()->LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, "Object/SK_FKnight_WeaponB_01.bin");
+	CLoadedModelInfo* pKnightModel = CModelManager::GetInst()->GetModelInfo("Object/SK_FKnight.bin");;
+	if (!pKnightModel) pKnightModel = CModelManager::GetInst()->LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, "Object/SK_FKnight.bin");
 
 	SetChild(pKnightModel->m_pModelRootObject, true);
 	m_pSkinnedAnimationController = std::make_unique<CKightRootRollBackAnimationController>(pd3dDevice, pd3dCommandList, nAnimationTracks, pKnightModel);
 
+#ifdef KNIGHT_ROOT_MOTION
 	m_pSkinnedAnimationController->m_pRootMotionObject = pKnightModel->m_pModelRootObject->FindFrame("root");
 	if (m_pSkinnedAnimationController->m_pRootMotionObject) {
 		m_pSkinnedAnimationController->m_bRootMotion = true;
 		m_pSkinnedAnimationController->m_xmf3RootObjectScale = XMFLOAT3(5.0f, 5.0f, 5.0f);
 	}
+#endif // KNIGHT_ROOT_MOTION
 }
 
 CKnightObject::~CKnightObject()

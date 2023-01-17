@@ -314,17 +314,17 @@ void CImGuiManager::SetUI()
 
         if (ImGui::Button("Animation1", ImVec2(175.f, 45.f))) // Buttons return true when clicked (most widgets return true when edited/activated)
         {
-            CSimulatorScene::GetInst()->SetPlayerAnimationSet(28);
+            CSimulatorScene::GetInst()->SetPlayerAnimationSet(0);
         }
         ImGui::SameLine();
         if (ImGui::Button("Animation2", ImVec2(175.f, 45.f))) // Buttons return true when clicked (most widgets return true when edited/activated)
         {
-            CSimulatorScene::GetInst()->SetPlayerAnimationSet(4);
+            CSimulatorScene::GetInst()->SetPlayerAnimationSet(1);
         }
         ImGui::SameLine();
         if (ImGui::Button("Animation3", ImVec2(175.f, 45.f))) // Buttons return true when clicked (most widgets return true when edited/activated)
         {
-            CSimulatorScene::GetInst()->SetPlayerAnimationSet(3);
+            CSimulatorScene::GetInst()->SetPlayerAnimationSet(2);
         }
         ImGui::End();
     }

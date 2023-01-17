@@ -95,7 +95,7 @@ void CSimulatorScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 	// 5->IDLE
 	m_pDummyEnemy = std::make_unique<CGoblinObject>(pd3dDevice, pd3dCommandList, 1);
 	m_pDummyEnemy->SetPosition(XMFLOAT3(8.0f, 0.0f, 0.0f));
-	m_pDummyEnemy->SetScale(8.0f, 8.0f, 8.0f);
+	m_pDummyEnemy->SetScale(5.0f, 5.0f, 5.0f);
 	m_pDummyEnemy->Rotate(0.0f, -90.0f, 0.0f);
 	m_pDummyEnemy->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 5);
 
@@ -103,9 +103,10 @@ void CSimulatorScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 	// 28->Attack
 	m_pMainCharacter = std::make_unique<CKnightObject>(pd3dDevice, pd3dCommandList, 1);
 	m_pMainCharacter->SetPosition(XMFLOAT3(-8.0f, 0.0f, 0.0f));
-	m_pMainCharacter->SetScale(8.0f, 8.0f, 8.0f);
+	m_pMainCharacter->SetScale(14.0f, 14.0f, 14.0f);
 	m_pMainCharacter->Rotate(0.0f, 90.0f, 0.0f);
-	m_pMainCharacter->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 3);
+	m_pMainCharacter->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
+	m_pMainCharacter->m_pSkinnedAnimationController->m_xmf3RootObjectScale = XMFLOAT3(14.0f, 14.0f, 14.0f);
 
 	int nAnimationSets = m_pMainCharacter->m_pSkinnedAnimationController->m_pAnimationSets->m_nAnimationSets;
 

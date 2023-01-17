@@ -154,7 +154,7 @@ public:
 
 	CGameObject* m_pRootMotionObject = NULL;
 	XMFLOAT3						m_xmf3FirstRootMotionPosition = XMFLOAT3(0.0f, 0.0f, 0.0f);
-	XMFLOAT3						m_xmf3RootObjectScale;
+	XMFLOAT3						m_xmf3RootObjectScale = XMFLOAT3(1.0f, 1.0f, 1.0f);
 
 	void SetRootMotion(bool bRootMotion) { m_bRootMotion = bRootMotion; }
 
