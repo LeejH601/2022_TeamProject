@@ -2,6 +2,7 @@
 #include "..\Global\stdafx.h"
 #include "..\Object\Object.h"
 #include "..\Object\Mesh.h"
+
 class CHeightMapTerrain : public CGameObject
 {
 public:

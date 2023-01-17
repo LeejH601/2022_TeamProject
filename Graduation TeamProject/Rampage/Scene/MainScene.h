@@ -1,8 +1,17 @@
 #pragma once
 #include "Scene.h"
+#include "..\Object\Object.h"
+#include "..\Object\Light.h"
+#include "..\Object\Terrain.h"
+#include "..\Shader\TerrainShader.h"
 
 class CMainTMPScene : public CScene
 {
+private:
+	std::vector<std::unique_ptr<CGameObject>> m_pObjects;
+	std::unique_ptr<CLight> m_pLight;
+	std::unique_ptr<CHeightMapTerrain> m_pTerrain;
+	std::unique_ptr<CTerrainShader> m_pTerrainShader;
 public:
 	CMainTMPScene() {}
 	virtual ~CMainTMPScene() {}
@@ -17,6 +26,6 @@ public:
 	virtual void ReleaseObjects() {}
 
 	virtual bool ProcessInput(UCHAR* pKeysBuffer) { return false; }
-	virtual void AnimateObjects(float fTimeElapsed) {}
-	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = NULL);
+	virtual void AnimateObjects(float fTimeElapsed);
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed);
 };

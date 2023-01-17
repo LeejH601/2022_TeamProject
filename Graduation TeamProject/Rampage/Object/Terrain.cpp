@@ -1,6 +1,7 @@
 #include "Texture.h"
 #include "Terrain.h"
 #include "../Shader/TerrainShader.h"
+
 CHeightMapTerrain::CHeightMapTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, LPCTSTR pFileName, int nWidth, int nLength, int nBlockWidth, int nBlockLength, XMFLOAT3 xmf3Scale, XMFLOAT4 xmf4Color, CShader* pTerrainShader) : CGameObject(1)
 {
 	m_xmf4x4World = Matrix4x4::Identity();

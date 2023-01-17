@@ -5,13 +5,6 @@
 class CScene;
 class CCamera;
 class CShader;
-class CTerrainShader;
-class CSplatTerrainShader;
-class CGameObject;
-class CLight;
-class CHeightMapTerrain;
-class CSplatTerrain;;
-class CTexture;
 
 struct CB_Parallax_Info
 {
@@ -71,13 +64,6 @@ private:
 	std::unique_ptr<CScene> m_pScene = NULL;
 	std::unique_ptr<CCamera> m_pCamera = NULL;
 
-	std::vector<std::unique_ptr<CGameObject>> m_pObjects;
-	std::unique_ptr<CLight> m_pLight = NULL;
-
-	std::unique_ptr<CTerrainShader> m_pTerrainShader = NULL;
-	std::unique_ptr<CSplatTerrainShader> m_pSplatTerrainShader = NULL;
-	std::unique_ptr<CHeightMapTerrain> m_pTerrain = NULL;
-
 	CGameTimer					m_GameTimer;
 	POINT						m_ptOldCursorPos;
 	_TCHAR						m_pszFrameRate[50];
@@ -108,6 +94,7 @@ public:
 
 	// 렌더타겟을 렌더링하기 위한 준비를 하는 함수이다.
 	void OnPrepareRenderTarget();
+	void OnPrepareImGui();
 	void OnPostRenderTarget();
 
 	//렌더 타겟 뷰와 깊이-스텐실 뷰를 생성하는 함수이다. 

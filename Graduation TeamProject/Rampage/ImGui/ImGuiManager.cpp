@@ -1,4 +1,7 @@
 #include "ImGuiManager.h"
+#include "..\Global\Timer.h"
+#include "..\Global\Camera.h"
+#include "..\Scene\SimulatorScene.h"
 #include "..\Object\Texture.h"
 #include "..\Global\GameFramework.h"
 
@@ -69,14 +72,16 @@ void CImGuiManager::Init(HWND hWnd, ID3D12Device* pd3dDevice, ID3D12GraphicsComm
         m_pd3dSrvDescHeap->GetCPUDescriptorHandleForHeapStart(),
         m_pd3dSrvDescHeap->GetGPUDescriptorHandleForHeapStart());
 
-    m_pTexture = std::make_unique<CTexture>(1, RESOURCE_TEXTURE2D, 0, 1);
-    m_pTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/Base_Texture.dds", RESOURCE_TEXTURE2D, 0);
-    CreateShaderResourceViews(pd3dDevice, m_pTexture.get(), 1);
+    m_pCamera = std::make_unique<CFirstPersonCamera>();
+    m_pCamera->Init(pd3dDevice, pd3dCommandList);
+    m_pCamera->SetPosition(XMFLOAT3(-18.5f, 37.5f, -18.5f));
+    m_pCamera->SetLookAt(XMFLOAT3(0.0f, 0.0f, 0.0f));
+    m_pCamera->RegenerateViewMatrix();
 
-    m_pRTTexture = std::make_unique<CTexture>(1, RESOURCE_TEXTURE2D, 0, 1);
     D3D12_CLEAR_VALUE d3dClearValue = { DXGI_FORMAT_R8G8B8A8_UNORM, { 0.0f, 0.0f, 0.0f, 1.0f } };
+    m_pRTTexture = std::make_unique<CTexture>(1, RESOURCE_TEXTURE2D, 0, 1);
     m_pRTTexture->CreateTexture(pd3dDevice, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, DXGI_FORMAT_R8G8B8A8_UNORM, D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET, D3D12_RESOURCE_STATE_COMMON, &d3dClearValue, RESOURCE_TEXTURE2D, 0);
-    CreateShaderResourceViews(pd3dDevice, m_pRTTexture.get(), 0);
+    CreateShaderResourceViews(pd3dDevice, m_pRTTexture.get(), 1);
 
     D3D12_RENDER_TARGET_VIEW_DESC d3dRenderTargetViewDesc;
     d3dRenderTargetViewDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
@@ -87,7 +92,6 @@ void CImGuiManager::Init(HWND hWnd, ID3D12Device* pd3dDevice, ID3D12GraphicsComm
     ID3D12Resource* pd3dTextureResource = m_pRTTexture->GetResource(0);
     pd3dDevice->CreateRenderTargetView(pd3dTextureResource, &d3dRenderTargetViewDesc, d3dRtvCPUDescriptorHandle);
     m_pd3dRtvCPUDescriptorHandles = d3dRtvCPUDescriptorHandle;
-
 }
 void CImGuiManager::DemoRendering()
 {
@@ -130,7 +134,7 @@ void CImGuiManager::DemoRendering()
         ImGui::End();
     }
 }
-void CImGuiManager::OnPreRender()
+void CImGuiManager::SetUI()
 {
     // Start the Dear ImGui frame
     ImGui_ImplDX12_NewFrame();
@@ -310,17 +314,38 @@ void CImGuiManager::OnPreRender()
 
         if (ImGui::Button("Animation1", ImVec2(175.f, 45.f))) // Buttons return true when clicked (most widgets return true when edited/activated)
         {
+            CSimulatorScene::GetInst()->SetPlayerAnimationSet(28);
         }
         ImGui::SameLine();
         if (ImGui::Button("Animation2", ImVec2(175.f, 45.f))) // Buttons return true when clicked (most widgets return true when edited/activated)
         {
+            CSimulatorScene::GetInst()->SetPlayerAnimationSet(4);
         }
         ImGui::SameLine();
         if (ImGui::Button("Animation3", ImVec2(175.f, 45.f))) // Buttons return true when clicked (most widgets return true when edited/activated)
         {
+            CSimulatorScene::GetInst()->SetPlayerAnimationSet(3);
         }
         ImGui::End();
     }
+}
+void CImGuiManager::OnPrepareRender(ID3D12GraphicsCommandList* pd3dCommandList, D3D12_CPU_DESCRIPTOR_HANDLE* d3dDsvDescriptorCPUHandle, float fTimeElapsed, CCamera* pCamera)
+{
+    PrepareRenderTarget(pd3dCommandList, d3dDsvDescriptorCPUHandle);
+    CSimulatorScene::GetInst()->OnPrepareRender(pd3dCommandList);
+
+    /*if (pCamera)
+        pCamera->OnPrepareRender(pd3dCommandList);*/
+    m_pCamera->OnPrepareRender(pd3dCommandList);
+
+    CSimulatorScene::GetInst()->Render(pd3dCommandList, fTimeElapsed);
+}
+void CImGuiManager::PrepareRenderTarget(ID3D12GraphicsCommandList* pd3dCommandList, D3D12_CPU_DESCRIPTOR_HANDLE* d3dDsvDescriptorCPUHandle)
+{
+    FLOAT pfDefaultClearColor[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
+    pd3dCommandList->ClearDepthStencilView(*d3dDsvDescriptorCPUHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
+    pd3dCommandList->ClearRenderTargetView(m_pd3dRtvCPUDescriptorHandles, pfDefaultClearColor, 0, NULL);
+    pd3dCommandList->OMSetRenderTargets(1, &m_pd3dRtvCPUDescriptorHandles, FALSE, d3dDsvDescriptorCPUHandle);
 }
 void CImGuiManager::Render(ID3D12GraphicsCommandList* pd3dCommandList)
 {

@@ -95,7 +95,6 @@ public:
 	virtual void ReleaseUploadBuffers() {}
 	virtual void LoadMeshFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, FILE* pInFile);
 };
-
 #define SKINNED_ANIMATION_BONES		128
 class CSkinnedMesh : public CTexturedModelingMesh
 {

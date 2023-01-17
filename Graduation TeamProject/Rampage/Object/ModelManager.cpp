@@ -56,7 +56,7 @@ CLoadedModelInfo* CModelManager::LoadGeometryAndAnimationFromFile(ID3D12Device* 
 	}
 
 	vModels.push_back(std::move(pLoadedModel));
-	return (pLoadedModel.get());
+	return (vModels.back()).get();
 }
 void CModelManager::LoadAnimationFromFile(FILE* pInFile, CLoadedModelInfo* pLoadedModel)
 {

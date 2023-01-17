@@ -1,14 +1,9 @@
 #include "GameFramework.h"
-#include "..\Scene\MainScene.h"
 #include "..\Global\Camera.h"
-#include "..\Object\Object.h"
-#include "..\Object\ModelManager.h"
+#include "..\Scene\MainScene.h"
+#include "..\Scene\SimulatorScene.h"
 #include "..\ImGui\ImGuiManager.h"
-#include "..\Shader\ModelShader.h"
-#include "..\Shader\TerrainShader.h"
-#include "..\Object\Light.h"
-#include "..\Object\Terrain.h"
-#include "..\Object\Texture.h"
+#include "..\Sound\SoundManager.h"
 
 CGameFramework::CGameFramework()
 {
@@ -22,6 +17,8 @@ CGameFramework::CGameFramework()
 }
 CGameFramework::~CGameFramework()
 {
+	// Release Fmod Llibrary
+	CSoundManager::GetInst()->Release();
 }
 bool CGameFramework::OnCreate(HINSTANCE hInstance, HWND hMainWnd)
 {
@@ -36,6 +33,9 @@ bool CGameFramework::OnCreate(HINSTANCE hInstance, HWND hMainWnd)
 	CreateRenderTargetViews();
 	CreateDepthStencilView();
 
+	//Init FMOD
+	CSoundManager::GetInst()->Init();
+
 	//렌더링할 게임 객체를 생성한다.
 	BuildObjects();
 
@@ -45,7 +45,8 @@ bool CGameFramework::OnCreate(HINSTANCE hInstance, HWND hMainWnd)
 	CImGuiManager::GetInst()->Init(m_hWnd, m_pd3dDevice.Get(), m_pd3dCommandList.Get(), d3dRtvCPUDescriptorHandle);
 
 	//CommandList를 실행하고 GPU 연산이 완료될 때까지 기다립니다.
-	//ExecuteCommandLists();
+	ExecuteCommandLists();
+	
 	return(true);
 }
 void CGameFramework::OnDestroy()
@@ -241,65 +242,10 @@ void CGameFramework::BuildObjects()
 	m_pScene = std::make_unique<CMainTMPScene>();
 	m_pScene->BuildObjects(m_pd3dDevice.Get(), m_pd3dCommandList.Get());
 
+	CSimulatorScene::GetInst()->BuildObjects(m_pd3dDevice.Get(), m_pd3dCommandList.Get());
+
 	m_pCamera = std::make_unique<CFirstPersonCamera>();
 	m_pCamera->Init(m_pd3dDevice.Get(), m_pd3dCommandList.Get());
-
-	DXGI_FORMAT pdxgiObjectRtvFormats[2] = {DXGI_FORMAT_R8G8B8A8_UNORM, DXGI_FORMAT_R8G8B8A8_UNORM};
-
-	CModelShader::GetInst()->CreateShader(m_pd3dDevice.Get(), m_pScene->GetGraphicsRootSignature(), 2, pdxgiObjectRtvFormats, 0);
-	CModelShader::GetInst()->CreateShaderVariables(m_pd3dDevice.Get(), m_pd3dCommandList.Get());
-	CModelShader::GetInst()->CreateCbvSrvDescriptorHeaps(m_pd3dDevice.Get(), 0, 100);
-
-	CModelManager::GetInst()->LoadModel(m_pd3dDevice.Get(), m_pd3dCommandList.Get(), "Object/Angrybot.bin");;
-	CModelManager::GetInst()->LoadModel(m_pd3dDevice.Get(), m_pd3dCommandList.Get(), "Object/Eagle.bin");
-	CModelManager::GetInst()->LoadModel(m_pd3dDevice.Get(), m_pd3dCommandList.Get(), "Object/Lion.bin");
-	CModelManager::GetInst()->LoadModel(m_pd3dDevice.Get(), m_pd3dCommandList.Get(), "Object/SK_FKnight_WeaponB_01.bin");
-
-
-	std::unique_ptr<CKnightObject> m_pObject = std::make_unique<CKnightObject>(m_pd3dDevice.Get(), m_pd3dCommandList.Get(), 1);
-	m_pObject->SetPosition(XMFLOAT3(0.0f, 0.0f, 0.0f));
-	m_pObject->SetScale(5.0f, 5.0f, 5.0f);
-	m_pObject->Rotate(0.0f, 180.0f, 0.0f);
-	m_pObject->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 15);
-	m_pObjects.push_back(std::move(m_pObject));
-
-	/*m_pObject = std::make_unique<CKnightObject>(m_pd3dDevice.Get(), m_pd3dCommandList.Get(), 1);
-	m_pObject->SetPosition(XMFLOAT3(-15.0f, 0.0f, 0.0f));
-	m_pObject->SetScale(5.0f, 5.0f, 5.0f);
-	m_pObject->Rotate(0.0f, 180.0f, 0.0f);
-	m_pObject->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 16);
-	m_pObjects.push_back(std::move(m_pObject));
-
-	m_pObject = std::make_unique<CKnightObject>(m_pd3dDevice.Get(), m_pd3dCommandList.Get(), 1);
-	m_pObject->SetPosition(XMFLOAT3(15.0f, 0.0f, 0.0f));
-	m_pObject->SetScale(5.0f, 5.0f, 5.0f);
-	m_pObject->Rotate(0.0f, 180.0f, 0.0f);
-	m_pObject->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 17);
-	m_pObjects.push_back(std::move(m_pObject));*/
-
-	// Light 생성
-	m_pLight = std::make_unique<CLight>();
-	m_pLight->CreateLightVariables(m_pd3dDevice.Get(), m_pd3dCommandList.Get());
-
-	// Terrain Shader 생성
-	/*m_pTerrainShader = std::make_unique<CTerrainShader>();
-	m_pTerrainShader->CreateShader(m_pd3dDevice.Get(), m_pScene->GetGraphicsRootSignature(), 2, pdxgiObjectRtvFormats, 0);
-	m_pTerrainShader->CreateCbvSrvDescriptorHeaps(m_pd3dDevice.Get(), 0, 3);
-	m_pTerrainShader->CreateShaderVariables(m_pd3dDevice.Get(), m_pd3dCommandList.Get());*/
-
-	m_pSplatTerrainShader = std::make_unique<CSplatTerrainShader>();
-	m_pSplatTerrainShader->CreateShader(m_pd3dDevice.Get(), m_pScene->GetGraphicsRootSignature(), 2, pdxgiObjectRtvFormats, 0);
-	m_pSplatTerrainShader->CreateCbvSrvDescriptorHeaps(m_pd3dDevice.Get(), 0, 13);
-	m_pSplatTerrainShader->CreateShaderVariables(m_pd3dDevice.Get(), m_pd3dCommandList.Get());
-
-	// Terrain 생성
-	XMFLOAT3 xmf3Scale(18.0f, 6.0f, 18.0f);
-	XMFLOAT4 xmf4Color(0.0f, 0.5f, 0.0f, 0.0f);
-	m_pTerrain = std::make_unique<CSplatTerrain>(m_pd3dDevice.Get(), m_pd3dCommandList.Get(), m_pScene->GetGraphicsRootSignature(), _T("Terrain/terrainHeightMap257.raw"), 257, 257, 257, 257, xmf3Scale, xmf4Color, m_pSplatTerrainShader.get());
-	m_pTerrain->SetPosition(XMFLOAT3(-800.f, -750.f, -800.f));
-	//m_pTerrain->SetPosition(XMFLOAT3(0.f, 0.f, 0.f));
-
-	CreateShaderVariables(m_pd3dDevice.Get(), m_pd3dCommandList.Get());
 }
 void CGameFramework::ReleaseObjects()
 {
@@ -489,6 +435,8 @@ void CGameFramework::ProcessInput()
 void CGameFramework::AnimateObjects()
 {
 	// Object들의 애니메이션을 수행한다.
+	m_pScene->AnimateObjects(m_GameTimer.GetFrameTimeElapsed());
+	CSimulatorScene::GetInst()->AnimateObjects(m_GameTimer.GetFrameTimeElapsed());
 
 }
 
@@ -504,7 +452,8 @@ void CGameFramework::OnPrepareRenderTarget()
 {
 	ImVec4 clear_color = CImGuiManager::GetInst()->GetColor();
 	const float clear_color_with_alpha[4] = { clear_color.x * clear_color.w, clear_color.y * clear_color.w, clear_color.z * clear_color.w, clear_color.w };
-	FLOAT pfDefaultClearColor[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
+	
+	/*FLOAT pfDefaultClearColor[4] = {0.0f, 0.0f, 0.0f, 1.0f};
 
 	D3D12_CPU_DESCRIPTOR_HANDLE* pd3dAllRtvCPUHandles = new D3D12_CPU_DESCRIPTOR_HANDLE[2];
 	
@@ -519,10 +468,28 @@ void CGameFramework::OnPrepareRenderTarget()
 	
 	m_pd3dCommandList->OMSetRenderTargets(2, pd3dAllRtvCPUHandles, FALSE, &m_d3dDsvDescriptorCPUHandle);
 
-	if (pd3dAllRtvCPUHandles) delete[] pd3dAllRtvCPUHandles;
+	if (pd3dAllRtvCPUHandles) delete[] pd3dAllRtvCPUHandles;*/
 	
-	/*m_pd3dCommandList->ClearRenderTargetView(m_pd3dSwapRTVCPUHandles[m_nSwapChainBufferIndex], clear_color_with_alpha, 0, NULL);
-	m_pd3dCommandList->OMSetRenderTargets(1, &m_pd3dSwapRTVCPUHandles[m_nSwapChainBufferIndex], FALSE, &m_d3dDsvDescriptorCPUHandle);*/
+	m_pd3dCommandList->ClearRenderTargetView(m_pd3dSwapRTVCPUHandles[m_nSwapChainBufferIndex], clear_color_with_alpha, 0, NULL);
+	m_pd3dCommandList->OMSetRenderTargets(1, &m_pd3dSwapRTVCPUHandles[m_nSwapChainBufferIndex], FALSE, &m_d3dDsvDescriptorCPUHandle);
+}
+void CGameFramework::OnPrepareImGui()
+{
+	//명령 할당자와 명령 리스트를 리셋한다.
+	HRESULT hResult = m_pd3dCommandAllocator->Reset();
+	hResult = m_pd3dCommandList->Reset(m_pd3dCommandAllocator.Get(), NULL);
+
+	CImGuiManager::GetInst()->OnPrepareRender(m_pd3dCommandList.Get(), &m_d3dDsvDescriptorCPUHandle, m_GameTimer.GetFrameTimeElapsed(), m_pCamera.get());
+
+	//명령 리스트를 닫힌 상태로 만든다. 
+	hResult = m_pd3dCommandList->Close();
+
+	//명령 리스트를 명령 큐에 추가하여 실행한다.
+	ID3D12CommandList* CommandLists[] = { m_pd3dCommandList.Get() };
+	m_pd3dCommandQueue->ExecuteCommandLists(1, CommandLists);
+
+	//GPU가 모든 명령 리스트를 실행할 때 까지 기다린다.
+	::WaitForGpuComplete(m_pd3dCommandQueue.Get(), m_pd3dFence.Get(), ++m_nFenceValues[m_nSwapChainBufferIndex], m_hFenceEvent);
 }
 void CGameFramework::OnPostRenderTarget()
 {
@@ -551,46 +518,29 @@ void CGameFramework::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dComman
 	D3D12_GPU_VIRTUAL_ADDRESS d3dGpuVirtualAddress = m_pd3dcbParallax->GetGPUVirtualAddress();
 	pd3dCommandList->SetGraphicsRootConstantBufferView(7, d3dGpuVirtualAddress);
 }
-void CGameFramework::FrameAdvance()
+void CGameFramework::FrameAdvance() 
 {
 	m_GameTimer.Tick(0.0f);
 
 	ProcessInput();
 	AnimateObjects();
+	OnPrepareImGui();
 
 	//명령 할당자와 명령 리스트를 리셋한다.
 	HRESULT hResult = m_pd3dCommandAllocator->Reset();
 	hResult = m_pd3dCommandList->Reset(m_pd3dCommandAllocator.Get(), NULL);
 
 	//CImGuiManager::GetInst()->DemoRendering();
-	CImGuiManager::GetInst()->OnPreRender();
+	CImGuiManager::GetInst()->SetUI();
 
 	::SynchronizeResourceTransition(m_pd3dCommandList.Get(), m_ppd3dRenderTargetBuffers[m_nSwapChainBufferIndex].Get(), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
 
-	if (m_pScene) m_pScene->OnPrepareRender(m_pd3dCommandList.Get());
-
+	m_pScene->OnPrepareRender(m_pd3dCommandList.Get());
 	m_pd3dCommandList->ClearDepthStencilView(m_d3dDsvDescriptorCPUHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
-
 	OnPrepareRenderTarget();
 	UpdateShaderVariables(m_pd3dCommandList.Get());
-	m_pScene->OnPrepareRender(m_pd3dCommandList.Get());
 	m_pCamera->OnPrepareRender(m_pd3dCommandList.Get());
-	m_pLight->Render((m_pd3dCommandList.Get()));
-
-	m_pScene->Render(m_pd3dCommandList.Get(), m_pCamera.get());
-
-	CModelShader::GetInst()->Render(m_pd3dCommandList.Get(), 0);
-
-	for (int i = 0; i < m_pObjects.size(); ++i)
-	{
-		m_pObjects[i]->Animate(m_GameTimer.GetFrameTimeElapsed() * (i + 1));
-		if (!m_pObjects[i]->m_pSkinnedAnimationController) m_pObjects[i]->UpdateTransform(NULL);
-		m_pObjects[i]->Render(m_pd3dCommandList.Get());
-	}
-
-	//m_pTerrainShader->Render(m_pd3dCommandList.Get(), 0);
-	m_pSplatTerrainShader->Render(m_pd3dCommandList.Get(), 0);
-	m_pTerrain->Render(m_pd3dCommandList.Get());
+	m_pScene->Render(m_pd3dCommandList.Get(), m_GameTimer.GetFrameTimeElapsed());
 
 	CImGuiManager::GetInst()->Render(m_pd3dCommandList.Get());
 

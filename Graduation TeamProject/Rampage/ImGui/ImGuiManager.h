@@ -2,6 +2,7 @@
 #include "..\Global\stdafx.h"
 
 class CTexture;
+class CCamera;
 class CImGuiManager
 {
 private:
@@ -19,7 +20,7 @@ private:
 	bool show_another_window = false;
 	bool show_my_window = true;
 
-	std::unique_ptr<CTexture> m_pTexture;
+	std::unique_ptr<CCamera> m_pCamera = NULL;
 
 	std::unique_ptr<CTexture> m_pRTTexture;
 	D3D12_CPU_DESCRIPTOR_HANDLE m_pd3dRtvCPUDescriptorHandles;
@@ -47,7 +48,9 @@ public:
 	void Init(HWND hWnd, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, D3D12_CPU_DESCRIPTOR_HANDLE d3dRtvCPUDescriptorHandle);
 
 	void DemoRendering();
-	void OnPreRender();
+	void SetUI();
+	void OnPrepareRender(ID3D12GraphicsCommandList* pd3dCommandList, D3D12_CPU_DESCRIPTOR_HANDLE* d3dDsvDescriptorCPUHandle, float fTimeElapsed, CCamera* pCamera = NULL);
+	void PrepareRenderTarget(ID3D12GraphicsCommandList* pd3dCommandList, D3D12_CPU_DESCRIPTOR_HANDLE* d3dDsvDescriptorCPUHandle);
 	void Render(ID3D12GraphicsCommandList* pd3dCommandList);
 
 	ImVec4 GetColor() { return clear_color; };
