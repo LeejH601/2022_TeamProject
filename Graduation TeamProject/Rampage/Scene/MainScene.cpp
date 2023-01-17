@@ -103,21 +103,21 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	CSoundManager::GetInst()->RegisterSound("Sound/mp3/David Bowie - Starman.mp3", false);
 	//CSoundManager::GetInst()->PlaySound("Sound/mp3/David Bowie - Starman.mp3");
 
-	std::unique_ptr<CGoblinObject> m_pObject = std::make_unique<CGoblinObject>(pd3dDevice, pd3dCommandList, 1);
+	std::unique_ptr<CSkeletonObject> m_pObject = std::make_unique<CSkeletonObject>(pd3dDevice, pd3dCommandList, 1);
 	m_pObject->SetPosition(XMFLOAT3(0.0f, 0.0f, 0.0f));
 	m_pObject->SetScale(5.0f, 5.0f, 5.0f);
 	m_pObject->Rotate(0.0f, 180.0f, 0.0f);
 	m_pObject->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 2);
 	m_pObjects.push_back(std::move(m_pObject));
 
-	m_pObject = std::make_unique<CGoblinObject>(pd3dDevice, pd3dCommandList, 1);
+	m_pObject = std::make_unique<CSkeletonObject>(pd3dDevice, pd3dCommandList, 1);
 	m_pObject->SetPosition(XMFLOAT3(-15.0f, 0.0f, 0.0f));
 	m_pObject->SetScale(5.0f, 5.0f, 5.0f);
 	m_pObject->Rotate(0.0f, 180.0f, 0.0f);
 	m_pObject->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 2);
 	m_pObjects.push_back(std::move(m_pObject));
 
-	m_pObject = std::make_unique<CGoblinObject>(pd3dDevice, pd3dCommandList, 1);
+	m_pObject = std::make_unique<CSkeletonObject>(pd3dDevice, pd3dCommandList, 1);
 	m_pObject->SetPosition(XMFLOAT3(15.0f, 0.0f, 0.0f));
 	m_pObject->SetScale(5.0f, 5.0f, 5.0f);
 	m_pObject->Rotate(0.0f, 180.0f, 0.0f);
