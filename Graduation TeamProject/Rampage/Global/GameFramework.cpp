@@ -493,7 +493,6 @@ void CGameFramework::OnPrepareImGui()
 }
 void CGameFramework::OnPostRenderTarget()
 {
-	::SynchronizeResourceTransition(m_pd3dCommandList.Get(), CImGuiManager::GetInst()->GetRTTextureResource(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_COMMON);
 }
 void CGameFramework::MoveToNextFrame()
 {

@@ -331,6 +331,8 @@ void CImGuiManager::SetUI()
 }
 void CImGuiManager::OnPrepareRender(ID3D12GraphicsCommandList* pd3dCommandList, D3D12_CPU_DESCRIPTOR_HANDLE* d3dDsvDescriptorCPUHandle, float fTimeElapsed, CCamera* pCamera)
 {
+    ::SynchronizeResourceTransition(pd3dCommandList, m_pRTTexture->GetResource(0), D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_RENDER_TARGET);
+    
     PrepareRenderTarget(pd3dCommandList, d3dDsvDescriptorCPUHandle);
     CSimulatorScene::GetInst()->OnPrepareRender(pd3dCommandList);
 
@@ -339,6 +341,8 @@ void CImGuiManager::OnPrepareRender(ID3D12GraphicsCommandList* pd3dCommandList, 
     m_pCamera->OnPrepareRender(pd3dCommandList);
 
     CSimulatorScene::GetInst()->Render(pd3dCommandList, fTimeElapsed);
+
+    ::SynchronizeResourceTransition(pd3dCommandList, m_pRTTexture->GetResource(0), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_COMMON);
 }
 void CImGuiManager::PrepareRenderTarget(ID3D12GraphicsCommandList* pd3dCommandList, D3D12_CPU_DESCRIPTOR_HANDLE* d3dDsvDescriptorCPUHandle)
 {
