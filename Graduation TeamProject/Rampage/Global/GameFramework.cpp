@@ -510,13 +510,13 @@ void CGameFramework::MoveToNextFrame()
 }
 void CGameFramework::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
 {
-	m_pcbMappedParallax->m_fParallaxScale = CImGuiManager::GetInst()->GetParallaxScale();
+	/*m_pcbMappedParallax->m_fParallaxScale = CImGuiManager::GetInst()->GetParallaxScale();
 	m_pcbMappedParallax->m_fParallaxBias = CImGuiManager::GetInst()->GetParallaxBias();
 	m_pcbMappedParallax->m_iMappingMode = CImGuiManager::GetInst()->GetTerrainMappingMode() % 3;
 	if (m_pcbMappedParallax->m_iMappingMode < 0) m_pcbMappedParallax->m_iMappingMode = 0;
 
 	D3D12_GPU_VIRTUAL_ADDRESS d3dGpuVirtualAddress = m_pd3dcbParallax->GetGPUVirtualAddress();
-	pd3dCommandList->SetGraphicsRootConstantBufferView(7, d3dGpuVirtualAddress);
+	pd3dCommandList->SetGraphicsRootConstantBufferView(7, d3dGpuVirtualAddress);*/
 }
 void CGameFramework::FrameAdvance() 
 {

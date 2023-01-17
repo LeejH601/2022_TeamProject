@@ -292,7 +292,7 @@ void CImGuiManager::SetUI()
             ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
         }
 
-        initial_curpos.y += 25.f;
+       /* initial_curpos.y += 25.f;
         ImGui::SetCursorPos(initial_curpos);
         ImGui::SetNextItemWidth(170.f);
         ImGui::DragFloat("Parallax Scale", (float*)&ParallaxScale, 0.01f, 0.0f, 1.0f, "%.6f", 0);
@@ -305,7 +305,7 @@ void CImGuiManager::SetUI()
         initial_curpos.y += 25.f;
         ImGui::SetCursorPos(initial_curpos);
         ImGui::SetNextItemWidth(120.f);
-        ImGui::InputInt("Terrain Mapping Mode", (int*)&Terrain_Mapping_mode, 1, 1, 0);
+        ImGui::InputInt("Terrain Mapping Mode", (int*)&Terrain_Mapping_mode, 1, 1, 0);*/
 
         button_pos.y += 5.f;
         ImGui::SetCursorPos(button_pos);

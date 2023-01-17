@@ -108,13 +108,13 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	DXGI_FORMAT pdxgiObjectRtvFormats[2] = { DXGI_FORMAT_R8G8B8A8_UNORM, DXGI_FORMAT_R8G8B8A8_UNORM };
 
 	CModelShader::GetInst()->CreateShader(pd3dDevice, GetGraphicsRootSignature(), 2, pdxgiObjectRtvFormats, 0);
-	CModelShader::GetInst()->CreateShaderVariables(pd3dDevice,pd3dCommandList);
+	CModelShader::GetInst()->CreateShaderVariables(pd3dDevice, pd3dCommandList);
 	CModelShader::GetInst()->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 100);
 
-	CModelManager::GetInst()->LoadModel(pd3dDevice,pd3dCommandList, "Object/Angrybot.bin");;
-	CModelManager::GetInst()->LoadModel(pd3dDevice,pd3dCommandList, "Object/Eagle.bin");
-	CModelManager::GetInst()->LoadModel(pd3dDevice,pd3dCommandList, "Object/Lion.bin");
-	CModelManager::GetInst()->LoadModel(pd3dDevice,pd3dCommandList, "Object/SK_FKnight_WeaponB_01.bin");
+	CModelManager::GetInst()->LoadModel(pd3dDevice, pd3dCommandList, "Object/Angrybot.bin");;
+	CModelManager::GetInst()->LoadModel(pd3dDevice, pd3dCommandList, "Object/Eagle.bin");
+	CModelManager::GetInst()->LoadModel(pd3dDevice, pd3dCommandList, "Object/Lion.bin");
+	CModelManager::GetInst()->LoadModel(pd3dDevice, pd3dCommandList, "Object/SK_FKnight_WeaponB_01.bin");
 
 	CSoundManager::GetInst()->RegisterSound("Sound/mp3/David Bowie - Starman.mp3", false);
 	//CSoundManager::GetInst()->PlaySound("Sound/mp3/David Bowie - Starman.mp3");
@@ -144,22 +144,33 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pLight = std::make_unique<CLight>();
 	m_pLight->CreateLightVariables(pd3dDevice, pd3dCommandList);
 
-	// Terrain Shader 持失
-	m_pTerrainShader = std::make_unique<CTerrainShader>();
+	//// Terrain Shader 持失
+	//m_pTerrainShader = std::make_unique<CTerrainShader>();
+	//m_pTerrainShader->CreateShader(pd3dDevice, GetGraphicsRootSignature(), 2, pdxgiObjectRtvFormats, 0);
+	//m_pTerrainShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 3);
+	//m_pTerrainShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
+
+	//// Terrain 持失
+	//XMFLOAT3 xmf3Scale(18.0f, 6.0f, 18.0f);
+	//XMFLOAT4 xmf4Color(0.0f, 0.5f, 0.0f, 0.0f);
+	//m_pTerrain = std::make_unique<CHeightMapTerrain>(pd3dDevice, pd3dCommandList, GetGraphicsRootSignature(), _T("Image/HeightMap.raw"), 257, 257, 257, 257, xmf3Scale, xmf4Color, m_pTerrainShader.get());
+	//m_pTerrain->SetPosition(XMFLOAT3(-800.f, -750.f, -800.f));
+	////m_pTerrain->SetPosition(XMFLOAT3(0.f, 0.f, 0.f));
+
+	m_pTerrainShader = std::make_unique<CSplatTerrainShader>();
 	m_pTerrainShader->CreateShader(pd3dDevice, GetGraphicsRootSignature(), 2, pdxgiObjectRtvFormats, 0);
-	m_pTerrainShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 3);
+	m_pTerrainShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 13);
 	m_pTerrainShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
 	// Terrain 持失
 	XMFLOAT3 xmf3Scale(18.0f, 6.0f, 18.0f);
 	XMFLOAT4 xmf4Color(0.0f, 0.5f, 0.0f, 0.0f);
-	m_pTerrain = std::make_unique<CHeightMapTerrain>(pd3dDevice, pd3dCommandList, GetGraphicsRootSignature(), _T("Image/HeightMap.raw"), 257, 257, 257, 257, xmf3Scale, xmf4Color, m_pTerrainShader.get());
+	m_pTerrain = std::make_unique<CSplatTerrain>(pd3dDevice, pd3dCommandList, GetGraphicsRootSignature(), _T("Terrain/terrainHeightMap257.raw"), 257, 257, 257, 257, xmf3Scale, xmf4Color, m_pTerrainShader.get());
 	m_pTerrain->SetPosition(XMFLOAT3(-800.f, -750.f, -800.f));
-	//m_pTerrain->SetPosition(XMFLOAT3(0.f, 0.f, 0.f));
 }
 void CMainTMPScene::AnimateObjects(float fTimeElapsed)
 {
-	
+
 }
 void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed)
 {

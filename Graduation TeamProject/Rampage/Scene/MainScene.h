@@ -10,8 +10,8 @@ class CMainTMPScene : public CScene
 private:
 	std::vector<std::unique_ptr<CGameObject>> m_pObjects;
 	std::unique_ptr<CLight> m_pLight;
-	std::unique_ptr<CHeightMapTerrain> m_pTerrain;
-	std::unique_ptr<CTerrainShader> m_pTerrainShader;
+	std::unique_ptr<CSplatTerrain> m_pTerrain;
+	std::unique_ptr<CShader> m_pTerrainShader;
 public:
 	CMainTMPScene() {}
 	virtual ~CMainTMPScene() {}
