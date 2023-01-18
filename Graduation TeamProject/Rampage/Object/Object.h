@@ -56,6 +56,7 @@ public:
 	XMFLOAT3 GetUp();
 	XMFLOAT3 GetRight();
 	XMFLOAT4X4 GetTransform();
+	XMFLOAT4X4 GetWorld();
 	CGameObject* GetParent() { return (m_pParent); }
 	UINT GetMeshType();
 
@@ -69,11 +70,12 @@ public:
 	void SetPosition(float x, float y, float z);
 	void SetPosition(XMFLOAT3 xmf3Position);
 	void SetTransform(XMFLOAT4X4 xmf4x4Transform) { m_xmf4x4Transform = xmf4x4Transform; }
+	void SetWorld(XMFLOAT4X4 xmf4x4World) { m_xmf4x4World = xmf4x4World; }
 
 	void Rotate(float fPitch = 10.0f, float fYaw = 10.0f, float fRoll = 10.0f);
 	void Rotate(XMFLOAT3* pxmf3Axis, float fAngle);
 
-	void UpdateTransform(XMFLOAT4X4* pxmf4x4Parent = NULL);
+	virtual void UpdateTransform(XMFLOAT4X4* pxmf4x4Parent = NULL);
 	void PrintFrameInfo(CGameObject* pGameObject, CGameObject* pParent);
 	CGameObject* FindFrame(const char* pstrFrameName);
 	virtual void CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList) {}
@@ -82,6 +84,7 @@ public:
 	virtual void ReleaseUploadBuffers();
 
 	virtual void PrepareAnimate() {}
+	virtual void PrepareBoundingBox(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList) {}
 	virtual void Animate(float fTimeElapsed);
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = NULL);
 
@@ -102,6 +105,7 @@ public:
 
 	void PrepareRender();
 	void SetParent(CGameObject* pObject) { m_pParent = pObject; }
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = NULL);
 };
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -138,11 +142,18 @@ public:
 //
 class COrcObject : public CGameObject
 {
+private:
+	CGameObject* pWeapon;
+	CGameObject* pBodyBoundingBox;
+	CGameObject* pWeaponBodyBoundingBox;
+	CGameObject* pWeaponBoundingBox;
 public:
 	COrcObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks);
 	virtual ~COrcObject();
 
 	virtual void Animate(float fTimeElapsed);
+	virtual void UpdateTransform(XMFLOAT4X4* pxmf4x4Parent = NULL);
+	virtual void PrepareBoundingBox(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 };
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

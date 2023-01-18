@@ -98,33 +98,28 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	CModelShader::GetInst()->CreateShaderVariables(pd3dDevice,pd3dCommandList);
 	CModelShader::GetInst()->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 100);
 
-	CModelManager::GetInst()->LoadModel(pd3dDevice,pd3dCommandList, "Object/Angrybot.bin");;
-	CModelManager::GetInst()->LoadModel(pd3dDevice,pd3dCommandList, "Object/Eagle.bin");
-	CModelManager::GetInst()->LoadModel(pd3dDevice,pd3dCommandList, "Object/Lion.bin");
-	CModelManager::GetInst()->LoadModel(pd3dDevice,pd3dCommandList, "Object/SK_FKnight_WeaponB_01.bin");
-
 	CSoundManager::GetInst()->RegisterSound("Sound/mp3/David Bowie - Starman.mp3", false);
 	//CSoundManager::GetInst()->PlaySound("Sound/mp3/David Bowie - Starman.mp3");
 
-	std::unique_ptr<CGoblinObject> m_pObject = std::make_unique<CGoblinObject>(pd3dDevice, pd3dCommandList, 1);
-	m_pObject->SetPosition(XMFLOAT3(0.0f, 0.0f, 0.0f));
+	std::unique_ptr<COrcObject> m_pObject = std::make_unique<COrcObject>(pd3dDevice, pd3dCommandList, 1);
+	m_pObject->SetPosition(XMFLOAT3(5.0f, 2.0f, -13.4f));
 	m_pObject->SetScale(5.0f, 5.0f, 5.0f);
 	m_pObject->Rotate(0.0f, 180.0f, 0.0f);
-	m_pObject->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 2);
+	m_pObject->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 1);
 	m_pObjects.push_back(std::move(m_pObject));
 
-	m_pObject = std::make_unique<CGoblinObject>(pd3dDevice, pd3dCommandList, 1);
+	m_pObject = std::make_unique<COrcObject>(pd3dDevice, pd3dCommandList, 1);
 	m_pObject->SetPosition(XMFLOAT3(-15.0f, 0.0f, 0.0f));
-	m_pObject->SetScale(5.0f, 5.0f, 5.0f);
+	m_pObject->SetScale(2.5f, 2.5f, 2.5f);
 	m_pObject->Rotate(0.0f, 180.0f, 0.0f);
 	m_pObject->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 2);
 	m_pObjects.push_back(std::move(m_pObject));
 
-	m_pObject = std::make_unique<CGoblinObject>(pd3dDevice, pd3dCommandList, 1);
+	m_pObject = std::make_unique<COrcObject>(pd3dDevice, pd3dCommandList, 1);
 	m_pObject->SetPosition(XMFLOAT3(15.0f, 0.0f, 0.0f));
-	m_pObject->SetScale(5.0f, 5.0f, 5.0f);
+	m_pObject->SetScale(3.0f, 3.0f, 3.0f);
 	m_pObject->Rotate(0.0f, 180.0f, 0.0f);
-	m_pObject->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 2);
+	m_pObject->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
 	m_pObjects.push_back(std::move(m_pObject));
 
 	// Light »ý¼º

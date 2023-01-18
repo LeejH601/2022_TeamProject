@@ -1,11 +1,13 @@
 #include "BoundingBoxShader.h"
 #include "..\Object\Object.h"
 
-void CBoundingBoxShader::AddBoundingObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CGameObject* pParent, XMFLOAT3 xmf3AABBCenter, XMFLOAT3 xmf3AABBExtents)
+CGameObject* CBoundingBoxShader::AddBoundingObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CGameObject* pParent, XMFLOAT3 xmf3AABBCenter, XMFLOAT3 xmf3AABBExtents)
 {
 	std::unique_ptr<CBoundingBoxObject> pObject = std::make_unique<CBoundingBoxObject>(pd3dDevice, pd3dCommandList, xmf3AABBCenter, xmf3AABBExtents);
 	pObject->SetParent(pParent);
 	m_pBoundingObjects.push_back(std::move(pObject));
+
+	return m_pBoundingObjects.back().get();
 }
 void CBoundingBoxShader::CreateShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature, UINT nRenderTargets, DXGI_FORMAT* pdxgiRtvFormats, int nPipelineState)
 {

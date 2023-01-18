@@ -133,6 +133,10 @@ XMFLOAT4X4 CGameObject::GetTransform()
 {
 	return m_xmf4x4Transform;
 }
+XMFLOAT4X4 CGameObject::GetWorld()
+{
+	return m_xmf4x4World;
+}
 UINT CGameObject::GetMeshType() 
 { 
 	return((m_pMesh) ? m_pMesh->GetType() : 0x00); 
@@ -223,6 +227,7 @@ void CGameObject::LoadFrameHierarchyFromFile(ID3D12Device* pd3dDevice, ID3D12Gra
 		{
 			std::shared_ptr<CSkinnedMesh> pMesh = std::make_shared<CSkinnedMesh>(pd3dDevice, pd3dCommandList);
 			pMesh->LoadMeshFromFile(pd3dDevice, pd3dCommandList, pInFile);
+
 			SetMesh(pMesh);
 		}
 		else if (!strcmp(pstrToken, "<SkinningInfo>:"))
@@ -231,11 +236,6 @@ void CGameObject::LoadFrameHierarchyFromFile(ID3D12Device* pd3dDevice, ID3D12Gra
 
 			std::shared_ptr<CSkinnedMesh> pSkinnedMesh = std::make_shared<CSkinnedMesh>(pd3dDevice, pd3dCommandList);
 			pSkinnedMesh->LoadSkinInfoFromFile(pd3dDevice, pd3dCommandList, pInFile);
-
-			if (pSkinnedMesh->GetIsBoundLoaded())
-			{
-				CBoundingBoxShader::GetInst()->AddBoundingObject(pd3dDevice, pd3dCommandList, this, pSkinnedMesh->GetBoundingCenter(), pSkinnedMesh->GetBoundingExtent());
-			}
 
 			::ReadStringFromFile(pInFile, pstrToken); //<Mesh>:
 			if (!strcmp(pstrToken, "<Mesh>:")) pSkinnedMesh->LoadMeshFromFile(pd3dDevice, pd3dCommandList, pInFile);
@@ -416,11 +416,6 @@ void CGameObject::FindAndSetSkinnedMesh(CSkinnedMesh** ppSkinnedMeshes, int* pnS
 //
 CBoundingBoxObject::CBoundingBoxObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, XMFLOAT3 xmf3AABBCenter, XMFLOAT3 xmf3AABBExtents)
 {
-	m_nMaterials = 1;
-	m_ppMaterials.resize(m_nMaterials);
-	std::shared_ptr<CMaterial> pMaterial = std::make_shared<CMaterial>();
-	m_ppMaterials[0] = pMaterial;
-
 	m_xmf4x4World = Matrix4x4::Identity();
 	m_xmf4x4Transform = Matrix4x4::Identity();
 
@@ -432,7 +427,16 @@ CBoundingBoxObject::~CBoundingBoxObject()
 }
 void CBoundingBoxObject::PrepareRender()
 {
-	m_xmf4x4Transform = m_pParent->GetTransform();
+}
+void CBoundingBoxObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
+{
+	if (m_pMesh)
+	{
+		UpdateShaderVariables(pd3dCommandList);
+
+		m_pMesh->OnPreRender(pd3dCommandList);
+		m_pMesh->Render(pd3dCommandList, 0);
+	}
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -491,11 +495,13 @@ void CKnightObject::Animate(float fTimeElapsed)
 //
 COrcObject::COrcObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks)
 {
-	CLoadedModelInfo* pKnightModel = CModelManager::GetInst()->GetModelInfo("Object/SK_Orc.bin");;
-	if (!pKnightModel) pKnightModel = CModelManager::GetInst()->LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, "Object/SK_Orc.bin");
+	CLoadedModelInfo* pOrcModel = CModelManager::GetInst()->GetModelInfo("Object/Orc.bin");;
+	if (!pOrcModel) pOrcModel = CModelManager::GetInst()->LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, "Object/Orc.bin");
 
-	SetChild(pKnightModel->m_pModelRootObject, true);
-	m_pSkinnedAnimationController = std::make_unique<CAnimationController>(pd3dDevice, pd3dCommandList, nAnimationTracks, pKnightModel);
+	SetChild(pOrcModel->m_pModelRootObject, true);
+	m_pSkinnedAnimationController = std::make_unique<CAnimationController>(pd3dDevice, pd3dCommandList, nAnimationTracks, pOrcModel);
+	
+	PrepareBoundingBox(pd3dDevice, pd3dCommandList);
 }
 COrcObject::~COrcObject()
 {
@@ -504,15 +510,38 @@ void COrcObject::Animate(float fTimeElapsed)
 {
 	CGameObject::Animate(fTimeElapsed);
 }
+void COrcObject::UpdateTransform(XMFLOAT4X4* pxmf4x4Parent)
+{
+	m_xmf4x4World = (pxmf4x4Parent) ? Matrix4x4::Multiply(m_xmf4x4Transform, *pxmf4x4Parent) : m_xmf4x4Transform;
+
+	if (m_pSibling) m_pSibling->UpdateTransform(pxmf4x4Parent);
+	if (m_pChild) m_pChild->UpdateTransform(&m_xmf4x4World);
+
+	pBodyBoundingBox->SetWorld(m_xmf4x4Transform);
+
+	if (pWeapon)
+	{
+		pWeaponBodyBoundingBox->SetWorld(pWeapon->GetWorld());
+		pWeaponBoundingBox->SetWorld(pWeapon->GetWorld());
+	}
+}
+void COrcObject::PrepareBoundingBox(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	pWeapon = CGameObject::FindFrame("SM_Weapon");
+	
+	pBodyBoundingBox = CBoundingBoxShader::GetInst()->AddBoundingObject(pd3dDevice, pd3dCommandList, this, XMFLOAT3(0.0f, 1.05f, 0.0f), XMFLOAT3(1.2f, 2.0f, 1.2f));
+	pWeaponBodyBoundingBox = CBoundingBoxShader::GetInst()->AddBoundingObject(pd3dDevice, pd3dCommandList, pWeapon, XMFLOAT3(0.0f, 0.0f, 0.32f), XMFLOAT3(0.18f, 0.28f, 0.71f));
+	pWeaponBoundingBox = CBoundingBoxShader::GetInst()->AddBoundingObject(pd3dDevice, pd3dCommandList, pWeapon, XMFLOAT3(0.0f, 0.0f, 0.85f), XMFLOAT3(0.3f, 0.6f, 0.35f));
+}
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 CGoblinObject::CGoblinObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks)
 {
-	CLoadedModelInfo* pKnightModel = CModelManager::GetInst()->GetModelInfo("Object/SK_Goblin.bin");;
-	if (!pKnightModel) pKnightModel = CModelManager::GetInst()->LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, "Object/SK_Goblin.bin");
+	CLoadedModelInfo* pGoblinModel = CModelManager::GetInst()->GetModelInfo("Object/Goblin.bin");;
+	if (!pGoblinModel) pGoblinModel = CModelManager::GetInst()->LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, "Object/Goblin.bin");
 
-	SetChild(pKnightModel->m_pModelRootObject, true);
-	m_pSkinnedAnimationController = std::make_unique<CAnimationController>(pd3dDevice, pd3dCommandList, nAnimationTracks, pKnightModel);
+	SetChild(pGoblinModel->m_pModelRootObject, true);
+	m_pSkinnedAnimationController = std::make_unique<CAnimationController>(pd3dDevice, pd3dCommandList, nAnimationTracks, pGoblinModel);
 }
 CGoblinObject::~CGoblinObject()
 {

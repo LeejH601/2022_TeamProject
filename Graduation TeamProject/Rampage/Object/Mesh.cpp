@@ -1,5 +1,6 @@
 #include "Mesh.h"
 #include "Object.h"
+#include "..\Shader\BoundingBoxShader.h"
 
 // Mesh »ý¼ºÀÚ
 CMesh::~CMesh()
@@ -515,7 +516,6 @@ void CSkinnedMesh::LoadSkinInfoFromFile(ID3D12Device* pd3dDevice, ID3D12Graphics
 		}
 		else if (!strcmp(pstrToken, "<Bounds>:"))
 		{
-			IsBoundLoaded = true;
 			nReads = (UINT)::fread(&m_xmf3AABBCenter, sizeof(XMFLOAT3), 1, pInFile);
 			nReads = (UINT)::fread(&m_xmf3AABBExtents, sizeof(XMFLOAT3), 1, pInFile);
 		}

@@ -17,7 +17,6 @@ protected:
 	UINT m_nType = 0x00;
 	UINT m_nVertices = 0;
 
-	bool IsBoundLoaded = false;
 	XMFLOAT3 m_xmf3AABBCenter = XMFLOAT3(0.0f, 0.0f, 0.0f);
 	XMFLOAT3 m_xmf3AABBExtents = XMFLOAT3(0.0f, 0.0f, 0.0f);
 
@@ -61,7 +60,6 @@ public:
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList);
 
 	UINT GetType() { return(m_nType); }
-	bool GetIsBoundLoaded() { return (IsBoundLoaded); }
 	XMFLOAT3 GetBoundingCenter() { return(m_xmf3AABBCenter); }
 	XMFLOAT3 GetBoundingExtent() { return(m_xmf3AABBExtents); }
 };
