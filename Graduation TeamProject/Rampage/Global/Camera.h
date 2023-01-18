@@ -10,6 +10,30 @@ struct VS_CB_CAMERA_INFO
 	XMFLOAT4X4 m_xmf4x4InverseProjection;
 	XMFLOAT3 m_xmf3CameraPosition;
 };
+
+class CPath
+{
+public:
+	CPath() {};
+	~CPath() {};
+
+	CPath(const CPath& path);
+	CPath& operator=(const CPath& path);
+
+	void Reset();
+
+	std::vector<XMFLOAT3> m_vPaths;
+	float m_ft = 0.0f;
+	int m_iIndex = 0;
+	bool m_bPathEnd = false;
+	float m_fDuration = 10.0f;
+
+	XMFLOAT3 m_xmf3OriginOffset = XMFLOAT3(0.f, 0.f, 0.f);
+	XMFLOAT3 m_xmf3Offset = XMFLOAT3(0.f, 0.f, 0.f);
+};
+
+
+
 class CCamera
 {
 protected:
@@ -36,6 +60,9 @@ protected:
 
 	ComPtr<ID3D12Resource> m_pd3dcbCamera = NULL;
 	VS_CB_CAMERA_INFO* m_pcbMappedCamera = NULL;
+
+	std::unique_ptr<CPath> m_ShakePath;
+
 public:
 	CCamera();
 	virtual ~CCamera();
@@ -74,16 +101,30 @@ public:
 	D3D12_VIEWPORT GetViewport() { return(m_d3dViewport); }
 	D3D12_RECT GetScissorRect() { return(m_d3dScissorRect); }
 
+	CPath* GetPath() { return m_ShakePath.get(); };
+
 	virtual void SetViewportsAndScissorRects(ID3D12GraphicsCommandList* pd3dCommandList);
 
 	virtual void CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	virtual void ReleaseShaderVariables();
 	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList);
 
-	virtual void Move(const XMFLOAT3& xmf3Shift) { m_xmf3Position.x += xmf3Shift.x; m_xmf3Position.y += xmf3Shift.y; m_xmf3Position.z += xmf3Shift.z; }
+	virtual void Move(const XMFLOAT3& xmf3Shift) { m_xmf3Position.x += xmf3Shift.x; m_xmf3Position.y += xmf3Shift.y; m_xmf3Position.z += xmf3Shift.z; m_ShakePath->m_xmf3OriginOffset = m_xmf3Position; }
 	virtual void Rotate(float fPitch = 0.0f, float fYaw = 0.0f, float fRoll = 0.0f) { }
 	virtual void Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed) { }
 	virtual void SetLookAt(XMFLOAT3& xmf3LookAt);
+};
+
+class CCameraMovementManager
+{
+public:
+	CCameraMovementManager() {};
+	~CCameraMovementManager() {};
+protected:
+	float m_fMagnitude = 1.0f;
+	std::uniform_real_distribution<float> urd{ -1.0f, 1.0f };
+public:
+	void ShaketoNextPostion(CCamera* camera, float fElapsedTime);
 };
 
 class CFirstPersonCamera : public CCamera

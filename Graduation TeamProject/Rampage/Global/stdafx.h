@@ -33,6 +33,7 @@
 //--------------------------
 #include <fstream>
 #include <vector>
+#include <random>
 #include "..\ImGui\imgui.h"
 #include "..\ImGui\imgui_impl_dx12.h"
 #include "..\ImGui\imgui_impl_win32.h"
@@ -83,8 +84,12 @@ public:\
 		return &m_pInst;\
 	}
 
+class CCameraMovementManager;
 extern UINT	gnCbvSrvDescriptorIncrementSize;
 extern UINT gnRtvDescriptorIncrementSize;
+extern std::default_random_engine dre;
+extern CCameraMovementManager CMManager;
+
 
 extern int ReadIntegerFromFile(FILE* pInFile);
 extern float ReadFloatFromFile(FILE* pInFile);

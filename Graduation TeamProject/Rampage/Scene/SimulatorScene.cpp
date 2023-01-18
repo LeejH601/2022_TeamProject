@@ -5,6 +5,7 @@
 #include "..\Shader\ModelShader.h"
 #include "..\Shader\ModelShader.h"
 #include "..\Sound\SoundManager.h"
+#include "..\Global\Camera.h"
 
 void CSimulatorScene::OnPrepareRender(ID3D12GraphicsCommandList* pd3dCommandList)
 {

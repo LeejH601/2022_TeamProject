@@ -339,6 +339,8 @@ void CImGuiManager::OnPrepareRender(ID3D12GraphicsCommandList* pd3dCommandList, 
     /*if (pCamera)
         pCamera->OnPrepareRender(pd3dCommandList);*/
     m_pCamera->OnPrepareRender(pd3dCommandList);
+    CMManager.ShaketoNextPostion(m_pCamera.get(), fTimeElapsed);
+    m_pCamera->RegenerateViewMatrix();
 
     CSimulatorScene::GetInst()->Render(pd3dCommandList, fTimeElapsed);
 

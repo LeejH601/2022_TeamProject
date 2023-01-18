@@ -5,6 +5,7 @@
 class CScene;
 class CCamera;
 class CShader;
+class CCameraMovementManager;
 
 struct CB_Parallax_Info
 {
@@ -63,6 +64,7 @@ private:
 
 	std::unique_ptr<CScene> m_pScene = NULL;
 	std::unique_ptr<CCamera> m_pCamera = NULL;
+
 
 	CGameTimer					m_GameTimer;
 	POINT						m_ptOldCursorPos;

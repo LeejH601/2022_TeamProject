@@ -16,6 +16,8 @@ CCamera::CCamera()
 	m_xmf3Offset = XMFLOAT3(0.0f, 0.0f, 0.0f);
 	m_fTimeLag = 0.0f;
 	m_xmf3LookAtWorld = XMFLOAT3(0.0f, 0.0f, 0.0f);
+	m_ShakePath = std::make_unique<CPath>();
+	m_ShakePath->m_xmf3OriginOffset = m_xmf3Position;
 }
 CCamera::~CCamera()
 {
@@ -145,4 +147,96 @@ void CFirstPersonCamera::Rotate(float fPitch, float fYaw, float fRoll)
 		m_xmf3Right = Vector3::TransformNormal(m_xmf3Right, xmmtxRotate);
 	}
 
+}
+
+CPath::CPath(const CPath& path)
+{
+	m_vPaths.resize(path.m_vPaths.size());
+	std::copy(path.m_vPaths.begin(), path.m_vPaths.end(), m_vPaths.begin());
+}
+
+CPath& CPath::operator=(const CPath& path)
+{
+	if (this != &path) {
+		if (m_vPaths.data())
+			m_vPaths.clear();
+
+		m_vPaths.resize(path.m_vPaths.size());
+		std::copy(path.m_vPaths.begin(), path.m_vPaths.end(), m_vPaths.begin());
+	}
+
+	return *this;
+}
+
+void CPath::Reset()
+{
+	m_ft = 0.0f;
+	m_iIndex = 0;
+	m_bPathEnd = false;
+}
+
+void CCameraMovementManager::ShaketoNextPostion(CCamera* camera, float fElapsedTime)
+{
+	/*CPath* path = camera->GetPath();
+
+	if (path->m_bPathEnd || path->m_vPaths.size() == 0)
+		return;
+
+	XMFLOAT3& SeekPos = path->m_vPaths[path->m_iIndex];
+	XMFLOAT3 Dir = Vector3::Normalize(Vector3::Subtract(SeekPos, path->m_xmf3Offset));
+
+	float speed = .5f;
+
+	XMFLOAT3 NextDistance = Vector3::ScalarProduct(Dir, fElapsedTime * speed, false);
+
+	XMFLOAT3 NextPos = Vector3::Add(path->m_xmf3Offset, NextDistance);
+
+	float length = Vector3::Length(Vector3::Subtract(SeekPos, NextPos));
+
+	if (length <= 0.01f) {
+		path->m_iIndex++;
+		if (path->m_iIndex >= path->m_vPaths.size()) {
+			path->m_iIndex = 0;
+			path->m_bPathEnd = true;
+		}
+		NextPos = SeekPos;
+		NextDistance = XMFLOAT3(0.f, 0.f, 0.f);
+	}
+
+	TCHAR pstrDebug[256] = { 0 };
+	_stprintf_s(pstrDebug, 256, _T("%f, %f, %f \n"), NextPos.x, NextPos.y, NextPos.z);
+	OutputDebugString(pstrDebug);
+
+	path->m_xmf3Offset = NextPos;
+	camera->SetOffset(Vector3::Add(camera->GetOffset(), NextDistance));
+
+	_stprintf_s(pstrDebug, 256, _T("%f, %f, %f \n"), camera->GetOffset().x, camera->GetOffset().y, camera->GetOffset().z);
+	OutputDebugString(pstrDebug);*/
+
+
+	CPath* path = camera->GetPath();
+	if (path->m_fDuration > path->m_ft) {
+		path->m_ft += fElapsedTime;
+
+		XMFLOAT3 CameraDir = camera->GetRightVector();
+
+		float ShakeConstant = urd(dre);
+		float RotateConstant = urd(dre);
+		RotateConstant *= XM_PI;
+
+		CameraDir = Vector3::ScalarProduct(CameraDir, ShakeConstant * m_fMagnitude, false);
+		XMMATRIX RotateMatrix = XMMatrixRotationAxis(XMLoadFloat3(&camera->GetLookVector()), RotateConstant);
+
+		XMFLOAT3 ShakeOffset; XMStoreFloat3(&ShakeOffset, XMVector3TransformCoord(XMLoadFloat3(&CameraDir), RotateMatrix));
+		/*ShakeOffset.x = urd(dre);
+		ShakeOffset.y = urd(dre);
+		ShakeOffset.z = 0.0f;
+		ShakeOffset = Vector3::ScalarProduct(ShakeOffset, m_fMagnitude, false);
+		ShakeOffset = Vector3::Add(path->m_xmf3OriginOffset, ShakeOffset);*/
+
+		camera->SetPosition(Vector3::Add(path->m_xmf3OriginOffset, ShakeOffset));
+	}
+	else {
+		camera->SetPosition(path->m_xmf3OriginOffset);
+	}
 }

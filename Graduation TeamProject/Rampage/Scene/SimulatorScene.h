@@ -1,4 +1,5 @@
 #pragma once
+#include "..\Global\stdafx.h"
 #include "Scene.h"
 #include "..\Object\Object.h"
 #include "..\Object\Light.h"

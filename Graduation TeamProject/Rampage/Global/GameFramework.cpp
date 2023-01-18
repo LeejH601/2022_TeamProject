@@ -437,7 +437,7 @@ void CGameFramework::AnimateObjects()
 	// Object들의 애니메이션을 수행한다.
 	m_pScene->AnimateObjects(m_GameTimer.GetFrameTimeElapsed());
 	CSimulatorScene::GetInst()->AnimateObjects(m_GameTimer.GetFrameTimeElapsed());
-
+	CMManager.ShaketoNextPostion(m_pCamera.get(), m_GameTimer.GetFrameTimeElapsed());
 }
 
 void CGameFramework::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
