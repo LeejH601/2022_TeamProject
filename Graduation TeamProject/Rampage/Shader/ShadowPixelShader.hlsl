@@ -29,17 +29,24 @@ cbuffer cbCameraInfo : register(b1)
 	matrix gmtxProjection : packoffset(c4);
 	matrix gmtxInverseProjection : packoffset(c8);
 	float3 gf3CameraPosition : packoffset(c12);
-	float3 gf3CameraDirection : packoffset(c16);
+	float3 gf3CameraDirection : packoffset(c13);
 };
 
-VS_TERRAIN_OUTPUT VSTerrain(VS_TERRAIN_INPUT input)
+struct VS_PLANAR_SHADOW_OUTPUT
 {
-	VS_TERRAIN_OUTPUT output;
+	float4 position : SV_POSITION;
+};
 
-	output.position = mul(mul(mul(float4(input.position, 1.0f), gmtxGameObject), gmtxView), gmtxProjection);
-	output.color = input.color;
-	output.uv0 = input.uv0;
-	output.uv1 = input.uv1;
+VS_PLANAR_SHADOW_OUTPUT VSPlanarShadow(VS_LIGHTING_INPUT input)
+{
+	VS_PLANAR_SHADOW_OUTPUT output;
+
+	output.position = mul(mul(mul(float4(input.position, 1.0f), gmtxWorld), gmtxView), gmtxProjection);
 
 	return(output);
+}
+
+float4 PSPlanarShadow(VS_PLANAR_SHADOW_OUTPUT input) : SV_TARGET
+{
+	return(float4(0.25f, 0.25f, 0.25f, 1.0f));
 }

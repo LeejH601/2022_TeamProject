@@ -13,6 +13,10 @@ CGameObject::CGameObject()
 }
 CGameObject::CGameObject(int nMaterials)
 {
+	m_xmf4x4World = Matrix4x4::Identity();
+	m_xmf4x4Transform = Matrix4x4::Identity();
+	m_xmf4x4Texture = Matrix4x4::Identity();
+
 	m_nMaterials = nMaterials;
 	if (m_nMaterials > 0)
 	{
@@ -88,7 +92,7 @@ void CGameObject::Animate(float fTimeElapsed)
 	if (m_pSibling) m_pSibling->Animate(fTimeElapsed);
 	if (m_pChild) m_pChild->Animate(fTimeElapsed);
 }
-void CGameObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
+void CGameObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, bool bShadow)
 {
 	if (m_pSkinnedAnimationController) m_pSkinnedAnimationController->UpdateShaderVariables(pd3dCommandList);
 
@@ -98,7 +102,7 @@ void CGameObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pC
 		UpdateShaderVariables(pd3dCommandList);
 		for (int i = 0; i < m_nMaterials; ++i)
 		{
-			if (m_ppMaterials[i])
+			if (m_ppMaterials[i] && !bShadow)
 			{
 				if (m_ppMaterials[i]->m_pShader) m_ppMaterials[0]->m_pShader->Render(pd3dCommandList, 0);
 				m_ppMaterials[i]->UpdateShaderVariables(pd3dCommandList);
@@ -109,9 +113,12 @@ void CGameObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pC
 		}
 	}
 
-	if (m_pChild) m_pChild->Render(pd3dCommandList, pCamera);
-	if (m_pSibling) m_pSibling->Render(pd3dCommandList, pCamera);
+	if (m_pChild) m_pChild->Render(pd3dCommandList, pCamera, bShadow);
+	if (m_pSibling) m_pSibling->Render(pd3dCommandList, pCamera, bShadow);
 }
+
+
+
 XMFLOAT3 CGameObject::GetPosition()
 {
 	return XMFLOAT3(m_xmf4x4Transform._41, m_xmf4x4Transform._42, m_xmf4x4Transform._43);

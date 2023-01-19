@@ -6,21 +6,14 @@
 #define MATERIAL_DETAIL_ALBEDO_MAP	0x20
 #define MATERIAL_DETAIL_NORMAL_MAP	0x40
 
+#include "Light.hlsl"
+
 cbuffer cbGameObjectInfo : register(b0)
 {
 	matrix gmtxGameObject : packoffset(c0);
 	matrix gmtxTexture : packoffset(c4);
 	uint gnTexturesMask : packoffset(c8);
 }
-
-cbuffer cbCameraInfo : register(b1)
-{
-	matrix gmtxView : packoffset(c0);
-	matrix gmtxProjection : packoffset(c4);
-	matrix gmtxInverseProjection : packoffset(c8);
-	float3 gf3CameraPosition : packoffset(c12);
-	float3 gf3CameraDirection : packoffset(c13);
-};
 
 Texture2D gtxMappedTexture[7] : register(t0);
 SamplerState gSamplerState : register(s0);
@@ -34,8 +27,6 @@ struct VS_OUTPUT
 	float3 bitangentW : BITANGENT;
 	float2 uv : TEXCOORD;
 };
-
-#include "Light.hlsl"
 
 struct PS_MULTIPLE_RENDER_TARGETS_OUTPUT
 {
@@ -60,7 +51,7 @@ PS_MULTIPLE_RENDER_TARGETS_OUTPUT PS_Player(VS_OUTPUT input) : SV_TARGET
 	if (gnTexturesMask & MATERIAL_METALLIC_MAP) cMetallicColor = gtxMappedTexture[3].Sample(gSamplerState, input.uv);
 	if (gnTexturesMask & MATERIAL_EMISSION_MAP) cEmissionColor = gtxMappedTexture[4].Sample(gSamplerState, input.uv);
 
-
+	float4 uvs[MAX_LIGHTS];
 	float3 N = normalize(input.normalW);
 	float3 T = normalize(input.tangentW - dot(input.tangentW, N) * N);
 	float3 B = cross(N, T);
@@ -72,7 +63,7 @@ PS_MULTIPLE_RENDER_TARGETS_OUTPUT PS_Player(VS_OUTPUT input) : SV_TARGET
 	float4 cColor = cAlbedoColor + cSpecularColor + cEmissionColor;
 	//float3 normalW = normalize(input.normalW);
 	float3 normalW = mul(normal, TBN);
-	float4 cIllumination = Lighting(input.positionW, normalW);
+	float4 cIllumination = Lighting(input.positionW, normalW, false, uvs);
 	cColor = lerp(cColor, cIllumination, 0.2f);
 
 	output.f4Scene = cColor;

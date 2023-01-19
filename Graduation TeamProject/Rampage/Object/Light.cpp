@@ -22,6 +22,7 @@ void CLightManager::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommand
 
 	::memcpy(&m_pcbMappedLights->m_xmf4GlobalAmbient, &m_xmf4GlobalAmbient, sizeof(XMFLOAT4));
 	::memcpy(&m_pcbMappedLights->m_nLights, &LightN, sizeof(int));
+	::memcpy(&m_pcbMappedLights->m_pToLightSpaces, &m_pToLightSpaces, sizeof(TOLIGHTSPACES));
 	D3D12_GPU_VIRTUAL_ADDRESS d3dcbLightsGpuVirtualAddress = m_pd3dcbLights.Get()->GetGPUVirtualAddress();
 	pd3dCommandList->SetGraphicsRootConstantBufferView(ROOTSIGNATUREINDEX_LIGHT, d3dcbLightsGpuVirtualAddress); //Lights
 }
@@ -38,4 +39,21 @@ void CLightManager::ReleaseLightVariables()
 void CLightManager::Add_Light(LIGHT sLight)
 {
 	vLights.emplace_back(sLight);
+}
+
+LIGHT CLightManager::Get_Light(int index)
+{
+	if (index >= vLights.size())
+		return LIGHT();
+	return vLights[index];
+}
+
+int CLightManager::Get_LightSize()
+{
+	return vLights.size();
+}
+
+void CLightManager::Set_LightSpace(TOLIGHTSPACES& ToLightSpaces)
+{
+	m_pToLightSpaces = ToLightSpaces;
 }

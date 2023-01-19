@@ -1,7 +1,7 @@
 #pragma once
 #include "..\Global\stdafx.h"
 
-#define MAX_LIGHTS			16 
+
 
 enum LIGHT_TYPE
 {
@@ -13,6 +13,7 @@ enum LIGHT_TYPE
 
 struct LIGHT
 {
+	LIGHT() {};
 	// DIRECTIONAL_LIGHT
 	LIGHT(LIGHT_TYPE eType, float fRange, XMFLOAT4 xmf4Ambient, XMFLOAT4 xmf4Diffuse, XMFLOAT4 xmf4Specular, XMFLOAT3 xmf3Position, XMFLOAT3 xmf3Directional, bool bEnable = true)
 	{
@@ -44,13 +45,24 @@ struct LIGHT
 	float					padding;
 };
 
+struct TOOBJECTSPACEINFO
+{
+	XMFLOAT4X4						m_xmf4x4ToTexture;
+	XMFLOAT4						m_xmf4Position;
+};
+
+struct TOLIGHTSPACES
+{
+	TOOBJECTSPACEINFO				m_pToLightSpaces[MAX_LIGHTS];
+};
+
 struct LIGHTS
 {
 	LIGHT					m_pLights[MAX_LIGHTS];
 	XMFLOAT4				m_xmf4GlobalAmbient;
 	int						m_nLights;
+	TOOBJECTSPACEINFO		m_pToLightSpaces[MAX_LIGHTS];
 };
-
 
 
 class CLightManager
@@ -69,10 +81,18 @@ public:
 
 public:
 	void Add_Light(LIGHT sLight);
+	LIGHT Get_Light(int index);
+	int	Get_LightSize();
+	
+public:
+	void Set_LightSpace(TOLIGHTSPACES& ToLightSpaces);
+
 private:
 	std::vector<LIGHT> vLights;
 
 	XMFLOAT4 m_xmf4GlobalAmbient = XMFLOAT4(0.4f, 0.4f, 0.4f, 1.5f);
+
+	TOLIGHTSPACES m_pToLightSpaces;
 
 	ComPtr<ID3D12Resource> m_pd3dcbLights = NULL;
 	LIGHTS* m_pcbMappedLights = NULL;

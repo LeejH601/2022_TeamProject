@@ -104,6 +104,9 @@
     <ClCompile Include="Shader\TerrainShader.cpp">
       <Filter>Shader</Filter>
     </ClCompile>
+    <ClCompile Include="Shader\ShadowShader.cpp">
+      <Filter>Shader</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Global\stdafx.h">
@@ -187,12 +190,20 @@
     <ClInclude Include="Shader\TerrainShader.h">
       <Filter>Shader</Filter>
     </ClInclude>
+    <ClInclude Include="Shader\ShadowShader.h">
+      <Filter>Shader</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shader\PlayerPixelShader.hlsl" />
     <FxCompile Include="Shader\PlayerVertexShader.hlsl" />
     <FxCompile Include="Shader\Light.hlsl" />
-    <FxCompile Include="TerrainPixelShader.hlsl" />
-    <FxCompile Include="TerrainVertexShader.hlsl" />
+    <FxCompile Include="Shader\LightingPixelShader.hlsl" />
+    <FxCompile Include="Shader\LightingVertexShader.hlsl" />
+    <FxCompile Include="Shader\ShadowMapPixelShader.hlsl" />
+    <FxCompile Include="Shader\ShadowMapVertexShader.hlsl" />
+    <FxCompile Include="Shader\DepthWritePixelShader.hlsl" />
+    <FxCompile Include="Shader\TerrainPixelShader.hlsl" />
+    <FxCompile Include="Shader\TerrainVertexShader.hlsl" />
   </ItemGroup>
 </Project>

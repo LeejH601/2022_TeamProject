@@ -11,7 +11,7 @@ cbuffer cbCameraInfo : register(b1)
 	matrix gmtxProjection : packoffset(c4);
 	matrix gmtxInverseProjection : packoffset(c8);
 	float3 gf3CameraPosition : packoffset(c12);
-	float3 gf3CameraDirection : packoffset(c13);
+	float3 gf3CameraDirection : packoffset(c16);
 };
 
 #define MAX_VERTEX_INFLUENCES			4

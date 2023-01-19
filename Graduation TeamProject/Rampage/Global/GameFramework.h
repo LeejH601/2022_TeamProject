@@ -9,7 +9,9 @@ class CTerrainShader;
 class CGameObject;
 class CHeightMapTerrain;
 class CTexture;
-
+class CDepthRenderShader;
+class CShadowMapShader;
+class CPlaneShader;
 class CGameFramework
 {
 private:
@@ -61,10 +63,13 @@ private:
 	std::unique_ptr<CScene> m_pScene = NULL;
 	std::unique_ptr<CCamera> m_pCamera = NULL;
 
-	std::vector<std::unique_ptr<CGameObject>> m_pObjects;
+	std::vector<std::shared_ptr<CGameObject>> m_pObjects;
 
 	std::unique_ptr<CTerrainShader> m_pTerrainShader = NULL;
 	std::unique_ptr<CHeightMapTerrain> m_pTerrain = NULL;
+
+	std::unique_ptr<CDepthRenderShader> m_pDepthRenderShader = NULL;
+	std::unique_ptr<CShadowMapShader> m_pShadowShader = NULL;
 
 	CGameTimer					m_GameTimer;
 	POINT						m_ptOldCursorPos;

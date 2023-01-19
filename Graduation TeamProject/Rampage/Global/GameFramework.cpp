@@ -9,6 +9,7 @@
 #include "..\Object\Light.h"
 #include "..\Object\Terrain.h"
 #include "..\Object\Texture.h"
+#include "..\Shader\ShadowShader.h"
 
 CGameFramework::CGameFramework()
 {
@@ -281,7 +282,8 @@ void CGameFramework::BuildObjects()
 	CLightManager::GetInst()->CreateLightVariables(m_pd3dDevice.Get(), m_pd3dCommandList.Get());
 
 	// Light 추가
-	CLightManager::GetInst()->Add_Light(LIGHT(LIGHT_TYPE::POINT_LIGHT, 500.f, XMFLOAT4(0.5f, 0.0f, 0.0f, 1.0f), XMFLOAT4(1.f, 0.f, 0.f, 1.0f), XMFLOAT4(0.5f, 0.5f, 0.5f, 0.5f), XMFLOAT3(0.F, 30.0f, 4.f), XMFLOAT3(0.0f, 0.f, 0.0f), XMFLOAT3(1.0f, 0.00001f, 0.0001f)));
+	//CLightManager::GetInst()->Add_Light(LIGHT(LIGHT_TYPE::POINT_LIGHT, 500.f, XMFLOAT4(0.5f, 0.0f, 0.0f, 1.0f), XMFLOAT4(1.f, 0.f, 0.f, 1.0f), XMFLOAT4(0.5f, 0.5f, 0.5f, 0.5f), XMFLOAT3(0.F, 30.0f, 4.f), XMFLOAT3(0.0f, 0.f, 0.0f), XMFLOAT3(1.0f, 0.00001f, 0.0001f)));
+	CLightManager::GetInst()->Add_Light(LIGHT(LIGHT_TYPE::DIRECTIONAL_LIGHT, 12000.0f, XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f), XMFLOAT4(1.f, 0.f, 0.f, 1.0f), XMFLOAT4(0.3f, 0.3f, 0.3f, 0.0f), XMFLOAT3(0.F, 512.0f, 4.f), XMFLOAT3(+1.0f, -1.0f, 0.0f)));
 
 	// Terrain Shader 생성
 	m_pTerrainShader = std::make_unique<CTerrainShader>();
@@ -294,7 +296,18 @@ void CGameFramework::BuildObjects()
 	XMFLOAT4 xmf4Color(0.0f, 0.5f, 0.0f, 0.0f);
 	m_pTerrain = std::make_unique<CHeightMapTerrain>(m_pd3dDevice.Get(), m_pd3dCommandList.Get(), m_pScene->GetGraphicsRootSignature(), _T("Image/HeightMap.raw"), 257, 257, 257, 257, xmf3Scale, xmf4Color, m_pTerrainShader.get());
 	m_pTerrain->SetPosition(XMFLOAT3(-800.f, -750.f, -800.f));
-	//m_pTerrain->SetPosition(XMFLOAT3(0.f, 0.f, 0.f));
+
+
+	// Shadow 생성
+	m_pDepthRenderShader = std::make_unique<CDepthRenderShader>();
+	DXGI_FORMAT pdxgiRtvFormats[1] = { DXGI_FORMAT_R32_FLOAT };
+	m_pDepthRenderShader->CreateShader(m_pd3dDevice.Get(), m_pScene->GetGraphicsRootSignature(), D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, 1, pdxgiRtvFormats, DXGI_FORMAT_D32_FLOAT, 0);
+	m_pDepthRenderShader->BuildObjects(m_pd3dDevice.Get(), m_pd3dCommandList.Get(), NULL);
+
+	m_pShadowShader = std::make_unique <CShadowMapShader>();
+	m_pShadowShader->CreateShader(m_pd3dDevice.Get(), m_pScene->GetGraphicsRootSignature(), D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE,  1, NULL, DXGI_FORMAT_D32_FLOAT, 0);
+	m_pShadowShader->BuildObjects(m_pd3dDevice.Get(), m_pd3dCommandList.Get(), m_pDepthRenderShader->GetDepthTexture());
+
 }
 void CGameFramework::ReleaseObjects()
 {
@@ -537,13 +550,15 @@ void CGameFramework::FrameAdvance()
 	::SynchronizeResourceTransition(m_pd3dCommandList.Get(), m_ppd3dRenderTargetBuffers[m_nSwapChainBufferIndex].Get(), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
 
 	if (m_pScene) m_pScene->OnPrepareRender(m_pd3dCommandList.Get());
+	CLightManager::GetInst()->OnPrepareRender(m_pd3dCommandList.Get());
+	m_pDepthRenderShader->PrepareShadowMap(m_pd3dCommandList.Get(), m_pObjects, m_GameTimer.GetFrameTimeElapsed());
 
 	m_pd3dCommandList->ClearDepthStencilView(m_d3dDsvDescriptorCPUHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
 
 	OnPrepareRenderTarget();
 	m_pScene->OnPrepareRender(m_pd3dCommandList.Get());
 	m_pCamera->OnPrepareRender(m_pd3dCommandList.Get());
-	CLightManager::GetInst()->OnPrepareRender(m_pd3dCommandList.Get());
+	
 
 	m_pScene->Render(m_pd3dCommandList.Get(), m_pCamera.get());
 
@@ -558,6 +573,10 @@ void CGameFramework::FrameAdvance()
 
 	m_pTerrainShader->Render(m_pd3dCommandList.Get(), 0);
 	m_pTerrain->Render(m_pd3dCommandList.Get());
+
+	m_pDepthRenderShader->UpdateShaderVariables(m_pd3dCommandList.Get());
+	if (m_pShadowShader) m_pShadowShader->Render(m_pd3dCommandList.Get(), m_pCamera.get(), m_pObjects); // 여기서 오류
+
 
 	CImGuiManager::GetInst()->Render(m_pd3dCommandList.Get());
 
