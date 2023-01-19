@@ -100,7 +100,7 @@ class CSkinnedMesh : public CTexturedModelingMesh
 {
 public:
 	int	m_nBonesPerVertex = 4;
-	
+
 	std::vector<XMINT4> m_pxmn4BoneIndices;
 	std::vector<XMFLOAT4> m_pxmf4BoneWeights;
 
