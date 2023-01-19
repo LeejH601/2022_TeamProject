@@ -19,8 +19,6 @@ struct VS_TERRAIN_OUTPUT
 	float3 tangentW : TANGENT;
 };
 
-
-
 cbuffer cbGameObjectInfo : register(b0)
 {
 	matrix gmtxGameObject : packoffset(c0);

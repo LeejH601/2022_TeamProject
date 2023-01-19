@@ -241,11 +241,12 @@ void CGameFramework::BuildObjects()
 	// CScene 持失(RootSignature 持失)
 	m_pScene = std::make_unique<CMainTMPScene>();
 	m_pScene->BuildObjects(m_pd3dDevice.Get(), m_pd3dCommandList.Get());
-
+	
 	CSimulatorScene::GetInst()->BuildObjects(m_pd3dDevice.Get(), m_pd3dCommandList.Get());
 
 	m_pCamera = std::make_unique<CFirstPersonCamera>();
 	m_pCamera->Init(m_pd3dDevice.Get(), m_pd3dCommandList.Get());
+
 }
 void CGameFramework::ReleaseObjects()
 {

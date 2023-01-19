@@ -1,5 +1,6 @@
 #include "Mesh.h"
 #include "Object.h"
+#include "..\Shader\BoundingBoxShader.h"
 
 // Mesh 생성자
 CMesh::~CMesh()
@@ -40,7 +41,6 @@ void CMesh::Render(ID3D12GraphicsCommandList* pd3dCommandList, UINT nSubset)
 		pd3dCommandList->DrawInstanced(m_nVertices, 1, m_nOffset, 0);
 	}
 }
-
 void CMesh::Render(ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	if (!m_ppd3dIndexBuffers.empty())
@@ -1004,5 +1004,79 @@ CSplatGridMesh::CSplatGridMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 }
 
 CSplatGridMesh::~CSplatGridMesh()
+{
+}
+//-------------------------------------------------------------------
+CBoundingBoxMesh::CBoundingBoxMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, XMFLOAT3 xmf3AABBCenter, XMFLOAT3 xmf3AABBExtents)
+{
+	//BoundingBox는 직육면체이다. 
+	m_nVertices = 8;
+	m_nOffset = 0;
+	m_nSlot = 0;
+	m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+	float fx = xmf3AABBExtents.x * 0.5f, fy = xmf3AABBExtents.y * 0.5f, fz = xmf3AABBExtents.z * 0.5f;
+
+	//정점 버퍼는 직육면체의 꼭지점 8개에 대한 정점 데이터를 가진다.
+	m_pxmf3Positions.push_back(Vector3::Add(xmf3AABBCenter, XMFLOAT3(-fx, +fy, -fz)));
+	m_pxmf3Positions.push_back(Vector3::Add(xmf3AABBCenter, XMFLOAT3(+fx, +fy, -fz)));
+	m_pxmf3Positions.push_back(Vector3::Add(xmf3AABBCenter, XMFLOAT3(+fx, +fy, +fz)));
+	m_pxmf3Positions.push_back(Vector3::Add(xmf3AABBCenter, XMFLOAT3(-fx, +fy, +fz)));
+	m_pxmf3Positions.push_back(Vector3::Add(xmf3AABBCenter, XMFLOAT3(-fx, -fy, -fz)));
+	m_pxmf3Positions.push_back(Vector3::Add(xmf3AABBCenter, XMFLOAT3(+fx, -fy, -fz)));
+	m_pxmf3Positions.push_back(Vector3::Add(xmf3AABBCenter, XMFLOAT3(+fx, -fy, +fz)));
+	m_pxmf3Positions.push_back(Vector3::Add(xmf3AABBCenter, XMFLOAT3(-fx, -fy, +fz)));
+
+	m_pd3dPositionBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, m_pxmf3Positions.data(), sizeof(XMFLOAT3) * m_nVertices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dPositionUploadBuffer);
+	
+	m_nVertexBufferViews = 1;
+	m_pd3dVertexBufferViews.resize(m_nVertexBufferViews);
+
+	m_pd3dVertexBufferViews[0].BufferLocation = m_pd3dPositionBuffer->GetGPUVirtualAddress();
+	m_pd3dVertexBufferViews[0].StrideInBytes = sizeof(XMFLOAT3);
+	m_pd3dVertexBufferViews[0].SizeInBytes = sizeof(XMFLOAT3) * m_nVertices;
+
+	m_nSubMeshes = 1;
+	m_nIndices = 36;
+	m_pnSubSetIndices.resize(m_nSubMeshes);
+	m_ppnSubSetIndices.resize(m_nSubMeshes);
+
+	m_ppd3dIndexBuffers.resize(m_nSubMeshes);
+	m_ppd3dIndexUploadBuffers.resize(m_nSubMeshes);
+	m_pd3dIndexBufferViews.resize(m_nSubMeshes);
+
+	m_pnSubSetIndices[0] = m_nIndices;
+
+	//ⓐ 앞면(Front) 사각형의 위쪽 삼각형
+	m_ppnSubSetIndices[0].push_back(3); m_ppnSubSetIndices[0].push_back(1); m_ppnSubSetIndices[0].push_back(0);
+	//ⓑ 앞면(Front) 사각형의 아래쪽 삼각형
+	m_ppnSubSetIndices[0].push_back(2); m_ppnSubSetIndices[0].push_back(1); m_ppnSubSetIndices[0].push_back(3);
+	//ⓒ 윗면(Top) 사각형의 위쪽 삼각형
+	m_ppnSubSetIndices[0].push_back(0); m_ppnSubSetIndices[0].push_back(5); m_ppnSubSetIndices[0].push_back(4);
+	//ⓓ 윗면(Top) 사각형의 아래쪽 삼각형
+	m_ppnSubSetIndices[0].push_back(1); m_ppnSubSetIndices[0].push_back(5); m_ppnSubSetIndices[0].push_back(0);
+	//ⓔ 뒷면(Back) 사각형의 위쪽 삼각형
+	m_ppnSubSetIndices[0].push_back(3); m_ppnSubSetIndices[0].push_back(4); m_ppnSubSetIndices[0].push_back(7);
+	//ⓕ 뒷면(Back) 사각형의 아래쪽 삼각형
+	m_ppnSubSetIndices[0].push_back(0); m_ppnSubSetIndices[0].push_back(4); m_ppnSubSetIndices[0].push_back(3);
+	//ⓖ 아래면(Bottom) 사각형의 위쪽 삼각형
+	m_ppnSubSetIndices[0].push_back(1); m_ppnSubSetIndices[0].push_back(6); m_ppnSubSetIndices[0].push_back(5);
+	//ⓗ 아래면(Bottom) 사각형의 아래쪽 삼각형
+	m_ppnSubSetIndices[0].push_back(2); m_ppnSubSetIndices[0].push_back(6); m_ppnSubSetIndices[0].push_back(1);
+	//ⓘ 옆면(Left) 사각형의 위쪽 삼각형
+	m_ppnSubSetIndices[0].push_back(2); m_ppnSubSetIndices[0].push_back(7); m_ppnSubSetIndices[0].push_back(6);
+	//ⓙ 옆면(Left) 사각형의 아래쪽 삼각형
+	m_ppnSubSetIndices[0].push_back(3); m_ppnSubSetIndices[0].push_back(7); m_ppnSubSetIndices[0].push_back(2);
+	//ⓚ 옆면(Right) 사각형의 위쪽 삼각형
+	m_ppnSubSetIndices[0].push_back(6); m_ppnSubSetIndices[0].push_back(4); m_ppnSubSetIndices[0].push_back(5);
+	//ⓛ 옆면(Right) 사각형의 아래쪽 삼각형
+	m_ppnSubSetIndices[0].push_back(7); m_ppnSubSetIndices[0].push_back(4); m_ppnSubSetIndices[0].push_back(6);
+
+	m_ppd3dIndexBuffers[0] = ::CreateBufferResource(pd3dDevice, pd3dCommandList, m_ppnSubSetIndices[0].data(), sizeof(UINT) * m_pnSubSetIndices[0], D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_INDEX_BUFFER, &m_ppd3dIndexUploadBuffers[0]);
+
+	m_pd3dIndexBufferViews[0].BufferLocation = m_ppd3dIndexBuffers[0]->GetGPUVirtualAddress();
+	m_pd3dIndexBufferViews[0].Format = DXGI_FORMAT_R32_UINT;
+	m_pd3dIndexBufferViews[0].SizeInBytes = sizeof(UINT) * m_pnSubSetIndices[0];
+}
+CBoundingBoxMesh::~CBoundingBoxMesh()
 {
 }
