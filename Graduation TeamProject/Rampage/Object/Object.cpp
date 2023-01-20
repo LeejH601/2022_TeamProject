@@ -550,6 +550,8 @@ CGoblinObject::CGoblinObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 	SetChild(pGoblinModel->m_pModelRootObject, true);
 	m_pSkinnedAnimationController = std::make_unique<CAnimationController>(pd3dDevice, pd3dCommandList, nAnimationTracks, pGoblinModel);
 	m_pSkinnedAnimationController->m_xmf4x4Transforms.resize(m_pSkinnedAnimationController->m_pAnimationSets->m_nAnimatedBoneFrames);
+
+	PrepareBoundingBox(pd3dDevice, pd3dCommandList);
 }
 CGoblinObject::~CGoblinObject()
 {
@@ -557,6 +559,27 @@ CGoblinObject::~CGoblinObject()
 void CGoblinObject::Animate(float fTimeElapsed)
 {
 	CGameObject::Animate(fTimeElapsed);
+}
+void CGoblinObject::UpdateTransform(XMFLOAT4X4* pxmf4x4Parent)
+{
+	m_xmf4x4World = (pxmf4x4Parent) ? Matrix4x4::Multiply(m_xmf4x4Transform, *pxmf4x4Parent) : m_xmf4x4Transform;
+
+	if (m_pSibling) m_pSibling->UpdateTransform(pxmf4x4Parent);
+	if (m_pChild) m_pChild->UpdateTransform(&m_xmf4x4World);
+
+	pBodyBoundingBox->SetWorld(m_xmf4x4Transform);
+
+	if (pWeapon)
+	{
+		pWeaponBoundingBox->SetWorld(pWeapon->GetWorld());
+		pWeaponBoundingBox->SetWorld(pWeapon->GetWorld());
+	}
+}
+void CGoblinObject::PrepareBoundingBox(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	pWeapon = CGameObject::FindFrame("SM_Weapon");
+	pBodyBoundingBox = CBoundingBoxShader::GetInst()->AddBoundingObject(pd3dDevice, pd3dCommandList, this, XMFLOAT3(0.0f, 0.75f, 0.0f), XMFLOAT3(0.6f, 1.1f, 0.6f));
+	pWeaponBoundingBox = CBoundingBoxShader::GetInst()->AddBoundingObject(pd3dDevice, pd3dCommandList, pWeapon, XMFLOAT3(0.0f, 0.0f, 0.22f), XMFLOAT3(0.14f, 0.14f, 0.83f));
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
