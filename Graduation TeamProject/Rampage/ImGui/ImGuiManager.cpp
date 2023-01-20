@@ -75,6 +75,7 @@ void CImGuiManager::Init(HWND hWnd, ID3D12Device* pd3dDevice, ID3D12GraphicsComm
     m_pCamera = std::make_unique<CFirstPersonCamera>();
     m_pCamera->Init(pd3dDevice, pd3dCommandList);
     m_pCamera->SetPosition(XMFLOAT3(-18.5f, 37.5f, -18.5f));
+    m_pCamera->GetPath()->m_xmf3OriginOffset = m_pCamera->GetPosition();
     m_pCamera->SetLookAt(XMFLOAT3(0.0f, 0.0f, 0.0f));
     m_pCamera->RegenerateViewMatrix();
 
@@ -242,10 +243,26 @@ void CImGuiManager::SetUI()
 
         if (ImGui::CollapsingHeader("Camera Shake"))
         {
+            CCamera* pCamera = Locator.GetSimulaterCamera();
+            if (pCamera == nullptr)
+                pCamera = m_pCamera.get();
+
             initial_curpos.y += 25.f;
             ImGui::SetCursorPos(initial_curpos);
             ImGui::SetNextItemWidth(190.f);
-            ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
+            ImGui::Checkbox("On/Off", &pCamera->m_bCameraShaking);
+
+            initial_curpos.y += 25.f;
+            ImGui::SetCursorPos(initial_curpos);
+            ImGui::SetNextItemWidth(190.f);
+            ImGui::DragFloat("Magnitude", &pCamera->GetPath()->m_fMagnitude, 0.01f, 0.0f, 10.0f, "%.2f", 0);
+
+            initial_curpos.y += 25.f;
+            ImGui::SetCursorPos(initial_curpos);
+            ImGui::SetNextItemWidth(190.f);
+            ImGui::DragFloat("Duration", &pCamera->GetPath()->m_fDuration, 0.01f, 0.0f, 10.0f, "%.2f", 0);
+
+            //ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
         }
 
         initial_curpos.y += 25.f;
@@ -338,9 +355,9 @@ void CImGuiManager::OnPrepareRender(ID3D12GraphicsCommandList* pd3dCommandList, 
 
     /*if (pCamera)
         pCamera->OnPrepareRender(pd3dCommandList);*/
-    m_pCamera->OnPrepareRender(pd3dCommandList);
     CMManager.ShaketoNextPostion(m_pCamera.get(), fTimeElapsed);
     m_pCamera->RegenerateViewMatrix();
+    m_pCamera->OnPrepareRender(pd3dCommandList);
 
     CSimulatorScene::GetInst()->Render(pd3dCommandList, fTimeElapsed);
 

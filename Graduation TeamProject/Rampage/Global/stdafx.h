@@ -84,6 +84,7 @@ public:\
 		return &m_pInst;\
 	}
 
+class CCamera;
 class CCameraMovementManager;
 extern UINT	gnCbvSrvDescriptorIncrementSize;
 extern UINT gnRtvDescriptorIncrementSize;
@@ -110,6 +111,17 @@ inline bool IsZero(float fValue, float fEpsilon) { return((fabsf(fValue) < fEpsi
 inline bool IsEqual(float fA, float fB, float fEpsilon) { return(::IsZero(fA - fB, fEpsilon)); }
 inline float InverseSqrt(float fValue) { return 1.0f / sqrtf(fValue); }
 inline void Swap(float* pfS, float* pfT) { float fTemp = *pfS; *pfS = *pfT; *pfT = fTemp; }
+
+class CLocator
+{
+	std::shared_ptr<CCamera> m_pSimulaterCamera;
+
+public:
+	CCamera* GetSimulaterCamera() { return m_pSimulaterCamera.get(); };
+	void SetSimulaterCamera(std::shared_ptr<CCamera> pCamera) { m_pSimulaterCamera = pCamera; };
+};
+
+extern CLocator Locator;
 
 namespace Vector3
 {

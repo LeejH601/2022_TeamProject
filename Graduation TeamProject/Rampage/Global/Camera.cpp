@@ -215,6 +215,10 @@ void CCameraMovementManager::ShaketoNextPostion(CCamera* camera, float fElapsedT
 
 
 	CPath* path = camera->GetPath();
+
+	if (path->m_bPathEnd || !camera->m_bCameraShaking)
+		return;
+
 	if (path->m_fDuration > path->m_ft) {
 		path->m_ft += fElapsedTime;
 
@@ -224,7 +228,7 @@ void CCameraMovementManager::ShaketoNextPostion(CCamera* camera, float fElapsedT
 		float RotateConstant = urd(dre);
 		RotateConstant *= XM_PI;
 
-		CameraDir = Vector3::ScalarProduct(CameraDir, ShakeConstant * m_fMagnitude, false);
+		CameraDir = Vector3::ScalarProduct(CameraDir, ShakeConstant * path->m_fMagnitude, false);
 		XMMATRIX RotateMatrix = XMMatrixRotationAxis(XMLoadFloat3(&camera->GetLookVector()), RotateConstant);
 
 		XMFLOAT3 ShakeOffset; XMStoreFloat3(&ShakeOffset, XMVector3TransformCoord(XMLoadFloat3(&CameraDir), RotateMatrix));
@@ -238,5 +242,7 @@ void CCameraMovementManager::ShaketoNextPostion(CCamera* camera, float fElapsedT
 	}
 	else {
 		camera->SetPosition(path->m_xmf3OriginOffset);
+		path->m_bPathEnd = true;
+		//path->m_ft = 0.0f;
 	}
 }

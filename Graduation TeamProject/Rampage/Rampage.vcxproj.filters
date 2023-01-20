@@ -20,10 +20,6 @@
     <Filter Include="ImGui">
       <UniqueIdentifier>{004ed374-4344-4b49-ba42-1bd5a35cf8a2}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Shader\소스 파일">
-      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
-      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
-    </Filter>
     <Filter Include="Sound">
       <UniqueIdentifier>{96c12eaf-b1cf-470d-9525-f4822f78368c}</UniqueIdentifier>
     </Filter>
@@ -31,9 +27,6 @@
   <ItemGroup>
     <ClCompile Include="Global\stdafx.cpp">
       <Filter>Global</Filter>
-    </ClCompile>
-    <ClCompile Include="Rampage.cpp">
-      <Filter>Shader\소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="Global\GameFramework.cpp">
       <Filter>Global</Filter>
@@ -115,6 +108,9 @@
     </ClCompile>
     <ClCompile Include="Sound\SoundManager.cpp">
       <Filter>Sound</Filter>
+    </ClCompile>
+    <ClCompile Include="Rampage.cpp">
+      <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

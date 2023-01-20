@@ -26,7 +26,8 @@ public:
 	float m_ft = 0.0f;
 	int m_iIndex = 0;
 	bool m_bPathEnd = false;
-	float m_fDuration = 10.0f;
+	float m_fDuration = 1.0f;
+	float m_fMagnitude = 1.0f;
 
 	XMFLOAT3 m_xmf3OriginOffset = XMFLOAT3(0.f, 0.f, 0.f);
 	XMFLOAT3 m_xmf3Offset = XMFLOAT3(0.f, 0.f, 0.f);
@@ -36,6 +37,9 @@ public:
 
 class CCamera
 {
+public:
+	bool m_bCameraShaking = false;
+
 protected:
 	XMFLOAT3 m_xmf3Position;
 	XMFLOAT3 m_xmf3Right;
@@ -121,7 +125,7 @@ public:
 	CCameraMovementManager() {};
 	~CCameraMovementManager() {};
 protected:
-	float m_fMagnitude = 1.0f;
+	
 	std::uniform_real_distribution<float> urd{ -1.0f, 1.0f };
 public:
 	void ShaketoNextPostion(CCamera* camera, float fElapsedTime);
