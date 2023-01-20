@@ -1,10 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="소스 파일">
-      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
-      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
-    </Filter>
     <Filter Include="Global">
       <UniqueIdentifier>{be576d88-a15a-4a2a-b526-2667789d24e2}</UniqueIdentifier>
     </Filter>
@@ -23,10 +19,17 @@
     <Filter Include="Sound">
       <UniqueIdentifier>{96c12eaf-b1cf-470d-9525-f4822f78368c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="소스 파일">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Global\stdafx.cpp">
       <Filter>Global</Filter>
+    </ClCompile>
+    <ClCompile Include="Rampage.cpp">
+      <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="Global\GameFramework.cpp">
       <Filter>Global</Filter>
@@ -109,8 +112,8 @@
     <ClCompile Include="Sound\SoundManager.cpp">
       <Filter>Sound</Filter>
     </ClCompile>
-    <ClCompile Include="Rampage.cpp">
-      <Filter>소스 파일</Filter>
+    <ClCompile Include="Shader\BoundingBoxShader.cpp">
+      <Filter>Shader</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -204,6 +207,9 @@
     <ClInclude Include="Scene\SimulatorScene.h">
       <Filter>Scene</Filter>
     </ClInclude>
+    <ClInclude Include="Shader\BoundingBoxShader.h">
+      <Filter>Shader</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shader\PlayerPixelShader.hlsl" />
@@ -214,5 +220,7 @@
     <FxCompile Include="Shader\TerrainSplatPixelShader.hlsl" />
     <FxCompile Include="Shader\TerrainParallaxVertexShader.hlsl" />
     <FxCompile Include="Shader\TerrainParallaxPixelShader.hlsl" />
+    <FxCompile Include="Shader\BoundVertexShader.hlsl" />
+    <FxCompile Include="Shader\BoundPixelShader.hlsl" />
   </ItemGroup>
 </Project>

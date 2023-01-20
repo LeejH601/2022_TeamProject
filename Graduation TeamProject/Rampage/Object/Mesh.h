@@ -16,6 +16,7 @@ public:
 protected:
 	UINT m_nType = 0x00;
 	UINT m_nVertices = 0;
+
 	XMFLOAT3 m_xmf3AABBCenter = XMFLOAT3(0.0f, 0.0f, 0.0f);
 	XMFLOAT3 m_xmf3AABBExtents = XMFLOAT3(0.0f, 0.0f, 0.0f);
 
@@ -59,14 +60,13 @@ public:
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList);
 
 	UINT GetType() { return(m_nType); }
+	XMFLOAT3 GetBoundingCenter() { return(m_xmf3AABBCenter); }
+	XMFLOAT3 GetBoundingExtent() { return(m_xmf3AABBExtents); }
 };
 class CTexturedModelingMesh : public CMesh
 {
 protected:
 	char m_pstrMeshName[256] = { 0 };
-
-	XMFLOAT3 m_xmf3AABBCenter = XMFLOAT3(0.0f, 0.0f, 0.0f);
-	XMFLOAT3 m_xmf3AABBExtents = XMFLOAT3(0.0f, 0.0f, 0.0f);
 
 	std::vector<XMFLOAT2> m_pxmf2TextureCoords0;
 	ComPtr<ID3D12Resource> m_pd3dTextureCoord0Buffer = NULL;
@@ -100,7 +100,7 @@ class CSkinnedMesh : public CTexturedModelingMesh
 {
 public:
 	int	m_nBonesPerVertex = 4;
-	
+
 	std::vector<XMINT4> m_pxmn4BoneIndices;
 	std::vector<XMFLOAT4> m_pxmf4BoneWeights;
 
@@ -215,6 +215,14 @@ public:
 
 	virtual float OnGetHeight(int x, int z, void* pContext);
 	virtual XMFLOAT4 OnGetColor(int x, int z, void* pContext);
+};
+//-------------------------------------------------------------------
+class CBoundingBoxMesh : public CMesh
+{
+public:
+	CBoundingBoxMesh() {};
+	CBoundingBoxMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, XMFLOAT3 xmf3AABBCenter, XMFLOAT3 xmf3AABBExtents);
+	virtual ~CBoundingBoxMesh();
 };
 
 class CSplatGridMesh : public CHeightMapGridMesh
