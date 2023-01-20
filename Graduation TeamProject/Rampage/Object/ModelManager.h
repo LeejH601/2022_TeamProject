@@ -16,7 +16,7 @@ public:
 	int m_nSkinnedMeshes = 0;
 	std::vector<CSkinnedMesh*> m_ppSkinnedMeshes; //[SkinnedMeshes], Skinned Mesh Cache
 
-	CAnimationSets* m_pAnimationSets = NULL;
+	std::shared_ptr<CAnimationSets> m_pAnimationSets = NULL;
 public:
 	void PrepareSkinning();
 };

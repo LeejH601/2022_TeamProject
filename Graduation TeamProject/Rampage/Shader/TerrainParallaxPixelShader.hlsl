@@ -47,20 +47,13 @@ struct VS_TERRAIN_OUTPUT
 	float3 toLight : TEXCOORD3;
 };
 
-struct PS_MULTIPLE_RENDER_TARGETS_OUTPUT
-{
-	float4 f4Scene : SV_TARGET0; //Swap Chain Back Buffer
-	float4 f4ImGui : SV_TARGET1;
-};
 
 static int gnMaxSamples = 20;
 static int gnMinSamples = 4;
 static float gfscale = 0.0001f;
 
-PS_MULTIPLE_RENDER_TARGETS_OUTPUT PSParallaxTerrain(VS_TERRAIN_OUTPUT input)
+float4 PSParallaxTerrain(VS_TERRAIN_OUTPUT input) : SV_TARGET
 {
-	PS_MULTIPLE_RENDER_TARGETS_OUTPUT output;
-
 	float fParallaxLimit = -length(input.toCamera.xy) / input.toCamera.z;
 	fParallaxLimit *= gfscale;
 
@@ -157,9 +150,6 @@ PS_MULTIPLE_RENDER_TARGETS_OUTPUT PSParallaxTerrain(VS_TERRAIN_OUTPUT input)
 	float3 vDiffuse = vFinalColor.rgb * max(0.0f, dot(input.toLight, vFinalNormal.xyz)) * 0.5;
 	float3 vAmbient = vFinalColor.rgb * 1.0f;
 	vFinalColor.rgb = vAmbient + vDiffuse;
-	
-	output.f4Scene = vFinalColor;
-	output.f4ImGui = vFinalColor;
 
-	return output;
+	return (vFinalColor);
 }

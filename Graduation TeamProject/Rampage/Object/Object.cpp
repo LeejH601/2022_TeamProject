@@ -480,6 +480,7 @@ CKnightObject::CKnightObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 
 	SetChild(pKnightModel->m_pModelRootObject, true);
 	m_pSkinnedAnimationController = std::make_unique<CKightRootRollBackAnimationController>(pd3dDevice, pd3dCommandList, nAnimationTracks, pKnightModel);
+	m_pSkinnedAnimationController->m_xmf4x4Transforms.resize(m_pSkinnedAnimationController->m_pAnimationSets->m_nAnimatedBoneFrames);
 
 #ifdef KNIGHT_ROOT_MOTION
 	m_pSkinnedAnimationController->m_pRootMotionObject = pKnightModel->m_pModelRootObject->FindFrame("root");
@@ -489,15 +490,12 @@ CKnightObject::CKnightObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 	}
 #endif // KNIGHT_ROOT_MOTION
 }
-
 CKnightObject::~CKnightObject()
 {
 }
 void CKnightObject::Animate(float fTimeElapsed)
 {
 	CGameObject::Animate(fTimeElapsed);
-
-
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -508,7 +506,8 @@ COrcObject::COrcObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3d
 
 	SetChild(pOrcModel->m_pModelRootObject, true);
 	m_pSkinnedAnimationController = std::make_unique<CAnimationController>(pd3dDevice, pd3dCommandList, nAnimationTracks, pOrcModel);
-	
+	m_pSkinnedAnimationController->m_xmf4x4Transforms.resize(m_pSkinnedAnimationController->m_pAnimationSets->m_nAnimatedBoneFrames);
+
 	PrepareBoundingBox(pd3dDevice, pd3dCommandList);
 }
 COrcObject::~COrcObject()
@@ -550,6 +549,7 @@ CGoblinObject::CGoblinObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 
 	SetChild(pGoblinModel->m_pModelRootObject, true);
 	m_pSkinnedAnimationController = std::make_unique<CAnimationController>(pd3dDevice, pd3dCommandList, nAnimationTracks, pGoblinModel);
+	m_pSkinnedAnimationController->m_xmf4x4Transforms.resize(m_pSkinnedAnimationController->m_pAnimationSets->m_nAnimatedBoneFrames);
 }
 CGoblinObject::~CGoblinObject()
 {
@@ -575,7 +575,8 @@ void CLionObject::Animate(float fTimeElapsed)
 {
 	CGameObject::Animate(fTimeElapsed);
 }
-
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//
 CSkeletonObject::CSkeletonObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks)
 {
 	CLoadedModelInfo* pSkeletonModel = CModelManager::GetInst()->GetModelInfo("Object/SK_Skeleton.bin");;
@@ -590,20 +591,18 @@ CSkeletonObject::CSkeletonObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	SetChild(pArmorModel->m_pModelRootObject, true);*/
 	//m_pSkinnedAnimationController = std::make_unique<CAnimationController>(pd3dDevice, pd3dCommandList, nAnimationTracks, pArmorModel);
 }
-
 CSkeletonObject::~CSkeletonObject()
 {
 }
-
 void CSkeletonObject::Animate(float fTimeElapsed)
 {
 	CGameObject::Animate(fTimeElapsed);
 }
-
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//
 CKightRootRollBackAnimationController::CKightRootRollBackAnimationController(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks, CLoadedModelInfo* pModel) : CAnimationController(pd3dDevice, pd3dCommandList, nAnimationTracks, pModel)
 {
 }
-
 CKightRootRollBackAnimationController::~CKightRootRollBackAnimationController()
 {
 }

@@ -71,7 +71,7 @@ void CModelManager::LoadAnimationFromFile(FILE* pInFile, CLoadedModelInfo* pLoad
 		if (!strcmp(pstrToken, "<AnimationSets>:"))
 		{
 			nAnimationSets = ::ReadIntegerFromFile(pInFile);
-			pLoadedModel->m_pAnimationSets = new CAnimationSets(nAnimationSets);
+			pLoadedModel->m_pAnimationSets = std::make_shared<CAnimationSets>(nAnimationSets);
 		}
 		else if (!strcmp(pstrToken, "<FrameNames>:"))
 		{
