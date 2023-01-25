@@ -86,6 +86,7 @@ public:\
 
 class CCamera;
 class CCameraMovementManager;
+class CGameObject;
 extern UINT	gnCbvSrvDescriptorIncrementSize;
 extern UINT gnRtvDescriptorIncrementSize;
 extern std::default_random_engine dre;
@@ -115,10 +116,18 @@ inline void Swap(float* pfS, float* pfT) { float fTemp = *pfS; *pfS = *pfT; *pfT
 class CLocator
 {
 	std::shared_ptr<CCamera> m_pSimulaterCamera;
+	std::shared_ptr<CGameObject> m_pSimulaterPlayer;
+	std::shared_ptr<CGameObject> m_pMainPlayer;
 
 public:
 	CCamera* GetSimulaterCamera() { return m_pSimulaterCamera.get(); };
 	void SetSimulaterCamera(std::shared_ptr<CCamera> pCamera) { m_pSimulaterCamera = pCamera; };
+
+	CGameObject* GetSimulaterPlayer() { return m_pSimulaterPlayer.get(); };
+	void SetSimulaterPlayer(std::shared_ptr<CGameObject> pPlayer) { m_pSimulaterPlayer = pPlayer; };
+
+	CGameObject* GetMainPlayer() { return m_pMainPlayer.get(); };
+	void SetMainPlayer(std::shared_ptr<CGameObject> pPlayer) { m_pMainPlayer = pPlayer; };
 };
 
 extern CLocator Locator;

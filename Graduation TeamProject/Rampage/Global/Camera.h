@@ -22,12 +22,19 @@ public:
 
 	void Reset();
 
-	std::vector<XMFLOAT3> m_vPaths;
-	float m_ft = 0.0f;
-	int m_iIndex = 0;
 	bool m_bPathEnd = false;
+	float m_ft = 0.0f;
+
+
+	std::vector<XMFLOAT3> m_vMovingPaths;
+	std::vector<XMFLOAT3> m_vZoomPaths;
+	int m_iIndex = 0;
+
 	float m_fDuration = 1.0f;
 	float m_fMagnitude = 1.0f;
+
+	float m_fMovingCurrDistance = 0.0f;
+	float m_fMovingMaxDistance = 10.0f;
 
 	XMFLOAT3 m_xmf3OriginOffset = XMFLOAT3(0.f, 0.f, 0.f);
 	XMFLOAT3 m_xmf3Offset = XMFLOAT3(0.f, 0.f, 0.f);
@@ -39,6 +46,7 @@ class CCamera
 {
 public:
 	bool m_bCameraShaking = false;
+	bool m_bCameraMoving = false;
 
 protected:
 	XMFLOAT3 m_xmf3Position;
@@ -113,7 +121,9 @@ public:
 	virtual void ReleaseShaderVariables();
 	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList);
 
-	virtual void Move(const XMFLOAT3& xmf3Shift) { m_xmf3Position.x += xmf3Shift.x; m_xmf3Position.y += xmf3Shift.y; m_xmf3Position.z += xmf3Shift.z; m_ShakePath->m_xmf3OriginOffset = m_xmf3Position; }
+	virtual void Move(const XMFLOAT3& xmf3Shift) { m_xmf3Position.x += xmf3Shift.x; m_xmf3Position.y += xmf3Shift.y; m_xmf3Position.z += xmf3Shift.z; 
+	m_ShakePath->m_xmf3OriginOffset.x += xmf3Shift.x; m_ShakePath->m_xmf3OriginOffset.y += xmf3Shift.y; m_ShakePath->m_xmf3OriginOffset.z += xmf3Shift.z;
+	}
 	virtual void Rotate(float fPitch = 0.0f, float fYaw = 0.0f, float fRoll = 0.0f) { }
 	virtual void Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed) { }
 	virtual void SetLookAt(XMFLOAT3& xmf3LookAt);
@@ -129,6 +139,9 @@ protected:
 	std::uniform_real_distribution<float> urd{ -1.0f, 1.0f };
 public:
 	void ShaketoNextPostion(CCamera* camera, float fElapsedTime);
+	void ZoomIntoNextPosition(CCamera* camera, float fElapsedTime);
+	void ZoomOuttoNextPosition(CCamera* camera, float fElapsedTime);
+	void MoveToNextPosition(CCamera* camera, float fElapsedTime);
 };
 
 class CFirstPersonCamera : public CCamera

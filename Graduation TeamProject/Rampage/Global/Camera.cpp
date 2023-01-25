@@ -1,4 +1,5 @@
 #include "Camera.h"
+#include "..\Object\Object.h"
 
 CCamera::CCamera()
 {
@@ -151,18 +152,27 @@ void CFirstPersonCamera::Rotate(float fPitch, float fYaw, float fRoll)
 
 CPath::CPath(const CPath& path)
 {
-	m_vPaths.resize(path.m_vPaths.size());
-	std::copy(path.m_vPaths.begin(), path.m_vPaths.end(), m_vPaths.begin());
+	m_vMovingPaths.resize(path.m_vMovingPaths.size());
+	std::copy(path.m_vMovingPaths.begin(), path.m_vMovingPaths.end(), m_vMovingPaths.begin());
+
+	m_vZoomPaths.resize(path.m_vZoomPaths.size());
+	std::copy(path.m_vZoomPaths.begin(), path.m_vZoomPaths.end(), m_vZoomPaths.begin());
 }
 
 CPath& CPath::operator=(const CPath& path)
 {
 	if (this != &path) {
-		if (m_vPaths.data())
-			m_vPaths.clear();
+		if (m_vMovingPaths.data())
+			m_vMovingPaths.clear();
 
-		m_vPaths.resize(path.m_vPaths.size());
-		std::copy(path.m_vPaths.begin(), path.m_vPaths.end(), m_vPaths.begin());
+		m_vMovingPaths.resize(path.m_vMovingPaths.size());
+		std::copy(path.m_vMovingPaths.begin(), path.m_vMovingPaths.end(), m_vMovingPaths.begin());
+
+		if (m_vZoomPaths.data())
+			m_vZoomPaths.clear();
+
+		m_vZoomPaths.resize(path.m_vZoomPaths.size());
+		std::copy(path.m_vZoomPaths.begin(), path.m_vZoomPaths.end(), m_vZoomPaths.begin());
 	}
 
 	return *this;
@@ -245,4 +255,35 @@ void CCameraMovementManager::ShaketoNextPostion(CCamera* camera, float fElapsedT
 		path->m_bPathEnd = true;
 		//path->m_ft = 0.0f;
 	}
+}
+
+
+void CCameraMovementManager::MoveToNextPosition(CCamera* camera, float fElapsedTime)
+{
+	CGameObject* obj = Locator.GetSimulaterPlayer();
+	XMFLOAT3 Dir = XMFLOAT3(0.0f, 0.0f, 0.0f);
+	if(obj)
+		Dir = obj->GetLook();
+
+	CPath* path = camera->GetPath();
+
+	if (path->m_bPathEnd || !camera->m_bCameraMoving)
+		return;
+
+	if (path->m_fMovingMaxDistance > path->m_fMovingCurrDistance) {
+
+	}
+	else {
+
+	}
+
+	// 이동거리
+	// 시간
+	// 딜레이
+
+	// 복귀시간
+
+	// 최대 거리
+
+
 }
