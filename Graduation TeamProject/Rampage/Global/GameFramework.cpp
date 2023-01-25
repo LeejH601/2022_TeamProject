@@ -476,9 +476,7 @@ void CGameFramework::OnPrepareRenderTarget()
 }
 void CGameFramework::OnPrepareImGui()
 {
-	//명령 할당자와 명령 리스트를 리셋한다.
-	HRESULT hResult = m_pd3dCommandAllocator->Reset();
-	hResult = m_pd3dCommandList->Reset(m_pd3dCommandAllocator.Get(), NULL);
+	HRESULT hResult = m_pd3dCommandList->Reset(m_pd3dCommandAllocator.Get(), NULL);
 
 	CImGuiManager::GetInst()->OnPrepareRender(m_pd3dCommandList.Get(), &m_d3dDsvDescriptorCPUHandle, m_GameTimer.GetFrameTimeElapsed(), m_pCamera.get());
 
@@ -524,10 +522,13 @@ void CGameFramework::FrameAdvance()
 
 	ProcessInput();
 	AnimateObjects();
+
+	//명령 할당자를 리셋한다.
+	HRESULT hResult = m_pd3dCommandAllocator->Reset();
+
 	OnPrepareImGui();
 
-	//명령 할당자와 명령 리스트를 리셋한다.
-	HRESULT hResult = m_pd3dCommandAllocator->Reset();
+	//명령 리스트를 리셋한다.
 	hResult = m_pd3dCommandList->Reset(m_pd3dCommandAllocator.Get(), NULL);
 
 	//CImGuiManager::GetInst()->DemoRendering();
