@@ -115,6 +115,9 @@
     <ClCompile Include="Shader\BoundingBoxShader.cpp">
       <Filter>Shader</Filter>
     </ClCompile>
+    <ClCompile Include="Shader\CDepthRenderShader.cpp">
+      <Filter>Shader</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Global\stdafx.h">
@@ -208,6 +211,9 @@
       <Filter>Scene</Filter>
     </ClInclude>
     <ClInclude Include="Shader\BoundingBoxShader.h">
+      <Filter>Shader</Filter>
+    </ClInclude>
+    <ClInclude Include="Shader\CDepthRenderShader.h">
       <Filter>Shader</Filter>
     </ClInclude>
   </ItemGroup>

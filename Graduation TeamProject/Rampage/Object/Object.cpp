@@ -479,8 +479,8 @@ CKnightObject::CKnightObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 	if (!pKnightModel) pKnightModel = CModelManager::GetInst()->LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, "Object/SK_FKnight.bin");
 
 	SetChild(pKnightModel->m_pModelRootObject, true);
-	m_pSkinnedAnimationController = std::make_unique<CKightRootRollBackAnimationController>(pd3dDevice, pd3dCommandList, nAnimationTracks, pKnightModel);
-	//m_pSkinnedAnimationController = std::make_unique<CKightNoMoveRootAnimationController>(pd3dDevice, pd3dCommandList, nAnimationTracks, pKnightModel);
+	//m_pSkinnedAnimationController = std::make_unique<CKightRootRollBackAnimationController>(pd3dDevice, pd3dCommandList, nAnimationTracks, pKnightModel);
+	m_pSkinnedAnimationController = std::make_unique<CKightNoMoveRootAnimationController>(pd3dDevice, pd3dCommandList, nAnimationTracks, pKnightModel);
 
 	PrepareBoundingBox(pd3dDevice, pd3dCommandList);
 #ifdef KNIGHT_ROOT_MOTION

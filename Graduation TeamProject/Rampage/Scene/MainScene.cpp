@@ -121,14 +121,14 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pObject->SetPosition(XMFLOAT3(5.0f, 2.0f, -13.4f));
 	m_pObject->SetScale(5.0f, 5.0f, 5.0f);
 	m_pObject->Rotate(0.0f, 180.0f, 0.0f);
-	m_pObject->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 9);
+	m_pObject->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
 	m_pObjects.push_back(std::move(m_pObject));
 
 	m_pObject = std::make_unique<CKnightObject>(pd3dDevice, pd3dCommandList, 1);
 	m_pObject->SetPosition(XMFLOAT3(-15.0f, 0.0f, 0.0f));
 	m_pObject->SetScale(5.0f, 5.0f, 5.0f);
 	m_pObject->Rotate(0.0f, 180.0f, 0.0f);
-	m_pObject->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 10);
+	m_pObject->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 1);
 	m_pObject->m_pSkinnedAnimationController->m_xmf3RootObjectScale = XMFLOAT3(10.0f, 10.0f, 10.0f);
 	m_pObjects.push_back(std::move(m_pObject));
 
@@ -136,7 +136,7 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pObject->SetPosition(XMFLOAT3(15.0f, 0.0f, 0.0f));
 	m_pObject->SetScale(5.0f, 5.0f, 5.0f);
 	m_pObject->Rotate(0.0f, 180.0f, 0.0f);
-	m_pObject->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 11);
+	m_pObject->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 2);
 	m_pObjects.push_back(std::move(m_pObject));
 
 	// Light »ý¼º
