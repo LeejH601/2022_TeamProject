@@ -186,11 +186,17 @@ public:
 //
 class CSkeletonObject : public CGameObject
 {
+private:
+	CGameObject* pWeapon;
+	CGameObject* pBodyBoundingBox;
+	CGameObject* pWeaponBoundingBox;
 public:
 	CSkeletonObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks);
 	virtual ~CSkeletonObject();
 
 	virtual void Animate(float fTimeElapsed);
+	virtual void UpdateTransform(XMFLOAT4X4* pxmf4x4Parent = NULL);
+	virtual void PrepareBoundingBox(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 };
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
