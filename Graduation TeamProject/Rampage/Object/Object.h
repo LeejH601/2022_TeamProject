@@ -138,13 +138,27 @@ public:
 	virtual void OnRootMotion(CGameObject* pRootGameObject);
 };
 
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+class CKightNoMoveRootAnimationController : public CAnimationController
+{
+public:
+	CKightNoMoveRootAnimationController(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks, CLoadedModelInfo* pModel);
+	virtual ~CKightNoMoveRootAnimationController();
+
+	virtual void OnRootMotion(CGameObject* pRootGameObject);
+};
 class CKnightObject : public CGameObject
 {
+private:
+	CGameObject* pBodyBoundingBox;
 public:
 	CKnightObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks);
 	virtual ~CKnightObject();
 
 	virtual void Animate(float fTimeElapsed);
+	virtual void UpdateTransform(XMFLOAT4X4* pxmf4x4Parent = NULL);
+	virtual void PrepareBoundingBox(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 };
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -117,26 +117,26 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	CSoundManager::GetInst()->RegisterSound("Sound/mp3/David Bowie - Starman.mp3", false);
 	//CSoundManager::GetInst()->PlaySound("Sound/mp3/David Bowie - Starman.mp3");
 
-	std::unique_ptr<CSkeletonObject> m_pObject = std::make_unique<CSkeletonObject>(pd3dDevice, pd3dCommandList, 1);
+	std::unique_ptr<CKnightObject> m_pObject = std::make_unique<CKnightObject>(pd3dDevice, pd3dCommandList, 1);
 	m_pObject->SetPosition(XMFLOAT3(5.0f, 2.0f, -13.4f));
 	m_pObject->SetScale(5.0f, 5.0f, 5.0f);
 	m_pObject->Rotate(0.0f, 180.0f, 0.0f);
-	m_pObject->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 1);
+	m_pObject->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 9);
 	m_pObjects.push_back(std::move(m_pObject));
 
-	m_pObject = std::make_unique<CSkeletonObject>(pd3dDevice, pd3dCommandList, 1);
+	m_pObject = std::make_unique<CKnightObject>(pd3dDevice, pd3dCommandList, 1);
 	m_pObject->SetPosition(XMFLOAT3(-15.0f, 0.0f, 0.0f));
-	m_pObject->SetScale(2.5f, 2.5f, 2.5f);
+	m_pObject->SetScale(5.0f, 5.0f, 5.0f);
 	m_pObject->Rotate(0.0f, 180.0f, 0.0f);
-	m_pObject->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 2);
+	m_pObject->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 10);
 	m_pObject->m_pSkinnedAnimationController->m_xmf3RootObjectScale = XMFLOAT3(10.0f, 10.0f, 10.0f);
 	m_pObjects.push_back(std::move(m_pObject));
 
-	m_pObject = std::make_unique<CSkeletonObject>(pd3dDevice, pd3dCommandList, 1);
+	m_pObject = std::make_unique<CKnightObject>(pd3dDevice, pd3dCommandList, 1);
 	m_pObject->SetPosition(XMFLOAT3(15.0f, 0.0f, 0.0f));
-	m_pObject->SetScale(3.0f, 3.0f, 3.0f);
+	m_pObject->SetScale(5.0f, 5.0f, 5.0f);
 	m_pObject->Rotate(0.0f, 180.0f, 0.0f);
-	m_pObject->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
+	m_pObject->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 11);
 	m_pObjects.push_back(std::move(m_pObject));
 
 	// Light »ý¼º
@@ -178,7 +178,7 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 
 	for (int i = 0; i < m_pObjects.size(); ++i)
 	{
-		m_pObjects[i]->Animate(fTimeElapsed * (i + 1));
+		m_pObjects[i]->Animate(fTimeElapsed);
 		if (!m_pObjects[i]->m_pSkinnedAnimationController) m_pObjects[i]->UpdateTransform(NULL);
 		m_pObjects[i]->Render(pd3dCommandList);
 	}
@@ -186,7 +186,7 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 	m_pTerrainShader->Render(pd3dCommandList, 0);
 	m_pTerrain->Render(pd3dCommandList);
 
-	CBoundingBoxShader::GetInst()->Render(pd3dCommandList, 0);
+	//CBoundingBoxShader::GetInst()->Render(pd3dCommandList, 0);
 }
 
 

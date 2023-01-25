@@ -472,7 +472,7 @@ void CEagleObject::Animate(float fTimeElapsed)
 	SetPosition(xmf3Position);
 	CGameObject::Animate(fTimeElapsed);
 }
-//#define KNIGHT_ROOT_MOTION
+#define KNIGHT_ROOT_MOTION
 CKnightObject::CKnightObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks)
 {
 	CLoadedModelInfo* pKnightModel = CModelManager::GetInst()->GetModelInfo("Object/SK_FKnight.bin");;
@@ -480,8 +480,9 @@ CKnightObject::CKnightObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 
 	SetChild(pKnightModel->m_pModelRootObject, true);
 	m_pSkinnedAnimationController = std::make_unique<CKightRootRollBackAnimationController>(pd3dDevice, pd3dCommandList, nAnimationTracks, pKnightModel);
-	m_pSkinnedAnimationController->m_xmf4x4Transforms.resize(m_pSkinnedAnimationController->m_pAnimationSets->m_nAnimatedBoneFrames);
+	//m_pSkinnedAnimationController = std::make_unique<CKightNoMoveRootAnimationController>(pd3dDevice, pd3dCommandList, nAnimationTracks, pKnightModel);
 
+	PrepareBoundingBox(pd3dDevice, pd3dCommandList);
 #ifdef KNIGHT_ROOT_MOTION
 	m_pSkinnedAnimationController->m_pRootMotionObject = pKnightModel->m_pModelRootObject->FindFrame("root");
 	if (m_pSkinnedAnimationController->m_pRootMotionObject) {
@@ -497,6 +498,19 @@ void CKnightObject::Animate(float fTimeElapsed)
 {
 	CGameObject::Animate(fTimeElapsed);
 }
+void CKnightObject::UpdateTransform(XMFLOAT4X4* pxmf4x4Parent)
+{
+	m_xmf4x4World = (pxmf4x4Parent) ? Matrix4x4::Multiply(m_xmf4x4Transform, *pxmf4x4Parent) : m_xmf4x4Transform;
+
+	if (m_pSibling) m_pSibling->UpdateTransform(pxmf4x4Parent);
+	if (m_pChild) m_pChild->UpdateTransform(&m_xmf4x4World);
+
+	pBodyBoundingBox->SetWorld(m_xmf4x4Transform);
+}
+void CKnightObject::PrepareBoundingBox(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	pBodyBoundingBox = CBoundingBoxShader::GetInst()->AddBoundingObject(pd3dDevice, pd3dCommandList, this, XMFLOAT3(0.0f, 1.0f, 0.0f), XMFLOAT3(0.7f, 2.0f, 0.7f));
+}
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 COrcObject::COrcObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks)
@@ -506,8 +520,7 @@ COrcObject::COrcObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3d
 
 	SetChild(pOrcModel->m_pModelRootObject, true);
 	m_pSkinnedAnimationController = std::make_unique<CAnimationController>(pd3dDevice, pd3dCommandList, nAnimationTracks, pOrcModel);
-	m_pSkinnedAnimationController->m_xmf4x4Transforms.resize(m_pSkinnedAnimationController->m_pAnimationSets->m_nAnimatedBoneFrames);
-
+	
 	PrepareBoundingBox(pd3dDevice, pd3dCommandList);
 }
 COrcObject::~COrcObject()
@@ -549,8 +562,7 @@ CGoblinObject::CGoblinObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 
 	SetChild(pGoblinModel->m_pModelRootObject, true);
 	m_pSkinnedAnimationController = std::make_unique<CAnimationController>(pd3dDevice, pd3dCommandList, nAnimationTracks, pGoblinModel);
-	m_pSkinnedAnimationController->m_xmf4x4Transforms.resize(m_pSkinnedAnimationController->m_pAnimationSets->m_nAnimatedBoneFrames);
-
+	
 	PrepareBoundingBox(pd3dDevice, pd3dCommandList);
 }
 CGoblinObject::~CGoblinObject()
@@ -631,7 +643,7 @@ void CSkeletonObject::UpdateTransform(XMFLOAT4X4* pxmf4x4Parent)
 	if (m_pSibling) m_pSibling->UpdateTransform(pxmf4x4Parent);
 	if (m_pChild) m_pChild->UpdateTransform(&m_xmf4x4World);
 
-	//pBodyBoundingBox->SetWorld(m_xmf4x4Transform);
+	pBodyBoundingBox->SetWorld(m_xmf4x4Transform);
 
 	if (pWeapon)
 	{
@@ -643,7 +655,7 @@ void CSkeletonObject::UpdateTransform(XMFLOAT4X4* pxmf4x4Parent)
 void CSkeletonObject::PrepareBoundingBox(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	pWeapon = CGameObject::FindFrame("SM_Sword");
-	//pBodyBoundingBox = CBoundingBoxShader::GetInst()->AddBoundingObject(pd3dDevice, pd3dCommandList, this, XMFLOAT3(0.0f, 1.0f, 0.0f), XMFLOAT3(0.7f, 2.0f, 0.7f));
+	pBodyBoundingBox = CBoundingBoxShader::GetInst()->AddBoundingObject(pd3dDevice, pd3dCommandList, this, XMFLOAT3(0.0f, 1.0f, 0.0f), XMFLOAT3(0.7f, 2.0f, 0.7f));
 	pWeaponBoundingBox = CBoundingBoxShader::GetInst()->AddBoundingObject(pd3dDevice, pd3dCommandList, pWeapon, XMFLOAT3(0.0f, 0.0f, 0.48f), XMFLOAT3(0.04f, 0.14f, 1.22f));
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -697,3 +709,20 @@ void CKightRootRollBackAnimationController::OnRootMotion(CGameObject* pRootGameO
 		}
 	}
 }
+CKightNoMoveRootAnimationController::CKightNoMoveRootAnimationController(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks, CLoadedModelInfo* pModel) : CAnimationController(pd3dDevice, pd3dCommandList, nAnimationTracks, pModel)
+{
+}
+CKightNoMoveRootAnimationController::~CKightNoMoveRootAnimationController()
+{
+}
+void CKightNoMoveRootAnimationController::OnRootMotion(CGameObject* pRootGameObject)
+{
+	if (m_bRootMotion)
+	{
+		m_xmf3FirstRootMotionPosition = pRootGameObject->GetPosition();
+		m_pRootMotionObject->m_xmf4x4Transform._41 = 0.f;
+		m_pRootMotionObject->m_xmf4x4Transform._42 = 0.f;
+		m_pRootMotionObject->m_xmf4x4Transform._43 = 0.f;
+	}
+}
+
