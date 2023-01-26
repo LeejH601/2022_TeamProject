@@ -74,7 +74,7 @@ void CImGuiManager::Init(HWND hWnd, ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 
 	m_pCamera = std::make_shared<CFirstPersonCamera>();
 	m_pCamera->Init(pd3dDevice, pd3dCommandList);
-	std::shared_ptr<CComponent> com = std::make_shared<CCameraMover>();
+	std::shared_ptr<CComponent> com = std::make_shared<CCameraMover>(m_pCamera);
 	m_pCamera->m_vComponentSet.emplace_back(com);
 	com = std::make_shared<CCameraShaker>(m_pCamera);
 	m_pCamera->m_vComponentSet.emplace_back(com);
@@ -237,10 +237,30 @@ void CImGuiManager::SetUI()
 
 		if (ImGui::CollapsingHeader("Camera Move"))
 		{
+			CCamera* pCamera = Locator.GetSimulaterCamera();
+			if (pCamera == nullptr)
+				pCamera = m_pCamera.get();
+
 			initial_curpos.y += 25.f;
 			ImGui::SetCursorPos(initial_curpos);
 			ImGui::SetNextItemWidth(190.f);
-			ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
+			ImGui::Checkbox("On/Off", &pCamera->m_bCameraMoving);
+
+			initial_curpos.y += 25.f;
+			ImGui::SetCursorPos(initial_curpos);
+			ImGui::SetNextItemWidth(190.f);
+			CCameraMover* mover = (CCameraMover*)(pCamera->FindComponent(typeid(CCameraMover)));
+			ImGui::DragFloat("Distance", &mover->m_fMaxDistance, 0.01f, 0.0f, 10.0f, "%.2f", 0);
+
+			initial_curpos.y += 25.f;
+			ImGui::SetCursorPos(initial_curpos);
+			ImGui::SetNextItemWidth(190.f);
+			ImGui::DragFloat("Time", &mover->m_fMovingTime, 0.01f, 0.0f, 10.0f, "%.2f", 0);
+
+			initial_curpos.y += 25.f;
+			ImGui::SetCursorPos(initial_curpos);
+			ImGui::SetNextItemWidth(190.f);
+			ImGui::DragFloat("RollBackTime", &mover->m_fRollBackTime, 0.01f, 0.0f, 10.0f, "%.2f", 0);
 		}
 
 		initial_curpos.y += 25.f;

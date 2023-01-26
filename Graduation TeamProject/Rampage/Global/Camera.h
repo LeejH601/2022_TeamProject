@@ -43,7 +43,28 @@ public:
 
 class CCameraMover : public CComponent
 {
+	std::shared_ptr<CCamera> m_pCamera;
+	XMFLOAT3 m_xmf3Direction;
+public:
+	bool m_bMoveEnd;
 
+	float m_fMaxDistance;
+	float m_fCurrDistance;
+	float m_fSpeed;
+	float m_fMovingTime;
+	
+	float m_fBackSpeed;
+	float m_fRollBackTime;
+
+	XMFLOAT3 offset;
+
+public:
+	CCameraMover();
+	CCameraMover(std::shared_ptr<CCamera> pCamera);
+	virtual ~CCameraMover() {};
+
+	void Update(float fElapsedTime);
+	void Reset();
 };
 
 class CCameraShaker : public CComponent

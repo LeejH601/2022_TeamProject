@@ -254,3 +254,60 @@ void CCameraShaker::Reset()
 	m_bShakeEnd = false;
 	m_ft = 0.0f;
 }
+
+CCameraMover::CCameraMover()
+{
+	m_fMaxDistance = 10.0f;
+	m_fCurrDistance = 0.f;
+	m_fMovingTime = 1.0f;
+	m_fSpeed = m_fMaxDistance / m_fMovingTime;
+	m_fRollBackTime = 2.0f;
+	m_fBackSpeed = m_fMaxDistance / m_fRollBackTime;
+	m_bMoveEnd = false;
+	m_xmf3Direction = XMFLOAT3(0.0f, 0.0f, 1.0f);
+	offset = XMFLOAT3(0.0f, 0.0f, 0.0f);
+}
+
+CCameraMover::CCameraMover(std::shared_ptr<CCamera> pCamera) : CCameraMover()
+{
+	m_pCamera = pCamera;
+}
+
+void CCameraMover::Update(float fElapsedTime)
+{
+	if (m_bMoveEnd || !m_pCamera->m_bCameraMoving)
+		return;
+
+	m_fSpeed = m_fMaxDistance / m_fMovingTime;
+	m_fBackSpeed = m_fMaxDistance / m_fRollBackTime;
+
+	if (m_fCurrDistance < m_fMaxDistance) {
+		float length = m_fSpeed * 1.0f * fElapsedTime;
+		m_fCurrDistance += length;
+
+		offset = Vector3::Add(offset, Vector3::ScalarProduct(m_xmf3Direction, length, false));
+
+		m_pCamera->m_xmf3CalculatedPosition = Vector3::Add(m_pCamera->m_xmf3CalculatedPosition, offset);
+	}
+	else if (m_fCurrDistance > m_fMaxDistance * 2.0f) {
+		m_bMoveEnd = true;
+	}
+	else if (m_fCurrDistance > m_fMaxDistance) {
+		float length = m_fBackSpeed * 1.0f * fElapsedTime;
+		m_fCurrDistance += length;
+
+		offset = Vector3::Add(offset, Vector3::ScalarProduct(m_xmf3Direction, -length, false));
+
+		m_pCamera->m_xmf3CalculatedPosition = Vector3::Add(m_pCamera->m_xmf3CalculatedPosition, offset);
+	}
+	
+}
+
+void CCameraMover::Reset()
+{
+	m_fCurrDistance = 0.f;
+	m_bMoveEnd = false;
+	offset.x = 0.0f;
+	offset.y = 0.0f;
+	offset.z = 0.0f;
+}

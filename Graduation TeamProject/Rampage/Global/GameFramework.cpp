@@ -436,6 +436,7 @@ void CGameFramework::ProcessInput()
 void CGameFramework::AnimateObjects()
 {
 	// Object들의 애니메이션을 수행한다.
+	m_pCamera->Animate(m_GameTimer.GetFrameTimeElapsed());
 	m_pScene->AnimateObjects(m_GameTimer.GetFrameTimeElapsed());
 	CSimulatorScene::GetInst()->AnimateObjects(m_GameTimer.GetFrameTimeElapsed());
 }
