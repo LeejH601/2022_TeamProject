@@ -1,11 +1,6 @@
 #pragma once
 #include "..\Global\stdafx.h"
 
-#define MAX_LIGHTS			16 
-
-#define POINT_LIGHT			1
-#define SPOT_LIGHT			2
-#define DIRECTIONAL_LIGHT	3
 struct LIGHT
 {
 	XMFLOAT4				m_xmf4Ambient;
@@ -34,6 +29,7 @@ public:
 	CLight();
 	virtual ~CLight();
 
+	LIGHT* GetLights() { return m_pLights; }
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList);
 	virtual void CreateLightVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	virtual void ReleaseLightVariables();
@@ -42,7 +38,6 @@ private:
 
 	LIGHT* m_pLights = NULL;
 	int	m_nLights = 0;
-
 
 	ComPtr<ID3D12Resource> m_pd3dcbLights = NULL;
 	LIGHTS* m_pcbMappedLights = NULL;

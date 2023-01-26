@@ -3,7 +3,7 @@
 
 CLight::CLight()
 {
-	m_nLights = 1;
+	m_nLights = 16;
 	m_pLights = new LIGHT[m_nLights];
 	::ZeroMemory(m_pLights, sizeof(LIGHT) * m_nLights);
 
@@ -21,6 +21,21 @@ CLight::CLight()
 	m_pLights[0].m_fFalloff = 4.0f;
 	m_pLights[0].m_fPhi = (float)cos(XMConvertToRadians(60.0f));
 	m_pLights[0].m_fTheta = (float)cos(XMConvertToRadians(30.0f));
+	m_pLights[1].m_bEnable = false;
+	m_pLights[2].m_bEnable = false;
+	m_pLights[3].m_bEnable = false;
+	m_pLights[4].m_bEnable = false;
+	m_pLights[5].m_bEnable = false;
+	m_pLights[6].m_bEnable = false;
+	m_pLights[7].m_bEnable = false;
+	m_pLights[8].m_bEnable = false;
+	m_pLights[9].m_bEnable = false;
+	m_pLights[10].m_bEnable = false;
+	m_pLights[11].m_bEnable = false;
+	m_pLights[12].m_bEnable = false;
+	m_pLights[13].m_bEnable = false;
+	m_pLights[14].m_bEnable = false;
+	m_pLights[15].m_bEnable = false;
 }
 
 CLight::~CLight()

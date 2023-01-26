@@ -6,6 +6,12 @@
 #include "..\Shader\ModelShader.h"
 #include "..\Sound\SoundManager.h"
 #include "..\Shader\BoundingBoxShader.h"
+#include "..\Shader\DepthRenderShader.h"
+
+void CMainTMPScene::OnPreRender(ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	CDepthRenderShader::GetInst()->PrepareShadowMap(pd3dCommandList);
+}
 
 void CMainTMPScene::OnPrepareRender(ID3D12GraphicsCommandList* pd3dCommandList)
 {
@@ -108,9 +114,9 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 
 	DXGI_FORMAT pdxgiObjectRtvFormats = { DXGI_FORMAT_R8G8B8A8_UNORM };
 
-	CBoundingBoxShader::GetInst()->CreateShader(pd3dDevice, GetGraphicsRootSignature(), 1, &pdxgiObjectRtvFormats, 0);
+	CBoundingBoxShader::GetInst()->CreateShader(pd3dDevice, GetGraphicsRootSignature(), 1, &pdxgiObjectRtvFormats, DXGI_FORMAT_D32_FLOAT, 0);
 
-	CModelShader::GetInst()->CreateShader(pd3dDevice, GetGraphicsRootSignature(), 1, &pdxgiObjectRtvFormats, 0);
+	CModelShader::GetInst()->CreateShader(pd3dDevice, GetGraphicsRootSignature(), 1, &pdxgiObjectRtvFormats, DXGI_FORMAT_D32_FLOAT, 0);
 	CModelShader::GetInst()->CreateShaderVariables(pd3dDevice,pd3dCommandList);
 	CModelShader::GetInst()->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 100);
 
@@ -157,7 +163,7 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	////m_pTerrain->SetPosition(XMFLOAT3(0.f, 0.f, 0.f));
 
 	m_pTerrainShader = std::make_unique<CSplatTerrainShader>();
-	m_pTerrainShader->CreateShader(pd3dDevice, GetGraphicsRootSignature(), 1, &pdxgiObjectRtvFormats, 0);
+	m_pTerrainShader->CreateShader(pd3dDevice, GetGraphicsRootSignature(), 1, &pdxgiObjectRtvFormats, DXGI_FORMAT_D32_FLOAT, 0);
 	m_pTerrainShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 13);
 	m_pTerrainShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
@@ -166,6 +172,15 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	XMFLOAT4 xmf4Color(0.0f, 0.5f, 0.0f, 0.0f);
 	m_pTerrain = std::make_unique<CSplatTerrain>(pd3dDevice, pd3dCommandList, GetGraphicsRootSignature(), _T("Terrain/terrainHeightMap257.raw"), 257, 257, 257, 257, xmf3Scale, xmf4Color, m_pTerrainShader.get());
 	m_pTerrain->SetPosition(XMFLOAT3(-800.f, -750.f, -800.f));
+
+	DXGI_FORMAT pdxgiRtvFormats[1] = { DXGI_FORMAT_R32_FLOAT };
+	CDepthRenderShader::GetInst()->SetObjects(&m_pObjects);
+	CDepthRenderShader::GetInst()->SetLight(m_pLight->GetLights());
+	CDepthRenderShader::GetInst()->SetTerrain(m_pTerrain.get());
+
+	CDepthRenderShader::GetInst()->CreateShader(pd3dDevice, GetGraphicsRootSignature(), 1, pdxgiRtvFormats, DXGI_FORMAT_D32_FLOAT, 0);
+	CDepthRenderShader::GetInst()->CreateShader(pd3dDevice, GetGraphicsRootSignature(), 1, pdxgiRtvFormats, DXGI_FORMAT_D32_FLOAT, 1);
+	CDepthRenderShader::GetInst()->BuildObjects(pd3dDevice, pd3dCommandList, NULL);
 }
 void CMainTMPScene::AnimateObjects(float fTimeElapsed)
 {
@@ -180,11 +195,11 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 	{
 		m_pObjects[i]->Animate(fTimeElapsed);
 		if (!m_pObjects[i]->m_pSkinnedAnimationController) m_pObjects[i]->UpdateTransform(NULL);
-		m_pObjects[i]->Render(pd3dCommandList);
+		m_pObjects[i]->Render(pd3dCommandList, true);
 	}
 
 	m_pTerrainShader->Render(pd3dCommandList, 0);
-	m_pTerrain->Render(pd3dCommandList);
+	m_pTerrain->Render(pd3dCommandList, true);
 
 	//CBoundingBoxShader::GetInst()->Render(pd3dCommandList, 0);
 }

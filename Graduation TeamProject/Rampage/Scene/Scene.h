@@ -12,6 +12,7 @@ public:
 	
 	ID3D12RootSignature* GetGraphicsRootSignature() { return(m_pd3dGraphicsRootSignature.Get()); }
 
+	virtual void OnPreRender(ID3D12GraphicsCommandList* pd3dCommandList) {}
 	virtual void OnPrepareRender(ID3D12GraphicsCommandList* pd3dCommandList);
 	virtual void CreateGraphicsRootSignature(ID3D12Device* pd3dDevice);
 

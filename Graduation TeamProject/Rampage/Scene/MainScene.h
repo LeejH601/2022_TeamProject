@@ -16,6 +16,7 @@ public:
 	CMainTMPScene() {}
 	virtual ~CMainTMPScene() {}
 
+	virtual void OnPreRender(ID3D12GraphicsCommandList* pd3dCommandList);
 	virtual void OnPrepareRender(ID3D12GraphicsCommandList* pd3dCommandList);
 	virtual void CreateGraphicsRootSignature(ID3D12Device* pd3dDevice);
 
