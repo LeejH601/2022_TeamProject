@@ -1,5 +1,6 @@
 #pragma once
 #include "stdafx.h"
+#include "Component.h"
 
 #define ASPECT_RATIO (float(FRAME_BUFFER_WIDTH) / float(FRAME_BUFFER_HEIGHT))
 
@@ -40,13 +41,40 @@ public:
 	XMFLOAT3 m_xmf3Offset = XMFLOAT3(0.f, 0.f, 0.f);
 };
 
+class CCameraMover : public CComponent
+{
 
+};
+
+class CCameraShaker : public CComponent
+{
+private:
+	std::shared_ptr<CCamera> m_pCamera;
+
+	float m_fDuration;
+	float m_ft;
+	bool m_bShakeEnd;
+	float m_fMagnitude;
+
+	std::uniform_real_distribution<float> urd{ -1.0f, 1.0f };
+
+public:
+	virtual void Update(float fElapsedTime);
+	virtual void Reset();
+};
+
+class CCameraZoomer : public CComponent
+{
+
+};
 
 class CCamera
 {
 public:
 	bool m_bCameraShaking = false;
 	bool m_bCameraMoving = false;
+
+	XMFLOAT3 m_xmf3CalculatedPosition;
 
 protected:
 	XMFLOAT3 m_xmf3Position;
@@ -73,8 +101,7 @@ protected:
 	ComPtr<ID3D12Resource> m_pd3dcbCamera = NULL;
 	VS_CB_CAMERA_INFO* m_pcbMappedCamera = NULL;
 
-	std::unique_ptr<CPath> m_ShakePath;
-
+	std::vector<CComponent> m_vComponentSet;
 public:
 	CCamera();
 	virtual ~CCamera();
@@ -113,8 +140,6 @@ public:
 	D3D12_VIEWPORT GetViewport() { return(m_d3dViewport); }
 	D3D12_RECT GetScissorRect() { return(m_d3dScissorRect); }
 
-	CPath* GetPath() { return m_ShakePath.get(); };
-
 	virtual void SetViewportsAndScissorRects(ID3D12GraphicsCommandList* pd3dCommandList);
 
 	virtual void CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
@@ -122,26 +147,10 @@ public:
 	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList);
 
 	virtual void Move(const XMFLOAT3& xmf3Shift) { m_xmf3Position.x += xmf3Shift.x; m_xmf3Position.y += xmf3Shift.y; m_xmf3Position.z += xmf3Shift.z; 
-	m_ShakePath->m_xmf3OriginOffset.x += xmf3Shift.x; m_ShakePath->m_xmf3OriginOffset.y += xmf3Shift.y; m_ShakePath->m_xmf3OriginOffset.z += xmf3Shift.z;
 	}
 	virtual void Rotate(float fPitch = 0.0f, float fYaw = 0.0f, float fRoll = 0.0f) { }
-	virtual void Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed) { }
+	virtual void Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed);
 	virtual void SetLookAt(XMFLOAT3& xmf3LookAt);
-};
-
-class CCameraMovementManager
-{
-public:
-	CCameraMovementManager() {};
-	~CCameraMovementManager() {};
-protected:
-	
-	std::uniform_real_distribution<float> urd{ -1.0f, 1.0f };
-public:
-	void ShaketoNextPostion(CCamera* camera, float fElapsedTime);
-	void ZoomIntoNextPosition(CCamera* camera, float fElapsedTime);
-	void ZoomOuttoNextPosition(CCamera* camera, float fElapsedTime);
-	void MoveToNextPosition(CCamera* camera, float fElapsedTime);
 };
 
 class CFirstPersonCamera : public CCamera

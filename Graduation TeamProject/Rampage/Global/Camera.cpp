@@ -17,8 +17,6 @@ CCamera::CCamera()
 	m_xmf3Offset = XMFLOAT3(0.0f, 0.0f, 0.0f);
 	m_fTimeLag = 0.0f;
 	m_xmf3LookAtWorld = XMFLOAT3(0.0f, 0.0f, 0.0f);
-	m_ShakePath = std::make_unique<CPath>();
-	m_ShakePath->m_xmf3OriginOffset = m_xmf3Position;
 }
 CCamera::~CCamera()
 {
@@ -60,6 +58,7 @@ void CCamera::GenerateProjectionMatrix(float fNearPlaneDistance, float fFarPlane
 void CCamera::GenerateViewMatrix(XMFLOAT3 xmf3Position, XMFLOAT3 xmf3LookAt, XMFLOAT3 xmf3Up)
 {
 	m_xmf3Position = xmf3Position;
+	m_xmf3CalculatedPosition = m_xmf3Position;
 	m_xmf3LookAtWorld = xmf3LookAt;
 	m_xmf3Up = xmf3Up;
 
@@ -67,7 +66,7 @@ void CCamera::GenerateViewMatrix(XMFLOAT3 xmf3Position, XMFLOAT3 xmf3LookAt, XMF
 }
 void CCamera::GenerateViewMatrix()
 {
-	m_xmf4x4View = Matrix4x4::LookAtLH(m_xmf3Position, m_xmf3LookAtWorld, m_xmf3Up);
+	m_xmf4x4View = Matrix4x4::LookAtLH(m_xmf3CalculatedPosition, m_xmf3LookAtWorld, m_xmf3Up);
 }
 void CCamera::RegenerateViewMatrix()
 {
@@ -78,9 +77,9 @@ void CCamera::RegenerateViewMatrix()
 	m_xmf4x4View._11 = m_xmf3Right.x; m_xmf4x4View._12 = m_xmf3Up.x; m_xmf4x4View._13 = m_xmf3Look.x;
 	m_xmf4x4View._21 = m_xmf3Right.y; m_xmf4x4View._22 = m_xmf3Up.y; m_xmf4x4View._23 = m_xmf3Look.y;
 	m_xmf4x4View._31 = m_xmf3Right.z; m_xmf4x4View._32 = m_xmf3Up.z; m_xmf4x4View._33 = m_xmf3Look.z;
-	m_xmf4x4View._41 = -Vector3::DotProduct(m_xmf3Position, m_xmf3Right);
-	m_xmf4x4View._42 = -Vector3::DotProduct(m_xmf3Position, m_xmf3Up);
-	m_xmf4x4View._43 = -Vector3::DotProduct(m_xmf3Position, m_xmf3Look);
+	m_xmf4x4View._41 = -Vector3::DotProduct(m_xmf3CalculatedPosition, m_xmf3Right);
+	m_xmf4x4View._42 = -Vector3::DotProduct(m_xmf3CalculatedPosition, m_xmf3Up);
+	m_xmf4x4View._43 = -Vector3::DotProduct(m_xmf3CalculatedPosition, m_xmf3Look);
 }
 void CCamera::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
@@ -99,6 +98,14 @@ void CCamera::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
 
 	D3D12_GPU_VIRTUAL_ADDRESS d3dGpuVirtualAddress = m_pd3dcbCamera->GetGPUVirtualAddress();
 	pd3dCommandList->SetGraphicsRootConstantBufferView(ROOTSIGNATUREINDEX_CAMERA, d3dGpuVirtualAddress);
+}
+void CCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
+{
+	m_xmf3CalculatedPosition = m_xmf3Position;
+
+	for (CComponent& component : m_vComponentSet) {
+		component.Update(fTimeElapsed);
+	}
 }
 void CCamera::SetLookAt(XMFLOAT3& xmf3LookAt)
 {
@@ -185,61 +192,22 @@ void CPath::Reset()
 	m_bPathEnd = false;
 }
 
-void CCameraMovementManager::ShaketoNextPostion(CCamera* camera, float fElapsedTime)
+void CCameraShaker::Update(float fElapsedTime)
 {
-	/*CPath* path = camera->GetPath();
-
-	if (path->m_bPathEnd || path->m_vPaths.size() == 0)
+	if (m_bShakeEnd || !m_pCamera->m_bCameraShaking)
 		return;
 
-	XMFLOAT3& SeekPos = path->m_vPaths[path->m_iIndex];
-	XMFLOAT3 Dir = Vector3::Normalize(Vector3::Subtract(SeekPos, path->m_xmf3Offset));
+	if (m_fDuration > m_ft) {
+		m_ft += fElapsedTime;
 
-	float speed = .5f;
-
-	XMFLOAT3 NextDistance = Vector3::ScalarProduct(Dir, fElapsedTime * speed, false);
-
-	XMFLOAT3 NextPos = Vector3::Add(path->m_xmf3Offset, NextDistance);
-
-	float length = Vector3::Length(Vector3::Subtract(SeekPos, NextPos));
-
-	if (length <= 0.01f) {
-		path->m_iIndex++;
-		if (path->m_iIndex >= path->m_vPaths.size()) {
-			path->m_iIndex = 0;
-			path->m_bPathEnd = true;
-		}
-		NextPos = SeekPos;
-		NextDistance = XMFLOAT3(0.f, 0.f, 0.f);
-	}
-
-	TCHAR pstrDebug[256] = { 0 };
-	_stprintf_s(pstrDebug, 256, _T("%f, %f, %f \n"), NextPos.x, NextPos.y, NextPos.z);
-	OutputDebugString(pstrDebug);
-
-	path->m_xmf3Offset = NextPos;
-	camera->SetOffset(Vector3::Add(camera->GetOffset(), NextDistance));
-
-	_stprintf_s(pstrDebug, 256, _T("%f, %f, %f \n"), camera->GetOffset().x, camera->GetOffset().y, camera->GetOffset().z);
-	OutputDebugString(pstrDebug);*/
-
-
-	CPath* path = camera->GetPath();
-
-	if (path->m_bPathEnd || !camera->m_bCameraShaking)
-		return;
-
-	if (path->m_fDuration > path->m_ft) {
-		path->m_ft += fElapsedTime;
-
-		XMFLOAT3 CameraDir = camera->GetRightVector();
+		XMFLOAT3 CameraDir = m_pCamera->GetRightVector();
 
 		float ShakeConstant = urd(dre);
 		float RotateConstant = urd(dre);
 		RotateConstant *= XM_PI;
 
-		CameraDir = Vector3::ScalarProduct(CameraDir, ShakeConstant * path->m_fMagnitude, false);
-		XMMATRIX RotateMatrix = XMMatrixRotationAxis(XMLoadFloat3(&camera->GetLookVector()), RotateConstant);
+		CameraDir = Vector3::ScalarProduct(CameraDir, ShakeConstant * m_fMagnitude, false);
+		XMMATRIX RotateMatrix = XMMatrixRotationAxis(XMLoadFloat3(&m_pCamera->GetLookVector()), RotateConstant);
 
 		XMFLOAT3 ShakeOffset; XMStoreFloat3(&ShakeOffset, XMVector3TransformCoord(XMLoadFloat3(&CameraDir), RotateMatrix));
 		/*ShakeOffset.x = urd(dre);
@@ -248,42 +216,16 @@ void CCameraMovementManager::ShaketoNextPostion(CCamera* camera, float fElapsedT
 		ShakeOffset = Vector3::ScalarProduct(ShakeOffset, m_fMagnitude, false);
 		ShakeOffset = Vector3::Add(path->m_xmf3OriginOffset, ShakeOffset);*/
 
-		camera->SetPosition(Vector3::Add(path->m_xmf3OriginOffset, ShakeOffset));
+		m_pCamera->m_xmf3CalculatedPosition = Vector3::Add(m_pCamera->m_xmf3CalculatedPosition, ShakeOffset);
 	}
 	else {
-		camera->SetPosition(path->m_xmf3OriginOffset);
-		path->m_bPathEnd = true;
-		//path->m_ft = 0.0f;
+		m_bShakeEnd = true;
+		//path->m_ft =
 	}
 }
 
-
-void CCameraMovementManager::MoveToNextPosition(CCamera* camera, float fElapsedTime)
+void CCameraShaker::Reset()
 {
-	CGameObject* obj = Locator.GetSimulaterPlayer();
-	XMFLOAT3 Dir = XMFLOAT3(0.0f, 0.0f, 0.0f);
-	if(obj)
-		Dir = obj->GetLook();
-
-	CPath* path = camera->GetPath();
-
-	if (path->m_bPathEnd || !camera->m_bCameraMoving)
-		return;
-
-	if (path->m_fMovingMaxDistance > path->m_fMovingCurrDistance) {
-
-	}
-	else {
-
-	}
-
-	// 이동거리
-	// 시간
-	// 딜레이
-
-	// 복귀시간
-
-	// 최대 거리
-
-
+	m_bShakeEnd = false;
+	m_ft = 0.0f;
 }

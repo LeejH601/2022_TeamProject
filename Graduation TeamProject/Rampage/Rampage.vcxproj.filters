@@ -115,6 +115,9 @@
     <ClCompile Include="Shader\BoundingBoxShader.cpp">
       <Filter>Shader</Filter>
     </ClCompile>
+    <ClCompile Include="Global\Component.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Global\stdafx.h">
@@ -210,6 +213,7 @@
     <ClInclude Include="Shader\BoundingBoxShader.h">
       <Filter>Shader</Filter>
     </ClInclude>
+    <ClInclude Include="Global\Component.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shader\PlayerPixelShader.hlsl" />

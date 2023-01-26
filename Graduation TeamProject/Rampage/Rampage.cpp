@@ -10,7 +10,6 @@ HINSTANCE hInst;                                // 현재 인스턴스입니다.
 // 게임 프로그램의 골격을 나타내는 CGameFramework 클래스 객체
 CGameFramework gGameFramework;
 std::default_random_engine dre;
-CCameraMovementManager CMManager;
 CLocator Locator;
 
 // 이 코드 모듈에 포함된 함수의 선언을 전달합니다:

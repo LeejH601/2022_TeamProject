@@ -382,6 +382,7 @@ static void ImGui_ImplDX12_CreateFontsTexture()
 
         ID3D12CommandQueue* cmdQueue = nullptr;
         hr = bd->pd3dDevice->CreateCommandQueue(&queueDesc, IID_PPV_ARGS(&cmdQueue));
+        HRESULT result = bd->pd3dDevice->GetDeviceRemovedReason();
         IM_ASSERT(SUCCEEDED(hr));
 
         ID3D12CommandAllocator* cmdAlloc = nullptr;
