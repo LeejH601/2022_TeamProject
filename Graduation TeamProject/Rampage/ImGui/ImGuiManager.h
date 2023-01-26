@@ -20,7 +20,7 @@ private:
 	bool show_another_window = false;
 	bool show_my_window = true;
 
-	std::unique_ptr<CCamera> m_pCamera = NULL;
+	std::shared_ptr<CCamera> m_pCamera = NULL;
 
 	std::unique_ptr<CTexture> m_pRTTexture;
 	D3D12_CPU_DESCRIPTOR_HANDLE m_pd3dRtvCPUDescriptorHandles;

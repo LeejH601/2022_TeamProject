@@ -99,13 +99,17 @@ void CCamera::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
 	D3D12_GPU_VIRTUAL_ADDRESS d3dGpuVirtualAddress = m_pd3dcbCamera->GetGPUVirtualAddress();
 	pd3dCommandList->SetGraphicsRootConstantBufferView(ROOTSIGNATUREINDEX_CAMERA, d3dGpuVirtualAddress);
 }
-void CCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
+void CCamera::Animate(float fTimeElapsed)
 {
 	m_xmf3CalculatedPosition = m_xmf3Position;
 
-	for (CComponent& component : m_vComponentSet) {
-		component.Update(fTimeElapsed);
+	for (std::shared_ptr<CComponent>& component : m_vComponentSet) {
+		component->Update(fTimeElapsed);
 	}
+}
+void CCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
+{
+
 }
 void CCamera::SetLookAt(XMFLOAT3& xmf3LookAt)
 {
@@ -119,6 +123,14 @@ void CCamera::ReleaseShaderVariables()
 {
 	if (m_pd3dcbCamera)
 		m_pd3dcbCamera->Unmap(0, NULL);
+}
+CComponent* CCamera::FindComponent(const std::type_info& typeinfo)
+{
+	for (std::shared_ptr<CComponent>& component : m_vComponentSet) {
+		if (strcmp(typeinfo.name(), typeid(*component.get()).name()) == 0)
+			return component.get();
+	}
+	return nullptr;
 }
 void CCamera::SetViewportsAndScissorRects(ID3D12GraphicsCommandList* pd3dCommandList)
 {
@@ -190,6 +202,19 @@ void CPath::Reset()
 	m_ft = 0.0f;
 	m_iIndex = 0;
 	m_bPathEnd = false;
+}
+
+CCameraShaker::CCameraShaker()
+{
+	m_fDuration = 1.0f;
+	m_ft = 0.0f;
+	m_bShakeEnd = false;
+	m_fMagnitude = 1.0f;
+}
+
+CCameraShaker::CCameraShaker(std::shared_ptr<CCamera> pCamera) : CCameraShaker()
+{
+	m_pCamera = pCamera;
 }
 
 void CCameraShaker::Update(float fElapsedTime)
