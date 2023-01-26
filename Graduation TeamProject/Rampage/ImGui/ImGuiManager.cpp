@@ -78,7 +78,7 @@ void CImGuiManager::Init(HWND hWnd, ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 	m_pCamera->m_vComponentSet.emplace_back(com);
 	com = std::make_shared<CCameraShaker>(m_pCamera);
 	m_pCamera->m_vComponentSet.emplace_back(com);
-	com = std::make_shared<CCameraZoomer>();
+	com = std::make_shared<CCameraZoomer>(m_pCamera);
 	m_pCamera->m_vComponentSet.emplace_back(com);
 	m_pCamera->SetPosition(XMFLOAT3(-18.5f, 37.5f, -18.5f));
 	m_pCamera->SetLookAt(XMFLOAT3(0.0f, 0.0f, 0.0f));
@@ -296,10 +296,35 @@ void CImGuiManager::SetUI()
 
 		if (ImGui::CollapsingHeader("Camera ZoomIn/ZoomOut"))
 		{
+			CCamera* pCamera = Locator.GetSimulaterCamera();
+			if (pCamera == nullptr)
+				pCamera = m_pCamera.get();
+
 			initial_curpos.y += 25.f;
 			ImGui::SetCursorPos(initial_curpos);
 			ImGui::SetNextItemWidth(190.f);
-			ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
+			ImGui::Checkbox("On/Off", &pCamera->m_bCameraZooming);
+
+			initial_curpos.y += 25.f;
+			ImGui::SetCursorPos(initial_curpos);
+			ImGui::SetNextItemWidth(190.f);
+			CCameraZoomer* Zoomer = (CCameraZoomer*)(pCamera->FindComponent(typeid(CCameraZoomer)));
+			ImGui::DragFloat("Distance", &Zoomer->m_fMaxDistance, 0.01f, 0.0f, 10.0f, "%.2f", 0);
+
+			initial_curpos.y += 25.f;
+			ImGui::SetCursorPos(initial_curpos);
+			ImGui::SetNextItemWidth(190.f);
+			ImGui::DragFloat("Time", &Zoomer->m_fMovingTime, 0.01f, 0.0f, 10.0f, "%.2f", 0);
+
+			initial_curpos.y += 25.f;
+			ImGui::SetCursorPos(initial_curpos);
+			ImGui::SetNextItemWidth(190.f);
+			ImGui::DragFloat("RollBackTime", &Zoomer->m_fRollBackTime, 0.01f, 0.0f, 10.0f, "%.2f", 0);
+
+			initial_curpos.y += 25.f;
+			ImGui::SetCursorPos(initial_curpos);
+			ImGui::SetNextItemWidth(190.f);
+			ImGui::Checkbox("IN / OUT", &Zoomer->m_bIsIN);
 		}
 
 		initial_curpos.y += 25.f;

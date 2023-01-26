@@ -311,3 +311,66 @@ void CCameraMover::Reset()
 	offset.y = 0.0f;
 	offset.z = 0.0f;
 }
+
+CCameraZoomer::CCameraZoomer()
+{
+	m_fMaxDistance = 10.0f;
+	m_fCurrDistance = 0.f;
+	m_fMovingTime = 1.0f;
+	m_fSpeed = m_fMaxDistance / m_fMovingTime;
+	m_fRollBackTime = 2.0f;
+	m_fBackSpeed = m_fMaxDistance / m_fRollBackTime;
+	m_bZoomEnd = false;
+	m_bIsIN = true;
+	m_xmf3Direction = XMFLOAT3(0.0f, 0.0f, 1.0f);
+	offset = XMFLOAT3(0.0f, 0.0f, 0.0f);
+}
+
+CCameraZoomer::CCameraZoomer(std::shared_ptr<CCamera> pCamera) : CCameraZoomer()
+{
+	m_pCamera = pCamera;
+}
+
+CCameraZoomer::~CCameraZoomer()
+{
+}
+
+void CCameraZoomer::Update(float fElapsedTime)
+{
+	if (m_bZoomEnd || !m_pCamera->m_bCameraZooming)
+		return;
+
+	m_fSpeed = m_fMaxDistance / m_fMovingTime;
+	m_fBackSpeed = m_fMaxDistance / m_fRollBackTime;
+
+	float ZoomConstant = (m_bIsIN) ? 1.0f : -1.0f;
+
+	if (m_fCurrDistance < m_fMaxDistance) {
+		float length = m_fSpeed * 1.0f * fElapsedTime;
+		m_fCurrDistance += length;
+
+		offset = Vector3::Add(offset, Vector3::ScalarProduct(m_xmf3Direction, length * ZoomConstant, false));
+
+		m_pCamera->m_xmf3CalculatedPosition = Vector3::Add(m_pCamera->m_xmf3CalculatedPosition, offset);
+	}
+	else if (m_fCurrDistance > m_fMaxDistance * 2.0f) {
+		m_bZoomEnd = true;
+	}
+	else if (m_fCurrDistance > m_fMaxDistance) {
+		float length = m_fBackSpeed * 1.0f * fElapsedTime;
+		m_fCurrDistance += length;
+
+		offset = Vector3::Add(offset, Vector3::ScalarProduct(m_xmf3Direction, -length * ZoomConstant, false));
+
+		m_pCamera->m_xmf3CalculatedPosition = Vector3::Add(m_pCamera->m_xmf3CalculatedPosition, offset);
+	}
+}
+
+void CCameraZoomer::Reset()
+{
+	m_fCurrDistance = 0.f;
+	m_bZoomEnd = false;
+	offset.x = 0.0f;
+	offset.y = 0.0f;
+	offset.z = 0.0f;
+}

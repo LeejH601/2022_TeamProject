@@ -63,6 +63,8 @@ public:
 	CCameraMover(std::shared_ptr<CCamera> pCamera);
 	virtual ~CCameraMover() {};
 
+	void SetDirection(XMFLOAT3 Dir) { m_xmf3Direction = Dir; };
+
 	void Update(float fElapsedTime);
 	void Reset();
 };
@@ -90,7 +92,31 @@ public:
 
 class CCameraZoomer : public CComponent
 {
+	std::shared_ptr<CCamera> m_pCamera;
 
+	XMFLOAT3 m_xmf3Direction;
+public:
+	bool m_bZoomEnd;
+	bool m_bIsIN;
+
+	float m_fMaxDistance;
+	float m_fCurrDistance;
+	float m_fSpeed;
+	float m_fMovingTime;
+
+	float m_fBackSpeed;
+	float m_fRollBackTime;
+
+	XMFLOAT3 offset;
+
+
+public:
+	CCameraZoomer();
+	CCameraZoomer(std::shared_ptr<CCamera> pCamera);
+	virtual ~CCameraZoomer();
+
+	void Update(float fElapsedTime);
+	void Reset();
 };
 
 class CCamera
@@ -98,6 +124,7 @@ class CCamera
 public:
 	bool m_bCameraShaking = false;
 	bool m_bCameraMoving = false;
+	bool m_bCameraZooming = false;
 
 	XMFLOAT3 m_xmf3CalculatedPosition;
 
