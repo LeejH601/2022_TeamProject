@@ -65,7 +65,7 @@ using Microsoft::WRL::ComPtr;
 #define ANIMATION_TYPE_LOOP				1
 #define ANIMATION_TYPE_PINGPONG			2
 
-#define MAX_LIGHTS			16 
+#define MAX_LIGHTS			4 
 
 #define POINT_LIGHT			1
 #define SPOT_LIGHT			2

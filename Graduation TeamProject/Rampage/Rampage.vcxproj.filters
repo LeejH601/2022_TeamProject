@@ -115,7 +115,10 @@
     <ClCompile Include="Shader\BoundingBoxShader.cpp">
       <Filter>Shader</Filter>
     </ClCompile>
-    <ClCompile Include="Shader\CDepthRenderShader.cpp">
+    <ClCompile Include="Shader\DepthRenderShader.cpp">
+      <Filter>Shader</Filter>
+    </ClCompile>
+    <ClCompile Include="Shader\ShadowMapShader.cpp">
       <Filter>Shader</Filter>
     </ClCompile>
   </ItemGroup>
@@ -213,7 +216,10 @@
     <ClInclude Include="Shader\BoundingBoxShader.h">
       <Filter>Shader</Filter>
     </ClInclude>
-    <ClInclude Include="Shader\CDepthRenderShader.h">
+    <ClInclude Include="Shader\ShadowMapShader.h">
+      <Filter>Shader</Filter>
+    </ClInclude>
+    <ClInclude Include="Shader\DepthRenderShader.h">
       <Filter>Shader</Filter>
     </ClInclude>
   </ItemGroup>
@@ -228,5 +234,10 @@
     <FxCompile Include="Shader\TerrainParallaxPixelShader.hlsl" />
     <FxCompile Include="Shader\BoundVertexShader.hlsl" />
     <FxCompile Include="Shader\BoundPixelShader.hlsl" />
+    <FxCompile Include="Shader\PlayerDepthWriteShader.hlsl" />
+    <FxCompile Include="Shader\TerrainDepthWriteShader.hlsl" />
+    <FxCompile Include="Shader\PlayerShadowVS.hlsl" />
+    <FxCompile Include="Shader\TerrainShadowVS.hlsl" />
+    <FxCompile Include="Shader\ShadowMapPS.hlsl" />
   </ItemGroup>
 </Project>

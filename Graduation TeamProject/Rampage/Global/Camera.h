@@ -69,10 +69,10 @@ public:
 	float& GetRoll() { return(m_fRoll); }
 	float& GetYaw() { return(m_fYaw); }
 
-	XMFLOAT4X4 GetViewMatrix() { return(m_xmf4x4View); }
-	XMFLOAT4X4 GetProjectionMatrix() { return(m_xmf4x4Projection); }
-	D3D12_VIEWPORT GetViewport() { return(m_d3dViewport); }
-	D3D12_RECT GetScissorRect() { return(m_d3dScissorRect); }
+	XMFLOAT4X4& GetViewMatrix() { return(m_xmf4x4View); }
+	XMFLOAT4X4& GetProjectionMatrix() { return(m_xmf4x4Projection); }
+	D3D12_VIEWPORT& GetViewport() { return(m_d3dViewport); }
+	D3D12_RECT& GetScissorRect() { return(m_d3dScissorRect); }
 
 	virtual void SetViewportsAndScissorRects(ID3D12GraphicsCommandList* pd3dCommandList);
 

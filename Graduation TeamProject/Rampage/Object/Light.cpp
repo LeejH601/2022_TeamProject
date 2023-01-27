@@ -3,39 +3,35 @@
 
 CLight::CLight()
 {
-	m_nLights = 16;
+	m_nLights = 4;
 	m_pLights = new LIGHT[m_nLights];
 	::ZeroMemory(m_pLights, sizeof(LIGHT) * m_nLights);
 
 	m_xmf4GlobalAmbient = XMFLOAT4(0.15f, 0.15f, 0.15f, 1.0f);
 
 	m_pLights[0].m_bEnable = true;
-	m_pLights[0].m_nType = SPOT_LIGHT;
-	m_pLights[0].m_fRange = 500.0f;
-	m_pLights[0].m_xmf4Ambient = XMFLOAT4(0.1f, 0.1f, 0.1f, 1.0f);
-	m_pLights[0].m_xmf4Diffuse = XMFLOAT4(0.85f, 0.85f, 0.85f, 1.0f);
-	m_pLights[0].m_xmf4Specular = XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f);
-	m_pLights[0].m_xmf3Position = XMFLOAT3(-200.0f, 200.0f, 0.0f);
+	m_pLights[0].m_nType = DIRECTIONAL_LIGHT;
+	m_pLights[0].m_fRange = 2000.0f;
+	m_pLights[0].m_xmf4Ambient = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
+	m_pLights[0].m_xmf4Diffuse = XMFLOAT4(0.73f, 0.73f, 0.73f, 1.0f);
+	m_pLights[0].m_xmf4Specular = XMFLOAT4(0.3f, 0.3f, 0.3f, 0.0f);
+	m_pLights[0].m_xmf3Position = XMFLOAT3(-(_PLANE_WIDTH * 0.5f), 512.0f, 0.0f);
 	m_pLights[0].m_xmf3Direction = XMFLOAT3(+1.0f, -1.0f, 0.0f);
-	m_pLights[0].m_xmf3Attenuation = XMFLOAT3(0.5f, 0.01f, 0.0001f);
-	m_pLights[0].m_fFalloff = 4.0f;
-	m_pLights[0].m_fPhi = (float)cos(XMConvertToRadians(60.0f));
-	m_pLights[0].m_fTheta = (float)cos(XMConvertToRadians(30.0f));
-	m_pLights[1].m_bEnable = false;
+
+	m_pLights[1].m_bEnable = true;
+	m_pLights[1].m_nType = SPOT_LIGHT;
+	m_pLights[1].m_fRange = 500.0f;
+	m_pLights[1].m_xmf4Ambient = XMFLOAT4(0.1f, 0.1f, 0.1f, 1.0f);
+	m_pLights[1].m_xmf4Diffuse = XMFLOAT4(0.54f, 0.54f, 0.54f, 1.0f);
+	m_pLights[1].m_xmf4Specular = XMFLOAT4(0.13f, 0.13f, 0.13f, 0.0f);
+	m_pLights[1].m_xmf3Position = XMFLOAT3(-250.0f, 250.0f, 0.0f);
+	m_pLights[1].m_xmf3Direction = XMFLOAT3(+1.0f, -1.0f, 0.0f);
+	m_pLights[1].m_xmf3Attenuation = XMFLOAT3(1.0f, 0.1f, 0.001f);
+	m_pLights[1].m_fFalloff = 16.0f;
+	m_pLights[1].m_fPhi = (float)cos(XMConvertToRadians(60.0f));
+	m_pLights[1].m_fTheta = (float)cos(XMConvertToRadians(30.0f));
 	m_pLights[2].m_bEnable = false;
 	m_pLights[3].m_bEnable = false;
-	m_pLights[4].m_bEnable = false;
-	m_pLights[5].m_bEnable = false;
-	m_pLights[6].m_bEnable = false;
-	m_pLights[7].m_bEnable = false;
-	m_pLights[8].m_bEnable = false;
-	m_pLights[9].m_bEnable = false;
-	m_pLights[10].m_bEnable = false;
-	m_pLights[11].m_bEnable = false;
-	m_pLights[12].m_bEnable = false;
-	m_pLights[13].m_bEnable = false;
-	m_pLights[14].m_bEnable = false;
-	m_pLights[15].m_bEnable = false;
 }
 
 CLight::~CLight()
