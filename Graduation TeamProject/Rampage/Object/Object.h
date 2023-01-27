@@ -1,6 +1,7 @@
 #pragma once
 #include "..\Global\stdafx.h"
 #include "Animation.h"
+#include "..\Global\Entity.h"
 
 #define MAX_FRAMENAME 64
 
@@ -26,7 +27,7 @@ class CShader;
 class CTexture;
 class CMaterial;
 
-class CGameObject
+class CGameObject : public IEntity
 {
 public:
 	char m_pstrFrameName[MAX_FRAMENAME];

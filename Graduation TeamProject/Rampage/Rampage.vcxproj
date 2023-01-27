@@ -149,7 +149,9 @@
     <ClCompile Include="Global\Camera.cpp" />
     <ClCompile Include="Global\Component.cpp" />
     <ClCompile Include="Global\DDSTextureLoader12.cpp" />
+    <ClCompile Include="Global\Entity.cpp" />
     <ClCompile Include="Global\GameFramework.cpp" />
+    <ClCompile Include="Global\MessageDispatcher.cpp" />
     <ClCompile Include="Global\stdafx.cpp" />
     <ClCompile Include="Global\Timer.cpp" />
     <ClCompile Include="ImGui\imgui.cpp" />
@@ -183,7 +185,10 @@
     <ClInclude Include="Global\Component.h" />
     <ClInclude Include="Global\d3dx12.h" />
     <ClInclude Include="Global\DDSTextureLoader12.h" />
+    <ClInclude Include="Global\Entity.h" />
     <ClInclude Include="Global\GameFramework.h" />
+    <ClInclude Include="Global\Global.h" />
+    <ClInclude Include="Global\MessageDispatcher.h" />
     <ClInclude Include="Global\stdafx.h" />
     <ClInclude Include="Global\Timer.h" />
     <ClInclude Include="ImGui\imconfig.h" />

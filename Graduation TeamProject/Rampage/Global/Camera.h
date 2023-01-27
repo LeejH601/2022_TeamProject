@@ -1,6 +1,7 @@
 #pragma once
 #include "stdafx.h"
 #include "Component.h"
+#include "Entity.h"
 
 #define ASPECT_RATIO (float(FRAME_BUFFER_WIDTH) / float(FRAME_BUFFER_HEIGHT))
 
@@ -65,8 +66,9 @@ public:
 
 	void SetDirection(XMFLOAT3 Dir) { m_xmf3Direction = Dir; };
 
-	void Update(float fElapsedTime);
-	void Reset();
+	virtual void Update(float fElapsedTime);
+	virtual void Reset();
+	virtual bool HandleMessage(const Telegram& msg);
 };
 
 class CCameraShaker : public CComponent
@@ -86,8 +88,9 @@ public:
 	CCameraShaker(std::shared_ptr<CCamera> pCamera);
 	virtual ~CCameraShaker() {};
 
-	void Update(float fElapsedTime);
-	void Reset();
+	virtual void Update(float fElapsedTime);
+	virtual void Reset();
+	virtual bool HandleMessage(const Telegram& msg);
 };
 
 class CCameraZoomer : public CComponent
@@ -115,11 +118,12 @@ public:
 	CCameraZoomer(std::shared_ptr<CCamera> pCamera);
 	virtual ~CCameraZoomer();
 
-	void Update(float fElapsedTime);
-	void Reset();
+	virtual void Update(float fElapsedTime);
+	virtual void Reset();
+	virtual bool HandleMessage(const Telegram& msg);
 };
 
-class CCamera
+class CCamera : public IEntity
 {
 public:
 	bool m_bCameraShaking = false;
@@ -206,6 +210,8 @@ public:
 	virtual void Animate(float fTimeElapsed);
 	virtual void Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed);
 	virtual void SetLookAt(XMFLOAT3& xmf3LookAt);
+
+	virtual bool HandleMessage(const Telegram& msg);
 };
 
 class CFirstPersonCamera : public CCamera

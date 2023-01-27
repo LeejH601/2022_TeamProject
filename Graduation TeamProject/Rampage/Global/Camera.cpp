@@ -1,5 +1,7 @@
 #include "Camera.h"
 #include "..\Object\Object.h"
+#include "MessageDispatcher.h"
+#include "Global.h"
 
 CCamera::CCamera()
 {
@@ -118,6 +120,31 @@ void CCamera::SetLookAt(XMFLOAT3& xmf3LookAt)
 	m_xmf3Right = XMFLOAT3(mtxLookAt._11, mtxLookAt._21, mtxLookAt._31);
 	m_xmf3Up = XMFLOAT3(mtxLookAt._12, mtxLookAt._22, mtxLookAt._32);
 	m_xmf3Look = XMFLOAT3(mtxLookAt._13, mtxLookAt._23, mtxLookAt._33);
+}
+bool CCamera::HandleMessage(const Telegram& msg)
+{
+	MESSAGE_TYPE type = static_cast<MESSAGE_TYPE>(msg.Msg);
+	if (type == MESSAGE_TYPE::Msg_CameraMoveStart || type == MESSAGE_TYPE::Msg_CameraShakeStart || type == MESSAGE_TYPE::Msg_CameraZoomStart)
+	{
+		CComponent* com = nullptr;
+		switch (type)
+		{
+		case MESSAGE_TYPE::Msg_CameraMoveStart:
+			com = FindComponent(typeid(CCameraMover));
+			break;
+		case MESSAGE_TYPE::Msg_CameraShakeStart:
+			com = FindComponent(typeid(CCameraShaker));
+			break;
+		case MESSAGE_TYPE::Msg_CameraZoomStart:
+			com = FindComponent(typeid(CCameraZoomer));
+			break;
+		default:
+			break;
+		}
+		return (com) ? com->HandleMessage(msg) : false;
+	}
+	
+	return false;
 }
 void CCamera::ReleaseShaderVariables()
 {
@@ -255,6 +282,16 @@ void CCameraShaker::Reset()
 	m_ft = 0.0f;
 }
 
+bool CCameraShaker::HandleMessage(const Telegram& msg)
+{
+	if (m_bShakeEnd)
+		return false;
+
+	Reset();
+
+	return true;
+}
+
 CCameraMover::CCameraMover()
 {
 	m_fMaxDistance = 10.0f;
@@ -310,6 +347,16 @@ void CCameraMover::Reset()
 	offset.x = 0.0f;
 	offset.y = 0.0f;
 	offset.z = 0.0f;
+}
+
+bool CCameraMover::HandleMessage(const Telegram& msg)
+{
+	if (m_bMoveEnd)
+		return false;
+
+	Reset();
+
+	return true;
 }
 
 CCameraZoomer::CCameraZoomer()
@@ -373,4 +420,14 @@ void CCameraZoomer::Reset()
 	offset.x = 0.0f;
 	offset.y = 0.0f;
 	offset.z = 0.0f;
+}
+
+bool CCameraZoomer::HandleMessage(const Telegram& msg)
+{
+	if (m_bZoomEnd)
+		return false;
+
+	Reset();
+
+	return true;
 }

@@ -116,7 +116,13 @@
       <Filter>Shader</Filter>
     </ClCompile>
     <ClCompile Include="Global\Component.cpp">
-      <Filter>소스 파일</Filter>
+      <Filter>Global</Filter>
+    </ClCompile>
+    <ClCompile Include="Global\MessageDispatcher.cpp">
+      <Filter>Global</Filter>
+    </ClCompile>
+    <ClCompile Include="Global\Entity.cpp">
+      <Filter>Global</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -213,7 +219,18 @@
     <ClInclude Include="Shader\BoundingBoxShader.h">
       <Filter>Shader</Filter>
     </ClInclude>
-    <ClInclude Include="Global\Component.h" />
+    <ClInclude Include="Global\MessageDispatcher.h">
+      <Filter>Global</Filter>
+    </ClInclude>
+    <ClInclude Include="Global\Entity.h">
+      <Filter>Global</Filter>
+    </ClInclude>
+    <ClInclude Include="Global\Component.h">
+      <Filter>Global</Filter>
+    </ClInclude>
+    <ClInclude Include="Global\Global.h">
+      <Filter>Global</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shader\PlayerPixelShader.hlsl" />
