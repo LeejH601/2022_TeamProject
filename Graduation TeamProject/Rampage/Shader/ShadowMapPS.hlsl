@@ -31,7 +31,6 @@ struct VS_SHADOW_MAP_OUTPUT
 
 float4 PSShadowMapShadow(VS_SHADOW_MAP_OUTPUT input) : SV_TARGET
 {
-	float4 tmp[MAX_LIGHTS] = {float4(0.0f, 0.0f, 0.0f, 1.0f), float4(0.0f, 0.0f, 0.0f, 1.0f), float4(0.0f, 0.0f, 0.0f, 1.0f), float4(0.0f, 0.0f, 0.0f, 1.0f)};
 	float4 cIllumination = Lighting(input.positionW, normalize(input.normalW), true, input.uvs);
 
 	return(cIllumination);

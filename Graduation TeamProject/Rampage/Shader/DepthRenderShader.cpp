@@ -238,7 +238,7 @@ void CDepthRenderShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
-void CDepthRenderShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
+void CDepthRenderShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, float fTimeElapsed)
 {
 	pCamera->SetViewportsAndScissorRects(pd3dCommandList);
 	pCamera->UpdateShaderVariables(pd3dCommandList);
@@ -248,8 +248,7 @@ void CDepthRenderShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCam
 		CShader::Render(pd3dCommandList, 0);
 		for (int i = 0; i < m_pObjects->size(); ++i)
 		{
-			(*m_pObjects)[i]->Animate(0.0f);
-			if (!(*m_pObjects)[i]->m_pSkinnedAnimationController) (*m_pObjects)[i]->UpdateTransform(NULL);
+			(*m_pObjects)[i]->Animate(fTimeElapsed);
 			(*m_pObjects)[i]->Render(pd3dCommandList, false);
 		}
 	}
@@ -259,7 +258,7 @@ void CDepthRenderShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCam
 		m_pTerrain->Render(pd3dCommandList, false);
 	}
 }
-void CDepthRenderShader::PrepareShadowMap(ID3D12GraphicsCommandList* pd3dCommandList)
+void CDepthRenderShader::PrepareShadowMap(ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed)
 {
 	for (int j = 0; j < MAX_LIGHTS; j++)
 	{
@@ -309,7 +308,7 @@ void CDepthRenderShader::PrepareShadowMap(ID3D12GraphicsCommandList* pd3dCommand
 
 			pd3dCommandList->OMSetRenderTargets(1, &m_pd3dRtvCPUDescriptorHandles[j], TRUE, &m_d3dDsvDescriptorCPUHandle);
 
-			Render(pd3dCommandList, m_ppDepthRenderCameras[j].get());
+			Render(pd3dCommandList, m_ppDepthRenderCameras[j].get(), fTimeElapsed);
 
 			::SynchronizeResourceTransition(pd3dCommandList, m_pDepthTexture->GetResource(j), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_COMMON);
 		}

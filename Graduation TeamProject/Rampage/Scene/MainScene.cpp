@@ -9,9 +9,9 @@
 #include "..\Shader\DepthRenderShader.h"
 #include "..\Shader\ShadowMapShader.h"
 
-void CMainTMPScene::OnPreRender(ID3D12GraphicsCommandList* pd3dCommandList)
+void CMainTMPScene::OnPreRender(ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed)
 {
-	CDepthRenderShader::GetInst()->PrepareShadowMap(pd3dCommandList);
+	CDepthRenderShader::GetInst()->PrepareShadowMap(pd3dCommandList, fTimeElapsed);
 }
 
 void CMainTMPScene::OnPrepareRender(ID3D12GraphicsCommandList* pd3dCommandList)
@@ -190,16 +190,16 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pObjects.push_back(std::move(m_pObject));
 
 	m_pObject = std::make_unique<CKnightObject>(pd3dDevice, pd3dCommandList, 1);
-	m_pObject->SetPosition(XMFLOAT3(-15.0f, 15.0f, 0.0f));
-	m_pObject->SetScale(15.0f, 15.0f, 15.0f);
+	m_pObject->SetPosition(XMFLOAT3(-15.0f, 15.0f, 15.0f));
+	m_pObject->SetScale(5.0f, 5.0f, 5.0f);
 	m_pObject->Rotate(0.0f, 180.0f, 0.0f);
 	m_pObject->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 1);
 	m_pObject->m_pSkinnedAnimationController->m_xmf3RootObjectScale = XMFLOAT3(10.0f, 10.0f, 10.0f);
 	m_pObjects.push_back(std::move(m_pObject));
 
 	m_pObject = std::make_unique<CKnightObject>(pd3dDevice, pd3dCommandList, 1);
-	m_pObject->SetPosition(XMFLOAT3(15.0f, -15.0f, 0.0f));
-	m_pObject->SetScale(15.0f, 15.0f, 15.0f);
+	m_pObject->SetPosition(XMFLOAT3(15.0f, -15.0f, -15.0f));
+	m_pObject->SetScale(10.0f, 10.0f, 10.0f);
 	m_pObject->Rotate(0.0f, 180.0f, 0.0f);
 	m_pObject->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 2);
 	m_pObjects.push_back(std::move(m_pObject));

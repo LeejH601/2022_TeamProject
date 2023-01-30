@@ -61,7 +61,7 @@ public:
 	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList, void* pContext);
 
 	virtual void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, void* pContext = NULL);
-	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, float fTimeElapsed);
 
-	void PrepareShadowMap(ID3D12GraphicsCommandList* pd3dCommandList);
+	void PrepareShadowMap(ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed);
 };

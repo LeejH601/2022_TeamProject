@@ -45,7 +45,8 @@ cbuffer cbLights : register(b4)
 };
 
 Texture2D<float> gtxtDepthTextures[MAX_DEPTH_TEXTURES] : register(t23);
-SamplerComparisonState gssComparisonPCFShadow : register(s1);
+SamplerComparisonState gssComparisonPCFShadow : register(s2);
+SamplerState gSampler : register(s0);
 
 float4 DirectionalLight(int nIndex, float3 vNormal, float3 vToCamera)
 {
@@ -175,7 +176,8 @@ float4 Lighting(float3 vPosition, float3 vNormal)
 	cColor += gcGlobalAmbientLight;
 	return(cColor);
 }
-#define _WITH_PCF_FILTERING
+
+//#define _WITH_PCF_FILTERING
 
 float Compute3x3ShadowFactor(float2 uv, float fDepth, uint nIndex)
 {
@@ -198,9 +200,7 @@ float4 Lighting(float3 vPosition, float3 vNormal, bool bShadow, float4 uvs[MAX_L
 	float3 vToCamera = normalize(gf3_CameraPosition - vPosition);
 	float4 cColor = float4(0.0f, 0.0f, 0.0f, 0.0f);
 
-
-	[unroll]
-	for (int i = 0; i < MAX_LIGHTS; i++)
+	[unroll(MAX_LIGHTS)] for (int i = 0; i < gnLights; i++)
 	{
 		if (gLights[i].m_bEnable)
 		{
@@ -208,9 +208,8 @@ float4 Lighting(float3 vPosition, float3 vNormal, bool bShadow, float4 uvs[MAX_L
 #ifdef _WITH_PCF_FILTERING
 			if (bShadow) fShadowFactor = Compute3x3ShadowFactor(uvs[i].xy / uvs[i].ww, uvs[i].z / uvs[i].w, i);
 #else
-			if (bShadow) fShadowFactor = gtxtDepthTextures[i].SampleCmpLevelZero(gssComparisonPCFShadow, uvs[i].xy / uvs[i].ww, uvs[i].z / uvs[i].w).r;
+			if (bShadow) fShadowFactor = gtxtDepthTextures[i].SampleCmpLevelZero(gssComparisonPCFShadow, uvs[i].xy / uvs[i].ww, uvs[i].z / uvs[i].w).r;			
 #endif
-
 			if (gLights[i].m_nType == DIRECTIONAL_LIGHT)
 			{
 				cColor += DirectionalLight(i, vNormal, vToCamera) * fShadowFactor;
@@ -222,15 +221,13 @@ float4 Lighting(float3 vPosition, float3 vNormal, bool bShadow, float4 uvs[MAX_L
 			else if (gLights[i].m_nType == SPOT_LIGHT)
 			{
 				cColor += SpotLight(i, vPosition, vNormal, vToCamera) * fShadowFactor;
-				//				cColor += SpotLight(i, vPosition, vNormal, vToCamera);
 			}
-			cColor += gLights[i].m_cAmbient * 0.5f;
+
+			cColor = float4(1.0f, 1.0f, 1.0f, 1.0f) * fShadowFactor;
 		}
 	}
 
-	cColor += (gcGlobalAmbientLight * 0.5f);
-	cColor.a = 1.0f;
-
+	//cColor += gcGlobalAmbientLight;
 	return(cColor);
 }
 

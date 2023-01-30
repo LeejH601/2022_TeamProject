@@ -119,7 +119,6 @@ void CShadowMapShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamer
 		for (int i = 0; i < m_pObjects->size(); ++i)
 		{
 			(*m_pObjects)[i]->Animate(0.0f);
-			if (!(*m_pObjects)[i]->m_pSkinnedAnimationController) (*m_pObjects)[i]->UpdateTransform(NULL);
 			(*m_pObjects)[i]->Render(pd3dCommandList, false);
 		}
 	}
