@@ -38,6 +38,19 @@ struct VS_INPUT
 	float3 bitangent : BITANGENT;
 };
 
+#include "Light.hlsl"
+
+struct CB_TOOBJECTSPACE
+{
+	matrix		mtxToTexture;
+	float4		f4Position;
+};
+
+cbuffer cbToLightSpace : register(b6)
+{
+	CB_TOOBJECTSPACE gcbToLightSpaces[MAX_LIGHTS];
+};
+
 struct VS_OUTPUT
 {
 	float4 position : SV_POSITION;
@@ -45,7 +58,8 @@ struct VS_OUTPUT
 	float3 normalW : NORMAL;
 	float3 tangentW : TANGENT;
 	float3 bitangentW : BITANGENT;
-	float2 uv : TEXCOORD;
+	float2 uv : TEXCOORD0;
+	float4 uvs[MAX_LIGHTS] : TEXCOORD1;
 };
 
 float WeightSum(float4 fWeight)
@@ -70,21 +84,32 @@ VS_OUTPUT VS_Player(VS_INPUT input)
 			mtxVertexToBoneWorld += input.weights[i] * mul(gpmtxBoneOffsets[input.indices[i]], gpmtxBoneTransforms[input.indices[i]]);
 		}
 
-		output.positionW = mul(float4(input.position, 1.0f), mtxVertexToBoneWorld).xyz;
+		float4 positionW = mul(float4(input.position, 1.0f), mtxVertexToBoneWorld);
+		output.positionW = positionW.xyz;
 		output.normalW = mul(input.normal, (float3x3)mtxVertexToBoneWorld).xyz;
 		output.tangentW = mul(input.tangent, (float3x3)mtxVertexToBoneWorld).xyz;
 		output.bitangentW = mul(input.bitangent, (float3x3)mtxVertexToBoneWorld).xyz;
 		output.position = mul(mul(float4(output.positionW, 1.0f), gmtxView), gmtxProjection);
 		output.uv = input.uv;
+
+		for (int i = 0; i < MAX_LIGHTS; i++)
+		{
+			if (gcbToLightSpaces[i].f4Position.w != 0.0f) output.uvs[i] = mul(positionW, gcbToLightSpaces[i].mtxToTexture);
+		}
 	}
 	else
 	{
-		output.positionW = mul(float4(input.position, 1.0f), gmtxGameObject).xyz;
+		float4 positionW = mul(float4(input.position, 1.0f), gmtxGameObject);
+		output.positionW = positionW.xyz;
 		output.normalW = mul(input.normal, (float3x3)gmtxGameObject);
 		output.tangentW = mul(input.tangent, (float3x3)gmtxGameObject);
 		output.bitangentW = mul(input.bitangent, (float3x3)gmtxGameObject);
 		output.position = mul(mul(float4(output.positionW, 1.0f), gmtxView), gmtxProjection);
 		output.uv = input.uv;
+		for (int i = 0; i < MAX_LIGHTS; i++)
+		{
+			if (gcbToLightSpaces[i].f4Position.w != 0.0f) output.uvs[i] = mul(positionW, gcbToLightSpaces[i].mtxToTexture);
+		}
 	}
 
 	return(output);

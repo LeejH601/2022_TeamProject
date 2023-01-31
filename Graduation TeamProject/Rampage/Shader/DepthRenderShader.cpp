@@ -318,3 +318,9 @@ void CDepthRenderShader::PrepareShadowMap(ID3D12GraphicsCommandList* pd3dCommand
 		}
 	}
 }
+
+void CDepthRenderShader::UpdateDepthTexture(ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	if (m_pd3dCbvSrvDescriptorHeap) pd3dCommandList->SetDescriptorHeaps(1, m_pd3dCbvSrvDescriptorHeap.GetAddressOf());
+	if (m_pDepthTexture) m_pDepthTexture->UpdateShaderVariables(pd3dCommandList);
+}

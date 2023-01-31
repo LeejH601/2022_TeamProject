@@ -45,6 +45,7 @@ struct VS_TERRAIN_OUTPUT
 	float3 normal : NORMAL;
 	float3 toCamera : TEXCOORD2;
 	float3 toLight : TEXCOORD3;
+	float4 uvs[MAX_LIGHTS] : TEXCOORD4;
 };
 
 
@@ -145,9 +146,10 @@ float4 PSParallaxTerrain(VS_TERRAIN_OUTPUT input) : SV_TARGET
 	}
 	vFinalNormal = vFinalNormal * 2.0f - 1.0f;
 	float3 toLight = float3(0.0f, 1.0f, 0.0f);
-	/*float4 cIllumination = Lighting(input.positionW, input.normal);
-	float3 vDiffuse = (lerp(vFinalColor, cIllumination, 0.2f).xyz);*/
-	float3 vDiffuse = vFinalColor.rgb * max(0.0f, dot(input.toLight, vFinalNormal.xyz)) * 0.5;
+	float4 cIllumination = Lighting(input.positionW, input.normal, true, input.uvs);
+
+	float3 vDiffuse = (lerp(vFinalColor, cIllumination, 0.2f).xyz);
+	//float3 vDiffuse = vFinalColor.rgb * max(0.0f, dot(input.toLight, vFinalNormal.xyz)) * 0.5;
 	float3 vAmbient = vFinalColor.rgb * 1.0f;
 	vFinalColor.rgb = vAmbient + vDiffuse;
 

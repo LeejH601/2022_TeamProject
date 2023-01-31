@@ -46,7 +46,6 @@ cbuffer cbLights : register(b4)
 
 Texture2D<float> gtxtDepthTextures[MAX_DEPTH_TEXTURES] : register(t23);
 SamplerComparisonState gssComparisonPCFShadow : register(s2);
-SamplerState gSampler : register(s0);
 
 float4 DirectionalLight(int nIndex, float3 vNormal, float3 vToCamera)
 {
@@ -177,7 +176,7 @@ float4 Lighting(float3 vPosition, float3 vNormal)
 	return(cColor);
 }
 
-//#define _WITH_PCF_FILTERING
+#define _WITH_PCF_FILTERING
 
 float Compute3x3ShadowFactor(float2 uv, float fDepth, uint nIndex)
 {
@@ -223,7 +222,7 @@ float4 Lighting(float3 vPosition, float3 vNormal, bool bShadow, float4 uvs[MAX_L
 				cColor += SpotLight(i, vPosition, vNormal, vToCamera) * fShadowFactor;
 			}
 
-			cColor = float4(1.0f, 1.0f, 1.0f, 1.0f) * fShadowFactor;
+			//cColor = float4(1.0f, 1.0f, 1.0f, 1.0f) * fShadowFactor;
 		}
 	}
 

@@ -25,6 +25,8 @@ cbuffer cbCameraInfo : register(b1)
 Texture2D gtxMappedTexture[7] : register(t0);
 SamplerState gSamplerState : register(s0);
 
+#include "Light.hlsl"
+
 struct VS_OUTPUT
 {
 	float4 position : SV_POSITION;
@@ -32,10 +34,20 @@ struct VS_OUTPUT
 	float3 normalW : NORMAL;
 	float3 tangentW : TANGENT;
 	float3 bitangentW : BITANGENT;
-	float2 uv : TEXCOORD;
+	float2 uv : TEXCOORD0;
+	float4 uvs[MAX_LIGHTS] : TEXCOORD1;
 };
 
-#include "Light.hlsl"
+struct CB_TOOBJECTSPACE
+{
+	matrix		mtxToTexture;
+	float4		f4Position;
+};
+
+cbuffer cbToLightSpace : register(b6)
+{
+	CB_TOOBJECTSPACE gcbToLightSpaces[MAX_LIGHTS];
+};
 
 [earlydepthstencil]
 float4 PS_Player(VS_OUTPUT input) : SV_TARGET
@@ -65,7 +77,7 @@ float4 PS_Player(VS_OUTPUT input) : SV_TARGET
 	float4 cColor = cAlbedoColor + cSpecularColor + cEmissionColor;
 	//float3 normalW = normalize(input.normalW);
 	float3 normalW = mul(normal, TBN);
-	float4 cIllumination = Lighting(input.positionW, normalW);
+	float4 cIllumination = Lighting(input.positionW, normalW, true, input.uvs);
 	cColor = lerp(cColor, cIllumination, 0.2f);
 
 	return cColor;

@@ -12,8 +12,8 @@
 void CMainTMPScene::OnPreRender(ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed)
 {
 	CDepthRenderShader::GetInst()->PrepareShadowMap(pd3dCommandList, fTimeElapsed);
+	CDepthRenderShader::GetInst()->UpdateDepthTexture(pd3dCommandList);
 }
-
 void CMainTMPScene::OnPrepareRender(ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	pd3dCommandList->SetGraphicsRootSignature(m_pd3dGraphicsRootSignature.Get());
@@ -175,10 +175,17 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 
 	CBoundingBoxShader::GetInst()->CreateShader(pd3dDevice, GetGraphicsRootSignature(), 1, &pdxgiObjectRtvFormats, DXGI_FORMAT_D32_FLOAT, 0);
 
+	DXGI_FORMAT pdxgiRtvFormats[1] = { DXGI_FORMAT_R32_FLOAT };
+	CDepthRenderShader::GetInst()->CreateShader(pd3dDevice, GetGraphicsRootSignature(), 1, pdxgiRtvFormats, DXGI_FORMAT_D32_FLOAT, 0);
+	CDepthRenderShader::GetInst()->CreateShader(pd3dDevice, GetGraphicsRootSignature(), 1, pdxgiRtvFormats, DXGI_FORMAT_D32_FLOAT, 1);
+	CDepthRenderShader::GetInst()->BuildObjects(pd3dDevice, pd3dCommandList, NULL);
+	CDepthRenderShader::GetInst()->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, CDepthRenderShader::GetInst()->GetDepthTexture()->GetTextures());
+	CDepthRenderShader::GetInst()->CreateShaderResourceViews(pd3dDevice, CDepthRenderShader::GetInst()->GetDepthTexture(), 0, 9);
+
 	CModelShader::GetInst()->CreateShader(pd3dDevice, GetGraphicsRootSignature(), 1, &pdxgiObjectRtvFormats, DXGI_FORMAT_D32_FLOAT, 0);
 	CModelShader::GetInst()->CreateShaderVariables(pd3dDevice,pd3dCommandList);
 	CModelShader::GetInst()->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 100);
-
+	
 	CSoundManager::GetInst()->RegisterSound("Sound/mp3/David Bowie - Starman.mp3", false);
 	//CSoundManager::GetInst()->PlaySound("Sound/mp3/David Bowie - Starman.mp3");
 
@@ -223,29 +230,25 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 
 	m_pTerrainShader = std::make_unique<CSplatTerrainShader>();
 	m_pTerrainShader->CreateShader(pd3dDevice, GetGraphicsRootSignature(), 1, &pdxgiObjectRtvFormats, DXGI_FORMAT_D32_FLOAT, 0);
-	m_pTerrainShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 13);
+	m_pTerrainShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 13 + CDepthRenderShader::GetInst()->GetDepthTexture()->GetTextures());
 	m_pTerrainShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
+	
 
 	// Terrain »ý¼º
 	XMFLOAT3 xmf3Scale(18.0f, 6.0f, 18.0f);
 	XMFLOAT4 xmf4Color(0.0f, 0.5f, 0.0f, 0.0f);
 	m_pTerrain = std::make_unique<CSplatTerrain>(pd3dDevice, pd3dCommandList, GetGraphicsRootSignature(), _T("Terrain/terrainHeightMap257.raw"), 257, 257, 257, 257, xmf3Scale, xmf4Color, m_pTerrainShader.get());
-	m_pTerrain->SetPosition(XMFLOAT3(-800.f, -350.f, -800.f));
+	m_pTerrain->SetPosition(XMFLOAT3(-800.f, -600.f, -800.f));
 
-	DXGI_FORMAT pdxgiRtvFormats[1] = { DXGI_FORMAT_R32_FLOAT };
 	CDepthRenderShader::GetInst()->SetObjects(&m_pObjects);
 	CDepthRenderShader::GetInst()->SetLight(m_pLight->GetLights());
 	CDepthRenderShader::GetInst()->SetTerrain(m_pTerrain.get());
-	CDepthRenderShader::GetInst()->CreateShader(pd3dDevice, GetGraphicsRootSignature(), 1, pdxgiRtvFormats, DXGI_FORMAT_D32_FLOAT, 0);
-	CDepthRenderShader::GetInst()->CreateShader(pd3dDevice, GetGraphicsRootSignature(), 1, pdxgiRtvFormats, DXGI_FORMAT_D32_FLOAT, 1);
-	CDepthRenderShader::GetInst()->BuildObjects(pd3dDevice, pd3dCommandList, NULL);
 
-	CShadowMapShader::GetInst()->SetObjects(&m_pObjects);
+	/*CShadowMapShader::GetInst()->SetObjects(&m_pObjects);
 	CShadowMapShader::GetInst()->SetTerrain(m_pTerrain.get());
 	CShadowMapShader::GetInst()->CreateShader(pd3dDevice, GetGraphicsRootSignature(), 1, &pdxgiObjectRtvFormats, DXGI_FORMAT_D32_FLOAT, 0);
 	CShadowMapShader::GetInst()->CreateShader(pd3dDevice, GetGraphicsRootSignature(), 1, &pdxgiObjectRtvFormats, DXGI_FORMAT_D32_FLOAT, 1);
-	CShadowMapShader::GetInst()->BuildObjects(pd3dDevice, pd3dCommandList, CDepthRenderShader::GetInst()->GetDepthTexture());
-
+	CShadowMapShader::GetInst()->BuildObjects(pd3dDevice, pd3dCommandList, CDepthRenderShader::GetInst()->GetDepthTexture());*/
 }
 void CMainTMPScene::AnimateObjects(float fTimeElapsed)
 {
@@ -255,10 +258,9 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 	m_pLight->Render(pd3dCommandList);
 
 	CModelShader::GetInst()->Render(pd3dCommandList, 0);
+	//CShadowMapShader::GetInst()->Render(pd3dCommandList, NULL);
 
-	CShadowMapShader::GetInst()->Render(pd3dCommandList, NULL);
-
-	/*for (int i = 0; i < m_pObjects.size(); ++i)
+	for (int i = 0; i < m_pObjects.size(); ++i)
 	{
 		m_pObjects[i]->Animate(fTimeElapsed);
 		if (!m_pObjects[i]->m_pSkinnedAnimationController) m_pObjects[i]->UpdateTransform(NULL);
@@ -266,7 +268,7 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 	}
 
 	m_pTerrainShader->Render(pd3dCommandList, 0);
-	m_pTerrain->Render(pd3dCommandList, true);*/
+	m_pTerrain->Render(pd3dCommandList, true);
 
 	//CBoundingBoxShader::GetInst()->Render(pd3dCommandList, 0);
 }

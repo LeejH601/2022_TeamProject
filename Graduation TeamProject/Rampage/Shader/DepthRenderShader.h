@@ -64,4 +64,5 @@ public:
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, float fTimeElapsed);
 
 	void PrepareShadowMap(ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed);
+	void UpdateDepthTexture(ID3D12GraphicsCommandList* pd3dCommandList);
 };
