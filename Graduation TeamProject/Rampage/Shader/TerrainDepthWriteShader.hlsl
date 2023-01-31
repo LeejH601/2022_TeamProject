@@ -2,10 +2,10 @@ struct VS_TERRAIN_OUTPUT
 {
 	float4 position : SV_POSITION;
 	float4 positionW : POSITION;
-	float4 color : COLOR;
 	float2 uv0 : TEXCOORD0;
 	float2 uv1 : TEXCOORD1;
-	float3 normal : NORMAL;
+	float3 normal : NORMAL0;
+	float3 normalW : NORMAL1;
 	float3 toCamera : TEXCOORD2;
 	float3 toLight : TEXCOORD3;
 };

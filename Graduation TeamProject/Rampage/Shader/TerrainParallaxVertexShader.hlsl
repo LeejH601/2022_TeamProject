@@ -40,10 +40,10 @@ struct VS_TERRAIN_OUTPUT
 {
 	float4 position : SV_POSITION;
 	float4 positionW : POSITION;
-	float4 color : COLOR;
 	float2 uv0 : TEXCOORD0;
 	float2 uv1 : TEXCOORD1;
-	float3 normal : NORMAL;
+	float3 normal : NORMAL0;
+	float3 normalW : NORMAL1;
 	float3 toCamera : TEXCOORD2;
 	float3 toLight : TEXCOORD3;
 	float4 uvs[MAX_LIGHTS] : TEXCOORD4;
@@ -53,13 +53,12 @@ VS_TERRAIN_OUTPUT VSParallaxTerrain(VS_TERRAIN_INPUT input)
 {
 	VS_TERRAIN_OUTPUT output;
 
-	output.color = input.color;
 	output.uv0 = input.uv0;
 	output.uv1 = input.uv1;
 
 	float4 positionW = mul(float4(input.position, 1.0f), gmtxGameObject);
-	float3 normalW = mul(float4(input.normal, 1.0f), gmtxGameObject).xyz;
-
+	float3 normalW = mul(float4(input.normal, 0.0f), gmtxGameObject).xyz;
+	output.normalW = normalW;
 	output.position = mul(mul(positionW, gmtxView), gmtxProjection);
 	output.positionW = positionW;
 

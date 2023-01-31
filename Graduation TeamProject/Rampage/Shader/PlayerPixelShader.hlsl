@@ -72,13 +72,13 @@ float4 PS_Player(VS_OUTPUT input) : SV_TARGET
 	float3x3 TBN = float3x3(T, B, N);
 
 	float3 normal = cNormalColor.rgb;
-	normal = 2.0f * normal - 1.0f;
+	normal = (2.0f * normal) - 1.0f;
 
 	float4 cColor = cAlbedoColor + cSpecularColor + cEmissionColor;
 	//float3 normalW = normalize(input.normalW);
-	float3 normalW = mul(normal, TBN);
-	float4 cIllumination = Lighting(input.positionW, normalW, true, input.uvs);
-	cColor = lerp(cColor, cIllumination, 0.2f);
+	float3 normalW = mul(TBN, normal);
 
-	return cColor;
+	float4 cIllumination = Lighting(input.positionW, normalize(input.normalW), cColor, true, input.uvs);
+
+	return (cIllumination);
 }

@@ -262,8 +262,7 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 
 	for (int i = 0; i < m_pObjects.size(); ++i)
 	{
-		m_pObjects[i]->Animate(fTimeElapsed);
-		if (!m_pObjects[i]->m_pSkinnedAnimationController) m_pObjects[i]->UpdateTransform(NULL);
+		m_pObjects[i]->Animate(0.0f);
 		m_pObjects[i]->Render(pd3dCommandList, true);
 	}
 
