@@ -124,6 +124,9 @@
     <ClCompile Include="Global\Entity.cpp">
       <Filter>Global</Filter>
     </ClCompile>
+    <ClCompile Include="Global\Locator.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Global\stdafx.h">
@@ -231,6 +234,7 @@
     <ClInclude Include="Global\Global.h">
       <Filter>Global</Filter>
     </ClInclude>
+    <ClInclude Include="Global\Locator.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shader\PlayerPixelShader.hlsl" />

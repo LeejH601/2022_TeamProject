@@ -36,6 +36,8 @@
 #include <vector>
 #include <random>
 #include <set>
+#include <typeinfo>
+#include <algorithm>
 #include "..\ImGui\imgui.h"
 #include "..\ImGui\imgui_impl_dx12.h"
 #include "..\ImGui\imgui_impl_win32.h"
@@ -86,13 +88,10 @@ public:\
 		return &m_pInst;\
 	}
 
-class CCamera;
-class CCameraMovementManager;
-class CGameObject;
+
 extern UINT	gnCbvSrvDescriptorIncrementSize;
 extern UINT gnRtvDescriptorIncrementSize;
 extern std::default_random_engine dre;
-extern CCameraMovementManager CMManager;
 
 
 extern int ReadIntegerFromFile(FILE* pInFile);
@@ -115,24 +114,9 @@ inline bool IsEqual(float fA, float fB, float fEpsilon) { return(::IsZero(fA - f
 inline float InverseSqrt(float fValue) { return 1.0f / sqrtf(fValue); }
 inline void Swap(float* pfS, float* pfT) { float fTemp = *pfS; *pfS = *pfT; *pfT = fTemp; }
 
-class CLocator
-{
-	std::shared_ptr<CCamera> m_pSimulaterCamera;
-	std::shared_ptr<CGameObject> m_pSimulaterPlayer;
-	std::shared_ptr<CGameObject> m_pMainPlayer;
 
-public:
-	CCamera* GetSimulaterCamera() { return m_pSimulaterCamera.get(); };
-	void SetSimulaterCamera(std::shared_ptr<CCamera> pCamera) { m_pSimulaterCamera = pCamera; };
 
-	CGameObject* GetSimulaterPlayer() { return m_pSimulaterPlayer.get(); };
-	void SetSimulaterPlayer(std::shared_ptr<CGameObject> pPlayer) { m_pSimulaterPlayer = pPlayer; };
 
-	CGameObject* GetMainPlayer() { return m_pMainPlayer.get(); };
-	void SetMainPlayer(std::shared_ptr<CGameObject> pPlayer) { m_pMainPlayer = pPlayer; };
-};
-
-extern CLocator Locator;
 
 namespace Vector3
 {

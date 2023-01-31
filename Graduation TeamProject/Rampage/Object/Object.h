@@ -27,7 +27,7 @@ class CShader;
 class CTexture;
 class CMaterial;
 
-class CGameObject : public IEntity
+class CGameObject
 {
 public:
 	char m_pstrFrameName[MAX_FRAMENAME];
@@ -139,7 +139,7 @@ public:
 	virtual void OnRootMotion(CGameObject* pRootGameObject);
 };
 
-class CKnightObject : public CGameObject
+class CKnightObject : public CGameObject, public IEntity
 {
 public:
 	CKnightObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks);
@@ -150,7 +150,7 @@ public:
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
-class COrcObject : public CGameObject
+class COrcObject : public CGameObject, public IEntity
 {
 private:
 	CGameObject* pWeapon;

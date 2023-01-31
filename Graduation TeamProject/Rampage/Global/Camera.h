@@ -5,6 +5,8 @@
 
 #define ASPECT_RATIO (float(FRAME_BUFFER_WIDTH) / float(FRAME_BUFFER_HEIGHT))
 
+class CCamera;
+
 struct VS_CB_CAMERA_INFO
 {
 	XMFLOAT4X4 m_xmf4x4View;

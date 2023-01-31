@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "DDSTextureLoader12.h"
+#include "Component.h"
 
 UINT gnCbvSrvDescriptorIncrementSize = 0;
 UINT gnRtvDescriptorIncrementSize = 0;

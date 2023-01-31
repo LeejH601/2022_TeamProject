@@ -4,6 +4,7 @@
 #include "..\Scene\SimulatorScene.h"
 #include "..\Object\Texture.h"
 #include "..\Global\GameFramework.h"
+#include "..\Global\Locator.h"
 
 #define NUM_FRAMES_IN_FLIGHT 3
 
