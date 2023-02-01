@@ -147,7 +147,11 @@ void CAnimationController::SetAnimationCallbackHandler(int nAnimationTrack, CAni
 }
 void CAnimationController::SetTrackAnimationSet(int nAnimationTrack, int nAnimationSet)
 {
-	if (m_pAnimationTracks.data()) m_pAnimationTracks[nAnimationTrack].m_nAnimationSet = nAnimationSet;
+	if (m_pAnimationTracks.data())
+	{
+		m_pAnimationTracks[nAnimationTrack].m_nAnimationSet = nAnimationSet;
+		m_pAnimationTracks[nAnimationTrack].SetPosition(0.0f);
+	}
 }
 void CAnimationController::SetTrackEnable(int nAnimationTrack, bool bEnable)
 {

@@ -29,6 +29,8 @@ class CMaterial;
 class CGameObject
 {
 public:
+	bool bEnable = true;
+	
 	char m_pstrFrameName[MAX_FRAMENAME];
 
 	XMFLOAT4X4 m_xmf4x4Transform;
@@ -59,6 +61,8 @@ public:
 	XMFLOAT4X4 GetWorld();
 	CGameObject* GetParent() { return (m_pParent); }
 	UINT GetMeshType();
+	bool GetEnable() { return bEnable; }
+	virtual BoundingBox GetBoundingBox() { return BoundingBox{}; }
 
 	void SetChild(std::shared_ptr<CGameObject> pChild, bool bReferenceUpdate = false);
 	void SetShader(std::shared_ptr<CShader> pShader, std::shared_ptr<CTexture> pTexture = NULL);
@@ -71,7 +75,9 @@ public:
 	void SetPosition(XMFLOAT3 xmf3Position);
 	void SetTransform(XMFLOAT4X4 xmf4x4Transform) { m_xmf4x4Transform = xmf4x4Transform; }
 	void SetWorld(XMFLOAT4X4 xmf4x4World) { m_xmf4x4World = xmf4x4World; }
-
+	void SetEnable() { bEnable = true; }
+	void SetDisable() { bEnable = false; }
+	
 	void Rotate(float fPitch = 10.0f, float fYaw = 10.0f, float fRoll = 10.0f);
 	void Rotate(XMFLOAT3* pxmf3Axis, float fAngle);
 
@@ -87,6 +93,7 @@ public:
 	virtual void PrepareBoundingBox(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList) {}
 	virtual void Animate(float fTimeElapsed);
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, bool b_UseTexture, CCamera* pCamera = NULL);
+	virtual void CheckCollision(CGameObject* pTargetObject) {}
 
 	void LoadFrameHierarchyFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CGameObject* pParent, FILE* pInFile, int* pnSkinnedMeshes);
 	void LoadMaterialsFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CGameObject* pParent, FILE* pInFile);
@@ -154,11 +161,23 @@ private:
 	CGameObject* pWeapon;
 	BoundingBox m_BodyBoundingBox;
 	BoundingBox m_WeaponBoundingBox;
+	BoundingBox m_TransformedBodyBoudningBox;
+	BoundingBox m_TransformedWeaponBoudningBox;
 	CGameObject* pBodyBoundingBoxMesh;
 	CGameObject* pWeaponBoundingBoxMesh;
 public:
 	CKnightObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks);
 	virtual ~CKnightObject();
+
+	virtual BoundingBox GetBoundingBox() { return m_TransformedBodyBoudningBox; }
+	virtual void CheckCollision(CGameObject* pTargetObject) {
+		if (pTargetObject)
+		{
+			BoundingBox TargetBoundingBox = pTargetObject->GetBoundingBox();
+			if (m_TransformedWeaponBoudningBox.Intersects(TargetBoundingBox))
+				pTargetObject->SetDisable();
+		}
+	}
 
 	virtual void Animate(float fTimeElapsed);
 	virtual void UpdateTransform(XMFLOAT4X4* pxmf4x4Parent = NULL);
@@ -172,14 +191,24 @@ class COrcObject : public CGameObject
 private:
 	CGameObject* pWeapon;
 	BoundingBox m_BodyBoundingBox;
-	BoundingBox m_WeaponBodyBoundingBox;
 	BoundingBox m_WeaponBoundingBox;
+	BoundingBox m_TransformedBodyBoudningBox;
+	BoundingBox m_TransformedWeaponBoudningBox;
 	CGameObject* pBodyBoundingBoxMesh;
-	CGameObject* pWeaponBodyBoundingBoxMesh;
 	CGameObject* pWeaponBoundingBoxMesh;
 public:
 	COrcObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks);
 	virtual ~COrcObject();
+
+	virtual BoundingBox GetBoundingBox() { return m_TransformedBodyBoudningBox; }
+	virtual void CheckCollision(CGameObject* pTargetObject) {
+		if (pTargetObject)
+		{
+			BoundingBox TargetBoundingBox = pTargetObject->GetBoundingBox();
+			if (m_TransformedWeaponBoudningBox.Intersects(TargetBoundingBox))
+				pTargetObject->SetDisable();
+		}
+	}
 
 	virtual void Animate(float fTimeElapsed);
 	virtual void UpdateTransform(XMFLOAT4X4* pxmf4x4Parent = NULL);
@@ -194,11 +223,23 @@ private:
 	CGameObject* pWeapon;
 	BoundingBox m_BodyBoundingBox;
 	BoundingBox m_WeaponBoundingBox;
+	BoundingBox m_TransformedBodyBoudningBox;
+	BoundingBox m_TransformedWeaponBoudningBox;
 	CGameObject* pBodyBoundingBoxMesh;
 	CGameObject* pWeaponBoundingBoxMesh;
 public:
 	CGoblinObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks);
 	virtual ~CGoblinObject();
+
+	virtual BoundingBox GetBoundingBox() { return m_TransformedBodyBoudningBox; }
+	virtual void CheckCollision(CGameObject* pTargetObject) {
+		if (pTargetObject)
+		{
+			BoundingBox TargetBoundingBox = pTargetObject->GetBoundingBox();
+			if (m_TransformedWeaponBoudningBox.Intersects(TargetBoundingBox))
+				pTargetObject->SetDisable();
+		}
+	}
 
 	virtual void Animate(float fTimeElapsed);
 	virtual void UpdateTransform(XMFLOAT4X4* pxmf4x4Parent = NULL);
@@ -213,11 +254,23 @@ private:
 	CGameObject* pWeapon;
 	BoundingBox m_BodyBoundingBox;
 	BoundingBox m_WeaponBoundingBox;
+	BoundingBox m_TransformedBodyBoudningBox;
+	BoundingBox m_TransformedWeaponBoudningBox;
 	CGameObject* pBodyBoundingBoxMesh;
 	CGameObject* pWeaponBoundingBoxMesh;
 public:
 	CSkeletonObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks);
 	virtual ~CSkeletonObject();
+
+	virtual BoundingBox GetBoundingBox() { return m_TransformedBodyBoudningBox; }
+	virtual void CheckCollision(CGameObject* pTargetObject) {
+		if (pTargetObject)
+		{
+			BoundingBox TargetBoundingBox = pTargetObject->GetBoundingBox();
+			if (m_TransformedWeaponBoudningBox.Intersects(TargetBoundingBox))
+				pTargetObject->SetDisable();
+		}
+	}
 
 	virtual void Animate(float fTimeElapsed);
 	virtual void UpdateTransform(XMFLOAT4X4* pxmf4x4Parent = NULL);

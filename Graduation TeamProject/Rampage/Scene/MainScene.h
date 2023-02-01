@@ -12,6 +12,7 @@ private:
 	std::unique_ptr<CLight> m_pLight;
 	std::unique_ptr<CSplatTerrain> m_pTerrain;
 	std::unique_ptr<CShader> m_pTerrainShader;
+	std::unique_ptr<CShader> m_pDepthRenderShader;
 public:
 	CMainTMPScene() {}
 	virtual ~CMainTMPScene() {}

@@ -333,13 +333,14 @@ void CImGuiManager::OnPrepareRender(ID3D12GraphicsCommandList* pd3dCommandList, 
 {
     ::SynchronizeResourceTransition(pd3dCommandList, m_pRTTexture->GetResource(0), D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_RENDER_TARGET);
 
-    PrepareRenderTarget(pd3dCommandList, d3dDsvDescriptorCPUHandle);
     CSimulatorScene::GetInst()->OnPrepareRender(pd3dCommandList);
 
     /*if (pCamera)
         pCamera->OnPrepareRender(pd3dCommandList);*/
-    m_pCamera->OnPrepareRender(pd3dCommandList);
+    CSimulatorScene::GetInst()->OnPreRender(pd3dCommandList, fTimeElapsed);
 
+    PrepareRenderTarget(pd3dCommandList, d3dDsvDescriptorCPUHandle);
+    m_pCamera->OnPrepareRender(pd3dCommandList);
     CSimulatorScene::GetInst()->Render(pd3dCommandList, fTimeElapsed);
 
     ::SynchronizeResourceTransition(pd3dCommandList, m_pRTTexture->GetResource(0), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_COMMON);

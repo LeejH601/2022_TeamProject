@@ -3,9 +3,18 @@
 #include "..\Object\Texture.h"
 #include "..\Object\ModelManager.h"
 #include "..\Shader\ModelShader.h"
-#include "..\Shader\ModelShader.h"
-#include "..\Sound\SoundManager.h"
+#include "..\Shader\DepthRenderShader.h"
+//#include "..\Sound\SoundManager.h"
 
+void CSimulatorScene::OnPreRender(ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed)
+{
+	if (m_pDepthRenderShader)
+	{
+		((CDepthRenderShader*)m_pDepthRenderShader.get())->PrepareShadowMap(pd3dCommandList, fTimeElapsed);
+		((CDepthRenderShader*)m_pDepthRenderShader.get())->UpdateDepthTexture(pd3dCommandList);
+		CheckCollide();
+	}
+}
 void CSimulatorScene::OnPrepareRender(ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	pd3dCommandList->SetGraphicsRootSignature(m_pd3dGraphicsRootSignature.Get());
@@ -163,52 +172,88 @@ void CSimulatorScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 {
 	CreateGraphicsRootSignature(pd3dDevice);
 
-	DXGI_FORMAT pdxgiObjectRtvFormats[2] = { DXGI_FORMAT_R8G8B8A8_UNORM, DXGI_FORMAT_R8G8B8A8_UNORM };
+	DXGI_FORMAT pdxgiObjectRtvFormats = { DXGI_FORMAT_R8G8B8A8_UNORM };
+
+	CModelShader::GetInst()->CreateShader(pd3dDevice, GetGraphicsRootSignature(), 1, &pdxgiObjectRtvFormats, DXGI_FORMAT_D32_FLOAT, 1);
+
+	DXGI_FORMAT pdxgiRtvFormats[1] = { DXGI_FORMAT_R32_FLOAT };
+	m_pDepthRenderShader = std::make_unique<CDepthRenderShader>();
+	m_pDepthRenderShader->CreateShader(pd3dDevice, GetGraphicsRootSignature(), 1, pdxgiRtvFormats, DXGI_FORMAT_D32_FLOAT, 0);
+	m_pDepthRenderShader->CreateShader(pd3dDevice, GetGraphicsRootSignature(), 1, pdxgiRtvFormats, DXGI_FORMAT_D32_FLOAT, 1);
+	m_pDepthRenderShader->BuildObjects(pd3dDevice, pd3dCommandList, NULL);
+	m_pDepthRenderShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, ((CDepthRenderShader*)m_pDepthRenderShader.get())->GetDepthTexture()->GetTextures());
+	m_pDepthRenderShader->CreateShaderResourceViews(pd3dDevice, ((CDepthRenderShader*)m_pDepthRenderShader.get())->GetDepthTexture(), 0, 9);
+
+	// Light 持失
+	m_pLight = std::make_unique<CLight>();
+	m_pLight->CreateLightVariables(pd3dDevice, pd3dCommandList);
 
 	// 4->HIT
 	// 5->IDLE
-	m_pDummyEnemy = std::make_unique<CGoblinObject>(pd3dDevice, pd3dCommandList, 1);
+	std::unique_ptr<CGoblinObject> m_pDummyEnemy = std::make_unique<CGoblinObject>(pd3dDevice, pd3dCommandList, 1);
 	m_pDummyEnemy->SetPosition(XMFLOAT3(8.0f, 0.0f, 0.0f));
-	m_pDummyEnemy->SetScale(5.0f, 5.0f, 5.0f);
+	m_pDummyEnemy->SetScale(14.0f, 14.0f, 14.0f);
 	m_pDummyEnemy->Rotate(0.0f, -90.0f, 0.0f);
 	m_pDummyEnemy->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 5);
+	m_pEnemys.push_back(std::move(m_pDummyEnemy));
 
-	// 3->IDLE
-	// 28->Attack
 	m_pMainCharacter = std::make_unique<CKnightObject>(pd3dDevice, pd3dCommandList, 1);
 	m_pMainCharacter->SetPosition(XMFLOAT3(-8.0f, 0.0f, 0.0f));
 	m_pMainCharacter->SetScale(14.0f, 14.0f, 14.0f);
 	m_pMainCharacter->Rotate(0.0f, 90.0f, 0.0f);
-	m_pMainCharacter->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
+	m_pMainCharacter->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 4);
 	m_pMainCharacter->m_pSkinnedAnimationController->m_xmf3RootObjectScale = XMFLOAT3(14.0f, 14.0f, 14.0f);
 
-	/*int nAnimationSets = m_pMainCharacter->m_pSkinnedAnimationController->m_pAnimationSets->m_nAnimationSets;
+	((CDepthRenderShader*)m_pDepthRenderShader.get())->RegisterObject(m_pMainCharacter.get());
+	for (int i = 0; i < m_pEnemys.size(); ++i)
+		((CDepthRenderShader*)m_pDepthRenderShader.get())->RegisterObject(m_pEnemys[i].get());
 
-	for (int i = 0; i < nAnimationSets; ++i)
-	{
-		std::unique_ptr<CGameObject> pCharater = std::make_unique<CKnightObject>(pd3dDevice, pd3dCommandList, 1);
-		pCharater->SetPosition(XMFLOAT3(5.0f * i, 0.0f, 0.0f));
-		pCharater->SetScale(5.0f, 5.0f, 5.0f);
-		pCharater->Rotate(0.0f, -90.0f, 0.0f);
-		pCharater->m_pSkinnedAnimationController->SetTrackAnimationSet(0, i);
-		m_pMainCharacters.push_back(std::move(pCharater));
-	}*/
+	((CDepthRenderShader*)m_pDepthRenderShader.get())->SetLight(m_pLight->GetLights());
+	((CDepthRenderShader*)m_pDepthRenderShader.get())->SetTerrain(m_pTerrain.get());
+
+	m_pTerrainShader = std::make_unique<CSplatTerrainShader>();
+	m_pTerrainShader->CreateShader(pd3dDevice, GetGraphicsRootSignature(), 1, &pdxgiObjectRtvFormats, DXGI_FORMAT_D32_FLOAT, 0);
+	m_pTerrainShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 13);
+	m_pTerrainShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
+
+	// Terrain 持失
+	XMFLOAT3 xmf3Scale(18.0f, 6.0f, 18.0f);
+	XMFLOAT4 xmf4Color(0.0f, 0.5f, 0.0f, 0.0f);
+	m_pTerrain = std::make_unique<CSplatTerrain>(pd3dDevice, pd3dCommandList, GetGraphicsRootSignature(), _T("Terrain/terrainHeightMap257.raw"), 257, 257, 257, 257, xmf3Scale, xmf4Color, m_pTerrainShader.get());
+	m_pTerrain->SetPosition(XMFLOAT3(-800.f, -310.f, -800.f));
 }
 void CSimulatorScene::AnimateObjects(float fTimeElapsed)
 {
 
 }
+void CSimulatorScene::CheckCollide()
+{
+	for (int i = 0; i < m_pEnemys.size(); ++i)
+		m_pMainCharacter->CheckCollision(m_pEnemys[i].get());
+}
 void CSimulatorScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed)
 {
-	CModelShader::GetInst()->Render(pd3dCommandList, 0);
+	m_pLight->Render(pd3dCommandList);
 
-	m_pDummyEnemy->Animate(fTimeElapsed);
-	if (!m_pDummyEnemy->m_pSkinnedAnimationController) m_pDummyEnemy->UpdateTransform(NULL);
-	m_pDummyEnemy->Render(pd3dCommandList, true);
+	CModelShader::GetInst()->Render(pd3dCommandList, 1);
 
-	m_pMainCharacter->Animate(fTimeElapsed);
-	if (!m_pDummyEnemy->m_pSkinnedAnimationController) m_pMainCharacter->UpdateTransform(NULL);
-	m_pMainCharacter->Render(pd3dCommandList, true);
+	if (m_pMainCharacter->GetEnable())
+	{
+		m_pMainCharacter->Animate(0.0f);
+		m_pMainCharacter->Render(pd3dCommandList, true);
+	}
+
+	for (int i = 0; i < m_pEnemys.size(); ++i)
+	{
+		if (m_pEnemys[i]->GetEnable())
+		{
+			m_pEnemys[i]->Animate(0.0f);
+			m_pEnemys[i]->Render(pd3dCommandList, true);
+		}
+	}
+
+	m_pTerrainShader->Render(pd3dCommandList, 0);
+	m_pTerrain->Render(pd3dCommandList, true);
 
 	/*for (int i = 0; i < m_pMainCharacters.size(); ++i)
 	{
@@ -221,6 +266,7 @@ void CSimulatorScene::SetPlayerAnimationSet(int nSet)
 {
 	m_pMainCharacter->m_pSkinnedAnimationController->SetTrackAnimationSet(0, nSet);
 	m_pMainCharacter->m_pSkinnedAnimationController->m_fTime = 0.0f;
+	m_pMainCharacter->Animate(0.0f);
 }
 
 

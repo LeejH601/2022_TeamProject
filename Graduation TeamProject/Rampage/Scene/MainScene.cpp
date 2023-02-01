@@ -4,14 +4,17 @@
 #include "..\Object\ModelManager.h"
 #include "..\Shader\ModelShader.h"
 #include "..\Shader\ModelShader.h"
-#include "..\Sound\SoundManager.h"
+//#include "..\Sound\SoundManager.h"
 #include "..\Shader\BoundingBoxShader.h"
 #include "..\Shader\DepthRenderShader.h"
 
 void CMainTMPScene::OnPreRender(ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed)
 {
-	CDepthRenderShader::GetInst()->PrepareShadowMap(pd3dCommandList, fTimeElapsed);
-	CDepthRenderShader::GetInst()->UpdateDepthTexture(pd3dCommandList);
+	if (m_pDepthRenderShader)
+	{
+		((CDepthRenderShader*)m_pDepthRenderShader.get())->PrepareShadowMap(pd3dCommandList, fTimeElapsed);
+		((CDepthRenderShader*)m_pDepthRenderShader.get())->UpdateDepthTexture(pd3dCommandList);
+	}
 }
 void CMainTMPScene::OnPrepareRender(ID3D12GraphicsCommandList* pd3dCommandList)
 {
@@ -175,17 +178,18 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	CBoundingBoxShader::GetInst()->CreateShader(pd3dDevice, GetGraphicsRootSignature(), 1, &pdxgiObjectRtvFormats, DXGI_FORMAT_D32_FLOAT, 0);
 
 	DXGI_FORMAT pdxgiRtvFormats[1] = { DXGI_FORMAT_R32_FLOAT };
-	CDepthRenderShader::GetInst()->CreateShader(pd3dDevice, GetGraphicsRootSignature(), 1, pdxgiRtvFormats, DXGI_FORMAT_D32_FLOAT, 0);
-	CDepthRenderShader::GetInst()->CreateShader(pd3dDevice, GetGraphicsRootSignature(), 1, pdxgiRtvFormats, DXGI_FORMAT_D32_FLOAT, 1);
-	CDepthRenderShader::GetInst()->BuildObjects(pd3dDevice, pd3dCommandList, NULL);
-	CDepthRenderShader::GetInst()->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, CDepthRenderShader::GetInst()->GetDepthTexture()->GetTextures());
-	CDepthRenderShader::GetInst()->CreateShaderResourceViews(pd3dDevice, CDepthRenderShader::GetInst()->GetDepthTexture(), 0, 9);
+	m_pDepthRenderShader = std::make_unique<CDepthRenderShader>();
+	m_pDepthRenderShader->CreateShader(pd3dDevice, GetGraphicsRootSignature(), 1, pdxgiRtvFormats, DXGI_FORMAT_D32_FLOAT, 0);
+	m_pDepthRenderShader->CreateShader(pd3dDevice, GetGraphicsRootSignature(), 1, pdxgiRtvFormats, DXGI_FORMAT_D32_FLOAT, 1);
+	m_pDepthRenderShader->BuildObjects(pd3dDevice, pd3dCommandList, NULL);
+	m_pDepthRenderShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, ((CDepthRenderShader*)m_pDepthRenderShader.get())->GetDepthTexture()->GetTextures());
+	m_pDepthRenderShader->CreateShaderResourceViews(pd3dDevice, ((CDepthRenderShader*)m_pDepthRenderShader.get())->GetDepthTexture(), 0, 9);
 
 	CModelShader::GetInst()->CreateShader(pd3dDevice, GetGraphicsRootSignature(), 1, &pdxgiObjectRtvFormats, DXGI_FORMAT_D32_FLOAT, 0);
 	CModelShader::GetInst()->CreateShaderVariables(pd3dDevice,pd3dCommandList);
 	CModelShader::GetInst()->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 100);
 	
-	CSoundManager::GetInst()->RegisterSound("Sound/mp3/David Bowie - Starman.mp3", false);
+	//CSoundManager::GetInst()->RegisterSound("Sound/mp3/David Bowie - Starman.mp3", false);
 	//CSoundManager::GetInst()->PlaySound("Sound/mp3/David Bowie - Starman.mp3");
 
 	std::unique_ptr<CKnightObject> m_pObject = std::make_unique<CKnightObject>(pd3dDevice, pd3dCommandList, 1);
@@ -208,7 +212,21 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pObject->SetScale(10.0f, 10.0f, 10.0f);
 	m_pObject->Rotate(0.0f, 180.0f, 0.0f);
 	m_pObject->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 2);
+
+	//int nAnimationSets = m_pObject->m_pSkinnedAnimationController->m_pAnimationSets->m_nAnimationSets;
+
 	m_pObjects.push_back(std::move(m_pObject));
+
+
+	/*for (int i = 0; i < nAnimationSets; ++i)
+	{
+		std::unique_ptr<CGameObject> pCharater = std::make_unique<CKnightObject>(pd3dDevice, pd3dCommandList, 1);
+		pCharater->SetPosition(XMFLOAT3(5.0f * i, 0.0f, 0.0f));
+		pCharater->SetScale(5.0f, 5.0f, 5.0f);
+		pCharater->Rotate(0.0f, -90.0f, 0.0f);
+		pCharater->m_pSkinnedAnimationController->SetTrackAnimationSet(0, i);
+		m_pObjects.push_back(std::move(pCharater));
+	}*/
 
 	// Light »ý¼º
 	m_pLight = std::make_unique<CLight>();
@@ -229,7 +247,7 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 
 	m_pTerrainShader = std::make_unique<CSplatTerrainShader>();
 	m_pTerrainShader->CreateShader(pd3dDevice, GetGraphicsRootSignature(), 1, &pdxgiObjectRtvFormats, DXGI_FORMAT_D32_FLOAT, 0);
-	m_pTerrainShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 13 + CDepthRenderShader::GetInst()->GetDepthTexture()->GetTextures());
+	m_pTerrainShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 13);
 	m_pTerrainShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
 	
 
@@ -238,10 +256,10 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	XMFLOAT4 xmf4Color(0.0f, 0.5f, 0.0f, 0.0f);
 	m_pTerrain = std::make_unique<CSplatTerrain>(pd3dDevice, pd3dCommandList, GetGraphicsRootSignature(), _T("Terrain/terrainHeightMap257.raw"), 257, 257, 257, 257, xmf3Scale, xmf4Color, m_pTerrainShader.get());
 	m_pTerrain->SetPosition(XMFLOAT3(-800.f, -600.f, -800.f));
-
-	CDepthRenderShader::GetInst()->SetObjects(&m_pObjects);
-	CDepthRenderShader::GetInst()->SetLight(m_pLight->GetLights());
-	CDepthRenderShader::GetInst()->SetTerrain(m_pTerrain.get());
+	for (int i = 0; i < m_pObjects.size(); ++i)
+		((CDepthRenderShader*)m_pDepthRenderShader.get())->RegisterObject(m_pObjects[i].get());
+	((CDepthRenderShader*)m_pDepthRenderShader.get())->SetLight(m_pLight->GetLights());
+	((CDepthRenderShader*)m_pDepthRenderShader.get())->SetTerrain(m_pTerrain.get());
 }
 void CMainTMPScene::AnimateObjects(float fTimeElapsed)
 {

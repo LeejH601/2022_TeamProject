@@ -20,7 +20,7 @@ class CDepthRenderShader : public CShader
 {
 private:
 	LIGHT* m_pLights = NULL;
-	std::vector<std::unique_ptr<CGameObject>>* m_pObjects;
+	std::vector<CGameObject*> m_pObjects;
 	CGameObject* m_pTerrain;
 
 	std::unique_ptr<TOLIGHTSPACES> m_pToLightSpaces;
@@ -40,11 +40,10 @@ private:
 
 	XMMATRIX						m_xmProjectionToTexture;
 public:
-	DECLARE_SINGLE(CDepthRenderShader);
 	CDepthRenderShader();
 	virtual ~CDepthRenderShader();
 
-	void SetObjects(std::vector<std::unique_ptr<CGameObject>>* pObjects) { m_pObjects = pObjects; }
+	void RegisterObject(CGameObject* pObject) { m_pObjects.push_back(pObject); }
 	void SetTerrain(CGameObject* pTerrain) { m_pTerrain = pTerrain; }
 	void SetLight(LIGHT* pLights) { m_pLights = pLights; }
 	CTexture* GetDepthTexture() { return m_pDepthTexture.get(); }
