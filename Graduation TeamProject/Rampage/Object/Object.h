@@ -152,8 +152,10 @@ class CKnightObject : public CGameObject
 {
 private:
 	CGameObject* pWeapon;
-	CGameObject* pBodyBoundingBox;
-	CGameObject* pWeaponBoundingBox;
+	BoundingBox m_BodyBoundingBox;
+	BoundingBox m_WeaponBoundingBox;
+	CGameObject* pBodyBoundingBoxMesh;
+	CGameObject* pWeaponBoundingBoxMesh;
 public:
 	CKnightObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks);
 	virtual ~CKnightObject();
@@ -169,9 +171,12 @@ class COrcObject : public CGameObject
 {
 private:
 	CGameObject* pWeapon;
-	CGameObject* pBodyBoundingBox;
-	CGameObject* pWeaponBodyBoundingBox;
-	CGameObject* pWeaponBoundingBox;
+	BoundingBox m_BodyBoundingBox;
+	BoundingBox m_WeaponBodyBoundingBox;
+	BoundingBox m_WeaponBoundingBox;
+	CGameObject* pBodyBoundingBoxMesh;
+	CGameObject* pWeaponBodyBoundingBoxMesh;
+	CGameObject* pWeaponBoundingBoxMesh;
 public:
 	COrcObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks);
 	virtual ~COrcObject();
@@ -187,8 +192,10 @@ class CGoblinObject : public CGameObject
 {
 private:
 	CGameObject* pWeapon;
-	CGameObject* pBodyBoundingBox;
-	CGameObject* pWeaponBoundingBox;
+	BoundingBox m_BodyBoundingBox;
+	BoundingBox m_WeaponBoundingBox;
+	CGameObject* pBodyBoundingBoxMesh;
+	CGameObject* pWeaponBoundingBoxMesh;
 public:
 	CGoblinObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks);
 	virtual ~CGoblinObject();
@@ -204,8 +211,10 @@ class CSkeletonObject : public CGameObject
 {
 private:
 	CGameObject* pWeapon;
-	CGameObject* pBodyBoundingBox;
-	CGameObject* pWeaponBoundingBox;
+	BoundingBox m_BodyBoundingBox;
+	BoundingBox m_WeaponBoundingBox;
+	CGameObject* pBodyBoundingBoxMesh;
+	CGameObject* pWeaponBoundingBoxMesh;
 public:
 	CSkeletonObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks);
 	virtual ~CSkeletonObject();
