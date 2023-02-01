@@ -230,8 +230,5 @@
     <FxCompile Include="Shader\BoundPixelShader.hlsl" />
     <FxCompile Include="Shader\PlayerDepthWriteShader.hlsl" />
     <FxCompile Include="Shader\TerrainDepthWriteShader.hlsl" />
-    <FxCompile Include="Shader\PlayerShadowVS.hlsl" />
-    <FxCompile Include="Shader\TerrainShadowVS.hlsl" />
-    <FxCompile Include="Shader\ShadowMapPS.hlsl" />
   </ItemGroup>
 </Project>
