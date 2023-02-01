@@ -430,7 +430,7 @@ CBoundingBoxObject::~CBoundingBoxObject()
 void CBoundingBoxObject::PrepareRender()
 {
 }
-void CBoundingBoxObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
+void CBoundingBoxObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, bool b_UseTexture, CCamera* pCamera)
 {
 	if (m_pMesh)
 	{
@@ -508,10 +508,25 @@ void CKnightObject::UpdateTransform(XMFLOAT4X4* pxmf4x4Parent)
 	if (m_pChild) m_pChild->UpdateTransform(&m_xmf4x4World);
 
 	pBodyBoundingBox->SetWorld(m_xmf4x4Transform);
+
+	if (pWeapon)
+	{
+		XMFLOAT4X4 xmf4x4World = pWeapon->GetWorld();
+		XMFLOAT3 xmf3Position = XMFLOAT3{ xmf4x4World._41, xmf4x4World._42, xmf4x4World._43 };
+		XMFLOAT3 xmf3Direction = XMFLOAT3{ xmf4x4World._31, xmf4x4World._32, xmf4x4World._33 };
+		xmf3Position = Vector3::Add(xmf3Position, xmf3Direction, -0.8f);
+		xmf4x4World._41 = xmf3Position.x;
+		xmf4x4World._42 = xmf3Position.y;
+		xmf4x4World._43 = xmf3Position.z;
+		pWeaponBoundingBox->SetWorld(xmf4x4World);
+	}
 }
 void CKnightObject::PrepareBoundingBox(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
+	pWeapon = CGameObject::FindFrame("Weapon_r");
 	pBodyBoundingBox = CBoundingBoxShader::GetInst()->AddBoundingObject(pd3dDevice, pd3dCommandList, this, XMFLOAT3(0.0f, 1.0f, 0.0f), XMFLOAT3(0.7f, 2.0f, 0.7f));
+	pWeaponBoundingBox = CBoundingBoxShader::GetInst()->AddBoundingObject(pd3dDevice, pd3dCommandList, this, XMFLOAT3(0.0f, 0.4f, 0.8f), XMFLOAT3(0.025f, 0.55f, 0.125f));
+
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //

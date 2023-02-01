@@ -105,7 +105,7 @@ public:
 
 	void PrepareRender();
 	void SetParent(CGameObject* pObject) { m_pParent = pObject; }
-	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = NULL);
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, bool b_UseTexture, CCamera* pCamera = NULL);
 };
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -151,7 +151,9 @@ public:
 class CKnightObject : public CGameObject
 {
 private:
+	CGameObject* pWeapon;
 	CGameObject* pBodyBoundingBox;
+	CGameObject* pWeaponBoundingBox;
 public:
 	CKnightObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks);
 	virtual ~CKnightObject();
