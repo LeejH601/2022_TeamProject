@@ -175,7 +175,6 @@
     <ClCompile Include="Shader\DepthRenderShader.cpp" />
     <ClCompile Include="Shader\ModelShader.cpp" />
     <ClCompile Include="Shader\Shader.cpp" />
-    <ClCompile Include="Shader\ShadowMapShader.cpp" />
     <ClCompile Include="Shader\TerrainShader.cpp" />
     <ClCompile Include="Sound\Sound.cpp" />
     <ClCompile Include="Sound\SoundManager.cpp" />
@@ -210,7 +209,6 @@
     <ClInclude Include="Shader\DepthRenderShader.h" />
     <ClInclude Include="Shader\ModelShader.h" />
     <ClInclude Include="Shader\Shader.h" />
-    <ClInclude Include="Shader\ShadowMapShader.h" />
     <ClInclude Include="Shader\TerrainShader.h" />
     <ClInclude Include="Sound\Sound.h" />
     <ClInclude Include="Sound\SoundManager.h" />

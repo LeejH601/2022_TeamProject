@@ -7,7 +7,6 @@
 #include "..\Sound\SoundManager.h"
 #include "..\Shader\BoundingBoxShader.h"
 #include "..\Shader\DepthRenderShader.h"
-#include "..\Shader\ShadowMapShader.h"
 
 void CMainTMPScene::OnPreRender(ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed)
 {
@@ -243,12 +242,6 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	CDepthRenderShader::GetInst()->SetObjects(&m_pObjects);
 	CDepthRenderShader::GetInst()->SetLight(m_pLight->GetLights());
 	CDepthRenderShader::GetInst()->SetTerrain(m_pTerrain.get());
-
-	/*CShadowMapShader::GetInst()->SetObjects(&m_pObjects);
-	CShadowMapShader::GetInst()->SetTerrain(m_pTerrain.get());
-	CShadowMapShader::GetInst()->CreateShader(pd3dDevice, GetGraphicsRootSignature(), 1, &pdxgiObjectRtvFormats, DXGI_FORMAT_D32_FLOAT, 0);
-	CShadowMapShader::GetInst()->CreateShader(pd3dDevice, GetGraphicsRootSignature(), 1, &pdxgiObjectRtvFormats, DXGI_FORMAT_D32_FLOAT, 1);
-	CShadowMapShader::GetInst()->BuildObjects(pd3dDevice, pd3dCommandList, CDepthRenderShader::GetInst()->GetDepthTexture());*/
 }
 void CMainTMPScene::AnimateObjects(float fTimeElapsed)
 {
@@ -258,7 +251,6 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 	m_pLight->Render(pd3dCommandList);
 
 	CModelShader::GetInst()->Render(pd3dCommandList, 0);
-	//CShadowMapShader::GetInst()->Render(pd3dCommandList, NULL);
 
 	for (int i = 0; i < m_pObjects.size(); ++i)
 	{
@@ -269,7 +261,7 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 	m_pTerrainShader->Render(pd3dCommandList, 0);
 	m_pTerrain->Render(pd3dCommandList, true);
 
-	//CBoundingBoxShader::GetInst()->Render(pd3dCommandList, 0);
+	CBoundingBoxShader::GetInst()->Render(pd3dCommandList, 0);
 }
 
 
