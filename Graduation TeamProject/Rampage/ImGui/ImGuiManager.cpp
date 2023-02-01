@@ -75,15 +75,16 @@ void CImGuiManager::Init(HWND hWnd, ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 
 	m_pCamera = std::make_shared<CFirstPersonCamera>();
 	m_pCamera->Init(pd3dDevice, pd3dCommandList);
-	std::shared_ptr<CComponent> com = std::make_shared<CCameraMover>(m_pCamera);
+	/*std::shared_ptr<CComponent> com = std::make_shared<CCameraMover>(m_pCamera);
 	m_pCamera->m_vComponentSet.emplace_back(com);
 	com = std::make_shared<CCameraShaker>(m_pCamera);
 	m_pCamera->m_vComponentSet.emplace_back(com);
 	com = std::make_shared<CCameraZoomer>(m_pCamera);
-	m_pCamera->m_vComponentSet.emplace_back(com);
+	m_pCamera->m_vComponentSet.emplace_back(com);*/
 	m_pCamera->SetPosition(XMFLOAT3(-18.5f, 37.5f, -18.5f));
 	m_pCamera->SetLookAt(XMFLOAT3(0.0f, 0.0f, 0.0f));
 	m_pCamera->RegenerateViewMatrix();
+	Locator.SetSimulaterCamera(m_pCamera);
 
 	D3D12_CLEAR_VALUE d3dClearValue = { DXGI_FORMAT_R8G8B8A8_UNORM, { 0.0f, 0.0f, 0.0f, 1.0f } };
 	m_pRTTexture = std::make_unique<CTexture>(1, RESOURCE_TEXTURE2D, 0, 1);
@@ -147,6 +148,12 @@ void CImGuiManager::SetUI()
 	ImGui_ImplDX12_NewFrame();
 	ImGui_ImplWin32_NewFrame();
 	ImGui::NewFrame();
+
+	if (m_pCurrentComponentSet == nullptr) {
+		m_pCurrentComponentSet = Locator.GetComponentSet(0);
+		m_pCamera->LoadComponentFromSet(m_pCurrentComponentSet);
+	}
+
 
 	// Show my window.
 	{
@@ -236,32 +243,33 @@ void CImGuiManager::SetUI()
 		initial_curpos.y += 25.f;
 		ImGui::SetCursorPos(initial_curpos);
 
+		CCamera* pCamera = Locator.GetSimulaterCamera();
+		if (pCamera == nullptr)
+			pCamera = m_pCamera.get();
+
 		if (ImGui::CollapsingHeader("Camera Move"))
 		{
-			CCamera* pCamera = Locator.GetSimulaterCamera();
-			if (pCamera == nullptr)
-				pCamera = m_pCamera.get();
+			initial_curpos.y += 25.f;
+			ImGui::SetCursorPos(initial_curpos);
+			ImGui::SetNextItemWidth(190.f);
+			CCameraMover* mover = (CCameraMover*)(m_pCurrentComponentSet->FindComponent(typeid(CCameraMover)));
+			ImGui::Checkbox("On/Off##Move", &mover->GetEnable());
 
 			initial_curpos.y += 25.f;
 			ImGui::SetCursorPos(initial_curpos);
 			ImGui::SetNextItemWidth(190.f);
-			ImGui::Checkbox("On/Off", &pCamera->m_bCameraMoving);
+			
+			ImGui::DragFloat("Distance##Move", &mover->m_fMaxDistance, 0.01f, 0.0f, 10.0f, "%.2f", 0);
 
 			initial_curpos.y += 25.f;
 			ImGui::SetCursorPos(initial_curpos);
 			ImGui::SetNextItemWidth(190.f);
-			CCameraMover* mover = (CCameraMover*)(pCamera->FindComponent(typeid(CCameraMover)));
-			ImGui::DragFloat("Distance", &mover->m_fMaxDistance, 0.01f, 0.0f, 10.0f, "%.2f", 0);
+			ImGui::DragFloat("Time##Move", &mover->m_fMovingTime, 0.01f, 0.0f, 10.0f, "%.2f", 0);
 
 			initial_curpos.y += 25.f;
 			ImGui::SetCursorPos(initial_curpos);
 			ImGui::SetNextItemWidth(190.f);
-			ImGui::DragFloat("Time", &mover->m_fMovingTime, 0.01f, 0.0f, 10.0f, "%.2f", 0);
-
-			initial_curpos.y += 25.f;
-			ImGui::SetCursorPos(initial_curpos);
-			ImGui::SetNextItemWidth(190.f);
-			ImGui::DragFloat("RollBackTime", &mover->m_fRollBackTime, 0.01f, 0.0f, 10.0f, "%.2f", 0);
+			ImGui::DragFloat("RollBackTime##Move", &mover->m_fRollBackTime, 0.01f, 0.0f, 10.0f, "%.2f", 0);
 		}
 
 		initial_curpos.y += 25.f;
@@ -269,25 +277,22 @@ void CImGuiManager::SetUI()
 
 		if (ImGui::CollapsingHeader("Camera Shake"))
 		{
-			CCamera* pCamera = Locator.GetSimulaterCamera();
-			if (pCamera == nullptr)
-				pCamera = m_pCamera.get();
+			initial_curpos.y += 25.f;
+			ImGui::SetCursorPos(initial_curpos);
+			ImGui::SetNextItemWidth(190.f);
+			CCameraShaker* shaker = (CCameraShaker*)(m_pCurrentComponentSet->FindComponent(typeid(CCameraShaker)));
+			ImGui::Checkbox("On/Off##Shake", &shaker->GetEnable());
 
 			initial_curpos.y += 25.f;
 			ImGui::SetCursorPos(initial_curpos);
 			ImGui::SetNextItemWidth(190.f);
-			ImGui::Checkbox("On/Off", &pCamera->m_bCameraShaking);
+			
+			ImGui::DragFloat("Magnitude##Shake", &shaker->m_fMagnitude, 0.01f, 0.0f, 10.0f, "%.2f", 0);
 
 			initial_curpos.y += 25.f;
 			ImGui::SetCursorPos(initial_curpos);
 			ImGui::SetNextItemWidth(190.f);
-			CCameraShaker* shaker = (CCameraShaker*)(pCamera->FindComponent(typeid(CCameraShaker)));
-			ImGui::DragFloat("Magnitude", &shaker->m_fMagnitude, 0.01f, 0.0f, 10.0f, "%.2f", 0);
-
-			initial_curpos.y += 25.f;
-			ImGui::SetCursorPos(initial_curpos);
-			ImGui::SetNextItemWidth(190.f);
-			ImGui::DragFloat("Duration", &shaker->m_fDuration, 0.01f, 0.0f, 10.0f, "%.2f", 0);
+			ImGui::DragFloat("Duration##Shake", &shaker->m_fDuration, 0.01f, 0.0f, 10.0f, "%.2f", 0);
 
 			//ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
 		}
@@ -297,35 +302,32 @@ void CImGuiManager::SetUI()
 
 		if (ImGui::CollapsingHeader("Camera ZoomIn/ZoomOut"))
 		{
-			CCamera* pCamera = Locator.GetSimulaterCamera();
-			if (pCamera == nullptr)
-				pCamera = m_pCamera.get();
+			initial_curpos.y += 25.f;
+			ImGui::SetCursorPos(initial_curpos);
+			ImGui::SetNextItemWidth(190.f);
+			CCameraZoomer* Zoomer = (CCameraZoomer*)(m_pCurrentComponentSet->FindComponent(typeid(CCameraZoomer)));
+			ImGui::Checkbox("On/Off##Zoom", &Zoomer->GetEnable());
 
 			initial_curpos.y += 25.f;
 			ImGui::SetCursorPos(initial_curpos);
 			ImGui::SetNextItemWidth(190.f);
-			ImGui::Checkbox("On/Off", &pCamera->m_bCameraZooming);
+			
+			ImGui::DragFloat("Distance##Zoom", &Zoomer->m_fMaxDistance, 0.01f, 0.0f, 10.0f, "%.2f", 0);
 
 			initial_curpos.y += 25.f;
 			ImGui::SetCursorPos(initial_curpos);
 			ImGui::SetNextItemWidth(190.f);
-			CCameraZoomer* Zoomer = (CCameraZoomer*)(pCamera->FindComponent(typeid(CCameraZoomer)));
-			ImGui::DragFloat("Distance", &Zoomer->m_fMaxDistance, 0.01f, 0.0f, 10.0f, "%.2f", 0);
+			ImGui::DragFloat("Time##Zoom", &Zoomer->m_fMovingTime, 0.01f, 0.0f, 10.0f, "%.2f", 0);
 
 			initial_curpos.y += 25.f;
 			ImGui::SetCursorPos(initial_curpos);
 			ImGui::SetNextItemWidth(190.f);
-			ImGui::DragFloat("Time", &Zoomer->m_fMovingTime, 0.01f, 0.0f, 10.0f, "%.2f", 0);
+			ImGui::DragFloat("RollBackTime##Zoom", &Zoomer->m_fRollBackTime, 0.01f, 0.0f, 10.0f, "%.2f", 0);
 
 			initial_curpos.y += 25.f;
 			ImGui::SetCursorPos(initial_curpos);
 			ImGui::SetNextItemWidth(190.f);
-			ImGui::DragFloat("RollBackTime", &Zoomer->m_fRollBackTime, 0.01f, 0.0f, 10.0f, "%.2f", 0);
-
-			initial_curpos.y += 25.f;
-			ImGui::SetCursorPos(initial_curpos);
-			ImGui::SetNextItemWidth(190.f);
-			ImGui::Checkbox("IN / OUT", &Zoomer->m_bIsIN);
+			ImGui::Checkbox("IN / OUT##Zoom", &Zoomer->m_bIsIN);
 		}
 
 		initial_curpos.y += 25.f;
@@ -383,17 +385,32 @@ void CImGuiManager::SetUI()
 
 		if (ImGui::Button("Animation1", ImVec2(175.f, 45.f))) // Buttons return true when clicked (most widgets return true when edited/activated)
 		{
-			CSimulatorScene::GetInst()->SetPlayerAnimationSet(0);
+			CComponentSet* componentset = Locator.GetComponentSet(0);
+			if (componentset) {
+				m_pCurrentComponentSet = componentset;
+				m_pCamera->LoadComponentFromSet(m_pCurrentComponentSet);
+				CSimulatorScene::GetInst()->SetPlayerAnimationSet(0);
+			}
 		}
 		ImGui::SameLine();
 		if (ImGui::Button("Animation2", ImVec2(175.f, 45.f))) // Buttons return true when clicked (most widgets return true when edited/activated)
 		{
-			CSimulatorScene::GetInst()->SetPlayerAnimationSet(1);
+			CComponentSet* componentset = Locator.GetComponentSet(1);
+			if (componentset) {
+				m_pCurrentComponentSet = componentset;
+				m_pCamera->LoadComponentFromSet(m_pCurrentComponentSet);
+				CSimulatorScene::GetInst()->SetPlayerAnimationSet(1);
+			}
 		}
 		ImGui::SameLine();
 		if (ImGui::Button("Animation3", ImVec2(175.f, 45.f))) // Buttons return true when clicked (most widgets return true when edited/activated)
 		{
-			CSimulatorScene::GetInst()->SetPlayerAnimationSet(2);
+			CComponentSet* componentset = Locator.GetComponentSet(2);
+			if (componentset) {
+				m_pCurrentComponentSet = componentset;
+				m_pCamera->LoadComponentFromSet(m_pCurrentComponentSet);
+				CSimulatorScene::GetInst()->SetPlayerAnimationSet(2);
+			}
 		}
 		ImGui::End();
 	}

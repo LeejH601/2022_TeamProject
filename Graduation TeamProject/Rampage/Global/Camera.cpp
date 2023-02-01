@@ -2,6 +2,7 @@
 #include "..\Object\Object.h"
 #include "MessageDispatcher.h"
 #include "Global.h"
+#include "Locator.h"
 
 CCamera::CCamera()
 {
@@ -105,7 +106,7 @@ void CCamera::Animate(float fTimeElapsed)
 {
 	m_xmf3CalculatedPosition = m_xmf3Position;
 
-	for (std::shared_ptr<CComponent>& component : m_vComponentSet) {
+	for (CComponent* component : m_vComponentSet) {
 		component->Update(fTimeElapsed);
 	}
 }
@@ -151,11 +152,18 @@ void CCamera::ReleaseShaderVariables()
 	if (m_pd3dcbCamera)
 		m_pd3dcbCamera->Unmap(0, NULL);
 }
+void CCamera::LoadComponentFromSet(CComponentSet* componentset)
+{
+	m_vComponentSet.clear();
+	m_vComponentSet.emplace_back(componentset->FindComponent(typeid(CCameraMover)));
+	m_vComponentSet.emplace_back(componentset->FindComponent(typeid(CCameraShaker)));
+	m_vComponentSet.emplace_back(componentset->FindComponent(typeid(CCameraZoomer)));
+}
 CComponent* CCamera::FindComponent(const std::type_info& typeinfo)
 {
-	for (std::shared_ptr<CComponent>& component : m_vComponentSet) {
-		if (strcmp(typeinfo.name(), typeid(*component.get()).name()) == 0)
-			return component.get();
+	for (CComponent* component : m_vComponentSet) {
+		if (strcmp(typeinfo.name(), typeid(*component).name()) == 0)
+			return component;
 	}
 	return nullptr;
 }
@@ -246,7 +254,9 @@ CCameraShaker::CCameraShaker(std::shared_ptr<CCamera> pCamera) : CCameraShaker()
 
 void CCameraShaker::Update(float fElapsedTime)
 {
-	if (m_bShakeEnd || !m_pCamera->m_bCameraShaking)
+	if (m_pCamera.get() == nullptr)
+		m_pCamera = Locator.GetSimulaterCameraWithShared();
+	if (m_bShakeEnd || !m_pCamera->m_bCameraShaking || !m_bEnable)
 		return;
 
 	if (m_fDuration > m_ft) {
@@ -312,7 +322,9 @@ CCameraMover::CCameraMover(std::shared_ptr<CCamera> pCamera) : CCameraMover()
 
 void CCameraMover::Update(float fElapsedTime)
 {
-	if (m_bMoveEnd || !m_pCamera->m_bCameraMoving)
+	if (m_pCamera.get() == nullptr)
+		m_pCamera = Locator.GetSimulaterCameraWithShared();
+	if (m_bMoveEnd || !m_pCamera->m_bCameraMoving || !m_bEnable)
 		return;
 
 	m_fSpeed = m_fMaxDistance / m_fMovingTime;
@@ -384,7 +396,9 @@ CCameraZoomer::~CCameraZoomer()
 
 void CCameraZoomer::Update(float fElapsedTime)
 {
-	if (m_bZoomEnd || !m_pCamera->m_bCameraZooming)
+	if (m_pCamera.get() == nullptr)
+		m_pCamera = Locator.GetSimulaterCameraWithShared();
+	if (m_bZoomEnd || !m_pCamera->m_bCameraZooming || !m_bEnable)
 		return;
 
 	m_fSpeed = m_fMaxDistance / m_fMovingTime;

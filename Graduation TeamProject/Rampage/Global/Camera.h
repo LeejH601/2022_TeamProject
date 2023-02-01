@@ -128,9 +128,9 @@ public:
 class CCamera : public IEntity
 {
 public:
-	bool m_bCameraShaking = false;
-	bool m_bCameraMoving = false;
-	bool m_bCameraZooming = false;
+	bool m_bCameraShaking = true;
+	bool m_bCameraMoving = true;
+	bool m_bCameraZooming = true;
 
 	XMFLOAT3 m_xmf3CalculatedPosition;
 
@@ -159,7 +159,7 @@ protected:
 	ComPtr<ID3D12Resource> m_pd3dcbCamera = NULL;
 	VS_CB_CAMERA_INFO* m_pcbMappedCamera = NULL;
 public:
-	std::vector<std::shared_ptr<CComponent>> m_vComponentSet;
+	std::vector<CComponent*> m_vComponentSet;
 public:
 	CCamera();
 	virtual ~CCamera();
@@ -198,6 +198,7 @@ public:
 	D3D12_VIEWPORT GetViewport() { return(m_d3dViewport); }
 	D3D12_RECT GetScissorRect() { return(m_d3dScissorRect); }
 
+	void LoadComponentFromSet(CComponentSet* componentset);
 	CComponent* FindComponent(const std::type_info& typeinfo);
 
 	virtual void SetViewportsAndScissorRects(ID3D12GraphicsCommandList* pd3dCommandList);

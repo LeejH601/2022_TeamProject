@@ -5,14 +5,20 @@ class Telegram;
 
 class CComponent
 {
+protected:
+	bool m_bEnable = false;
+
 public:
 	CComponent() = default;
 	virtual ~CComponent() = default;
 
-	virtual void Update(float fElapsedTime) {};
+	virtual void Update(float fElapsedTime) { };
 	virtual bool Init() { return true; };
 	virtual void Reset() {};
 	virtual bool HandleMessage(const Telegram& msg) { return true; };
+
+	void SetEnable(bool flag) { m_bEnable = flag; };
+	bool& GetEnable() { return m_bEnable; };
 };
 
 typedef std::pair<size_t, std::shared_ptr<CComponent>> ComponentPair;
@@ -38,7 +44,6 @@ public:
 	CComponentSet() = default;
 	virtual ~CComponentSet() = default;
 
-	CComponent* FindComponent(type_info& type);
+	CComponent* FindComponent(const type_info& type);
 	void AddComponent(std::shared_ptr<CComponent>& component);
-	void StoreComponentSetToLocator();
 };

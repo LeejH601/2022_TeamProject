@@ -1,6 +1,7 @@
 #include "Component.h"
+#include "Locator.h"
 
-CComponent* CComponentSet::FindComponent(type_info& type)
+CComponent* CComponentSet::FindComponent(const type_info& type)
 {
     static ComponentPair dummy(0, std::shared_ptr<CComponent>());
 
@@ -18,9 +19,4 @@ void CComponentSet::AddComponent(std::shared_ptr<CComponent>& component)
     ComponentPair pair = std::make_pair(typeid(*(component.get())).hash_code(), component);
 
     m_sComponents.insert(pair);
-}
-
-void CComponentSet::StoreComponentSetToLocator()
-{
-
 }

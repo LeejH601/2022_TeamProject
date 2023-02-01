@@ -1,5 +1,6 @@
 #pragma once
 #include "..\Global\stdafx.h"
+#include "..\Global\Component.h"
 
 class CTexture;
 class CCamera;
@@ -19,6 +20,8 @@ private:
 	bool show_demo_window = false;
 	bool show_another_window = false;
 	bool show_my_window = true;
+
+	CComponentSet* m_pCurrentComponentSet = nullptr;
 
 	std::shared_ptr<CCamera> m_pCamera = NULL;
 

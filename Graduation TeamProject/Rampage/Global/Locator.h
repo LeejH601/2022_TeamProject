@@ -33,6 +33,7 @@ public:
 	bool Init();
 
 	CCamera* GetSimulaterCamera() { return m_pSimulaterCamera.get(); };
+	std::shared_ptr<CCamera>& GetSimulaterCameraWithShared() { return m_pSimulaterCamera; };
 	void SetSimulaterCamera(std::shared_ptr<CCamera> pCamera) { m_pSimulaterCamera = pCamera; };
 
 	CGameObject* GetSimulaterPlayer() { return m_pSimulaterPlayer.get(); };
