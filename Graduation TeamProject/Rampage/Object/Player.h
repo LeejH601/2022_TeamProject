@@ -1,5 +1,6 @@
 #pragma once
 #include "Object.h"
+#include "StateMachine.h"
 
 class CPlayer : public CGameObject, public IEntity
 {
@@ -26,6 +27,9 @@ protected:
 	LPVOID						m_pCameraUpdatedContext;
 
 	std::shared_ptr<CCamera> m_pCamera = NULL;
+
+public:
+	std::unique_ptr<CStateMachine<CPlayer>> m_pStateMachine;
 
 public:
 	CPlayer();

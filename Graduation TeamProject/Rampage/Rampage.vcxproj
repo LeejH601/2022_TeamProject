@@ -169,6 +169,8 @@
     <ClCompile Include="Object\Mesh.cpp" />
     <ClCompile Include="Object\ModelManager.cpp" />
     <ClCompile Include="Object\Object.cpp" />
+    <ClCompile Include="Object\Player.cpp" />
+    <ClCompile Include="Object\State.cpp" />
     <ClCompile Include="Object\Terrain.cpp" />
     <ClCompile Include="Object\Texture.cpp" />
     <ClCompile Include="Rampage.cpp" />
@@ -208,6 +210,9 @@
     <ClInclude Include="Object\Mesh.h" />
     <ClInclude Include="Object\ModelManager.h" />
     <ClInclude Include="Object\Object.h" />
+    <ClInclude Include="Object\Player.h" />
+    <ClInclude Include="Object\State.h" />
+    <ClInclude Include="Object\StateMachine.h" />
     <ClInclude Include="Object\Terrain.h" />
     <ClInclude Include="Object\Texture.h" />
     <ClInclude Include="Scene\MainScene.h" />

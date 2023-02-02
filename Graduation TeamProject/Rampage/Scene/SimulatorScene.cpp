@@ -6,6 +6,7 @@
 #include "..\Shader\ModelShader.h"
 #include "..\Sound\SoundManager.h"
 #include "..\Global\Camera.h"
+#include "..\Global\Locator.h"
 
 void CSimulatorScene::OnPrepareRender(ID3D12GraphicsCommandList* pd3dCommandList)
 {
@@ -118,14 +119,17 @@ void CSimulatorScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 
 	// 3->IDLE
 	// 28->Attack
-	m_pMainCharacter = std::make_unique<CKnightObject>(pd3dDevice, pd3dCommandList, 1);
-	m_pMainCharacter->SetPosition(XMFLOAT3(-8.0f, 0.0f, 0.0f));
-	m_pMainCharacter->SetScale(14.0f, 14.0f, 14.0f);
-	m_pMainCharacter->Rotate(0.0f, 90.0f, 0.0f);
-	m_pMainCharacter->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
-	m_pMainCharacter->m_pSkinnedAnimationController->m_xmf3RootObjectScale = XMFLOAT3(14.0f, 14.0f, 14.0f);
+	std::shared_ptr<CGameObject> knightObject = std::make_shared<CKnightObject>(pd3dDevice, pd3dCommandList, 1);
+	knightObject->SetPosition(XMFLOAT3(-8.0f, 0.0f, 0.0f));
+	knightObject->SetScale(14.0f, 14.0f, 14.0f);
+	knightObject->Rotate(0.0f, 90.0f, 0.0f);
+	knightObject->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 4);
+	knightObject->m_pSkinnedAnimationController->m_xmf3RootObjectScale = XMFLOAT3(14.0f, 14.0f, 14.0f);
 
-	int nAnimationSets = m_pMainCharacter->m_pSkinnedAnimationController->m_pAnimationSets->m_nAnimationSets;
+	int nAnimationSets = knightObject->m_pSkinnedAnimationController->m_pAnimationSets->m_nAnimationSets;
+
+	m_pMainCharacter = std::make_unique<CPlayer>();
+	m_pMainCharacter->SetChild(knightObject, true);
 
 	/*for (int i = 0; i < nAnimationSets; ++i)
 	{
@@ -149,7 +153,8 @@ void CSimulatorScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float f
 	if (!m_pDummyEnemy->m_pSkinnedAnimationController) m_pDummyEnemy->UpdateTransform(NULL);
 	m_pDummyEnemy->Render(pd3dCommandList);
 
-	m_pMainCharacter->Animate(fTimeElapsed);
+	//m_pMainCharacter->Animate(fTimeElapsed);
+	m_pMainCharacter->Update(fTimeElapsed);
 	if (!m_pDummyEnemy->m_pSkinnedAnimationController) m_pMainCharacter->UpdateTransform(NULL);
 	m_pMainCharacter->Render(pd3dCommandList);
 
@@ -162,6 +167,23 @@ void CSimulatorScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float f
 }
 void CSimulatorScene::SetPlayerAnimationSet(int nSet)
 {
+	switch (nSet)
+	{
+	case 0:
+		m_pMainCharacter->m_pStateMachine->ChangeState(Locator.GetPlayerState(typeid(Atk1_Player)));
+		break;
+	case 1:
+		m_pMainCharacter->m_pStateMachine->ChangeState(Locator.GetPlayerState(typeid(Atk2_Player)));
+		break;
+	case 2:
+		m_pMainCharacter->m_pStateMachine->ChangeState(Locator.GetPlayerState(typeid(Atk3_Player)));
+		break;
+	default:
+		break;
+	}
+
+	return;
+
 	m_pMainCharacter->m_pSkinnedAnimationController->SetTrackAnimationSet(0, nSet);
 	m_pMainCharacter->m_pSkinnedAnimationController->m_fTime = 0.0f;
 }

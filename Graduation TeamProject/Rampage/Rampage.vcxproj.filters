@@ -124,8 +124,14 @@
     <ClCompile Include="Global\Entity.cpp">
       <Filter>Global</Filter>
     </ClCompile>
+    <ClCompile Include="Object\Player.cpp">
+      <Filter>Object</Filter>
+    </ClCompile>
     <ClCompile Include="Global\Locator.cpp">
-      <Filter>소스 파일</Filter>
+      <Filter>Global</Filter>
+    </ClCompile>
+    <ClCompile Include="Object\State.cpp">
+      <Filter>Object</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -234,7 +240,18 @@
     <ClInclude Include="Global\Global.h">
       <Filter>Global</Filter>
     </ClInclude>
-    <ClInclude Include="Global\Locator.h" />
+    <ClInclude Include="Global\Locator.h">
+      <Filter>Global</Filter>
+    </ClInclude>
+    <ClInclude Include="Object\Player.h">
+      <Filter>Object</Filter>
+    </ClInclude>
+    <ClInclude Include="Object\State.h">
+      <Filter>Object</Filter>
+    </ClInclude>
+    <ClInclude Include="Object\StateMachine.h">
+      <Filter>Object</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shader\PlayerPixelShader.hlsl" />

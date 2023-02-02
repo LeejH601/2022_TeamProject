@@ -2,6 +2,7 @@
 #include "Global\GameFramework.h"
 #include "Global/Camera.h"
 #include "Global/Locator.h"
+#include "Object/State.h"
 
 #define MAX_LOADSTRING 100
 

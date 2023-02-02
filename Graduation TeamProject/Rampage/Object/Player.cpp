@@ -1,8 +1,13 @@
 #include "Player.h"
 #include "..\Global\Camera.h"
+#include "..\Global\Locator.h"
 
 CPlayer::CPlayer()
 {
+	m_pStateMachine = std::make_unique<CStateMachine<CPlayer>>(this);
+	m_pStateMachine->SetCurrentState(Locator.GetPlayerState(typeid(Idle_Player)));
+	m_pStateMachine->SetPreviousState(Locator.GetPlayerState(typeid(Idle_Player)));
+
 	m_pCamera = nullptr;;
 
 	m_xmf3Position = XMFLOAT3(0.0f, 0.0f, 0.0f);
@@ -38,7 +43,8 @@ void CPlayer::Move(const XMFLOAT3& xmf3Shift, bool bUpdateVelocity)
 	else
 	{
 		m_xmf3Position = Vector3::Add(m_xmf3Position, xmf3Shift);
-		m_pCamera->Move(xmf3Shift);
+		if(m_pCamera)
+			m_pCamera->Move(xmf3Shift);
 	}
 }
 
@@ -80,6 +86,8 @@ void CPlayer::Rotate(float x, float y, float z)
 
 void CPlayer::Update(float fTimeElapsed)
 {
+	m_pStateMachine->Update(fTimeElapsed);
+
 	m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, m_xmf3Gravity);
 	float fLength = sqrtf(m_xmf3Velocity.x * m_xmf3Velocity.x + m_xmf3Velocity.z * m_xmf3Velocity.z);
 	float fMaxVelocityXZ = m_fMaxVelocityXZ;
@@ -98,12 +106,16 @@ void CPlayer::Update(float fTimeElapsed)
 	if (m_pPlayerUpdatedContext) OnPlayerUpdateCallback(fTimeElapsed);
 
 	// thrid Person Camera
-	m_pCamera->Update(m_xmf3Position, fTimeElapsed);
-	if (m_pCameraUpdatedContext) OnCameraUpdateCallback(fTimeElapsed);
-	m_pCamera->SetLookAt(m_xmf3Position);
+	if (m_pCamera)
+	{
+		m_pCamera->Update(m_xmf3Position, fTimeElapsed);
+		if (m_pCameraUpdatedContext) OnCameraUpdateCallback(fTimeElapsed);
+		m_pCamera->SetLookAt(m_xmf3Position);
 
-	m_pCamera->Animate(fTimeElapsed);
-	m_pCamera->RegenerateViewMatrix();
+		m_pCamera->Animate(fTimeElapsed);
+		m_pCamera->RegenerateViewMatrix();
+	}
+	
 
 	fLength = Vector3::Length(m_xmf3Velocity);
 	float fDeceleration = (m_fFriction * fTimeElapsed);
