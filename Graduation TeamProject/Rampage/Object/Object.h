@@ -76,6 +76,8 @@ public:
 	void Rotate(float fPitch = 10.0f, float fYaw = 10.0f, float fRoll = 10.0f);
 	void Rotate(XMFLOAT3* pxmf3Axis, float fAngle);
 
+	void SetLookAt(XMFLOAT3& xmf3Target, XMFLOAT3& xmf3Up = XMFLOAT3(0.0f, 1.0f, 0.0f));
+
 	virtual void UpdateTransform(XMFLOAT4X4* pxmf4x4Parent = NULL);
 	void PrintFrameInfo(CGameObject* pGameObject, CGameObject* pParent);
 	CGameObject* FindFrame(const char* pstrFrameName);

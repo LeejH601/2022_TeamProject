@@ -141,7 +141,7 @@ void CSimulatorScene::AnimateObjects(float fTimeElapsed)
 {
 
 }
-void CSimulatorScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed)
+void CSimulatorScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed, CCamera* pCamera)
 {
 	CModelShader::GetInst()->Render(pd3dCommandList, 0);
 

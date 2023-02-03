@@ -124,6 +124,12 @@
     <ClCompile Include="Global\Entity.cpp">
       <Filter>Global</Filter>
     </ClCompile>
+    <ClCompile Include="Object\BillBoardObject.cpp">
+      <Filter>Object</Filter>
+    </ClCompile>
+    <ClCompile Include="Shader\BillBoardObjectShader.cpp">
+      <Filter>Shader</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Global\stdafx.h">
@@ -231,6 +237,12 @@
     <ClInclude Include="Global\Global.h">
       <Filter>Global</Filter>
     </ClInclude>
+    <ClInclude Include="Object\BillBoardObject.h">
+      <Filter>Object</Filter>
+    </ClInclude>
+    <ClInclude Include="Shader\BillBoardObjectShader.h">
+      <Filter>Shader</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shader\PlayerPixelShader.hlsl" />
@@ -243,5 +255,7 @@
     <FxCompile Include="Shader\TerrainParallaxPixelShader.hlsl" />
     <FxCompile Include="Shader\BoundVertexShader.hlsl" />
     <FxCompile Include="Shader\BoundPixelShader.hlsl" />
+    <FxCompile Include="Shader\BillboardObjectPixelShader.hlsl" />
+    <FxCompile Include="Shader\BillboardObjectVertexShader.hlsl" />
   </ItemGroup>
 </Project>

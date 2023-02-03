@@ -28,7 +28,10 @@ public:
 public:
 	int GetTextures() { return(m_nTextures); }
 	ID3D12Resource* GetResource(int nIndex) { return(m_ppd3dTextures[nIndex].Get()); }
-	const wchar_t* GetTextureName(int nIndex) { return(m_ppstrTextureNames[nIndex].data()); }
+	const wchar_t* GetTextureName(int nIndex) 
+	{ 
+		return(m_ppstrTextureNames[nIndex].data());
+	}
 	D3D12_GPU_DESCRIPTOR_HANDLE GetGpuDescriptorHandle(int nIndex) { return(m_pd3dSrvGpuDescriptorHandles[nIndex]); }
 	int GetRootParameter(int nIndex) { if (nIndex < m_pnRootParameterIndices.size()) return(m_pnRootParameterIndices[nIndex]); return -1; }
 	int GetRootParameters() { return(m_nRootParameters); }

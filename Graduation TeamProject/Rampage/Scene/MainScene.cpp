@@ -13,7 +13,7 @@ void CMainTMPScene::OnPrepareRender(ID3D12GraphicsCommandList* pd3dCommandList)
 }
 void CMainTMPScene::CreateGraphicsRootSignature(ID3D12Device* pd3dDevice)
 {
-	D3D12_DESCRIPTOR_RANGE pd3dDescriptorRanges[2];
+	D3D12_DESCRIPTOR_RANGE pd3dDescriptorRanges[3];
 	pd3dDescriptorRanges[0].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
 	pd3dDescriptorRanges[0].NumDescriptors = 7;
 	pd3dDescriptorRanges[0].BaseShaderRegister = 0; //t0 ~ t6: MappingTexture
@@ -26,7 +26,13 @@ void CMainTMPScene::CreateGraphicsRootSignature(ID3D12Device* pd3dDevice)
 	pd3dDescriptorRanges[1].RegisterSpace = 0;
 	pd3dDescriptorRanges[1].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
-	D3D12_ROOT_PARAMETER pd3dRootParameters[8];
+	pd3dDescriptorRanges[2].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+	pd3dDescriptorRanges[2].NumDescriptors = 1;
+	pd3dDescriptorRanges[2].BaseShaderRegister = 24; //t24: gtxtTexture
+	pd3dDescriptorRanges[2].RegisterSpace = 0;
+	pd3dDescriptorRanges[2].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+
+	D3D12_ROOT_PARAMETER pd3dRootParameters[9];
 
 	pd3dRootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
 	pd3dRootParameters[0].Constants.Num32BitValues = 33;
@@ -68,6 +74,11 @@ void CMainTMPScene::CreateGraphicsRootSignature(ID3D12Device* pd3dDevice)
 	pd3dRootParameters[7].Descriptor.ShaderRegister = 5; // b5 : Parallex constant
 	pd3dRootParameters[7].Descriptor.RegisterSpace = 0;
 	pd3dRootParameters[7].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+
+	pd3dRootParameters[8].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+	pd3dRootParameters[8].DescriptorTable.NumDescriptorRanges = 1;
+	pd3dRootParameters[8].DescriptorTable.pDescriptorRanges = &pd3dDescriptorRanges[2];
+	pd3dRootParameters[8].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
 
 	D3D12_STATIC_SAMPLER_DESC d3dSamplerDesc;
 	::ZeroMemory(&d3dSamplerDesc, sizeof(D3D12_STATIC_SAMPLER_DESC));
@@ -156,6 +167,7 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	//m_pTerrain->SetPosition(XMFLOAT3(-800.f, -750.f, -800.f));
 	////m_pTerrain->SetPosition(XMFLOAT3(0.f, 0.f, 0.f));
 
+
 	m_pTerrainShader = std::make_unique<CSplatTerrainShader>();
 	m_pTerrainShader->CreateShader(pd3dDevice, GetGraphicsRootSignature(), 1, &pdxgiObjectRtvFormats, 0);
 	m_pTerrainShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 13);
@@ -166,12 +178,32 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	XMFLOAT4 xmf4Color(0.0f, 0.5f, 0.0f, 0.0f);
 	m_pTerrain = std::make_unique<CSplatTerrain>(pd3dDevice, pd3dCommandList, GetGraphicsRootSignature(), _T("Terrain/terrainHeightMap257.raw"), 257, 257, 257, 257, xmf3Scale, xmf4Color, m_pTerrainShader.get());
 	m_pTerrain->SetPosition(XMFLOAT3(-800.f, -750.f, -800.f));
+
+	m_pBillBoardObjectShader = std::make_unique<CBillBoardObjectShader>();
+	m_pBillBoardObjectShader->CreateShader(pd3dDevice, GetGraphicsRootSignature(), 1, &pdxgiObjectRtvFormats, 0);
+	m_pBillBoardObjectShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 10);
+	
+	std::unique_ptr<CBillBoardObject> pBillBoardObject = std::make_unique<CBillBoardObject>(m_pBillBoardObjectShader->Load_Texture(pd3dDevice, pd3dCommandList, L"Image/Grass01.dds"), pd3dDevice, pd3dCommandList, m_pBillBoardObjectShader.get());
+	pBillBoardObject->SetPosition(XMFLOAT3(-10.f, 0.0f, 0.f));
+	m_pBillBoardObjects.push_back(std::move(pBillBoardObject));
+
+	pBillBoardObject = std::make_unique<CBillBoardObject>(m_pBillBoardObjectShader->Load_Texture(pd3dDevice, pd3dCommandList, L"Image/Grass02.dds"), pd3dDevice, pd3dCommandList, m_pBillBoardObjectShader.get());
+	pBillBoardObject->SetPosition(XMFLOAT3(0.f, 0.0f, 15.0f));
+	m_pBillBoardObjects.push_back(std::move(pBillBoardObject));
+
+	pBillBoardObject = std::make_unique<CBillBoardObject>(m_pBillBoardObjectShader->Load_Texture(pd3dDevice, pd3dCommandList, L"Image/flower02.dds"), pd3dDevice, pd3dCommandList, m_pBillBoardObjectShader.get());
+	pBillBoardObject->SetPosition(XMFLOAT3(25.0f, 0.0f, 25.0f));
+	m_pBillBoardObjects.push_back(std::move(pBillBoardObject));
+
+	pBillBoardObject = std::make_unique<CBillBoardObject>(m_pBillBoardObjectShader->Load_Texture(pd3dDevice, pd3dCommandList, L"Image/flower02.dds"), pd3dDevice, pd3dCommandList, m_pBillBoardObjectShader.get());
+	pBillBoardObject->SetPosition(XMFLOAT3(35.0f, 0.0f, 0.f));
+	m_pBillBoardObjects.push_back(std::move(pBillBoardObject));
 }
 void CMainTMPScene::AnimateObjects(float fTimeElapsed)
 {
 
 }
-void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed)
+void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed, CCamera* pCamera)
 {
 	m_pLight->Render(pd3dCommandList);
 
@@ -186,6 +218,13 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 
 	m_pTerrainShader->Render(pd3dCommandList, 0);
 	m_pTerrain->Render(pd3dCommandList);
+
+	
+	for (int i = 0; i < m_pBillBoardObjects.size(); i++)
+	{
+		m_pBillBoardObjectShader->Render(pd3dCommandList, 0);
+		m_pBillBoardObjects[i]->Render(pd3dCommandList, pCamera);
+	}
 
 	CBoundingBoxShader::GetInst()->Render(pd3dCommandList, 0);
 }

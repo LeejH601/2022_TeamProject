@@ -163,6 +163,7 @@
     <ClCompile Include="ImGui\imgui_tables.cpp" />
     <ClCompile Include="ImGui\imgui_widgets.cpp" />
     <ClCompile Include="Object\Animation.cpp" />
+    <ClCompile Include="Object\BillBoardObject.cpp" />
     <ClCompile Include="Object\Light.cpp" />
     <ClCompile Include="Object\Mesh.cpp" />
     <ClCompile Include="Object\ModelManager.cpp" />
@@ -173,6 +174,7 @@
     <ClCompile Include="Scene\MainScene.cpp" />
     <ClCompile Include="Scene\Scene.cpp" />
     <ClCompile Include="Scene\SimulatorScene.cpp" />
+    <ClCompile Include="Shader\BillBoardObjectShader.cpp" />
     <ClCompile Include="Shader\BoundingBoxShader.cpp" />
     <ClCompile Include="Shader\ModelShader.cpp" />
     <ClCompile Include="Shader\Shader.cpp" />
@@ -201,6 +203,7 @@
     <ClInclude Include="ImGui\imstb_textedit.h" />
     <ClInclude Include="ImGui\imstb_truetype.h" />
     <ClInclude Include="Object\Animation.h" />
+    <ClInclude Include="Object\BillBoardObject.h" />
     <ClInclude Include="Object\Light.h" />
     <ClInclude Include="Object\Mesh.h" />
     <ClInclude Include="Object\ModelManager.h" />
@@ -210,6 +213,7 @@
     <ClInclude Include="Scene\MainScene.h" />
     <ClInclude Include="Scene\Scene.h" />
     <ClInclude Include="Scene\SimulatorScene.h" />
+    <ClInclude Include="Shader\BillBoardObjectShader.h" />
     <ClInclude Include="Shader\BoundingBoxShader.h" />
     <ClInclude Include="Shader\ModelShader.h" />
     <ClInclude Include="Shader\Shader.h" />
@@ -218,6 +222,18 @@
     <ClInclude Include="Sound\SoundManager.h" />
   </ItemGroup>
   <ItemGroup>
+    <FxCompile Include="Shader\BillboardObjectPixelShader.hlsl">
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">PSTextured</EntryPointName>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.1</ShaderModel>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(Filename).cso</ObjectFileOutput>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Shader\BillboardObjectVertexShader.hlsl">
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">VSTextured</EntryPointName>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.1</ShaderModel>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(Filename).cso</ObjectFileOutput>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+    </FxCompile>
     <FxCompile Include="Shader\BoundPixelShader.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
