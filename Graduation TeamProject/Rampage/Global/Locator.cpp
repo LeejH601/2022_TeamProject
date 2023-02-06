@@ -3,7 +3,9 @@
 #include "Component.h"
 #include "Camera.h"
 #include "..\Object\State.h"
+#include "..\Sound\SoundComponent.h"
 #include "..\Sound\SoundManager.h"
+#include "..\Sound\SoundPlayer.h"
 
 bool CLocator::Init()
 {
@@ -14,7 +16,6 @@ bool CLocator::Init()
 	componentset = std::make_shared<CComponentSet>();
 	SetComponentSet(componentset);
 
-	CSoundManager::GetInst()->RegisterSound("Sound/David Bowie - Starman.mp3", false);
 
 	for (auto& [num, componentSet] : m_sComponentSets) {
 		std::shared_ptr<CComponent> component;
@@ -31,7 +32,7 @@ bool CLocator::Init()
 		component = std::make_shared<CEffectSoundComponent>(CSoundManager::GetInst()->GetSoundSystem());
 		componentSet->AddComponent(component);
 		component = std::make_shared<CShootSoundComponent>(CSoundManager::GetInst()->GetSoundSystem());
-		((CShootSoundComponent*)component.get())->SetSound(&*CSoundManager::GetInst()->FindSound("Sound/David Bowie - Starman.mp3"));
+		((CSoundComponent*)component.get())->SetSound("Sound/David Bowie - Starman.mp3");
 		componentSet->AddComponent(component);
 	}
 
@@ -45,7 +46,6 @@ bool CLocator::Init()
 	SetPlayerState(state);
 
 	m_pSoundPlayer = std::make_shared<CSoundPlayer>();
-
 	return true;
 }
 

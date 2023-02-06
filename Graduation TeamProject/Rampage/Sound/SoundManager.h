@@ -6,18 +6,10 @@
 
 class CSoundManager {
 private:
-    FMOD_SYSTEM* g_sound_system = nullptr;
+    FMOD_SYSTEM* g_sound_system;
     std::vector<CSound> m_Sounds;
 public:
-    static CSoundManager* GetInst()
-    {
-        static std::shared_ptr<CSoundManager> m_pInst = nullptr;
-        if (m_pInst.get() == nullptr) {
-            m_pInst = std::make_shared<CSoundManager>();
-            m_pInst->Init();
-        }
-        return m_pInst.get();
-    }
+    DECLARE_SINGLE(CSoundManager);
 
     CSoundManager();
     ~CSoundManager();
@@ -27,7 +19,7 @@ public:
     FMOD_SYSTEM* GetSoundSystem() { return g_sound_system; };
 
     void RegisterSound(std::string path, bool loop);
-    std::vector<CSound>::iterator FindSound(std::string path);
+    std::vector<CSound>::iterator FindSound(const std::string path);
     void PlaySound(std::string path);
     void PauseSound(std::string path);
     void ResumeSound(std::string path);

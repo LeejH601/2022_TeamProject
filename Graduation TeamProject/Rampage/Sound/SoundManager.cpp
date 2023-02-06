@@ -9,7 +9,7 @@ void CSoundManager::RegisterSound(std::string path, bool loop) {
     m_Sounds.push_back(sound);
 }
 
-std::vector<CSound>::iterator CSoundManager::FindSound(std::string path)
+std::vector<CSound>::iterator CSoundManager::FindSound(const std::string path)
 {
     const std::vector<CSound>::iterator it = std::find_if(m_Sounds.begin(), m_Sounds.end(), [&](CSound sound) {
         if (sound.GetPath() == path)
@@ -27,6 +27,8 @@ CSoundManager::~CSoundManager() {
 void CSoundManager::Init() {
     FMOD_System_Create(&g_sound_system, FMOD_VERSION);
     FMOD_System_Init(g_sound_system, 32, FMOD_INIT_NORMAL, NULL);
+
+    RegisterSound("Sound/David Bowie - Starman.mp3", false);
 }
 
 void CSoundManager::Release() {

@@ -5,6 +5,7 @@
 #include "..\Shader\ModelShader.h"
 #include "..\Shader\ModelShader.h"
 #include "..\Sound\SoundManager.h"
+#include "..\Sound\SoundPlayer.h"
 #include "..\Global\Camera.h"
 #include "..\Global\Locator.h"
 #include "..\Shader\DepthRenderShader.h"

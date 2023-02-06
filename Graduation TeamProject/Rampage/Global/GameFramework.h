@@ -1,8 +1,8 @@
 #pragma once
 #include "stdafx.h"
 #include "Timer.h"
+#include "..\Scene\Scene.h"
 
-class CScene;
 class CCamera;
 class CShader;
 class CCameraMovementManager;

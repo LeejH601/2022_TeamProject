@@ -3,7 +3,7 @@
 #include "..\Scene\MainScene.h"
 #include "..\Scene\SimulatorScene.h"
 #include "..\ImGui\ImGuiManager.h"
-#include "..\Sound\SoundManager.h"
+#include "..\Object\Texture.h"
 #include "..\Shader\DepthRenderShader.h"
 
 CGameFramework::CGameFramework()
@@ -18,8 +18,6 @@ CGameFramework::CGameFramework()
 }
 CGameFramework::~CGameFramework()
 {
-	// Release Fmod Llibrary
-	CSoundManager::GetInst()->Release();
 }
 bool CGameFramework::OnCreate(HINSTANCE hInstance, HWND hMainWnd)
 {
@@ -33,9 +31,6 @@ bool CGameFramework::OnCreate(HINSTANCE hInstance, HWND hMainWnd)
 	CreateSwapChain();
 	CreateRenderTargetViews();
 	CreateDepthStencilView();
-
-	//Init FMOD
-	CSoundManager::GetInst()->Init();
 
 	//렌더링할 게임 객체를 생성한다.
 	BuildObjects();
@@ -244,6 +239,7 @@ void CGameFramework::BuildObjects()
 	m_pScene->BuildObjects(m_pd3dDevice.Get(), m_pd3dCommandList.Get());
 	
 	CSimulatorScene::GetInst()->BuildObjects(m_pd3dDevice.Get(), m_pd3dCommandList.Get());
+
 
 	m_pCamera = std::make_unique<CFirstPersonCamera>();
 	m_pCamera->Init(m_pd3dDevice.Get(), m_pd3dCommandList.Get());

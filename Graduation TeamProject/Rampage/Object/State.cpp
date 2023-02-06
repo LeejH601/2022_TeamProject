@@ -4,6 +4,7 @@
 #include "..\Global\MessageDispatcher.h"
 #include "..\Global\Global.h"
 #include "..\Sound\Sound.h"
+#include "..\Sound\SoundPlayer.h"
 
 void Idle_Player::Enter(CPlayer* player)
 {

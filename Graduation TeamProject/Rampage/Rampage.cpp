@@ -3,6 +3,7 @@
 #include "Global/Camera.h"
 #include "Global/Locator.h"
 #include "Object/State.h"
+#include "Sound\SoundManager.h"
 
 #define MAX_LOADSTRING 100
 
@@ -27,6 +28,10 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 {
 	UNREFERENCED_PARAMETER(hPrevInstance);
 	UNREFERENCED_PARAMETER(lpCmdLine);
+
+	//Init FMOD
+	CSoundManager::GetInst()->Init();
+
 	Locator.Init();
 
 	MyRegisterClass(hInstance);
@@ -59,6 +64,9 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		}
 	}
 	gGameFramework.OnDestroy();
+
+	// Release Fmod Llibrary
+	CSoundManager::GetInst()->Release();
 	return 0;
 }
 

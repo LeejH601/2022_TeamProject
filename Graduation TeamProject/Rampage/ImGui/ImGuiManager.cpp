@@ -6,6 +6,7 @@
 #include "..\Global\GameFramework.h"
 #include "..\Global\Locator.h"
 #include "..\Sound\Sound.h"
+#include "..\Sound\SoundPlayer.h"
 
 #define NUM_FRAMES_IN_FLIGHT 3
 

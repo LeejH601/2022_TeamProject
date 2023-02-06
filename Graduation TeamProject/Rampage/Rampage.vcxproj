@@ -183,7 +183,9 @@
     <ClCompile Include="Shader\Shader.cpp" />
     <ClCompile Include="Shader\TerrainShader.cpp" />
     <ClCompile Include="Sound\Sound.cpp" />
+    <ClCompile Include="Sound\SoundComponent.cpp" />
     <ClCompile Include="Sound\SoundManager.cpp" />
+    <ClCompile Include="Sound\SoundPlayer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Global\Camera.h" />
@@ -225,7 +227,9 @@
     <ClInclude Include="Shader\Shader.h" />
     <ClInclude Include="Shader\TerrainShader.h" />
     <ClInclude Include="Sound\Sound.h" />
+    <ClInclude Include="Sound\SoundComponent.h" />
     <ClInclude Include="Sound\SoundManager.h" />
+    <ClInclude Include="Sound\SoundPlayer.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shader\BoundPixelShader.hlsl">
