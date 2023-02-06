@@ -127,6 +127,9 @@
     <ClCompile Include="Global\Locator.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="Shader\DepthRenderShader.cpp">
+      <Filter>Shader</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Global\stdafx.h">
@@ -235,6 +238,9 @@
       <Filter>Global</Filter>
     </ClInclude>
     <ClInclude Include="Global\Locator.h" />
+    <ClInclude Include="Shader\DepthRenderShader.h">
+      <Filter>Shader</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shader\PlayerPixelShader.hlsl" />
@@ -247,5 +253,7 @@
     <FxCompile Include="Shader\TerrainParallaxPixelShader.hlsl" />
     <FxCompile Include="Shader\BoundVertexShader.hlsl" />
     <FxCompile Include="Shader\BoundPixelShader.hlsl" />
+    <FxCompile Include="Shader\PlayerDepthWriteShader.hlsl" />
+    <FxCompile Include="Shader\TerrainDepthWriteShader.hlsl" />
   </ItemGroup>
 </Project>

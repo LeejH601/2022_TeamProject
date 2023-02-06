@@ -9,12 +9,12 @@ CGameObject* CBoundingBoxShader::AddBoundingObject(ID3D12Device* pd3dDevice, ID3
 
 	return m_pBoundingObjects.back().get();
 }
-void CBoundingBoxShader::CreateShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature, UINT nRenderTargets, DXGI_FORMAT* pdxgiRtvFormats, int nPipelineState)
+void CBoundingBoxShader::CreateShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature, UINT nRenderTargets, DXGI_FORMAT* pdxgiRtvFormats, DXGI_FORMAT dxgiDsvFormat, int nPipelineState)
 {
 	m_nPipelineStates = 1;
 	m_ppd3dPipelineStates.resize(m_nPipelineStates);
 
-	CShader::CreateShader(pd3dDevice, pd3dGraphicsRootSignature, nRenderTargets, pdxgiRtvFormats, 0);
+	CShader::CreateShader(pd3dDevice, pd3dGraphicsRootSignature, nRenderTargets, pdxgiRtvFormats, dxgiDsvFormat, 0);
 }
 D3D12_SHADER_BYTECODE CBoundingBoxShader::CreateVertexShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
 {
@@ -42,6 +42,6 @@ void CBoundingBoxShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, int 
 	CShader::Render(pd3dCommandList, nPipelineState);
 	for (int i = 0; i < m_pBoundingObjects.size(); ++i)
 	{
-		m_pBoundingObjects[i]->Render(pd3dCommandList);
+		m_pBoundingObjects[i]->Render(pd3dCommandList, true);
 	}
 }

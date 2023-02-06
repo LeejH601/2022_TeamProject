@@ -12,10 +12,13 @@ private:
 	std::unique_ptr<CLight> m_pLight;
 	std::unique_ptr<CSplatTerrain> m_pTerrain;
 	std::unique_ptr<CShader> m_pTerrainShader;
+	std::unique_ptr<CShader> m_pDepthRenderShader;
 public:
 	CMainTMPScene() {}
 	virtual ~CMainTMPScene() {}
 
+	virtual void OnPreRender(ID3D12GraphicsCommandList* pd3dCommandList) { }
+	virtual void OnPreRender(ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed);
 	virtual void OnPrepareRender(ID3D12GraphicsCommandList* pd3dCommandList);
 	virtual void CreateGraphicsRootSignature(ID3D12Device* pd3dDevice);
 

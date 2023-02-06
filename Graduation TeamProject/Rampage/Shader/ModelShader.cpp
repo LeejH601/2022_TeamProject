@@ -1,11 +1,15 @@
 #include "ModelShader.h"
+#include "..\Object\Texture.h"
 
-void CModelShader::CreateShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature, UINT nRenderTargets, DXGI_FORMAT* pdxgiRtvFormats, int nPipelineState)
+void CModelShader::CreateShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature, UINT nRenderTargets, DXGI_FORMAT* pdxgiRtvFormats, DXGI_FORMAT dxgiDsvFormat, int nPipelineState)
 {
-	m_nPipelineStates = 1;
-	m_ppd3dPipelineStates.resize(m_nPipelineStates);
+	if (m_ppd3dPipelineStates.size() != 2)
+	{
+		m_nPipelineStates = 2;
+		m_ppd3dPipelineStates.resize(m_nPipelineStates);
+	}
 
-	CShader::CreateShader(pd3dDevice, pd3dGraphicsRootSignature, nRenderTargets, pdxgiRtvFormats, 0);
+	CShader::CreateShader(pd3dDevice, pd3dGraphicsRootSignature, nRenderTargets, pdxgiRtvFormats, dxgiDsvFormat, nPipelineState);
 }
 D3D12_BLEND_DESC CModelShader::CreateBlendState(int nPipelineState)
 {

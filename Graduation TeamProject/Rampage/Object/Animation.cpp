@@ -115,7 +115,6 @@ CAnimationController::CAnimationController(ID3D12Device* pd3dDevice, ID3D12Graph
 	m_pAnimationTracks.resize(nAnimationTracks);
 
 	m_pAnimationSets = pModel->m_pAnimationSets;
-	m_pAnimationSets->AddRef();
 
 	m_nSkinnedMeshes = pModel->m_nSkinnedMeshes;
 	m_ppSkinnedMeshes.resize(m_nSkinnedMeshes);
@@ -133,13 +132,6 @@ CAnimationController::CAnimationController(ID3D12Device* pd3dDevice, ID3D12Graph
 }
 CAnimationController::~CAnimationController()
 {
-	for (int i = 0; i < m_nSkinnedMeshes; i++)
-	{
-		m_ppd3dcbSkinningBoneTransforms[i]->Unmap(0, NULL);
-		m_ppd3dcbSkinningBoneTransforms[i]->Release();
-	}
-
-	if (m_pAnimationSets) m_pAnimationSets->Release();
 }
 void CAnimationController::SetCallbackKeys(int nAnimationTrack, int nCallbackKeys)
 {
@@ -155,7 +147,11 @@ void CAnimationController::SetAnimationCallbackHandler(int nAnimationTrack, CAni
 }
 void CAnimationController::SetTrackAnimationSet(int nAnimationTrack, int nAnimationSet)
 {
-	if (m_pAnimationTracks.data()) m_pAnimationTracks[nAnimationTrack].m_nAnimationSet = nAnimationSet;
+	if (m_pAnimationTracks.data())
+	{
+		m_pAnimationTracks[nAnimationTrack].m_nAnimationSet = nAnimationSet;
+		m_pAnimationTracks[nAnimationTrack].SetPosition(0.0f);
+	}
 }
 void CAnimationController::SetTrackEnable(int nAnimationTrack, bool bEnable)
 {
@@ -206,9 +202,9 @@ void CAnimationController::AdvanceTime(float fTimeElapsed, CGameObject* pRootGam
 			}
 		}
 
-		pRootGameObject->UpdateTransform(NULL);
-
 		OnRootMotion(pRootGameObject);
 		OnAnimationIK(pRootGameObject);
+
+		pRootGameObject->UpdateTransform(NULL);
 	}
 }

@@ -4,6 +4,7 @@
 #include "..\Scene\SimulatorScene.h"
 #include "..\ImGui\ImGuiManager.h"
 #include "..\Sound\SoundManager.h"
+#include "..\Shader\DepthRenderShader.h"
 
 CGameFramework::CGameFramework()
 {
@@ -476,9 +477,7 @@ void CGameFramework::OnPrepareRenderTarget()
 }
 void CGameFramework::OnPrepareImGui()
 {
-	//명령 할당자와 명령 리스트를 리셋한다.
-	HRESULT hResult = m_pd3dCommandAllocator->Reset();
-	hResult = m_pd3dCommandList->Reset(m_pd3dCommandAllocator.Get(), NULL);
+	HRESULT hResult = m_pd3dCommandList->Reset(m_pd3dCommandAllocator.Get(), NULL);
 
 	CImGuiManager::GetInst()->OnPrepareRender(m_pd3dCommandList.Get(), &m_d3dDsvDescriptorCPUHandle, m_GameTimer.GetFrameTimeElapsed(), m_pCamera.get());
 
@@ -524,10 +523,13 @@ void CGameFramework::FrameAdvance()
 
 	ProcessInput();
 	AnimateObjects();
+
+	//명령 할당자를 리셋한다.
+	HRESULT hResult = m_pd3dCommandAllocator->Reset();
+
 	OnPrepareImGui();
 
-	//명령 할당자와 명령 리스트를 리셋한다.
-	HRESULT hResult = m_pd3dCommandAllocator->Reset();
+	//명령 리스트를 리셋한다.
 	hResult = m_pd3dCommandList->Reset(m_pd3dCommandAllocator.Get(), NULL);
 
 	//CImGuiManager::GetInst()->DemoRendering();
@@ -536,6 +538,7 @@ void CGameFramework::FrameAdvance()
 	::SynchronizeResourceTransition(m_pd3dCommandList.Get(), m_ppd3dRenderTargetBuffers[m_nSwapChainBufferIndex].Get(), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
 
 	m_pScene->OnPrepareRender(m_pd3dCommandList.Get());
+	m_pScene->OnPreRender(m_pd3dCommandList.Get(), m_GameTimer.GetFrameTimeElapsed());
 	m_pd3dCommandList->ClearDepthStencilView(m_d3dDsvDescriptorCPUHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
 	OnPrepareRenderTarget();
 	UpdateShaderVariables(m_pd3dCommandList.Get());

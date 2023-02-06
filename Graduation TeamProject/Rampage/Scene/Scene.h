@@ -12,6 +12,8 @@ public:
 	
 	ID3D12RootSignature* GetGraphicsRootSignature() { return(m_pd3dGraphicsRootSignature.Get()); }
 
+	virtual void OnPreRender(ID3D12GraphicsCommandList* pd3dCommandList) {}
+	virtual void OnPreRender(ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed) {}
 	virtual void OnPrepareRender(ID3D12GraphicsCommandList* pd3dCommandList);
 	virtual void CreateGraphicsRootSignature(ID3D12Device* pd3dDevice);
 
@@ -23,5 +25,6 @@ public:
 
 	virtual bool ProcessInput(UCHAR* pKeysBuffer) { return false; }
 	virtual void AnimateObjects(float fTimeElapsed) {}
+	virtual void CheckCollide() {}
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed) {}
 };

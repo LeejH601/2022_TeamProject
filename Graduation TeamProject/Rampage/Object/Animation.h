@@ -56,13 +56,6 @@ public:
 
 class CAnimationSets
 {
-private:
-	int								m_nReferences = 0;
-
-public:
-	void AddRef() { m_nReferences++; }
-	void Release() { if (--m_nReferences <= 0) delete this; }
-
 public:
 	CAnimationSets(int nAnimationSets);
 	~CAnimationSets();
@@ -123,14 +116,13 @@ public:
 	int m_nAnimationTracks = 0;
 	std::vector<CAnimationTrack> m_pAnimationTracks;
 
-	CAnimationSets* m_pAnimationSets = NULL;
+	std::shared_ptr<CAnimationSets> m_pAnimationSets = NULL;
 
 	int m_nSkinnedMeshes = 0;
 	std::vector<CSkinnedMesh*> m_ppSkinnedMeshes ; //[SkinnedMeshes], Skinned Mesh Cache
 
 	std::vector<ComPtr<ID3D12Resource>> m_ppd3dcbSkinningBoneTransforms; //[SkinnedMeshes]
 	std::vector<XMFLOAT4X4*> m_ppcbxmf4x4MappedSkinningBoneTransforms; //[SkinnedMeshes]
-
 public:
 	void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList);
 

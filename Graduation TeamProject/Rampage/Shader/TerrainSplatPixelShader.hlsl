@@ -132,7 +132,7 @@ PS_MULTIPLE_RENDER_TARGETS_OUTPUT PSTerrainSplat(VS_TERRAIN_OUTPUT input)
 		normal = 2.0f * normal - 1.0f;
 
 		float3 normalW = mul(normal, TBN);
-		float4 cIllumination = Lighting(input.positionW, normalW);
+		float4 cIllumination = Lighting(input.positionW, normalW, cColor);
 		//float4 cIllumination = Lighting(input.position, input.normalW);
 		cColor = lerp(cColor, cIllumination, 0.2f);
 	}
@@ -168,7 +168,7 @@ PS_MULTIPLE_RENDER_TARGETS_OUTPUT PSTerrainSplat(VS_TERRAIN_OUTPUT input)
 		normal = 2.0f * normal - 1.0f;
 
 		float3 normalW = mul(normal, TBN);
-		float4 cIllumination = Lighting(input.positionW, normalW);
+		float4 cIllumination = Lighting(input.positionW, normalW, cColor);
 		//float4 cIllumination = Lighting(input.position, input.normalW);
 		cColor = lerp(cColor, cIllumination, 0.2f);
 	}
@@ -190,7 +190,7 @@ PS_MULTIPLE_RENDER_TARGETS_OUTPUT PSTerrainSplat(VS_TERRAIN_OUTPUT input)
 			}
 		}
 
-		float4 cIllumination = Lighting(input.positionW, input.normalW);
+		float4 cIllumination = Lighting(input.positionW, input.normalW, cColor);
 		//float4 cIllumination = Lighting(input.position, input.normalW);
 		cColor = lerp(cColor, cIllumination, 0.2f);
 	}

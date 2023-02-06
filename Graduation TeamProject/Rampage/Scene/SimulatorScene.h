@@ -9,15 +9,20 @@
 class CSimulatorScene : public CScene
 {
 private:
-	std::vector<std::unique_ptr<CGameObject>> m_pMainCharacters;
 	std::unique_ptr<CGameObject> m_pMainCharacter;
-	std::unique_ptr<CGameObject> m_pDummyEnemy;
+	std::vector<std::unique_ptr<CGameObject>> m_pEnemys;
 	std::unique_ptr<CLight> m_pLight;
+	std::unique_ptr<CSplatTerrain> m_pTerrain;
+	std::unique_ptr<CShader> m_pTerrainShader;
+
+	std::unique_ptr<CShader> m_pDepthRenderShader;
 public:
 	DECLARE_SINGLE(CSimulatorScene);
 	CSimulatorScene() {}
 	virtual ~CSimulatorScene() {}
 
+	virtual void OnPreRender(ID3D12GraphicsCommandList* pd3dCommandList) { }
+	virtual void OnPreRender(ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed);
 	virtual void OnPrepareRender(ID3D12GraphicsCommandList* pd3dCommandList);
 	virtual void CreateGraphicsRootSignature(ID3D12Device* pd3dDevice);
 
@@ -29,6 +34,7 @@ public:
 
 	virtual bool ProcessInput(UCHAR* pKeysBuffer) { return false; }
 	virtual void AnimateObjects(float fTimeElapsed);
+	virtual void CheckCollide();
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed);
 
 	void SetPlayerAnimationSet(int nSet);
