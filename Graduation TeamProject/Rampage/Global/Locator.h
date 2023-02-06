@@ -1,9 +1,11 @@
 #pragma once
 #include "stdafx.h"
 
+template <class entity_type> class CState;
 class CCamera;
 class CGameObject;
 class CComponentSet;
+class CPlayer;
 
 typedef std::pair<int, std::shared_ptr<CComponentSet>> CoptSetPair;
 
@@ -15,6 +17,25 @@ public:
 	}
 };
 
+typedef std::pair<size_t, std::shared_ptr<CState<CPlayer>>> PlayerStatePair;
+
+class Comp_PlayerState
+{
+public:
+	bool operator()(const PlayerStatePair& lhs, const PlayerStatePair& rhs) const {
+		return lhs.first < rhs.first;
+	}
+};
+
+class Statecomp {
+public:
+	using is_transparent = size_t;
+
+	template<class t1, class t2>
+	constexpr auto operator()(t1&& lhs, t2&& rhs) const {
+		return static_cast<t1&&>(lhs) < typeid(*(static_cast<t2&&>(rhs).get())).hash_code();
+	};
+};
 
 class CLocator
 {
@@ -23,8 +44,10 @@ class CLocator
 	std::shared_ptr<CGameObject> m_pMainPlayer;
 
 	std::set<CoptSetPair, Comp_ComponentSet> m_sComponentSets;
+	std::set<PlayerStatePair, Comp_PlayerState> m_sPlayerStateSet;
 
 	CoptSetPair dummy;
+	PlayerStatePair statedummy;
 
 public:
 	CLocator() = default;
@@ -58,6 +81,10 @@ public:
 		CoptSetPair pair = std::make_pair(ComponentSets_Num++, pSet);
 		m_sComponentSets.insert(pair);
 	}
+
+	CState<CPlayer>* GetPlayerState(const std::type_info& type);
+
+	void SetPlayerState(std::shared_ptr<CState<CPlayer>>& state);
 };
 
 extern CLocator Locator;

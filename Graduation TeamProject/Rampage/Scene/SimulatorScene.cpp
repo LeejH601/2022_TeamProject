@@ -6,6 +6,7 @@
 #include "..\Shader\ModelShader.h"
 #include "..\Sound\SoundManager.h"
 #include "..\Global\Camera.h"
+#include "..\Global\Locator.h"
 #include "..\Shader\DepthRenderShader.h"
 
 void CSimulatorScene::OnPreRender(ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed)
@@ -199,12 +200,14 @@ void CSimulatorScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 	m_pDummyEnemy->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 5);
 	m_pEnemys.push_back(std::move(m_pDummyEnemy));
 
-	m_pMainCharacter = std::make_unique<CKnightObject>(pd3dDevice, pd3dCommandList, 1);
-	m_pMainCharacter->SetPosition(XMFLOAT3(-8.0f, 0.0f, 0.0f));
-	m_pMainCharacter->SetScale(14.0f, 14.0f, 14.0f);
-	m_pMainCharacter->Rotate(0.0f, 90.0f, 0.0f);
-	m_pMainCharacter->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 4);
-	m_pMainCharacter->m_pSkinnedAnimationController->m_xmf3RootObjectScale = XMFLOAT3(14.0f, 14.0f, 14.0f);
+	// 3->IDLE
+	// 28->Attack
+	std::shared_ptr<CGameObject> knightObject = std::make_shared<CKnightObject>(pd3dDevice, pd3dCommandList, 1);
+	knightObject->SetPosition(XMFLOAT3(-8.0f, 0.0f, 0.0f));
+	knightObject->SetScale(14.0f, 14.0f, 14.0f);
+	knightObject->Rotate(0.0f, 90.0f, 0.0f);
+	knightObject->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 4);
+	knightObject->m_pSkinnedAnimationController->m_xmf3RootObjectScale = XMFLOAT3(14.0f, 14.0f, 14.0f);
 
 	((CDepthRenderShader*)m_pDepthRenderShader.get())->RegisterObject(m_pMainCharacter.get());
 	for (int i = 0; i < m_pEnemys.size(); ++i)
@@ -223,6 +226,18 @@ void CSimulatorScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 	XMFLOAT4 xmf4Color(0.0f, 0.5f, 0.0f, 0.0f);
 	m_pTerrain = std::make_unique<CSplatTerrain>(pd3dDevice, pd3dCommandList, GetGraphicsRootSignature(), _T("Terrain/terrainHeightMap257.raw"), 257, 257, 257, 257, xmf3Scale, xmf4Color, m_pTerrainShader.get());
 	m_pTerrain->SetPosition(XMFLOAT3(-800.f, -310.f, -800.f));
+	m_pMainCharacter = std::make_unique<CPlayer>();
+	m_pMainCharacter->SetChild(knightObject, true);
+
+	/*for (int i = 0; i < nAnimationSets; ++i)
+	{
+		std::unique_ptr<CGameObject> pCharater = std::make_unique<CKnightObject>(pd3dDevice, pd3dCommandList, 1);
+		pCharater->SetPosition(XMFLOAT3(5.0f * i, 0.0f, 0.0f));
+		pCharater->SetScale(5.0f, 5.0f, 5.0f);
+		pCharater->Rotate(0.0f, -90.0f, 0.0f);
+		pCharater->m_pSkinnedAnimationController->SetTrackAnimationSet(0, i);
+		m_pMainCharacters.push_back(std::move(pCharater));
+	}*/
 }
 void CSimulatorScene::AnimateObjects(float fTimeElapsed)
 {
@@ -256,6 +271,10 @@ void CSimulatorScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float f
 
 	m_pTerrainShader->Render(pd3dCommandList, 0);
 	m_pTerrain->Render(pd3dCommandList, true);
+	//m_pMainCharacter->Animate(fTimeElapsed);
+	/*m_pMainCharacter->Update(fTimeElapsed);
+	if (!m_pDummyEnemy->m_pSkinnedAnimationController) m_pMainCharacter->UpdateTransform(NULL);
+	m_pMainCharacter->Render(pd3dCommandList);*/
 
 	/*for (int i = 0; i < m_pMainCharacters.size(); ++i)
 	{
@@ -266,6 +285,23 @@ void CSimulatorScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float f
 }
 void CSimulatorScene::SetPlayerAnimationSet(int nSet)
 {
+	switch (nSet)
+	{
+	case 0:
+		m_pMainCharacter->m_pStateMachine->ChangeState(Locator.GetPlayerState(typeid(Atk1_Player)));
+		break;
+	case 1:
+		m_pMainCharacter->m_pStateMachine->ChangeState(Locator.GetPlayerState(typeid(Atk2_Player)));
+		break;
+	case 2:
+		m_pMainCharacter->m_pStateMachine->ChangeState(Locator.GetPlayerState(typeid(Atk3_Player)));
+		break;
+	default:
+		break;
+	}
+
+	return;
+
 	m_pMainCharacter->m_pSkinnedAnimationController->SetTrackAnimationSet(0, nSet);
 	m_pMainCharacter->m_pSkinnedAnimationController->m_fTime = 0.0f;
 	m_pMainCharacter->Animate(0.0f);

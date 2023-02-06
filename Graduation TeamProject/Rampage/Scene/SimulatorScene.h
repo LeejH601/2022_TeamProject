@@ -5,12 +5,14 @@
 #include "..\Object\Light.h"
 #include "..\Object\Terrain.h"
 #include "..\Shader\TerrainShader.h"
+#include "..\Object\Player.h"
+
 
 class CSimulatorScene : public CScene
 {
 private:
-	std::unique_ptr<CGameObject> m_pMainCharacter;
 	std::vector<std::unique_ptr<CGameObject>> m_pEnemys;
+	std::unique_ptr<CPlayer> m_pMainCharacter;
 	std::unique_ptr<CLight> m_pLight;
 	std::unique_ptr<CSplatTerrain> m_pTerrain;
 	std::unique_ptr<CShader> m_pTerrainShader;
