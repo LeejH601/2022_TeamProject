@@ -12,7 +12,7 @@ void Idle_Player::Enter(CPlayer* player)
 
 void Idle_Player::Execute(CPlayer* player, float fElapsedTime)
 {
-	player->Animate(fElapsedTime);
+	//player->Animate(fElapsedTime);
 }
 
 void Idle_Player::Exit(CPlayer* player)
@@ -35,7 +35,7 @@ void Atk1_Player::Enter(CPlayer* player)
 
 void Atk1_Player::Execute(CPlayer* player, float fElapsedTime)
 {
-	player->Animate(fElapsedTime);
+	//player->Animate(fElapsedTime);
 	CAnimationSet* pAnimationSet = player->m_pChild->m_pSkinnedAnimationController->m_pAnimationSets->m_pAnimationSets[player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_nAnimationSet];
 	if (player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition == pAnimationSet->m_fLength)
 	{
@@ -62,7 +62,7 @@ void Atk2_Player::Enter(CPlayer* player)
 
 void Atk2_Player::Execute(CPlayer* player, float fElapsedTime)
 {
-	player->Animate(fElapsedTime);
+	//player->Animate(fElapsedTime);
 	CAnimationSet* pAnimationSet = player->m_pChild->m_pSkinnedAnimationController->m_pAnimationSets->m_pAnimationSets[player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_nAnimationSet];
 	if (player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition == pAnimationSet->m_fLength)
 	{
@@ -89,7 +89,7 @@ void Atk3_Player::Enter(CPlayer* player)
 
 void Atk3_Player::Execute(CPlayer* player, float fElapsedTime)
 {
-	player->Animate(fElapsedTime);
+	//player->Animate(fElapsedTime);
 	CAnimationSet* pAnimationSet = player->m_pChild->m_pSkinnedAnimationController->m_pAnimationSets->m_pAnimationSets[player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_nAnimationSet];
 	if (player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition == pAnimationSet->m_fLength)
 	{

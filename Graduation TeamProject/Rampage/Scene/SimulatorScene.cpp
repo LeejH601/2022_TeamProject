@@ -209,6 +209,9 @@ void CSimulatorScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 	knightObject->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 4);
 	knightObject->m_pSkinnedAnimationController->m_xmf3RootObjectScale = XMFLOAT3(14.0f, 14.0f, 14.0f);
 
+	m_pMainCharacter = std::make_unique<CPlayer>();
+	m_pMainCharacter->SetChild(knightObject, true);
+
 	((CDepthRenderShader*)m_pDepthRenderShader.get())->RegisterObject(m_pMainCharacter.get());
 	for (int i = 0; i < m_pEnemys.size(); ++i)
 		((CDepthRenderShader*)m_pDepthRenderShader.get())->RegisterObject(m_pEnemys[i].get());
@@ -226,8 +229,7 @@ void CSimulatorScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 	XMFLOAT4 xmf4Color(0.0f, 0.5f, 0.0f, 0.0f);
 	m_pTerrain = std::make_unique<CSplatTerrain>(pd3dDevice, pd3dCommandList, GetGraphicsRootSignature(), _T("Terrain/terrainHeightMap257.raw"), 257, 257, 257, 257, xmf3Scale, xmf4Color, m_pTerrainShader.get());
 	m_pTerrain->SetPosition(XMFLOAT3(-800.f, -310.f, -800.f));
-	m_pMainCharacter = std::make_unique<CPlayer>();
-	m_pMainCharacter->SetChild(knightObject, true);
+	
 
 	/*for (int i = 0; i < nAnimationSets; ++i)
 	{
@@ -257,6 +259,7 @@ void CSimulatorScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float f
 	if (m_pMainCharacter->GetEnable())
 	{
 		m_pMainCharacter->Animate(0.0f);
+		m_pMainCharacter->Update(fTimeElapsed);
 		m_pMainCharacter->Render(pd3dCommandList, true);
 	}
 
