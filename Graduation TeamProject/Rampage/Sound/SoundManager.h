@@ -6,13 +6,17 @@
 
 class CSoundManager {
 private:
-    FMOD_SYSTEM* g_sound_system;
+    FMOD_SYSTEM* g_sound_system = nullptr;
     std::vector<CSound> m_Sounds;
 public:
     static CSoundManager* GetInst()
     {
-        static CSoundManager m_pInst;
-        return &m_pInst;
+        static std::shared_ptr<CSoundManager> m_pInst = nullptr;
+        if (m_pInst.get() == nullptr) {
+            m_pInst = std::make_shared<CSoundManager>();
+            m_pInst->Init();
+        }
+        return m_pInst.get();
     }
 
     CSoundManager();
@@ -20,6 +24,7 @@ public:
 
     void Init();
     void Release();
+    FMOD_SYSTEM* GetSoundSystem() { return g_sound_system; };
 
     void RegisterSound(std::string path, bool loop);
     std::vector<CSound>::iterator FindSound(std::string path);

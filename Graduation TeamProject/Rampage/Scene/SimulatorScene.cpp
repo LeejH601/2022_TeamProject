@@ -279,6 +279,7 @@ void CSimulatorScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float f
 	if (!m_pDummyEnemy->m_pSkinnedAnimationController) m_pMainCharacter->UpdateTransform(NULL);
 	m_pMainCharacter->Render(pd3dCommandList);*/
 
+	Locator.GetSoundPlayer()->Update(fTimeElapsed);
 	/*for (int i = 0; i < m_pMainCharacters.size(); ++i)
 	{
 		m_pMainCharacters[i]->Animate(fTimeElapsed);

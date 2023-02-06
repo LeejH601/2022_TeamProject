@@ -1,6 +1,9 @@
 #include "State.h"
 #include "Player.h"
 #include "..\Global\Locator.h"
+#include "..\Global\MessageDispatcher.h"
+#include "..\Global\Global.h"
+#include "..\Sound\Sound.h"
 
 void Idle_Player::Enter(CPlayer* player)
 {
@@ -31,6 +34,9 @@ void Atk1_Player::Enter(CPlayer* player)
 	player->m_pChild->m_pSkinnedAnimationController->m_fTime = 0.0f;
 	player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition = 0.0f;
 	player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_nType = ANIMATION_TYPE_ONCE;
+	Telegram msg;
+	msg.Msg = (int)MESSAGE_TYPE::Msg_PlaySoundShoot;
+	Locator.GetSoundPlayer()->HandleMessage(msg);
 }
 
 void Atk1_Player::Execute(CPlayer* player, float fElapsedTime)

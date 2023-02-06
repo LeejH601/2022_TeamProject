@@ -5,6 +5,7 @@
 #include "..\Object\Texture.h"
 #include "..\Global\GameFramework.h"
 #include "..\Global\Locator.h"
+#include "..\Sound\Sound.h"
 
 #define NUM_FRAMES_IN_FLIGHT 3
 
@@ -389,6 +390,7 @@ void CImGuiManager::SetUI()
 			if (componentset) {
 				m_pCurrentComponentSet = componentset;
 				m_pCamera->LoadComponentFromSet(m_pCurrentComponentSet);
+				Locator.GetSoundPlayer()->LoadComponentFromSet(m_pCurrentComponentSet);
 				CSimulatorScene::GetInst()->SetPlayerAnimationSet(0);
 			}
 		}
@@ -399,6 +401,7 @@ void CImGuiManager::SetUI()
 			if (componentset) {
 				m_pCurrentComponentSet = componentset;
 				m_pCamera->LoadComponentFromSet(m_pCurrentComponentSet);
+				Locator.GetSoundPlayer()->LoadComponentFromSet(m_pCurrentComponentSet);
 				CSimulatorScene::GetInst()->SetPlayerAnimationSet(1);
 			}
 		}
@@ -409,6 +412,7 @@ void CImGuiManager::SetUI()
 			if (componentset) {
 				m_pCurrentComponentSet = componentset;
 				m_pCamera->LoadComponentFromSet(m_pCurrentComponentSet);
+				Locator.GetSoundPlayer()->LoadComponentFromSet(m_pCurrentComponentSet);
 				CSimulatorScene::GetInst()->SetPlayerAnimationSet(2);
 			}
 		}

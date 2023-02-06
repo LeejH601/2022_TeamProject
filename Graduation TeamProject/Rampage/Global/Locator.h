@@ -4,6 +4,7 @@
 template <class entity_type> class CState;
 class CCamera;
 class CGameObject;
+class CSoundPlayer;
 class CComponentSet;
 class CPlayer;
 
@@ -46,6 +47,8 @@ class CLocator
 	std::set<CoptSetPair, Comp_ComponentSet> m_sComponentSets;
 	std::set<PlayerStatePair, Comp_PlayerState> m_sPlayerStateSet;
 
+	std::shared_ptr<CSoundPlayer> m_pSoundPlayer;
+
 	CoptSetPair dummy;
 	PlayerStatePair statedummy;
 
@@ -85,6 +88,8 @@ public:
 	CState<CPlayer>* GetPlayerState(const std::type_info& type);
 
 	void SetPlayerState(std::shared_ptr<CState<CPlayer>>& state);
+
+	CSoundPlayer* GetSoundPlayer() { return m_pSoundPlayer.get(); };
 };
 
 extern CLocator Locator;
