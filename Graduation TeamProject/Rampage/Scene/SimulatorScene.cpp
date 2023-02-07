@@ -3,7 +3,6 @@
 #include "..\Object\Texture.h"
 #include "..\Object\ModelManager.h"
 #include "..\Shader\ModelShader.h"
-#include "..\Shader\ModelShader.h"
 #include "..\Sound\SoundManager.h"
 #include "..\Sound\SoundPlayer.h"
 #include "..\Global\Camera.h"
@@ -194,12 +193,15 @@ void CSimulatorScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 
 	// 4->HIT
 	// 5->IDLE
-	std::unique_ptr<CGoblinObject> m_pDummyEnemy = std::make_unique<CGoblinObject>(pd3dDevice, pd3dCommandList, 1);
+	std::shared_ptr<CGameObject> m_pDummyEnemy = std::make_unique<CGoblinObject>(pd3dDevice, pd3dCommandList, 1);
 	m_pDummyEnemy->SetPosition(XMFLOAT3(8.0f, 0.0f, 0.0f));
 	m_pDummyEnemy->SetScale(14.0f, 14.0f, 14.0f);
 	m_pDummyEnemy->Rotate(0.0f, -90.0f, 0.0f);
 	m_pDummyEnemy->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 5);
-	m_pEnemys.push_back(std::move(m_pDummyEnemy));
+
+	std::unique_ptr<CMonster> pMonster = std::make_unique<CMonster>();
+	pMonster->SetChild(m_pDummyEnemy);
+	m_pEnemys.push_back(std::move(pMonster));
 
 	// 3->IDLE
 	// 28->Attack

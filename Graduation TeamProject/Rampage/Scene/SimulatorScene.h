@@ -6,6 +6,7 @@
 #include "..\Object\Terrain.h"
 #include "..\Shader\TerrainShader.h"
 #include "..\Object\Player.h"
+#include "..\Object\Monster.h"
 
 
 class CSimulatorScene : public CScene

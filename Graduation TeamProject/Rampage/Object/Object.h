@@ -174,7 +174,7 @@ public:
 	virtual void CheckCollision(CGameObject* pTargetObject) {
 		if (pTargetObject)
 		{
-			BoundingBox TargetBoundingBox = pTargetObject->GetBoundingBox();
+			BoundingBox TargetBoundingBox = pTargetObject->m_pChild->GetBoundingBox();
 			if (m_TransformedWeaponBoudningBox.Intersects(TargetBoundingBox))
 				pTargetObject->SetDisable();
 		}
@@ -205,7 +205,7 @@ public:
 	virtual void CheckCollision(CGameObject* pTargetObject) {
 		if (pTargetObject)
 		{
-			BoundingBox TargetBoundingBox = pTargetObject->GetBoundingBox();
+			BoundingBox TargetBoundingBox = pTargetObject->m_pChild->GetBoundingBox();
 			if (m_TransformedWeaponBoudningBox.Intersects(TargetBoundingBox))
 				pTargetObject->SetDisable();
 		}
@@ -236,7 +236,7 @@ public:
 	virtual void CheckCollision(CGameObject* pTargetObject) {
 		if (pTargetObject)
 		{
-			BoundingBox TargetBoundingBox = pTargetObject->GetBoundingBox();
+			BoundingBox TargetBoundingBox = pTargetObject->m_pChild->GetBoundingBox();
 			if (m_TransformedWeaponBoudningBox.Intersects(TargetBoundingBox))
 				pTargetObject->SetDisable();
 		}
@@ -267,7 +267,7 @@ public:
 	virtual void CheckCollision(CGameObject* pTargetObject) {
 		if (pTargetObject)
 		{
-			BoundingBox TargetBoundingBox = pTargetObject->GetBoundingBox();
+			BoundingBox TargetBoundingBox = pTargetObject->m_pChild->GetBoundingBox();
 			if (m_TransformedWeaponBoudningBox.Intersects(TargetBoundingBox))
 				pTargetObject->SetDisable();
 		}
