@@ -1168,3 +1168,69 @@ CTexturedRectMesh::~CTexturedRectMesh()
 {
 }
 
+CBillBoardMesh::CBillBoardMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_POINTLIST;
+	int nBillBoard = 5;
+	m_nStride = sizeof(CBillBoardVertex);
+	m_nVertices = nBillBoard;
+	XMFLOAT3 xmf3Position;
+	std::vector< CBillBoardVertex> m_BillBordVertices;
+	m_BillBordVertices.reserve(nBillBoard);
+
+	for (int i = 0; i < nBillBoard; i++)
+	{
+		float fxTerrain = 0.f;
+		float fzTerrain = 0.f;
+		xmf3Position.x = fxTerrain;
+		xmf3Position.z = fzTerrain + 15.f * i;
+		xmf3Position.y = 0.f;
+		m_BillBordVertices.push_back(CBillBoardVertex(xmf3Position, XMFLOAT2(5.f, 5.f)));
+	}
+
+	m_pd3dPositionBuffer = CreateBufferResource(pd3dDevice, pd3dCommandList, m_BillBordVertices.data(), m_nStride * m_nVertices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dPositionUploadBuffer);
+
+	D3D12_VERTEX_BUFFER_VIEW m_pd3dPositionBufferView;
+	m_pd3dPositionBufferView.BufferLocation = m_pd3dPositionBuffer->GetGPUVirtualAddress();
+	m_pd3dPositionBufferView.StrideInBytes = m_nStride;
+	m_pd3dPositionBufferView.SizeInBytes = m_nStride * m_nVertices;
+	m_pd3dVertexBufferViews.emplace_back(m_pd3dPositionBufferView);
+}
+
+CBillBoardMesh::~CBillBoardMesh()
+{
+}
+
+//CSpriteAnimateMesh::CSpriteAnimateMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList) : CMesh(pd3dDevice, pd3dCommandList)
+//{
+//	m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_POINTLIST;
+//	int nSprite = 1;
+//	m_nStride = sizeof(CSpriteAnimateVertex);
+//	m_nVertices = nSprite;
+//	XMFLOAT3 xmf3Position;
+//	std::vector< CSpriteAnimateVertex> m_SpriteAnimateVertices;
+//	m_SpriteAnimateVertices.reserve(nSprite);
+//
+//	for (int i = 0; i < nSprite; i++)
+//	{
+//		float fxTerrain = 0.f;
+//		float fzTerrain = 0.f;
+//		xmf3Position.x = fxTerrain;
+//		xmf3Position.z = fzTerrain + 15.f * i;
+//		xmf3Position.y = 0.f;
+//
+//		m_SpriteAnimateVertices.push_back(CSpriteAnimateVertex(xmf3Position, XMFLOAT2(5.f, 5.f)));
+//	}
+//
+//	m_pd3dPositionBuffer = CreateBufferResource(pd3dDevice, pd3dCommandList, m_BillBordVertices.data(), m_nStride * m_nVertices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dPositionUploadBuffer);
+//
+//	D3D12_VERTEX_BUFFER_VIEW m_pd3dPositionBufferView;
+//	m_pd3dPositionBufferView.BufferLocation = m_pd3dPositionBuffer->GetGPUVirtualAddress();
+//	m_pd3dPositionBufferView.StrideInBytes = m_nStride;
+//	m_pd3dPositionBufferView.SizeInBytes = m_nStride * m_nVertices;
+//	m_pd3dVertexBufferViews.emplace_back(m_pd3dPositionBufferView);
+//}
+//
+//CSpriteAnimateMesh::~CSpriteAnimateMesh()
+//{
+//}

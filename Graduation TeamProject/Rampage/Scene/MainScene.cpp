@@ -167,7 +167,6 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	//m_pTerrain->SetPosition(XMFLOAT3(-800.f, -750.f, -800.f));
 	////m_pTerrain->SetPosition(XMFLOAT3(0.f, 0.f, 0.f));
 
-
 	m_pTerrainShader = std::make_unique<CSplatTerrainShader>();
 	m_pTerrainShader->CreateShader(pd3dDevice, GetGraphicsRootSignature(), 1, &pdxgiObjectRtvFormats, 0);
 	m_pTerrainShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 13);
@@ -182,22 +181,12 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pBillBoardObjectShader = std::make_unique<CBillBoardObjectShader>();
 	m_pBillBoardObjectShader->CreateShader(pd3dDevice, GetGraphicsRootSignature(), 1, &pdxgiObjectRtvFormats, 0);
 	m_pBillBoardObjectShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 10);
-	
+
 	std::unique_ptr<CBillBoardObject> pBillBoardObject = std::make_unique<CBillBoardObject>(m_pBillBoardObjectShader->Load_Texture(pd3dDevice, pd3dCommandList, L"Image/Grass01.dds"), pd3dDevice, pd3dCommandList, m_pBillBoardObjectShader.get());
-	pBillBoardObject->SetPosition(XMFLOAT3(-10.f, 0.0f, 0.f));
 	m_pBillBoardObjects.push_back(std::move(pBillBoardObject));
 
-	pBillBoardObject = std::make_unique<CBillBoardObject>(m_pBillBoardObjectShader->Load_Texture(pd3dDevice, pd3dCommandList, L"Image/Grass02.dds"), pd3dDevice, pd3dCommandList, m_pBillBoardObjectShader.get());
-	pBillBoardObject->SetPosition(XMFLOAT3(0.f, 0.0f, 15.0f));
-	m_pBillBoardObjects.push_back(std::move(pBillBoardObject));
-
-	pBillBoardObject = std::make_unique<CBillBoardObject>(m_pBillBoardObjectShader->Load_Texture(pd3dDevice, pd3dCommandList, L"Image/flower02.dds"), pd3dDevice, pd3dCommandList, m_pBillBoardObjectShader.get());
-	pBillBoardObject->SetPosition(XMFLOAT3(25.0f, 0.0f, 25.0f));
-	m_pBillBoardObjects.push_back(std::move(pBillBoardObject));
-
-	pBillBoardObject = std::make_unique<CBillBoardObject>(m_pBillBoardObjectShader->Load_Texture(pd3dDevice, pd3dCommandList, L"Image/flower02.dds"), pd3dDevice, pd3dCommandList, m_pBillBoardObjectShader.get());
-	pBillBoardObject->SetPosition(XMFLOAT3(35.0f, 0.0f, 0.f));
-	m_pBillBoardObjects.push_back(std::move(pBillBoardObject));
+	std::unique_ptr<CMultiSpriteObject> pSpriteAnimationObject = std::make_unique<CMultiSpriteObject>(m_pBillBoardObjectShader->Load_Texture(pd3dDevice, pd3dCommandList, L"Image/Explode_8x8.dds"), pd3dDevice, pd3dCommandList, m_pBillBoardObjectShader.get(), 8, 8, 0.05f);
+	m_pBillBoardObjects.push_back(std::move(pSpriteAnimationObject));
 }
 void CMainTMPScene::AnimateObjects(float fTimeElapsed)
 {
@@ -220,13 +209,17 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 	m_pTerrain->Render(pd3dCommandList);
 
 	
+
+
+	CBoundingBoxShader::GetInst()->Render(pd3dCommandList, 0);
+
 	for (int i = 0; i < m_pBillBoardObjects.size(); i++)
 	{
 		m_pBillBoardObjectShader->Render(pd3dCommandList, 0);
+		m_pBillBoardObjects[i]->Animate(fTimeElapsed);
 		m_pBillBoardObjects[i]->Render(pd3dCommandList, pCamera);
 	}
 
-	CBoundingBoxShader::GetInst()->Render(pd3dCommandList, 0);
 }
 
 

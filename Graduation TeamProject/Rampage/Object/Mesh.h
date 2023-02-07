@@ -245,10 +245,12 @@ class CVertex
 {
 public:
 	XMFLOAT3						m_xmf3Position;
-
+	XMFLOAT2						m_xmf2Size;
 public:
-	CVertex() { m_xmf3Position = XMFLOAT3(0.0f, 0.0f, 0.0f); }
+	CVertex() { m_xmf3Position = XMFLOAT3(0.0f, 0.0f, 0.0f), m_xmf2Size = XMFLOAT2(0.f, 0.f); }
+
 	CVertex(XMFLOAT3 xmf3Position) { m_xmf3Position = xmf3Position; }
+	CVertex(XMFLOAT3 xmf3Position, XMFLOAT2 xmf2Size) { m_xmf3Position = xmf3Position; m_xmf2Size = xmf2Size; }
 	~CVertex() { }
 };
 
@@ -273,3 +275,52 @@ public:
 	CTexturedRectMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fWidth = 20.0f, float fHeight = 20.0f, float fDepth = 20.0f, float fxPosition = 0.0f, float fyPosition = 0.0f, float fzPosition = 0.0f);
 	virtual ~CTexturedRectMesh();
 };
+
+
+class CBillBoardVertex
+{
+public:
+	XMFLOAT3						m_xmf3Position;
+	XMFLOAT2						m_xmf2Size;
+
+public:
+	CBillBoardVertex() { m_xmf3Position = XMFLOAT3(0.0f, 0.0f, 0.0f), m_xmf2Size = XMFLOAT2(0.f, 0.f); }
+	CBillBoardVertex(XMFLOAT3 xmf3Position, XMFLOAT2 xmf2Size) 
+	{ m_xmf3Position = xmf3Position; 
+	m_xmf2Size = xmf2Size; }
+	~CBillBoardVertex() { }
+};
+
+class CSpriteAnimateVertex
+{
+public:
+	XMFLOAT3						m_xmf3Position;
+	XMFLOAT2						m_xmf2Size;
+	XMFLOAT2						m_xmf2TexCoord;
+public:
+	CSpriteAnimateVertex() { m_xmf3Position = XMFLOAT3(0.0f, 0.0f, 0.0f), m_xmf2Size = XMFLOAT2(0.f, 0.f), m_xmf2TexCoord = XMFLOAT2(0.f, 0.f); }
+	CSpriteAnimateVertex(XMFLOAT3 xmf3Position, XMFLOAT2 xmf2Size, XMFLOAT2 xmf2TexCoord)
+	{
+		m_xmf3Position = xmf3Position;
+		m_xmf2Size = xmf2Size;
+		m_xmf2TexCoord = xmf2TexCoord;
+	}
+	~CSpriteAnimateVertex() { }
+};
+
+class CBillBoardMesh : public CMesh
+{
+
+public:
+	CBillBoardMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+	virtual ~CBillBoardMesh();
+};
+
+//class CSpriteAnimateMesh : public CMesh
+//{
+//	
+//public:
+//	CSpriteAnimateMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+//	virtual ~CSpriteAnimateMesh();
+//};
+//

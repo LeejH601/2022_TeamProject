@@ -52,6 +52,8 @@ public:
 	D3D12_SHADER_RESOURCE_VIEW_DESC GetShaderResourceViewDesc(int nIndex);
 
 	void ReleaseUploadBuffers();
+
+	void AnimateRowColumn(float fTime = 0.0f);
 };
 class CMaterial
 {
@@ -69,7 +71,7 @@ public:
 	void SetShader(std::shared_ptr<CShader> pShader);
 	void SetMaterialType(UINT nType) { m_nType |= nType; }
 	void SetTexture(std::shared_ptr<CTexture> pTexture);
-
+	std::shared_ptr<CTexture> GetTexture() { return m_pTexture; }
 	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList);
 	virtual void ReleaseShaderVariables();
 

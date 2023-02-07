@@ -257,5 +257,6 @@
     <FxCompile Include="Shader\BoundPixelShader.hlsl" />
     <FxCompile Include="Shader\BillboardObjectPixelShader.hlsl" />
     <FxCompile Include="Shader\BillboardObjectVertexShader.hlsl" />
+    <FxCompile Include="Shader\BillboardObjectGSShader.hlsl" />
   </ItemGroup>
 </Project>
