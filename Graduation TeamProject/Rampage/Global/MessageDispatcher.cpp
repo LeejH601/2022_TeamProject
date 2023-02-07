@@ -1,4 +1,6 @@
 #include "MessageDispatcher.h"
+#include "EntityManager.h"
+#include "Locator.h"
 
 void CMessageDispatcher::Discharge(IEntity* pReceiver, const Telegram& msg)
 {
@@ -13,9 +15,9 @@ void CMessageDispatcher::DispatchMessages()
 	{
 		Telegram& telegram = const_cast<Telegram&>(*PriorityQ.begin());
 		IEntity* pReceiver = nullptr;
-		//pReceiver = CObjectManager::GetInst()->GetObjectFromID(telegram.Receiver);
-		if (pReceiver)
-			Discharge(pReceiver, telegram);
+		//pReceiver = Locator.GetEntityManager()->GetEntity(telegram.Receiver);
+		if (telegram.Receiver)
+			Discharge(telegram.Receiver, telegram);
 		if (telegram.Extrainfo)
 			delete[] telegram.Extrainfo;
 		PriorityQ.erase(PriorityQ.begin());

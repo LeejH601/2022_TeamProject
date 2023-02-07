@@ -10,9 +10,16 @@ class IEntity
 public:
 	IEntity();
 	virtual ~IEntity();
-
-	const unsigned int GetID() { return ID; };
+public:
+	const unsigned int GetID() const { return ID; };
 
 	virtual bool HandleMessage(const Telegram& msg) { return true; };
-};
 
+	bool operator<(const IEntity* rhs) {
+		return this->ID < rhs->ID;
+	}
+	bool operator<(const IEntity& rhs) {
+		return this->ID < rhs.ID;
+	}
+
+};

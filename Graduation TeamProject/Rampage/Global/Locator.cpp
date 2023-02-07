@@ -4,9 +4,20 @@
 #include "Camera.h"
 #include "..\Object\State.h"
 #include "..\Sound\SoundManager.h"
+#include "EntityManager.h"
+#include "MessageDispatcher.h"
+
+CLocator::~CLocator()
+{
+	m_pEntityManager->Clear();
+	m_pEntityManager.reset();
+}
 
 bool CLocator::Init()
 {
+	m_pMessageDispatcher = std::make_shared<CMessageDispatcher>();
+	m_pEntityManager = std::make_shared<CEntityManager>();
+
 	std::shared_ptr<CComponentSet> componentset = std::make_shared<CComponentSet>();
 	SetComponentSet(componentset);
 	componentset = std::make_shared<CComponentSet>();

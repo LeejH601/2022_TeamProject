@@ -136,6 +136,9 @@
     <ClCompile Include="Shader\DepthRenderShader.cpp">
       <Filter>Shader</Filter>
     </ClCompile>
+    <ClCompile Include="Global\EntityManager.cpp">
+      <Filter>Global</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Global\stdafx.h">
@@ -257,6 +260,9 @@
     </ClInclude>
     <ClInclude Include="Shader\DepthRenderShader.h">
       <Filter>Shader</Filter>
+    </ClInclude>
+    <ClInclude Include="Global\EntityManager.h">
+      <Filter>Global</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

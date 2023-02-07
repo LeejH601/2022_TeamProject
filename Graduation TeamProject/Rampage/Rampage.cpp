@@ -3,6 +3,7 @@
 #include "Global/Camera.h"
 #include "Global/Locator.h"
 #include "Object/State.h"
+#include "Global/EntityManager.h"
 
 #define MAX_LOADSTRING 100
 
@@ -28,6 +29,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	UNREFERENCED_PARAMETER(hPrevInstance);
 	UNREFERENCED_PARAMETER(lpCmdLine);
 	Locator.Init();
+	Locator.SetTimer(&gGameFramework.m_GameTimer);
 
 	MyRegisterClass(hInstance);
 

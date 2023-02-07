@@ -5,6 +5,10 @@
 #include "..\Shader\Shader.h"
 #include "..\Shader\ModelShader.h"
 #include "..\Shader\BoundingBoxShader.h"
+#include "..\Global\MessageDispatcher.h"
+#include "..\Global\Locator.h"
+#include "..\Global\Timer.h"
+#include "..\Global\Global.h"
 
 CGameObject::CGameObject()
 {
@@ -101,7 +105,7 @@ void CGameObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, bool b_UseT
 		{
 			if (m_ppMaterials[i])
 			{
-				if (m_ppMaterials[i]->m_pShader) 
+				if (m_ppMaterials[i]->m_pShader)
 					m_ppMaterials[0]->m_pShader->Render(pd3dCommandList, 0);
 				if (b_UseTexture)
 					m_ppMaterials[i]->UpdateShaderVariables(pd3dCommandList);
@@ -139,9 +143,9 @@ XMFLOAT4X4 CGameObject::GetWorld()
 {
 	return m_xmf4x4World;
 }
-UINT CGameObject::GetMeshType() 
-{ 
-	return((m_pMesh) ? m_pMesh->GetType() : 0x00); 
+UINT CGameObject::GetMeshType()
+{
+	return((m_pMesh) ? m_pMesh->GetType() : 0x00);
 }
 void CGameObject::SetPosition(float x, float y, float z)
 {
@@ -496,6 +500,20 @@ CKnightObject::CKnightObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 CKnightObject::~CKnightObject()
 {
 }
+bool CKnightObject::CheckCollision(CGameObject* pTargetObject)
+{
+	bool flag = false;
+	if (pTargetObject)
+	{
+		BoundingBox TargetBoundingBox = pTargetObject->GetBoundingBox();
+		if (m_TransformedWeaponBoudningBox.Intersects(TargetBoundingBox)) {
+			pTargetObject->SetDisable();
+
+			flag = true;
+		}
+	}
+	return flag;
+}
 void CKnightObject::Animate(float fTimeElapsed)
 {
 	CGameObject::Animate(fTimeElapsed);
@@ -541,7 +559,7 @@ COrcObject::COrcObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3d
 
 	SetChild(pOrcModel->m_pModelRootObject, true);
 	m_pSkinnedAnimationController = std::make_unique<CAnimationController>(pd3dDevice, pd3dCommandList, nAnimationTracks, pOrcModel);
-	
+
 	PrepareBoundingBox(pd3dDevice, pd3dCommandList);
 }
 COrcObject::~COrcObject()
@@ -570,7 +588,7 @@ void COrcObject::UpdateTransform(XMFLOAT4X4* pxmf4x4Parent)
 void COrcObject::PrepareBoundingBox(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	pWeapon = CGameObject::FindFrame("SM_Weapon");
-	
+
 	m_BodyBoundingBox = BoundingBox{ XMFLOAT3(0.0f, 1.05f, 0.0f), XMFLOAT3(1.2f, 2.0f, 1.2f) };
 	m_WeaponBoundingBox = BoundingBox{ XMFLOAT3(0.0f, 0.0f, 0.85f), XMFLOAT3(0.3f, 0.6f, 0.35f) };
 	pBodyBoundingBoxMesh = CBoundingBoxShader::GetInst()->AddBoundingObject(pd3dDevice, pd3dCommandList, this, XMFLOAT3(0.0f, 1.05f, 0.0f), XMFLOAT3(1.2f, 2.0f, 1.2f));
@@ -586,7 +604,7 @@ CGoblinObject::CGoblinObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 
 	SetChild(pGoblinModel->m_pModelRootObject, true);
 	m_pSkinnedAnimationController = std::make_unique<CAnimationController>(pd3dDevice, pd3dCommandList, nAnimationTracks, pGoblinModel);
-	
+
 	PrepareBoundingBox(pd3dDevice, pd3dCommandList);
 }
 CGoblinObject::~CGoblinObject()
@@ -715,7 +733,7 @@ void CKightRootRollBackAnimationController::OnRootMotion(CGameObject* pRootGameO
 			//		pRootGameObject->m_xmf4x4ToParent = m_pModelRootObject->m_xmf4x4World;
 			//		pRootGameObject->SetPosition(xmf3RootPosition);
 			//XMFLOAT3 xmf3Offset = Vector3::Subtract(xmf3Position, m_xmf3FirstRootMotionPosition);
-			XMFLOAT3 xmf3Offset = Vector3::Subtract(m_xmf3FirstRootMotionPosition,  xmf3Position);
+			XMFLOAT3 xmf3Offset = Vector3::Subtract(m_xmf3FirstRootMotionPosition, xmf3Position);
 			xmf3Offset = {
 				xmf3Offset.x * m_xmf3RootObjectScale.x,
 				xmf3Offset.y * m_xmf3RootObjectScale.y,

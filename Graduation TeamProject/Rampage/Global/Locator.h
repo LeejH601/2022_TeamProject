@@ -7,6 +7,9 @@ class CGameObject;
 class CSoundPlayer;
 class CComponentSet;
 class CPlayer;
+class CEntityManager;
+class CMessageDispatcher;
+class CGameTimer;
 
 typedef std::pair<int, std::shared_ptr<CComponentSet>> CoptSetPair;
 
@@ -48,13 +51,17 @@ class CLocator
 	std::set<PlayerStatePair, Comp_PlayerState> m_sPlayerStateSet;
 
 	std::shared_ptr<CSoundPlayer> m_pSoundPlayer;
+	std::shared_ptr<CEntityManager> m_pEntityManager;
+	std::shared_ptr<CMessageDispatcher> m_pMessageDispatcher;
+
+	CGameTimer* m_pTimer;
 
 	CoptSetPair dummy;
 	PlayerStatePair statedummy;
 
 public:
 	CLocator() = default;
-	~CLocator() = default;
+	~CLocator();
 
 	bool Init();
 
@@ -90,6 +97,13 @@ public:
 	void SetPlayerState(std::shared_ptr<CState<CPlayer>>& state);
 
 	CSoundPlayer* GetSoundPlayer() { return m_pSoundPlayer.get(); };
+
+	void SetEntityManager(std::shared_ptr<CEntityManager>& entitymanager) { m_pEntityManager = entitymanager; };
+	CEntityManager* GetEntityManager() { return m_pEntityManager.get(); };
+	CMessageDispatcher* GetMessageDispather() { return m_pMessageDispatcher.get(); };
+
+	void SetTimer(CGameTimer* timer) { m_pTimer = timer; };
+	CGameTimer* GetTimer() { return m_pTimer; };
 };
 
 extern CLocator Locator;

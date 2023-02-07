@@ -151,6 +151,7 @@
     <ClCompile Include="Global\Component.cpp" />
     <ClCompile Include="Global\DDSTextureLoader12.cpp" />
     <ClCompile Include="Global\Entity.cpp" />
+    <ClCompile Include="Global\EntityManager.cpp" />
     <ClCompile Include="Global\GameFramework.cpp" />
     <ClCompile Include="Global\Locator.cpp" />
     <ClCompile Include="Global\MessageDispatcher.cpp" />
@@ -191,6 +192,7 @@
     <ClInclude Include="Global\d3dx12.h" />
     <ClInclude Include="Global\DDSTextureLoader12.h" />
     <ClInclude Include="Global\Entity.h" />
+    <ClInclude Include="Global\EntityManager.h" />
     <ClInclude Include="Global\GameFramework.h" />
     <ClInclude Include="Global\Global.h" />
     <ClInclude Include="Global\Locator.h" />
