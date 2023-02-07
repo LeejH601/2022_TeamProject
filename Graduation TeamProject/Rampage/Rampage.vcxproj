@@ -165,9 +165,12 @@
     <ClCompile Include="ImGui\imgui_tables.cpp" />
     <ClCompile Include="ImGui\imgui_widgets.cpp" />
     <ClCompile Include="Object\Animation.cpp" />
+    <ClCompile Include="Object\AnimationComponent.cpp" />
     <ClCompile Include="Object\Light.cpp" />
     <ClCompile Include="Object\Mesh.cpp" />
     <ClCompile Include="Object\ModelManager.cpp" />
+    <ClCompile Include="Object\Monster.cpp" />
+    <ClCompile Include="Object\MonsterState.cpp" />
     <ClCompile Include="Object\Object.cpp" />
     <ClCompile Include="Object\Player.cpp" />
     <ClCompile Include="Object\State.cpp" />
@@ -209,9 +212,12 @@
     <ClInclude Include="ImGui\imstb_textedit.h" />
     <ClInclude Include="ImGui\imstb_truetype.h" />
     <ClInclude Include="Object\Animation.h" />
+    <ClInclude Include="Object\AnimationComponent.h" />
     <ClInclude Include="Object\Light.h" />
     <ClInclude Include="Object\Mesh.h" />
     <ClInclude Include="Object\ModelManager.h" />
+    <ClInclude Include="Object\Monster.h" />
+    <ClInclude Include="Object\MonsterState.h" />
     <ClInclude Include="Object\Object.h" />
     <ClInclude Include="Object\Player.h" />
     <ClInclude Include="Object\State.h" />

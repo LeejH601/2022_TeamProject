@@ -142,6 +142,15 @@
     <ClCompile Include="Sound\SoundPlayer.cpp">
       <Filter>Sound</Filter>
     </ClCompile>
+    <ClCompile Include="Object\AnimationComponent.cpp">
+      <Filter>Object</Filter>
+    </ClCompile>
+    <ClCompile Include="Object\MonsterState.cpp">
+      <Filter>Object</Filter>
+    </ClCompile>
+    <ClCompile Include="Object\Monster.cpp">
+      <Filter>Object</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Global\stdafx.h">
@@ -269,6 +278,15 @@
     </ClInclude>
     <ClInclude Include="Sound\SoundPlayer.h">
       <Filter>Sound</Filter>
+    </ClInclude>
+    <ClInclude Include="Object\AnimationComponent.h">
+      <Filter>Object</Filter>
+    </ClInclude>
+    <ClInclude Include="Object\MonsterState.h">
+      <Filter>Object</Filter>
+    </ClInclude>
+    <ClInclude Include="Object\Monster.h">
+      <Filter>Object</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

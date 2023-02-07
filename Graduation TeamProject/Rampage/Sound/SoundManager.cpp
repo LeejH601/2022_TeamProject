@@ -19,8 +19,6 @@ std::vector<CSound>::iterator CSoundManager::FindSound(const std::string path)
 }
 
 CSoundManager::~CSoundManager() {
-    for (auto sound : m_Sounds)
-        sound.Release();
 }
 
 
@@ -32,6 +30,9 @@ void CSoundManager::Init() {
 }
 
 void CSoundManager::Release() {
+    for (auto sound : m_Sounds)
+        sound.Release();
+
     FMOD_System_Close(g_sound_system);
     FMOD_System_Release(g_sound_system);
 }

@@ -3,6 +3,7 @@
 #include "Component.h"
 #include "Camera.h"
 #include "..\Object\State.h"
+#include "..\Object\AnimationComponent.h"
 #include "..\Sound\SoundComponent.h"
 #include "..\Sound\SoundManager.h"
 #include "..\Sound\SoundPlayer.h"
@@ -33,6 +34,13 @@ bool CLocator::Init()
 		componentSet->AddComponent(component);
 		component = std::make_shared<CShootSoundComponent>(CSoundManager::GetInst()->GetSoundSystem());
 		((CSoundComponent*)component.get())->SetSound("Sound/David Bowie - Starman.mp3");
+		componentSet->AddComponent(component);
+
+		component = std::make_shared<CDamageAnimationComponent>();
+		componentSet->AddComponent(component);
+		component = std::make_shared<CShakeAnimationComponent>();
+		componentSet->AddComponent(component);
+		component = std::make_shared<CStaggerAnimationComponent>();
 		componentSet->AddComponent(component);
 	}
 
