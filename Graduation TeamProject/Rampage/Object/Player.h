@@ -77,14 +77,6 @@ public:
 	virtual void OnPrepareRender();
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, bool b_UseTexture, CCamera* pCamera = NULL);
 
-	virtual BoundingBox GetBoundingBox() {
-		if (m_pChild.get()) {
-			return m_pChild->GetBoundingBox();
-		}
-		else
-			return BoundingBox{};
-	}
-
 	virtual void CheckCollision(CGameObject* pTargetObject) {
 		if (m_pChild.get()) {
 			m_pChild->CheckCollision(pTargetObject);

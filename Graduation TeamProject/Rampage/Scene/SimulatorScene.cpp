@@ -13,6 +13,9 @@ void CSimulatorScene::OnPreRender(ID3D12GraphicsCommandList* pd3dCommandList, fl
 {
 	if (m_pDepthRenderShader)
 	{
+		for (int i = 0; i < m_pEnemys.size(); ++i)
+			m_pEnemys[i]->Update(fTimeElapsed);
+
 		((CDepthRenderShader*)m_pDepthRenderShader.get())->PrepareShadowMap(pd3dCommandList, fTimeElapsed);
 		((CDepthRenderShader*)m_pDepthRenderShader.get())->UpdateDepthTexture(pd3dCommandList);
 		CheckCollide();
@@ -193,15 +196,12 @@ void CSimulatorScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 
 	// 4->HIT
 	// 5->IDLE
-	std::shared_ptr<CGameObject> m_pDummyEnemy = std::make_unique<CGoblinObject>(pd3dDevice, pd3dCommandList, 1);
+	std::unique_ptr<CMonster> m_pDummyEnemy = std::make_unique<CGoblinObject>(pd3dDevice, pd3dCommandList, 1);
 	m_pDummyEnemy->SetPosition(XMFLOAT3(8.0f, 0.0f, 0.0f));
 	m_pDummyEnemy->SetScale(14.0f, 14.0f, 14.0f);
 	m_pDummyEnemy->Rotate(0.0f, -90.0f, 0.0f);
 	m_pDummyEnemy->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 5);
-
-	std::unique_ptr<CMonster> pMonster = std::make_unique<CMonster>();
-	pMonster->SetChild(m_pDummyEnemy);
-	m_pEnemys.push_back(std::move(pMonster));
+	m_pEnemys.push_back(std::move(m_pDummyEnemy));
 
 	// 3->IDLE
 	// 28->Attack
@@ -246,7 +246,6 @@ void CSimulatorScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 }
 void CSimulatorScene::AnimateObjects(float fTimeElapsed)
 {
-
 }
 void CSimulatorScene::CheckCollide()
 {
@@ -259,20 +258,14 @@ void CSimulatorScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float f
 
 	CModelShader::GetInst()->Render(pd3dCommandList, 1);
 
-	if (m_pMainCharacter->GetEnable())
-	{
-		m_pMainCharacter->Animate(0.0f);
-		m_pMainCharacter->Update(fTimeElapsed);
-		m_pMainCharacter->Render(pd3dCommandList, true);
-	}
+	m_pMainCharacter->Animate(0.0f);
+	m_pMainCharacter->Update(fTimeElapsed);
+	m_pMainCharacter->Render(pd3dCommandList, true);
 
 	for (int i = 0; i < m_pEnemys.size(); ++i)
 	{
-		if (m_pEnemys[i]->GetEnable())
-		{
-			m_pEnemys[i]->Animate(0.0f);
-			m_pEnemys[i]->Render(pd3dCommandList, true);
-		}
+		m_pEnemys[i]->Animate(0.0f);
+		m_pEnemys[i]->Render(pd3dCommandList, true);
 	}
 
 	m_pTerrainShader->Render(pd3dCommandList, 0);

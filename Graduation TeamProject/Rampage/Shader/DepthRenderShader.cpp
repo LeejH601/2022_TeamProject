@@ -246,12 +246,9 @@ void CDepthRenderShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCam
 	CShader::Render(pd3dCommandList, 0);
 	for (int i = 0; i < m_pObjects.size(); ++i)
 	{
-		if (m_pObjects[i]->GetEnable())
-		{
-			//(*m_pObjects)[i]->Animate(0.0f);
-			m_pObjects[i]->Animate(fTimeElapsed);
-			m_pObjects[i]->Render(pd3dCommandList, false);
-		}
+		//(*m_pObjects)[i]->Animate(0.0f);
+		m_pObjects[i]->Animate(fTimeElapsed);
+		m_pObjects[i]->Render(pd3dCommandList, false);
 	}
 	if (m_pTerrain)
 	{

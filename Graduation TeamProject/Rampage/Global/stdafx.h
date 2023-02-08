@@ -85,6 +85,7 @@ using Microsoft::WRL::ComPtr;
 
 #define ANIMATION_CALLBACK_EPSILON		0.0165f
 #define EPSILON							1.0e-10f
+#define PI								3.14159
 
 #define DIR_FORWARD					0x01
 #define DIR_BACKWARD				0x02

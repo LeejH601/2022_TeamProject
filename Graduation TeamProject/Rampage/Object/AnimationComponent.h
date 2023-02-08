@@ -11,10 +11,12 @@ public:
 
 class CShakeAnimationComponent : public CComponent
 {
-    float m_fFrequency;
-    float m_fDistance;
+    float m_fDistance = 3.5f;
+    float m_fFrequency = 0.8f;
 public:
+    DECLARE_SINGLE(CShakeAnimationComponent);
     CShakeAnimationComponent();
+    float GetShakeDistance(float t);
     bool HandleMessage(const Telegram& msg);
 };
 
