@@ -11,6 +11,8 @@ class CEntityManager;
 class CMessageDispatcher;
 class CGameTimer;
 
+
+
 typedef std::pair<int, std::shared_ptr<CComponentSet>> CoptSetPair;
 
 class Comp_ComponentSet
@@ -20,6 +22,20 @@ public:
 		return lhs.first < rhs.first;
 	}
 };
+
+class DataLoader
+{
+	std::string file_path = "Data\\Component";
+	std::string file_ext = ".bin";
+
+public:
+	void SaveComponentSets(std::set<CoptSetPair, Comp_ComponentSet>& ComponentSets);
+	void LoadComponentSets(std::set<CoptSetPair, Comp_ComponentSet>& ComponentSets);
+
+	void SaveComponentSet(FILE* pInFile, CComponentSet* componentset);
+	void LoadComponentSet(FILE* pInFile, CComponentSet* componentset);
+};
+
 
 typedef std::pair<size_t, std::shared_ptr<CState<CPlayer>>> PlayerStatePair;
 
@@ -104,6 +120,8 @@ public:
 
 	void SetTimer(CGameTimer* timer) { m_pTimer = timer; };
 	CGameTimer* GetTimer() { return m_pTimer; };
+
+	std::set<CoptSetPair, Comp_ComponentSet>& GetComponentSetRoot() { return m_sComponentSets; };
 };
 
 extern CLocator Locator;

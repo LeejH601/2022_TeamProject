@@ -31,6 +31,10 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	Locator.Init();
 	Locator.SetTimer(&gGameFramework.m_GameTimer);
 
+	DataLoader loader;
+	loader.LoadComponentSets(Locator.GetComponentSetRoot());
+
+
 	MyRegisterClass(hInstance);
 
 	// 애플리케이션 초기화를 수행합니다:
@@ -60,6 +64,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 			gGameFramework.FrameAdvance();
 		}
 	}
+	loader.SaveComponentSets(Locator.GetComponentSetRoot());
+
 	gGameFramework.OnDestroy();
 	return 0;
 }

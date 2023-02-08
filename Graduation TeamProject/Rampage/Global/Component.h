@@ -45,5 +45,8 @@ public:
 	virtual ~CComponentSet() = default;
 
 	CComponent* FindComponent(const type_info& type);
+	CComponent* FindComponent(const size_t& hashcode);
 	void AddComponent(std::shared_ptr<CComponent>& component);
+
+	std::set<ComponentPair, Comp_Compair>& GetComponentSet() { return m_sComponents; };
 };

@@ -5,6 +5,28 @@
 UINT gnCbvSrvDescriptorIncrementSize = 0;
 UINT gnRtvDescriptorIncrementSize = 0;
 
+int WriteIntegerFromFile(FILE* pInFile, const int value)
+{
+	UINT nReads = (UINT)::fwrite(&value, sizeof(int), 1, pInFile);
+	return(value);
+}
+
+float WriteFloatFromFile(FILE* pInFile, const float fValue)
+{
+	UINT nReads = (UINT)::fwrite(&fValue, sizeof(float), 1, pInFile);
+	return(fValue);
+}
+
+BYTE WriteStringFromFile(FILE* pInFile, std::string& pstrToken)
+{
+	BYTE nStrLength = pstrToken.length();
+	UINT nReads = 0;
+	nReads = (UINT)::fwrite(&nStrLength, sizeof(BYTE), 1, pInFile);
+	nReads = (UINT)::fwrite(pstrToken.c_str(), sizeof(char), nStrLength, pInFile);
+
+	return(nStrLength);
+}
+
 int ReadIntegerFromFile(FILE* pInFile)
 {
 	int nValue = 0;
