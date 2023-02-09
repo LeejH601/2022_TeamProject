@@ -2,6 +2,7 @@
 #include "..\Global\MessageDispatcher.h"
 #include "..\Global\Global.h"
 #include "..\Global\Locator.h"
+#include "..\Global\Timer.h"
 
 CSound::CSound()
 {
@@ -105,7 +106,7 @@ void CSoundComponent::Update(float fElapsedTime)
 
 		if (m_fCurrDelayed >= m_fDelay) {
 			if (m_pSound != nullptr) {
-				m_pSound->play(g_sound_system);
+				
 			}
 		}
 	}
@@ -114,7 +115,7 @@ void CSoundComponent::Update(float fElapsedTime)
 void CSoundComponent::Reset()
 {
 	m_fCurrDelayed = 0.0f;
-	SetEnable(true);
+	UpdateVolume();
 }
 
 void CSoundComponent::SetSound(CSound* sound)
@@ -123,7 +124,6 @@ void CSoundComponent::SetSound(CSound* sound)
 
 		m_pSound = new CSound();
 		memcpy(m_pSound, sound, sizeof(CSound));
-		m_fVolume = &m_pSound->m_volume;
 	}
 }
 
@@ -135,8 +135,17 @@ CEffectSoundComponent::CEffectSoundComponent(FMOD_SYSTEM* sound_system)
 
 bool CEffectSoundComponent::HandleMessage(const Telegram& msg)
 {
-	if (msg.Msg == (int)MESSAGE_TYPE::Msg_PlaySoundEffect) {
+	if (msg.Msg == (int)MESSAGE_TYPE::Msg_SoundEffectReady) {
 		Reset();
+		Telegram Msg;
+		Msg.Receiver = msg.Receiver;
+		Msg.Msg = (int)MESSAGE_TYPE::Msg_PlaySoundEffect;
+		Msg.DispatchTime = Locator.GetTimer()->GetNowTimeAfter(m_fDelay);
+		Locator.GetMessageDispather()->RegisterMessage(Msg);
+		return true;
+	}
+	else if (msg.Msg == (int)MESSAGE_TYPE::Msg_PlaySoundEffect) {
+		m_pSound->play(g_sound_system);
 		return true;
 	}
 	return false;
@@ -149,8 +158,17 @@ CShootSoundComponent::CShootSoundComponent(FMOD_SYSTEM* sound_system)
 
 bool CShootSoundComponent::HandleMessage(const Telegram& msg)
 {
-	if (msg.Msg == (int)MESSAGE_TYPE::Msg_PlaySoundShoot) {
+	if (msg.Msg == (int)MESSAGE_TYPE::Msg_SoundShootReady) {
 		Reset();
+		Telegram Msg;
+		Msg.Receiver = msg.Receiver;
+		Msg.Msg = (int)MESSAGE_TYPE::Msg_PlaySoundShoot;
+		Msg.DispatchTime = Locator.GetTimer()->GetNowTimeAfter(m_fDelay);
+		Locator.GetMessageDispather()->RegisterMessage(Msg);
+		return true;
+	}
+	else if (msg.Msg == (int)MESSAGE_TYPE::Msg_PlaySoundShoot) {
+		m_pSound->play(g_sound_system);
 		return true;
 	}
 	return false;
@@ -163,8 +181,17 @@ CDamageSoundComponent::CDamageSoundComponent(FMOD_SYSTEM* sound_system)
 
 bool CDamageSoundComponent::HandleMessage(const Telegram& msg)
 {
-	if (msg.Msg == (int)MESSAGE_TYPE::Msg_PlaySoundDamage) {
+	if (msg.Msg == (int)MESSAGE_TYPE::Msg_SoundDamageReady) {
 		Reset();
+		Telegram Msg;
+		Msg.Receiver = msg.Receiver;
+		Msg.Msg = (int)MESSAGE_TYPE::Msg_PlaySoundDamage;
+		Msg.DispatchTime = Locator.GetTimer()->GetNowTimeAfter(m_fDelay);
+		Locator.GetMessageDispather()->RegisterMessage(Msg);
+		return true;
+	}
+	else if (msg.Msg == (int)MESSAGE_TYPE::Msg_PlaySoundDamage) {
+		m_pSound->play(g_sound_system);
 		return true;
 	}
 	return false;
@@ -196,6 +223,12 @@ bool CSoundPlayer::HandleMessage(const Telegram& msg)
 	case MESSAGE_TYPE::Msg_PlaySoundEffect:
 		return m_pEffectComponent->HandleMessage(msg);
 	case MESSAGE_TYPE::Msg_PlaySoundShoot:
+		return m_pShootComponent->HandleMessage(msg);
+	case MESSAGE_TYPE::Msg_SoundDamageReady:
+		return m_pDamageComponent->HandleMessage(msg);
+	case MESSAGE_TYPE::Msg_SoundEffectReady:
+		return m_pEffectComponent->HandleMessage(msg);
+	case MESSAGE_TYPE::Msg_SoundShootReady:
 		return m_pShootComponent->HandleMessage(msg);
 	default:
 		return false;

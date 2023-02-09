@@ -17,6 +17,8 @@ public:
 	unsigned long GetFrameRate(LPTSTR lpszString = NULL, int nCharacters = 0);
 	float GetFrameTimeElapsed();
 	float GetTotalTime();
+	long long GetNowTimeAfter(float second);
+	long long GetNowTime();
 	__int64 GetCurrentCounter() {
 		return m_nCurrentPerformanceCounter;
 	};

@@ -1,6 +1,7 @@
 #include "MessageDispatcher.h"
 #include "EntityManager.h"
 #include "Locator.h"
+#include "Timer.h"
 
 void CMessageDispatcher::Discharge(IEntity* pReceiver, const Telegram& msg)
 {
@@ -14,6 +15,9 @@ void CMessageDispatcher::DispatchMessages()
 	while (!PriorityQ.empty())
 	{
 		Telegram& telegram = const_cast<Telegram&>(*PriorityQ.begin());
+		if (telegram.DispatchTime > Locator.GetTimer()->GetNowTime())
+			break;
+
 		IEntity* pReceiver = nullptr;
 		//pReceiver = Locator.GetEntityManager()->GetEntity(telegram.Receiver);
 		if (telegram.Receiver)

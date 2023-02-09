@@ -114,3 +114,17 @@ float CGameTimer::GetTotalTime()
 		return float(((m_nStopPerformanceCounter - m_nPausedPerformanceCounter) - m_nBasePerformanceCounter) * m_fTimeScale);
 	return float(((m_nCurrentPerformanceCounter - m_nPausedPerformanceCounter) - m_nBasePerformanceCounter) * m_fTimeScale);
 }
+
+long long CGameTimer::GetNowTimeAfter(float second)
+{
+	auto now = GetNowTime();
+	return now + std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::duration<float>(second)).count();
+}
+
+long long CGameTimer::GetNowTime()
+{
+	auto tp = std::chrono::system_clock::now().time_since_epoch();
+	auto now = std::chrono::duration_cast<std::chrono::microseconds>(tp);
+
+	return now.count();
+}

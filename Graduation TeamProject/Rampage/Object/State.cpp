@@ -41,8 +41,9 @@ void Atk1_Player::Enter(CPlayer* player)
 	player->m_fCMDConstant = 1.0f;
 
 	Telegram msg;
-	msg.Msg = (int)MESSAGE_TYPE::Msg_PlaySoundShoot;
-	//Locator.GetSoundPlayer()->HandleMessage(msg);
+	msg.Receiver = Locator.GetSoundPlayer();
+	msg.Msg = (int)MESSAGE_TYPE::Msg_SoundShootReady;
+	Locator.GetSoundPlayer()->HandleMessage(msg);
 }
 
 void Atk1_Player::Execute(CPlayer* player, float fElapsedTime)

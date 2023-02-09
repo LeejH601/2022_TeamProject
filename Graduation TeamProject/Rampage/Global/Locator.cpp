@@ -157,6 +157,36 @@ void DataLoader::SaveComponentSet(FILE* pInFile, CComponentSet* componentset)
 	WriteIntegerFromFile(pInFile, zoomer->m_bIsIN);
 	WriteStringFromFile(pInFile, std::string("</CCameraZoomer>:"));
 
+	WriteStringFromFile(pInFile, std::string("<CEffectSoundComponent>:"));
+	CEffectSoundComponent* effectsound = (CEffectSoundComponent*)componentset->FindComponent(typeid(CEffectSoundComponent));
+	WriteStringFromFile(pInFile, std::string("<Enable>:"));
+	WriteIntegerFromFile(pInFile, effectsound->GetEnable());
+	WriteStringFromFile(pInFile, std::string("<Delay>:"));
+	WriteFloatFromFile(pInFile, effectsound->m_fDelay);
+	WriteStringFromFile(pInFile, std::string("<Volume>:"));
+	WriteFloatFromFile(pInFile, effectsound->m_fVolume);
+	WriteStringFromFile(pInFile, std::string("</CEffectSoundComponent>:"));
+
+	WriteStringFromFile(pInFile, std::string("<CShootSoundComponent>:"));
+	CShootSoundComponent* shootsound = (CShootSoundComponent*)componentset->FindComponent(typeid(CShootSoundComponent));
+	WriteStringFromFile(pInFile, std::string("<Enable>:"));
+	WriteIntegerFromFile(pInFile, shootsound->GetEnable());
+	WriteStringFromFile(pInFile, std::string("<Delay>:"));
+	WriteFloatFromFile(pInFile, shootsound->m_fDelay);
+	WriteStringFromFile(pInFile, std::string("<Volume>:"));
+	WriteFloatFromFile(pInFile, shootsound->m_fVolume);
+	WriteStringFromFile(pInFile, std::string("</CShootSoundComponent>:"));
+
+	WriteStringFromFile(pInFile, std::string("<CDamageSoundComponent>:"));
+	CDamageSoundComponent* Damagesound = (CDamageSoundComponent*)componentset->FindComponent(typeid(CDamageSoundComponent));
+	WriteStringFromFile(pInFile, std::string("<Enable>:"));
+	WriteIntegerFromFile(pInFile, Damagesound->GetEnable());
+	WriteStringFromFile(pInFile, std::string("<Delay>:"));
+	WriteFloatFromFile(pInFile, Damagesound->m_fDelay);
+	WriteStringFromFile(pInFile, std::string("<Volume>:"));
+	WriteFloatFromFile(pInFile, Damagesound->m_fVolume);
+	WriteStringFromFile(pInFile, std::string("</CDamageSoundComponent>:"));
+
 	str = "</Components>:";
 	WriteStringFromFile(pInFile, str);
 }
@@ -261,6 +291,84 @@ void DataLoader::LoadComponentSet(FILE* pInFile, CComponentSet* componentset)
 					break;
 				}
 			}
+		}
+		else if (!strcmp(buf, "<CEffectSoundComponent>:"))
+		{
+			CEffectSoundComponent* component = (CEffectSoundComponent*)componentset->FindComponent(typeid(CEffectSoundComponent));
+
+			for (; ; )
+			{
+				ReadStringFromFile(pInFile, buf);
+
+				if (!strcmp(buf, "<Enable>:"))
+				{
+					component->SetEnable(ReadFloatFromFile(pInFile));
+				}
+				else if (!strcmp(buf, "<Delay>:"))
+				{
+					component->m_fDelay = ReadFloatFromFile(pInFile);
+				}
+				else if (!strcmp(buf, "<Volume>:"))
+				{
+					component->m_fVolume = ReadFloatFromFile(pInFile);
+				}
+				else if (!strcmp(buf, "</CEffectSoundComponent>:"))
+				{
+					break;
+				}
+			}
+		}
+		else if (!strcmp(buf, "<CShootSoundComponent>:"))
+		{
+		CShootSoundComponent* component = (CShootSoundComponent*)componentset->FindComponent(typeid(CShootSoundComponent));
+
+		for (; ; )
+		{
+			ReadStringFromFile(pInFile, buf);
+
+			if (!strcmp(buf, "<Enable>:"))
+			{
+				component->SetEnable(ReadFloatFromFile(pInFile));
+			}
+			else if (!strcmp(buf, "<Delay>:"))
+			{
+				component->m_fDelay = ReadFloatFromFile(pInFile);
+			}
+			else if (!strcmp(buf, "<Volume>:"))
+			{
+				component->m_fVolume = ReadFloatFromFile(pInFile);
+			}
+			else if (!strcmp(buf, "</CShootSoundComponent>:"))
+			{
+				break;
+			}
+		}
+		}
+		else if (!strcmp(buf, "<CDamageSoundComponent>:"))
+		{
+		CDamageSoundComponent* component = (CDamageSoundComponent*)componentset->FindComponent(typeid(CDamageSoundComponent));
+
+		for (; ; )
+		{
+			ReadStringFromFile(pInFile, buf);
+
+			if (!strcmp(buf, "<Enable>:"))
+			{
+				component->SetEnable(ReadFloatFromFile(pInFile));
+			}
+			else if (!strcmp(buf, "<Delay>:"))
+			{
+				component->m_fDelay = ReadFloatFromFile(pInFile);
+			}
+			else if (!strcmp(buf, "<Volume>:"))
+			{
+				component->m_fVolume = ReadFloatFromFile(pInFile);
+			}
+			else if (!strcmp(buf, "</CDamageSoundComponent>:"))
+			{
+				break;
+			}
+		}
 		}
 		else if (!strcmp(buf, "</Components>:"))
 		{
