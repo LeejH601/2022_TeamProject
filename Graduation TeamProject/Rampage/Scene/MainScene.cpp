@@ -183,9 +183,11 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pBillBoardObjectShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 10);
 
 	std::unique_ptr<CBillBoardObject> pBillBoardObject = std::make_unique<CBillBoardObject>(m_pBillBoardObjectShader->Load_Texture(pd3dDevice, pd3dCommandList, L"Image/Grass01.dds"), pd3dDevice, pd3dCommandList, m_pBillBoardObjectShader.get());
+	pBillBoardObject->SetPosition(XMFLOAT3(0.f, -5.f, 0.f));
 	m_pBillBoardObjects.push_back(std::move(pBillBoardObject));
 
 	std::unique_ptr<CMultiSpriteObject> pSpriteAnimationObject = std::make_unique<CMultiSpriteObject>(m_pBillBoardObjectShader->Load_Texture(pd3dDevice, pd3dCommandList, L"Image/Explode_8x8.dds"), pd3dDevice, pd3dCommandList, m_pBillBoardObjectShader.get(), 8, 8, 0.05f);
+	pSpriteAnimationObject->SetPosition(XMFLOAT3(0.f, 5.f, 0.f));
 	m_pBillBoardObjects.push_back(std::move(pSpriteAnimationObject));
 }
 void CMainTMPScene::AnimateObjects(float fTimeElapsed)

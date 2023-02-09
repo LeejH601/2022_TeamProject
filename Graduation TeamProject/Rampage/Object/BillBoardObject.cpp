@@ -29,9 +29,9 @@ void CBillBoardObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dComm
 {
 	CGameObject::UpdateShaderVariables(pd3dCommandList);
 
-	XMFLOAT4X4 xmf4x4Texture;
-	XMStoreFloat4x4(&xmf4x4Texture, XMMatrixTranspose(XMLoadFloat4x4(&m_xmf4x4Texture)));
-	pd3dCommandList->SetGraphicsRoot32BitConstants(0, 16, &xmf4x4Texture, 16);
+	//XMFLOAT4X4 xmf4x4Texture;
+	//XMStoreFloat4x4(&xmf4x4Texture, XMMatrixTranspose(XMLoadFloat4x4(&m_xmf4x4Texture)));
+	//pd3dCommandList->SetGraphicsRoot32BitConstants(0, 16, &xmf4x4Texture, 16);
 }
 
 CMultiSpriteObject::CMultiSpriteObject(std::shared_ptr<CTexture> pSpriteTexture, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CShader* pShader, int nRows, int nCols, float fSpeed) : CBillBoardObject(pSpriteTexture, pd3dDevice, pd3dCommandList, pShader)
@@ -47,10 +47,10 @@ CMultiSpriteObject::~CMultiSpriteObject()
 
 void CMultiSpriteObject::AnimateRowColumn(float fTimeElapsed)
 {
-	m_xmf4x4Texture._11 = 1.0f / float(m_nRows);
-	m_xmf4x4Texture._22 = 1.0f / float(m_nCols);
-	m_xmf4x4Texture._31 = float(m_nRow) / float(m_nRows);
-	m_xmf4x4Texture._32 = float(m_nCol) / float(m_nCols);
+	m_xmf4x4World._11 = 1.0f / float(m_nRows);
+	m_xmf4x4World._22 = 1.0f / float(m_nCols);
+	m_xmf4x4World._31 = float(m_nRow) / float(m_nRows);
+	m_xmf4x4World._32 = float(m_nCol) / float(m_nCols);
  	if (fTimeElapsed == 0.0f)
 	{
 		if (++m_nCol == m_nCols) { 

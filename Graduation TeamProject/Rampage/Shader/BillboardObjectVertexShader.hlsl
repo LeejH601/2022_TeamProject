@@ -11,19 +11,19 @@ SamplerState gSamplerState : register(s0);
 
 struct VS_OUT
 {
-	float3 centerW : POSITION;
+	//float3 centerW : POSITION;
 	float2 sizeW : SIZE;
 };
 struct VS_IN
 {
-	float3 posW : POSITION;
+	//float3 posW : POSITION;
 	float2 sizeW : SIZE;
 };
 
 VS_OUT Billboard_VS(VS_IN input)
 {
 	VS_OUT output;
-	output.centerW = input.posW;
+	//output.centerW = input.posW;
 	output.sizeW = input.sizeW;
 	return output;
 }
