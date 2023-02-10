@@ -49,6 +49,7 @@ protected:
 
     CSound* m_pSound = nullptr;
 public:
+    unsigned int m_nSoundNumber = 0;
     float m_fDelay = 0.0f;
     float m_fCurrDelayed = 0.0f;
     float m_fVolume = 0.0f;

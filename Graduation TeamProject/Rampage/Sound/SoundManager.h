@@ -8,6 +8,8 @@ class CSoundManager {
 private:
     FMOD_SYSTEM* g_sound_system = nullptr;
     std::vector<CSound> m_Sounds;
+    std::vector<std::string> m_vSoundPaths;
+
 public:
     static CSoundManager* GetInst()
     {
@@ -25,9 +27,11 @@ public:
     void Init();
     void Release();
     FMOD_SYSTEM* GetSoundSystem() { return g_sound_system; };
+    std::vector<std::string>& GetAllSoundPaths();
 
     void RegisterSound(std::string path, bool loop);
     std::vector<CSound>::iterator FindSound(std::string path);
+    std::vector<CSound>::iterator FindSound(unsigned int num);
     void PlaySound(std::string path);
     void PauseSound(std::string path);
     void ResumeSound(std::string path);

@@ -27,6 +27,12 @@ bool CLocator::Init()
 	SetComponentSet(componentset);
 
 	CSoundManager::GetInst()->RegisterSound("Sound/David Bowie - Starman.mp3", false);
+	CSoundManager::GetInst()->RegisterSound("Sound/Air Cut by Langerium Id-84616.wav", false);
+	CSoundManager::GetInst()->RegisterSound("Sound/Bloody Blade 2 by Kreastricon62 Id-323526.wav", false);
+	CSoundManager::GetInst()->RegisterSound("Sound/Swing by XxChr0nosxX Id-268227.wav", false);
+	CSoundManager::GetInst()->RegisterSound("Sound/Sword by hello_flowers Id-37596.wav", false);
+	CSoundManager::GetInst()->RegisterSound("Sound/Sword4 by Streety Id-30246.wav", false);
+	CSoundManager::GetInst()->RegisterSound("Sound/Sword7 by Streety Id-30248.wav", false);
 
 	for (auto& [num, componentSet] : m_sComponentSets) {
 		std::shared_ptr<CComponent> component;
@@ -43,7 +49,7 @@ bool CLocator::Init()
 		component = std::make_shared<CEffectSoundComponent>(CSoundManager::GetInst()->GetSoundSystem());
 		componentSet->AddComponent(component);
 		component = std::make_shared<CShootSoundComponent>(CSoundManager::GetInst()->GetSoundSystem());
-		((CShootSoundComponent*)component.get())->SetSound(&*CSoundManager::GetInst()->FindSound("Sound/David Bowie - Starman.mp3"));
+		//((CShootSoundComponent*)component.get())->SetSound(&*CSoundManager::GetInst()->FindSound("Sound/Swing by XxChr0nosxX Id-268227.wav"));
 		componentSet->AddComponent(component);
 	}
 

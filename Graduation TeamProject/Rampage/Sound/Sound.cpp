@@ -3,6 +3,7 @@
 #include "..\Global\Global.h"
 #include "..\Global\Locator.h"
 #include "..\Global\Timer.h"
+#include "SoundManager.h"
 
 CSound::CSound()
 {
@@ -116,14 +117,18 @@ void CSoundComponent::Reset()
 {
 	m_fCurrDelayed = 0.0f;
 	UpdateVolume();
+	SetSound(&*(CSoundManager::GetInst()->FindSound(m_nSoundNumber)));
 }
 
 void CSoundComponent::SetSound(CSound* sound)
 {
 	if (sound != nullptr) {
+		/*if (m_pSound)
+			delete m_pSound;
 
 		m_pSound = new CSound();
-		memcpy(m_pSound, sound, sizeof(CSound));
+		memcpy(m_pSound, sound, sizeof(CSound));*/
+		m_pSound = sound;
 	}
 }
 
@@ -145,7 +150,8 @@ bool CEffectSoundComponent::HandleMessage(const Telegram& msg)
 		return true;
 	}
 	else if (msg.Msg == (int)MESSAGE_TYPE::Msg_PlaySoundEffect) {
-		m_pSound->play(g_sound_system);
+		if(m_pSound)
+			m_pSound->play(g_sound_system);
 		return true;
 	}
 	return false;
@@ -168,7 +174,8 @@ bool CShootSoundComponent::HandleMessage(const Telegram& msg)
 		return true;
 	}
 	else if (msg.Msg == (int)MESSAGE_TYPE::Msg_PlaySoundShoot) {
-		m_pSound->play(g_sound_system);
+		if (m_pSound)
+			m_pSound->play(g_sound_system);
 		return true;
 	}
 	return false;
@@ -191,7 +198,8 @@ bool CDamageSoundComponent::HandleMessage(const Telegram& msg)
 		return true;
 	}
 	else if (msg.Msg == (int)MESSAGE_TYPE::Msg_PlaySoundDamage) {
-		m_pSound->play(g_sound_system);
+		if (m_pSound)
+			m_pSound->play(g_sound_system);
 		return true;
 	}
 	return false;

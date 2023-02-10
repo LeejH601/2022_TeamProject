@@ -67,10 +67,10 @@ float4 PS_Player(VS_OUTPUT input) : SV_TARGET
 
 
 	float3 N = normalize(input.normalW);
-	//float3 T = normalize(input.tangentW);
-	float3 T = normalize(input.tangentW - dot(input.tangentW, N) * N);
-	float3 B = cross(N, T);
-	//float3 B = normalize(input.bitangentW);
+	float3 T = normalize(input.tangentW);
+	//float3 T = normalize(input.tangentW - dot(input.tangentW, N) * N);
+	//float3 B = cross(N, T);
+	float3 B = normalize(input.bitangentW);
 
 	float3x3 TBN = float3x3(T, B, N);
 

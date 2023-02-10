@@ -6,6 +6,7 @@
 #include "..\Global\GameFramework.h"
 #include "..\Global\Locator.h"
 #include "..\Sound\Sound.h"
+#include "..\Sound\SoundManager.h"
 
 #define NUM_FRAMES_IN_FLIGHT 3
 
@@ -334,6 +335,12 @@ void CImGuiManager::SetUI()
 		initial_curpos.y += 25.f;
 		ImGui::SetCursorPos(initial_curpos);
 
+		std::vector<std::string> paths = CSoundManager::GetInst()->GetAllSoundPaths();
+		std::vector<const char*> items;
+		for (auto& path : paths) {
+			items.push_back(path.c_str());
+		}
+
 		if (ImGui::CollapsingHeader("Shock Sound Effect"))
 		{
 			initial_curpos.y += 25.f;
@@ -341,6 +348,11 @@ void CImGuiManager::SetUI()
 			ImGui::SetNextItemWidth(190.f);
 			CEffectSoundComponent* effect = (CEffectSoundComponent*)(m_pCurrentComponentSet->FindComponent(typeid(CEffectSoundComponent)));
 			ImGui::Checkbox("On/Off##effectsound", &effect->GetEnable());
+
+			initial_curpos.y += 25.f;
+			ImGui::SetCursorPos(initial_curpos);
+			ImGui::SetNextItemWidth(190.f);
+			ImGui::Combo("Sound##effectsound", (int*)&effect->m_nSoundNumber, items.data(), items.size());
 
 			initial_curpos.y += 25.f;
 			ImGui::SetCursorPos(initial_curpos);
@@ -367,6 +379,11 @@ void CImGuiManager::SetUI()
 			initial_curpos.y += 25.f;
 			ImGui::SetCursorPos(initial_curpos);
 			ImGui::SetNextItemWidth(190.f);
+			ImGui::Combo("Sound##shootsound", (int*)&shoot->m_nSoundNumber, items.data(), items.size());
+
+			initial_curpos.y += 25.f;
+			ImGui::SetCursorPos(initial_curpos);
+			ImGui::SetNextItemWidth(190.f);
 			ImGui::DragFloat("Delay##shootsound", &shoot->m_fDelay, 0.01f, 0.0f, 10.0f, "%.2f", 0);
 
 			initial_curpos.y += 25.f;
@@ -386,6 +403,11 @@ void CImGuiManager::SetUI()
 			ImGui::SetNextItemWidth(190.f);
 			CDamageSoundComponent* damage = (CDamageSoundComponent*)(m_pCurrentComponentSet->FindComponent(typeid(CDamageSoundComponent)));
 			ImGui::Checkbox("On/Off##damagesound", &damage->GetEnable());
+
+			initial_curpos.y += 25.f;
+			ImGui::SetCursorPos(initial_curpos);
+			ImGui::SetNextItemWidth(190.f);
+			ImGui::Combo("Sound##damagesound", (int*)&damage->m_nSoundNumber, items.data(), items.size());
 
 			initial_curpos.y += 25.f;
 			ImGui::SetCursorPos(initial_curpos);
