@@ -54,7 +54,7 @@ float4 PS_Player(VS_OUTPUT input) : SV_TARGET
 {
 	float4 cAlbedoColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
 	float4 cSpecularColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
-	float4 cNormalColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
+	float4 cNormalColor = float4(0.0f, 0.0f, 1.0f, 1.0f);
 	float4 cMetallicColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
 	float4 cEmissionColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
 
@@ -67,10 +67,10 @@ float4 PS_Player(VS_OUTPUT input) : SV_TARGET
 
 
 	float3 N = normalize(input.normalW);
-	float3 T = normalize(input.tangentW);
-	//float3 T = normalize(input.tangentW - dot(input.tangentW, N) * N);
-	//float3 B = cross(N, T);
-	float3 B = normalize(input.bitangentW);
+	//float3 T = normalize(input.tangentW);
+	float3 T = normalize(input.tangentW - dot(input.tangentW, N) * N);
+	float3 B = cross(N, T);
+	//float3 B = normalize(input.bitangentW);
 
 	float3x3 TBN = float3x3(T, B, N);
 
@@ -81,8 +81,12 @@ float4 PS_Player(VS_OUTPUT input) : SV_TARGET
 	//float3 normalW = normalize(input.normalW);
 	float3 normalW = mul(normal, TBN);
 
-	//float4 cIllumination = Lighting(input.positionW, normalize(normalW), cColor, true, input.uvs);
-	float4 cIllumination = Lighting(input.positionW, normalize(input.normalW), cColor, true, input.uvs);
+	float4 cIllumination;
+	if (gnTexturesMask & MATERIAL_NORMAL_MAP)
+		cIllumination = Lighting(input.positionW, normalize(normalW), cColor, true, input.uvs);
+	else
+		cIllumination = Lighting(input.positionW, normalize(input.normalW), cColor, true, input.uvs);
+	//float4 cIllumination = Lighting(input.positionW, normalize(input.normalW), cColor, true, input.uvs);
 
 	return (cIllumination);
 }

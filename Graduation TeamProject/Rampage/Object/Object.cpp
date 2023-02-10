@@ -481,8 +481,14 @@ void CEagleObject::Animate(float fTimeElapsed)
 #define KNIGHT_ROOT_MOTION
 CKnightObject::CKnightObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks)
 {
-	CLoadedModelInfo* pKnightModel = CModelManager::GetInst()->GetModelInfo("Object/SK_FKnight.bin");;
-	if (!pKnightModel) pKnightModel = CModelManager::GetInst()->LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, "Object/SK_FKnight.bin");
+	CLoadedModelInfo* pKnightModel = CModelManager::GetInst()->GetModelInfo("Object/SK_FKnightB.bin");;
+	if (!pKnightModel) pKnightModel = CModelManager::GetInst()->LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, "Object/SK_FKnightB.bin");
+
+	CGameObject* obj = pKnightModel->m_pModelRootObject->FindFrame("SK_FKnightB_05");
+	//obj->m_ppMaterials[8]->m_pTexture->m_nTextureType = 1;
+	obj->m_ppMaterials[5]->m_nType = 1; // ¸Ó¸® ³ë¸Ö ¸Ê »ç¿ë x
+	obj->m_ppMaterials[7]->m_nType = 1; // °¡½¿ ¹êµå ³ë¸Ö ¸Ê »ç¿ë x
+	obj->m_ppMaterials[8]->m_nType = 1; // ÇÇºÎ ³ë¸Ö ¸Ê »ç¿ë x
 
 	SetChild(pKnightModel->m_pModelRootObject, true);
 	//m_pSkinnedAnimationController = std::make_unique<CKightRootRollBackAnimationController>(pd3dDevice, pd3dCommandList, nAnimationTracks, pKnightModel);
