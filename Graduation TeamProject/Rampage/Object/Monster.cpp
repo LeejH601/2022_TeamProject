@@ -18,23 +18,40 @@ CMonster::~CMonster()
 
 void CMonster::Render(ID3D12GraphicsCommandList* pd3dCommandList, bool b_UseTexture, CCamera* pCamera)
 {
-	XMFLOAT3 m_xmf3OriginPos = GetPosition();
-
-	if (m_pStateMachine->GetCurrentState() == Damaged_Monster::GetInst())
-	{
-		XMFLOAT3 xmf3Pos = Vector3::Add(m_xmf3OriginPos, Vector3::ScalarProduct(GetRight(), m_fShakeDistance, false));
-		SetPosition(xmf3Pos);
-	}
-
 	CGameObject::Render(pd3dCommandList, b_UseTexture, pCamera);
-
-	if (m_pStateMachine->GetCurrentState() == Damaged_Monster::GetInst())
-		SetPosition(m_xmf3OriginPos);
 }
 
 void CMonster::Update(float fTimeElapsed)
 {
 	m_pStateMachine->Update(fTimeElapsed);
+}
+void CMonster::UpdateTransform(XMFLOAT4X4* pxmf4x4Parent)
+{
+	XMFLOAT4X4 xmf4x4Transform = m_xmf4x4Transform;
+
+	if (m_pStateMachine->GetCurrentState() == Damaged_Monster::GetInst())
+	{
+		XMFLOAT3 m_xmf3OriginPos = { xmf4x4Transform._41, xmf4x4Transform._42, xmf4x4Transform._43 };
+		XMFLOAT3 xmf3Pos = Vector3::Add(m_xmf3OriginPos, Vector3::ScalarProduct(GetRight(), m_fShakeDistance, false));
+
+		xmf4x4Transform._41 = xmf3Pos.x;
+		xmf4x4Transform._42 = xmf3Pos.y;
+		xmf4x4Transform._43 = xmf3Pos.z;
+	}
+
+	m_xmf4x4World = (pxmf4x4Parent) ? Matrix4x4::Multiply(xmf4x4Transform, *pxmf4x4Parent) : xmf4x4Transform;
+
+	if (m_pSibling) m_pSibling->UpdateTransform(pxmf4x4Parent);
+	if (m_pChild) m_pChild->UpdateTransform(&m_xmf4x4World);
+
+	pBodyBoundingBoxMesh->SetWorld(m_xmf4x4Transform);
+	m_BodyBoundingBox.Transform(m_TransformedBodyBoudningBox, XMLoadFloat4x4(&m_xmf4x4Transform));
+
+	if (pWeapon)
+	{
+		pWeaponBoundingBoxMesh->SetWorld(pWeapon->GetWorld());
+		m_WeaponBoundingBox.Transform(m_TransformedWeaponBoudningBox, XMLoadFloat4x4(&pWeapon->GetWorld()));
+	}
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -57,19 +74,7 @@ void COrcObject::Animate(float fTimeElapsed)
 }
 void COrcObject::UpdateTransform(XMFLOAT4X4* pxmf4x4Parent)
 {
-	m_xmf4x4World = (pxmf4x4Parent) ? Matrix4x4::Multiply(m_xmf4x4Transform, *pxmf4x4Parent) : m_xmf4x4Transform;
-
-	if (m_pSibling) m_pSibling->UpdateTransform(pxmf4x4Parent);
-	if (m_pChild) m_pChild->UpdateTransform(&m_xmf4x4World);
-
-	pBodyBoundingBoxMesh->SetWorld(m_xmf4x4Transform);
-	m_BodyBoundingBox.Transform(m_TransformedBodyBoudningBox, XMLoadFloat4x4(&m_xmf4x4Transform));
-
-	if (pWeapon)
-	{
-		pWeaponBoundingBoxMesh->SetWorld(pWeapon->GetWorld());
-		m_WeaponBoundingBox.Transform(m_TransformedWeaponBoudningBox, XMLoadFloat4x4(&pWeapon->GetWorld()));
-	}
+	CMonster::UpdateTransform(pxmf4x4Parent);
 }
 void COrcObject::PrepareBoundingBox(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
@@ -106,19 +111,7 @@ void CGoblinObject::Animate(float fTimeElapsed)
 }
 void CGoblinObject::UpdateTransform(XMFLOAT4X4* pxmf4x4Parent)
 {
-	m_xmf4x4World = (pxmf4x4Parent) ? Matrix4x4::Multiply(m_xmf4x4Transform, *pxmf4x4Parent) : m_xmf4x4Transform;
-
-	if (m_pSibling) m_pSibling->UpdateTransform(pxmf4x4Parent);
-	if (m_pChild) m_pChild->UpdateTransform(&m_xmf4x4World);
-
-	pBodyBoundingBoxMesh->SetWorld(m_xmf4x4Transform);
-	m_BodyBoundingBox.Transform(m_TransformedBodyBoudningBox, XMLoadFloat4x4(&m_xmf4x4Transform));
-
-	if (pWeapon)
-	{
-		pWeaponBoundingBoxMesh->SetWorld(pWeapon->GetWorld());
-		m_WeaponBoundingBox.Transform(m_TransformedWeaponBoudningBox, XMLoadFloat4x4(&pWeapon->GetWorld()));
-	}
+	CMonster::UpdateTransform(pxmf4x4Parent);
 }
 void CGoblinObject::PrepareBoundingBox(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
@@ -154,24 +147,7 @@ void CSkeletonObject::Animate(float fTimeElapsed)
 }
 void CSkeletonObject::UpdateTransform(XMFLOAT4X4* pxmf4x4Parent)
 {
-	m_xmf4x4World = (pxmf4x4Parent) ? Matrix4x4::Multiply(m_xmf4x4Transform, *pxmf4x4Parent) : m_xmf4x4Transform;
-
-	XMMATRIX mtxScale = XMMatrixScaling(0.5f, 0.5f, 0.5f);
-	m_xmf4x4World = Matrix4x4::Multiply(m_xmf4x4World, mtxScale);
-
-	if (m_pSibling) m_pSibling->UpdateTransform(pxmf4x4Parent);
-	if (m_pChild) m_pChild->UpdateTransform(&m_xmf4x4World);
-
-	pBodyBoundingBoxMesh->SetWorld(m_xmf4x4Transform);
-	m_BodyBoundingBox.Transform(m_TransformedBodyBoudningBox, XMLoadFloat4x4(&m_xmf4x4Transform));
-
-	if (pWeapon)
-	{
-		XMMATRIX mtxScale = XMMatrixScaling(2.0f, 2.0f, 2.0f);
-		XMFLOAT4X4 m_xmf4x4WeaponWorld = Matrix4x4::Multiply(pWeapon->GetWorld(), mtxScale);
-		pWeaponBoundingBoxMesh->SetWorld(m_xmf4x4WeaponWorld);
-		m_WeaponBoundingBox.Transform(m_TransformedWeaponBoudningBox, XMLoadFloat4x4(&m_xmf4x4WeaponWorld));
-	}
+	CMonster::UpdateTransform(pxmf4x4Parent);
 }
 void CSkeletonObject::PrepareBoundingBox(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {

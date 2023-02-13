@@ -8,18 +8,7 @@ class CMonster : public CGameObject, public IEntity
 public:
 	float m_fShakeDistance;
 	std::unique_ptr<CStateMachine<CMonster>> m_pStateMachine;
-public:
-	CMonster();
-	virtual ~CMonster();
-	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, bool b_UseTexture, CCamera* pCamera = NULL);
-	virtual void Update(float fTimeElapsed);
-};
 
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//
-class COrcObject : public CMonster
-{
-private:
 	CGameObject* pWeapon;
 	BoundingBox m_BodyBoundingBox;
 	BoundingBox m_WeaponBoundingBox;
@@ -27,6 +16,18 @@ private:
 	BoundingBox m_TransformedWeaponBoudningBox;
 	CGameObject* pBodyBoundingBoxMesh;
 	CGameObject* pWeaponBoundingBoxMesh;
+public:
+	CMonster();
+	virtual ~CMonster();
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, bool b_UseTexture, CCamera* pCamera = NULL);
+	virtual void Update(float fTimeElapsed);
+	virtual void UpdateTransform(XMFLOAT4X4* pxmf4x4Parent = NULL);
+};
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+class COrcObject : public CMonster
+{
 public:
 	COrcObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks);
 	virtual ~COrcObject();
@@ -50,14 +51,6 @@ public:
 //
 class CGoblinObject : public CMonster
 {
-private:
-	CGameObject* pWeapon;
-	BoundingBox m_BodyBoundingBox;
-	BoundingBox m_WeaponBoundingBox;
-	BoundingBox m_TransformedBodyBoudningBox;
-	BoundingBox m_TransformedWeaponBoudningBox;
-	CGameObject* pBodyBoundingBoxMesh;
-	CGameObject* pWeaponBoundingBoxMesh;
 public:
 	CGoblinObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks);
 	virtual ~CGoblinObject();
@@ -81,14 +74,6 @@ public:
 //
 class CSkeletonObject : public CMonster
 {
-private:
-	CGameObject* pWeapon;
-	BoundingBox m_BodyBoundingBox;
-	BoundingBox m_WeaponBoundingBox;
-	BoundingBox m_TransformedBodyBoudningBox;
-	BoundingBox m_TransformedWeaponBoudningBox;
-	CGameObject* pBodyBoundingBoxMesh;
-	CGameObject* pWeaponBoundingBoxMesh;
 public:
 	CSkeletonObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks);
 	virtual ~CSkeletonObject();
