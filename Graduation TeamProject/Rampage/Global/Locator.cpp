@@ -167,6 +167,8 @@ void DataLoader::SaveComponentSet(FILE* pInFile, CComponentSet* componentset)
 	CEffectSoundComponent* effectsound = (CEffectSoundComponent*)componentset->FindComponent(typeid(CEffectSoundComponent));
 	WriteStringFromFile(pInFile, std::string("<Enable>:"));
 	WriteIntegerFromFile(pInFile, effectsound->GetEnable());
+	WriteStringFromFile(pInFile, std::string("<Sound>:"));
+	WriteIntegerFromFile(pInFile, effectsound->m_nSoundNumber);
 	WriteStringFromFile(pInFile, std::string("<Delay>:"));
 	WriteFloatFromFile(pInFile, effectsound->m_fDelay);
 	WriteStringFromFile(pInFile, std::string("<Volume>:"));
@@ -177,6 +179,8 @@ void DataLoader::SaveComponentSet(FILE* pInFile, CComponentSet* componentset)
 	CShootSoundComponent* shootsound = (CShootSoundComponent*)componentset->FindComponent(typeid(CShootSoundComponent));
 	WriteStringFromFile(pInFile, std::string("<Enable>:"));
 	WriteIntegerFromFile(pInFile, shootsound->GetEnable());
+	WriteStringFromFile(pInFile, std::string("<Sound>:"));
+	WriteIntegerFromFile(pInFile, shootsound->m_nSoundNumber);
 	WriteStringFromFile(pInFile, std::string("<Delay>:"));
 	WriteFloatFromFile(pInFile, shootsound->m_fDelay);
 	WriteStringFromFile(pInFile, std::string("<Volume>:"));
@@ -187,6 +191,8 @@ void DataLoader::SaveComponentSet(FILE* pInFile, CComponentSet* componentset)
 	CDamageSoundComponent* Damagesound = (CDamageSoundComponent*)componentset->FindComponent(typeid(CDamageSoundComponent));
 	WriteStringFromFile(pInFile, std::string("<Enable>:"));
 	WriteIntegerFromFile(pInFile, Damagesound->GetEnable());
+	WriteStringFromFile(pInFile, std::string("<Sound>:"));
+	WriteIntegerFromFile(pInFile, Damagesound->m_nSoundNumber);
 	WriteStringFromFile(pInFile, std::string("<Delay>:"));
 	WriteFloatFromFile(pInFile, Damagesound->m_fDelay);
 	WriteStringFromFile(pInFile, std::string("<Volume>:"));
@@ -308,7 +314,11 @@ void DataLoader::LoadComponentSet(FILE* pInFile, CComponentSet* componentset)
 
 				if (!strcmp(buf, "<Enable>:"))
 				{
-					component->SetEnable(ReadFloatFromFile(pInFile));
+					component->SetEnable(ReadIntegerFromFile(pInFile));
+				}
+				else if (!strcmp(buf, "<Sound>:"))
+				{
+					component->m_nSoundNumber = ReadIntegerFromFile(pInFile);
 				}
 				else if (!strcmp(buf, "<Delay>:"))
 				{
@@ -334,7 +344,11 @@ void DataLoader::LoadComponentSet(FILE* pInFile, CComponentSet* componentset)
 
 			if (!strcmp(buf, "<Enable>:"))
 			{
-				component->SetEnable(ReadFloatFromFile(pInFile));
+				component->SetEnable(ReadIntegerFromFile(pInFile));
+			}
+			else if (!strcmp(buf, "<Sound>:"))
+			{
+				component->m_nSoundNumber = ReadIntegerFromFile(pInFile);
 			}
 			else if (!strcmp(buf, "<Delay>:"))
 			{
@@ -360,7 +374,11 @@ void DataLoader::LoadComponentSet(FILE* pInFile, CComponentSet* componentset)
 
 			if (!strcmp(buf, "<Enable>:"))
 			{
-				component->SetEnable(ReadFloatFromFile(pInFile));
+				component->SetEnable(ReadIntegerFromFile(pInFile));
+			}
+			else if (!strcmp(buf, "<Sound>:"))
+			{
+				component->m_nSoundNumber = ReadIntegerFromFile(pInFile);
 			}
 			else if (!strcmp(buf, "<Delay>:"))
 			{

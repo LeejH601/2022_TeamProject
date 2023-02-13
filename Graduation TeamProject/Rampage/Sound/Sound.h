@@ -6,7 +6,7 @@
 
 #define SOUND_MAX 1.0f
 #define SOUND_MIN 0.1f
-#define SOUND_DEFAULT 0.1f
+#define SOUND_DEFAULT 0.2f
 #define SOUND_WEIGHT 0.01f
 
 class CSound

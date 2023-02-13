@@ -140,6 +140,9 @@ CEffectSoundComponent::CEffectSoundComponent(FMOD_SYSTEM* sound_system)
 
 bool CEffectSoundComponent::HandleMessage(const Telegram& msg)
 {
+	if (!GetEnable())
+		return false;
+
 	if (msg.Msg == (int)MESSAGE_TYPE::Msg_SoundEffectReady) {
 		Reset();
 		Telegram Msg;
@@ -164,6 +167,9 @@ CShootSoundComponent::CShootSoundComponent(FMOD_SYSTEM* sound_system)
 
 bool CShootSoundComponent::HandleMessage(const Telegram& msg)
 {
+	if (!GetEnable())
+		return false;
+
 	if (msg.Msg == (int)MESSAGE_TYPE::Msg_SoundShootReady) {
 		Reset();
 		Telegram Msg;
@@ -188,6 +194,9 @@ CDamageSoundComponent::CDamageSoundComponent(FMOD_SYSTEM* sound_system)
 
 bool CDamageSoundComponent::HandleMessage(const Telegram& msg)
 {
+	if (!GetEnable())
+		return false;
+
 	if (msg.Msg == (int)MESSAGE_TYPE::Msg_SoundDamageReady) {
 		Reset();
 		Telegram Msg;

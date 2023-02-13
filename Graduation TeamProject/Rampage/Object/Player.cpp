@@ -170,20 +170,25 @@ bool CPlayer::CheckCollision(CGameObject* pTargetObject)
 
 			Telegram msg;
 			msg.Msg = (int)MESSAGE_TYPE::Msg_CameraShakeStart;
-			msg.DispatchTime = Locator.GetTimer()->GetCurrentCounter();
+			msg.DispatchTime = Locator.GetTimer()->GetNowTime();
 			msg.Receiver = (IEntity*)Locator.GetSimulaterCamera();
 			Locator.GetMessageDispather()->RegisterMessage(msg);
 
 			msg.Msg = (int)MESSAGE_TYPE::Msg_CameraMoveStart;
-			msg.DispatchTime++;
+			msg.DispatchTime = Locator.GetTimer()->GetNowTime();
 			msg.Receiver = (IEntity*)Locator.GetSimulaterCamera();
 			msg.Sender = this;
 			Locator.GetMessageDispather()->RegisterMessage(msg);
 
 			msg.Msg = (int)MESSAGE_TYPE::Msg_CameraZoomStart;
-			msg.DispatchTime++;
+			msg.DispatchTime = Locator.GetTimer()->GetNowTime();
 			msg.Receiver = (IEntity*)Locator.GetSimulaterCamera();
 			msg.Sender = (IEntity*)pTargetObject;
+			Locator.GetMessageDispather()->RegisterMessage(msg);
+
+			msg.Msg = (int)MESSAGE_TYPE::Msg_SoundEffectReady;
+			msg.DispatchTime = Locator.GetTimer()->GetNowTime();
+			msg.Receiver = (IEntity*)Locator.GetSoundPlayer();
 			Locator.GetMessageDispather()->RegisterMessage(msg);
 
 			if (m_iAttack_Limit < 1)
