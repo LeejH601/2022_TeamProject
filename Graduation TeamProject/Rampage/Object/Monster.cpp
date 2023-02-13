@@ -43,16 +43,19 @@ void CMonster::UpdateTransform(XMFLOAT4X4* pxmf4x4Parent)
 
 	if (m_pSibling) m_pSibling->UpdateTransform(pxmf4x4Parent);
 	if (m_pChild) m_pChild->UpdateTransform(&m_xmf4x4World);
+
+	m_BodyBoundingBox.Transform(m_TransformedBodyBoudningBox, XMLoadFloat4x4(&m_xmf4x4Transform));
 #ifdef RENDER_BOUNDING_BOX
 	pBodyBoundingBoxMesh->SetWorld(m_xmf4x4Transform);
-	m_BodyBoundingBox.Transform(m_TransformedBodyBoudningBox, XMLoadFloat4x4(&m_xmf4x4Transform));
+#endif // RENDER_BOUNDING_BOX
 
 	if (pWeapon)
 	{
+#ifdef RENDER_BOUNDING_BOX
 		pWeaponBoundingBoxMesh->SetWorld(pWeapon->GetWorld());
+#endif 
 		m_WeaponBoundingBox.Transform(m_TransformedWeaponBoudningBox, XMLoadFloat4x4(&pWeapon->GetWorld()));
 	}
-#endif // RENDER_BOUNDING_BOX
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -64,9 +67,7 @@ COrcObject::COrcObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3d
 	SetChild(pOrcModel->m_pModelRootObject, true);
 	m_pSkinnedAnimationController = std::make_unique<CAnimationController>(pd3dDevice, pd3dCommandList, nAnimationTracks, pOrcModel);
 
-#ifdef RENDER_BOUNDING_BOX
 	PrepareBoundingBox(pd3dDevice, pd3dCommandList);
-#endif
 }
 COrcObject::~COrcObject()
 {
@@ -85,9 +86,11 @@ void COrcObject::PrepareBoundingBox(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 
 	m_BodyBoundingBox = BoundingBox{ XMFLOAT3(0.0f, 1.05f, 0.0f), XMFLOAT3(1.2f, 2.0f, 1.2f) };
 	m_WeaponBoundingBox = BoundingBox{ XMFLOAT3(0.0f, 0.0f, 0.85f), XMFLOAT3(0.3f, 0.6f, 0.35f) };
+#ifdef RENDER_BOUNDING_BOX
 	pBodyBoundingBoxMesh = CBoundingBoxShader::GetInst()->AddBoundingObject(pd3dDevice, pd3dCommandList, this, XMFLOAT3(0.0f, 1.05f, 0.0f), XMFLOAT3(1.2f, 2.0f, 1.2f));
 	//pWeaponBodyBoundingBoxMesh = CBoundingBoxShader::GetInst()->AddBoundingObject(pd3dDevice, pd3dCommandList, pWeapon, XMFLOAT3(0.0f, 0.0f, 0.32f), XMFLOAT3(0.18f, 0.28f, 0.71f));
 	pWeaponBoundingBoxMesh = CBoundingBoxShader::GetInst()->AddBoundingObject(pd3dDevice, pd3dCommandList, pWeapon, XMFLOAT3(0.0f, 0.0f, 0.85f), XMFLOAT3(0.3f, 0.6f, 0.35f));
+#endif
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -99,9 +102,7 @@ CGoblinObject::CGoblinObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 	SetChild(pGoblinModel->m_pModelRootObject, true);
 	m_pSkinnedAnimationController = std::make_unique<CAnimationController>(pd3dDevice, pd3dCommandList, nAnimationTracks, pGoblinModel);
 
-#ifdef RENDER_BOUNDING_BOX
 	PrepareBoundingBox(pd3dDevice, pd3dCommandList);
-#endif
 }
 CGoblinObject::~CGoblinObject()
 {
@@ -123,8 +124,10 @@ void CGoblinObject::PrepareBoundingBox(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 	pWeapon = CGameObject::FindFrame("SM_Weapon");
 	m_BodyBoundingBox = BoundingBox{ XMFLOAT3(0.0f, 0.75f, 0.0f), XMFLOAT3(0.6f, 1.1f, 0.6f) };
 	m_WeaponBoundingBox = BoundingBox{ XMFLOAT3(0.0f, 0.0f, 0.22f), XMFLOAT3(0.14f, 0.14f, 0.83f) };
+#ifdef RENDER_BOUNDING_BOX
 	pBodyBoundingBoxMesh = CBoundingBoxShader::GetInst()->AddBoundingObject(pd3dDevice, pd3dCommandList, this, XMFLOAT3(0.0f, 0.75f, 0.0f), XMFLOAT3(0.6f, 1.1f, 0.6f));
 	pWeaponBoundingBoxMesh = CBoundingBoxShader::GetInst()->AddBoundingObject(pd3dDevice, pd3dCommandList, pWeapon, XMFLOAT3(0.0f, 0.0f, 0.22f), XMFLOAT3(0.14f, 0.14f, 0.83f));
+#endif
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -136,9 +139,7 @@ CSkeletonObject::CSkeletonObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	SetChild(pSkeletonModel->m_pModelRootObject, true);
 	m_pSkinnedAnimationController = std::make_unique<CAnimationController>(pd3dDevice, pd3dCommandList, nAnimationTracks, pSkeletonModel);
 
-#ifdef RENDER_BOUNDING_BOX
 	PrepareBoundingBox(pd3dDevice, pd3dCommandList);
-#endif
 	/*CLoadedModelInfo* pArmorModel = CModelManager::GetInst()->GetModelInfo("Object/SK_Armor.bin");;
 	if (!pArmorModel) pArmorModel = CModelManager::GetInst()->LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, "Object/SK_Armor.bin");
 
@@ -161,6 +162,8 @@ void CSkeletonObject::PrepareBoundingBox(ID3D12Device* pd3dDevice, ID3D12Graphic
 	pWeapon = CGameObject::FindFrame("SM_Sword");
 	m_BodyBoundingBox = BoundingBox{ XMFLOAT3(0.0f, 1.0f, 0.0f), XMFLOAT3(0.7f, 2.0f, 0.7f) };
 	m_WeaponBoundingBox = BoundingBox{ XMFLOAT3(0.0f, 0.0f, 0.48f), XMFLOAT3(0.04f, 0.14f, 1.22f) };
+#ifdef RENDER_BOUNDING_BOX
 	pBodyBoundingBoxMesh = CBoundingBoxShader::GetInst()->AddBoundingObject(pd3dDevice, pd3dCommandList, this, XMFLOAT3(0.0f, 1.0f, 0.0f), XMFLOAT3(0.7f, 2.0f, 0.7f));
 	pWeaponBoundingBoxMesh = CBoundingBoxShader::GetInst()->AddBoundingObject(pd3dDevice, pd3dCommandList, pWeapon, XMFLOAT3(0.0f, 0.0f, 0.48f), XMFLOAT3(0.04f, 0.14f, 1.22f));
+#endif
 }
