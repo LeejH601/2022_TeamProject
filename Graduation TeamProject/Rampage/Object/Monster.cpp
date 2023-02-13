@@ -43,7 +43,7 @@ void CMonster::UpdateTransform(XMFLOAT4X4* pxmf4x4Parent)
 
 	if (m_pSibling) m_pSibling->UpdateTransform(pxmf4x4Parent);
 	if (m_pChild) m_pChild->UpdateTransform(&m_xmf4x4World);
-
+#ifdef RENDER_BOUNDING_BOX
 	pBodyBoundingBoxMesh->SetWorld(m_xmf4x4Transform);
 	m_BodyBoundingBox.Transform(m_TransformedBodyBoudningBox, XMLoadFloat4x4(&m_xmf4x4Transform));
 
@@ -52,6 +52,7 @@ void CMonster::UpdateTransform(XMFLOAT4X4* pxmf4x4Parent)
 		pWeaponBoundingBoxMesh->SetWorld(pWeapon->GetWorld());
 		m_WeaponBoundingBox.Transform(m_TransformedWeaponBoudningBox, XMLoadFloat4x4(&pWeapon->GetWorld()));
 	}
+#endif // RENDER_BOUNDING_BOX
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -63,7 +64,9 @@ COrcObject::COrcObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3d
 	SetChild(pOrcModel->m_pModelRootObject, true);
 	m_pSkinnedAnimationController = std::make_unique<CAnimationController>(pd3dDevice, pd3dCommandList, nAnimationTracks, pOrcModel);
 
+#ifdef RENDER_BOUNDING_BOX
 	PrepareBoundingBox(pd3dDevice, pd3dCommandList);
+#endif
 }
 COrcObject::~COrcObject()
 {
@@ -96,7 +99,9 @@ CGoblinObject::CGoblinObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 	SetChild(pGoblinModel->m_pModelRootObject, true);
 	m_pSkinnedAnimationController = std::make_unique<CAnimationController>(pd3dDevice, pd3dCommandList, nAnimationTracks, pGoblinModel);
 
+#ifdef RENDER_BOUNDING_BOX
 	PrepareBoundingBox(pd3dDevice, pd3dCommandList);
+#endif
 }
 CGoblinObject::~CGoblinObject()
 {
@@ -131,7 +136,9 @@ CSkeletonObject::CSkeletonObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	SetChild(pSkeletonModel->m_pModelRootObject, true);
 	m_pSkinnedAnimationController = std::make_unique<CAnimationController>(pd3dDevice, pd3dCommandList, nAnimationTracks, pSkeletonModel);
 
+#ifdef RENDER_BOUNDING_BOX
 	PrepareBoundingBox(pd3dDevice, pd3dCommandList);
+#endif
 	/*CLoadedModelInfo* pArmorModel = CModelManager::GetInst()->GetModelInfo("Object/SK_Armor.bin");;
 	if (!pArmorModel) pArmorModel = CModelManager::GetInst()->LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, "Object/SK_Armor.bin");
 

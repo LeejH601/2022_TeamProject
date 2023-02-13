@@ -279,7 +279,9 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 	m_pTerrainShader->Render(pd3dCommandList, 0);
 	m_pTerrain->Render(pd3dCommandList, true);
 
-	//CBoundingBoxShader::GetInst()->Render(pd3dCommandList, 0);
+#ifdef RENDER_BOUNDING_BOX
+	CBoundingBoxShader::GetInst()->Render(pd3dCommandList, 0);
+#endif
 }
 
 
