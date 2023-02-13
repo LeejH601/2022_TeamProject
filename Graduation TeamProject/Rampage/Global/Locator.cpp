@@ -40,7 +40,7 @@ bool CLocator::Init()
 		componentSet->AddComponent(component);
 		component = std::make_shared<CShakeAnimationComponent>();
 		componentSet->AddComponent(component);
-		component = std::make_shared<CStaggerAnimationComponent>();
+		component = std::make_shared<CStunAnimationComponent>();
 		componentSet->AddComponent(component);
 	}
 

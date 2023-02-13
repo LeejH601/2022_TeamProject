@@ -11,8 +11,8 @@ public:
 
 class CShakeAnimationComponent : public CComponent
 {
-    float m_fDistance = 3.5f;
-    float m_fFrequency = 0.8f;
+    float m_fDistance = 0.5f;
+    float m_fFrequency = 0.2f;
 public:
     DECLARE_SINGLE(CShakeAnimationComponent);
     CShakeAnimationComponent();
@@ -20,10 +20,12 @@ public:
     bool HandleMessage(const Telegram& msg);
 };
 
-class CStaggerAnimationComponent : public CComponent
+class CStunAnimationComponent : public CComponent
 {
-    float m_fStaggerTime;
+    float m_fStunTime = 0.5f;
 public:
-    CStaggerAnimationComponent();
+    DECLARE_SINGLE(CStunAnimationComponent);
+    CStunAnimationComponent();
+    float GetStunTime() { return m_fStunTime; }
     bool HandleMessage(const Telegram& msg);
 };

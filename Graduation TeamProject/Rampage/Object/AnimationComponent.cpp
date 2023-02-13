@@ -24,11 +24,11 @@ bool CShakeAnimationComponent::HandleMessage(const Telegram& msg)
 	return false;
 }
 
-CStaggerAnimationComponent::CStaggerAnimationComponent()
+CStunAnimationComponent::CStunAnimationComponent()
 {
 }
 
-bool CStaggerAnimationComponent::HandleMessage(const Telegram& msg)
+bool CStunAnimationComponent::HandleMessage(const Telegram& msg)
 {
 	return false;
 }

@@ -6,6 +6,9 @@
 class CMonster : public CGameObject, public IEntity
 {
 public:
+	bool m_bStunned;
+	float m_fStunTime;
+	float m_fStunStartTime;
 	float m_fShakeDistance;
 	std::unique_ptr<CStateMachine<CMonster>> m_pStateMachine;
 

@@ -10,6 +10,9 @@ CMonster::CMonster()
 	m_pStateMachine = std::make_unique<CStateMachine<CMonster>>(this);
 	m_pStateMachine->SetCurrentState(Idle_Monster::GetInst());
 	m_pStateMachine->SetPreviousState(Idle_Monster::GetInst());
+	m_fStunStartTime = 0.0f;
+	m_fShakeDistance = 0.0f;
+	m_fStunTime = 0.0f;
 }
 
 CMonster::~CMonster()
@@ -96,6 +99,9 @@ void COrcObject::PrepareBoundingBox(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 //
 CGoblinObject::CGoblinObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks)
 {
+	m_fStunStartTime = 0.5f;
+	m_fStunTime = 0.0f;
+
 	CLoadedModelInfo* pGoblinModel = CModelManager::GetInst()->GetModelInfo("Object/Goblin.bin");;
 	if (!pGoblinModel) pGoblinModel = CModelManager::GetInst()->LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, "Object/Goblin.bin");
 
@@ -111,9 +117,18 @@ void CGoblinObject::Animate(float fTimeElapsed)
 {
 	if (m_pStateMachine->GetCurrentState() == Damaged_Monster::GetInst())
 	{
-		m_fShakeDistance = CShakeAnimationComponent::GetInst()->GetShakeDistance(m_pSkinnedAnimationController->m_fTime);
+		if (m_fStunStartTime < m_pSkinnedAnimationController->m_fTime && !m_bStunned)
+			m_pStateMachine->ChangeState(Stun_Monster::GetInst());
+		CGameObject::Animate(fTimeElapsed);
 	}
-	CGameObject::Animate(fTimeElapsed);
+
+	else if (m_pStateMachine->GetCurrentState() == Stun_Monster::GetInst())
+	{
+		
+	}
+
+	else
+		CGameObject::Animate(fTimeElapsed);
 }
 void CGoblinObject::UpdateTransform(XMFLOAT4X4* pxmf4x4Parent)
 {
