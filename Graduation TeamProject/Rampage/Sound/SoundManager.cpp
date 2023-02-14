@@ -4,28 +4,64 @@ CSoundManager::CSoundManager()
 {
 }
 
-void CSoundManager::RegisterSound(std::string path, bool loop) {
-	CSound sound = CSound(g_sound_system, path, loop);
-	m_Sounds.push_back(sound);
-	m_vSoundPaths.emplace_back(sound.GetPath());
+void CSoundManager::RegisterSound(std::string path, bool loop, SOUND_CATEGORY category) {
+	//CSound sound = CSound(g_sound_system, path, loop);
+
+	int index = 0;
+	CategoryMap::iterator it = m_mCategoryMap.find(category);
+	if (it == m_mCategoryMap.end()) {
+		std::pair<SOUND_CATEGORY, std::vector<CSound>> pair(category, std::vector<CSound>());
+		pair.second.emplace_back(g_sound_system, path, loop);
+		m_mCategoryMap.insert(pair);
+	}
+	else {
+		index = it->second.size();
+		it->second.emplace_back(g_sound_system, path, loop);
+	}
+
+	std::pair<int, SOUND_CATEGORY> pair(index, category);
+	m_mSoundIndexMap[path] = pair;
+	//m_mSoundIndexMap.emplace(path, (index, category));
+
+	//m_Sounds.push_back(sound);
+	//m_vSoundPaths.emplace_back(sound.GetPath());
 }
 
 std::vector<CSound>::iterator CSoundManager::FindSound(std::string path)
 {
-	const std::vector<CSound>::iterator it = std::find_if(m_Sounds.begin(), m_Sounds.end(), [path](CSound sound) {
+	SoundIndexMap::iterator it = m_mSoundIndexMap.find(path);
+
+	if (it != m_mSoundIndexMap.end()) {
+		CategoryMap::iterator ct_it = m_mCategoryMap.find(it->second.second);
+
+		return ct_it->second.begin() + it->second.first;
+	}
+
+	/*const std::vector<CSound>::iterator it = std::find_if(m_Sounds.begin(), m_Sounds.end(), [path](CSound sound) {
 		return sound.GetPath() == path;
 		});
-	return it;
+	return it;*/
 }
 
-std::vector<CSound>::iterator CSoundManager::FindSound(unsigned int num)
+std::vector<CSound>::iterator CSoundManager::FindSound(unsigned int num, SOUND_CATEGORY category)
 {
-	return FindSound(m_vSoundPaths[num]);
+	CategoryMap::iterator it = m_mCategoryMap.find(category);
+
+	return it->second.begin() + num;
+
+	//return FindSound(m_vSoundPaths[num]);
 }
 
 CSoundManager::~CSoundManager() {
-	for (auto sound : m_Sounds)
-		sound.Release();
+
+	for (auto vec : m_mCategoryMap) {
+		for (auto sound : vec.second) {
+			sound.Release();
+		}
+	}
+
+	/*for (auto sound : m_Sounds)
+		sound.Release();*/
 }
 
 
@@ -39,9 +75,19 @@ void CSoundManager::Release() {
 	FMOD_System_Release(g_sound_system);
 }
 
-std::vector<std::string>& CSoundManager::GetAllSoundPaths()
+std::vector<std::string> CSoundManager::getSoundPathsByCategory(SOUND_CATEGORY category)
 {
-	return m_vSoundPaths;
+	CategoryMap::iterator it = m_mCategoryMap.find(category);
+	if (it != m_mCategoryMap.end()) {
+		std::vector<std::string> paths;
+		for (auto& sound : it->second) {
+			paths.emplace_back(sound.GetPath());
+		}
+
+		return paths;
+	}
+
+	return std::vector<std::string>();
 }
 
 

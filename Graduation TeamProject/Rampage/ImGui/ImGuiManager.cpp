@@ -335,14 +335,14 @@ void CImGuiManager::SetUI()
 		initial_curpos.y += 25.f;
 		ImGui::SetCursorPos(initial_curpos);
 
-		std::vector<std::string> paths = CSoundManager::GetInst()->GetAllSoundPaths();
-		std::vector<const char*> items;
-		for (auto& path : paths) {
-			items.push_back(path.c_str());
-		}
-
 		if (ImGui::CollapsingHeader("Shock Sound Effect"))
 		{
+			std::vector<std::string> paths = CSoundManager::GetInst()->getSoundPathsByCategory(SOUND_CATEGORY::SOUND_SHOCK);
+			std::vector<const char*> items;
+			for (auto& path : paths) {
+				items.push_back(path.c_str());
+			}
+
 			initial_curpos.y += 25.f;
 			ImGui::SetCursorPos(initial_curpos);
 			ImGui::SetNextItemWidth(190.f);
@@ -370,6 +370,12 @@ void CImGuiManager::SetUI()
 
 		if (ImGui::CollapsingHeader("Shooting Sound Effect"))
 		{
+			std::vector<std::string> paths = CSoundManager::GetInst()->getSoundPathsByCategory(SOUND_CATEGORY::SOUND_SHOOT);
+			std::vector<const char*> items;
+			for (auto& path : paths) {
+				items.push_back(path.c_str());
+			}
+
 			initial_curpos.y += 25.f;
 			ImGui::SetCursorPos(initial_curpos);
 			ImGui::SetNextItemWidth(190.f);
@@ -398,6 +404,12 @@ void CImGuiManager::SetUI()
 
 		if (ImGui::CollapsingHeader("Damage Moan Sound Effect"))
 		{
+			std::vector<std::string> paths = CSoundManager::GetInst()->getSoundPathsByCategory(SOUND_CATEGORY::SOUND_VOICE);
+			std::vector<const char*> items;
+			for (auto& path : paths) {
+				items.push_back(path.c_str());
+			}
+
 			initial_curpos.y += 25.f;
 			ImGui::SetCursorPos(initial_curpos);
 			ImGui::SetNextItemWidth(190.f);

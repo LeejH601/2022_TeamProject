@@ -70,6 +70,7 @@ class CEffectSoundComponent : public CSoundComponent
 public:
     CEffectSoundComponent(FMOD_SYSTEM* sound_system);
     bool HandleMessage(const Telegram& msg);
+    virtual void Reset();
 };
 
 class CShootSoundComponent : public CSoundComponent
@@ -77,6 +78,7 @@ class CShootSoundComponent : public CSoundComponent
 public:
     CShootSoundComponent(FMOD_SYSTEM* sound_system);
     bool HandleMessage(const Telegram& msg);
+    virtual void Reset();
 };
 
 class CDamageSoundComponent : public CSoundComponent
@@ -84,6 +86,7 @@ class CDamageSoundComponent : public CSoundComponent
 public:
     CDamageSoundComponent(FMOD_SYSTEM* sound_system);
     bool HandleMessage(const Telegram& msg);
+    virtual void Reset();
 };
 
 class CSoundPlayer : public IEntity

@@ -117,7 +117,7 @@ void CSoundComponent::Reset()
 {
 	m_fCurrDelayed = 0.0f;
 	UpdateVolume();
-	SetSound(&*(CSoundManager::GetInst()->FindSound(m_nSoundNumber)));
+	//SetSound(&*(CSoundManager::GetInst()->FindSound(m_nSoundNumber)));
 }
 
 void CSoundComponent::SetSound(CSound* sound)
@@ -160,6 +160,12 @@ bool CEffectSoundComponent::HandleMessage(const Telegram& msg)
 	return false;
 }
 
+void CEffectSoundComponent::Reset()
+{
+	CSoundComponent::Reset();
+	SetSound(&*(CSoundManager::GetInst()->FindSound(m_nSoundNumber, SOUND_CATEGORY::SOUND_SHOCK)));
+}
+
 CShootSoundComponent::CShootSoundComponent(FMOD_SYSTEM* sound_system)
 {
 	g_sound_system = sound_system;
@@ -187,6 +193,12 @@ bool CShootSoundComponent::HandleMessage(const Telegram& msg)
 	return false;
 }
 
+void CShootSoundComponent::Reset()
+{
+	CSoundComponent::Reset();
+	SetSound(&*(CSoundManager::GetInst()->FindSound(m_nSoundNumber, SOUND_CATEGORY::SOUND_SHOOT)));
+}
+
 CDamageSoundComponent::CDamageSoundComponent(FMOD_SYSTEM* sound_system)
 {
 	g_sound_system = sound_system;
@@ -212,6 +224,12 @@ bool CDamageSoundComponent::HandleMessage(const Telegram& msg)
 		return true;
 	}
 	return false;
+}
+
+void CDamageSoundComponent::Reset()
+{
+	CSoundComponent::Reset();
+	SetSound(&*(CSoundManager::GetInst()->FindSound(m_nSoundNumber, SOUND_CATEGORY::SOUND_VOICE)));
 }
 
 void CSoundPlayer::Update(float fElapsedTime)

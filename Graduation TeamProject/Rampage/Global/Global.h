@@ -13,3 +13,12 @@ enum class MESSAGE_TYPE
 	Msg_PlaySoundShoot,
 	END_ENUM
 };
+
+enum class SOUND_CATEGORY
+{
+	SOUND_SHOCK,
+	SOUND_BACKGROUND,
+	SOUND_VOICE,
+	SOUND_SHOOT,
+	SOUND_EFFECT,
+};
