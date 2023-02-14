@@ -494,6 +494,7 @@ void CGameFramework::OnPrepareImGui()
 }
 void CGameFramework::OnPostRenderTarget()
 {
+	m_pScene->OnPostRenderTarget();
 }
 void CGameFramework::MoveToNextFrame()
 {
@@ -520,6 +521,9 @@ void CGameFramework::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dComman
 }
 void CGameFramework::FrameAdvance() 
 {
+
+
+
 	m_GameTimer.Tick(0.0f);
 
 	ProcessInput();
@@ -540,11 +544,9 @@ void CGameFramework::FrameAdvance()
 	OnPrepareRenderTarget();
 	UpdateShaderVariables(m_pd3dCommandList.Get());
 	m_pCamera->OnPrepareRender(m_pd3dCommandList.Get());
-	m_pScene->Render(m_pd3dCommandList.Get(), m_GameTimer.GetFrameTimeElapsed(), m_pCamera.get());
+	m_pScene->Render(m_pd3dCommandList.Get(), m_GameTimer.GetFrameTimeElapsed(), m_GameTimer.GetTotalTime(), m_pCamera.get());
 
 	//CImGuiManager::GetInst()->Render(m_pd3dCommandList.Get());
-
-	OnPostRenderTarget();
 
 	::SynchronizeResourceTransition(m_pd3dCommandList.Get(), m_ppd3dRenderTargetBuffers[m_nSwapChainBufferIndex].Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
 
@@ -557,6 +559,8 @@ void CGameFramework::FrameAdvance()
 
 	//GPU가 모든 명령 리스트를 실행할 때 까지 기다린다.
 	::WaitForGpuComplete(m_pd3dCommandQueue.Get(), m_pd3dFence.Get(), ++m_nFenceValues[m_nSwapChainBufferIndex], m_hFenceEvent);
+
+	OnPostRenderTarget();
 
 	/*스왑체인을 프리젠트한다. 프리젠트를 하면 현재 렌더 타겟(후면버퍼)의 내용이 전면버퍼로 옮겨지고 렌더 타겟 인
 	덱스가 바뀔 것이다.*/

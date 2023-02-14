@@ -32,6 +32,7 @@ CTexture::CTexture(int nTextures, UINT nTextureType, int nSamplers, int nRootPar
 	if (nRootParameters > 0) m_pnRootParameterIndices.resize(nRootParameters);
 	for (int i = 0; i < m_nRootParameters; i++) m_pnRootParameterIndices[i] = -1;
 }
+
 CTexture::~CTexture()
 {
 }

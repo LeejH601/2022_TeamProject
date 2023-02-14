@@ -10,8 +10,9 @@ cbuffer cbCameraInfo : register(b1)
 	matrix gmtxView : packoffset(c0);
 	matrix gmtxProjection : packoffset(c4);
 	matrix gmtxInverseProjection : packoffset(c8);
-	float3 gf3CameraPosition : packoffset(c12);
-	float3 gf3CameraDirection : packoffset(c13);
+	matrix gmtxInverseView : packoffset(c12);
+	float3 gf3CameraPosition : packoffset(c16);
+	//float3 gf3CameraDirection : packoffset(c17);
 };
 
 cbuffer cbParallax : register(b5)
