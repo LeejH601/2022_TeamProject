@@ -2,8 +2,8 @@
 #include "..\Global\Component.h"
 class CDamageAnimationComponent : public CComponent
 {
-    float m_fMaxDistance = 10.0f;
-    float m_fSpeed = 500.0f;
+    float m_fMaxDistance = 5.0f;
+    float m_fSpeed = 20.0f;
 public:
     DECLARE_SINGLE(CDamageAnimationComponent);
     CDamageAnimationComponent();

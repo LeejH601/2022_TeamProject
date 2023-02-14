@@ -20,7 +20,7 @@ CShakeAnimationComponent::CShakeAnimationComponent()
 
 float CShakeAnimationComponent::GetShakeDistance(float t)
 {
-	float fResult = m_fDistance * cos( (2 * PI * t) / m_fFrequency);
+	float fResult = m_fDistance * sin( (2 * PI * t) / m_fFrequency);
 	return fResult;
 }
 

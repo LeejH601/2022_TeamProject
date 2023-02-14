@@ -7,13 +7,13 @@ class CMonster : public CGameObject, public IEntity
 {
 public:
 	XMFLOAT3 m_xmf3HitterVec;
-	XMFLOAT4X4 m_xmf4x4AnimatedTransform;
 
 	bool m_bStunned;
 	float m_fStunTime;
 	float m_fStunStartTime;
 	float m_fShakeDistance;
 	float m_fDamageDistance;
+	float m_fTotalDamageDistance;
 
 	std::unique_ptr<CStateMachine<CMonster>> m_pStateMachine;
 

@@ -53,17 +53,19 @@ void Damaged_Monster::Execute(CMonster* monster, float fElapsedTime)
 	{
 		monster->m_fShakeDistance = CShakeAnimationComponent::GetInst()->GetShakeDistance(monster->m_pSkinnedAnimationController->m_fTime);
 		
-		float fDamageDistance = CDamageAnimationComponent::GetInst()->GetDamageDistance(monster->m_pSkinnedAnimationController->m_fTime);
-		
-		if (fDamageDistance < CDamageAnimationComponent::GetInst()->GetMaxEistance())
-			monster->m_fDamageDistance = fDamageDistance;
+		if (monster->m_fTotalDamageDistance < CDamageAnimationComponent::GetInst()->GetMaxEistance())
+		{
+			monster->m_fDamageDistance = CDamageAnimationComponent::GetInst()->GetDamageDistance(monster->m_pSkinnedAnimationController->m_fTime);
+			monster->m_fTotalDamageDistance += monster->m_fDamageDistance;
+		}
 		else
-			monster->m_fDamageDistance = CDamageAnimationComponent::GetInst()->GetMaxEistance();
+			monster->m_fDamageDistance = 0.0f;
 	}
 }
 
 void Damaged_Monster::Exit(CMonster* monster)
 {
+	monster->m_fTotalDamageDistance = 0.0f;
 }
 
 bool Damaged_Monster::OnMessage(CMonster* monster, const Telegram& msg)
@@ -83,12 +85,14 @@ void Stun_Monster::Execute(CMonster* monster, float fElapsedTime)
 	{
 		monster->m_fStunTime += fElapsedTime;
 		monster->m_fShakeDistance = CShakeAnimationComponent::GetInst()->GetShakeDistance(monster->m_pSkinnedAnimationController->m_fTime);
-		float fDamageDistance = CDamageAnimationComponent::GetInst()->GetDamageDistance(monster->m_pSkinnedAnimationController->m_fTime);
-
-		if (fDamageDistance < CDamageAnimationComponent::GetInst()->GetMaxEistance())
-			monster->m_fDamageDistance = fDamageDistance;
+		
+		if (monster->m_fTotalDamageDistance < CDamageAnimationComponent::GetInst()->GetMaxEistance())
+		{
+			monster->m_fDamageDistance = CDamageAnimationComponent::GetInst()->GetDamageDistance(monster->m_pSkinnedAnimationController->m_fTime);
+			monster->m_fTotalDamageDistance += monster->m_fDamageDistance;
+		}
 		else
-			monster->m_fDamageDistance = CDamageAnimationComponent::GetInst()->GetMaxEistance();
+			monster->m_fDamageDistance = 0.0f;
 	}
 	else
 		monster->m_pStateMachine->ChangeState(Damaged_Monster::GetInst());
