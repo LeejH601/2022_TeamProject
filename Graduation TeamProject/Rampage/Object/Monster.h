@@ -6,10 +6,15 @@
 class CMonster : public CGameObject, public IEntity
 {
 public:
+	XMFLOAT3 m_xmf3HitterVec;
+	XMFLOAT4X4 m_xmf4x4AnimatedTransform;
+
 	bool m_bStunned;
 	float m_fStunTime;
 	float m_fStunStartTime;
 	float m_fShakeDistance;
+	float m_fDamageDistance;
+
 	std::unique_ptr<CStateMachine<CMonster>> m_pStateMachine;
 
 	CGameObject* pWeapon;
@@ -25,6 +30,19 @@ public:
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, bool b_UseTexture, CCamera* pCamera = NULL);
 	virtual void Update(float fTimeElapsed);
 	virtual void UpdateTransform(XMFLOAT4X4* pxmf4x4Parent = NULL);
+	virtual void SetHit(CGameObject* pHitter)
+	{
+		bHit = true;
+		m_xmf3HitterVec = Vector3::Normalize(Vector3::Subtract(GetPosition(), pHitter->GetPosition()));
+	}
+	virtual void CheckCollision(CGameObject* pTargetObject) {
+		if (pTargetObject)
+		{
+			BoundingBox TargetBoundingBox = pTargetObject->GetBoundingBox();
+			if (m_TransformedWeaponBoudningBox.Intersects(TargetBoundingBox))
+				pTargetObject->SetHit(this);
+		}
+	}
 };
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -36,14 +54,6 @@ public:
 	virtual ~COrcObject();
 
 	virtual BoundingBox GetBoundingBox() { return m_TransformedBodyBoudningBox; }
-	virtual void CheckCollision(CGameObject* pTargetObject) {
-		if (pTargetObject)
-		{
-			BoundingBox TargetBoundingBox = pTargetObject->GetBoundingBox();
-			if (m_TransformedWeaponBoudningBox.Intersects(TargetBoundingBox))
-				pTargetObject->SetHit();
-		}
-	}
 
 	virtual void Animate(float fTimeElapsed);
 	virtual void UpdateTransform(XMFLOAT4X4* pxmf4x4Parent = NULL);
@@ -59,15 +69,7 @@ public:
 	virtual ~CGoblinObject();
 
 	virtual BoundingBox GetBoundingBox() { return m_TransformedBodyBoudningBox; }
-	virtual void CheckCollision(CGameObject* pTargetObject) {
-		if (pTargetObject)
-		{
-			BoundingBox TargetBoundingBox = pTargetObject->GetBoundingBox();
-			if (m_TransformedWeaponBoudningBox.Intersects(TargetBoundingBox))
-				pTargetObject->SetHit();
-		}
-	}
-
+	
 	virtual void Animate(float fTimeElapsed);
 	virtual void UpdateTransform(XMFLOAT4X4* pxmf4x4Parent = NULL);
 	virtual void PrepareBoundingBox(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
@@ -82,16 +84,17 @@ public:
 	virtual ~CSkeletonObject();
 
 	virtual BoundingBox GetBoundingBox() { return m_TransformedBodyBoudningBox; }
-	virtual void CheckCollision(CGameObject* pTargetObject) {
-		if (pTargetObject)
-		{
-			BoundingBox TargetBoundingBox = pTargetObject->GetBoundingBox();
-			if (m_TransformedWeaponBoudningBox.Intersects(TargetBoundingBox))
-				pTargetObject->SetHit();
-		}
-	}
 
 	virtual void Animate(float fTimeElapsed);
 	virtual void UpdateTransform(XMFLOAT4X4* pxmf4x4Parent = NULL);
 	virtual void PrepareBoundingBox(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+};
+
+class CMonsterRootAnimationController : public CAnimationController
+{
+public:
+	CMonsterRootAnimationController(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks, CLoadedModelInfo* pModel);
+	virtual ~CMonsterRootAnimationController();
+
+	virtual void OnRootMotion(CGameObject* pRootGameObject);
 };

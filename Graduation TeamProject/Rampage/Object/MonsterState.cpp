@@ -50,7 +50,16 @@ void Damaged_Monster::Execute(CMonster* monster, float fElapsedTime)
 		monster->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
 	}
 	else
+	{
 		monster->m_fShakeDistance = CShakeAnimationComponent::GetInst()->GetShakeDistance(monster->m_pSkinnedAnimationController->m_fTime);
+		
+		float fDamageDistance = CDamageAnimationComponent::GetInst()->GetDamageDistance(monster->m_pSkinnedAnimationController->m_fTime);
+		
+		if (fDamageDistance < CDamageAnimationComponent::GetInst()->GetMaxEistance())
+			monster->m_fDamageDistance = fDamageDistance;
+		else
+			monster->m_fDamageDistance = CDamageAnimationComponent::GetInst()->GetMaxEistance();
+	}
 }
 
 void Damaged_Monster::Exit(CMonster* monster)
@@ -74,6 +83,12 @@ void Stun_Monster::Execute(CMonster* monster, float fElapsedTime)
 	{
 		monster->m_fStunTime += fElapsedTime;
 		monster->m_fShakeDistance = CShakeAnimationComponent::GetInst()->GetShakeDistance(monster->m_pSkinnedAnimationController->m_fTime);
+		float fDamageDistance = CDamageAnimationComponent::GetInst()->GetDamageDistance(monster->m_pSkinnedAnimationController->m_fTime);
+
+		if (fDamageDistance < CDamageAnimationComponent::GetInst()->GetMaxEistance())
+			monster->m_fDamageDistance = fDamageDistance;
+		else
+			monster->m_fDamageDistance = CDamageAnimationComponent::GetInst()->GetMaxEistance();
 	}
 	else
 		monster->m_pStateMachine->ChangeState(Damaged_Monster::GetInst());

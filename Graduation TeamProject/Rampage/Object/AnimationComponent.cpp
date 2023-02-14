@@ -4,6 +4,11 @@ CDamageAnimationComponent::CDamageAnimationComponent()
 {
 }
 
+float CDamageAnimationComponent::GetDamageDistance(float t)
+{ 
+	return m_fSpeed * t;
+}
+
 bool CDamageAnimationComponent::HandleMessage(const Telegram& msg)
 {
 	return false;

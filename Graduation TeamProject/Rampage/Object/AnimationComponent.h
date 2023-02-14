@@ -2,17 +2,20 @@
 #include "..\Global\Component.h"
 class CDamageAnimationComponent : public CComponent
 {
-    float m_fDelay = 0.0f;
-    float m_fSpeed = 0.0f;
+    float m_fMaxDistance = 10.0f;
+    float m_fSpeed = 500.0f;
 public:
+    DECLARE_SINGLE(CDamageAnimationComponent);
     CDamageAnimationComponent();
+    float GetMaxEistance() { return m_fMaxDistance; }
+    float GetDamageDistance(float t);
     bool HandleMessage(const Telegram& msg);
 };
 
 class CShakeAnimationComponent : public CComponent
 {
-    float m_fDistance = 0.5f;
-    float m_fFrequency = 0.2f;
+    float m_fDistance = 0.15f;
+    float m_fFrequency = 0.05f;
 public:
     DECLARE_SINGLE(CShakeAnimationComponent);
     CShakeAnimationComponent();

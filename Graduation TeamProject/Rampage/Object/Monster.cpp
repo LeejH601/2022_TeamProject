@@ -30,19 +30,22 @@ void CMonster::Update(float fTimeElapsed)
 }
 void CMonster::UpdateTransform(XMFLOAT4X4* pxmf4x4Parent)
 {
-	XMFLOAT4X4 xmf4x4Transform = m_xmf4x4Transform;
+	m_xmf4x4AnimatedTransform = m_xmf4x4Transform;
 
-	if (m_pStateMachine->GetCurrentState() == Damaged_Monster::GetInst())
+	if (m_pStateMachine->GetCurrentState() == Damaged_Monster::GetInst() ||
+		m_pStateMachine->GetCurrentState() == Stun_Monster::GetInst())
 	{
-		XMFLOAT3 m_xmf3OriginPos = { xmf4x4Transform._41, xmf4x4Transform._42, xmf4x4Transform._43 };
-		XMFLOAT3 xmf3Pos = Vector3::Add(m_xmf3OriginPos, Vector3::ScalarProduct(GetRight(), m_fShakeDistance, false));
+		XMFLOAT3 m_xmf3OriginPos = { m_xmf4x4AnimatedTransform._41, m_xmf4x4AnimatedTransform._42, m_xmf4x4AnimatedTransform._43 };
+		XMFLOAT3 xmf3ShakeVec = Vector3::ScalarProduct(GetRight(), m_fShakeDistance, false);
+		XMFLOAT3 xmf3DamageVec = Vector3::ScalarProduct(m_xmf3HitterVec, m_fDamageDistance, false);
+		XMFLOAT3 xmf3Pos = Vector3::Add(Vector3::Add(m_xmf3OriginPos, xmf3ShakeVec), xmf3DamageVec);
 
-		xmf4x4Transform._41 = xmf3Pos.x;
-		xmf4x4Transform._42 = xmf3Pos.y;
-		xmf4x4Transform._43 = xmf3Pos.z;
+		m_xmf4x4AnimatedTransform._41 = xmf3Pos.x;
+		m_xmf4x4AnimatedTransform._42 = xmf3Pos.y;
+		m_xmf4x4AnimatedTransform._43 = xmf3Pos.z;
 	}
 
-	m_xmf4x4World = (pxmf4x4Parent) ? Matrix4x4::Multiply(xmf4x4Transform, *pxmf4x4Parent) : xmf4x4Transform;
+	m_xmf4x4World = (pxmf4x4Parent) ? Matrix4x4::Multiply(m_xmf4x4AnimatedTransform, *pxmf4x4Parent) : m_xmf4x4AnimatedTransform;
 
 	if (m_pSibling) m_pSibling->UpdateTransform(pxmf4x4Parent);
 	if (m_pChild) m_pChild->UpdateTransform(&m_xmf4x4World);
@@ -99,8 +102,8 @@ void COrcObject::PrepareBoundingBox(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 //
 CGoblinObject::CGoblinObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks)
 {
-	m_fStunStartTime = 0.5f;
 	m_fStunTime = 0.0f;
+	m_fStunStartTime = 0.4f;
 
 	CLoadedModelInfo* pGoblinModel = CModelManager::GetInst()->GetModelInfo("Object/Goblin.bin");;
 	if (!pGoblinModel) pGoblinModel = CModelManager::GetInst()->LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, "Object/Goblin.bin");
@@ -124,7 +127,7 @@ void CGoblinObject::Animate(float fTimeElapsed)
 
 	else if (m_pStateMachine->GetCurrentState() == Stun_Monster::GetInst())
 	{
-		
+		UpdateTransform(NULL);
 	}
 
 	else
@@ -181,4 +184,17 @@ void CSkeletonObject::PrepareBoundingBox(ID3D12Device* pd3dDevice, ID3D12Graphic
 	pBodyBoundingBoxMesh = CBoundingBoxShader::GetInst()->AddBoundingObject(pd3dDevice, pd3dCommandList, this, XMFLOAT3(0.0f, 1.0f, 0.0f), XMFLOAT3(0.7f, 2.0f, 0.7f));
 	pWeaponBoundingBoxMesh = CBoundingBoxShader::GetInst()->AddBoundingObject(pd3dDevice, pd3dCommandList, pWeapon, XMFLOAT3(0.0f, 0.0f, 0.48f), XMFLOAT3(0.04f, 0.14f, 1.22f));
 #endif
+}
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+CMonsterRootAnimationController::CMonsterRootAnimationController(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks, CLoadedModelInfo* pModel) : CAnimationController(pd3dDevice, pd3dCommandList, nAnimationTracks, pModel)
+{
+}
+
+CMonsterRootAnimationController::~CMonsterRootAnimationController()
+{
+}
+
+void CMonsterRootAnimationController::OnRootMotion(CGameObject* pRootGameObject)
+{
 }

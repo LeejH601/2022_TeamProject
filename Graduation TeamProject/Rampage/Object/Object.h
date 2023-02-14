@@ -76,8 +76,8 @@ public:
 	void SetPosition(XMFLOAT3 xmf3Position);
 	void SetTransform(XMFLOAT4X4 xmf4x4Transform) { m_xmf4x4Transform = xmf4x4Transform; }
 	void SetWorld(XMFLOAT4X4 xmf4x4World) { m_xmf4x4World = xmf4x4World; }
-	void SetHit() { bHit = true; }
-	void SetNotHit() { bHit = false; }
+	virtual void SetHit(CGameObject* pHitter) { bHit = true; }
+	virtual void SetNotHit() { bHit = false; }
 	
 	void Rotate(float fPitch = 10.0f, float fYaw = 10.0f, float fRoll = 10.0f);
 	void Rotate(XMFLOAT3* pxmf3Axis, float fAngle);
@@ -176,7 +176,7 @@ public:
 		{
 			BoundingBox TargetBoundingBox = pTargetObject->GetBoundingBox();
 			if (m_TransformedWeaponBoudningBox.Intersects(TargetBoundingBox))
-				pTargetObject->SetHit();
+				pTargetObject->SetHit(this);
 		}
 	}
 	virtual void Animate(float fTimeElapsed);
