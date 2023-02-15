@@ -11,7 +11,7 @@ public:
         return m_pInst;
     }
     CDamageAnimationComponent();
-    float& GetMaxEistance() { return m_fMaxDistance; }
+    float& GetMaxDistance() { return m_fMaxDistance; }
     float& GetSpeed() { return m_fSpeed; }
     float GetDamageDistance(float t);
     bool HandleMessage(const Telegram& msg);

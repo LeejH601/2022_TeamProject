@@ -58,12 +58,12 @@ void Damaged_Monster::Execute(CMonster* monster, float fElapsedTime)
 		else
 			monster->m_fShakeDistance = 0.0f;
 
-		if (CDamageAnimationComponent::GetInst()->GetEnable() && monster->m_fTotalDamageDistance < CDamageAnimationComponent::GetInst()->GetMaxEistance())
+		if (CDamageAnimationComponent::GetInst()->GetEnable() && monster->m_fTotalDamageDistance < CDamageAnimationComponent::GetInst()->GetMaxDistance())
 		{
 			monster->m_fDamageDistance = CDamageAnimationComponent::GetInst()->GetDamageDistance(fElapsedTime);
 			monster->m_fTotalDamageDistance += monster->m_fDamageDistance;
-			if (CDamageAnimationComponent::GetInst()->GetMaxEistance() < monster->m_fTotalDamageDistance)
-				monster->m_fDamageDistance -= (monster->m_fTotalDamageDistance - CDamageAnimationComponent::GetInst()->GetMaxEistance());
+			if (CDamageAnimationComponent::GetInst()->GetMaxDistance() < monster->m_fTotalDamageDistance)
+				monster->m_fDamageDistance -= (monster->m_fTotalDamageDistance - CDamageAnimationComponent::GetInst()->GetMaxDistance());
 		}
 		else
 			monster->m_fDamageDistance = 0.0f;
@@ -96,12 +96,12 @@ void Stun_Monster::Execute(CMonster* monster, float fElapsedTime)
 		else
 			monster->m_fShakeDistance = 0.0f;
 
-		if (CDamageAnimationComponent::GetInst()->GetEnable() && monster->m_fTotalDamageDistance < CDamageAnimationComponent::GetInst()->GetMaxEistance())
+		if (CDamageAnimationComponent::GetInst()->GetEnable() && monster->m_fTotalDamageDistance < CDamageAnimationComponent::GetInst()->GetMaxDistance())
 		{
 			monster->m_fDamageDistance = CDamageAnimationComponent::GetInst()->GetDamageDistance(fElapsedTime);
 			monster->m_fTotalDamageDistance += monster->m_fDamageDistance;
-			if (CDamageAnimationComponent::GetInst()->GetMaxEistance() < monster->m_fTotalDamageDistance)
-				monster->m_fDamageDistance -= (monster->m_fTotalDamageDistance - CDamageAnimationComponent::GetInst()->GetMaxEistance());
+			if (CDamageAnimationComponent::GetInst()->GetMaxDistance() < monster->m_fTotalDamageDistance)
+				monster->m_fDamageDistance -= (monster->m_fTotalDamageDistance - CDamageAnimationComponent::GetInst()->GetMaxDistance());
 		}
 		else
 			monster->m_fDamageDistance = 0.0f;

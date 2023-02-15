@@ -163,6 +163,7 @@ void CImGuiManager::SetUI()
 	{
 		ImGuiWindowFlags my_window_flags = 0;
 		bool* p_open = NULL;
+
 		my_window_flags |= ImGuiWindowFlags_NoResize;
 
 		const ImGuiViewport* main_viewport = ImGui::GetMainViewport();
@@ -226,13 +227,15 @@ void CImGuiManager::SetUI()
 			ImGui::SetCursorPos(initial_curpos);
 			ImGui::SetNextItemWidth(190.f);
 
-			ImGui::DragFloat("MaxDistance##Damage", &damage->GetMaxEistance(), 0.01f, 0.0f, 10.0f, "%.2f", 0);
+			if (ImGui::DragFloat("MaxDistance##Damage", &damage->GetMaxDistance(), 0.01f, 0.0f, 10.0f, "%.2f", 0))
+				damage->GetMaxDistance() = std::clamp(damage->GetMaxDistance(), 0.0f, 10.0f);
 
 			initial_curpos.y += 25.f;
 			ImGui::SetCursorPos(initial_curpos);
 			ImGui::SetNextItemWidth(190.f);
 
-			ImGui::DragFloat("Speed##Damage", &damage->GetSpeed(), 0.01f, 0.0f, 200.0f, "%.2f", 0);
+			if (ImGui::DragFloat("Speed##Damage", &damage->GetSpeed(), 0.01f, 0.0f, 200.0f, "%.2f", 0))
+				damage->GetSpeed() = std::clamp(damage->GetSpeed(), 0.0f, 200.0f);
 		}
 
 		initial_curpos.y += 25.f;
