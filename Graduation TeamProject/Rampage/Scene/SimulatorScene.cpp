@@ -252,7 +252,7 @@ void CSimulatorScene::CheckCollide()
 	for (int i = 0; i < m_pEnemys.size(); ++i)
 		m_pMainCharacter->CheckCollision(m_pEnemys[i].get());
 }
-void CSimulatorScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed)
+void CSimulatorScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed, CCamera* pCamera)
 {
 	m_pLight->Render(pd3dCommandList);
 

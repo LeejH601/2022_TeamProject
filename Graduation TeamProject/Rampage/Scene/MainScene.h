@@ -4,6 +4,9 @@
 #include "..\Object\Light.h"
 #include "..\Object\Terrain.h"
 #include "..\Shader\TerrainShader.h"
+#include "..\Object\BillBoardObject.h"
+#include "..\Object\ParticleObject.h"
+#include "..\Shader\ParticleShader.h"
 
 class CMainTMPScene : public CScene
 {
@@ -13,6 +16,12 @@ private:
 	std::unique_ptr<CSplatTerrain> m_pTerrain;
 	std::unique_ptr<CShader> m_pTerrainShader;
 	std::unique_ptr<CShader> m_pDepthRenderShader;
+	std::vector<std::unique_ptr<CGameObject>> m_pBillBoardObjects;
+	std::unique_ptr<CBillBoardObjectShader> m_pBillBoardObjectShader;
+
+	std::vector<std::unique_ptr<CParticleObject>> m_ppParticleObjects;
+	std::shared_ptr<CParticleShader> m_pParticleShader;
+
 public:
 	CMainTMPScene() {}
 	virtual ~CMainTMPScene() {}
@@ -30,5 +39,6 @@ public:
 
 	virtual bool ProcessInput(UCHAR* pKeysBuffer) { return false; }
 	virtual void AnimateObjects(float fTimeElapsed);
-	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed);
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed, float fCurrentTime, CCamera* pCamera = NULL);
+	virtual void OnPostRenderTarget();
 };

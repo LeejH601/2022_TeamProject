@@ -58,6 +58,9 @@ public:
 	virtual void OnPreRender(ID3D12GraphicsCommandList* pd3dCommandList);
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, UINT nSubset);
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList);
+	virtual void PreRender(ID3D12GraphicsCommandList* pd3dCommandList, int nPipelineState) {};
+	virtual void PostRender(ID3D12GraphicsCommandList* pd3dCommandList, int nPipelineState) {};
+	virtual void OnPostRender(int nPipelineState) {};
 
 	UINT GetType() { return(m_nType); }
 	XMFLOAT3 GetBoundingCenter() { return(m_xmf3AABBCenter); }
@@ -239,4 +242,139 @@ protected:
 public:
 	CSplatGridMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int xStart, int zStart, int nWidth, int nLength, XMFLOAT3 xmf3Scale = XMFLOAT3(1.0f, 1.0f, 1.0f), XMFLOAT4 xmf4Color = XMFLOAT4(1.0f, 1.0f, 0.0f, 0.0f), void* pContext = NULL);
 	virtual ~CSplatGridMesh();
+};
+//-------------------------------------------------------------------
+class CVertex
+{
+public:
+	XMFLOAT3						m_xmf3Position;
+	XMFLOAT2						m_xmf2Size;
+public:
+	CVertex() { m_xmf3Position = XMFLOAT3(0.0f, 0.0f, 0.0f), m_xmf2Size = XMFLOAT2(0.f, 0.f); }
+
+	CVertex(XMFLOAT3 xmf3Position) { m_xmf3Position = xmf3Position; }
+	CVertex(XMFLOAT3 xmf3Position, XMFLOAT2 xmf2Size) { m_xmf3Position = xmf3Position; m_xmf2Size = xmf2Size; }
+	~CVertex() { }
+};
+
+class CTexturedVertex : public CVertex
+{
+public:
+	XMFLOAT2						m_xmf2TexCoord;
+
+public:
+	CTexturedVertex() { m_xmf3Position = XMFLOAT3(0.0f, 0.0f, 0.0f); m_xmf2TexCoord = XMFLOAT2(0.0f, 0.0f); }
+	CTexturedVertex(float x, float y, float z, XMFLOAT2 xmf2TexCoord) { m_xmf3Position = XMFLOAT3(x, y, z); m_xmf2TexCoord = xmf2TexCoord; }
+	CTexturedVertex(XMFLOAT3 xmf3Position, XMFLOAT2 xmf2TexCoord = XMFLOAT2(0.0f, 0.0f)) { m_xmf3Position = xmf3Position; m_xmf2TexCoord = xmf2TexCoord; }
+	~CTexturedVertex() { }
+};
+
+
+class CTexturedRectMesh : public CMesh
+{
+public:
+	std::vector<CTexturedVertex> m_pxmfTexturedVertexs;
+public:
+	CTexturedRectMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fWidth = 20.0f, float fHeight = 20.0f, float fDepth = 20.0f, float fxPosition = 0.0f, float fyPosition = 0.0f, float fzPosition = 0.0f);
+	virtual ~CTexturedRectMesh();
+};
+
+class CBillBoardVertex
+{
+public:
+	XMFLOAT3						m_xmf3Position;
+	XMFLOAT2						m_xmf2Size;
+
+public:
+	CBillBoardVertex() { m_xmf3Position = XMFLOAT3(0.0f, 0.0f, 0.0f), m_xmf2Size = XMFLOAT2(0.f, 0.f); }
+	CBillBoardVertex(XMFLOAT3 xmf3Position, XMFLOAT2 xmf2Size) 
+	{ m_xmf3Position = xmf3Position; 
+	m_xmf2Size = xmf2Size; }
+	~CBillBoardVertex() { }
+};
+
+class CSpriteAnimateVertex
+{
+public:
+	XMFLOAT3						m_xmf3Position;
+	XMFLOAT2						m_xmf2Size;
+	XMFLOAT2						m_xmf2TexCoord;
+public:
+	CSpriteAnimateVertex() { m_xmf3Position = XMFLOAT3(0.0f, 0.0f, 0.0f), m_xmf2Size = XMFLOAT2(0.f, 0.f), m_xmf2TexCoord = XMFLOAT2(0.f, 0.f); }
+	CSpriteAnimateVertex(XMFLOAT3 xmf3Position, XMFLOAT2 xmf2Size, XMFLOAT2 xmf2TexCoord)
+	{
+		m_xmf3Position = xmf3Position;
+		m_xmf2Size = xmf2Size;
+		m_xmf2TexCoord = xmf2TexCoord;
+	}
+	~CSpriteAnimateVertex() { }
+};
+
+class CBillBoardMesh : public CMesh
+{
+
+public:
+	CBillBoardMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+	virtual ~CBillBoardMesh();
+};
+
+class CParticleVertex
+{
+public:
+	XMFLOAT3						m_xmf3Position = XMFLOAT3(0.0f, 0.0f, 0.0f);
+	XMFLOAT3						m_xmf3Velocity = XMFLOAT3(0.0f, 0.0f, 0.0f);
+	float							m_fLifetime = 0.0f;
+	UINT							m_nType = 0;
+	float							m_fSize = 0.1f;
+
+public:
+	CParticleVertex() { }
+	~CParticleVertex() { }
+};
+
+#define PARTICLE_TYPE_EMITTER		0
+#define PARTICLE_TYPE_SHELL			1
+#define PARTICLE_TYPE_FLARE01		2
+#define PARTICLE_TYPE_FLARE02		3
+#define PARTICLE_TYPE_FLARE03		4
+
+#define MAX_PARTICLES				100000
+
+//#define _WITH_QUERY_DATA_SO_STATISTICS
+
+class CParticleMesh : public CMesh
+{
+public:
+	CParticleMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, XMFLOAT3 xmf3Position, XMFLOAT3 xmf3Velocity, float fLifetime, XMFLOAT3 xmf3Acceleration, XMFLOAT3 xmf3Color, XMFLOAT2 xmf2Size, UINT nMaxParticles);
+	virtual ~CParticleMesh();
+
+	bool								m_bStart = true;
+
+	UINT								m_nMaxParticles = MAX_PARTICLES;
+
+	ComPtr<ID3D12Resource>				m_pd3dVertexBuffer = NULL;
+	ID3D12Resource*						m_pd3dStreamOutputBuffer = NULL;
+	ID3D12Resource*						m_pd3dDrawBuffer = NULL;
+
+	ID3D12Resource*						m_pd3dDefaultBufferFilledSize = NULL;
+	ID3D12Resource*						m_pd3dUploadBufferFilledSize = NULL;
+	UINT64*								m_pnUploadBufferFilledSize = NULL;
+#ifdef _WITH_QUERY_DATA_SO_STATISTICS
+	ID3D12QueryHeap*					m_pd3dSOQueryHeap = NULL;
+	ID3D12Resource*						m_pd3dSOQueryBuffer = NULL;
+	D3D12_QUERY_DATA_SO_STATISTICS*		m_pd3dSOQueryDataStatistics = NULL;
+#else
+	ID3D12Resource*						m_pd3dReadBackBufferFilledSize = NULL;
+#endif
+
+	D3D12_STREAM_OUTPUT_BUFFER_VIEW		m_d3dStreamOutputBufferView;
+
+	virtual void CreateVertexBuffer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, XMFLOAT3 xmf3Position, XMFLOAT3 xmf3Velocity, float fLifetime, XMFLOAT3 xmf3Acceleration, XMFLOAT3 xmf3Color, XMFLOAT2 xmf2Size);
+	virtual void CreateStreamOutputBuffer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, UINT nMaxParticles);
+
+	virtual void PreRender(ID3D12GraphicsCommandList* pd3dCommandList, int nPipelineState);
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, UINT nPipelineState);
+	virtual void PostRender(ID3D12GraphicsCommandList* pd3dCommandList, UINT nPipelineState);
+
+	virtual void OnPostRender(int nPipelineState);
 };

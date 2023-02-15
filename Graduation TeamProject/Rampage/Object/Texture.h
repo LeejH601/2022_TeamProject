@@ -28,7 +28,10 @@ public:
 public:
 	int GetTextures() { return(m_nTextures); }
 	ID3D12Resource* GetResource(int nIndex) { return(m_ppd3dTextures[nIndex].Get()); }
-	const wchar_t* GetTextureName(int nIndex) { return(m_ppstrTextureNames[nIndex].data()); }
+	const wchar_t* GetTextureName(int nIndex) 
+	{ 
+		return(m_ppstrTextureNames[nIndex].data());
+	}
 	D3D12_GPU_DESCRIPTOR_HANDLE GetGpuDescriptorHandle(int nIndex) { return(m_pd3dSrvGpuDescriptorHandles[nIndex]); }
 	int GetRootParameter(int nIndex) { if (nIndex < m_pnRootParameterIndices.size()) return(m_pnRootParameterIndices[nIndex]); return -1; }
 	int GetRootParameters() { return(m_nRootParameters); }
@@ -49,6 +52,8 @@ public:
 	D3D12_SHADER_RESOURCE_VIEW_DESC GetShaderResourceViewDesc(int nIndex);
 
 	void ReleaseUploadBuffers();
+
+	void AnimateRowColumn(float fTime = 0.0f);
 };
 class CMaterial
 {
@@ -66,7 +71,7 @@ public:
 	void SetShader(std::shared_ptr<CShader> pShader);
 	void SetMaterialType(UINT nType) { m_nType |= nType; }
 	void SetTexture(std::shared_ptr<CTexture> pTexture);
-
+	std::shared_ptr<CTexture> GetTexture() { return m_pTexture; }
 	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList);
 	virtual void ReleaseShaderVariables();
 

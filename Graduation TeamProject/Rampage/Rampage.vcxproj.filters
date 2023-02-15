@@ -151,6 +151,18 @@
     <ClCompile Include="Object\Monster.cpp">
       <Filter>Object</Filter>
     </ClCompile>
+    <ClCompile Include="Object\BillBoardObject.cpp">
+      <Filter>Object</Filter>
+    </ClCompile>
+    <ClCompile Include="Shader\BillBoardObjectShader.cpp">
+      <Filter>Shader</Filter>
+    </ClCompile>
+    <ClCompile Include="Shader\ParticleShader.cpp">
+      <Filter>Shader</Filter>
+    </ClCompile>
+    <ClCompile Include="Object\ParticleObject.cpp">
+      <Filter>Object</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Global\stdafx.h">
@@ -288,6 +300,18 @@
     <ClInclude Include="Object\Monster.h">
       <Filter>Object</Filter>
     </ClInclude>
+    <ClInclude Include="Object\BillBoardObject.h">
+      <Filter>Object</Filter>
+    </ClInclude>
+    <ClInclude Include="Shader\BillBoardObjectShader.h">
+      <Filter>Shader</Filter>
+    </ClInclude>
+    <ClInclude Include="Shader\ParticleShader.h">
+      <Filter>Shader</Filter>
+    </ClInclude>
+    <ClInclude Include="Object\ParticleObject.h">
+      <Filter>Object</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shader\PlayerPixelShader.hlsl" />
@@ -302,5 +326,13 @@
     <FxCompile Include="Shader\BoundPixelShader.hlsl" />
     <FxCompile Include="Shader\PlayerDepthWriteShader.hlsl" />
     <FxCompile Include="Shader\TerrainDepthWriteShader.hlsl" />
+    <FxCompile Include="Shader\BillboardObjectPixelShader.hlsl" />
+    <FxCompile Include="Shader\BillboardObjectVertexShader.hlsl" />
+    <FxCompile Include="Shader\BillboardObjectGSShader.hlsl" />
+    <FxCompile Include="Shader\ParticleDrawVertexShader.hlsl" />
+    <FxCompile Include="Shader\ParticleDrawPixelShader.hlsl" />
+    <FxCompile Include="Shader\ParticleDrawGSShader.hlsl" />
+    <FxCompile Include="Shader\ParticleSteamOutputGeometryShader.hlsl" />
+    <FxCompile Include="Shader\ParticleStreamOutputVertexShader.hlsl" />
   </ItemGroup>
 </Project>
