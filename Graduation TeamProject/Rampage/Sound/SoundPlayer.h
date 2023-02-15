@@ -4,6 +4,7 @@
 class CComponent;
 class CComponentSet;
 class Telegram;
+
 class CSoundPlayer : public IEntity
 {
     CComponent* m_pEffectComponent = nullptr;

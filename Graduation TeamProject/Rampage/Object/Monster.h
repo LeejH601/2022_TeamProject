@@ -35,12 +35,14 @@ public:
 		bHit = true;
 		m_xmf3HitterVec = Vector3::Normalize(Vector3::Subtract(GetPosition(), pHitter->GetPosition()));
 	}
-	virtual void CheckCollision(CGameObject* pTargetObject) {
+	virtual bool CheckCollision(CGameObject* pTargetObject) {
 		if (pTargetObject)
 		{
 			BoundingBox TargetBoundingBox = pTargetObject->GetBoundingBox();
-			if (m_TransformedWeaponBoudningBox.Intersects(TargetBoundingBox))
+			if (m_TransformedWeaponBoudningBox.Intersects(TargetBoundingBox)) {
 				pTargetObject->SetHit(this);
+				return true;
+			}
 		}
 	}
 };

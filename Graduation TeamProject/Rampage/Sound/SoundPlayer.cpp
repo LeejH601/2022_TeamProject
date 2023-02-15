@@ -31,7 +31,14 @@ bool CSoundPlayer::HandleMessage(const Telegram& msg)
 		return m_pEffectComponent->HandleMessage(msg);
 	case MESSAGE_TYPE::Msg_PlaySoundShoot:
 		return m_pShootComponent->HandleMessage(msg);
+	case MESSAGE_TYPE::Msg_SoundDamageReady:
+		return m_pDamageComponent->HandleMessage(msg);
+	case MESSAGE_TYPE::Msg_SoundEffectReady:
+		return m_pEffectComponent->HandleMessage(msg);
+	case MESSAGE_TYPE::Msg_SoundShootReady:
+		return m_pShootComponent->HandleMessage(msg);
 	default:
 		return false;
 	}
 }
+

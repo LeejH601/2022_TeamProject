@@ -6,6 +6,7 @@
 #include "..\Object\State.h"
 #include "..\Object\AnimationComponent.h"
 #include "..\Sound\SoundComponent.h"
+#include "..\Sound\SoundPlayer.h"
 #include "..\Sound\SoundManager.h"
 #include "EntityManager.h"
 #include "MessageDispatcher.h"
