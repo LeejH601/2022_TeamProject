@@ -44,6 +44,58 @@ bool CGameFramework::OnCreate(HINSTANCE hInstance, HWND hMainWnd)
 
 	//CommandList를 실행하고 GPU 연산이 완료될 때까지 기다립니다.
 	ExecuteCommandLists();
+
+	static physx::PxDefaultErrorCallback gDefaultErrorCallback;
+	static physx::PxDefaultAllocator gDefaultAllocatorCallback;
+
+	m_pFoundation = PxCreateFoundation(PX_PHYSICS_VERSION, gDefaultAllocatorCallback, gDefaultErrorCallback);
+
+	bool recordMemoryAllocations = true;
+
+	m_pPhysics = PxCreatePhysics(PX_PHYSICS_VERSION, *m_pFoundation, physx::PxTolerancesScale(), recordMemoryAllocations);
+
+	physx::PxSceneDesc SceneDesc(m_pPhysics->getTolerancesScale());
+	SceneDesc.cpuDispatcher = physx::PxDefaultCpuDispatcherCreate(1); // 이 세가지 파라미터가 반드시 필요함.
+	SceneDesc.filterShader = physx::PxDefaultSimulationFilterShader; // 각각 어떤 역할을 하는 지는 추가적으로 조사해볼 필요가 있음.
+	SceneDesc.gravity = physx::PxVec3(0.0f, -9.81f, 0.0f);
+
+	m_pPxScene = m_pPhysics->createScene(SceneDesc);
+
+
+
+
+	physx::PxTransform transform(physx::PxVec3(0.0f, 10.0f, 0.0f));
+
+	physx::PxMaterial* material = m_pPhysics->createMaterial(0.5, 0.5, 0.5);
+	physx::PxShape* shape = m_pPhysics->createShape(physx::PxBoxGeometry(1.0f, 1.0f, 1.0f),*material);
+
+	physx::PxRigidDynamic* actor = physx::PxCreateDynamic(*m_pPhysics, transform, physx::PxBoxGeometry(1.0f,1.0f,1.0f), *material, 1.0f);
+
+
+	physx::PxRigidStatic* plane = physx::PxCreateStatic(*m_pPhysics, physx::PxTransform(physx::PxVec3(0.0f), physx::PxQuat(physx::PxHalfPi, physx::PxVec3(0.0f, 0.0f, 1.0f))), physx::PxPlaneGeometry(), *material);
+
+	//physx::PxActor* actor = m_pPhysics->createRigidDynamic(transform);
+
+	//actor->attachShape(*actor);
+	m_pPxScene->addActor(*plane);
+	m_pPxScene->addActor(*actor);
+
+	physx::PxTransform transform_test = plane->getGlobalPose();
+	transform_test = actor->getGlobalPose();
+
+	m_pPxScene->simulate(1.0f);
+
+	m_pPxScene->fetchResults(true);
+
+	transform_test = plane->getGlobalPose();
+	transform_test = actor->getGlobalPose();
+
+
+	/*physx::PxPvd* mPvd = physx::PxCreatePvd(*mFoundation);
+	physx::PxPvdTransport* transport = physx::PxDefaultPvdSocketTransportCreate(PVD_HOST, 5425, 10);
+
+	PxPvdTransport* transport = PxDefaultPvdSocketTransportCreate(PVD_HOST, 5425, 10);
+	mPvd->connect(*transport, PxPvdInstrumentationFlag::eALL);*/
 	
 	return(true);
 }

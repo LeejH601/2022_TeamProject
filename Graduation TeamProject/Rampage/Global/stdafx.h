@@ -30,6 +30,9 @@
 #include <DirectXCollision.h>
 #include <DXGIDebug.h>
 
+#include <foundation/PxFoundation.h>
+#include <PxPhysicsAPI.h>
+
 //--------------------------
 #include <iostream>
 #include <fstream> 
