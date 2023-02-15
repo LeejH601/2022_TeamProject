@@ -58,12 +58,12 @@ bool CLocator::Init()
 		componentSet->AddComponent(component);
 		component = std::make_shared<CShootSoundComponent>(CSoundManager::GetInst()->GetSoundSystem());
 		componentSet->AddComponent(component);
-
-		component = std::make_shared<CDamageAnimationComponent>();
+		
+		component = CDamageAnimationComponent::GetInst();
 		componentSet->AddComponent(component);
-		component = std::make_shared<CShakeAnimationComponent>();
+		component = CShakeAnimationComponent::GetInst();
 		componentSet->AddComponent(component);
-		component = std::make_shared<CStunAnimationComponent>();
+		component = CStunAnimationComponent::GetInst();
 		componentSet->AddComponent(component);
 	}
 

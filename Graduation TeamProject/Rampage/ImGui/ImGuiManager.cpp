@@ -8,6 +8,7 @@
 #include "..\Sound\SoundComponent.h"
 #include "..\Sound\SoundPlayer.h"
 #include "..\Sound\SoundManager.h"
+#include "..\Object\AnimationComponent.h"
 
 #define NUM_FRAMES_IN_FLIGHT 3
 
@@ -218,7 +219,20 @@ void CImGuiManager::SetUI()
 			initial_curpos.y += 25.f;
 			ImGui::SetCursorPos(initial_curpos);
 			ImGui::SetNextItemWidth(190.f);
-			ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
+			CDamageAnimationComponent* damage = (CDamageAnimationComponent*)(m_pCurrentComponentSet->FindComponent(typeid(CDamageAnimationComponent)));
+			ImGui::Checkbox("On/Off##Damage", &damage->GetEnable());
+
+			initial_curpos.y += 25.f;
+			ImGui::SetCursorPos(initial_curpos);
+			ImGui::SetNextItemWidth(190.f);
+
+			ImGui::DragFloat("MaxDistance##Damage", &damage->GetMaxEistance(), 0.01f, 0.0f, 10.0f, "%.2f", 0);
+
+			initial_curpos.y += 25.f;
+			ImGui::SetCursorPos(initial_curpos);
+			ImGui::SetNextItemWidth(190.f);
+
+			ImGui::DragFloat("Speed##Damage", &damage->GetSpeed(), 0.01f, 0.0f, 200.0f, "%.2f", 0);
 		}
 
 		initial_curpos.y += 25.f;
@@ -229,18 +243,20 @@ void CImGuiManager::SetUI()
 			initial_curpos.y += 25.f;
 			ImGui::SetCursorPos(initial_curpos);
 			ImGui::SetNextItemWidth(190.f);
-			ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
+			CShakeAnimationComponent* shake = (CShakeAnimationComponent*)(m_pCurrentComponentSet->FindComponent(typeid(CShakeAnimationComponent)));
+			ImGui::Checkbox("On/Off##Shake", &shake->GetEnable());
 		}
 
 		initial_curpos.y += 25.f;
 		ImGui::SetCursorPos(initial_curpos);
 
-		if (ImGui::CollapsingHeader("Rigid Animation"))
+		if (ImGui::CollapsingHeader("Stun Animation"))
 		{
 			initial_curpos.y += 25.f;
 			ImGui::SetCursorPos(initial_curpos);
 			ImGui::SetNextItemWidth(190.f);
-			ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
+			CStunAnimationComponent* stun = (CStunAnimationComponent*)(m_pCurrentComponentSet->FindComponent(typeid(CStunAnimationComponent)));
+			ImGui::Checkbox("On/Off##Stun", &stun->GetEnable());
 		}
 
 		initial_curpos.y += 25.f;
@@ -450,8 +466,6 @@ void CImGuiManager::SetUI()
 
 		button_pos.y += 5.f;
 		ImGui::SetCursorPos(button_pos);
-
-
 
 		if (ImGui::Button("Animation1", ImVec2(175.f, 45.f))) // Buttons return true when clicked (most widgets return true when edited/activated)
 		{
