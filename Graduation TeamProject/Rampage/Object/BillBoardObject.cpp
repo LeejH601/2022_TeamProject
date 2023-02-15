@@ -9,7 +9,7 @@ CBillBoardObject::CBillBoardObject(std::shared_ptr<CTexture> pSpriteTexture, ID3
 	m_xmf4x4Transform = Matrix4x4::Identity();
 	m_xmf4x4Texture = Matrix4x4::Identity();
 
-	pShader->CreateShaderResourceViews(pd3dDevice, pSpriteTexture.get(), 0, 8);
+	pShader->CreateShaderResourceViews(pd3dDevice, pSpriteTexture.get(), 0, 10);
 
 	SetTexture(pSpriteTexture);
 

@@ -36,7 +36,7 @@ CParticleObject::CParticleObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	pShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
 	pShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 3);
 
-	pShader->CreateShaderResourceViews(pd3dDevice, pParticleTexture.get(), 0, 10);
+	pShader->CreateShaderResourceViews(pd3dDevice, pParticleTexture.get(), 0, 12);
 }
 
 CParticleObject::~CParticleObject()

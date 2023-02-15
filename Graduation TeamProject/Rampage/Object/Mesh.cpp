@@ -1379,7 +1379,7 @@ void CParticleMesh::Render(ID3D12GraphicsCommandList* pd3dCommandList, UINT nPip
 	}
 	else if (nPipelineState == 1)
 	{
-		pd3dCommandList->SOSetTargets(0, 1, NULL); // 스트림 출력 버퍼 설정
+		pd3dCommandList->SOSetTargets(0, 0, NULL); // 스트림 출력 버퍼 설정
 
 		CMesh::OnPreRender(pd3dCommandList);
 		CMesh::Render(pd3dCommandList); //Render m_pd3dDrawBuffer 

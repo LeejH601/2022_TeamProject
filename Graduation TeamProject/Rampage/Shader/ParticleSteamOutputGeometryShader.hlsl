@@ -9,10 +9,10 @@
 #define FLARE02_PARTICLE_LIFETIME	1.5f
 #define FLARE03_PARTICLE_LIFETIME	2.0f
 
-Buffer<float4> gRandomBuffer : register(t26);
-Buffer<float4> gRandomSphereBuffer : register(t27);
+Buffer<float4> gRandomBuffer : register(t32);
+Buffer<float4> gRandomSphereBuffer : register(t33);
 
-cbuffer cbFrameworkInfo : register(b6)
+cbuffer cbFrameworkInfo : register(b7)
 {
 	float		gfCurrentTime : packoffset(c0.x);
 	float		gfElapsedTime : packoffset(c0.y);

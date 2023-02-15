@@ -188,6 +188,6 @@ void CParticleShader::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dComma
 	m_pcbMappedFrameworkInfo->m_nMaxFlareType2Particles = 15 * 1.5f;
 
 	D3D12_GPU_VIRTUAL_ADDRESS d3dGpuVirtualAddress = m_pd3dcbFrameworkInfo->GetGPUVirtualAddress();
-	pd3dCommandList->SetGraphicsRootConstantBufferView(9, d3dGpuVirtualAddress);
+	pd3dCommandList->SetGraphicsRootConstantBufferView(11, d3dGpuVirtualAddress);
 }
 

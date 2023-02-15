@@ -438,7 +438,7 @@ void CImGuiManager::OnPrepareRender(ID3D12GraphicsCommandList* pd3dCommandList, 
 	m_pCamera->RegenerateViewMatrix();
 	m_pCamera->OnPrepareRender(pd3dCommandList);
 
-	CSimulatorScene::GetInst()->Render(pd3dCommandList, fTimeElapsed);
+	CSimulatorScene::GetInst()->Render(pd3dCommandList, fTimeElapsed, NULL);
 
 	::SynchronizeResourceTransition(pd3dCommandList, m_pRTTexture->GetResource(0), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_COMMON);
 }
