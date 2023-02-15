@@ -54,14 +54,7 @@ std::vector<CSound>::iterator CSoundManager::FindSound(unsigned int num, SOUND_C
 
 CSoundManager::~CSoundManager() {
 
-	for (auto vec : m_mCategoryMap) {
-		for (auto sound : vec.second) {
-			sound.Release();
-		}
-	}
-
-	/*for (auto sound : m_Sounds)
-		sound.Release();*/
+	
 }
 
 
@@ -71,6 +64,11 @@ void CSoundManager::Init() {
 }
 
 void CSoundManager::Release() {
+	for (auto vec : m_mCategoryMap) {
+		for (auto sound : vec.second) {
+			sound.Release();
+		}
+	}
 	FMOD_System_Close(g_sound_system);
 	FMOD_System_Release(g_sound_system);
 }
