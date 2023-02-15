@@ -38,6 +38,7 @@
 #include <set>
 #include <typeinfo>
 #include <algorithm>
+#include <chrono>
 #include "..\ImGui\imgui.h"
 #include "..\ImGui\imgui_impl_dx12.h"
 #include "..\ImGui\imgui_impl_win32.h"
@@ -109,6 +110,9 @@ extern UINT	gnCbvSrvDescriptorIncrementSize;
 extern UINT gnRtvDescriptorIncrementSize;
 extern std::default_random_engine dre;
 
+extern int WriteIntegerFromFile(FILE* pInFile, const int value);
+extern float WriteFloatFromFile(FILE* pInFile, const float fValue);
+extern BYTE WriteStringFromFile(FILE* pInFile, std::string& pstrToken);
 
 extern int ReadIntegerFromFile(FILE* pInFile);
 extern float ReadFloatFromFile(FILE* pInFile);

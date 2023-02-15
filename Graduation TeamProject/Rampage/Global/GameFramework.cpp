@@ -5,6 +5,8 @@
 #include "..\ImGui\ImGuiManager.h"
 #include "..\Object\Texture.h"
 #include "..\Shader\DepthRenderShader.h"
+#include "Locator.h"
+#include "MessageDispatcher.h"
 
 CGameFramework::CGameFramework()
 {
@@ -520,6 +522,7 @@ void CGameFramework::FrameAdvance()
 
 	ProcessInput();
 	AnimateObjects();
+	Locator.GetMessageDispather()->DispatchMessages();
 
 	//명령 할당자를 리셋한다.
 	HRESULT hResult = m_pd3dCommandAllocator->Reset();

@@ -65,8 +65,10 @@ private:
 	std::unique_ptr<CScene> m_pScene = NULL;
 	std::unique_ptr<CCamera> m_pCamera = NULL;
 
-
+public:
 	CGameTimer					m_GameTimer;
+
+private:
 	POINT						m_ptOldCursorPos;
 	_TCHAR						m_pszFrameRate[50];
 

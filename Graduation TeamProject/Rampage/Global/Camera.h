@@ -50,7 +50,7 @@ class CCameraMover : public CComponent
 	std::shared_ptr<CCamera> m_pCamera;
 	XMFLOAT3 m_xmf3Direction;
 public:
-	bool m_bMoveEnd;
+	bool m_bMoveEnd = true;
 
 	float m_fMaxDistance;
 	float m_fCurrDistance;
@@ -83,7 +83,7 @@ private:
 public:
 	float m_fDuration;
 	float m_ft;
-	bool m_bShakeEnd;
+	bool m_bShakeEnd = true;
 	float m_fMagnitude;
 
 public:
@@ -102,7 +102,7 @@ class CCameraZoomer : public CComponent
 
 	XMFLOAT3 m_xmf3Direction;
 public:
-	bool m_bZoomEnd;
+	bool m_bZoomEnd = true;
 	bool m_bIsIN;
 
 	float m_fMaxDistance;
@@ -129,9 +129,9 @@ public:
 class CCamera : public IEntity
 {
 public:
-	bool m_bCameraShaking = true;
-	bool m_bCameraMoving = true;
-	bool m_bCameraZooming = true;
+	bool m_bCameraShaking = false;
+	bool m_bCameraMoving = false;
+	bool m_bCameraZooming = false;
 
 	XMFLOAT3 m_xmf3CalculatedPosition;
 

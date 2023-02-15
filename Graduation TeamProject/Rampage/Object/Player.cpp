@@ -1,6 +1,9 @@
 #include "Player.h"
 #include "..\Global\Camera.h"
 #include "..\Global\Locator.h"
+#include "..\Global\Global.h"
+#include "..\Global\MessageDispatcher.h"
+#include "..\Global\Timer.h"
 
 CPlayer::CPlayer()
 {
@@ -43,7 +46,7 @@ void CPlayer::Move(const XMFLOAT3& xmf3Shift, bool bUpdateVelocity)
 	else
 	{
 		m_xmf3Position = Vector3::Add(m_xmf3Position, xmf3Shift);
-		if(m_pCamera)
+		if (m_pCamera)
 			m_pCamera->Move(xmf3Shift);
 	}
 }
@@ -115,7 +118,7 @@ void CPlayer::Update(float fTimeElapsed)
 		m_pCamera->Animate(fTimeElapsed);
 		m_pCamera->RegenerateViewMatrix();
 	}
-	
+
 
 	fLength = Vector3::Length(m_xmf3Velocity);
 	float fDeceleration = (m_fFriction * fTimeElapsed);
@@ -155,4 +158,42 @@ void CPlayer::OnPrepareRender()
 void CPlayer::Render(ID3D12GraphicsCommandList* pd3dCommandList, bool b_UseTexture, CCamera* pCamera)
 {
 	CGameObject::Render(pd3dCommandList, b_UseTexture, pCamera);
+}
+
+bool CPlayer::CheckCollision(CGameObject* pTargetObject)
+{
+	bool flag = false;
+	if (m_pChild.get()) {
+		if (m_pChild->CheckCollision(pTargetObject) && !m_bAttacked) {
+			flag = true;
+			m_iAttack_Limit--;
+
+			Telegram msg;
+			msg.Msg = (int)MESSAGE_TYPE::Msg_CameraShakeStart;
+			msg.DispatchTime = Locator.GetTimer()->GetNowTime();
+			msg.Receiver = (IEntity*)Locator.GetSimulaterCamera();
+			Locator.GetMessageDispather()->RegisterMessage(msg);
+
+			msg.Msg = (int)MESSAGE_TYPE::Msg_CameraMoveStart;
+			msg.DispatchTime = Locator.GetTimer()->GetNowTime();
+			msg.Receiver = (IEntity*)Locator.GetSimulaterCamera();
+			msg.Sender = this;
+			Locator.GetMessageDispather()->RegisterMessage(msg);
+
+			msg.Msg = (int)MESSAGE_TYPE::Msg_CameraZoomStart;
+			msg.DispatchTime = Locator.GetTimer()->GetNowTime();
+			msg.Receiver = (IEntity*)Locator.GetSimulaterCamera();
+			msg.Sender = (IEntity*)pTargetObject;
+			Locator.GetMessageDispather()->RegisterMessage(msg);
+
+			msg.Msg = (int)MESSAGE_TYPE::Msg_SoundEffectReady;
+			msg.DispatchTime = Locator.GetTimer()->GetNowTime();
+			msg.Receiver = (IEntity*)Locator.GetSoundPlayer();
+			Locator.GetMessageDispather()->RegisterMessage(msg);
+
+			if (m_iAttack_Limit < 1)
+				m_bAttacked = true;
+		}
+	}
+	return flag;
 }

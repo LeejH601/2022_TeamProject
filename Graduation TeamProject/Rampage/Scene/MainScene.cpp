@@ -239,7 +239,7 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pObject->SetPosition(XMFLOAT3(15.0f, -15.0f, -15.0f));
 	m_pObject->SetScale(10.0f, 10.0f, 10.0f);
 	m_pObject->Rotate(0.0f, 180.0f, 0.0f);
-	m_pObject->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 2);
+	m_pObject->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 4);
 
 	//int nAnimationSets = m_pObject->m_pSkinnedAnimationController->m_pAnimationSets->m_nAnimationSets;
 

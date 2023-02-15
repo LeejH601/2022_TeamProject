@@ -3,7 +3,8 @@
 #include "Global/Camera.h"
 #include "Global/Locator.h"
 #include "Object/State.h"
-#include "Sound\SoundManager.h"
+#include "Global/EntityManager.h"
+#include "Sound/SoundManager.h"
 
 #define MAX_LOADSTRING 100
 
@@ -33,6 +34,23 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	CSoundManager::GetInst()->Init();
 
 	Locator.Init();
+	Locator.SetTimer(&gGameFramework.m_GameTimer);
+
+	DataLoader loader;
+	loader.LoadComponentSets(Locator.GetComponentSetRoot());
+	CSoundManager::GetInst()->RegisterSound("Sound/Background/Action 1 (Loop).wav", true, SOUND_CATEGORY::SOUND_BACKGROUND);
+	CSoundManager::GetInst()->RegisterSound("Sound/Background/Action 2 (Loop).wav", true, SOUND_CATEGORY::SOUND_BACKGROUND);
+	CSoundManager::GetInst()->RegisterSound("Sound/Background/Action 3 (Loop).wav", true, SOUND_CATEGORY::SOUND_BACKGROUND);
+	CSoundManager::GetInst()->RegisterSound("Sound/Background/Action 4 (Loop).wav", true, SOUND_CATEGORY::SOUND_BACKGROUND);
+	CSoundManager::GetInst()->RegisterSound("Sound/Background/Action 5 (Loop).wav", true, SOUND_CATEGORY::SOUND_BACKGROUND);
+	CSoundManager::GetInst()->RegisterSound("Sound/Background/Light Ambient 1 (Loop).wav", true, SOUND_CATEGORY::SOUND_BACKGROUND);
+	CSoundManager::GetInst()->RegisterSound("Sound/Background/Light Ambient 2 (Loop).wav", true, SOUND_CATEGORY::SOUND_BACKGROUND);
+	CSoundManager::GetInst()->RegisterSound("Sound/Background/Light Ambient 3 (Loop).wav", true, SOUND_CATEGORY::SOUND_BACKGROUND);
+	CSoundManager::GetInst()->RegisterSound("Sound/Background/Light Ambient 4 (Loop).wav", true, SOUND_CATEGORY::SOUND_BACKGROUND);
+	CSoundManager::GetInst()->RegisterSound("Sound/Background/Light Ambient 5 (Loop).wav", true, SOUND_CATEGORY::SOUND_BACKGROUND);
+
+	//CSoundManager::GetInst()->PlaySound("Sound/Background/Action 1 (Loop).wav");
+	//CSoundManager::GetInst()->PlaySound("Sound/Background/Light Ambient 1 (Loop).wav");
 
 	MyRegisterClass(hInstance);
 
@@ -63,6 +81,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 			gGameFramework.FrameAdvance();
 		}
 	}
+	loader.SaveComponentSets(Locator.GetComponentSetRoot());
+
 	gGameFramework.OnDestroy();
 
 	// Release Fmod Llibrary

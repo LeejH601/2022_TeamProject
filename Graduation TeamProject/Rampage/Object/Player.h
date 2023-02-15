@@ -31,6 +31,12 @@ protected:
 public:
 	std::unique_ptr<CStateMachine<CPlayer>> m_pStateMachine;
 
+	int m_iAttack_Limit;
+	bool m_bAttacked = false;
+
+	XMFLOAT3 m_xmf3CameraMoveDirection = XMFLOAT3(1.0f, 0.0f, 0.0f);
+	float m_fCMDConstant = 1.0f;
+
 public:
 	CPlayer();
 	virtual ~CPlayer();
@@ -77,9 +83,5 @@ public:
 	virtual void OnPrepareRender();
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, bool b_UseTexture, CCamera* pCamera = NULL);
 
-	virtual void CheckCollision(CGameObject* pTargetObject) {
-		if (m_pChild.get()) {
-			m_pChild->CheckCollision(pTargetObject);
-		}
-	}
+	virtual bool CheckCollision(CGameObject* pTargetObject);
 };

@@ -35,8 +35,15 @@ void Atk1_Player::Enter(CPlayer* player)
 	player->m_pChild->m_pSkinnedAnimationController->m_fTime = 0.0f;
 	player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition = 0.0f;
 	player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_nType = ANIMATION_TYPE_ONCE;
+	player->m_bAttacked = false;
+	player->m_iAttack_Limit = 1;
+
+	player->m_xmf3CameraMoveDirection = Vector3::Normalize(XMFLOAT3(-1.0f, -1.0f, 0.0f));
+	player->m_fCMDConstant = 1.0f;
+
 	Telegram msg;
-	msg.Msg = (int)MESSAGE_TYPE::Msg_PlaySoundShoot;
+	msg.Receiver = Locator.GetSoundPlayer();
+	msg.Msg = (int)MESSAGE_TYPE::Msg_SoundShootReady;
 	Locator.GetSoundPlayer()->HandleMessage(msg);
 }
 
@@ -65,6 +72,11 @@ void Atk2_Player::Enter(CPlayer* player)
 	player->m_pChild->m_pSkinnedAnimationController->m_fTime = 0.0f;
 	player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition = 0.0f;
 	player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_nType = ANIMATION_TYPE_ONCE;
+	player->m_bAttacked = false;
+	player->m_iAttack_Limit = 1;
+
+	player->m_xmf3CameraMoveDirection = Vector3::Normalize(XMFLOAT3(1.0f, -1.0f, 0.0f));
+	player->m_fCMDConstant = 1.0f;
 }
 
 void Atk2_Player::Execute(CPlayer* player, float fElapsedTime)
@@ -92,6 +104,8 @@ void Atk3_Player::Enter(CPlayer* player)
 	player->m_pChild->m_pSkinnedAnimationController->m_fTime = 0.0f;
 	player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition = 0.0f;
 	player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_nType = ANIMATION_TYPE_ONCE;
+	player->m_bAttacked = false;
+	player->m_iAttack_Limit = 1;
 }
 
 void Atk3_Player::Execute(CPlayer* player, float fElapsedTime)

@@ -43,5 +43,6 @@ class CMessageDispatcher
 
 public:
 	void DispatchMessages();
+	void RegisterMessage(Telegram& msg) { PriorityQ.insert(msg); };
 };
 

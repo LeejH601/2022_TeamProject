@@ -8,8 +8,9 @@ class CTexture
 public:
 	CTexture(int nTextureResources, UINT nResourceType, int nSamplers, int nRootParameters);
 	virtual ~CTexture();
-private:
 	UINT m_nTextureType;		// Texture 타입
+
+private:
 	int	m_nTextures = 0;		// Texture 개수
 	std::vector<ComPtr<ID3D12Resource>> m_ppd3dTextures;	// Texture 리소스
 	std::vector<ComPtr<ID3D12Resource>> m_ppd3dTextureUploadBuffers;	//Texture 업로드 버퍼

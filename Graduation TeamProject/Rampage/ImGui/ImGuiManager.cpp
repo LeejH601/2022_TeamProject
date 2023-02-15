@@ -6,7 +6,7 @@
 #include "..\Global\GameFramework.h"
 #include "..\Global\Locator.h"
 #include "..\Sound\Sound.h"
-#include "..\Sound\SoundPlayer.h"
+#include "..\Sound\SoundManager.h"
 
 #define NUM_FRAMES_IN_FLIGHT 3
 
@@ -260,7 +260,7 @@ void CImGuiManager::SetUI()
 			initial_curpos.y += 25.f;
 			ImGui::SetCursorPos(initial_curpos);
 			ImGui::SetNextItemWidth(190.f);
-			
+
 			ImGui::DragFloat("Distance##Move", &mover->m_fMaxDistance, 0.01f, 0.0f, 10.0f, "%.2f", 0);
 
 			initial_curpos.y += 25.f;
@@ -288,7 +288,7 @@ void CImGuiManager::SetUI()
 			initial_curpos.y += 25.f;
 			ImGui::SetCursorPos(initial_curpos);
 			ImGui::SetNextItemWidth(190.f);
-			
+
 			ImGui::DragFloat("Magnitude##Shake", &shaker->m_fMagnitude, 0.01f, 0.0f, 10.0f, "%.2f", 0);
 
 			initial_curpos.y += 25.f;
@@ -313,7 +313,7 @@ void CImGuiManager::SetUI()
 			initial_curpos.y += 25.f;
 			ImGui::SetCursorPos(initial_curpos);
 			ImGui::SetNextItemWidth(190.f);
-			
+
 			ImGui::DragFloat("Distance##Zoom", &Zoomer->m_fMaxDistance, 0.01f, 0.0f, 10.0f, "%.2f", 0);
 
 			initial_curpos.y += 25.f;
@@ -337,10 +337,32 @@ void CImGuiManager::SetUI()
 
 		if (ImGui::CollapsingHeader("Shock Sound Effect"))
 		{
+			std::vector<std::string> paths = CSoundManager::GetInst()->getSoundPathsByCategory(SOUND_CATEGORY::SOUND_SHOCK);
+			std::vector<const char*> items;
+			for (auto& path : paths) {
+				items.push_back(path.c_str());
+			}
+
 			initial_curpos.y += 25.f;
 			ImGui::SetCursorPos(initial_curpos);
 			ImGui::SetNextItemWidth(190.f);
-			ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
+			CEffectSoundComponent* effect = (CEffectSoundComponent*)(m_pCurrentComponentSet->FindComponent(typeid(CEffectSoundComponent)));
+			ImGui::Checkbox("On/Off##effectsound", &effect->GetEnable());
+
+			initial_curpos.y += 25.f;
+			ImGui::SetCursorPos(initial_curpos);
+			ImGui::SetNextItemWidth(190.f);
+			ImGui::Combo("Sound##effectsound", (int*)&effect->m_nSoundNumber, items.data(), items.size());
+
+			initial_curpos.y += 25.f;
+			ImGui::SetCursorPos(initial_curpos);
+			ImGui::SetNextItemWidth(190.f);
+			ImGui::DragFloat("Delay##effectsound", &effect->m_fDelay, 0.01f, 0.0f, 10.0f, "%.2f", 0);
+
+			initial_curpos.y += 25.f;
+			ImGui::SetCursorPos(initial_curpos);
+			ImGui::SetNextItemWidth(190.f);
+			ImGui::DragFloat("Volume##effectsound", &effect->m_fVolume, 0.01f, 0.0f, 10.0f, "%.2f", 0);
 		}
 
 		initial_curpos.y += 25.f;
@@ -348,10 +370,33 @@ void CImGuiManager::SetUI()
 
 		if (ImGui::CollapsingHeader("Shooting Sound Effect"))
 		{
+			std::vector<std::string> paths = CSoundManager::GetInst()->getSoundPathsByCategory(SOUND_CATEGORY::SOUND_SHOOT);
+			std::vector<const char*> items;
+			for (auto& path : paths) {
+				items.push_back(path.c_str());
+			}
+
 			initial_curpos.y += 25.f;
 			ImGui::SetCursorPos(initial_curpos);
 			ImGui::SetNextItemWidth(190.f);
-			ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
+			CShootSoundComponent* shoot = (CShootSoundComponent*)(m_pCurrentComponentSet->FindComponent(typeid(CShootSoundComponent)));
+			ImGui::Checkbox("On/Off##shootsound", &shoot->GetEnable());
+
+			initial_curpos.y += 25.f;
+			ImGui::SetCursorPos(initial_curpos);
+			ImGui::SetNextItemWidth(190.f);
+			ImGui::Combo("Sound##shootsound", (int*)&shoot->m_nSoundNumber, items.data(), items.size());
+
+			initial_curpos.y += 25.f;
+			ImGui::SetCursorPos(initial_curpos);
+			ImGui::SetNextItemWidth(190.f);
+			ImGui::DragFloat("Delay##shootsound", &shoot->m_fDelay, 0.01f, 0.0f, 10.0f, "%.2f", 0);
+
+			initial_curpos.y += 25.f;
+			ImGui::SetCursorPos(initial_curpos);
+			ImGui::SetNextItemWidth(190.f);
+			ImGui::DragFloat("Volume##shootsound", &shoot->m_fVolume, 0.01f, 0.0f, 10.0f, "%.2f", 0);
+
 		}
 
 		initial_curpos.y += 25.f;
@@ -359,10 +404,32 @@ void CImGuiManager::SetUI()
 
 		if (ImGui::CollapsingHeader("Damage Moan Sound Effect"))
 		{
+			std::vector<std::string> paths = CSoundManager::GetInst()->getSoundPathsByCategory(SOUND_CATEGORY::SOUND_VOICE);
+			std::vector<const char*> items;
+			for (auto& path : paths) {
+				items.push_back(path.c_str());
+			}
+
 			initial_curpos.y += 25.f;
 			ImGui::SetCursorPos(initial_curpos);
 			ImGui::SetNextItemWidth(190.f);
-			ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
+			CDamageSoundComponent* damage = (CDamageSoundComponent*)(m_pCurrentComponentSet->FindComponent(typeid(CDamageSoundComponent)));
+			ImGui::Checkbox("On/Off##damagesound", &damage->GetEnable());
+
+			initial_curpos.y += 25.f;
+			ImGui::SetCursorPos(initial_curpos);
+			ImGui::SetNextItemWidth(190.f);
+			ImGui::Combo("Sound##damagesound", (int*)&damage->m_nSoundNumber, items.data(), items.size());
+
+			initial_curpos.y += 25.f;
+			ImGui::SetCursorPos(initial_curpos);
+			ImGui::SetNextItemWidth(190.f);
+			ImGui::DragFloat("Delay##damagesound", &damage->m_fDelay, 0.01f, 0.0f, 10.0f, "%.2f", 0);
+
+			initial_curpos.y += 25.f;
+			ImGui::SetCursorPos(initial_curpos);
+			ImGui::SetNextItemWidth(190.f);
+			ImGui::DragFloat("Volume##damagesound", &damage->m_fVolume, 0.01f, 0.0f, 10.0f, "%.2f", 0);
 		}
 
 		/* initial_curpos.y += 25.f;
@@ -427,11 +494,11 @@ void CImGuiManager::OnPrepareRender(ID3D12GraphicsCommandList* pd3dCommandList, 
 	//PrepareRenderTarget(pd3dCommandList, d3dDsvDescriptorCPUHandle);
 	CSimulatorScene::GetInst()->OnPrepareRender(pd3dCommandList);
 
-    /*if (pCamera)
-        pCamera->OnPrepareRender(pd3dCommandList);*/
-    CSimulatorScene::GetInst()->OnPreRender(pd3dCommandList, fTimeElapsed);
+	/*if (pCamera)
+		pCamera->OnPrepareRender(pd3dCommandList);*/
+	CSimulatorScene::GetInst()->OnPreRender(pd3dCommandList, fTimeElapsed);
 
-    PrepareRenderTarget(pd3dCommandList, d3dDsvDescriptorCPUHandle);
+	PrepareRenderTarget(pd3dCommandList, d3dDsvDescriptorCPUHandle);
 	/*if (pCamera)
 		pCamera->OnPrepareRender(pd3dCommandList);*/
 	m_pCamera->Animate(fTimeElapsed);
