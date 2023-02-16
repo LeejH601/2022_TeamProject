@@ -221,20 +221,20 @@ void CImGuiManager::SetUI()
 			ImGui::SetCursorPos(initial_curpos);
 			ImGui::SetNextItemWidth(190.f);
 			CDamageAnimationComponent* damage = (CDamageAnimationComponent*)(m_pCurrentComponentSet->FindComponent(typeid(CDamageAnimationComponent)));
-			ImGui::Checkbox("On/Off##Damage", &damage->GetEnable());
+			ImGui::Checkbox("On/Off##DamageAnimation", &damage->GetEnable());
 
 			initial_curpos.y += 25.f;
 			ImGui::SetCursorPos(initial_curpos);
 			ImGui::SetNextItemWidth(190.f);
 
-			if (ImGui::DragFloat("MaxDistance##Damage", &damage->GetMaxDistance(), 0.01f, 0.0f, 10.0f, "%.2f", 0))
+			if (ImGui::DragFloat("MaxDistance##DamageAnimation", &damage->GetMaxDistance(), 0.01f, 0.0f, 10.0f, "%.2f", 0))
 				damage->GetMaxDistance() = std::clamp(damage->GetMaxDistance(), 0.0f, 10.0f);
 
 			initial_curpos.y += 25.f;
 			ImGui::SetCursorPos(initial_curpos);
 			ImGui::SetNextItemWidth(190.f);
 
-			if (ImGui::DragFloat("Speed##Damage", &damage->GetSpeed(), 0.01f, 0.0f, 200.0f, "%.2f", 0))
+			if (ImGui::DragFloat("Speed##DamageAnimation", &damage->GetSpeed(), 0.01f, 0.0f, 200.0f, "%.2f", 0))
 				damage->GetSpeed() = std::clamp(damage->GetSpeed(), 0.0f, 200.0f);
 		}
 
@@ -247,7 +247,21 @@ void CImGuiManager::SetUI()
 			ImGui::SetCursorPos(initial_curpos);
 			ImGui::SetNextItemWidth(190.f);
 			CShakeAnimationComponent* shake = (CShakeAnimationComponent*)(m_pCurrentComponentSet->FindComponent(typeid(CShakeAnimationComponent)));
-			ImGui::Checkbox("On/Off##Shake", &shake->GetEnable());
+			ImGui::Checkbox("On/Off##ShakeAnimation", &shake->GetEnable());
+
+			initial_curpos.y += 25.f;
+			ImGui::SetCursorPos(initial_curpos);
+			ImGui::SetNextItemWidth(190.f);
+
+			if (ImGui::DragFloat("Distance##ShakeAnimation", &shake->GetDistance(), 0.01f, 0.0f, 1.0f, "%.2f", 0))
+				shake->GetDistance() = std::clamp(shake->GetDistance(), 0.0f, 1.0f);
+
+			initial_curpos.y += 25.f;
+			ImGui::SetCursorPos(initial_curpos);
+			ImGui::SetNextItemWidth(190.f);
+
+			if (ImGui::DragFloat("Frequency##ShakeAnimation", &shake->GetFrequency(), 0.01f, 0.0f, 1.0f, "%.2f", 0))
+				shake->GetFrequency() = std::clamp(shake->GetFrequency(), 0.0f, 1.0f);
 		}
 
 		initial_curpos.y += 25.f;
@@ -259,7 +273,14 @@ void CImGuiManager::SetUI()
 			ImGui::SetCursorPos(initial_curpos);
 			ImGui::SetNextItemWidth(190.f);
 			CStunAnimationComponent* stun = (CStunAnimationComponent*)(m_pCurrentComponentSet->FindComponent(typeid(CStunAnimationComponent)));
-			ImGui::Checkbox("On/Off##Stun", &stun->GetEnable());
+			ImGui::Checkbox("On/Off##StunAnimation", &stun->GetEnable());
+
+			initial_curpos.y += 25.f;
+			ImGui::SetCursorPos(initial_curpos);
+			ImGui::SetNextItemWidth(190.f);
+
+			if (ImGui::DragFloat("StunTime##StunAnimation", &stun->GetStunTime(), 0.01f, 0.0f, 1.0f, "%.2f", 0))
+				stun->GetStunTime() = std::clamp(stun->GetStunTime(), 0.0f, 1.0f);
 		}
 
 		initial_curpos.y += 25.f;

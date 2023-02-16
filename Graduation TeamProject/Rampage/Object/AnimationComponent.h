@@ -28,6 +28,8 @@ public:
         return m_pInst;
     }
     CShakeAnimationComponent();
+    float& GetDistance() { return m_fDistance; }
+    float& GetFrequency() { return m_fFrequency; }
     float GetShakeDistance(float t);
     bool HandleMessage(const Telegram& msg);
 };
@@ -42,6 +44,6 @@ public:
         return m_pInst;
     }
     CStunAnimationComponent();
-    float GetStunTime() { return m_fStunTime; }
+    float& GetStunTime() { return m_fStunTime; }
     bool HandleMessage(const Telegram& msg);
 };
