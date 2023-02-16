@@ -205,15 +205,8 @@ void CSimulatorScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 
 	// 3->IDLE
 	// 28->Attack
-	std::shared_ptr<CGameObject> knightObject = std::make_shared<CKnightObject>(pd3dDevice, pd3dCommandList, 1);
-	knightObject->SetPosition(XMFLOAT3(-8.0f, 0.0f, 0.0f));
-	knightObject->SetScale(14.0f, 14.0f, 14.0f);
-	knightObject->Rotate(0.0f, 90.0f, 0.0f);
-	knightObject->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 4);
-	knightObject->m_pSkinnedAnimationController->m_xmf3RootObjectScale = XMFLOAT3(14.0f, 14.0f, 14.0f);
-
-	m_pMainCharacter = std::make_unique<CPlayer>();
-	m_pMainCharacter->SetChild(knightObject, true);
+	
+	m_pMainCharacter = std::make_unique<CPlayer>(pd3dDevice, pd3dCommandList, 1);
 
 	((CDepthRenderShader*)m_pDepthRenderShader.get())->RegisterObject(m_pMainCharacter.get());
 	for (int i = 0; i < m_pEnemys.size(); ++i)
@@ -259,7 +252,7 @@ void CSimulatorScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float f
 	CModelShader::GetInst()->Render(pd3dCommandList, 1);
 
 	m_pMainCharacter->Animate(0.0f);
-	m_pMainCharacter->Update(fTimeElapsed);
+	//m_pMainCharacter->Update(fTimeElapsed);
 	m_pMainCharacter->Render(pd3dCommandList, true);
 
 	for (int i = 0; i < m_pEnemys.size(); ++i)

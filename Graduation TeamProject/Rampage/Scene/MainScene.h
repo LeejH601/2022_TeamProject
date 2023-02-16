@@ -25,6 +25,8 @@ private:
 public:
 	CMainTMPScene() {}
 	virtual ~CMainTMPScene() {}
+	
+	virtual void SetPlayer(CGameObject* pPlayer);
 
 	virtual void OnPreRender(ID3D12GraphicsCommandList* pd3dCommandList) { }
 	virtual void OnPreRender(ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed);

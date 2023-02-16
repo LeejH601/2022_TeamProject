@@ -9,6 +9,14 @@
 #include "..\Shader\ParticleShader.h"
 #include "..\Shader\DepthRenderShader.h"
 
+void CMainTMPScene::SetPlayer(CGameObject* pPlayer)
+{
+	m_pPlayer = pPlayer;
+
+	if (m_pDepthRenderShader.get())
+		((CDepthRenderShader*)m_pDepthRenderShader.get())->RegisterObject(pPlayer);
+}
+
 void CMainTMPScene::OnPreRender(ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed)
 {
 	if (m_pDepthRenderShader)
@@ -221,11 +229,6 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	//CSoundManager::GetInst()->PlaySound("Sound/mp3/David Bowie - Starman.mp3");
 
 	std::unique_ptr<CKnightObject> m_pObject = std::make_unique<CKnightObject>(pd3dDevice, pd3dCommandList, 1);
-	m_pObject->SetPosition(XMFLOAT3(0.0f, 0.0f, 0.0f));
-	m_pObject->SetScale(15.0f, 15.0f, 15.0f);
-	m_pObject->Rotate(0.0f, 180.0f, 0.0f);
-	m_pObject->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
-	m_pObjects.push_back(std::move(m_pObject));
 
 	m_pObject = std::make_unique<CKnightObject>(pd3dDevice, pd3dCommandList, 1);
 	m_pObject->SetPosition(XMFLOAT3(-15.0f, 15.0f, 15.0f));
@@ -314,6 +317,12 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 	m_pLight->Render(pd3dCommandList);
 
 	CModelShader::GetInst()->Render(pd3dCommandList, 0);
+
+	if (m_pPlayer)
+	{
+		m_pPlayer->Animate(0.0f);
+		m_pPlayer->Render(pd3dCommandList, true);
+	}
 
 	for (int i = 0; i < m_pObjects.size(); ++i)
 	{

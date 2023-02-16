@@ -520,8 +520,12 @@ bool CKnightObject::CheckCollision(CGameObject* pTargetObject)
 	if (pTargetObject)
 	{
 		BoundingBox TargetBoundingBox = pTargetObject->GetBoundingBox();
-		if (m_TransformedWeaponBoudningBox.Intersects(TargetBoundingBox)) {
+		if (m_TransformedWeaponBoundingBox.Intersects(TargetBoundingBox)) {
 			pTargetObject->SetHit(this);
+
+			TCHAR pstrDebug[256] = { 0 };
+			_stprintf_s(pstrDebug, 256, _T("Collide\n"));
+			OutputDebugString(pstrDebug);
 
 			flag = true;
 		}
@@ -540,7 +544,7 @@ void CKnightObject::UpdateTransform(XMFLOAT4X4* pxmf4x4Parent)
 	if (m_pChild) m_pChild->UpdateTransform(&m_xmf4x4World);
 
 	pBodyBoundingBoxMesh->SetWorld(m_xmf4x4Transform);
-	m_BodyBoundingBox.Transform(m_TransformedBodyBoudningBox, XMLoadFloat4x4(&m_xmf4x4Transform));
+	m_BodyBoundingBox.Transform(m_TransformedBodyBoundingBox, XMLoadFloat4x4(&m_xmf4x4Transform));
 
 	if (pWeapon)
 	{
@@ -553,7 +557,7 @@ void CKnightObject::UpdateTransform(XMFLOAT4X4* pxmf4x4Parent)
 		xmf4x4World._43 = xmf3Position.z;
 		pWeaponBoundingBoxMesh->SetWorld(xmf4x4World);
 
-		m_WeaponBoundingBox.Transform(m_TransformedWeaponBoudningBox, XMLoadFloat4x4(&xmf4x4World));
+		m_WeaponBoundingBox.Transform(m_TransformedWeaponBoundingBox, XMLoadFloat4x4(&xmf4x4World));
 	}
 }
 void CKnightObject::PrepareBoundingBox(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)

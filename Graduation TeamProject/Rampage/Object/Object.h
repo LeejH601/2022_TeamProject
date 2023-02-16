@@ -164,15 +164,15 @@ private:
 	CGameObject* pWeapon;
 	BoundingBox m_BodyBoundingBox;
 	BoundingBox m_WeaponBoundingBox;
-	BoundingBox m_TransformedBodyBoudningBox;
-	BoundingBox m_TransformedWeaponBoudningBox;
+	BoundingBox m_TransformedBodyBoundingBox;
+	BoundingBox m_TransformedWeaponBoundingBox;
 	CGameObject* pBodyBoundingBoxMesh;
 	CGameObject* pWeaponBoundingBoxMesh;
 public:
 	CKnightObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks);
 	virtual ~CKnightObject();
 
-	virtual BoundingBox GetBoundingBox() { return m_TransformedBodyBoudningBox; }
+	virtual BoundingBox GetBoundingBox() { return m_TransformedBodyBoundingBox; }
 	virtual bool CheckCollision(CGameObject* pTargetObject);
 
 	virtual void Animate(float fTimeElapsed);

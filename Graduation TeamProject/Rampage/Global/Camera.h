@@ -6,6 +6,7 @@
 #define ASPECT_RATIO (float(FRAME_BUFFER_WIDTH) / float(FRAME_BUFFER_HEIGHT))
 
 class CCamera;
+class CGameObject;
 
 struct VS_CB_CAMERA_INFO
 {
@@ -208,8 +209,7 @@ public:
 	virtual void ReleaseShaderVariables();
 	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList);
 
-	virtual void Move(const XMFLOAT3& xmf3Shift) { m_xmf3Position.x += xmf3Shift.x; m_xmf3Position.y += xmf3Shift.y; m_xmf3Position.z += xmf3Shift.z; 
-	}
+	virtual void Move(const XMFLOAT3& xmf3Shift) { m_xmf3Position.x += xmf3Shift.x; m_xmf3Position.y += xmf3Shift.y; m_xmf3Position.z += xmf3Shift.z; }
 	virtual void Rotate(float fPitch = 0.0f, float fYaw = 0.0f, float fRoll = 0.0f) { }
 	virtual void Animate(float fTimeElapsed);
 	virtual void Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed);
@@ -225,4 +225,5 @@ public:
 	virtual ~CFirstPersonCamera() { }
 
 	virtual void Rotate(float fPitch = 0.0f, float fYaw = 0.0f, float fRoll = 0.0f);
+	virtual void Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed);
 };

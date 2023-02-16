@@ -205,6 +205,12 @@ void CFirstPersonCamera::Rotate(float fPitch, float fYaw, float fRoll)
 
 }
 
+void CFirstPersonCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
+{
+	RegenerateViewMatrix();
+	SetLookAt(xmf3LookAt);
+}
+
 CPath::CPath(const CPath& path)
 {
 	m_vMovingPaths.resize(path.m_vMovingPaths.size());

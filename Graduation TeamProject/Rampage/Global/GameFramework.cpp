@@ -242,10 +242,16 @@ void CGameFramework::BuildObjects()
 	
 	CSimulatorScene::GetInst()->BuildObjects(m_pd3dDevice.Get(), m_pd3dCommandList.Get());
 
-
 	m_pCamera = std::make_unique<CFirstPersonCamera>();
 	m_pCamera->Init(m_pd3dDevice.Get(), m_pd3dCommandList.Get());
 
+	m_pPlayer = std::make_unique<CKnightObject>(m_pd3dDevice.Get(), m_pd3dCommandList.Get(), 1);
+	m_pPlayer->SetPosition(XMFLOAT3(0.0f, 0.0f, 0.0f));
+	m_pPlayer->SetScale(15.0f, 15.0f, 15.0f);
+	m_pPlayer->Rotate(0.0f, 180.0f, 0.0f);
+	m_pPlayer->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
+
+	m_pScene->SetPlayer(m_pPlayer.get());
 }
 void CGameFramework::ReleaseObjects()
 {
@@ -403,29 +409,24 @@ void CGameFramework::ProcessInput()
 			m_pCamera->Rotate(cyDelta, cxDelta, 0.0f);
 	}
 
-	m_pCamera->RegenerateViewMatrix();
-
 	if (pKeysBuffer[VK_RBUTTON] & 0xF0) {
 		if (dwDirection) {
-			if (dwDirection)
-			{
-				XMFLOAT3 xmf3Shift = XMFLOAT3(0, 0, 0);
-				float fDistance = 40.0f * m_GameTimer.GetFrameTimeElapsed();
-				if (pKeysBuffer[VK_SHIFT] & 0xF0)
-					fDistance *= 10.0f;
-				if (dwDirection & DIR_FORWARD) xmf3Shift = Vector3::Add(xmf3Shift, m_pCamera->GetLookVector(), fDistance);
-				if (dwDirection & DIR_BACKWARD) xmf3Shift = Vector3::Add(xmf3Shift, m_pCamera->GetLookVector(), -fDistance);
-				if (dwDirection & DIR_RIGHT) xmf3Shift = Vector3::Add(xmf3Shift, m_pCamera->GetRightVector(), fDistance);
-				if (dwDirection & DIR_LEFT) xmf3Shift = Vector3::Add(xmf3Shift, m_pCamera->GetRightVector(), -fDistance);
-				if (dwDirection & DIR_UP) xmf3Shift = Vector3::Add(xmf3Shift, m_pCamera->GetUpVector(), fDistance);
-				if (dwDirection & DIR_DOWN) xmf3Shift = Vector3::Add(xmf3Shift, m_pCamera->GetUpVector(), -fDistance);
+			XMFLOAT3 xmf3Shift = XMFLOAT3(0, 0, 0);
+			float fDistance = 40.0f * m_GameTimer.GetFrameTimeElapsed();
+			if (pKeysBuffer[VK_SHIFT] & 0xF0)
+				fDistance *= 10.0f;
+			if (dwDirection & DIR_FORWARD) xmf3Shift = Vector3::Add(xmf3Shift, m_pCamera->GetLookVector(), fDistance);
+			if (dwDirection & DIR_BACKWARD) xmf3Shift = Vector3::Add(xmf3Shift, m_pCamera->GetLookVector(), -fDistance);
+			if (dwDirection & DIR_RIGHT) xmf3Shift = Vector3::Add(xmf3Shift, m_pCamera->GetRightVector(), fDistance);
+			if (dwDirection & DIR_LEFT) xmf3Shift = Vector3::Add(xmf3Shift, m_pCamera->GetRightVector(), -fDistance);
+			if (dwDirection & DIR_UP) xmf3Shift = Vector3::Add(xmf3Shift, m_pCamera->GetUpVector(), fDistance);
+			if (dwDirection & DIR_DOWN) xmf3Shift = Vector3::Add(xmf3Shift, m_pCamera->GetUpVector(), -fDistance);
 
-				m_pCamera->Move(xmf3Shift);
-			}
+			m_pCamera->Move(xmf3Shift);
 		}
 	}
 	
-	
+	m_pCamera->Update(XMFLOAT3(0.0f, 0.0f, 0.0f), 0.0f);
 
 
 	/*TCHAR pstrDebug[256] = { 0 };

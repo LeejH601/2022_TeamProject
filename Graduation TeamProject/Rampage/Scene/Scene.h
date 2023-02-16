@@ -2,15 +2,19 @@
 #include "../Global/stdafx.h"
 
 class CCamera;
+class CGameObject;
 class CScene 
 {
 protected:
 	ComPtr<ID3D12RootSignature> m_pd3dGraphicsRootSignature = nullptr;
+
+	CGameObject* m_pPlayer = nullptr;
 public:
 	CScene() {}
 	virtual ~CScene() {}
 	
 	ID3D12RootSignature* GetGraphicsRootSignature() { return(m_pd3dGraphicsRootSignature.Get()); }
+	virtual void SetPlayer(CGameObject* pPlayer) { m_pPlayer = pPlayer; }
 
 	virtual void OnPreRender(ID3D12GraphicsCommandList* pd3dCommandList) {}
 	virtual void OnPreRender(ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed) {}
