@@ -83,7 +83,11 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	}
 	loader.SaveComponentSets(Locator.GetComponentSetRoot());
 
+
 	gGameFramework.OnDestroy();
+
+	Locator.GetPxScene()->release();
+
 
 	// Release Fmod Llibrary
 	CSoundManager::GetInst()->Release();

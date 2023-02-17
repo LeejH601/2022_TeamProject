@@ -513,6 +513,24 @@ CKnightObject::CKnightObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 }
 CKnightObject::~CKnightObject()
 {
+	if (Rigid) {
+		Locator.GetPxScene()->removeActor(*Rigid);
+	}
+}
+void CKnightObject::SetRigidDynamic()
+{
+	physx::PxPhysics* pPhysics = Locator.GetPxPhysics();
+
+	physx::PxTransform transform(physx::PxVec3(0.0f, 10.0f, 0.0f));
+
+	physx::PxMaterial* material = pPhysics->createMaterial(0.5, 0.5, 0.5);
+	physx::PxShape* shape = pPhysics->createShape(physx::PxBoxGeometry(1.0f, 1.0f, 1.0f), *material);
+
+	physx::PxRigidDynamic* actor = physx::PxCreateDynamic(*pPhysics, transform, physx::PxBoxGeometry(1.0f, 1.0f, 1.0f), *material, 1.0f);
+
+	Rigid = actor;
+
+	Locator.GetPxScene()->addActor(*Rigid);
 }
 bool CKnightObject::CheckCollision(CGameObject* pTargetObject)
 {
@@ -531,6 +549,12 @@ bool CKnightObject::CheckCollision(CGameObject* pTargetObject)
 void CKnightObject::Animate(float fTimeElapsed)
 {
 	CGameObject::Animate(fTimeElapsed);
+	if (Rigid) {
+		physx::PxRigidDynamic* actor = (physx::PxRigidDynamic*)Rigid;
+		physx::PxTransform transform = actor->getGlobalPose();
+
+		SetPosition(XMFLOAT3(transform.p.x, transform.p.y, transform.p.z));
+	}
 }
 void CKnightObject::UpdateTransform(XMFLOAT4X4* pxmf4x4Parent)
 {

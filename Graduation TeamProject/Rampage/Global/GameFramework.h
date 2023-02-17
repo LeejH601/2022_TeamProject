@@ -65,9 +65,7 @@ private:
 	std::unique_ptr<CScene> m_pScene = NULL;
 	std::unique_ptr<CCamera> m_pCamera = NULL;
 
-	physx::PxFoundation* m_pFoundation;
-	physx::PxPhysics* m_pPhysics;
-	physx::PxScene* m_pPxScene;
+	
 
 public:
 	CGameTimer					m_GameTimer;

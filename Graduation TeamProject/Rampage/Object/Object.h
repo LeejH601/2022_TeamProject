@@ -31,7 +31,7 @@ class CGameObject
 {
 public:
 	bool bHit = false;
-	
+
 	char m_pstrFrameName[MAX_FRAMENAME];
 
 	XMFLOAT4X4 m_xmf4x4Transform;
@@ -39,19 +39,25 @@ public:
 	XMFLOAT4X4 m_xmf4x4Texture;
 
 	std::shared_ptr<CMesh> m_pMesh;
-	
+
 	int	m_nMaterials = 0;
 	std::vector<std::shared_ptr<CMaterial>> m_ppMaterials;
 
 	CGameObject* m_pParent = nullptr;
 	std::shared_ptr<CGameObject> m_pChild = nullptr;
 	std::shared_ptr<CGameObject> m_pSibling = nullptr;
+
+	physx::PxActor* Rigid = nullptr;
+
 public:
 	std::unique_ptr<CAnimationController> m_pSkinnedAnimationController;
 
 	CGameObject();
 	CGameObject(int nMaterials);
 	virtual ~CGameObject();
+
+	virtual void SetRigidDynamic() {};
+	virtual void SetRigidStatic() {};
 
 	char* GetFrameName() { return m_pstrFrameName; }
 	XMFLOAT3 GetPosition();
@@ -78,7 +84,7 @@ public:
 	void SetWorld(XMFLOAT4X4 xmf4x4World) { m_xmf4x4World = xmf4x4World; }
 	virtual void SetHit(CGameObject* pHitter) { bHit = true; }
 	virtual void SetNotHit() { bHit = false; }
-	
+
 	void Rotate(float fPitch = 10.0f, float fYaw = 10.0f, float fRoll = 10.0f);
 	void Rotate(XMFLOAT3* pxmf3Axis, float fAngle);
 
@@ -100,7 +106,7 @@ public:
 
 	void LoadFrameHierarchyFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CGameObject* pParent, FILE* pInFile, int* pnSkinnedMeshes);
 	void LoadMaterialsFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CGameObject* pParent, FILE* pInFile);
-	
+
 	int FindReplicatedTexture(_TCHAR* pstrTextureName, D3D12_GPU_DESCRIPTOR_HANDLE* pd3dSrvGpuDescriptorHandle);
 	void FindAndSetSkinnedMesh(CSkinnedMesh** ppSkinnedMeshes, int* pnSkinnedMesh);
 };
@@ -171,6 +177,8 @@ private:
 public:
 	CKnightObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks);
 	virtual ~CKnightObject();
+
+	virtual void SetRigidDynamic();
 
 	virtual BoundingBox GetBoundingBox() { return m_TransformedBodyBoudningBox; }
 	virtual bool CheckCollision(CGameObject* pTargetObject);

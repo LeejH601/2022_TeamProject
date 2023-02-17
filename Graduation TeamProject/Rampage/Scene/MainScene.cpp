@@ -214,9 +214,9 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pDepthRenderShader->CreateShaderResourceViews(pd3dDevice, ((CDepthRenderShader*)m_pDepthRenderShader.get())->GetDepthTexture(), 0, 9);
 
 	CModelShader::GetInst()->CreateShader(pd3dDevice, GetGraphicsRootSignature(), 1, &pdxgiObjectRtvFormats, DXGI_FORMAT_D32_FLOAT, 0);
-	CModelShader::GetInst()->CreateShaderVariables(pd3dDevice,pd3dCommandList);
+	CModelShader::GetInst()->CreateShaderVariables(pd3dDevice, pd3dCommandList);
 	CModelShader::GetInst()->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 100);
-	
+
 	//CSoundManager::GetInst()->RegisterSound("Sound/mp3/David Bowie - Starman.mp3", false);
 	//CSoundManager::GetInst()->PlaySound("Sound/mp3/David Bowie - Starman.mp3");
 
@@ -225,6 +225,11 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pObject->SetScale(15.0f, 15.0f, 15.0f);
 	m_pObject->Rotate(0.0f, 180.0f, 0.0f);
 	m_pObject->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
+	m_pObject->SetRigidDynamic();
+	physx::PxRigidDynamic* rigid = (physx::PxRigidDynamic*)m_pObject->Rigid;
+	XMFLOAT3 pos = m_pObject->GetPosition();
+	physx::PxTransform transform(physx::PxVec3(pos.x, pos.y, pos.z));
+	rigid->setGlobalPose(transform);
 	m_pObjects.push_back(std::move(m_pObject));
 
 	m_pObject = std::make_unique<CKnightObject>(pd3dDevice, pd3dCommandList, 1);
@@ -233,12 +238,22 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pObject->Rotate(0.0f, 180.0f, 0.0f);
 	m_pObject->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 1);
 	m_pObject->m_pSkinnedAnimationController->m_xmf3RootObjectScale = XMFLOAT3(10.0f, 10.0f, 10.0f);
+	m_pObject->SetRigidDynamic();
+	rigid = (physx::PxRigidDynamic*)m_pObject->Rigid;
+	pos = m_pObject->GetPosition();
+	transform = physx::PxTransform(physx::PxVec3(pos.x, pos.y, pos.z));
+	rigid->setGlobalPose(transform);
 	m_pObjects.push_back(std::move(m_pObject));
 
 	m_pObject = std::make_unique<CKnightObject>(pd3dDevice, pd3dCommandList, 1);
 	m_pObject->SetPosition(XMFLOAT3(15.0f, -15.0f, -15.0f));
 	m_pObject->SetScale(10.0f, 10.0f, 10.0f);
 	m_pObject->Rotate(0.0f, 180.0f, 0.0f);
+	m_pObject->SetRigidDynamic();
+	rigid = (physx::PxRigidDynamic*)m_pObject->Rigid;
+	pos = m_pObject->GetPosition();
+	transform = physx::PxTransform(physx::PxVec3(pos.x, pos.y, pos.z));
+	rigid->setGlobalPose(transform);
 	m_pObject->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 4);
 
 	//int nAnimationSets = m_pObject->m_pSkinnedAnimationController->m_pAnimationSets->m_nAnimationSets;
@@ -277,13 +292,14 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pTerrainShader->CreateShader(pd3dDevice, GetGraphicsRootSignature(), 1, &pdxgiObjectRtvFormats, DXGI_FORMAT_D32_FLOAT, 0);
 	m_pTerrainShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 13);
 	m_pTerrainShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
-	
+
 
 	// Terrain »ý¼º
 	XMFLOAT3 xmf3Scale(18.0f, 6.0f, 18.0f);
 	XMFLOAT4 xmf4Color(0.0f, 0.5f, 0.0f, 0.0f);
 	m_pTerrain = std::make_unique<CSplatTerrain>(pd3dDevice, pd3dCommandList, GetGraphicsRootSignature(), _T("Terrain/terrainHeightMap257.raw"), 257, 257, 257, 257, xmf3Scale, xmf4Color, m_pTerrainShader.get());
 	m_pTerrain->SetPosition(XMFLOAT3(-800.f, -600.f, -800.f));
+	m_pTerrain->SetRigidStatic();
 	for (int i = 0; i < m_pObjects.size(); ++i)
 		((CDepthRenderShader*)m_pDepthRenderShader.get())->RegisterObject(m_pObjects[i].get());
 	((CDepthRenderShader*)m_pDepthRenderShader.get())->SetLight(m_pLight->GetLights());
@@ -303,7 +319,7 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 
 	m_pParticleShader = std::make_shared<CParticleShader>();
 	std::unique_ptr<CParticleObject> pParticleObject = std::make_unique<CParticleObject>(pd3dDevice, pd3dCommandList, GetGraphicsRootSignature(), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 65.0f, 0.0f), 2.0f, XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT2(2.0f, 2.0f), MAX_PARTICLES, m_pParticleShader.get());
-	
+
 	m_ppParticleObjects.push_back(std::move(pParticleObject));
 }
 void CMainTMPScene::AnimateObjects(float fTimeElapsed)

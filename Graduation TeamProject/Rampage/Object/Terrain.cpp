@@ -1,6 +1,7 @@
 #include "Texture.h"
 #include "Terrain.h"
 #include "../Shader/TerrainShader.h"
+#include "../Global/Locator.h"
 
 CHeightMapTerrain::CHeightMapTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, LPCTSTR pFileName, int nWidth, int nLength, int nBlockWidth, int nBlockLength, XMFLOAT3 xmf3Scale, XMFLOAT4 xmf4Color, CShader* pTerrainShader) : CGameObject(1)
 {
@@ -130,4 +131,58 @@ CSplatTerrain::CSplatTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 
 CSplatTerrain::~CSplatTerrain()
 {
+	if (Rigid) {
+		Locator.GetPxScene()->removeActor(*Rigid);
+	}
+}
+
+void CSplatTerrain::SetRigidStatic()
+{
+
+	physx::PxPhysics* pPhysics = Locator.GetPxPhysics();
+
+	physx::PxHeightFieldDesc Desc;
+	Desc.format = physx::PxHeightFieldFormat::eS16_TM;
+	Desc.nbColumns = m_nWidth;
+	Desc.nbRows = m_nLength;
+	Desc.samples.data = m_pHeightMapImage->GetAllPixels();
+	Desc.samples.stride = sizeof(physx::PxHeightFieldSample);
+	CTerrainInputStream stream(Desc, m_pHeightMapImage->GetAllPixels());
+
+	physx::PxHeightField* HF = pPhysics->createHeightField(stream);
+
+	physx::PxTransform transform(physx::PxVec3(0.0f,-50.0f,0.0f));
+
+	physx::PxMaterial* material = pPhysics->createMaterial(0.5, 0.5, 0.5);
+	physx::PxRigidStatic* plane = pPhysics->createRigidStatic(transform);
+
+	physx::PxShape* planeShape = pPhysics->createShape(physx::PxPlaneGeometry(), *material);
+	planeShape->setFlag(physx::PxShapeFlag::eSIMULATION_SHAPE, false);
+	planeShape->setFlag(physx::PxShapeFlag::eTRIGGER_SHAPE, true);
+	plane->attachShape(*planeShape);
+
+	Rigid = plane;
+
+	Locator.GetPxScene()->addActor(*Rigid);
+}
+
+CTerrainInputStream::CTerrainInputStream(physx::PxHeightFieldDesc& Desc, BYTE* bytes)
+{
+	HeightFiledDesc = Desc;
+	m_pRawImagePixels = bytes;
+}
+
+CTerrainInputStream::~CTerrainInputStream()
+{
+}
+
+uint32_t CTerrainInputStream::read(void* dest, uint32_t count)
+{
+	uint32_t cnt = count;
+	if (HeightFiledDesc.nbColumns * HeightFiledDesc.nbRows <= count)
+		cnt = HeightFiledDesc.nbColumns * HeightFiledDesc.nbRows - 1;
+
+	memcpy(dest, m_pRawImagePixels, cnt);
+
+	return cnt;
 }

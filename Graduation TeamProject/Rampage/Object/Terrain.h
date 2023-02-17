@@ -55,7 +55,21 @@ public:
 	CSplatTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, LPCTSTR pFileName, int nWidth, int nLength, int nBlockWidth, int nBlockLength, XMFLOAT3 xmf3Scale, XMFLOAT4 xmf4Color, CShader* pTerrainShader);
 	virtual ~CSplatTerrain();
 
+	virtual void SetRigidStatic();
+
 private:
 	int m_nTerrainLayers;
 	std::vector<CTerrainLayer> m_vTerrainLayers;
+};
+
+class CTerrainInputStream : public physx::PxInputStream
+{
+	physx::PxHeightFieldDesc HeightFiledDesc;
+	BYTE* m_pRawImagePixels = NULL;
+
+public:
+	CTerrainInputStream(physx::PxHeightFieldDesc& Desc, BYTE* bytes);
+	virtual ~CTerrainInputStream();
+
+	virtual uint32_t read(void* dest, uint32_t count);
 };

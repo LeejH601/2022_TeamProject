@@ -166,6 +166,8 @@ public:
 
 	int GetRawImageWidth() { return(m_nWidth); }
 	int GetRawImageLength() { return(m_nLength); }
+
+	BYTE* GetAllPixels() { return m_pRawImagePixels; };
 };
 class CHeightMapImage : public CRawFormatImage
 {
