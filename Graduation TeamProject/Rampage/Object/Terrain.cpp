@@ -131,35 +131,67 @@ CSplatTerrain::CSplatTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 
 CSplatTerrain::~CSplatTerrain()
 {
-	if (Rigid) {
+	/*if (Locator.GetPxScene() && Rigid) {
 		Locator.GetPxScene()->removeActor(*Rigid);
-	}
+	}*/
 }
 
 void CSplatTerrain::SetRigidStatic()
 {
-
 	physx::PxPhysics* pPhysics = Locator.GetPxPhysics();
 
 	physx::PxHeightFieldDesc Desc;
 	Desc.format = physx::PxHeightFieldFormat::eS16_TM;
-	Desc.nbColumns = m_nWidth;
-	Desc.nbRows = m_nLength;
-	Desc.samples.data = m_pHeightMapImage->GetAllPixels();
+	Desc.nbColumns =  m_nLength* m_xmf3Scale.z;
+	Desc.nbRows = m_nWidth * m_xmf3Scale.x;
+
+	physx::PxReal* buffer = new physx::PxReal[Desc.nbColumns * Desc.nbRows];
+
+	float fHeight = 0.0f, fMinHeight = +FLT_MAX, fMaxHeight = -FLT_MAX;
+	int i = 0;
+	for (int z = 0; z < Desc.nbColumns; z++)
+	{
+		for (int x = 0; x < Desc.nbRows; x++, i++)
+		{
+			buffer[i] = physx::PxReal(GetHeight(x / m_xmf3Scale.x, z / m_xmf3Scale.z));
+			/*TCHAR pstrDebug[256] = { 0 };
+			_stprintf_s(pstrDebug, 256, _T("height = %f\n"), GetHeight(x, z));
+			OutputDebugString(pstrDebug);*/
+		}
+	}
+
+	Desc.samples.data = buffer;
 	Desc.samples.stride = sizeof(physx::PxHeightFieldSample);
 	CTerrainInputStream stream(Desc, m_pHeightMapImage->GetAllPixels());
 
-	physx::PxHeightField* HF = pPhysics->createHeightField(stream);
+	physx::PxCooking* pCooking = PxCreateCooking(PX_PHYSICS_VERSION, pPhysics->getFoundation(), physx::PxCookingParams(pPhysics->getTolerancesScale()));
 
-	physx::PxTransform transform(physx::PxVec3(0.0f,-50.0f,0.0f));
+	physx::PxHeightField* HF = pCooking->createHeightField(Desc);
 
-	physx::PxMaterial* material = pPhysics->createMaterial(0.5, 0.5, 0.5);
+	physx::PxHeightFieldGeometry HeightGeometry;
+	HeightGeometry.heightField = HF;
+
+	/*XMFLOAT4X4 matrix = Matrix4x4::Identity();
+	matrix._41 = -800.0f;
+	matrix._42 = -300.0f;
+	matrix._43 = -800.0f;*/
+	XMFLOAT4X4 directxToPhysx; XMStoreFloat4x4(&directxToPhysx, XMMatrixScaling(1.0f, 1.0f, -1.0f) * XMMatrixRotationX(XMConvertToRadians(90.0f)));
+	XMFLOAT3 _pos{-800.0f, -600.0f, -800.0f - m_nLength * m_xmf3Scale.z };
+	_pos = Vector3::TransformCoord(_pos, directxToPhysx);
+
+	//physx::PxVec3 pos = convertToPhysXCoordSystem(matrix).column3.getXYZ();
+
+	physx::PxTransform transform(physx::PxVec3(_pos.x, _pos.y, _pos.z));
+
+	physx::PxMaterial* material = pPhysics->createMaterial(0.7, 0.5, 0.0);
 	physx::PxRigidStatic* plane = pPhysics->createRigidStatic(transform);
 
-	physx::PxShape* planeShape = pPhysics->createShape(physx::PxPlaneGeometry(), *material);
-	planeShape->setFlag(physx::PxShapeFlag::eSIMULATION_SHAPE, false);
-	planeShape->setFlag(physx::PxShapeFlag::eTRIGGER_SHAPE, true);
+
+	physx::PxShape* planeShape = pPhysics->createShape(HeightGeometry, *material);
+	/*planeShape->setFlag(physx::PxShapeFlag::eSIMULATION_SHAPE, false);
+	planeShape->setFlag(physx::PxShapeFlag::eTRIGGER_SHAPE, true);*/
 	plane->attachShape(*planeShape);
+
 
 	Rigid = plane;
 

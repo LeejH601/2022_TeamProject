@@ -513,9 +513,9 @@ CKnightObject::CKnightObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 }
 CKnightObject::~CKnightObject()
 {
-	if (Rigid) {
+	/*if (Rigid) {
 		Locator.GetPxScene()->removeActor(*Rigid);
-	}
+	}*/
 }
 void CKnightObject::SetRigidDynamic()
 {

@@ -31,6 +31,11 @@
 #include <DXGIDebug.h>
 
 #include <foundation/PxFoundation.h>
+#include <cooking/PxCooking.h>
+#include <geometry/PxTriangleMeshGeometry.h>
+#include <geometry/PxHeightField.h>
+#include <pvd/PxPvd.h>
+#include <pvd/PxPvdTransport.h>
 #include <PxPhysicsAPI.h>
 
 //--------------------------

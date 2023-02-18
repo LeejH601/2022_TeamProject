@@ -73,6 +73,8 @@ class CLocator
 	physx::PxFoundation* m_pFoundation;
 	physx::PxPhysics* m_pPhysics;
 	physx::PxScene* m_pPxScene;
+	physx::PxPvd* m_pPxPvd;
+	physx::PxPvdSceneClient* pvdClient = nullptr;
 
 	CGameTimer* m_pTimer;
 

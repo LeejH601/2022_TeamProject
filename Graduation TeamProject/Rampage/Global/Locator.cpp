@@ -24,9 +24,13 @@ bool CLocator::Init()
 
 	m_pFoundation = PxCreateFoundation(PX_PHYSICS_VERSION, gDefaultAllocatorCallback, gDefaultErrorCallback);
 
+	m_pPxPvd = physx::PxCreatePvd(*m_pFoundation);
+	physx::PxPvdTransport* transport = physx::PxDefaultPvdSocketTransportCreate("127.0.0.1", 5425, 100);
+	m_pPxPvd->connect(*transport, physx::PxPvdInstrumentationFlag::eALL);
+
 	bool recordMemoryAllocations = true;
 
-	m_pPhysics = PxCreatePhysics(PX_PHYSICS_VERSION, *m_pFoundation, physx::PxTolerancesScale(), recordMemoryAllocations);
+	m_pPhysics = PxCreatePhysics(PX_PHYSICS_VERSION, *m_pFoundation, physx::PxTolerancesScale(), recordMemoryAllocations, m_pPxPvd);
 
 	physx::PxSceneDesc SceneDesc(m_pPhysics->getTolerancesScale());
 	SceneDesc.cpuDispatcher = physx::PxDefaultCpuDispatcherCreate(1); // 이 세가지 파라미터가 반드시 필요함.
@@ -50,6 +54,13 @@ bool CLocator::Init()
 	////actor->attachShape(*actor);
 	//m_pPxScene->addActor(*plane);
 	//m_pPxScene->addActor(*actor);
+
+	pvdClient = m_pPxScene->getScenePvdClient();
+	if (pvdClient) {
+		pvdClient->setScenePvdFlag(physx::PxPvdSceneFlag::eTRANSMIT_CONSTRAINTS, true);
+		pvdClient->setScenePvdFlag(physx::PxPvdSceneFlag::eTRANSMIT_CONTACTS, true);
+		pvdClient->setScenePvdFlag(physx::PxPvdSceneFlag::eTRANSMIT_SCENEQUERIES, true);
+	}
 
 
 	m_pMessageDispatcher = std::make_shared<CMessageDispatcher>();
