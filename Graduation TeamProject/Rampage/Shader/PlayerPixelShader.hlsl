@@ -79,6 +79,14 @@ float4 PS_Player(VS_OUTPUT input) : SV_TARGET
 	normal = (2.0f * normal) - 1.0f;
 
 	float4 cColor = cAlbedoColor + cSpecularColor + cEmissionColor;
+
+	/*if (gnTexturesMask & MATERIAL_METALLIC_MAP) {
+		float MetailcConstant = cMetallicColor.r * 0.1f;
+		float4 MetalColor = float4(0.95f, 0.95f, 0.95f, 1.0f);
+		cColor = lerp(cColor, MetalColor, MetailcConstant);
+	}
+		 */
+
 	//float3 normalW = normalize(input.normalW);
 	float3 normalW = mul(normal, TBN);
 

@@ -880,7 +880,7 @@ CSplatGridMesh::CSplatGridMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 			fHeight = OnGetHeight(x, z, pContext);
 			m_pxmf3Positions[i] = XMFLOAT3((x * m_xmf3Scale.x), fHeight, (z * m_xmf3Scale.z));
 			m_pxmf4Colors[i] = Vector4::Add(OnGetColor(x, z, pContext), xmf4Color);
-			m_pxmf2TextureCoords0[i] = XMFLOAT2(float(x) / float(m_xmf3Scale.x * 0.5f), float(z) / float(m_xmf3Scale.z * 0.5f));
+			m_pxmf2TextureCoords0[i] = XMFLOAT2(float(x) / float(m_xmf3Scale.x * 3.0f), float(z) / float(m_xmf3Scale.z * 3.0f));
 			m_pxmf2TextureCoords1[i] = XMFLOAT2(float(x) / float(cxHeightMap - 1), float(czHeightMap - 1 - z) / float(czHeightMap - 1));
 			if (fHeight < fMinHeight) fMinHeight = fHeight;
 			if (fHeight > fMaxHeight) fMaxHeight = fHeight;
@@ -924,7 +924,7 @@ CSplatGridMesh::CSplatGridMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 
 			XMFLOAT4X4 result = Matrix4x4::Multiply(uvMatrix, edgeMatrix);
 
-			m_pxmf3Tangents[i] = XMFLOAT3(result._11, result._12, result._13);
+			m_pxmf3Tangents[i] = Vector3::Normalize(XMFLOAT3(result._11, result._12, result._13));
 		}
 	}
 
@@ -1027,7 +1027,7 @@ CBoundingBoxMesh::CBoundingBoxMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 	m_pxmf3Positions.push_back(Vector3::Add(xmf3AABBCenter, XMFLOAT3(-fx, -fy, +fz)));
 
 	m_pd3dPositionBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, m_pxmf3Positions.data(), sizeof(XMFLOAT3) * m_nVertices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dPositionUploadBuffer);
-	
+
 	m_nVertexBufferViews = 1;
 	m_pd3dVertexBufferViews.resize(m_nVertexBufferViews);
 

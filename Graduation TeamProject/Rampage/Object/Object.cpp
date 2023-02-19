@@ -553,6 +553,11 @@ void CKnightObject::Animate(float fTimeElapsed)
 		physx::PxRigidDynamic* actor = (physx::PxRigidDynamic*)Rigid;
 		physx::PxTransform transform = actor->getGlobalPose();
 
+		physx::PxMat44 Matrix(transform);
+		m_xmf4x4World._11 = Matrix.column0.x; m_xmf4x4World._12 = Matrix.column0.y; m_xmf4x4World._13 = Matrix.column0.z; m_xmf4x4World._14 = Matrix.column0.w;
+		m_xmf4x4World._21 = Matrix.column1.x; m_xmf4x4World._22 = Matrix.column1.y; m_xmf4x4World._23 = Matrix.column1.z; m_xmf4x4World._24 = Matrix.column1.w;
+		m_xmf4x4World._31 = Matrix.column2.x; m_xmf4x4World._32 = Matrix.column2.y; m_xmf4x4World._33 = Matrix.column2.z; m_xmf4x4World._34 = Matrix.column2.w;
+		//m_xmf4x4World._41 = Matrix.column3.x; m_xmf4x4World._42 = Matrix.column3.y; m_xmf4x4World._43 = Matrix.column3.z; m_xmf4x4World._44 = Matrix.column3.w;
 		SetPosition(XMFLOAT3(transform.p.x, transform.p.y, transform.p.z));
 	}
 }

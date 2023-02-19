@@ -142,46 +142,77 @@ void CSplatTerrain::SetRigidStatic()
 
 	physx::PxHeightFieldDesc Desc;
 	Desc.format = physx::PxHeightFieldFormat::eS16_TM;
-	Desc.nbColumns =  m_nLength* m_xmf3Scale.z;
-	Desc.nbRows = m_nWidth * m_xmf3Scale.x;
+	Desc.nbColumns =  m_nLength/* * m_xmf3Scale.z*/;
+	Desc.nbRows = m_nWidth/* * m_xmf3Scale.x*/;
 
-	physx::PxReal* buffer = new physx::PxReal[Desc.nbColumns * Desc.nbRows];
-
-	float fHeight = 0.0f, fMinHeight = +FLT_MAX, fMaxHeight = -FLT_MAX;
-	int i = 0;
+	BYTE* Pixels = m_pHeightMapImage->GetRawImagePixels();
+	physx::PxReal minHeight = PX_MAX_F32;
+	physx::PxReal maxHeight = -PX_MAX_F32;
 	for (int z = 0; z < Desc.nbColumns; z++)
 	{
-		for (int x = 0; x < Desc.nbRows; x++, i++)
+		//tessflag = z % 2 == 0 ? false : true;
+		for (int x = 0; x < Desc.nbRows; x++)
 		{
-			buffer[i] = physx::PxReal(GetHeight(x / m_xmf3Scale.x, z / m_xmf3Scale.z));
+			minHeight = physx::PxMin(minHeight, (float)(m_pHeightMapImage->GetRawImagePixel(x, z)));
+			maxHeight = physx::PxMax(maxHeight, (float)(m_pHeightMapImage->GetRawImagePixel(x, z)));
 			/*TCHAR pstrDebug[256] = { 0 };
-			_stprintf_s(pstrDebug, 256, _T("height = %f\n"), GetHeight(x, z));
+			_stprintf_s(pstrDebug, 256, _T("height = %f\n"), m_pHeightMapImage->GetHeight(x, z));
 			OutputDebugString(pstrDebug);*/
 		}
 	}
 
-	Desc.samples.data = buffer;
+	physx::PxReal deltaHeight = maxHeight - minHeight;
+
+	physx::PxHeightFieldSample* hfSamples = new physx::PxHeightFieldSample[Desc.nbColumns * Desc.nbRows];
+
+	//physx::PxReal* buffer = new physx::PxReal[Desc.nbColumns * Desc.nbRows];
+	physx::PxReal quantization = (physx::PxReal)0x0100;
+
+	float fHeight = 0.0f, fMinHeight = +FLT_MAX, fMaxHeight = -FLT_MAX;
+	int i = 0;
+	bool tessflag = false;
+	for (int z = 0; z < Desc.nbColumns; z++)
+	{
+		//tessflag = z % 2 == 0 ? false : true;
+		for (int x = 0; x < Desc.nbRows; x++, i++)
+		{
+			physx::PxI16 height;
+			//height = physx::PxI16(quantization * ((float)(m_pHeightMapImage->GetRawImagePixel(x, z) - minHeight) / deltaHeight));
+			//height = (int)(((float)(m_pHeightMapImage->GetRawImagePixel(x, z) - minHeight) / deltaHeight)*100);
+			height = physx::PxI16((m_pHeightMapImage->GetRawImagePixel(x, z)));
+
+			physx::PxHeightFieldSample& smp = hfSamples[(x * Desc.nbColumns) + z];
+			smp.height = height;
+			if (tessflag)
+				smp.setTessFlag();
+			//buffer[i] = physx::PxReal(GetHeight(x / m_xmf3Scale.x, z / m_xmf3Scale.z));
+			
+		}
+	}
+
+	Desc.samples.data = hfSamples;
 	Desc.samples.stride = sizeof(physx::PxHeightFieldSample);
-	CTerrainInputStream stream(Desc, m_pHeightMapImage->GetAllPixels());
 
-	physx::PxCooking* pCooking = PxCreateCooking(PX_PHYSICS_VERSION, pPhysics->getFoundation(), physx::PxCookingParams(pPhysics->getTolerancesScale()));
-
-	physx::PxHeightField* HF = pCooking->createHeightField(Desc);
 
 	physx::PxHeightFieldGeometry HeightGeometry;
-	HeightGeometry.heightField = HF;
+	HeightGeometry.rowScale = m_xmf3Scale.x;
+	HeightGeometry.columnScale = m_xmf3Scale.z;
+	HeightGeometry.heightScale = m_xmf3Scale.y;
+	HeightGeometry.heightField = PxCreateHeightField(Desc);
+
+	delete[] hfSamples;
 
 	/*XMFLOAT4X4 matrix = Matrix4x4::Identity();
 	matrix._41 = -800.0f;
 	matrix._42 = -300.0f;
 	matrix._43 = -800.0f;*/
-	XMFLOAT4X4 directxToPhysx; XMStoreFloat4x4(&directxToPhysx, XMMatrixScaling(1.0f, 1.0f, -1.0f) * XMMatrixRotationX(XMConvertToRadians(90.0f)));
+	/*XMFLOAT4X4 directxToPhysx; XMStoreFloat4x4(&directxToPhysx, XMMatrixScaling(1.0f, 1.0f, -1.0f) * XMMatrixRotationX(XMConvertToRadians(90.0f)));
 	XMFLOAT3 _pos{-800.0f, -600.0f, -800.0f - m_nLength * m_xmf3Scale.z };
-	_pos = Vector3::TransformCoord(_pos, directxToPhysx);
+	_pos = Vector3::TransformCoord(_pos, directxToPhysx);*/
 
 	//physx::PxVec3 pos = convertToPhysXCoordSystem(matrix).column3.getXYZ();
 
-	physx::PxTransform transform(physx::PxVec3(_pos.x, _pos.y, _pos.z));
+	physx::PxTransform transform(physx::PxVec3(-800.f, -600.f, -800.f));
 
 	physx::PxMaterial* material = pPhysics->createMaterial(0.7, 0.5, 0.0);
 	physx::PxRigidStatic* plane = pPhysics->createRigidStatic(transform);
