@@ -139,6 +139,8 @@ public:
 
 	void AdvanceTime(float fElapsedTime, CGameObject* pRootGameObject);
 
+	
+
 
 public:
 	bool							m_bRootMotion = false;

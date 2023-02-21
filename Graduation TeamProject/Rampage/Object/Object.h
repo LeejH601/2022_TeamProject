@@ -48,6 +48,7 @@ public:
 	std::shared_ptr<CGameObject> m_pSibling = nullptr;
 
 	physx::PxActor* Rigid = nullptr;
+	physx::PxArticulationReducedCoordinate* m_pArticulation;
 
 public:
 	std::unique_ptr<CAnimationController> m_pSkinnedAnimationController;
@@ -109,6 +110,8 @@ public:
 
 	int FindReplicatedTexture(_TCHAR* pstrTextureName, D3D12_GPU_DESCRIPTOR_HANDLE* pd3dSrvGpuDescriptorHandle);
 	void FindAndSetSkinnedMesh(CSkinnedMesh** ppSkinnedMeshes, int* pnSkinnedMesh);
+
+	void CreateArticulation(physx::PxArticulationReducedCoordinate* articulation, physx::PxArticulationLink* Parent, const physx::PxTransform& pos);
 };
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

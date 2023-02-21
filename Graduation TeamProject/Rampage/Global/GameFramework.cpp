@@ -529,6 +529,7 @@ void CGameFramework::FrameAdvance()
 {
 	m_GameTimer.Tick(0.0f);
 	Locator.GetPxScene()->simulate(m_GameTimer.GetFrameTimeElapsed());
+	//Locator.GetPxScene()->advance(m_GameTimer.GetFrameTimeElapsed());
 	Locator.GetPxScene()->fetchResults(true);
 	ProcessInput();
 	AnimateObjects();

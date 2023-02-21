@@ -33,9 +33,9 @@ bool CLocator::Init()
 	m_pPhysics = PxCreatePhysics(PX_PHYSICS_VERSION, *m_pFoundation, physx::PxTolerancesScale(), recordMemoryAllocations, m_pPxPvd);
 
 	physx::PxSceneDesc SceneDesc(m_pPhysics->getTolerancesScale());
-	SceneDesc.cpuDispatcher = physx::PxDefaultCpuDispatcherCreate(1); // 이 세가지 파라미터가 반드시 필요함.
+	SceneDesc.cpuDispatcher = physx::PxDefaultCpuDispatcherCreate(2); // 이 세가지 파라미터가 반드시 필요함.
 	SceneDesc.filterShader = physx::PxDefaultSimulationFilterShader; // 각각 어떤 역할을 하는 지는 추가적으로 조사해볼 필요가 있음.
-	SceneDesc.gravity = physx::PxVec3(0.0f, -9.81f, 0.0f);
+	SceneDesc.gravity = physx::PxVec3(0.0f, 0.0f, 0.0f);
 
 	m_pPxScene = m_pPhysics->createScene(SceneDesc);
 
@@ -61,6 +61,20 @@ bool CLocator::Init()
 		pvdClient->setScenePvdFlag(physx::PxPvdSceneFlag::eTRANSMIT_CONTACTS, true);
 		pvdClient->setScenePvdFlag(physx::PxPvdSceneFlag::eTRANSMIT_SCENEQUERIES, true);
 	}
+
+	////////////////////////////////////////////////
+
+	//physx::PxArticulationReducedCoordinate* articulation = m_pPhysics->createArticulationReducedCoordinate();
+
+	//articulation->setArticulationFlag(physx::PxArticulationFlag::eFIX_BASE, true);
+	//articulation->setSolverIterationCounts(1);
+	////articulation->setMaxCOMLinearVelocity(maxCOMLinearVelocity);
+
+	//physx::PxArticulationLink* link = articulation->createLink(parent, PxTransform());
+	//physx::PxRigidActorExt::createExclusiveShape(*link, linkGeometry, material);
+	//physx::PxRigidBodyExt::updateMassAndInertia(*link, 1.0f);
+
+	/////////////////////////////////////////////////////
 
 
 	m_pMessageDispatcher = std::make_shared<CMessageDispatcher>();

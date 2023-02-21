@@ -426,6 +426,85 @@ void CGameObject::FindAndSetSkinnedMesh(CSkinnedMesh** ppSkinnedMeshes, int* pnS
 	if (m_pSibling) m_pSibling->FindAndSetSkinnedMesh(ppSkinnedMeshes, pnSkinnedMesh);
 	if (m_pChild) m_pChild->FindAndSetSkinnedMesh(ppSkinnedMeshes, pnSkinnedMesh);
 }
+void CGameObject::CreateArticulation(physx::PxArticulationReducedCoordinate* articulation, physx::PxArticulationLink* Parent, const physx::PxTransform& pos)
+{
+	static int count = 0;
+	TCHAR pstrDebug[256] = { 0 };
+	_stprintf_s(pstrDebug, 256, _T("cnt : %d - %s \n"), ++count, m_pstrFrameName);
+	OutputDebugString(pstrDebug);
+
+	if (m_pChild) {
+		physx::PxMat44 mymatrix;
+		XMFLOAT4X4 myTransform = m_xmf4x4Transform;
+		XMFLOAT3 mypos(GetPosition());
+		myTransform._41 = 0;
+		myTransform._42 = 0;
+		myTransform._43 = 0;
+		memcpy(&mymatrix, &Matrix4x4::Inverse(myTransform), sizeof(physx::PxMat44));
+
+		mymatrix.column3.x = mypos.x;
+		mymatrix.column3.y = mypos.y;
+		mymatrix.column3.z = mypos.z;
+
+		physx::PxTransform transform(mymatrix);
+
+		//if (Parent) {
+		physx::PxArticulationLink* link = articulation->createLink(Parent, transform);
+		physx::PxBoxGeometry linkGeometry = physx::PxBoxGeometry(0.01f, 0.01f, 0.01f);
+		physx::PxMaterial* material = Locator.GetPxPhysics()->createMaterial(0.5, 0.5, 0.5);
+		physx::PxRigidActorExt::createExclusiveShape(*link, linkGeometry, *material);
+		physx::PxRigidBodyExt::updateMassAndInertia(*link, 1.0f);
+
+		physx::PxArticulationJointReducedCoordinate* joint = link->getInboundJoint();
+
+		if (joint) {
+			joint->setJointType(physx::PxArticulationJointType::eFIX);
+			// revolute joint that rotates about the z axis (eSWING2) of the joint frames
+			joint->setMotion(physx::PxArticulationAxis::eTWIST, physx::PxArticulationMotion::eFREE);
+			//joint->setMotion(physx::PxArticulationAxis::eSWING2, physx::PxArticulationMotion::eLIMITED);
+			//physx::PxArticulationLimit limits;
+			//limits.low = -physx::PxPiDivFour;  // in rad for a rotational motion
+			//limits.high = physx::PxPiDivFour;
+			//joint->setLimitParams(physx::PxArticulationAxis::eSWING2, limits);
+
+			//physx::PxArticulationDrive posDrive;
+			//posDrive.stiffness = driveStiffness;                      // the spring constant driving the joint to a target position
+			//posDrive.damping = driveDamping;                        // the damping coefficient driving the joint to a target velocity
+			//posDrive.maxForce = actuatorLimit;                        // force limit for the drive
+			//posDrive.driveType = PxArticulationDriveType::eFORCE;
+
+			//joint->setDriveParams(physx::PxArticulationAxis::eSWING2, posDrive);
+			//joint->setDriveVelocity(physx::PxArticulationAxis::eSWING2, 0.0f);
+			//joint->setDriveTarget(physx::PxArticulationAxis::eSWING2, targetPosition);
+
+			joint->setParentPose(pos);
+
+			physx::PxMat44 matrix;
+			XMFLOAT4X4 childTransform = m_pChild->m_xmf4x4Transform;
+			XMFLOAT3 childpos(m_pChild->GetPosition());
+			childTransform._41 = 0;
+			childTransform._42 = 0;
+			childTransform._43 = 0;
+			memcpy(&matrix, &Matrix4x4::Inverse(childTransform), sizeof(physx::PxMat44));
+
+			matrix.column3.x = childpos.x;
+			matrix.column3.y = childpos.y;
+			matrix.column3.z = childpos.z;
+
+			physx::PxTransform childPx(matrix);
+			joint->setChildPose(transform);
+		}
+		m_pChild->CreateArticulation(articulation, link, transform);
+	}
+	if (m_pSibling) {
+
+		m_pSibling->CreateArticulation(articulation, Parent, pos);
+	}
+	/*}
+	else {
+
+	}*/
+}
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 CBoundingBoxObject::CBoundingBoxObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, XMFLOAT3 xmf3AABBCenter, XMFLOAT3 xmf3AABBExtents)
@@ -502,6 +581,19 @@ CKnightObject::CKnightObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 	//m_pSkinnedAnimationController = std::make_unique<CKightRootRollBackAnimationController>(pd3dDevice, pd3dCommandList, nAnimationTracks, pKnightModel);
 	m_pSkinnedAnimationController = std::make_unique<CKightNoMoveRootAnimationController>(pd3dDevice, pd3dCommandList, nAnimationTracks, pKnightModel);
 
+	static int test = 0;
+	if (test == 0) {
+		m_pArticulation = Locator.GetPxPhysics()->createArticulationReducedCoordinate();
+
+		physx::PxTransform transform(physx::PxVec3(0.0f, 0.0f, 0.0f));
+		m_pChild->m_pChild->CreateArticulation(m_pArticulation, NULL, transform);
+
+		Locator.GetPxScene()->addArticulation(*m_pArticulation);
+
+		test++;
+	}
+	
+
 	PrepareBoundingBox(pd3dDevice, pd3dCommandList);
 #ifdef KNIGHT_ROOT_MOTION
 	m_pSkinnedAnimationController->m_pRootMotionObject = pKnightModel->m_pModelRootObject->FindFrame("root");
@@ -530,7 +622,13 @@ void CKnightObject::SetRigidDynamic()
 
 	Rigid = actor;
 
-	Locator.GetPxScene()->addActor(*Rigid);
+	//Locator.GetPxScene()->addActor(*Rigid);
+
+
+	//
+	//physx::PxArticulationReducedCoordinate* Articulation = pPhysics->createArticulationReducedCoordinate();
+	//Articulation->setArticulationFlag(physx::PxArticulationFlag::eFIX_BASE, true);
+
 }
 bool CKnightObject::CheckCollision(CGameObject* pTargetObject)
 {
@@ -555,9 +653,9 @@ void CKnightObject::Animate(float fTimeElapsed)
 
 		physx::PxMat44 Matrix(transform);
 		Matrix = Matrix.inverseRT();
-		m_pChild->m_xmf4x4Transform._11 = Matrix.column0.x; m_pChild->m_xmf4x4Transform._12 = Matrix.column0.y; m_pChild->m_xmf4x4Transform._13 = Matrix.column0.z; 
-		m_pChild->m_xmf4x4Transform._21 = Matrix.column1.x; m_pChild->m_xmf4x4Transform._22 = Matrix.column1.y; m_pChild->m_xmf4x4Transform._23 = Matrix.column1.z; 
-		m_pChild->m_xmf4x4Transform._31 = Matrix.column2.x; m_pChild->m_xmf4x4Transform._32 = Matrix.column2.y; m_pChild->m_xmf4x4Transform._33 = Matrix.column2.z; 
+		m_pChild->m_xmf4x4Transform._11 = Matrix.column0.x; m_pChild->m_xmf4x4Transform._12 = Matrix.column0.y; m_pChild->m_xmf4x4Transform._13 = Matrix.column0.z;
+		m_pChild->m_xmf4x4Transform._21 = Matrix.column1.x; m_pChild->m_xmf4x4Transform._22 = Matrix.column1.y; m_pChild->m_xmf4x4Transform._23 = Matrix.column1.z;
+		m_pChild->m_xmf4x4Transform._31 = Matrix.column2.x; m_pChild->m_xmf4x4Transform._32 = Matrix.column2.y; m_pChild->m_xmf4x4Transform._33 = Matrix.column2.z;
 		//m_xmf4x4World._41 = Matrix.column3.x; m_xmf4x4World._42 = Matrix.column3.y; m_xmf4x4World._43 = Matrix.column3.z; m_xmf4x4World._44 = Matrix.column3.w;
 		SetPosition(XMFLOAT3(transform.p.x, transform.p.y, transform.p.z));
 	}

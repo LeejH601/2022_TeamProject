@@ -19,6 +19,7 @@ public:
 	std::shared_ptr<CAnimationSets> m_pAnimationSets = NULL;
 public:
 	void PrepareSkinning();
+
 };
 
 class CModelManager

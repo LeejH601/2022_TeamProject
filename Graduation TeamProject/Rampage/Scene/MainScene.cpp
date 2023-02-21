@@ -230,6 +230,7 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	XMFLOAT3 pos = m_pObject->GetPosition();
 	physx::PxTransform transform(physx::PxVec3(pos.x, pos.y, pos.z));
 	rigid->setGlobalPose(transform);
+	m_pObject->m_pArticulation->setRootGlobalPose(transform);
 	m_pObjects.push_back(std::move(m_pObject));
 
 	m_pObject = std::make_unique<CKnightObject>(pd3dDevice, pd3dCommandList, 1);
@@ -243,6 +244,7 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	pos = m_pObject->GetPosition();
 	transform = physx::PxTransform(physx::PxVec3(pos.x, pos.y, pos.z));
 	rigid->setGlobalPose(transform);
+		//m_pObject->m_pArticulation->setRootGlobalPose(transform);
 	m_pObjects.push_back(std::move(m_pObject));
 
 	m_pObject = std::make_unique<CKnightObject>(pd3dDevice, pd3dCommandList, 1);
@@ -254,6 +256,7 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	pos = m_pObject->GetPosition();
 	transform = physx::PxTransform(physx::PxVec3(pos.x, pos.y, pos.z));
 	rigid->setGlobalPose(transform);
+	//m_pObject->m_pArticulation->setRootGlobalPose(transform);
 	m_pObject->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 4);
 
 	//int nAnimationSets = m_pObject->m_pSkinnedAnimationController->m_pAnimationSets->m_nAnimationSets;

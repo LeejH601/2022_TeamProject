@@ -132,7 +132,6 @@ public:
 	physx::PxFoundation* GetPxFoundation() { return m_pFoundation; };
 	physx::PxPhysics* GetPxPhysics() { return m_pPhysics; };
 	physx::PxScene* GetPxScene() { return m_pPxScene; };
-
 };
 
 extern CLocator Locator;
