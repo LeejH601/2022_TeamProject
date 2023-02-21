@@ -2,6 +2,7 @@
 
 CDamageAnimationComponent::CDamageAnimationComponent()
 {
+	CShakeAnimationComponent::GetInst();
 	m_bEnable = true;
 }
 

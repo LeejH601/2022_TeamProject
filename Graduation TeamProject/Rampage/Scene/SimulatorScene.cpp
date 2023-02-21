@@ -252,7 +252,7 @@ void CSimulatorScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float f
 	CModelShader::GetInst()->Render(pd3dCommandList, 1);
 
 	m_pMainCharacter->Animate(0.0f);
-	//m_pMainCharacter->Update(fTimeElapsed);
+	m_pMainCharacter->Update(fTimeElapsed);
 	m_pMainCharacter->Render(pd3dCommandList, true);
 
 	for (int i = 0; i < m_pEnemys.size(); ++i)

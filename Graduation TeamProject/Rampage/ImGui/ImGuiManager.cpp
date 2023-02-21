@@ -77,7 +77,7 @@ void CImGuiManager::Init(HWND hWnd, ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 		m_pd3dSrvDescHeap->GetCPUDescriptorHandleForHeapStart(),
 		m_pd3dSrvDescHeap->GetGPUDescriptorHandleForHeapStart());
 
-	m_pCamera = std::make_shared<CFirstPersonCamera>();
+	m_pCamera = std::make_shared<CThirdPersonCamera>();
 	m_pCamera->Init(pd3dDevice, pd3dCommandList);
 	/*std::shared_ptr<CComponent> com = std::make_shared<CCameraMover>(m_pCamera);
 	m_pCamera->m_vComponentSet.emplace_back(com);

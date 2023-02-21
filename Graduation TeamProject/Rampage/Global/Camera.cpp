@@ -111,6 +111,9 @@ void CCamera::Animate(float fTimeElapsed)
 		component->Update(fTimeElapsed);
 	}
 }
+void CCamera::ProcessInput(DWORD dwDirection, float cxDelta, float cyDelta, float fTimeElapsed)
+{
+}
 void CCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
 {
 
@@ -174,11 +177,119 @@ void CCamera::SetViewportsAndScissorRects(ID3D12GraphicsCommandList* pd3dCommand
 	pd3dCommandList->RSSetScissorRects(1, &m_d3dScissorRect);
 }
 
-CFirstPersonCamera::CFirstPersonCamera() : CCamera()
+CThirdPersonCamera::CThirdPersonCamera() : CCamera()
+{
+	m_pPlayer = nullptr;
+	SetOffset(XMFLOAT3(0.0f, 10.0f, -15.0f));
+}
+
+void CThirdPersonCamera::ProcessInput(DWORD dwDirection, float cxDelta, float cyDelta, float fTimeElapsed)
+{
+	static UCHAR pKeysBuffer[256];
+
+	GetKeyboardState(pKeysBuffer);
+
+	if (pKeysBuffer[VK_RBUTTON] & 0xF0)
+	{
+		if (cxDelta || cyDelta)
+			Rotate(cyDelta, cxDelta, 0.0f);
+	}
+}
+
+void CThirdPersonCamera::Rotate(float fPitch, float fYaw, float fRoll)
+{
+	if (fPitch != 0.0f)
+	{
+		m_fPitch += fPitch;
+		if (m_fPitch > +45.0f) { fPitch -= (m_fPitch - 45.0f); m_fPitch = +45.0f; }
+		if (m_fPitch < -45.0f) { fPitch -= (m_fPitch + 45.0f); m_fPitch = -45.0f; }
+	}
+	if (fYaw != 0.0f)
+	{
+		m_fYaw += fYaw;
+		if (m_fYaw > 360.0f) m_fYaw -= 360.0f;
+		if (m_fYaw < 0.0f) m_fYaw += 360.0f;
+	}
+	if (fRoll != 0.0f)
+	{
+		m_fRoll += fRoll;
+		if (m_fRoll > +20.0f) { fRoll -= (m_fRoll - 20.0f); m_fRoll = +20.0f; }
+		if (m_fRoll < -20.0f) { fRoll -= (m_fRoll + 20.0f); m_fRoll = -20.0f; }
+	}
+}
+
+void CThirdPersonCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
+{
+	if (m_pPlayer)
+	{
+		XMMATRIX xmmtxRotate = XMMatrixIdentity();
+		XMMATRIX xmmtxRotateX = XMMatrixIdentity();
+		XMMATRIX xmmtxRotateY = XMMatrixIdentity();
+		XMMATRIX xmmtxRotateZ = XMMatrixIdentity();
+
+		XMFLOAT3 xmf3XAxis = XMFLOAT3(1.0f, 0.0f, 0.0f);
+		XMFLOAT3 xmf3YAxis = XMFLOAT3(0.0f, 1.0f, 0.0f);
+		XMFLOAT3 xmf3ZAxis = XMFLOAT3(0.0f, 0.0f, 1.0f);
+		
+		if (m_fPitch != 0.0f)
+		{
+			xmmtxRotateX = XMMatrixRotationAxis(XMLoadFloat3(&xmf3XAxis), XMConvertToRadians(m_fPitch));
+		}
+		if (m_fYaw != 0.0f)
+		{
+			xmmtxRotateY = XMMatrixRotationAxis(XMLoadFloat3(&xmf3YAxis), XMConvertToRadians(m_fYaw));
+		}
+		if (m_fRoll != 0.0f)
+		{
+			xmmtxRotateY = XMMatrixRotationAxis(XMLoadFloat3(&xmf3ZAxis), XMConvertToRadians(m_fRoll));
+		}
+
+		xmmtxRotate = XMMatrixMultiply(xmmtxRotateZ, XMMatrixMultiply(xmmtxRotateX, xmmtxRotateY));
+
+		XMFLOAT3 xmf3Offset = Vector3::TransformNormal(m_xmf3Offset, xmmtxRotate);
+		XMFLOAT3 xmf3Position = Vector3::Add(xmf3LookAt, xmf3Offset);
+
+		m_xmf3Position = xmf3Position;
+		SetLookAt(xmf3LookAt);
+	}
+
+	Animate(fTimeElapsed);
+	RegenerateViewMatrix();
+}
+
+CFloatingCamera::CFloatingCamera() : CCamera()
 {
 }
 
-void CFirstPersonCamera::Rotate(float fPitch, float fYaw, float fRoll)
+void CFloatingCamera::ProcessInput(DWORD dwDirection, float cxDelta, float cyDelta, float fTimeElapsed)
+{
+	static UCHAR pKeysBuffer[256];
+
+	GetKeyboardState(pKeysBuffer);
+
+	if (pKeysBuffer[VK_RBUTTON] & 0xF0)
+	{
+		if (cxDelta || cyDelta)
+			Rotate(cyDelta, cxDelta, 0.0f);
+		if (dwDirection) {
+			XMFLOAT3 xmf3Shift = XMFLOAT3(0, 0, 0);
+			float fDistance = 40.0f * fTimeElapsed;
+			if (pKeysBuffer[VK_SHIFT] & 0xF0)
+				fDistance *= 10.0f;
+			if (dwDirection & DIR_FORWARD) xmf3Shift = Vector3::Add(xmf3Shift, GetLookVector(), fDistance);
+			if (dwDirection & DIR_BACKWARD) xmf3Shift = Vector3::Add(xmf3Shift, GetLookVector(), -fDistance);
+			if (dwDirection & DIR_RIGHT) xmf3Shift = Vector3::Add(xmf3Shift, GetRightVector(), fDistance);
+			if (dwDirection & DIR_LEFT) xmf3Shift = Vector3::Add(xmf3Shift, GetRightVector(), -fDistance);
+			if (dwDirection & DIR_UP) xmf3Shift = Vector3::Add(xmf3Shift, GetUpVector(), fDistance);
+			if (dwDirection & DIR_DOWN) xmf3Shift = Vector3::Add(xmf3Shift, GetUpVector(), -fDistance);
+
+			Move(xmf3Shift);
+		}
+	}
+	
+}
+
+void CFloatingCamera::Rotate(float fPitch, float fYaw, float fRoll)
 {
 	if (fPitch != 0.0f)
 	{
@@ -205,10 +316,9 @@ void CFirstPersonCamera::Rotate(float fPitch, float fYaw, float fRoll)
 
 }
 
-void CFirstPersonCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
+void CFloatingCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
 {
 	RegenerateViewMatrix();
-	SetLookAt(xmf3LookAt);
 }
 
 CPath::CPath(const CPath& path)

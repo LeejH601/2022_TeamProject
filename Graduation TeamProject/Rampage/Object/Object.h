@@ -54,12 +54,12 @@ public:
 	virtual ~CGameObject();
 
 	char* GetFrameName() { return m_pstrFrameName; }
-	XMFLOAT3 GetPosition();
-	XMFLOAT3 GetLook();
-	XMFLOAT3 GetUp();
-	XMFLOAT3 GetRight();
-	XMFLOAT4X4 GetTransform();
-	XMFLOAT4X4 GetWorld();
+	virtual XMFLOAT3 GetPosition();
+	virtual XMFLOAT3 GetLook();
+	virtual XMFLOAT3 GetUp();
+	virtual XMFLOAT3 GetRight();
+	virtual XMFLOAT4X4 GetTransform();
+	virtual XMFLOAT4X4 GetWorld();
 	CGameObject* GetParent() { return (m_pParent); }
 	UINT GetMeshType();
 	bool GetHit() { return bHit; }
@@ -72,14 +72,14 @@ public:
 	void SetMesh(std::shared_ptr<CMesh> pMesh) { m_pMesh = pMesh; }
 
 	void SetScale(float x, float y, float z);
-	void SetPosition(float x, float y, float z);
-	void SetPosition(XMFLOAT3 xmf3Position);
+	virtual void SetPosition(float x, float y, float z);
+	virtual void SetPosition(XMFLOAT3 xmf3Position);
 	void SetTransform(XMFLOAT4X4 xmf4x4Transform) { m_xmf4x4Transform = xmf4x4Transform; }
 	void SetWorld(XMFLOAT4X4 xmf4x4World) { m_xmf4x4World = xmf4x4World; }
 	virtual void SetHit(CGameObject* pHitter) { bHit = true; }
 	virtual void SetNotHit() { bHit = false; }
 	
-	void Rotate(float fPitch = 10.0f, float fYaw = 10.0f, float fRoll = 10.0f);
+	virtual void Rotate(float fPitch = 10.0f, float fYaw = 10.0f, float fRoll = 10.0f);
 	void Rotate(XMFLOAT3* pxmf3Axis, float fAngle);
 
 	void SetLookAt(XMFLOAT3& xmf3Target, XMFLOAT3& xmf3Up = XMFLOAT3(0.0f, 1.0f, 0.0f));
