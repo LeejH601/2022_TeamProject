@@ -1,6 +1,7 @@
 #include "MainScene.h"
 #include "..\Global\Timer.h"
 #include "..\Object\Texture.h"
+#include "..\Object\Player.h"
 #include "..\Object\ModelManager.h"
 #include "..\Shader\ModelShader.h"
 #include "..\Shader\ModelShader.h"
@@ -12,6 +13,7 @@
 void CMainTMPScene::SetPlayer(CGameObject* pPlayer)
 {
 	m_pPlayer = pPlayer;
+	((CPlayer*)m_pPlayer)->SetPlayerUpdatedContext(m_pTerrain.get());
 
 	if (m_pDepthRenderShader.get())
 		((CDepthRenderShader*)m_pDepthRenderShader.get())->RegisterObject(pPlayer);
@@ -21,7 +23,7 @@ void CMainTMPScene::OnPreRender(ID3D12GraphicsCommandList* pd3dCommandList, floa
 {
 	if (m_pDepthRenderShader)
 	{
-		((CDepthRenderShader*)m_pDepthRenderShader.get())->PrepareShadowMap(pd3dCommandList, fTimeElapsed);
+		((CDepthRenderShader*)m_pDepthRenderShader.get())->PrepareShadowMap(pd3dCommandList, 0.0f);
 		((CDepthRenderShader*)m_pDepthRenderShader.get())->UpdateDepthTexture(pd3dCommandList);
 	}
 }
@@ -309,8 +311,16 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	
 	m_ppParticleObjects.push_back(std::move(pParticleObject));
 }
+void CMainTMPScene::UpdateObjects(float fTimeElapsed)
+{
+	m_pPlayer->Update(fTimeElapsed);
+
+	for (int i = 0; i < m_pObjects.size(); ++i)
+		m_pObjects[i]->Update(fTimeElapsed);
+}
 void CMainTMPScene::AnimateObjects(float fTimeElapsed)
 {
+	UpdateObjects(fTimeElapsed);
 }
 void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed, float fCurrentTime, CCamera* pCamera)
 {
@@ -356,7 +366,6 @@ void CMainTMPScene::OnPostRenderTarget()
 	{
 		m_ppParticleObjects[i]->OnPostRender();
 	}
-
 }
 
 

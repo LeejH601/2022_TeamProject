@@ -2,6 +2,7 @@
 #include "Object.h"
 #include "StateMachine.h"
 
+class CCamera;
 class CPlayer : public CGameObject, public IEntity
 {
 public:
@@ -21,6 +22,8 @@ public:
 	float m_fRoll;
 	float m_fYaw;
 
+	LPVOID m_pPlayerUpdatedContext = NULL;
+
 	XMFLOAT3 m_xmf3CameraMoveDirection = XMFLOAT3(1.0f, 0.0f, 0.0f);
 	float m_fCMDConstant = 1.0f;
 public:
@@ -28,8 +31,8 @@ public:
 	virtual ~CPlayer();
 
 	void OnPrepareRender();
-	void Update(float fTimeElapsed);
 	void ProcessInput(DWORD dwDirection, float cxDelta, float cyDelta, float fTimeElapsed, CCamera* pCamera);
+	virtual void Update(float fTimeElapsed);
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, bool b_UseTexture, CCamera* pCamera = NULL);
 
 	virtual bool CheckCollision(CGameObject* pTargetObject);
@@ -49,6 +52,9 @@ public:
 	float& GetYaw() { return(m_fYaw); }
 
 	void SetLookAt(XMFLOAT3& xmf3LookAt);
+
+	void OnPlayerUpdateCallback(float fTimeElapsed);
+	void SetPlayerUpdatedContext(LPVOID pContext) { m_pPlayerUpdatedContext = pContext; }
 
 	void Move(const XMFLOAT3& xmf3Shift, bool bUpdateVelocity);
 	void Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity, CCamera* pCamera);

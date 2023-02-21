@@ -27,6 +27,7 @@ void CMonster::Render(ID3D12GraphicsCommandList* pd3dCommandList, bool b_UseText
 void CMonster::Update(float fTimeElapsed)
 {
 	m_pStateMachine->Update(fTimeElapsed);
+	Animate(fTimeElapsed);
 }
 void CMonster::UpdateTransform(XMFLOAT4X4* pxmf4x4Parent)
 {

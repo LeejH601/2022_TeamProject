@@ -251,7 +251,7 @@ void CGameFramework::BuildObjects()
 	m_pCurrentCamera = m_pFloatingCamera.get();
 
 	m_pPlayer = std::make_unique<CPlayer>(m_pd3dDevice.Get(), m_pd3dCommandList.Get(), 1);
-	
+
 	m_pScene->SetPlayer(m_pPlayer.get());
 	((CThirdPersonCamera*)(m_pFirstPersonCamera.get()))->SetPlayer((CPlayer*)m_pPlayer.get());
 }
@@ -404,10 +404,6 @@ void CGameFramework::ProcessInput()
 	
 	((CPlayer*)(m_pPlayer.get()))->ProcessInput(dwDirection, cxDelta, cyDelta, m_GameTimer.GetFrameTimeElapsed(), m_pCurrentCamera);
 	m_pCurrentCamera->ProcessInput(dwDirection, cxDelta, cyDelta, m_GameTimer.GetFrameTimeElapsed());
-
-	XMFLOAT3 xmf3PlayerPos = m_pPlayer->GetPosition();
-	xmf3PlayerPos.y += 12.5f;
-	m_pCurrentCamera->Update(xmf3PlayerPos, 0.0f);
 }
 void CGameFramework::AnimateObjects()
 {
@@ -500,6 +496,12 @@ void CGameFramework::FrameAdvance()
 
 	ProcessInput();
 	AnimateObjects();
+
+	XMFLOAT3 xmf3PlayerPos = m_pPlayer->GetPosition();
+	xmf3PlayerPos.y += 12.5f;
+
+	m_pCurrentCamera->Update(xmf3PlayerPos, 0.0f);
+
 	Locator.GetMessageDispather()->DispatchMessages();
 
 	//명령 할당자를 리셋한다.

@@ -13,10 +13,7 @@ void CSimulatorScene::OnPreRender(ID3D12GraphicsCommandList* pd3dCommandList, fl
 {
 	if (m_pDepthRenderShader)
 	{
-		for (int i = 0; i < m_pEnemys.size(); ++i)
-			m_pEnemys[i]->Update(fTimeElapsed);
-
-		((CDepthRenderShader*)m_pDepthRenderShader.get())->PrepareShadowMap(pd3dCommandList, fTimeElapsed);
+		((CDepthRenderShader*)m_pDepthRenderShader.get())->PrepareShadowMap(pd3dCommandList, 0.0f);
 		((CDepthRenderShader*)m_pDepthRenderShader.get())->UpdateDepthTexture(pd3dCommandList);
 		CheckCollide();
 	}
@@ -239,6 +236,14 @@ void CSimulatorScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 }
 void CSimulatorScene::AnimateObjects(float fTimeElapsed)
 {
+	UpdateObjects(fTimeElapsed);
+}
+void CSimulatorScene::UpdateObjects(float fTimeElapsed)
+{
+	m_pMainCharacter->Update(fTimeElapsed);
+
+	for (int i = 0; i < m_pEnemys.size(); ++i)
+		m_pEnemys[i]->Update(fTimeElapsed);
 }
 void CSimulatorScene::CheckCollide()
 {
@@ -252,7 +257,6 @@ void CSimulatorScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float f
 	CModelShader::GetInst()->Render(pd3dCommandList, 1);
 
 	m_pMainCharacter->Animate(0.0f);
-	m_pMainCharacter->Update(fTimeElapsed);
 	m_pMainCharacter->Render(pd3dCommandList, true);
 
 	for (int i = 0; i < m_pEnemys.size(); ++i)

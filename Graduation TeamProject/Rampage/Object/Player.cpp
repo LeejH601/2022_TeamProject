@@ -4,12 +4,15 @@
 #include "..\Global\Global.h"
 #include "..\Global\MessageDispatcher.h"
 #include "..\Global\Timer.h"
+#include "Terrain.h"
 
 CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks)
 {
 	m_xmf4x4World = Matrix4x4::Identity();
 	m_xmf4x4Transform = Matrix4x4::Identity();
 	m_xmf4x4Texture = Matrix4x4::Identity();
+
+	m_xmf3Velocity = XMFLOAT3{};
 
 	m_pStateMachine = std::make_unique<CStateMachine<CPlayer>>(this);
 	m_pStateMachine->SetCurrentState(Locator.GetPlayerState(typeid(Idle_Player)));
@@ -104,9 +107,36 @@ bool CPlayer::CheckCollision(CGameObject* pTargetObject)
 	return flag;
 }
 
+void CPlayer::OnPlayerUpdateCallback(float fTimeElapsed)
+{
+	if (m_pPlayerUpdatedContext)
+	{
+		CSplatTerrain* pTerrain = (CSplatTerrain*)m_pPlayerUpdatedContext;
+		XMFLOAT3 xmf3TerrainPos = pTerrain->GetPosition();
+
+		float fTerrainY = pTerrain->GetHeight(GetPosition().x - (xmf3TerrainPos.x), GetPosition().z - (xmf3TerrainPos.z));
+		
+		if (GetPosition().y < fTerrainY + xmf3TerrainPos.y)
+			SetPosition(XMFLOAT3(GetPosition().x, fTerrainY + xmf3TerrainPos.y, GetPosition().z));
+	}
+}
+
 void CPlayer::Update(float fTimeElapsed)
 {
 	m_pStateMachine->Update(fTimeElapsed);
+
+	m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, Vector3::ScalarProduct(XMFLOAT3(0.0f, -100.5f, 0.0f), fTimeElapsed, false));
+	
+	Move(m_xmf3Velocity, false);
+
+	if (m_pPlayerUpdatedContext)OnPlayerUpdateCallback(fTimeElapsed);
+
+	Animate(fTimeElapsed);
+
+	float fLength = Vector3::Length(m_xmf3Velocity);
+	float fDeceleration = (300.0f * fTimeElapsed);
+	if (fDeceleration > fLength)fDeceleration = fLength;
+	m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, Vector3::ScalarProduct(m_xmf3Velocity, -fDeceleration, true));
 }
 
 void CPlayer::ProcessInput(DWORD dwDirection, float cxDelta, float cyDelta, float fTimeElapsed, CCamera* pCamera)
@@ -121,7 +151,7 @@ void CPlayer::ProcessInput(DWORD dwDirection, float cxDelta, float cyDelta, floa
 		if (dwDirection)
 		{
 			Rotate(0.0f, pCamera->GetYaw() - GetYaw(), 0.0f);
-			Move(dwDirection, 50.0f * fTimeElapsed, false, pCamera);
+			Move(dwDirection, 50.0f * fTimeElapsed, true, pCamera);
 		}
 	}
 }

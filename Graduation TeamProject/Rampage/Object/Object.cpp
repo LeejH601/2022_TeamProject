@@ -86,6 +86,10 @@ void CGameObject::SetTexture(std::shared_ptr<CTexture> pTexture)
 		m_ppMaterials[0] = pMaterial;
 	}
 }
+void CGameObject::Update(float fTimeElapsed)
+{
+	Animate(fTimeElapsed);
+}
 void CGameObject::Animate(float fTimeElapsed)
 {
 	if (m_pSkinnedAnimationController) m_pSkinnedAnimationController->AdvanceTime(fTimeElapsed, this);
