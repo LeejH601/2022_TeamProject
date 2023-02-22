@@ -224,15 +224,18 @@ void CSimulatorScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 	m_pTerrain->SetPosition(XMFLOAT3(-800.f, -310.f, -800.f));
 	
 
-	/*for (int i = 0; i < nAnimationSets; ++i)
+	std::unique_ptr<CGameObject> pDumpCharater = std::make_unique<CKnightObject>(pd3dDevice, pd3dCommandList, 1);
+
+	for (int i = 0; i < pDumpCharater->m_pSkinnedAnimationController->m_pAnimationSets->m_nAnimationSets; ++i)
 	{
 		std::unique_ptr<CGameObject> pCharater = std::make_unique<CKnightObject>(pd3dDevice, pd3dCommandList, 1);
+		pCharater = std::make_unique<CKnightObject>(pd3dDevice, pd3dCommandList, 1);
 		pCharater->SetPosition(XMFLOAT3(5.0f * i, 0.0f, 0.0f));
 		pCharater->SetScale(5.0f, 5.0f, 5.0f);
 		pCharater->Rotate(0.0f, -90.0f, 0.0f);
 		pCharater->m_pSkinnedAnimationController->SetTrackAnimationSet(0, i);
 		m_pMainCharacters.push_back(std::move(pCharater));
-	}*/
+	}
 }
 void CSimulatorScene::AnimateObjects(float fTimeElapsed)
 {
@@ -256,6 +259,12 @@ void CSimulatorScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float f
 
 	CModelShader::GetInst()->Render(pd3dCommandList, 1);
 
+	for (int i = 0; i < m_pMainCharacters.size(); ++i)
+	{
+		m_pMainCharacters[i]->Animate(fTimeElapsed);
+		m_pMainCharacters[i]->Render(pd3dCommandList, true);
+	}
+
 	m_pMainCharacter->Animate(0.0f);
 	m_pMainCharacter->Render(pd3dCommandList, true);
 
@@ -273,12 +282,6 @@ void CSimulatorScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float f
 	m_pMainCharacter->Render(pd3dCommandList);*/
 
 	Locator.GetSoundPlayer()->Update(fTimeElapsed);
-	/*for (int i = 0; i < m_pMainCharacters.size(); ++i)
-	{
-		m_pMainCharacters[i]->Animate(fTimeElapsed);
-		if (!m_pDummyEnemy->m_pSkinnedAnimationController) m_pMainCharacters[i]->UpdateTransform(NULL);
-		m_pMainCharacters[i]->Render(pd3dCommandList);
-	}*/
 }
 void CSimulatorScene::SetPlayerAnimationSet(int nSet)
 {

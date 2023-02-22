@@ -136,3 +136,24 @@ bool Atk3_Player::OnMessage(CPlayer* player, const Telegram& msg)
 {
 	return false;
 }
+
+void Run_Player::Enter(CPlayer* player)
+{
+	player->m_pChild->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 16);
+	player->m_pChild->m_pSkinnedAnimationController->m_fTime = 0.0f;
+	player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition = 0.0f;
+	player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_nType = ANIMATION_TYPE_LOOP;
+}
+
+void Run_Player::Execute(CPlayer* player, float fElapsedTime)
+{
+}
+
+void Run_Player::Exit(CPlayer* player)
+{
+}
+
+bool Run_Player::OnMessage(CPlayer* player, const Telegram& msg)
+{
+	return false;
+}

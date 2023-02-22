@@ -14,19 +14,18 @@ CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 
 	m_xmf3Velocity = XMFLOAT3{};
 
-	m_pStateMachine = std::make_unique<CStateMachine<CPlayer>>(this);
-	m_pStateMachine->SetCurrentState(Locator.GetPlayerState(typeid(Idle_Player)));
-	m_pStateMachine->SetPreviousState(Locator.GetPlayerState(typeid(Idle_Player)));
-
 	SetPosition(XMFLOAT3(-15.0f, 0.0f, 0.0f));
 	SetScale(15.0f, 15.0f, 15.0f);
 	Rotate(0.0f, 90.0f, 0.0f);
 
 	std::shared_ptr<CGameObject> knightObject = std::make_shared<CKnightObject>(pd3dDevice, pd3dCommandList, 1);
-	knightObject->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 4);
-	knightObject->m_pSkinnedAnimationController->m_xmf3RootObjectScale = XMFLOAT3(14.0f, 14.0f, 14.0f);
+	knightObject->m_pSkinnedAnimationController->m_xmf3RootObjectScale = XMFLOAT3(15.0f, 15.0f, 15.0f);
 	
 	SetChild(knightObject);
+
+	m_pStateMachine = std::make_unique<CStateMachine<CPlayer>>(this);
+	m_pStateMachine->SetCurrentState(Locator.GetPlayerState(typeid(Idle_Player)));
+	m_pStateMachine->ChangeState(Locator.GetPlayerState(typeid(Idle_Player)));
 }
 
 CPlayer::~CPlayer()
@@ -44,14 +43,17 @@ void CPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity, CCa
 {
 	if (dwDirection)
 	{
+		if (m_pStateMachine->GetCurrentState() == Locator.GetPlayerState(typeid(Idle_Player)))
+			m_pStateMachine->ChangeState(Locator.GetPlayerState(typeid(Run_Player)));
+
 		XMFLOAT3 xmf3Shift = XMFLOAT3{};
 
-		if (dwDirection & DIR_FORWARD)xmf3Shift = Vector3::Add(xmf3Shift, GetLook(), fDistance);
-		if (dwDirection & DIR_BACKWARD)xmf3Shift = Vector3::Add(xmf3Shift, GetLook(), -fDistance);
-		if (dwDirection & DIR_RIGHT)xmf3Shift = Vector3::Add(xmf3Shift, GetRight(), fDistance);
-		if (dwDirection & DIR_LEFT)xmf3Shift = Vector3::Add(xmf3Shift, GetRight(), -fDistance);
-		if (dwDirection & DIR_UP)xmf3Shift = Vector3::Add(xmf3Shift, GetUp(), fDistance);
-		if (dwDirection & DIR_DOWN)xmf3Shift = Vector3::Add(xmf3Shift, GetUp(), -fDistance);
+		if (dwDirection & DIR_FORWARD)xmf3Shift = Vector3::Add(xmf3Shift, pCamera->GetLookVector(), fDistance);
+		if (dwDirection & DIR_BACKWARD)xmf3Shift = Vector3::Add(xmf3Shift, pCamera->GetLookVector(), -fDistance);
+		if (dwDirection & DIR_RIGHT)xmf3Shift = Vector3::Add(xmf3Shift, pCamera->GetRightVector(), fDistance);
+		if (dwDirection & DIR_LEFT)xmf3Shift = Vector3::Add(xmf3Shift, pCamera->GetRightVector(), -fDistance);
+		if (dwDirection & DIR_UP)xmf3Shift = Vector3::Add(xmf3Shift, pCamera->GetUpVector(), fDistance);
+		if (dwDirection & DIR_DOWN)xmf3Shift = Vector3::Add(xmf3Shift, pCamera->GetUpVector(), -fDistance);
 
 		Move(xmf3Shift, bUpdateVelocity);
 	}
@@ -125,8 +127,14 @@ void CPlayer::Update(float fTimeElapsed)
 {
 	m_pStateMachine->Update(fTimeElapsed);
 
-	m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, Vector3::ScalarProduct(XMFLOAT3(0.0f, -100.5f, 0.0f), fTimeElapsed, false));
+	if (!Vector3::Length(m_xmf3Velocity) && m_pStateMachine->GetCurrentState() == Locator.GetPlayerState(typeid(Run_Player)))
+		m_pStateMachine->ChangeState(Locator.GetPlayerState(typeid(Idle_Player)));
+
+	m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, Vector3::ScalarProduct(XMFLOAT3(0.0f, -100.0f, 0.0f), fTimeElapsed, false));
 	
+	if (m_xmf3Velocity.x + m_xmf3Velocity.z)
+		SetLookAt(Vector3::Add(GetPosition(), Vector3::Normalize(XMFLOAT3{ m_xmf3Velocity.x, 0.0f, m_xmf3Velocity.z })));
+
 	Move(m_xmf3Velocity, false);
 
 	if (m_pPlayerUpdatedContext)OnPlayerUpdateCallback(fTimeElapsed);
@@ -135,8 +143,11 @@ void CPlayer::Update(float fTimeElapsed)
 
 	float fLength = Vector3::Length(m_xmf3Velocity);
 	float fDeceleration = (300.0f * fTimeElapsed);
-	if (fDeceleration > fLength)fDeceleration = fLength;
-	m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, Vector3::ScalarProduct(m_xmf3Velocity, -fDeceleration, true));
+
+	if (fDeceleration > fLength)
+		m_xmf3Velocity = XMFLOAT3{};
+	else
+		m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, Vector3::ScalarProduct(m_xmf3Velocity, -fDeceleration, true));
 }
 
 void CPlayer::ProcessInput(DWORD dwDirection, float cxDelta, float cyDelta, float fTimeElapsed, CCamera* pCamera)
@@ -161,9 +172,9 @@ void CPlayer::SetLookAt(XMFLOAT3& xmf3LookAt)
 	XMFLOAT3 UpVec = XMFLOAT3(0.0f, 1.0f, 0.0f);
 	XMFLOAT4X4 mtxLookAt = Matrix4x4::LookAtLH(GetPosition(), xmf3LookAt, UpVec);
 	
-	m_xmf4x4Transform._11 = mtxLookAt._11, m_xmf4x4Transform._12 = mtxLookAt._21, m_xmf4x4Transform._13 = mtxLookAt._31;
-	m_xmf4x4Transform._21 = mtxLookAt._12, m_xmf4x4Transform._22 = mtxLookAt._22, m_xmf4x4Transform._23 = mtxLookAt._32;
-	m_xmf4x4Transform._31 = mtxLookAt._13, m_xmf4x4Transform._32 = mtxLookAt._23, m_xmf4x4Transform._33 = mtxLookAt._33;
+	m_xmf3Right.x = mtxLookAt._11, m_xmf3Right.y = mtxLookAt._21, m_xmf3Right.z = mtxLookAt._31;
+	m_xmf3Up.x = mtxLookAt._12, m_xmf3Up.y = mtxLookAt._22, m_xmf3Up.z = mtxLookAt._32;
+	m_xmf3Look.x = mtxLookAt._13, m_xmf3Look.y = mtxLookAt._23, m_xmf3Look.z = mtxLookAt._33;
 
 	SetScale(8.0f, 8.0f, 8.0f);
 }
@@ -242,4 +253,9 @@ void CPlayer::OnPrepareRender()
 	SetScale(8.0f, 8.0f, 8.0f);
 
 	UpdateTransform(NULL);
+}
+
+void CPlayer::Tmp()
+{
+	m_pChild->m_pSkinnedAnimationController->SetTrackAnimationSet(0, m_nAnimationNum++);
 }

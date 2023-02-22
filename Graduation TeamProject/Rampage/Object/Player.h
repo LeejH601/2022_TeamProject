@@ -8,6 +8,7 @@ class CPlayer : public CGameObject, public IEntity
 public:
 	std::unique_ptr<CStateMachine<CPlayer>> m_pStateMachine;
 
+	int m_nAnimationNum = 0;
 	int m_iAttack_Limit;
 	bool m_bAttacked = false;
 
@@ -52,6 +53,7 @@ public:
 	float& GetYaw() { return(m_fYaw); }
 
 	void SetLookAt(XMFLOAT3& xmf3LookAt);
+	void Tmp();
 
 	void OnPlayerUpdateCallback(float fTimeElapsed);
 	void SetPlayerUpdatedContext(LPVOID pContext) { m_pPlayerUpdatedContext = pContext; }

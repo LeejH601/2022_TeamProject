@@ -12,7 +12,8 @@
 class CSimulatorScene : public CScene
 {
 private:
-	std::vector<std::unique_ptr<CMonster>> m_pEnemys;
+	std::vector<std::unique_ptr<CMonster>> m_pEnemys; 
+	std::vector<std::unique_ptr<CGameObject>> m_pMainCharacters;
 	std::unique_ptr<CPlayer> m_pMainCharacter;
 	std::unique_ptr<CLight> m_pLight;
 	std::unique_ptr<CSplatTerrain> m_pTerrain;

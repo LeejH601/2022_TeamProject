@@ -75,7 +75,8 @@ bool CLocator::Init()
 	SetPlayerState(state);
 	state = std::make_shared<Atk3_Player>();
 	SetPlayerState(state);
-
+	state = std::make_shared<Run_Player>();
+	SetPlayerState(state);
 	m_pSoundPlayer = std::make_shared<CSoundPlayer>();
 	return true;
 }

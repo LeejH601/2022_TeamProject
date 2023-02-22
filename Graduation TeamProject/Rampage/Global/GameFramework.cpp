@@ -285,6 +285,10 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 	case WM_KEYDOWN:
 		switch (wParam)
 		{
+		case 'f':
+		case 'F':
+			((CPlayer*)m_pPlayer.get())->Tmp();
+			break;
 		case 'w':
 		case 'W':
 			if (wParam == 'w' || wParam == 'W') dwDirection |= DIR_FORWARD;
@@ -401,9 +405,9 @@ void CGameFramework::ProcessInput()
 		cyDelta = (float)(ptCursorPos.y - m_ptOldCursorPos.y) / 3.0f;
 		SetCursorPos(m_ptOldCursorPos.x, m_ptOldCursorPos.y);
 	}
-	
-	((CPlayer*)(m_pPlayer.get()))->ProcessInput(dwDirection, cxDelta, cyDelta, m_GameTimer.GetFrameTimeElapsed(), m_pCurrentCamera);
+
 	m_pCurrentCamera->ProcessInput(dwDirection, cxDelta, cyDelta, m_GameTimer.GetFrameTimeElapsed());
+	((CPlayer*)(m_pPlayer.get()))->ProcessInput(dwDirection, cxDelta, cyDelta, m_GameTimer.GetFrameTimeElapsed(), m_pCurrentCamera);
 }
 void CGameFramework::AnimateObjects()
 {
