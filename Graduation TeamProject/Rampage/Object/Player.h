@@ -11,6 +11,7 @@ public:
 	int m_nAnimationNum = 0;
 	int m_iAttack_Limit;
 	bool m_bAttacked = false;
+	bool m_bAttack = false;
 
 	XMFLOAT3 m_xmf3Position = XMFLOAT3(0.0f, 0.0f, 0.0f);
 	XMFLOAT3 m_xmf3Right = XMFLOAT3(1.0f, 0.0f, 0.0f);

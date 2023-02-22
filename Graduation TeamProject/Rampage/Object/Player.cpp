@@ -127,16 +127,28 @@ void CPlayer::Update(float fTimeElapsed)
 {
 	m_pStateMachine->Update(fTimeElapsed);
 
+	// Idle 상태로 복귀하는 코드
 	if (!Vector3::Length(m_xmf3Velocity) && m_pStateMachine->GetCurrentState() == Locator.GetPlayerState(typeid(Run_Player)))
 		m_pStateMachine->ChangeState(Locator.GetPlayerState(typeid(Idle_Player)));
 
-	m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, Vector3::ScalarProduct(XMFLOAT3(0.0f, -100.0f, 0.0f), fTimeElapsed, false));
-	
-	if (m_xmf3Velocity.x + m_xmf3Velocity.z)
-		SetLookAt(Vector3::Add(GetPosition(), Vector3::Normalize(XMFLOAT3{ m_xmf3Velocity.x, 0.0f, m_xmf3Velocity.z })));
+	// Run 상태일때 플레이어를 이동시키고 방향전환 시켜주는 코드
+	if (m_pStateMachine->GetCurrentState() == Locator.GetPlayerState(typeid(Run_Player)))
+	{
+		m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, Vector3::ScalarProduct(XMFLOAT3(0.0f, -100.0f, 0.0f), fTimeElapsed, false));
 
-	Move(m_xmf3Velocity, false);
-
+		if (m_xmf3Velocity.x + m_xmf3Velocity.z)
+			SetLookAt(Vector3::Add(GetPosition(), Vector3::Normalize(XMFLOAT3{ m_xmf3Velocity.x, 0.0f, m_xmf3Velocity.z })));
+		
+		Move(m_xmf3Velocity, false);
+	}
+	// Run 상태가 아닐때 플레이어에게 중력만 작용하는 코드
+	else
+	{
+		m_xmf3Velocity = XMFLOAT3{};
+		m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, Vector3::ScalarProduct(XMFLOAT3(0.0f, -100.0f, 0.0f), fTimeElapsed, false));
+		Move(m_xmf3Velocity, false);
+	}
+	// 플레이어가 터레인보다 아래에 있지 않도록 하는 코드
 	if (m_pPlayerUpdatedContext)OnPlayerUpdateCallback(fTimeElapsed);
 
 	Animate(fTimeElapsed);
@@ -144,6 +156,8 @@ void CPlayer::Update(float fTimeElapsed)
 	float fLength = Vector3::Length(m_xmf3Velocity);
 	float fDeceleration = (300.0f * fTimeElapsed);
 
+	// 마찰력을 적용하는 코드, 마찰력이 속도의 크기보다 크면 속도를 표현하는 m_xmf3Velocity를 {0.0f, 0.0f, 0.0f}로 초기화
+	// 이외에는 마찰로 인한 감속
 	if (fDeceleration > fLength)
 		m_xmf3Velocity = XMFLOAT3{};
 	else
@@ -158,10 +172,8 @@ void CPlayer::ProcessInput(DWORD dwDirection, float cxDelta, float cyDelta, floa
 
 	if ((dwDirection != 0) || (cxDelta != 0.0f) || (cyDelta != 0.0f))
 	{
-		
 		if (dwDirection)
 		{
-			Rotate(0.0f, pCamera->GetYaw() - GetYaw(), 0.0f);
 			Move(dwDirection, 50.0f * fTimeElapsed, true, pCamera);
 		}
 	}
