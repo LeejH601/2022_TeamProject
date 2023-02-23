@@ -265,8 +265,8 @@ void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM
 	{
 	case WM_LBUTTONDOWN:
 		// 좌클릭시 사용자가 좌클릭 했음을 표현하는 변수를 true로 바꿔줌
-		if (m_pPlayer)
-			((CPlayer*)m_pPlayer.get())->m_bAttack = true;
+		/*if (m_pPlayer)
+			((CPlayer*)m_pPlayer.get())->m_bAttack = true;*/
 
 		::SetCapture(hWnd);
 		::GetCursorPos(&m_ptOldCursorPos);
