@@ -62,6 +62,7 @@ class CLocator
 	std::shared_ptr<CCamera> m_pSimulaterCamera;
 	std::shared_ptr<CGameObject> m_pSimulaterPlayer;
 	std::shared_ptr<CGameObject> m_pMainPlayer;
+	std::shared_ptr<CGameObject> m_pBillBoardObject;
 
 	std::set<CoptSetPair, Comp_ComponentSet> m_sComponentSets;
 	std::set<PlayerStatePair, Comp_PlayerState> m_sPlayerStateSet;
@@ -90,6 +91,7 @@ public:
 
 	CGameObject* GetMainPlayer() { return m_pMainPlayer.get(); };
 	void SetMainPlayer(std::shared_ptr<CGameObject> pPlayer) { m_pMainPlayer = pPlayer; };
+
 
 	CComponentSet* GetComponentSet(int num)
 	{

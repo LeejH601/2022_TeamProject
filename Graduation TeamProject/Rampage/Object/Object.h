@@ -69,6 +69,7 @@ public:
 	void SetShader(std::shared_ptr<CShader> pShader, std::shared_ptr<CTexture> pTexture = NULL);
 	void SetMaterial(int nMaterial, std::shared_ptr<CMaterial> pMaterial);
 	void SetTexture(std::shared_ptr<CTexture> pTexture);
+	void ChangeTexture(std::shared_ptr<CTexture> pTexture);
 	void SetMesh(std::shared_ptr<CMesh> pMesh) { m_pMesh = pMesh; }
 
 	void SetScale(float x, float y, float z);

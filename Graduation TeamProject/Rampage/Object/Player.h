@@ -84,4 +84,5 @@ public:
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, bool b_UseTexture, CCamera* pCamera = NULL);
 
 	virtual bool CheckCollision(CGameObject* pTargetObject);
+	virtual bool HandleMessage(const Telegram& msg);
 };

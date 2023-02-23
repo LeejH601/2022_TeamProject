@@ -10,7 +10,8 @@
 #include "..\Sound\SoundManager.h"
 #include "EntityManager.h"
 #include "MessageDispatcher.h"
-
+#include "..\Object\BillBoardComponent.h"
+#include "..\Object\ParticleComponent.h"
 CLocator::~CLocator()
 {
 	m_pEntityManager->Clear();
@@ -64,6 +65,11 @@ bool CLocator::Init()
 		component = std::make_shared<CShakeAnimationComponent>();
 		componentSet->AddComponent(component);
 		component = std::make_shared<CStunAnimationComponent>();
+		componentSet->AddComponent(component);
+
+		component = std::make_shared<CAttackSpriteComponent>();
+		componentSet->AddComponent(component);
+		component = std::make_shared<CParticleComponent>();
 		componentSet->AddComponent(component);
 	}
 

@@ -8,8 +8,37 @@
 #include "..\Sound\SoundComponent.h"
 #include "..\Sound\SoundPlayer.h"
 #include "..\Sound\SoundManager.h"
+#include "..\Object\BillBoardComponent.h"
+#include "..\Object\TextureManager.h"
+#include "..\Object\ParticleComponent.h"
 
 #define NUM_FRAMES_IN_FLIGHT 3
+
+wchar_t* ConverCtoWC(const char* str)
+
+{
+
+	//wchar_t형 변수 선언
+
+	wchar_t* pStr;
+
+	//멀티 바이트 크기 계산 길이 반환
+
+	int strSize = MultiByteToWideChar(CP_ACP, 0, str, -1, NULL, NULL);
+
+	//wchar_t 메모리 할당
+
+	pStr = new WCHAR[strSize];
+
+	//형 변환
+
+	MultiByteToWideChar(CP_ACP, 0, str, strlen(str) + 1, pStr, strSize);
+
+	return pStr;
+
+}
+
+
 
 CImGuiManager::CImGuiManager()
 {
@@ -196,7 +225,25 @@ void CImGuiManager::SetUI()
 			initial_curpos.y += 25.f;
 			ImGui::SetCursorPos(initial_curpos);
 			ImGui::SetNextItemWidth(190.f);
-			ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
+
+			CParticleComponent* pParticleComponent = (CParticleComponent*)(m_pCurrentComponentSet->FindComponent(typeid(CParticleComponent)));
+
+			ImGui::Checkbox("On/Off##ParticleEffect", &pParticleComponent->GetEnable());
+
+			std::vector<std::shared_ptr<CTexture>> vTexture = CTextureManager::GetInst()->GetTextureList();
+			std::vector<const char*> items;
+			std::vector <std::string> str(100);
+			for (int i = 0; i < vTexture.size(); i++)
+			{
+				std::wstring wstr = vTexture[i]->GetTextureName(0);
+				str[i].assign(wstr.begin(), wstr.end());
+				items.emplace_back(str[i].c_str());
+			}
+			initial_curpos.y += 25.f;
+			ImGui::SetCursorPos(initial_curpos);
+			ImGui::SetNextItemWidth(190.f);
+			ImGui::DragFloat("Size", &pParticleComponent->m_fSize, 0.01f, 0.0f, 10.0f, "%.2f", 0);
+			pParticleComponent->Update();
 		}
 
 		initial_curpos.y += 25.f;
@@ -448,6 +495,56 @@ void CImGuiManager::SetUI()
 		 ImGui::SetNextItemWidth(120.f);
 		 ImGui::InputInt("Terrain Mapping Mode", (int*)&Terrain_Mapping_mode, 1, 1, 0);*/
 
+		initial_curpos.y += 25.f;
+		ImGui::SetCursorPos(initial_curpos);
+		if (ImGui::CollapsingHeader("Attack Sprite Effect"))
+		{
+			initial_curpos.y += 25.f;
+			ImGui::SetCursorPos(initial_curpos);
+			ImGui::SetNextItemWidth(190.f);
+
+			CAttackSpriteComponent* AttackSprite = (CAttackSpriteComponent*)(m_pCurrentComponentSet->FindComponent(typeid(CAttackSpriteComponent)));
+
+			ImGui::Checkbox("On/Off##SpriteEffect", &AttackSprite->m_vSprite[0].second->GetAnimation());
+
+			std::vector<std::shared_ptr<CTexture>> vTexture = CTextureManager::GetInst()->GetTextureList();
+			std::vector<const char*> items;
+			std::vector <std::string> str(100);
+			for (int i = 0; i < vTexture.size(); i++)
+			{
+				std::wstring wstr = vTexture[i]->GetTextureName(0);
+				str[i].assign(wstr.begin(), wstr.end());
+				items.emplace_back(str[i].c_str());
+			}
+
+			initial_curpos.y += 25.f;
+			ImGui::SetCursorPos(initial_curpos);
+			ImGui::SetNextItemWidth(190.f);
+
+			int iAttackSpriteN = AttackSprite->GetAttackNumber();
+			ImGui::Combo("##Attack", (int*)(&AttackSprite->GetAttackNumber()), items.data(), items.size());
+			if(iAttackSpriteN != AttackSprite->GetAttackNumber())
+				AttackSprite->SetTexture(0, ConverCtoWC(items[iAttackSpriteN]));
+
+			initial_curpos.x += 200.f;
+			ImGui::SetCursorPos(initial_curpos);
+			if (ImGui::Button("Animation"))
+				AttackSprite->SetSpriteEnable(0);
+			initial_curpos.x -= 200.f;
+
+			initial_curpos.y += 25.f;
+			ImGui::SetCursorPos(initial_curpos);
+			ImGui::SetNextItemWidth(190.f);
+			ImGui::DragFloat("Speed", &AttackSprite->GetSpeed(), 0.01f, 0.0f, 10.0f, "%.2f", 0);
+
+			initial_curpos.y += 25.f;
+			ImGui::SetCursorPos(initial_curpos);
+			ImGui::SetNextItemWidth(190.f);
+			ImGui::DragFloat("Alpha", &AttackSprite->GetAlpha(), 0.01f, 0.0f, 10.0f, "%.2f", 0);
+			AttackSprite->UpdateData();
+		}
+
+		
 		button_pos.y += 5.f;
 		ImGui::SetCursorPos(button_pos);
 
@@ -485,10 +582,11 @@ void CImGuiManager::SetUI()
 				CSimulatorScene::GetInst()->SetPlayerAnimationSet(2);
 			}
 		}
+
 		ImGui::End();
 	}
 }
-void CImGuiManager::OnPrepareRender(ID3D12GraphicsCommandList* pd3dCommandList, D3D12_CPU_DESCRIPTOR_HANDLE* d3dDsvDescriptorCPUHandle, float fTimeElapsed, CCamera* pCamera)
+void CImGuiManager::OnPrepareRender(ID3D12GraphicsCommandList* pd3dCommandList, D3D12_CPU_DESCRIPTOR_HANDLE* d3dDsvDescriptorCPUHandle, float fTimeElapsed, float fCurrentTime, CCamera* pCamera)
 {
 	::SynchronizeResourceTransition(pd3dCommandList, m_pRTTexture->GetResource(0), D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_RENDER_TARGET);
 
@@ -506,7 +604,7 @@ void CImGuiManager::OnPrepareRender(ID3D12GraphicsCommandList* pd3dCommandList, 
 	m_pCamera->RegenerateViewMatrix();
 	m_pCamera->OnPrepareRender(pd3dCommandList);
 
-	CSimulatorScene::GetInst()->Render(pd3dCommandList, fTimeElapsed, NULL);
+	CSimulatorScene::GetInst()->Render(pd3dCommandList, fTimeElapsed, fCurrentTime, NULL);
 
 	::SynchronizeResourceTransition(pd3dCommandList, m_pRTTexture->GetResource(0), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_COMMON);
 }
@@ -524,5 +622,10 @@ void CImGuiManager::Render(ID3D12GraphicsCommandList* pd3dCommandList)
 
 	pd3dCommandList->SetDescriptorHeaps(1, m_pd3dSrvDescHeap.GetAddressOf());
 	ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), pd3dCommandList);
+}
+
+void CImGuiManager::OnPostRenderTarget()
+{
+	CSimulatorScene::GetInst()->OnPostRenderTarget();
 }
 

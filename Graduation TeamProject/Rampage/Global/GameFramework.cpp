@@ -477,7 +477,7 @@ void CGameFramework::OnPrepareImGui()
 {
 	HRESULT hResult = m_pd3dCommandList->Reset(m_pd3dCommandAllocator.Get(), NULL);
 
-	CImGuiManager::GetInst()->OnPrepareRender(m_pd3dCommandList.Get(), &m_d3dDsvDescriptorCPUHandle, m_GameTimer.GetFrameTimeElapsed(), m_pCamera.get());
+	CImGuiManager::GetInst()->OnPrepareRender(m_pd3dCommandList.Get(), &m_d3dDsvDescriptorCPUHandle, m_GameTimer.GetFrameTimeElapsed(), m_GameTimer.GetTotalTime(), m_pCamera.get());
 
 	//명령 리스트를 닫힌 상태로 만든다. 
 	hResult = m_pd3dCommandList->Close();
@@ -492,6 +492,7 @@ void CGameFramework::OnPrepareImGui()
 void CGameFramework::OnPostRenderTarget()
 {
 	m_pScene->OnPostRenderTarget();
+	CImGuiManager::GetInst()->OnPostRenderTarget();
 }
 void CGameFramework::MoveToNextFrame()
 {
@@ -544,7 +545,6 @@ void CGameFramework::FrameAdvance()
 	UpdateShaderVariables(m_pd3dCommandList.Get());
 	m_pCamera->OnPrepareRender(m_pd3dCommandList.Get());
 	m_pScene->Render(m_pd3dCommandList.Get(), m_GameTimer.GetFrameTimeElapsed(), m_GameTimer.GetTotalTime(), m_pCamera.get());
-
 	CImGuiManager::GetInst()->Render(m_pd3dCommandList.Get());
 
 	::SynchronizeResourceTransition(m_pd3dCommandList.Get(), m_ppd3dRenderTargetBuffers[m_nSwapChainBufferIndex].Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);

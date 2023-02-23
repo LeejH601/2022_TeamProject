@@ -52,9 +52,10 @@ public:
 
 	void DemoRendering();
 	void SetUI();
-	void OnPrepareRender(ID3D12GraphicsCommandList* pd3dCommandList, D3D12_CPU_DESCRIPTOR_HANDLE* d3dDsvDescriptorCPUHandle, float fTimeElapsed, CCamera* pCamera = NULL);
+	void OnPrepareRender(ID3D12GraphicsCommandList* pd3dCommandList, D3D12_CPU_DESCRIPTOR_HANDLE* d3dDsvDescriptorCPUHandle, float fTimeElapsed, float fCurrentTime, CCamera* pCamera = NULL);
 	void PrepareRenderTarget(ID3D12GraphicsCommandList* pd3dCommandList, D3D12_CPU_DESCRIPTOR_HANDLE* d3dDsvDescriptorCPUHandle);
 	void Render(ID3D12GraphicsCommandList* pd3dCommandList);
+	void OnPostRenderTarget();
 
 	ImVec4 GetColor() { return clear_color; };
 	int GetAnimationNum() { return Player_Animation_Number; };

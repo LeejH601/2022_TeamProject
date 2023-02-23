@@ -11,6 +11,7 @@ enum class MESSAGE_TYPE
 	Msg_PlaySoundEffect,
 	Msg_PlaySoundDamage,
 	Msg_PlaySoundShoot,
+	Msg_MonsterAttackSprite,
 	END_ENUM
 };
 

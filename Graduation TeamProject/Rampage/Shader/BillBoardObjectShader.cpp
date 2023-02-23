@@ -5,8 +5,6 @@ void CBillBoardObjectShader::CreateShader(ID3D12Device* pd3dDevice, ID3D12RootSi
 	m_nPipelineStates = 1;
 	m_ppd3dPipelineStates.resize(m_nPipelineStates);
 
-	m_vTextures.reserve(10);
-
 	ID3DBlob* pd3dVertexShaderBlob = NULL, * pd3dPixelShaderBlob = NULL, * pd3dGeometryShaderBlob = NULL;
 
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC d3dPipelineStateDesc;
@@ -95,22 +93,4 @@ D3D12_INPUT_LAYOUT_DESC CBillBoardObjectShader::CreateInputLayout(int nPipelineS
 	d3dInputLayoutDesc.NumElements = nInputElementDescs;
 
 	return(d3dInputLayoutDesc);
-}
-
-std::shared_ptr<CTexture> CBillBoardObjectShader::Load_Texture(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, LPCTSTR pszFileName)
-{
-	for (const auto& texture : m_vTextures)
-	{
-		if (!wcscmp(texture->GetTextureName(0), pszFileName))
-			return texture;
-	}
-	
-
-	std::shared_ptr<CTexture> pSpriteTexture = std::make_shared<CTexture>(1, RESOURCE_TEXTURE2D, 0, 1);
-
-	pSpriteTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, pszFileName, RESOURCE_TEXTURE2D, 0);
-	
-	m_vTextures.emplace_back(pSpriteTexture);
-
-	return pSpriteTexture;
 }

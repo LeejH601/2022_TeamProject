@@ -191,9 +191,15 @@ bool CPlayer::CheckCollision(CGameObject* pTargetObject)
 			msg.Receiver = (IEntity*)Locator.GetSoundPlayer();
 			Locator.GetMessageDispather()->RegisterMessage(msg);
 
+
 			if (m_iAttack_Limit < 1)
 				m_bAttacked = true;
 		}
 	}
 	return flag;
+}
+
+bool CPlayer::HandleMessage(const Telegram& msg)
+{
+	return false;
 }
