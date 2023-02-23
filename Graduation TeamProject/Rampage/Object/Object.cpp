@@ -433,67 +433,68 @@ void CGameObject::CreateArticulation(physx::PxArticulationReducedCoordinate* art
 	_stprintf_s(pstrDebug, 256, _T("cnt : %d - %s \n"), ++count, m_pstrFrameName);
 	OutputDebugString(pstrDebug);
 
+	physx::PxMat44 mymatrix;
+	XMFLOAT4X4 myTransform = m_xmf4x4Transform;
+	XMFLOAT3 mypos(GetPosition());
+	myTransform._41 = 0;
+	myTransform._42 = 0;
+	myTransform._43 = 0;
+	memcpy(&mymatrix, &Matrix4x4::Inverse(myTransform), sizeof(physx::PxMat44));
+
+	mymatrix.column3.x = mypos.x;
+	mymatrix.column3.y = mypos.y;
+	mymatrix.column3.z = mypos.z;
+
+	physx::PxTransform transform(mymatrix);
+
+	//if (Parent) {
+	physx::PxArticulationLink* link = articulation->createLink(Parent, transform);
+	physx::PxBoxGeometry linkGeometry = physx::PxBoxGeometry(0.01f, 0.01f, 0.1f);
+	physx::PxMaterial* material = Locator.GetPxPhysics()->createMaterial(0.5, 0.5, 0.5);
+	physx::PxRigidActorExt::createExclusiveShape(*link, linkGeometry, *material);
+	physx::PxRigidBodyExt::updateMassAndInertia(*link, 1.0f);
+
+	physx::PxArticulationJointReducedCoordinate* joint = link->getInboundJoint();
+
+	if (joint) {
+		joint->setJointType(physx::PxArticulationJointType::ePRISMATIC);
+		// revolute joint that rotates about the z axis (eSWING2) of the joint frames
+		joint->setMotion(physx::PxArticulationAxis::eTWIST, physx::PxArticulationMotion::eFREE);
+		//joint->setMotion(physx::PxArticulationAxis::eSWING2, physx::PxArticulationMotion::eLIMITED);
+		//physx::PxArticulationLimit limits;
+		//limits.low = -physx::PxPiDivFour;  // in rad for a rotational motion
+		//limits.high = physx::PxPiDivFour;
+		//joint->setLimitParams(physx::PxArticulationAxis::eSWING2, limits);
+
+		//physx::PxArticulationDrive posDrive;
+		//posDrive.stiffness = driveStiffness;                      // the spring constant driving the joint to a target position
+		//posDrive.damping = driveDamping;                        // the damping coefficient driving the joint to a target velocity
+		//posDrive.maxForce = actuatorLimit;                        // force limit for the drive
+		//posDrive.driveType = PxArticulationDriveType::eFORCE;
+
+		//joint->setDriveParams(physx::PxArticulationAxis::eSWING2, posDrive);
+		//joint->setDriveVelocity(physx::PxArticulationAxis::eSWING2, 0.0f);
+		//joint->setDriveTarget(physx::PxArticulationAxis::eSWING2, targetPosition);
+
+		joint->setParentPose(pos);
+
+		/*physx::PxMat44 matrix;
+		XMFLOAT4X4 childTransform = m_pChild->m_xmf4x4Transform;
+		XMFLOAT3 childpos(m_pChild->GetPosition());
+		childTransform._41 = 0;
+		childTransform._42 = 0;
+		childTransform._43 = 0;
+		memcpy(&matrix, &Matrix4x4::Inverse(childTransform), sizeof(physx::PxMat44));
+
+		matrix.column3.x = childpos.x;
+		matrix.column3.y = childpos.y;
+		matrix.column3.z = childpos.z;
+
+		physx::PxTransform childPx(matrix);*/
+		joint->setChildPose(transform);
+	}
 	if (m_pChild) {
-		physx::PxMat44 mymatrix;
-		XMFLOAT4X4 myTransform = m_xmf4x4Transform;
-		XMFLOAT3 mypos(GetPosition());
-		myTransform._41 = 0;
-		myTransform._42 = 0;
-		myTransform._43 = 0;
-		memcpy(&mymatrix, &Matrix4x4::Inverse(myTransform), sizeof(physx::PxMat44));
 
-		mymatrix.column3.x = mypos.x;
-		mymatrix.column3.y = mypos.y;
-		mymatrix.column3.z = mypos.z;
-
-		physx::PxTransform transform(mymatrix);
-
-		//if (Parent) {
-		physx::PxArticulationLink* link = articulation->createLink(Parent, transform);
-		physx::PxBoxGeometry linkGeometry = physx::PxBoxGeometry(0.01f, 0.01f, 0.01f);
-		physx::PxMaterial* material = Locator.GetPxPhysics()->createMaterial(0.5, 0.5, 0.5);
-		physx::PxRigidActorExt::createExclusiveShape(*link, linkGeometry, *material);
-		physx::PxRigidBodyExt::updateMassAndInertia(*link, 1.0f);
-
-		physx::PxArticulationJointReducedCoordinate* joint = link->getInboundJoint();
-
-		if (joint) {
-			joint->setJointType(physx::PxArticulationJointType::eFIX);
-			// revolute joint that rotates about the z axis (eSWING2) of the joint frames
-			joint->setMotion(physx::PxArticulationAxis::eTWIST, physx::PxArticulationMotion::eFREE);
-			//joint->setMotion(physx::PxArticulationAxis::eSWING2, physx::PxArticulationMotion::eLIMITED);
-			//physx::PxArticulationLimit limits;
-			//limits.low = -physx::PxPiDivFour;  // in rad for a rotational motion
-			//limits.high = physx::PxPiDivFour;
-			//joint->setLimitParams(physx::PxArticulationAxis::eSWING2, limits);
-
-			//physx::PxArticulationDrive posDrive;
-			//posDrive.stiffness = driveStiffness;                      // the spring constant driving the joint to a target position
-			//posDrive.damping = driveDamping;                        // the damping coefficient driving the joint to a target velocity
-			//posDrive.maxForce = actuatorLimit;                        // force limit for the drive
-			//posDrive.driveType = PxArticulationDriveType::eFORCE;
-
-			//joint->setDriveParams(physx::PxArticulationAxis::eSWING2, posDrive);
-			//joint->setDriveVelocity(physx::PxArticulationAxis::eSWING2, 0.0f);
-			//joint->setDriveTarget(physx::PxArticulationAxis::eSWING2, targetPosition);
-
-			joint->setParentPose(pos);
-
-			physx::PxMat44 matrix;
-			XMFLOAT4X4 childTransform = m_pChild->m_xmf4x4Transform;
-			XMFLOAT3 childpos(m_pChild->GetPosition());
-			childTransform._41 = 0;
-			childTransform._42 = 0;
-			childTransform._43 = 0;
-			memcpy(&matrix, &Matrix4x4::Inverse(childTransform), sizeof(physx::PxMat44));
-
-			matrix.column3.x = childpos.x;
-			matrix.column3.y = childpos.y;
-			matrix.column3.z = childpos.z;
-
-			physx::PxTransform childPx(matrix);
-			joint->setChildPose(transform);
-		}
 		m_pChild->CreateArticulation(articulation, link, transform);
 	}
 	if (m_pSibling) {
@@ -581,7 +582,345 @@ CKnightObject::CKnightObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 	//m_pSkinnedAnimationController = std::make_unique<CKightRootRollBackAnimationController>(pd3dDevice, pd3dCommandList, nAnimationTracks, pKnightModel);
 	m_pSkinnedAnimationController = std::make_unique<CKightNoMoveRootAnimationController>(pd3dDevice, pd3dCommandList, nAnimationTracks, pKnightModel);
 
+	auto Find_Frame_Index = [](std::string& target, std::vector<std::string>& source) {
+		int cnt = 0;
+		for (std::string& str : source) {
+			if (strcmp(str.c_str(), target.c_str()) == 0)
+				break;
+			cnt++;
+		}
+		return cnt;
+	};
+
+	auto MakeTransform = [](XMFLOAT4X4& xmf44) {
+		physx::PxMat44 mymatrix;
+		XMFLOAT4X4 myTransform = xmf44;
+		/*XMFLOAT3 mypos(xmf44._41, xmf44._42, xmf44._43);
+		myTransform._41 = 0;
+		myTransform._42 = 0;
+		myTransform._43 = 0;
+		memcpy(&mymatrix, &Matrix4x4::Inverse(myTransform), sizeof(physx::PxMat44));
+
+		mymatrix.column3.x = mypos.x;
+		mymatrix.column3.y = mypos.y;
+		mymatrix.column3.z = mypos.z;*/
+
+		physx::PxMat44 TransMatrix = physx::PxMat44(physx::PxIdentity);
+		TransMatrix.column1.y = 0.0f;
+		TransMatrix.column1.z = 1.0f;
+		TransMatrix.column2.y = -1.0f;
+		TransMatrix.column2.z = 0.0f;
+
+
+		memcpy(&mymatrix, &myTransform, sizeof(physx::PxMat44));
+		return physx::PxTransform(mymatrix);
+
+		mymatrix = mymatrix * TransMatrix;
+
+		physx::PxTransform transform(mymatrix);
+
+		return transform;
+	};
+
+	auto SetLink = [](physx::PxArticulationReducedCoordinate* articulation, physx::PxArticulationLink* p_link, physx::PxTransform& parent, physx::PxTransform& child)
+	{
+		physx::PxArticulationLink* link = articulation->createLink(p_link, child);
+		physx::PxBoxGeometry linkGeometry = physx::PxBoxGeometry(0.05f, 0.05f, 0.05f);
+		physx::PxMaterial* material = Locator.GetPxPhysics()->createMaterial(0.5, 0.5, 0.5);
+		physx::PxRigidActorExt::createExclusiveShape(*link, linkGeometry, *material);
+		physx::PxRigidBodyExt::updateMassAndInertia(*link, 1.0f);
+
+		physx::PxArticulationJointReducedCoordinate* joint = link->getInboundJoint();
+
+		if (joint) {
+			joint->setJointType(physx::PxArticulationJointType::ePRISMATIC);
+			//joint->setMotion(physx::PxArticulationAxis::eSWING1, physx::PxArticulationMotion::eFREE);
+			//joint->setMotion(physx::PxArticulationAxis::eSWING2, physx::PxArticulationMotion::eFREE);
+			//joint->setMotion(physx::PxArticulationAxis::eTWIST, physx::PxArticulationMotion::eFREE);
+
+			/*joint->setLimitParams( physx::PxJointLimitCone(swing0, swing1));
+			joint->setTwistLimit(physx::PxJointAngularLimitPair(twistLo, twistHi));*/
+
+			physx::PxArticulationDrive drive;
+			drive.damping = 2.0f;
+			drive.stiffness = 0.2f;
+			drive.driveType = physx::PxArticulationDriveType::eFORCE;
+			joint->setDriveParams(physx::PxArticulationAxis::eSWING2, drive);
+			joint->setDriveTarget(physx::PxArticulationAxis::eSWING2, 10.0f);
+
+			//joint->setParentPose(parent);	
+
+			//joint->setChildPose(child);
+		}
+
+		return link;
+	};
+
+	CSkinnedMesh* Mesh = (CSkinnedMesh*)obj->m_pMesh.get();
+
 	static int test = 0;
+
+	if (test == 0) {
+		test++;
+		m_pArticulation = Locator.GetPxPhysics()->createArticulationReducedCoordinate();
+		m_pArticulation->setArticulationFlag(physx::PxArticulationFlag::eCOMPUTE_JOINT_FORCES, true);
+		m_pArticulation->setSolverIterationCounts(10, 10);
+		m_pArticulation->setMaxCOMLinearVelocity(100);
+
+		physx::PxMat44 scaleMatrix = physx::PxMat44(physx::PxIdentity);
+		physx::PxVec4 scale{ 1.0f, 1.0f,1.0f,1.0f };
+		scaleMatrix.scale(scale);
+
+		std::string target{ "pelvis" };
+		CGameObject* pelvis = FindFrame("pelvis");
+		XMFLOAT4X4 ParentMt = Matrix4x4::Identity();
+		XMFLOAT4X4 ChildMt = pelvis->m_xmf4x4Transform;
+		physx::PxArticulationLink* pelvis_link = SetLink(m_pArticulation, nullptr, MakeTransform(ParentMt), MakeTransform(ChildMt));
+
+		target = "spine_01";
+		CGameObject* spine_01 = FindFrame("spine_01");
+		ParentMt = pelvis->m_xmf4x4Transform;
+		ChildMt = spine_01->m_xmf4x4Transform;
+		physx::PxArticulationLink* Spine01_link = SetLink(m_pArticulation, pelvis_link, MakeTransform(ParentMt), MakeTransform(ChildMt));
+		physx::PxArticulationJointReducedCoordinate* joint = Spine01_link->getInboundJoint();
+		joint->setJointType(physx::PxArticulationJointType::eFIX);
+
+		target = "spine_02";
+		CGameObject* spine_02 = FindFrame("spine_02");
+		ParentMt = spine_01->m_xmf4x4Transform;
+		ChildMt = spine_02->m_xmf4x4Transform;
+		physx::PxArticulationLink* Spine02_link = SetLink(m_pArticulation, Spine01_link, MakeTransform(ParentMt), MakeTransform(ChildMt));
+		joint = Spine02_link->getInboundJoint();
+		joint->setJointType(physx::PxArticulationJointType::eFIX);
+
+		target = "spine_03";
+		CGameObject* spine_03 = FindFrame("spine_03");
+		ParentMt = spine_02->m_xmf4x4Transform;
+		ChildMt = spine_03->m_xmf4x4Transform;
+		physx::PxArticulationLink* Spine03_link = SetLink(m_pArticulation, Spine02_link, MakeTransform(ParentMt), MakeTransform(ChildMt));
+		joint = Spine03_link->getInboundJoint();
+		joint->setJointType(physx::PxArticulationJointType::eFIX);
+
+		Mesh->m_ppstrSkinningBoneNames;
+
+		target = "neck_01";
+		CGameObject* neck_01 = FindFrame("neck_01");
+		ParentMt = spine_03->m_xmf4x4Transform;
+		ChildMt = neck_01->m_xmf4x4Transform;
+		physx::PxArticulationLink* neck_link = SetLink(m_pArticulation, Spine03_link, MakeTransform(ParentMt), MakeTransform(ChildMt));
+		joint = neck_link->getInboundJoint();
+		joint->setJointType(physx::PxArticulationJointType::eREVOLUTE);
+		joint->setMotion(physx::PxArticulationAxis::eTWIST, physx::PxArticulationMotion::eFREE);
+
+		target = "head";
+		CGameObject* head = FindFrame("head");
+		ParentMt = neck_01->m_xmf4x4Transform;
+		ChildMt = head->m_xmf4x4Transform;
+		physx::PxArticulationLink* head_link = SetLink(m_pArticulation, neck_link, MakeTransform(ParentMt), MakeTransform(ChildMt));
+		joint = head_link->getInboundJoint();
+		joint->setJointType(physx::PxArticulationJointType::eSPHERICAL);
+		joint->setMotion(physx::PxArticulationAxis::eSWING1, physx::PxArticulationMotion::eFREE);
+		joint->setMotion(physx::PxArticulationAxis::eSWING2, physx::PxArticulationMotion::eFREE);
+		joint->setMotion(physx::PxArticulationAxis::eTWIST, physx::PxArticulationMotion::eFREE);
+
+
+		target = "clavicle_l";
+		CGameObject* clavicle_l = FindFrame("clavicle_l");
+		ParentMt = spine_03->m_xmf4x4Transform;
+		ChildMt = clavicle_l->m_xmf4x4Transform;
+		physx::PxArticulationLink* clavicle_l_link = SetLink(m_pArticulation, Spine03_link, MakeTransform(ParentMt), MakeTransform(ChildMt));
+		joint = clavicle_l_link->getInboundJoint();
+		joint->setJointType(physx::PxArticulationJointType::eFIX);
+		
+
+		/*target = "lowerarm_twist_0";
+		CGameObject* clavicle_l = FindFrame("clavicle_l");
+		ParentMt = spine_03->m_xmf4x4Transform;
+		ChildMt = clavicle_l->m_xmf4x4Transform;
+		physx::PxArticulationLink* clavicle_l_link = SetLink(m_pArticulation, Spine03_link, MakeTransform(ParentMt), MakeTransform(ChildMt));*/
+
+		target = "upperarm_l";
+		CGameObject* upperarm_l = FindFrame("upperarm_l");
+		ParentMt = clavicle_l->m_xmf4x4Transform;
+		ChildMt = upperarm_l->m_xmf4x4Transform;
+		physx::PxArticulationLink* upperarm_l_link = SetLink(m_pArticulation, clavicle_l_link, MakeTransform(ParentMt), MakeTransform(ChildMt));
+		joint = upperarm_l_link->getInboundJoint();
+		joint->setJointType(physx::PxArticulationJointType::eSPHERICAL);
+		joint->setMotion(physx::PxArticulationAxis::eSWING1, physx::PxArticulationMotion::eFREE);
+		joint->setMotion(physx::PxArticulationAxis::eSWING2, physx::PxArticulationMotion::eFREE);
+		joint->setMotion(physx::PxArticulationAxis::eTWIST, physx::PxArticulationMotion::eFREE);
+
+		target = "lowerarm_l";
+		CGameObject* lowerarm_l = FindFrame("lowerarm_l");
+		ParentMt = upperarm_l->m_xmf4x4Transform;
+		ChildMt = lowerarm_l->m_xmf4x4Transform;
+		physx::PxArticulationLink* lowerarm_l_link = SetLink(m_pArticulation, upperarm_l_link, MakeTransform(ParentMt), MakeTransform(ChildMt));
+		joint = lowerarm_l_link->getInboundJoint();
+		joint->setJointType(physx::PxArticulationJointType::eREVOLUTE);
+		joint->setMotion(physx::PxArticulationAxis::eSWING2, physx::PxArticulationMotion::eFREE);
+
+		target = "hand_l";
+		CGameObject* hand_l = FindFrame("hand_l");
+		ParentMt = lowerarm_l->m_xmf4x4Transform;
+		ChildMt = hand_l->m_xmf4x4Transform;
+		physx::PxArticulationLink* hand_l_link = SetLink(m_pArticulation, lowerarm_l_link, MakeTransform(ParentMt), MakeTransform(ChildMt));
+		joint = hand_l_link->getInboundJoint();
+		joint->setJointType(physx::PxArticulationJointType::eSPHERICAL);
+		joint->setMotion(physx::PxArticulationAxis::eSWING1, physx::PxArticulationMotion::eFREE);
+		joint->setMotion(physx::PxArticulationAxis::eSWING2, physx::PxArticulationMotion::eFREE);
+		joint->setMotion(physx::PxArticulationAxis::eTWIST, physx::PxArticulationMotion::eFREE);
+
+
+		target = "clavicle_r";
+		CGameObject* clavicle_r = FindFrame("clavicle_r");
+		ParentMt = spine_03->m_xmf4x4Transform;
+		ChildMt = clavicle_r->m_xmf4x4Transform;
+		physx::PxArticulationLink* clavicle_r_link = SetLink(m_pArticulation, Spine03_link, MakeTransform(ParentMt), MakeTransform(ChildMt));
+		joint = clavicle_r_link->getInboundJoint();
+		joint->setJointType(physx::PxArticulationJointType::eFIX);
+
+		target = "upperarm_r";
+		CGameObject* upperarm_r = FindFrame("upperarm_r");
+		ParentMt = clavicle_r->m_xmf4x4Transform;
+		ChildMt = upperarm_r->m_xmf4x4Transform;
+		physx::PxArticulationLink* upperarm_r_link = SetLink(m_pArticulation, clavicle_r_link, MakeTransform(ParentMt), MakeTransform(ChildMt));
+		joint = upperarm_r_link->getInboundJoint();
+		joint->setJointType(physx::PxArticulationJointType::eSPHERICAL);
+		joint->setMotion(physx::PxArticulationAxis::eSWING1, physx::PxArticulationMotion::eFREE);
+		joint->setMotion(physx::PxArticulationAxis::eSWING2, physx::PxArticulationMotion::eFREE);
+		joint->setMotion(physx::PxArticulationAxis::eTWIST, physx::PxArticulationMotion::eFREE);
+
+
+		target = "lowerarm_r";
+		CGameObject* lowerarm_r = FindFrame("lowerarm_r");
+		ParentMt = upperarm_r->m_xmf4x4Transform;
+		ChildMt = lowerarm_r->m_xmf4x4Transform;
+		physx::PxArticulationLink* lowerarm_r_link = SetLink(m_pArticulation, upperarm_r_link, MakeTransform(ParentMt), MakeTransform(ChildMt));
+		joint = lowerarm_r_link->getInboundJoint();
+		joint->setJointType(physx::PxArticulationJointType::eREVOLUTE);
+		joint->setMotion(physx::PxArticulationAxis::eSWING2, physx::PxArticulationMotion::eFREE);
+
+		target = "hand_r";
+		CGameObject* hand_r = FindFrame("hand_r");
+		ParentMt = lowerarm_r->m_xmf4x4Transform;
+		ChildMt = hand_r->m_xmf4x4Transform;
+		physx::PxArticulationLink* hand_r_ink = SetLink(m_pArticulation, lowerarm_r_link, MakeTransform(ParentMt), MakeTransform(ChildMt));
+		joint = hand_r_ink->getInboundJoint();
+		joint->setJointType(physx::PxArticulationJointType::eSPHERICAL);
+		joint->setMotion(physx::PxArticulationAxis::eSWING1, physx::PxArticulationMotion::eFREE);
+		joint->setMotion(physx::PxArticulationAxis::eSWING2, physx::PxArticulationMotion::eFREE);
+		joint->setMotion(physx::PxArticulationAxis::eTWIST, physx::PxArticulationMotion::eFREE);
+
+
+
+	/*	target = "thigh_twist_01_l";
+		CGameObject* thigh_twist_01_l = FindFrame("thigh_twist_01_l");
+		ParentMt = pelvis->m_xmf4x4Transform;
+		ChildMt = thigh_twist_01_l->m_xmf4x4Transform;
+		physx::PxArticulationLink* thigh_twist_01_l_link = SetLink(m_pArticulation, pelvis_link, MakeTransform(ParentMt), MakeTransform(ChildMt));*/
+
+		target = "thigh_l";
+		CGameObject* thigh_l = FindFrame("thigh_l");
+		ParentMt = pelvis->m_xmf4x4Transform;
+		ChildMt = thigh_l->m_xmf4x4Transform;
+		physx::PxArticulationLink* thigh_l_link = SetLink(m_pArticulation, pelvis_link, MakeTransform(ParentMt), MakeTransform(ChildMt));
+		joint = thigh_l_link->getInboundJoint();
+		joint->setJointType(physx::PxArticulationJointType::eSPHERICAL);
+		joint->setMotion(physx::PxArticulationAxis::eSWING1, physx::PxArticulationMotion::eFREE);
+		joint->setMotion(physx::PxArticulationAxis::eSWING2, physx::PxArticulationMotion::eFREE);
+		joint->setMotion(physx::PxArticulationAxis::eTWIST, physx::PxArticulationMotion::eLOCKED);
+
+		target = "calf_l";
+		CGameObject* calf_l = FindFrame("calf_l");
+		ParentMt = thigh_l->m_xmf4x4Transform;
+		ChildMt = calf_l->m_xmf4x4Transform;
+		physx::PxArticulationLink* calf_l_link = SetLink(m_pArticulation, thigh_l_link, MakeTransform(ParentMt), MakeTransform(ChildMt));
+		joint = calf_l_link->getInboundJoint();
+		joint->setJointType(physx::PxArticulationJointType::eREVOLUTE);
+		joint->setMotion(physx::PxArticulationAxis::eSWING2, physx::PxArticulationMotion::eFREE);
+
+		/*target = "calf_twist_01_l";
+		CGameObject* calf_twist_01_l = FindFrame("calf_twist_01_l");
+		ParentMt = calf_l->m_xmf4x4Transform;
+		ChildMt = calf_twist_01_l->m_xmf4x4Transform;
+		physx::PxArticulationLink* calf_twist_01_l_link = SetLink(m_pArticulation, calf_l_link, MakeTransform(ParentMt), MakeTransform(ChildMt));*/
+
+		target = "foot_l";
+		CGameObject* foot_l = FindFrame("foot_l");
+		ParentMt = calf_l->m_xmf4x4Transform;
+		ChildMt = foot_l->m_xmf4x4Transform;
+		physx::PxArticulationLink* foot_l_link = SetLink(m_pArticulation, calf_l_link, MakeTransform(ParentMt), MakeTransform(ChildMt));
+		joint = foot_l_link->getInboundJoint();
+		joint->setJointType(physx::PxArticulationJointType::eSPHERICAL);
+		joint->setMotion(physx::PxArticulationAxis::eSWING1, physx::PxArticulationMotion::eFREE);
+		joint->setMotion(physx::PxArticulationAxis::eSWING2, physx::PxArticulationMotion::eFREE);
+		joint->setMotion(physx::PxArticulationAxis::eTWIST, physx::PxArticulationMotion::eFREE);
+
+		target = "ball_l";
+		CGameObject* ball_l = FindFrame("ball_l");
+		ParentMt = foot_l->m_xmf4x4Transform;
+		ChildMt = ball_l->m_xmf4x4Transform;
+		physx::PxArticulationLink* ball_l_link = SetLink(m_pArticulation, foot_l_link, MakeTransform(ParentMt), MakeTransform(ChildMt));
+		joint = ball_l_link->getInboundJoint();
+		joint->setJointType(physx::PxArticulationJointType::eFIX);
+
+
+
+		/*target = "thigh_twist_01_r";
+		CGameObject* thigh_twist_01_r = FindFrame("thigh_twist_01_r");
+		ParentMt = pelvis->m_xmf4x4Transform;
+		ChildMt = thigh_twist_01_r->m_xmf4x4Transform;
+		physx::PxArticulationLink* thigh_twist_01_r_link = SetLink(m_pArticulation, pelvis_link, MakeTransform(ParentMt), MakeTransform(ChildMt));*/
+
+		target = "thigh_r";
+		CGameObject* thigh_r = FindFrame("thigh_r");
+		ParentMt = pelvis->m_xmf4x4Transform;
+		ChildMt = thigh_r->m_xmf4x4Transform;
+		physx::PxArticulationLink* thigh_r_link = SetLink(m_pArticulation, pelvis_link, MakeTransform(ParentMt), MakeTransform(ChildMt));
+		joint = thigh_r_link->getInboundJoint();
+		joint->setJointType(physx::PxArticulationJointType::eSPHERICAL);
+		joint->setMotion(physx::PxArticulationAxis::eSWING1, physx::PxArticulationMotion::eFREE);
+		joint->setMotion(physx::PxArticulationAxis::eSWING2, physx::PxArticulationMotion::eFREE);
+		joint->setMotion(physx::PxArticulationAxis::eTWIST, physx::PxArticulationMotion::eLOCKED);
+
+		target = "calf_r";
+		CGameObject* calf_r = FindFrame("calf_r");
+		ParentMt = thigh_r->m_xmf4x4Transform;
+		ChildMt = calf_r->m_xmf4x4Transform;
+		physx::PxArticulationLink* calf_r_link = SetLink(m_pArticulation, thigh_r_link, MakeTransform(ParentMt), MakeTransform(ChildMt));
+		joint = calf_r_link->getInboundJoint();
+		joint->setJointType(physx::PxArticulationJointType::eREVOLUTE);
+		joint->setMotion(physx::PxArticulationAxis::eSWING2, physx::PxArticulationMotion::eFREE);
+
+		/*target = "calf_twist_01_r";
+		CGameObject* calf_twist_01_r = FindFrame("calf_twist_01_r");
+		ParentMt = calf_r->m_xmf4x4Transform;
+		ChildMt = calf_twist_01_r->m_xmf4x4Transform;
+		physx::PxArticulationLink* calf_twist_01_r_link = SetLink(m_pArticulation, calf_r_link, MakeTransform(ParentMt), MakeTransform(ChildMt));*/
+
+		target = "foot_r";
+		CGameObject* foot_r = FindFrame("foot_r");
+		ParentMt = calf_r->m_xmf4x4Transform;
+		ChildMt = foot_r->m_xmf4x4Transform;
+		physx::PxArticulationLink* foot_r_link = SetLink(m_pArticulation, calf_r_link, MakeTransform(ParentMt), MakeTransform(ChildMt));
+		joint = foot_r_link->getInboundJoint();
+		joint->setJointType(physx::PxArticulationJointType::eSPHERICAL);
+		joint->setMotion(physx::PxArticulationAxis::eSWING1, physx::PxArticulationMotion::eFREE);
+		joint->setMotion(physx::PxArticulationAxis::eSWING2, physx::PxArticulationMotion::eFREE);
+		joint->setMotion(physx::PxArticulationAxis::eTWIST, physx::PxArticulationMotion::eFREE);
+
+
+		target = "ball_r";
+		CGameObject* ball_r = FindFrame("ball_r");
+		ParentMt = foot_r->m_xmf4x4Transform;
+		ChildMt = ball_r->m_xmf4x4Transform;
+		physx::PxArticulationLink* ball_r_link = SetLink(m_pArticulation, foot_r_link, MakeTransform(ParentMt), MakeTransform(ChildMt));
+		joint = ball_l_link->getInboundJoint();
+		joint->setJointType(physx::PxArticulationJointType::eFIX);
+
+		Locator.GetPxScene()->addArticulation(*m_pArticulation);
+	}
+
 	if (test == 0) {
 		m_pArticulation = Locator.GetPxPhysics()->createArticulationReducedCoordinate();
 
@@ -592,7 +931,7 @@ CKnightObject::CKnightObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 
 		test++;
 	}
-	
+
 
 	PrepareBoundingBox(pd3dDevice, pd3dCommandList);
 #ifdef KNIGHT_ROOT_MOTION
