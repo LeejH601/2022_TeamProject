@@ -49,6 +49,10 @@ public:
 
 	physx::PxActor* Rigid = nullptr;
 	physx::PxArticulationReducedCoordinate* m_pArticulation;
+	physx::PxArticulationCache* m_pArticulationCache;
+	physx::PxU32 m_nArtiCache;
+	std::vector<std::string> m_pArtiLinkNames;
+	std::vector<physx::PxArticulationLink*> m_pArticulationLinks;
 
 public:
 	std::unique_ptr<CAnimationController> m_pSkinnedAnimationController;
@@ -177,6 +181,9 @@ private:
 	BoundingBox m_TransformedWeaponBoudningBox;
 	CGameObject* pBodyBoundingBoxMesh;
 	CGameObject* pWeaponBoundingBoxMesh;
+
+	bool m_bSimulateArticulate = false;
+
 public:
 	CKnightObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks);
 	virtual ~CKnightObject();

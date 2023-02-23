@@ -625,9 +625,16 @@ CKnightObject::CKnightObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 	auto SetLink = [](physx::PxArticulationReducedCoordinate* articulation, physx::PxArticulationLink* p_link, physx::PxTransform& parent, physx::PxTransform& child)
 	{
 		physx::PxArticulationLink* link = articulation->createLink(p_link, child);
-		physx::PxBoxGeometry linkGeometry = physx::PxBoxGeometry(0.03f, 0.03f, 0.03f);
-		physx::PxMaterial* material = Locator.GetPxPhysics()->createMaterial(0.5, 0.5, 0.5);
-		physx::PxRigidActorExt::createExclusiveShape(*link, linkGeometry, *material);
+		physx::PxVec3 distance = child.p - parent.p;
+		physx::PxReal len = distance.magnitude();
+		physx::PxTransform center = physx::PxTransform(physx::PxVec3(len / 2.0f, 0.0f, 0.0f));
+		physx::PxBoxGeometry linkGeometry = physx::PxBoxGeometry(0.05f, 0.05f, 0.05f);
+		physx::PxMaterial* material = Locator.GetPxPhysics()->createMaterial(0.9, 0.9f, 0.1);
+		physx::PxShape* shape = Locator.GetPxPhysics()->createShape(linkGeometry, *material);
+		/*if(p_link)
+			shape->setLocalPose(center);*/
+		link->attachShape(*shape);
+		//physx::PxRigidActorExt::createExclusiveShape(*link, linkGeometry, *material);
 		physx::PxRigidBodyExt::updateMassAndInertia(*link, 1.0f);
 
 		return link;
@@ -761,7 +768,7 @@ CKnightObject::CKnightObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 		//physx::PxArticulationLimit limits;
 		//limits.low = -physx::PxPiDivFour;  // in rad for a rotational motion
 		//limits.high = physx::PxPiDivFour;
-		
+
 
 		//physx::PxArticulationDrive posDrive;
 		//posDrive.stiffness = 0.5f;                      // the spring constant driving the joint to a target position
@@ -769,7 +776,7 @@ CKnightObject::CKnightObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 		//posDrive.maxForce = FLT_MAX;                        // force limit for the drive
 		//posDrive.driveType = physx::PxArticulationDriveType::eFORCE;    // make the drive output be a force/torque (default)
 		// apply and set targets (note again the consistent axis)
-		
+
 	};
 
 	auto DebugJointDot = [](physx::PxArticulationLink* link) {
@@ -786,7 +793,7 @@ CKnightObject::CKnightObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 		test++;
 		m_pArticulation = Locator.GetPxPhysics()->createArticulationReducedCoordinate();
 		m_pArticulation->setArticulationFlag(physx::PxArticulationFlag::eCOMPUTE_JOINT_FORCES, true);
-		m_pArticulation->setSolverIterationCounts(5, 5);
+		m_pArticulation->setSolverIterationCounts(10, 10);
 		m_pArticulation->setMaxCOMLinearVelocity(40);
 
 		physx::PxMat44 scaleMatrix = physx::PxMat44(physx::PxIdentity);
@@ -810,7 +817,9 @@ CKnightObject::CKnightObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 		physx::PxArticulationLink* pelvis_link = SetLink(m_pArticulation, nullptr, MakeTransform(ParentMt), MakeTransform(ChildMt));
 		physx::PxArticulationJointReducedCoordinate* joint = pelvis_link->getInboundJoint();
 		DebugJointDot(pelvis_link);
+		m_pArtiLinkNames.emplace_back(target);
 
+#define _test_ragdoll
 
 		target = "spine_01";
 		CGameObject* spine_01 = FindFrame("spine_01");
@@ -820,6 +829,7 @@ CKnightObject::CKnightObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 		joint = Spine01_link->getInboundJoint();
 		SetJoint(joint, FixDesc);
 		DebugJointDot(Spine01_link);
+		m_pArtiLinkNames.emplace_back(target);
 
 		target = "spine_02";
 		CGameObject* spine_02 = FindFrame("spine_02");
@@ -829,6 +839,7 @@ CKnightObject::CKnightObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 		joint = Spine02_link->getInboundJoint();
 		SetJoint(joint, FixDesc);
 		DebugJointDot(Spine02_link);
+		m_pArtiLinkNames.emplace_back(target);
 
 		target = "spine_03";
 		CGameObject* spine_03 = FindFrame("spine_03");
@@ -838,6 +849,7 @@ CKnightObject::CKnightObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 		joint = Spine03_link->getInboundJoint();
 		SetJoint(joint, FixDesc);
 		DebugJointDot(Spine03_link);
+		m_pArtiLinkNames.emplace_back(target);
 
 		Mesh->m_ppstrSkinningBoneNames;
 
@@ -851,7 +863,7 @@ CKnightObject::CKnightObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 		SPHERICALDesc.eTLImit.high = 40.0f * physx::PxPi / 180.0f;
 		SPHERICALDesc.eS1LImit.low = -40.0f * physx::PxPi / 180.0f;
 		SPHERICALDesc.eS1LImit.high = 40.0f * physx::PxPi / 180.0f;
-		SPHERICALDesc.eS2LImit.low = -80.0f * physx::PxPi / 180.0f;
+		SPHERICALDesc.eS2LImit.low = -80.0f * physx::PxPi / 180.0f;  // x?
 		SPHERICALDesc.eS2LImit.high = 70.0f * physx::PxPi / 180.0f;
 		SPHERICALDesc.eTDrive.driveType = physx::PxArticulationDriveType::eNONE;
 		SPHERICALDesc.eTDrive.damping = 0.5f;
@@ -862,9 +874,14 @@ CKnightObject::CKnightObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 		SPHERICALDesc.eS2Drive.driveType = physx::PxArticulationDriveType::eNONE;
 		SPHERICALDesc.eS2Drive.damping = 0.5f;
 		SPHERICALDesc.eS2Drive.stiffness = 0.5f;
-		//SetJointRevolute(joint);
+#ifdef _test_ragdoll
 		SetJoint(joint, SPHERICALDesc);
+#else
+		SetJoint(joint, FixDesc);
+#endif // _test_ragdoll
+
 		DebugJointDot(neck_link);
+		m_pArtiLinkNames.emplace_back(target);
 
 		target = "head";
 		CGameObject* head = FindFrame("head");
@@ -872,16 +889,20 @@ CKnightObject::CKnightObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 		ChildMt = head->m_xmf4x4Transform;
 		physx::PxArticulationLink* head_link = SetLink(m_pArticulation, neck_link, MakeTransform(ParentMt), MakeTransform(ChildMt));
 		joint = head_link->getInboundJoint();
-		SPHERICALDesc.eSwing1 = true;
-		SPHERICALDesc.eSwing2 = false;
+		SPHERICALDesc.eSwing1 = false;
+		SPHERICALDesc.eSwing2 = true;
 		SPHERICALDesc.eTWIST = true;
-		SPHERICALDesc.eS1LImit.low = -40.0f * physx::PxPi / 180.0f;
-		SPHERICALDesc.eS1LImit.high = 40.0f * physx::PxPi / 180.0f;
-		SPHERICALDesc.eTLImit.low = -60.0f * physx::PxPi / 180.0f;
-		SPHERICALDesc.eTLImit.high = 70.0f * physx::PxPi / 180.0f;
+		SPHERICALDesc.eTLImit.low = -40.0f * physx::PxPi / 180.0f;
+		SPHERICALDesc.eTLImit.high = 40.0f * physx::PxPi / 180.0f;
+		SPHERICALDesc.eS2LImit.low = -60.0f * physx::PxPi / 180.0f;
+		SPHERICALDesc.eS2LImit.high = 70.0f * physx::PxPi / 180.0f;
+#ifdef _test_ragdoll
+		SetJoint(joint, SPHERICALDesc);
+#else
 		SetJoint(joint, FixDesc);
-		//SetJoint(joint, SPHERICALDesc);
+#endif // _test_ragdoll
 		DebugJointDot(head_link);
+		m_pArtiLinkNames.emplace_back(target);
 
 
 
@@ -893,6 +914,7 @@ CKnightObject::CKnightObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 		joint = clavicle_l_link->getInboundJoint();
 		SetJoint(joint, FixDesc);
 		DebugJointDot(clavicle_l_link);
+		m_pArtiLinkNames.emplace_back(target);
 
 		target = "upperarm_l";
 		CGameObject* upperarm_l = FindFrame("upperarm_l");
@@ -903,15 +925,19 @@ CKnightObject::CKnightObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 		SPHERICALDesc.eSwing1 = true;
 		SPHERICALDesc.eSwing2 = true;
 		SPHERICALDesc.eTWIST = true;
-		SPHERICALDesc.eS1LImit.low = -physx::PxPi;
-		SPHERICALDesc.eS1LImit.high = physx::PxPi;
+		SPHERICALDesc.eS1LImit.low = -90.0f * physx::PxPi / 180.0f;
+		SPHERICALDesc.eS1LImit.high = 90.0f * physx::PxPi / 180.0f;
 		SPHERICALDesc.eS2LImit.low = -90.0f * physx::PxPi / 180.0f;
 		SPHERICALDesc.eS2LImit.high = 90.0f * physx::PxPi / 180.0f;
-		SPHERICALDesc.eTLImit.low = -physx::PxPi;
-		SPHERICALDesc.eTLImit.high = physx::PxPi;
+		SPHERICALDesc.eTLImit.low = -50.0f * physx::PxPi / 180.0f;
+		SPHERICALDesc.eTLImit.high = 150.0f * physx::PxPi / 180.0f;
+#ifdef _test_ragdoll
+		SetJoint(joint, SPHERICALDesc);
+#else
 		SetJoint(joint, FixDesc);
-		//SetJoint(joint, SPHERICALDesc);
+#endif // _test_ragdoll
 		DebugJointDot(upperarm_l_link);
+		m_pArtiLinkNames.emplace_back(target);
 
 		target = "lowerarm_l";
 		CGameObject* lowerarm_l = FindFrame("lowerarm_l");
@@ -919,8 +945,27 @@ CKnightObject::CKnightObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 		ChildMt = lowerarm_l->m_xmf4x4Transform;
 		physx::PxArticulationLink* lowerarm_l_link = SetLink(m_pArticulation, upperarm_l_link, MakeTransform(ParentMt), MakeTransform(ChildMt));
 		joint = lowerarm_l_link->getInboundJoint();
+		REVOLUTEDesc.eSwing1 = true;
+		REVOLUTEDesc.eSwing2 = false;
+		REVOLUTEDesc.eTWIST = false;
+		REVOLUTEDesc.eS1LImit.low = 0.0f * physx::PxPi / 180.0f;
+		REVOLUTEDesc.eS1LImit.high = 140.0f * physx::PxPi / 180.0f;
+		REVOLUTEDesc.eTDrive.driveType = physx::PxArticulationDriveType::eNONE;
+		REVOLUTEDesc.eTDrive.damping = 0.5f;
+		REVOLUTEDesc.eTDrive.stiffness = 0.5f;
+		REVOLUTEDesc.eS1Drive.driveType = physx::PxArticulationDriveType::eNONE;
+		REVOLUTEDesc.eS1Drive.damping = 0.5f;
+		REVOLUTEDesc.eS1Drive.stiffness = 0.5f;
+		REVOLUTEDesc.eS2Drive.driveType = physx::PxArticulationDriveType::eNONE;
+		REVOLUTEDesc.eS2Drive.damping = 0.5f;
+		REVOLUTEDesc.eS2Drive.stiffness = 0.5f;
+#ifdef _test_ragdoll
+		SetJoint(joint, REVOLUTEDesc);
+#else
 		SetJoint(joint, FixDesc);
+#endif // _test_ragdoll
 		DebugJointDot(lowerarm_l_link);
+		m_pArtiLinkNames.emplace_back(target);
 
 		target = "hand_l";
 		CGameObject* hand_l = FindFrame("hand_l");
@@ -928,8 +973,20 @@ CKnightObject::CKnightObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 		ChildMt = hand_l->m_xmf4x4Transform;
 		physx::PxArticulationLink* hand_l_link = SetLink(m_pArticulation, lowerarm_l_link, MakeTransform(ParentMt), MakeTransform(ChildMt));
 		joint = hand_l_link->getInboundJoint();
+		SPHERICALDesc.eSwing1 = true;
+		SPHERICALDesc.eSwing2 = true;
+		SPHERICALDesc.eTWIST = false;
+		SPHERICALDesc.eS1LImit.low = -20.0f * physx::PxPi / 180.0f;
+		SPHERICALDesc.eS1LImit.high = 20.0f * physx::PxPi / 180.0f;
+		SPHERICALDesc.eS2LImit.low = -70.0f * physx::PxPi / 180.0f;
+		SPHERICALDesc.eS2LImit.high = 80.0f * physx::PxPi / 180.0f;
+#ifdef _test_ragdoll
+		SetJoint(joint, SPHERICALDesc);
+#else
 		SetJoint(joint, FixDesc);
+#endif // _test_ragdoll
 		DebugJointDot(hand_l_link);
+		m_pArtiLinkNames.emplace_back(target);
 
 
 
@@ -941,6 +998,7 @@ CKnightObject::CKnightObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 		joint = clavicle_r_link->getInboundJoint();
 		SetJoint(joint, FixDesc);
 		DebugJointDot(clavicle_r_link);
+		m_pArtiLinkNames.emplace_back(target);
 
 		target = "upperarm_r";
 		CGameObject* upperarm_r = FindFrame("upperarm_r");
@@ -948,8 +1006,22 @@ CKnightObject::CKnightObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 		ChildMt = upperarm_r->m_xmf4x4Transform;
 		physx::PxArticulationLink* upperarm_r_link = SetLink(m_pArticulation, clavicle_r_link, MakeTransform(ParentMt), MakeTransform(ChildMt));
 		joint = upperarm_r_link->getInboundJoint();
+		SPHERICALDesc.eSwing1 = true;
+		SPHERICALDesc.eSwing2 = true;
+		SPHERICALDesc.eTWIST = true;
+		SPHERICALDesc.eS1LImit.low = -90.0f * physx::PxPi / 180.0f;
+		SPHERICALDesc.eS1LImit.high = 90.0f * physx::PxPi / 180.0f;
+		SPHERICALDesc.eS2LImit.low = -90.0f * physx::PxPi / 180.0f;
+		SPHERICALDesc.eS2LImit.high = 90.0f * physx::PxPi / 180.0f;
+		SPHERICALDesc.eTLImit.low = -50.0f * physx::PxPi / 180.0f;
+		SPHERICALDesc.eTLImit.high = 150.0f * physx::PxPi / 180.0f;
+#ifdef _test_ragdoll
+		SetJoint(joint, SPHERICALDesc);
+#else
 		SetJoint(joint, FixDesc);
+#endif // _test_ragdoll
 		DebugJointDot(upperarm_r_link);
+		m_pArtiLinkNames.emplace_back(target);
 
 		target = "lowerarm_r";
 		CGameObject* lowerarm_r = FindFrame("lowerarm_r");
@@ -957,8 +1029,27 @@ CKnightObject::CKnightObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 		ChildMt = lowerarm_r->m_xmf4x4Transform;
 		physx::PxArticulationLink* lowerarm_r_link = SetLink(m_pArticulation, upperarm_r_link, MakeTransform(ParentMt), MakeTransform(ChildMt));
 		joint = lowerarm_r_link->getInboundJoint();
+		REVOLUTEDesc.eSwing1 = true;
+		REVOLUTEDesc.eSwing2 = false;
+		REVOLUTEDesc.eTWIST = false;
+		REVOLUTEDesc.eS1LImit.low = 0.0f * physx::PxPi / 180.0f;
+		REVOLUTEDesc.eS1LImit.high = 140.0f * physx::PxPi / 180.0f;
+		REVOLUTEDesc.eTDrive.driveType = physx::PxArticulationDriveType::eNONE;
+		REVOLUTEDesc.eTDrive.damping = 0.5f;
+		REVOLUTEDesc.eTDrive.stiffness = 0.5f;
+		REVOLUTEDesc.eS1Drive.driveType = physx::PxArticulationDriveType::eNONE;
+		REVOLUTEDesc.eS1Drive.damping = 0.5f;
+		REVOLUTEDesc.eS1Drive.stiffness = 0.5f;
+		REVOLUTEDesc.eS2Drive.driveType = physx::PxArticulationDriveType::eNONE;
+		REVOLUTEDesc.eS2Drive.damping = 0.5f;
+		REVOLUTEDesc.eS2Drive.stiffness = 0.5f;
+#ifdef _test_ragdoll
+		SetJoint(joint, REVOLUTEDesc);
+#else
 		SetJoint(joint, FixDesc);
+#endif // _test_ragdoll
 		DebugJointDot(lowerarm_r_link);
+		m_pArtiLinkNames.emplace_back(target);
 
 		target = "hand_r";
 		CGameObject* hand_r = FindFrame("hand_r");
@@ -966,9 +1057,20 @@ CKnightObject::CKnightObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 		ChildMt = hand_r->m_xmf4x4Transform;
 		physx::PxArticulationLink* hand_r_ink = SetLink(m_pArticulation, lowerarm_r_link, MakeTransform(ParentMt), MakeTransform(ChildMt));
 		joint = hand_r_ink->getInboundJoint();
+		SPHERICALDesc.eSwing1 = true;
+		SPHERICALDesc.eSwing2 = true;
+		SPHERICALDesc.eTWIST = false;
+		SPHERICALDesc.eS1LImit.low = -20.0f * physx::PxPi / 180.0f;
+		SPHERICALDesc.eS1LImit.high = 20.0f * physx::PxPi / 180.0f;
+		SPHERICALDesc.eS2LImit.low = -70.0f * physx::PxPi / 180.0f;
+		SPHERICALDesc.eS2LImit.high = 80.0f * physx::PxPi / 180.0f;
+#ifdef _test_ragdoll
+		SetJoint(joint, SPHERICALDesc);
+#else
 		SetJoint(joint, FixDesc);
+#endif // _test_ragdoll
 		DebugJointDot(hand_r_ink);
-
+		m_pArtiLinkNames.emplace_back(target);
 
 
 		target = "thigh_l";
@@ -977,8 +1079,22 @@ CKnightObject::CKnightObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 		ChildMt = thigh_l->m_xmf4x4Transform;
 		physx::PxArticulationLink* thigh_l_link = SetLink(m_pArticulation, pelvis_link, MakeTransform(ParentMt), MakeTransform(ChildMt));
 		joint = thigh_l_link->getInboundJoint();
+		SPHERICALDesc.eSwing1 = true;
+		SPHERICALDesc.eSwing2 = true;
+		SPHERICALDesc.eTWIST = true;
+		SPHERICALDesc.eS1LImit.low = -20.0f * physx::PxPi / 180.0f;
+		SPHERICALDesc.eS1LImit.high = 45.0f * physx::PxPi / 180.0f;
+		SPHERICALDesc.eS2LImit.low = -110.0f * physx::PxPi / 180.0f;
+		SPHERICALDesc.eS2LImit.high = 40.0f * physx::PxPi / 180.0f;
+		SPHERICALDesc.eTLImit.low = -40.0f * physx::PxPi / 180.0f;
+		SPHERICALDesc.eTLImit.high = 40.0f * physx::PxPi / 180.0f;
+#ifdef _test_ragdoll
+		SetJoint(joint, SPHERICALDesc);
+#else
 		SetJoint(joint, FixDesc);
+#endif
 		DebugJointDot(thigh_l_link);
+		m_pArtiLinkNames.emplace_back(target);
 
 		target = "calf_l";
 		CGameObject* calf_l = FindFrame("calf_l");
@@ -986,8 +1102,27 @@ CKnightObject::CKnightObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 		ChildMt = calf_l->m_xmf4x4Transform;
 		physx::PxArticulationLink* calf_l_link = SetLink(m_pArticulation, thigh_l_link, MakeTransform(ParentMt), MakeTransform(ChildMt));
 		joint = calf_l_link->getInboundJoint();
+		REVOLUTEDesc.eSwing1 = false;
+		REVOLUTEDesc.eSwing2 = true;
+		REVOLUTEDesc.eTWIST = false;
+		REVOLUTEDesc.eS2LImit.low = 0.0f * physx::PxPi / 180.0f;
+		REVOLUTEDesc.eS2LImit.high = 140.0f * physx::PxPi / 180.0f;
+		REVOLUTEDesc.eTDrive.driveType = physx::PxArticulationDriveType::eNONE;
+		REVOLUTEDesc.eTDrive.damping = 0.5f;
+		REVOLUTEDesc.eTDrive.stiffness = 0.5f;
+		REVOLUTEDesc.eS1Drive.driveType = physx::PxArticulationDriveType::eNONE;
+		REVOLUTEDesc.eS1Drive.damping = 0.5f;
+		REVOLUTEDesc.eS1Drive.stiffness = 0.5f;
+		REVOLUTEDesc.eS2Drive.driveType = physx::PxArticulationDriveType::eNONE;
+		REVOLUTEDesc.eS2Drive.damping = 0.5f;
+		REVOLUTEDesc.eS2Drive.stiffness = 0.5f;
+#ifdef _test_ragdoll
+		SetJoint(joint, REVOLUTEDesc);
+#else
 		SetJoint(joint, FixDesc);
+#endif
 		DebugJointDot(calf_l_link);
+		m_pArtiLinkNames.emplace_back(target);
 
 		target = "foot_l";
 		CGameObject* foot_l = FindFrame("foot_l");
@@ -995,8 +1130,20 @@ CKnightObject::CKnightObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 		ChildMt = foot_l->m_xmf4x4Transform;
 		physx::PxArticulationLink* foot_l_link = SetLink(m_pArticulation, calf_l_link, MakeTransform(ParentMt), MakeTransform(ChildMt));
 		joint = foot_l_link->getInboundJoint();
+		SPHERICALDesc.eSwing1 = false;
+		SPHERICALDesc.eSwing2 = true;
+		SPHERICALDesc.eTWIST = true;
+		SPHERICALDesc.eS2LImit.low = -50.0f * physx::PxPi / 180.0f;
+		SPHERICALDesc.eS2LImit.high = 20.0f * physx::PxPi / 180.0f;
+		SPHERICALDesc.eTLImit.low = -30.0f * physx::PxPi / 180.0f;
+		SPHERICALDesc.eTLImit.high = 30.0f * physx::PxPi / 180.0f;
+#ifdef _test_ragdoll
+		SetJoint(joint, SPHERICALDesc);
+#else
 		SetJoint(joint, FixDesc);
+#endif
 		DebugJointDot(foot_l_link);
+		m_pArtiLinkNames.emplace_back(target);
 
 		target = "ball_l";
 		CGameObject* ball_l = FindFrame("ball_l");
@@ -1006,7 +1153,7 @@ CKnightObject::CKnightObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 		joint = ball_l_link->getInboundJoint();
 		SetJoint(joint, FixDesc);
 		DebugJointDot(ball_l_link);
-
+		m_pArtiLinkNames.emplace_back(target);
 
 
 		target = "thigh_r";
@@ -1015,8 +1162,22 @@ CKnightObject::CKnightObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 		ChildMt = thigh_r->m_xmf4x4Transform;
 		physx::PxArticulationLink* thigh_r_link = SetLink(m_pArticulation, pelvis_link, MakeTransform(ParentMt), MakeTransform(ChildMt));
 		joint = thigh_r_link->getInboundJoint();
+		SPHERICALDesc.eSwing1 = true;
+		SPHERICALDesc.eSwing2 = true;
+		SPHERICALDesc.eTWIST = true;
+		SPHERICALDesc.eS1LImit.low = -20.0f * physx::PxPi / 180.0f;
+		SPHERICALDesc.eS1LImit.high = 45.0f * physx::PxPi / 180.0f;
+		SPHERICALDesc.eS2LImit.low = -110.0f * physx::PxPi / 180.0f;
+		SPHERICALDesc.eS2LImit.high = 40.0f * physx::PxPi / 180.0f;
+		SPHERICALDesc.eTLImit.low = -40.0f * physx::PxPi / 180.0f;
+		SPHERICALDesc.eTLImit.high = 40.0f * physx::PxPi / 180.0f;
+#ifdef _test_ragdoll
+		SetJoint(joint, SPHERICALDesc);
+#else
 		SetJoint(joint, FixDesc);
+#endif
 		DebugJointDot(thigh_r_link);
+		m_pArtiLinkNames.emplace_back(target);
 
 		target = "calf_r";
 		CGameObject* calf_r = FindFrame("calf_r");
@@ -1024,8 +1185,27 @@ CKnightObject::CKnightObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 		ChildMt = calf_r->m_xmf4x4Transform;
 		physx::PxArticulationLink* calf_r_link = SetLink(m_pArticulation, thigh_r_link, MakeTransform(ParentMt), MakeTransform(ChildMt));
 		joint = calf_r_link->getInboundJoint();
+		REVOLUTEDesc.eSwing1 = false;
+		REVOLUTEDesc.eSwing2 = true;
+		REVOLUTEDesc.eTWIST = false;
+		REVOLUTEDesc.eS2LImit.low = 0.0f * physx::PxPi / 180.0f;
+		REVOLUTEDesc.eS2LImit.high = 140.0f * physx::PxPi / 180.0f;
+		REVOLUTEDesc.eTDrive.driveType = physx::PxArticulationDriveType::eNONE;
+		REVOLUTEDesc.eTDrive.damping = 0.5f;
+		REVOLUTEDesc.eTDrive.stiffness = 0.5f;
+		REVOLUTEDesc.eS1Drive.driveType = physx::PxArticulationDriveType::eNONE;
+		REVOLUTEDesc.eS1Drive.damping = 0.5f;
+		REVOLUTEDesc.eS1Drive.stiffness = 0.5f;
+		REVOLUTEDesc.eS2Drive.driveType = physx::PxArticulationDriveType::eNONE;
+		REVOLUTEDesc.eS2Drive.damping = 0.5f;
+		REVOLUTEDesc.eS2Drive.stiffness = 0.5f;
+#ifdef _test_ragdoll
+		SetJoint(joint, REVOLUTEDesc);
+#else
 		SetJoint(joint, FixDesc);
+#endif
 		DebugJointDot(calf_r_link);
+		m_pArtiLinkNames.emplace_back(target);
 
 		target = "foot_r";
 		CGameObject* foot_r = FindFrame("foot_r");
@@ -1033,8 +1213,20 @@ CKnightObject::CKnightObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 		ChildMt = foot_r->m_xmf4x4Transform;
 		physx::PxArticulationLink* foot_r_link = SetLink(m_pArticulation, calf_r_link, MakeTransform(ParentMt), MakeTransform(ChildMt));
 		joint = foot_r_link->getInboundJoint();
+		SPHERICALDesc.eSwing1 = false;
+		SPHERICALDesc.eSwing2 = true;
+		SPHERICALDesc.eTWIST = true;
+		SPHERICALDesc.eS2LImit.low = -50.0f * physx::PxPi / 180.0f;
+		SPHERICALDesc.eS2LImit.high = 20.0f * physx::PxPi / 180.0f;
+		SPHERICALDesc.eTLImit.low = -30.0f * physx::PxPi / 180.0f;
+		SPHERICALDesc.eTLImit.high = 30.0f * physx::PxPi / 180.0f;
+#ifdef _test_ragdoll
+		SetJoint(joint, SPHERICALDesc);
+#else
 		SetJoint(joint, FixDesc);
+#endif
 		DebugJointDot(foot_r_link);
+		m_pArtiLinkNames.emplace_back(target);
 
 		target = "ball_r";
 		CGameObject* ball_r = FindFrame("ball_r");
@@ -1044,8 +1236,20 @@ CKnightObject::CKnightObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 		joint = ball_r_link->getInboundJoint();
 		SetJoint(joint, FixDesc);
 		DebugJointDot(ball_l_link);
+		m_pArtiLinkNames.emplace_back(target);
+
+
+
 
 		Locator.GetPxScene()->addArticulation(*m_pArticulation);
+
+		physx::PxU32 nbLinks = m_pArticulation->getNbLinks();
+		m_pArticulationLinks.resize(nbLinks);
+		m_pArticulation->getLinks(m_pArticulationLinks.data(), nbLinks, 0);
+
+		m_pArticulationCache = m_pArticulation->createCache();
+		m_nArtiCache = m_pArticulation->getCacheDataSize();
+		m_bSimulateArticulate = true;
 	}
 
 	if (test == 0) {
@@ -1112,19 +1316,39 @@ bool CKnightObject::CheckCollision(CGameObject* pTargetObject)
 }
 void CKnightObject::Animate(float fTimeElapsed)
 {
-	CGameObject::Animate(fTimeElapsed);
-	if (Rigid) {
-		physx::PxRigidDynamic* actor = (physx::PxRigidDynamic*)Rigid;
-		physx::PxTransform transform = actor->getGlobalPose();
+	if (m_bSimulateArticulate) {
+		int index = 0;
+		UpdateTransform(NULL);
 
-		physx::PxMat44 Matrix(transform);
-		Matrix = Matrix.inverseRT();
-		m_pChild->m_xmf4x4Transform._11 = Matrix.column0.x; m_pChild->m_xmf4x4Transform._12 = Matrix.column0.y; m_pChild->m_xmf4x4Transform._13 = Matrix.column0.z;
-		m_pChild->m_xmf4x4Transform._21 = Matrix.column1.x; m_pChild->m_xmf4x4Transform._22 = Matrix.column1.y; m_pChild->m_xmf4x4Transform._23 = Matrix.column1.z;
-		m_pChild->m_xmf4x4Transform._31 = Matrix.column2.x; m_pChild->m_xmf4x4Transform._32 = Matrix.column2.y; m_pChild->m_xmf4x4Transform._33 = Matrix.column2.z;
-		//m_xmf4x4World._41 = Matrix.column3.x; m_xmf4x4World._42 = Matrix.column3.y; m_xmf4x4World._43 = Matrix.column3.z; m_xmf4x4World._44 = Matrix.column3.w;
-		SetPosition(XMFLOAT3(transform.p.x, transform.p.y, transform.p.z));
+		for (std::string& frameName : m_pArtiLinkNames) {
+			if (index == 0)
+				continue;
+			CGameObject* obj = FindFrame(frameName.c_str());
+			physx::PxTransform transform = m_pArticulationLinks[index]->getInboundJoint()->getChildPose();
+			physx::PxMat44 World = physx::PxMat44(transform);
+
+			memcpy(&obj->m_xmf4x4Transform, &World, sizeof(XMFLOAT4X4));
+			obj->m_xmf4x4Transform = Matrix4x4::Scale(obj->m_xmf4x4Transform, 5.0f);
+			index++;
+		}
+
 	}
+	else {
+		CGameObject::Animate(fTimeElapsed);
+		if (Rigid) {
+			physx::PxRigidDynamic* actor = (physx::PxRigidDynamic*)Rigid;
+			physx::PxTransform transform = actor->getGlobalPose();
+
+			physx::PxMat44 Matrix(transform);
+			Matrix = Matrix.inverseRT();
+			m_pChild->m_xmf4x4Transform._11 = Matrix.column0.x; m_pChild->m_xmf4x4Transform._12 = Matrix.column0.y; m_pChild->m_xmf4x4Transform._13 = Matrix.column0.z;
+			m_pChild->m_xmf4x4Transform._21 = Matrix.column1.x; m_pChild->m_xmf4x4Transform._22 = Matrix.column1.y; m_pChild->m_xmf4x4Transform._23 = Matrix.column1.z;
+			m_pChild->m_xmf4x4Transform._31 = Matrix.column2.x; m_pChild->m_xmf4x4Transform._32 = Matrix.column2.y; m_pChild->m_xmf4x4Transform._33 = Matrix.column2.z;
+			//m_xmf4x4World._41 = Matrix.column3.x; m_xmf4x4World._42 = Matrix.column3.y; m_xmf4x4World._43 = Matrix.column3.z; m_xmf4x4World._44 = Matrix.column3.w;
+			SetPosition(XMFLOAT3(transform.p.x, transform.p.y, transform.p.z));
+		}
+	}
+	
 }
 void CKnightObject::UpdateTransform(XMFLOAT4X4* pxmf4x4Parent)
 {
