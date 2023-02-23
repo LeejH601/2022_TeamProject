@@ -625,7 +625,7 @@ CKnightObject::CKnightObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 	auto SetLink = [](physx::PxArticulationReducedCoordinate* articulation, physx::PxArticulationLink* p_link, physx::PxTransform& parent, physx::PxTransform& child)
 	{
 		physx::PxArticulationLink* link = articulation->createLink(p_link, child);
-		physx::PxBoxGeometry linkGeometry = physx::PxBoxGeometry(0.05f, 0.05f, 0.05f);
+		physx::PxBoxGeometry linkGeometry = physx::PxBoxGeometry(0.03f, 0.03f, 0.03f);
 		physx::PxMaterial* material = Locator.GetPxPhysics()->createMaterial(0.5, 0.5, 0.5);
 		physx::PxRigidActorExt::createExclusiveShape(*link, linkGeometry, *material);
 		physx::PxRigidBodyExt::updateMassAndInertia(*link, 1.0f);
@@ -636,12 +636,12 @@ CKnightObject::CKnightObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 	auto SetJointRevolute = [](physx::PxArticulationJointReducedCoordinate* joint) {
 		joint->setJointType(physx::PxArticulationJointType::eREVOLUTE);
 		joint->setMotion(physx::PxArticulationAxis::eSWING1, physx::PxArticulationMotion::eLIMITED);
-	
+
 		physx::PxArticulationLimit limits;
 		limits.low = -physx::PxPiDivFour;  // in rad for a rotational motion
 		limits.high = physx::PxPiDivFour;
 		joint->setLimitParams(physx::PxArticulationAxis::eSWING1, limits);
-	
+
 
 		physx::PxArticulationDrive posDrive;
 		posDrive.stiffness = 0.5f;                      // the spring constant driving the joint to a target position
@@ -651,33 +651,125 @@ CKnightObject::CKnightObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 		// apply and set targets (note again the consistent axis)
 		joint->setDriveParams(physx::PxArticulationAxis::eSWING1, posDrive);
 		joint->setDriveVelocity(physx::PxArticulationAxis::eSWING1, 0.0f);
-		
+
 	};
 
-	auto SetJointSpherical = [](physx::PxArticulationJointReducedCoordinate* joint) {
-		joint->setJointType(physx::PxArticulationJointType::eSPHERICAL);
-		joint->setMotion(physx::PxArticulationAxis::eSWING1, physx::PxArticulationMotion::eLIMITED);
-		joint->setMotion(physx::PxArticulationAxis::eSWING2, physx::PxArticulationMotion::eLIMITED);
-		joint->setMotion(physx::PxArticulationAxis::eTWIST, physx::PxArticulationMotion::eLIMITED);
-		physx::PxArticulationLimit limits;
-		limits.low = -physx::PxPiDivFour;  // in rad for a rotational motion
-		limits.high = physx::PxPiDivFour;
-		joint->setLimitParams(physx::PxArticulationAxis::eSWING1, limits);
-		joint->setLimitParams(physx::PxArticulationAxis::eSWING2, limits);
-		joint->setLimitParams(physx::PxArticulationAxis::eTWIST, limits);
+	struct JointAxisDesc {
+		physx::PxArticulationJointType::Enum type;
 
-		physx::PxArticulationDrive posDrive;
-		posDrive.stiffness = 0.5f;                      // the spring constant driving the joint to a target position
-		posDrive.damping = 0.5f;;                        // the damping coefficient driving the joint to a target velocity
-		posDrive.maxForce = FLT_MAX;                        // force limit for the drive
-		posDrive.driveType = physx::PxArticulationDriveType::eFORCE;    // make the drive output be a force/torque (default)
+		bool eSwing1;
+		bool eSwing2;
+		bool eTWIST;
+
+		physx::PxArticulationLimit eS1LImit;
+		physx::PxArticulationLimit eS2LImit;
+		physx::PxArticulationLimit eTLImit;
+
+		physx::PxArticulationDrive eS1Drive;
+		physx::PxArticulationDrive eS2Drive;
+		physx::PxArticulationDrive eTDrive;
+	};
+
+	auto SetJoint = [](physx::PxArticulationJointReducedCoordinate* joint, JointAxisDesc& JointDesc) {
+		int AxisCnt = 0;
+		switch (JointDesc.type)
+		{
+		case physx::PxArticulationJointType::eSPHERICAL:
+			joint->setJointType(physx::PxArticulationJointType::eSPHERICAL);
+			if (JointDesc.eSwing1) {
+				joint->setMotion(physx::PxArticulationAxis::eSWING1, physx::PxArticulationMotion::eLIMITED);
+				joint->setLimitParams(physx::PxArticulationAxis::eSWING1, JointDesc.eS1LImit);
+				joint->setDriveParams(physx::PxArticulationAxis::eSWING1, JointDesc.eS1Drive);
+				AxisCnt++;
+			}
+			if (JointDesc.eSwing2) {
+				joint->setMotion(physx::PxArticulationAxis::eSWING2, physx::PxArticulationMotion::eLIMITED);
+				joint->setLimitParams(physx::PxArticulationAxis::eSWING2, JointDesc.eS2LImit);
+				joint->setDriveParams(physx::PxArticulationAxis::eSWING2, JointDesc.eS2Drive);
+				AxisCnt++;
+			}
+			if (JointDesc.eTWIST) {
+				joint->setMotion(physx::PxArticulationAxis::eTWIST, physx::PxArticulationMotion::eLIMITED);
+				joint->setLimitParams(physx::PxArticulationAxis::eTWIST, JointDesc.eTLImit);
+				joint->setDriveParams(physx::PxArticulationAxis::eTWIST, JointDesc.eTDrive);
+				AxisCnt++;
+			}
+			if (AxisCnt < 2) {
+				TCHAR pstrDebug[256] = { 0 };
+				_stprintf_s(pstrDebug, 256, _T("error!!! Insufficient number of rotational axes set.\n"));
+				OutputDebugString(pstrDebug);
+			}
+			break;
+		case physx::PxArticulationJointType::eREVOLUTE:
+			joint->setJointType(physx::PxArticulationJointType::eREVOLUTE);
+			if (JointDesc.eSwing1) {
+				joint->setMotion(physx::PxArticulationAxis::eSWING1, physx::PxArticulationMotion::eLIMITED);
+				joint->setLimitParams(physx::PxArticulationAxis::eSWING1, JointDesc.eS1LImit);
+				joint->setDriveParams(physx::PxArticulationAxis::eSWING1, JointDesc.eS1Drive);
+				AxisCnt++;
+			}
+			if (JointDesc.eSwing2) {
+				joint->setMotion(physx::PxArticulationAxis::eSWING2, physx::PxArticulationMotion::eLIMITED);
+				joint->setLimitParams(physx::PxArticulationAxis::eSWING2, JointDesc.eS2LImit);
+				joint->setDriveParams(physx::PxArticulationAxis::eSWING2, JointDesc.eS2Drive);
+				AxisCnt++;
+			}
+			if (JointDesc.eTWIST) {
+				joint->setMotion(physx::PxArticulationAxis::eTWIST, physx::PxArticulationMotion::eLIMITED);
+				joint->setLimitParams(physx::PxArticulationAxis::eTWIST, JointDesc.eTLImit);
+				joint->setDriveParams(physx::PxArticulationAxis::eTWIST, JointDesc.eTDrive);
+				AxisCnt++;
+			}
+			if (AxisCnt > 1) {
+				TCHAR pstrDebug[256] = { 0 };
+				_stprintf_s(pstrDebug, 256, _T("error!!! Too many rotational axes set.\n"));
+				OutputDebugString(pstrDebug);
+			}
+			break;
+		case physx::PxArticulationJointType::eFIX:
+			joint->setJointType(physx::PxArticulationJointType::eFIX);
+			/*if (JointDesc.eSwing1) {
+				joint->setMotion(physx::PxArticulationAxis::eSWING1, physx::PxArticulationMotion::eLIMITED);
+				joint->setLimitParams(physx::PxArticulationAxis::eSWING1, JointDesc.eS1LImit);
+				joint->setDriveParams(physx::PxArticulationAxis::eSWING1, JointDesc.eS1Drive);
+				AxisCnt++;
+			}
+			if (JointDesc.eSwing2) {
+				joint->setMotion(physx::PxArticulationAxis::eSWING2, physx::PxArticulationMotion::eLIMITED);
+				joint->setLimitParams(physx::PxArticulationAxis::eSWING2, JointDesc.eS2LImit);
+				joint->setDriveParams(physx::PxArticulationAxis::eSWING2, JointDesc.eS2Drive);
+				AxisCnt++;
+			}
+			if (JointDesc.eTWIST) {
+				joint->setMotion(physx::PxArticulationAxis::eTWIST, physx::PxArticulationMotion::eLIMITED);
+				joint->setLimitParams(physx::PxArticulationAxis::eTWIST, JointDesc.eTLImit);
+				joint->setDriveParams(physx::PxArticulationAxis::eTWIST, JointDesc.eTDrive);
+				AxisCnt++;
+			}*/
+			if (AxisCnt > 0) {
+				TCHAR pstrDebug[256] = { 0 };
+				_stprintf_s(pstrDebug, 256, _T("error!!! Too many rotational axes set.\n"));
+				OutputDebugString(pstrDebug);
+			}
+			break;
+		default:
+			TCHAR pstrDebug[256] = { 0 };
+			_stprintf_s(pstrDebug, 256, _T("error!!! Invalid descriptor.\n"));
+			OutputDebugString(pstrDebug);
+			return;
+		}
+		//physx::PxArticulationLimit limits;
+		//limits.low = -physx::PxPiDivFour;  // in rad for a rotational motion
+		//limits.high = physx::PxPiDivFour;
+		
+
+		//physx::PxArticulationDrive posDrive;
+		//posDrive.stiffness = 0.5f;                      // the spring constant driving the joint to a target position
+		//posDrive.damping = 0.5f;;                        // the damping coefficient driving the joint to a target velocity
+		//posDrive.maxForce = FLT_MAX;                        // force limit for the drive
+		//posDrive.driveType = physx::PxArticulationDriveType::eFORCE;    // make the drive output be a force/torque (default)
 		// apply and set targets (note again the consistent axis)
-		joint->setDriveParams(physx::PxArticulationAxis::eSWING1, posDrive);
-		joint->setDriveVelocity(physx::PxArticulationAxis::eSWING1, 0.0f);
-		joint->setDriveParams(physx::PxArticulationAxis::eSWING2, posDrive);
-		joint->setDriveVelocity(physx::PxArticulationAxis::eSWING2, 0.0f);
-		joint->setDriveParams(physx::PxArticulationAxis::eTWIST, posDrive);
-		joint->setDriveVelocity(physx::PxArticulationAxis::eTWIST, 0.0f);
+		
 	};
 
 	auto DebugJointDot = [](physx::PxArticulationLink* link) {
@@ -701,6 +793,16 @@ CKnightObject::CKnightObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 		physx::PxVec4 scale{ 1.0f, 1.0f,1.0f,1.0f };
 		scaleMatrix.scale(scale);
 
+		JointAxisDesc FixDesc;
+		FixDesc.type = physx::PxArticulationJointType::eFIX;
+		JointAxisDesc SPHERICALDesc;
+		SPHERICALDesc.type = physx::PxArticulationJointType::eSPHERICAL;
+		SPHERICALDesc.eSwing1 = true;
+		SPHERICALDesc.eSwing2 = true;
+		SPHERICALDesc.eTWIST = true;
+		JointAxisDesc REVOLUTEDesc;
+		REVOLUTEDesc.type = physx::PxArticulationJointType::eREVOLUTE;
+
 		std::string target{ "pelvis" };
 		CGameObject* pelvis = FindFrame("pelvis");
 		XMFLOAT4X4 ParentMt = Matrix4x4::Identity();
@@ -715,8 +817,8 @@ CKnightObject::CKnightObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 		ParentMt = pelvis->m_xmf4x4Transform;
 		ChildMt = spine_01->m_xmf4x4Transform;
 		physx::PxArticulationLink* Spine01_link = SetLink(m_pArticulation, pelvis_link, MakeTransform(ParentMt), MakeTransform(ChildMt));
-		joint  = Spine01_link->getInboundJoint();
-		SetJointRevolute(joint);
+		joint = Spine01_link->getInboundJoint();
+		SetJoint(joint, FixDesc);
 		DebugJointDot(Spine01_link);
 
 		target = "spine_02";
@@ -725,7 +827,7 @@ CKnightObject::CKnightObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 		ChildMt = spine_02->m_xmf4x4Transform;
 		physx::PxArticulationLink* Spine02_link = SetLink(m_pArticulation, Spine01_link, MakeTransform(ParentMt), MakeTransform(ChildMt));
 		joint = Spine02_link->getInboundJoint();
-		SetJointRevolute(joint);
+		SetJoint(joint, FixDesc);
 		DebugJointDot(Spine02_link);
 
 		target = "spine_03";
@@ -734,7 +836,7 @@ CKnightObject::CKnightObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 		ChildMt = spine_03->m_xmf4x4Transform;
 		physx::PxArticulationLink* Spine03_link = SetLink(m_pArticulation, Spine02_link, MakeTransform(ParentMt), MakeTransform(ChildMt));
 		joint = Spine03_link->getInboundJoint();
-		SetJointRevolute(joint);
+		SetJoint(joint, FixDesc);
 		DebugJointDot(Spine03_link);
 
 		Mesh->m_ppstrSkinningBoneNames;
@@ -745,7 +847,23 @@ CKnightObject::CKnightObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 		ChildMt = neck_01->m_xmf4x4Transform;
 		physx::PxArticulationLink* neck_link = SetLink(m_pArticulation, Spine03_link, MakeTransform(ParentMt), MakeTransform(ChildMt));
 		joint = neck_link->getInboundJoint();
-		SetJointSpherical(joint);
+		SPHERICALDesc.eTLImit.low = -40.0f * physx::PxPi / 180.0f;
+		SPHERICALDesc.eTLImit.high = 40.0f * physx::PxPi / 180.0f;
+		SPHERICALDesc.eS1LImit.low = -40.0f * physx::PxPi / 180.0f;
+		SPHERICALDesc.eS1LImit.high = 40.0f * physx::PxPi / 180.0f;
+		SPHERICALDesc.eS2LImit.low = -80.0f * physx::PxPi / 180.0f;
+		SPHERICALDesc.eS2LImit.high = 70.0f * physx::PxPi / 180.0f;
+		SPHERICALDesc.eTDrive.driveType = physx::PxArticulationDriveType::eNONE;
+		SPHERICALDesc.eTDrive.damping = 0.5f;
+		SPHERICALDesc.eTDrive.stiffness = 0.5f;
+		SPHERICALDesc.eS1Drive.driveType = physx::PxArticulationDriveType::eNONE;
+		SPHERICALDesc.eS1Drive.damping = 0.5f;
+		SPHERICALDesc.eS1Drive.stiffness = 0.5f;
+		SPHERICALDesc.eS2Drive.driveType = physx::PxArticulationDriveType::eNONE;
+		SPHERICALDesc.eS2Drive.damping = 0.5f;
+		SPHERICALDesc.eS2Drive.stiffness = 0.5f;
+		//SetJointRevolute(joint);
+		SetJoint(joint, SPHERICALDesc);
 		DebugJointDot(neck_link);
 
 		target = "head";
@@ -754,8 +872,17 @@ CKnightObject::CKnightObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 		ChildMt = head->m_xmf4x4Transform;
 		physx::PxArticulationLink* head_link = SetLink(m_pArticulation, neck_link, MakeTransform(ParentMt), MakeTransform(ChildMt));
 		joint = head_link->getInboundJoint();
-		SetJointSpherical(joint);
+		SPHERICALDesc.eSwing1 = true;
+		SPHERICALDesc.eSwing2 = false;
+		SPHERICALDesc.eTWIST = true;
+		SPHERICALDesc.eS1LImit.low = -40.0f * physx::PxPi / 180.0f;
+		SPHERICALDesc.eS1LImit.high = 40.0f * physx::PxPi / 180.0f;
+		SPHERICALDesc.eTLImit.low = -60.0f * physx::PxPi / 180.0f;
+		SPHERICALDesc.eTLImit.high = 70.0f * physx::PxPi / 180.0f;
+		SetJoint(joint, FixDesc);
+		//SetJoint(joint, SPHERICALDesc);
 		DebugJointDot(head_link);
+
 
 
 		target = "clavicle_l";
@@ -764,15 +891,8 @@ CKnightObject::CKnightObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 		ChildMt = clavicle_l->m_xmf4x4Transform;
 		physx::PxArticulationLink* clavicle_l_link = SetLink(m_pArticulation, Spine03_link, MakeTransform(ParentMt), MakeTransform(ChildMt));
 		joint = clavicle_l_link->getInboundJoint();
-		SetJointRevolute(joint);
+		SetJoint(joint, FixDesc);
 		DebugJointDot(clavicle_l_link);
-		
-
-		/*target = "lowerarm_twist_0";
-		CGameObject* clavicle_l = FindFrame("clavicle_l");
-		ParentMt = spine_03->m_xmf4x4Transform;
-		ChildMt = clavicle_l->m_xmf4x4Transform;
-		physx::PxArticulationLink* clavicle_l_link = SetLink(m_pArticulation, Spine03_link, MakeTransform(ParentMt), MakeTransform(ChildMt));*/
 
 		target = "upperarm_l";
 		CGameObject* upperarm_l = FindFrame("upperarm_l");
@@ -780,7 +900,17 @@ CKnightObject::CKnightObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 		ChildMt = upperarm_l->m_xmf4x4Transform;
 		physx::PxArticulationLink* upperarm_l_link = SetLink(m_pArticulation, clavicle_l_link, MakeTransform(ParentMt), MakeTransform(ChildMt));
 		joint = upperarm_l_link->getInboundJoint();
-		SetJointSpherical(joint);
+		SPHERICALDesc.eSwing1 = true;
+		SPHERICALDesc.eSwing2 = true;
+		SPHERICALDesc.eTWIST = true;
+		SPHERICALDesc.eS1LImit.low = -physx::PxPi;
+		SPHERICALDesc.eS1LImit.high = physx::PxPi;
+		SPHERICALDesc.eS2LImit.low = -90.0f * physx::PxPi / 180.0f;
+		SPHERICALDesc.eS2LImit.high = 90.0f * physx::PxPi / 180.0f;
+		SPHERICALDesc.eTLImit.low = -physx::PxPi;
+		SPHERICALDesc.eTLImit.high = physx::PxPi;
+		SetJoint(joint, FixDesc);
+		//SetJoint(joint, SPHERICALDesc);
 		DebugJointDot(upperarm_l_link);
 
 		target = "lowerarm_l";
@@ -789,7 +919,7 @@ CKnightObject::CKnightObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 		ChildMt = lowerarm_l->m_xmf4x4Transform;
 		physx::PxArticulationLink* lowerarm_l_link = SetLink(m_pArticulation, upperarm_l_link, MakeTransform(ParentMt), MakeTransform(ChildMt));
 		joint = lowerarm_l_link->getInboundJoint();
-		SetJointRevolute(joint);
+		SetJoint(joint, FixDesc);
 		DebugJointDot(lowerarm_l_link);
 
 		target = "hand_l";
@@ -798,7 +928,7 @@ CKnightObject::CKnightObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 		ChildMt = hand_l->m_xmf4x4Transform;
 		physx::PxArticulationLink* hand_l_link = SetLink(m_pArticulation, lowerarm_l_link, MakeTransform(ParentMt), MakeTransform(ChildMt));
 		joint = hand_l_link->getInboundJoint();
-		SetJointSpherical(joint);
+		SetJoint(joint, FixDesc);
 		DebugJointDot(hand_l_link);
 
 
@@ -809,7 +939,7 @@ CKnightObject::CKnightObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 		ChildMt = clavicle_r->m_xmf4x4Transform;
 		physx::PxArticulationLink* clavicle_r_link = SetLink(m_pArticulation, Spine03_link, MakeTransform(ParentMt), MakeTransform(ChildMt));
 		joint = clavicle_r_link->getInboundJoint();
-		SetJointRevolute(joint);
+		SetJoint(joint, FixDesc);
 		DebugJointDot(clavicle_r_link);
 
 		target = "upperarm_r";
@@ -818,9 +948,8 @@ CKnightObject::CKnightObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 		ChildMt = upperarm_r->m_xmf4x4Transform;
 		physx::PxArticulationLink* upperarm_r_link = SetLink(m_pArticulation, clavicle_r_link, MakeTransform(ParentMt), MakeTransform(ChildMt));
 		joint = upperarm_r_link->getInboundJoint();
-		SetJointSpherical(joint);
+		SetJoint(joint, FixDesc);
 		DebugJointDot(upperarm_r_link);
-
 
 		target = "lowerarm_r";
 		CGameObject* lowerarm_r = FindFrame("lowerarm_r");
@@ -828,7 +957,7 @@ CKnightObject::CKnightObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 		ChildMt = lowerarm_r->m_xmf4x4Transform;
 		physx::PxArticulationLink* lowerarm_r_link = SetLink(m_pArticulation, upperarm_r_link, MakeTransform(ParentMt), MakeTransform(ChildMt));
 		joint = lowerarm_r_link->getInboundJoint();
-		SetJointRevolute(joint);
+		SetJoint(joint, FixDesc);
 		DebugJointDot(lowerarm_r_link);
 
 		target = "hand_r";
@@ -837,16 +966,10 @@ CKnightObject::CKnightObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 		ChildMt = hand_r->m_xmf4x4Transform;
 		physx::PxArticulationLink* hand_r_ink = SetLink(m_pArticulation, lowerarm_r_link, MakeTransform(ParentMt), MakeTransform(ChildMt));
 		joint = hand_r_ink->getInboundJoint();
-		SetJointSpherical(joint);
+		SetJoint(joint, FixDesc);
 		DebugJointDot(hand_r_ink);
 
 
-
-	/*	target = "thigh_twist_01_l";
-		CGameObject* thigh_twist_01_l = FindFrame("thigh_twist_01_l");
-		ParentMt = pelvis->m_xmf4x4Transform;
-		ChildMt = thigh_twist_01_l->m_xmf4x4Transform;
-		physx::PxArticulationLink* thigh_twist_01_l_link = SetLink(m_pArticulation, pelvis_link, MakeTransform(ParentMt), MakeTransform(ChildMt));*/
 
 		target = "thigh_l";
 		CGameObject* thigh_l = FindFrame("thigh_l");
@@ -854,7 +977,7 @@ CKnightObject::CKnightObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 		ChildMt = thigh_l->m_xmf4x4Transform;
 		physx::PxArticulationLink* thigh_l_link = SetLink(m_pArticulation, pelvis_link, MakeTransform(ParentMt), MakeTransform(ChildMt));
 		joint = thigh_l_link->getInboundJoint();
-		SetJointSpherical(joint);
+		SetJoint(joint, FixDesc);
 		DebugJointDot(thigh_l_link);
 
 		target = "calf_l";
@@ -863,14 +986,8 @@ CKnightObject::CKnightObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 		ChildMt = calf_l->m_xmf4x4Transform;
 		physx::PxArticulationLink* calf_l_link = SetLink(m_pArticulation, thigh_l_link, MakeTransform(ParentMt), MakeTransform(ChildMt));
 		joint = calf_l_link->getInboundJoint();
-		SetJointRevolute(joint);
+		SetJoint(joint, FixDesc);
 		DebugJointDot(calf_l_link);
-
-		/*target = "calf_twist_01_l";
-		CGameObject* calf_twist_01_l = FindFrame("calf_twist_01_l");
-		ParentMt = calf_l->m_xmf4x4Transform;
-		ChildMt = calf_twist_01_l->m_xmf4x4Transform;
-		physx::PxArticulationLink* calf_twist_01_l_link = SetLink(m_pArticulation, calf_l_link, MakeTransform(ParentMt), MakeTransform(ChildMt));*/
 
 		target = "foot_l";
 		CGameObject* foot_l = FindFrame("foot_l");
@@ -878,7 +995,7 @@ CKnightObject::CKnightObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 		ChildMt = foot_l->m_xmf4x4Transform;
 		physx::PxArticulationLink* foot_l_link = SetLink(m_pArticulation, calf_l_link, MakeTransform(ParentMt), MakeTransform(ChildMt));
 		joint = foot_l_link->getInboundJoint();
-		SetJointSpherical(joint);
+		SetJoint(joint, FixDesc);
 		DebugJointDot(foot_l_link);
 
 		target = "ball_l";
@@ -887,15 +1004,10 @@ CKnightObject::CKnightObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 		ChildMt = ball_l->m_xmf4x4Transform;
 		physx::PxArticulationLink* ball_l_link = SetLink(m_pArticulation, foot_l_link, MakeTransform(ParentMt), MakeTransform(ChildMt));
 		joint = ball_l_link->getInboundJoint();
-		SetJointRevolute(joint);
+		SetJoint(joint, FixDesc);
 		DebugJointDot(ball_l_link);
 
 
-		/*target = "thigh_twist_01_r";
-		CGameObject* thigh_twist_01_r = FindFrame("thigh_twist_01_r");
-		ParentMt = pelvis->m_xmf4x4Transform;
-		ChildMt = thigh_twist_01_r->m_xmf4x4Transform;
-		physx::PxArticulationLink* thigh_twist_01_r_link = SetLink(m_pArticulation, pelvis_link, MakeTransform(ParentMt), MakeTransform(ChildMt));*/
 
 		target = "thigh_r";
 		CGameObject* thigh_r = FindFrame("thigh_r");
@@ -903,7 +1015,7 @@ CKnightObject::CKnightObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 		ChildMt = thigh_r->m_xmf4x4Transform;
 		physx::PxArticulationLink* thigh_r_link = SetLink(m_pArticulation, pelvis_link, MakeTransform(ParentMt), MakeTransform(ChildMt));
 		joint = thigh_r_link->getInboundJoint();
-		SetJointSpherical(joint);
+		SetJoint(joint, FixDesc);
 		DebugJointDot(thigh_r_link);
 
 		target = "calf_r";
@@ -912,14 +1024,8 @@ CKnightObject::CKnightObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 		ChildMt = calf_r->m_xmf4x4Transform;
 		physx::PxArticulationLink* calf_r_link = SetLink(m_pArticulation, thigh_r_link, MakeTransform(ParentMt), MakeTransform(ChildMt));
 		joint = calf_r_link->getInboundJoint();
-		SetJointRevolute(joint);
+		SetJoint(joint, FixDesc);
 		DebugJointDot(calf_r_link);
-
-		/*target = "calf_twist_01_r";
-		CGameObject* calf_twist_01_r = FindFrame("calf_twist_01_r");
-		ParentMt = calf_r->m_xmf4x4Transform;
-		ChildMt = calf_twist_01_r->m_xmf4x4Transform;
-		physx::PxArticulationLink* calf_twist_01_r_link = SetLink(m_pArticulation, calf_r_link, MakeTransform(ParentMt), MakeTransform(ChildMt));*/
 
 		target = "foot_r";
 		CGameObject* foot_r = FindFrame("foot_r");
@@ -927,7 +1033,7 @@ CKnightObject::CKnightObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 		ChildMt = foot_r->m_xmf4x4Transform;
 		physx::PxArticulationLink* foot_r_link = SetLink(m_pArticulation, calf_r_link, MakeTransform(ParentMt), MakeTransform(ChildMt));
 		joint = foot_r_link->getInboundJoint();
-		SetJointSpherical(joint);
+		SetJoint(joint, FixDesc);
 		DebugJointDot(foot_r_link);
 
 		target = "ball_r";
@@ -936,7 +1042,7 @@ CKnightObject::CKnightObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 		ChildMt = ball_r->m_xmf4x4Transform;
 		physx::PxArticulationLink* ball_r_link = SetLink(m_pArticulation, foot_r_link, MakeTransform(ParentMt), MakeTransform(ChildMt));
 		joint = ball_r_link->getInboundJoint();
-		SetJointRevolute(joint);
+		SetJoint(joint, FixDesc);
 		DebugJointDot(ball_l_link);
 
 		Locator.GetPxScene()->addArticulation(*m_pArticulation);
