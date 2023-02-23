@@ -2,6 +2,8 @@
 
 CDamageAnimationComponent::CDamageAnimationComponent()
 {
+	CShakeAnimationComponent::GetInst();
+	m_bEnable = true;
 }
 
 float CDamageAnimationComponent::GetDamageDistance(float t)
@@ -16,6 +18,7 @@ bool CDamageAnimationComponent::HandleMessage(const Telegram& msg)
 
 CShakeAnimationComponent::CShakeAnimationComponent()
 {
+	m_bEnable = true;
 }
 
 float CShakeAnimationComponent::GetShakeDistance(float t)
@@ -31,6 +34,7 @@ bool CShakeAnimationComponent::HandleMessage(const Telegram& msg)
 
 CStunAnimationComponent::CStunAnimationComponent()
 {
+	m_bEnable = true;
 }
 
 bool CStunAnimationComponent::HandleMessage(const Telegram& msg)

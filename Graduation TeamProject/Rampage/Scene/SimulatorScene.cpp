@@ -16,10 +16,7 @@ void CSimulatorScene::OnPreRender(ID3D12GraphicsCommandList* pd3dCommandList, fl
 {
 	if (m_pDepthRenderShader)
 	{
-		for (int i = 0; i < m_pEnemys.size(); ++i)
-			m_pEnemys[i]->Update(fTimeElapsed);
-
-		((CDepthRenderShader*)m_pDepthRenderShader.get())->PrepareShadowMap(pd3dCommandList, fTimeElapsed);
+		((CDepthRenderShader*)m_pDepthRenderShader.get())->PrepareShadowMap(pd3dCommandList, 0.0f);
 		((CDepthRenderShader*)m_pDepthRenderShader.get())->UpdateDepthTexture(pd3dCommandList);
 		CheckCollide();
 	}
@@ -235,15 +232,8 @@ void CSimulatorScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 
 	// 3->IDLE
 	// 28->Attack
-	std::shared_ptr<CGameObject> knightObject = std::make_shared<CKnightObject>(pd3dDevice, pd3dCommandList, 1);
-	knightObject->SetPosition(XMFLOAT3(-8.0f, 0.0f, 0.0f));
-	knightObject->SetScale(14.0f, 14.0f, 14.0f);
-	knightObject->Rotate(0.0f, 90.0f, 0.0f);
-	knightObject->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 4);
-	knightObject->m_pSkinnedAnimationController->m_xmf3RootObjectScale = XMFLOAT3(14.0f, 14.0f, 14.0f);
-
-	m_pMainCharacter = std::make_unique<CPlayer>();
-	m_pMainCharacter->SetChild(knightObject, true);
+	
+	m_pMainCharacter = std::make_unique<CPlayer>(pd3dDevice, pd3dCommandList, 1);
 
 	((CDepthRenderShader*)m_pDepthRenderShader.get())->RegisterObject(m_pMainCharacter.get());
 	for (int i = 0; i < m_pEnemys.size(); ++i)
@@ -262,11 +252,14 @@ void CSimulatorScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 	XMFLOAT4 xmf4Color(0.0f, 0.5f, 0.0f, 0.0f);
 	m_pTerrain = std::make_unique<CSplatTerrain>(pd3dDevice, pd3dCommandList, GetGraphicsRootSignature(), _T("Terrain/terrainHeightMap257.raw"), 257, 257, 257, 257, xmf3Scale, xmf4Color, m_pTerrainShader.get());
 	m_pTerrain->SetPosition(XMFLOAT3(-800.f, -310.f, -800.f));
-	
+	m_pMainCharacter->SetPlayerUpdatedContext(m_pTerrain.get());
 
-	/*for (int i = 0; i < nAnimationSets; ++i)
+	/*std::unique_ptr<CGameObject> pDumpCharater = std::make_unique<CKnightObject>(pd3dDevice, pd3dCommandList, 1);
+
+	for (int i = 0; i < pDumpCharater->m_pSkinnedAnimationController->m_pAnimationSets->m_nAnimationSets; ++i)
 	{
 		std::unique_ptr<CGameObject> pCharater = std::make_unique<CKnightObject>(pd3dDevice, pd3dCommandList, 1);
+		pCharater = std::make_unique<CKnightObject>(pd3dDevice, pd3dCommandList, 1);
 		pCharater->SetPosition(XMFLOAT3(5.0f * i, 0.0f, 0.0f));
 		pCharater->SetScale(5.0f, 5.0f, 5.0f);
 		pCharater->Rotate(0.0f, -90.0f, 0.0f);
@@ -290,7 +283,14 @@ void CSimulatorScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 }
 void CSimulatorScene::AnimateObjects(float fTimeElapsed)
 {
+	UpdateObjects(fTimeElapsed);
+}
+void CSimulatorScene::UpdateObjects(float fTimeElapsed)
+{
+	m_pMainCharacter->Update(fTimeElapsed);
 
+	for (int i = 0; i < m_pEnemys.size(); ++i)
+		m_pEnemys[i]->Update(fTimeElapsed);
 }
 void CSimulatorScene::CheckCollide()
 {
@@ -305,8 +305,13 @@ void CSimulatorScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float f
 
 	CModelShader::GetInst()->Render(pd3dCommandList, 1);
 
+	for (int i = 0; i < m_pMainCharacters.size(); ++i)
+	{
+		m_pMainCharacters[i]->Animate(fTimeElapsed);
+		m_pMainCharacters[i]->Render(pd3dCommandList, true);
+	}
+
 	m_pMainCharacter->Animate(0.0f);
-	m_pMainCharacter->Update(fTimeElapsed);
 	m_pMainCharacter->Render(pd3dCommandList, true);
 
 	for (int i = 0; i < m_pEnemys.size(); ++i)

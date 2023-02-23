@@ -52,3 +52,11 @@ public:
     virtual bool OnMessage(CPlayer* player, const Telegram& msg);
 };
 
+class Run_Player : public CState<CPlayer>
+{
+public:
+    virtual void Enter(CPlayer* player);
+    virtual void Execute(CPlayer* player, float fElapsedTime);
+    virtual void Exit(CPlayer* player);
+    virtual bool OnMessage(CPlayer* player, const Telegram& msg);
+};

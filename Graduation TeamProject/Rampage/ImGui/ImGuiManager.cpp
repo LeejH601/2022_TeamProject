@@ -11,6 +11,7 @@
 #include "..\Object\BillBoardComponent.h"
 #include "..\Object\TextureManager.h"
 #include "..\Object\ParticleComponent.h"
+#include "..\Object\AnimationComponent.h"
 
 #define NUM_FRAMES_IN_FLIGHT 3
 
@@ -105,7 +106,7 @@ void CImGuiManager::Init(HWND hWnd, ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 		m_pd3dSrvDescHeap->GetCPUDescriptorHandleForHeapStart(),
 		m_pd3dSrvDescHeap->GetGPUDescriptorHandleForHeapStart());
 
-	m_pCamera = std::make_shared<CFirstPersonCamera>();
+	m_pCamera = std::make_shared<CThirdPersonCamera>();
 	m_pCamera->Init(pd3dDevice, pd3dCommandList);
 	/*std::shared_ptr<CComponent> com = std::make_shared<CCameraMover>(m_pCamera);
 	m_pCamera->m_vComponentSet.emplace_back(com);
@@ -191,6 +192,7 @@ void CImGuiManager::SetUI()
 	{
 		ImGuiWindowFlags my_window_flags = 0;
 		bool* p_open = NULL;
+
 		my_window_flags |= ImGuiWindowFlags_NoResize;
 
 		const ImGuiViewport* main_viewport = ImGui::GetMainViewport();
@@ -265,7 +267,22 @@ void CImGuiManager::SetUI()
 			initial_curpos.y += 25.f;
 			ImGui::SetCursorPos(initial_curpos);
 			ImGui::SetNextItemWidth(190.f);
-			ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
+			CDamageAnimationComponent* damage = (CDamageAnimationComponent*)(m_pCurrentComponentSet->FindComponent(typeid(CDamageAnimationComponent)));
+			ImGui::Checkbox("On/Off##DamageAnimation", &damage->GetEnable());
+
+			initial_curpos.y += 25.f;
+			ImGui::SetCursorPos(initial_curpos);
+			ImGui::SetNextItemWidth(190.f);
+
+			if (ImGui::DragFloat("MaxDistance##DamageAnimation", &damage->GetMaxDistance(), 0.01f, 0.0f, 10.0f, "%.2f", 0))
+				damage->GetMaxDistance() = std::clamp(damage->GetMaxDistance(), 0.0f, 10.0f);
+
+			initial_curpos.y += 25.f;
+			ImGui::SetCursorPos(initial_curpos);
+			ImGui::SetNextItemWidth(190.f);
+
+			if (ImGui::DragFloat("Speed##DamageAnimation", &damage->GetSpeed(), 0.01f, 0.0f, 200.0f, "%.2f", 0))
+				damage->GetSpeed() = std::clamp(damage->GetSpeed(), 0.0f, 200.0f);
 		}
 
 		initial_curpos.y += 25.f;
@@ -276,18 +293,41 @@ void CImGuiManager::SetUI()
 			initial_curpos.y += 25.f;
 			ImGui::SetCursorPos(initial_curpos);
 			ImGui::SetNextItemWidth(190.f);
-			ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
+			CShakeAnimationComponent* shake = (CShakeAnimationComponent*)(m_pCurrentComponentSet->FindComponent(typeid(CShakeAnimationComponent)));
+			ImGui::Checkbox("On/Off##ShakeAnimation", &shake->GetEnable());
+
+			initial_curpos.y += 25.f;
+			ImGui::SetCursorPos(initial_curpos);
+			ImGui::SetNextItemWidth(190.f);
+
+			if (ImGui::DragFloat("Distance##ShakeAnimation", &shake->GetDistance(), 0.01f, 0.0f, 1.0f, "%.2f", 0))
+				shake->GetDistance() = std::clamp(shake->GetDistance(), 0.0f, 1.0f);
+
+			initial_curpos.y += 25.f;
+			ImGui::SetCursorPos(initial_curpos);
+			ImGui::SetNextItemWidth(190.f);
+
+			if (ImGui::DragFloat("Frequency##ShakeAnimation", &shake->GetFrequency(), 0.01f, 0.0f, 1.0f, "%.2f", 0))
+				shake->GetFrequency() = std::clamp(shake->GetFrequency(), 0.0f, 1.0f);
 		}
 
 		initial_curpos.y += 25.f;
 		ImGui::SetCursorPos(initial_curpos);
 
-		if (ImGui::CollapsingHeader("Rigid Animation"))
+		if (ImGui::CollapsingHeader("Stun Animation"))
 		{
 			initial_curpos.y += 25.f;
 			ImGui::SetCursorPos(initial_curpos);
 			ImGui::SetNextItemWidth(190.f);
-			ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
+			CStunAnimationComponent* stun = (CStunAnimationComponent*)(m_pCurrentComponentSet->FindComponent(typeid(CStunAnimationComponent)));
+			ImGui::Checkbox("On/Off##StunAnimation", &stun->GetEnable());
+
+			initial_curpos.y += 25.f;
+			ImGui::SetCursorPos(initial_curpos);
+			ImGui::SetNextItemWidth(190.f);
+
+			if (ImGui::DragFloat("StunTime##StunAnimation", &stun->GetStunTime(), 0.01f, 0.0f, 1.0f, "%.2f", 0))
+				stun->GetStunTime() = std::clamp(stun->GetStunTime(), 0.0f, 1.0f);
 		}
 
 		initial_curpos.y += 25.f;
@@ -547,8 +587,6 @@ void CImGuiManager::SetUI()
 		
 		button_pos.y += 5.f;
 		ImGui::SetCursorPos(button_pos);
-
-
 
 		if (ImGui::Button("Animation1", ImVec2(175.f, 45.f))) // Buttons return true when clicked (most widgets return true when edited/activated)
 		{

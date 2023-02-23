@@ -59,12 +59,12 @@ bool CLocator::Init()
 		componentSet->AddComponent(component);
 		component = std::make_shared<CShootSoundComponent>(CSoundManager::GetInst()->GetSoundSystem());
 		componentSet->AddComponent(component);
-
-		component = std::make_shared<CDamageAnimationComponent>();
+		
+		component = CDamageAnimationComponent::GetInst();
 		componentSet->AddComponent(component);
-		component = std::make_shared<CShakeAnimationComponent>();
+		component = CShakeAnimationComponent::GetInst();
 		componentSet->AddComponent(component);
-		component = std::make_shared<CStunAnimationComponent>();
+		component = CStunAnimationComponent::GetInst();
 		componentSet->AddComponent(component);
 
 		component = std::make_shared<CAttackSpriteComponent>();
@@ -81,7 +81,8 @@ bool CLocator::Init()
 	SetPlayerState(state);
 	state = std::make_shared<Atk3_Player>();
 	SetPlayerState(state);
-
+	state = std::make_shared<Run_Player>();
+	SetPlayerState(state);
 	m_pSoundPlayer = std::make_shared<CSoundPlayer>();
 	return true;
 }

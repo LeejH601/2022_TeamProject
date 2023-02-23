@@ -1,6 +1,7 @@
 #include "MainScene.h"
 #include "..\Global\Timer.h"
 #include "..\Object\Texture.h"
+#include "..\Object\Player.h"
 #include "..\Object\ModelManager.h"
 #include "..\Shader\ModelShader.h"
 #include "..\Shader\ModelShader.h"
@@ -9,11 +10,21 @@
 #include "..\Shader\ParticleShader.h"
 #include "..\Shader\DepthRenderShader.h"
 #include "..\Object\TextureManager.h"
+
+void CMainTMPScene::SetPlayer(CGameObject* pPlayer)
+{
+	m_pPlayer = pPlayer;
+	((CPlayer*)m_pPlayer)->SetPlayerUpdatedContext(m_pTerrain.get());
+
+	if (m_pDepthRenderShader.get())
+		((CDepthRenderShader*)m_pDepthRenderShader.get())->RegisterObject(pPlayer);
+}
+
 void CMainTMPScene::OnPreRender(ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed)
 {
 	if (m_pDepthRenderShader)
 	{
-		((CDepthRenderShader*)m_pDepthRenderShader.get())->PrepareShadowMap(pd3dCommandList, fTimeElapsed);
+		((CDepthRenderShader*)m_pDepthRenderShader.get())->PrepareShadowMap(pd3dCommandList, 0.0f);
 		((CDepthRenderShader*)m_pDepthRenderShader.get())->UpdateDepthTexture(pd3dCommandList);
 	}
 }
@@ -221,11 +232,6 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	//CSoundManager::GetInst()->PlaySound("Sound/mp3/David Bowie - Starman.mp3");
 
 	std::unique_ptr<CKnightObject> m_pObject = std::make_unique<CKnightObject>(pd3dDevice, pd3dCommandList, 1);
-	m_pObject->SetPosition(XMFLOAT3(0.0f, 0.0f, 0.0f));
-	m_pObject->SetScale(15.0f, 15.0f, 15.0f);
-	m_pObject->Rotate(0.0f, 180.0f, 0.0f);
-	m_pObject->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
-	m_pObjects.push_back(std::move(m_pObject));
 
 	m_pObject = std::make_unique<CKnightObject>(pd3dDevice, pd3dCommandList, 1);
 	m_pObject->SetPosition(XMFLOAT3(-15.0f, 15.0f, 15.0f));
@@ -311,14 +317,28 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	
 	m_ppParticleObjects.push_back(std::move(pParticleObject));
 }
+void CMainTMPScene::UpdateObjects(float fTimeElapsed)
+{
+	m_pPlayer->Update(fTimeElapsed);
+
+	for (int i = 0; i < m_pObjects.size(); ++i)
+		m_pObjects[i]->Update(fTimeElapsed);
+}
 void CMainTMPScene::AnimateObjects(float fTimeElapsed)
 {
+	UpdateObjects(fTimeElapsed);
 }
 void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed, float fCurrentTime, CCamera* pCamera)
 {
 	m_pLight->Render(pd3dCommandList);
 
 	CModelShader::GetInst()->Render(pd3dCommandList, 0);
+
+	if (m_pPlayer)
+	{
+		m_pPlayer->Animate(0.0f);
+		m_pPlayer->Render(pd3dCommandList, true);
+	}
 
 	for (int i = 0; i < m_pObjects.size(); ++i)
 	{
@@ -354,7 +374,6 @@ void CMainTMPScene::OnPostRenderTarget()
 	{
 		m_ppParticleObjects[i]->OnPostRender();
 	}
-
 }
 
 
