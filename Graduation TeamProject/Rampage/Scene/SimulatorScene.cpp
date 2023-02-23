@@ -305,11 +305,11 @@ void CSimulatorScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float f
 
 	CModelShader::GetInst()->Render(pd3dCommandList, 1);
 
-	for (int i = 0; i < m_pMainCharacters.size(); ++i)
+	/*for (int i = 0; i < m_pMainCharacters.size(); ++i)
 	{
 		m_pMainCharacters[i]->Animate(fTimeElapsed);
 		m_pMainCharacters[i]->Render(pd3dCommandList, true);
-	}
+	}*/
 
 	m_pMainCharacter->Animate(0.0f);
 	m_pMainCharacter->Render(pd3dCommandList, true);

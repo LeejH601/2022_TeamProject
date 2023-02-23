@@ -271,8 +271,3 @@ void CPlayer::Tmp()
 {
 	m_pChild->m_pSkinnedAnimationController->SetTrackAnimationSet(0, m_nAnimationNum++);
 }
-	
-bool CPlayer::HandleMessage(const Telegram& msg)
-{
-	return false;
-}

@@ -47,10 +47,12 @@ void Atk1_Player::Enter(CPlayer* player)
 	player->m_xmf3CameraMoveDirection = Vector3::Normalize(XMFLOAT3(-1.0f, -1.0f, 0.0f));
 	player->m_fCMDConstant = 1.0f;
 
+#ifdef ATTACK_SOUND
 	Telegram msg;
 	msg.Receiver = Locator.GetSoundPlayer();
 	msg.Msg = (int)MESSAGE_TYPE::Msg_SoundShootReady;
 	Locator.GetSoundPlayer()->HandleMessage(msg);
+#endif
 }
 
 void Atk1_Player::Execute(CPlayer* player, float fElapsedTime)
@@ -90,10 +92,12 @@ void Atk2_Player::Enter(CPlayer* player)
 	player->m_xmf3CameraMoveDirection = Vector3::Normalize(XMFLOAT3(1.0f, -1.0f, 0.0f));
 	player->m_fCMDConstant = 1.0f;
 
+#ifdef ATTACK_SOUND
 	Telegram msg;
 	msg.Receiver = Locator.GetSoundPlayer();
 	msg.Msg = (int)MESSAGE_TYPE::Msg_SoundShootReady;
 	Locator.GetSoundPlayer()->HandleMessage(msg);
+#endif
 }
 
 void Atk2_Player::Execute(CPlayer* player, float fElapsedTime)
@@ -130,10 +134,12 @@ void Atk3_Player::Enter(CPlayer* player)
 	player->m_bAttack = false; // 사용자가 좌클릭시 true가 되는 변수
 	player->m_iAttack_Limit = 1;
 
+#ifdef ATTACK_SOUND
 	Telegram msg;
 	msg.Receiver = Locator.GetSoundPlayer();
 	msg.Msg = (int)MESSAGE_TYPE::Msg_SoundShootReady;
 	Locator.GetSoundPlayer()->HandleMessage(msg);
+#endif
 }
 
 void Atk3_Player::Execute(CPlayer* player, float fElapsedTime)
