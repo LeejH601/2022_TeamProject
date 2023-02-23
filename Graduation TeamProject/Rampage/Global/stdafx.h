@@ -118,6 +118,9 @@ extern UINT	gnCbvSrvDescriptorIncrementSize;
 extern UINT gnRtvDescriptorIncrementSize;
 extern std::default_random_engine dre;
 
+extern physx::PxDefaultErrorCallback gDefaultErrorCallback;
+extern physx::PxDefaultAllocator gDefaultAllocatorCallback;
+
 extern int WriteIntegerFromFile(FILE* pInFile, const int value);
 extern float WriteFloatFromFile(FILE* pInFile, const float fValue);
 extern BYTE WriteStringFromFile(FILE* pInFile, std::string& pstrToken);
