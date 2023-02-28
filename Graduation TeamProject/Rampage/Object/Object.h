@@ -72,7 +72,7 @@ public:
 	void ChangeTexture(std::shared_ptr<CTexture> pTexture);
 	void SetMesh(std::shared_ptr<CMesh> pMesh) { m_pMesh = pMesh; }
 
-	void SetScale(float x, float y, float z);
+	virtual void SetScale(float x, float y, float z);
 	virtual void SetPosition(float x, float y, float z);
 	virtual void SetPosition(XMFLOAT3 xmf3Position);
 	void SetTransform(XMFLOAT4X4 xmf4x4Transform) { m_xmf4x4Transform = xmf4x4Transform; }

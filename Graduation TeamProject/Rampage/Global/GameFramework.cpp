@@ -241,13 +241,14 @@ void CGameFramework::BuildObjects()
 
 	m_pFloatingCamera = std::make_unique<CFloatingCamera>();
 	m_pFloatingCamera->Init(m_pd3dDevice.Get(), m_pd3dCommandList.Get());
+	m_pFloatingCamera->SetPosition(XMFLOAT3(0.0f, 400.0f, -100.0f));
 
 	Locator.CreateMainSceneCamera(m_pd3dDevice.Get(), m_pd3dCommandList.Get());
 	
-
 	m_pCurrentCamera = m_pFloatingCamera.get();
 
 	m_pPlayer = std::make_unique<CPlayer>(m_pd3dDevice.Get(), m_pd3dCommandList.Get(), 1);
+
 	m_pSceneManager->SetPlayer((CPlayer*)m_pPlayer.get());
 	((CThirdPersonCamera*)Locator.GetMainSceneCamera())->SetPlayer((CPlayer*)m_pPlayer.get());
 }
@@ -400,7 +401,7 @@ void CGameFramework::OnPrepareImGui()
 {
 	HRESULT hResult = m_pd3dCommandList->Reset(m_pd3dCommandAllocator.Get(), NULL);
 
-	CImGuiManager::GetInst()->OnPrepareRender(m_pd3dCommandList.Get(), &m_d3dDsvDescriptorCPUHandle, m_GameTimer.GetFrameTimeElapsed(), m_GameTimer.GetTotalTime(), m_pFloatingCamera.get());
+	CImGuiManager::GetInst()->OnPrepareRender(m_pd3dCommandList.Get(), &m_d3dDsvDescriptorCPUHandle, m_GameTimer.GetFrameTimeElapsed(), m_GameTimer.GetTotalTime(), m_pCurrentCamera);
 
 	//명령 리스트를 닫힌 상태로 만든다. 
 	hResult = m_pd3dCommandList->Close();

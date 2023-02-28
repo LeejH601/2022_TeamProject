@@ -323,7 +323,7 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	std::unique_ptr<CKnightObject> m_pObject = std::make_unique<CKnightObject>(pd3dDevice, pd3dCommandList, 1);
 
 	m_pObject = std::make_unique<CKnightObject>(pd3dDevice, pd3dCommandList, 1);
-	m_pObject->SetPosition(XMFLOAT3(-15.0f, 15.0f, 15.0f));
+	m_pObject->SetPosition(XMFLOAT3(-15.0f, 350.0f, 15.0f));
 	m_pObject->SetScale(5.0f, 5.0f, 5.0f);
 	m_pObject->Rotate(0.0f, 180.0f, 0.0f);
 	m_pObject->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 1);
@@ -331,7 +331,7 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pObjects.push_back(std::move(m_pObject));
 
 	m_pObject = std::make_unique<CKnightObject>(pd3dDevice, pd3dCommandList, 1);
-	m_pObject->SetPosition(XMFLOAT3(15.0f, -15.0f, -15.0f));
+	m_pObject->SetPosition(XMFLOAT3(15.0f, 350.0f, -15.0f));
 	m_pObject->SetScale(10.0f, 10.0f, 10.0f);
 	m_pObject->Rotate(0.0f, 180.0f, 0.0f);
 	m_pObject->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 4);
@@ -355,19 +355,6 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pLight = std::make_unique<CLight>();
 	m_pLight->CreateLightVariables(pd3dDevice, pd3dCommandList);
 
-	//// Terrain Shader 持失
-	//m_pTerrainShader = std::make_unique<CTerrainShader>();
-	//m_pTerrainShader->CreateShader(pd3dDevice, GetGraphicsRootSignature(), 2, pdxgiObjectRtvFormats, 0);
-	//m_pTerrainShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 3);
-	//m_pTerrainShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
-
-	//// Terrain 持失
-	//XMFLOAT3 xmf3Scale(18.0f, 6.0f, 18.0f);
-	//XMFLOAT4 xmf4Color(0.0f, 0.5f, 0.0f, 0.0f);
-	//m_pTerrain = std::make_unique<CHeightMapTerrain>(pd3dDevice, pd3dCommandList, GetGraphicsRootSignature(), _T("Image/HeightMap.raw"), 257, 257, 257, 257, xmf3Scale, xmf4Color, m_pTerrainShader.get());
-	//m_pTerrain->SetPosition(XMFLOAT3(-800.f, -750.f, -800.f));
-	////m_pTerrain->SetPosition(XMFLOAT3(0.f, 0.f, 0.f));
-
 	m_pTerrainShader = std::make_unique<CSplatTerrainShader>();
 	m_pTerrainShader->CreateShader(pd3dDevice, GetGraphicsRootSignature(), 1, &pdxgiObjectRtvFormats, DXGI_FORMAT_D32_FLOAT, 0);
 	m_pTerrainShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 13);
@@ -378,7 +365,7 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	XMFLOAT3 xmf3Scale(18.0f, 6.0f, 18.0f);
 	XMFLOAT4 xmf4Color(0.0f, 0.5f, 0.0f, 0.0f);
 	m_pTerrain = std::make_unique<CSplatTerrain>(pd3dDevice, pd3dCommandList, GetGraphicsRootSignature(), _T("Terrain/terrainHeightMap257.raw"), 257, 257, 257, 257, xmf3Scale, xmf4Color, m_pTerrainShader.get());
-	m_pTerrain->SetPosition(XMFLOAT3(-800.f, -600.f, -800.f));
+	m_pTerrain->SetPosition(XMFLOAT3(-800.f, 0.f, -800.f));
 	for (int i = 0; i < m_pObjects.size(); ++i)
 		((CDepthRenderShader*)m_pDepthRenderShader.get())->RegisterObject(m_pObjects[i].get());
 	((CDepthRenderShader*)m_pDepthRenderShader.get())->SetLight(m_pLight->GetLights());
@@ -402,8 +389,9 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	//m_pBillBoardObjects.push_back(std::move(pSpriteAnimationObject));
 
 	m_pParticleShader = std::make_shared<CParticleShader>();
-	std::unique_ptr<CParticleObject> pParticleObject = std::make_unique<CParticleObject>(pd3dDevice, pd3dCommandList, GetGraphicsRootSignature(), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 65.0f, 0.0f), 2.0f, XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT2(2.0f, 2.0f), MAX_PARTICLES, m_pParticleShader.get(), true);
 	
+	std::unique_ptr<CParticleObject> pParticleObject = std::make_unique<CParticleObject>(pd3dDevice, pd3dCommandList, GetGraphicsRootSignature(), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 65.0f, 0.0f), 2.0f, XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT2(2.0f, 2.0f), MAX_PARTICLES, m_pParticleShader.get(), true);
+
 	m_ppParticleObjects.push_back(std::move(pParticleObject));
 }
 void CMainTMPScene::UpdateObjects(float fTimeElapsed)
