@@ -48,7 +48,7 @@ public:
 
 class CCameraMover : public CComponent
 {
-	std::shared_ptr<CCamera> m_pCamera;
+	CCamera* m_pCamera = NULL;
 	XMFLOAT3 m_xmf3Direction;
 public:
 	bool m_bMoveEnd = true;
@@ -65,7 +65,6 @@ public:
 
 public:
 	CCameraMover();
-	CCameraMover(std::shared_ptr<CCamera> pCamera);
 	virtual ~CCameraMover() {};
 
 	void SetDirection(XMFLOAT3 Dir) { m_xmf3Direction = Dir; };
@@ -78,7 +77,7 @@ public:
 class CCameraShaker : public CComponent
 {
 private:
-	std::shared_ptr<CCamera> m_pCamera;
+	CCamera* m_pCamera = NULL;
 	std::uniform_real_distribution<float> urd{ -1.0f, 1.0f };
 
 public:
@@ -89,7 +88,6 @@ public:
 
 public:
 	CCameraShaker();
-	CCameraShaker(std::shared_ptr<CCamera> pCamera);
 	virtual ~CCameraShaker() {};
 
 	virtual void Update(float fElapsedTime);
@@ -99,7 +97,7 @@ public:
 
 class CCameraZoomer : public CComponent
 {
-	std::shared_ptr<CCamera> m_pCamera;
+	CCamera* m_pCamera = NULL;
 
 	XMFLOAT3 m_xmf3Direction;
 public:
@@ -119,7 +117,6 @@ public:
 
 public:
 	CCameraZoomer();
-	CCameraZoomer(std::shared_ptr<CCamera> pCamera);
 	virtual ~CCameraZoomer();
 
 	virtual void Update(float fElapsedTime);
@@ -239,7 +236,6 @@ public:
 	virtual void Rotate(float fPitch = 0.0f, float fYaw = 0.0f, float fRoll = 0.0f);
 	virtual void Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed);
 };
-
 class CFloatingCamera : public CCamera
 {
 public:
@@ -250,4 +246,10 @@ public:
 
 	virtual void Rotate(float fPitch = 0.0f, float fYaw = 0.0f, float fRoll = 0.0f);
 	virtual void Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed);
+};
+class CSimulatorCamera : public CCamera
+{
+public:
+	CSimulatorCamera();
+	virtual ~CSimulatorCamera() { }
 };
