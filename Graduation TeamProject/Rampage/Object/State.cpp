@@ -47,6 +47,11 @@ void Atk1_Player::Enter(CPlayer* player)
 	player->m_xmf3CameraMoveDirection = Vector3::Normalize(XMFLOAT3(-1.0f, -1.0f, 0.0f));
 	player->m_fCMDConstant = 1.0f;
 
+	CComponentSet* componentset = Locator.GetComponentSet(0);
+	if (componentset) {
+		Locator.GetSoundPlayer()->LoadComponentFromSet(componentset);
+	}
+
 #ifdef ATTACK_SOUND
 	Telegram msg;
 	msg.Receiver = Locator.GetSoundPlayer();
@@ -92,6 +97,11 @@ void Atk2_Player::Enter(CPlayer* player)
 	player->m_xmf3CameraMoveDirection = Vector3::Normalize(XMFLOAT3(1.0f, -1.0f, 0.0f));
 	player->m_fCMDConstant = 1.0f;
 
+	CComponentSet* componentset = Locator.GetComponentSet(1);
+	if (componentset) {
+		Locator.GetSoundPlayer()->LoadComponentFromSet(componentset);
+	}
+
 #ifdef ATTACK_SOUND
 	Telegram msg;
 	msg.Receiver = Locator.GetSoundPlayer();
@@ -133,6 +143,11 @@ void Atk3_Player::Enter(CPlayer* player)
 	player->m_bAttacked = false;
 	player->m_bAttack = false; // 사용자가 좌클릭시 true가 되는 변수
 	player->m_iAttack_Limit = 1;
+
+	CComponentSet* componentset = Locator.GetComponentSet(2);
+	if (componentset) {
+		Locator.GetSoundPlayer()->LoadComponentFromSet(componentset);
+	}
 
 #ifdef ATTACK_SOUND
 	Telegram msg;

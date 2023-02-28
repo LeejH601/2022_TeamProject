@@ -1,5 +1,6 @@
 #include "MainScene.h"
 #include "..\Global\Timer.h"
+#include "..\Global\Camera.h"
 #include "..\Object\Texture.h"
 #include "..\Object\Player.h"
 #include "..\Object\ModelManager.h"
@@ -208,6 +209,94 @@ void CMainTMPScene::CreateGraphicsRootSignature(ID3D12Device* pd3dDevice)
 	if (pd3dSignatureBlob) pd3dSignatureBlob->Release();
 	if (pd3dErrorBlob) pd3dErrorBlob->Release();
 }
+bool CMainTMPScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
+{
+	switch (nMessageID)
+	{
+	case WM_LBUTTONDOWN:
+		// 좌클릭시 사용자가 좌클릭 했음을 표현하는 변수를 true로 바꿔줌
+		if (m_pPlayer)
+			((CPlayer*)m_pPlayer)->m_bAttack = true;
+		break;
+	default:
+		break;
+	}
+
+	return 0;
+}
+bool CMainTMPScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam, DWORD& dwDirection)
+{
+	switch (nMessageID)
+	{
+	case WM_KEYDOWN:
+		switch (wParam)
+		{
+		case 'f':
+		case 'F':
+			((CPlayer*)m_pPlayer)->Tmp();
+			break;
+		case 'w':
+		case 'W':
+			if (wParam == 'w' || wParam == 'W') dwDirection |= DIR_FORWARD;
+			break;
+		case 's':
+		case 'S':
+			if (wParam == 's' || wParam == 'S') dwDirection |= DIR_BACKWARD;
+			break;
+		case 'a':
+		case 'A':
+			if (wParam == 'a' || wParam == 'A') dwDirection |= DIR_LEFT;
+			break;
+		case 'd':
+		case 'D':
+			if (wParam == 'd' || wParam == 'D') dwDirection |= DIR_RIGHT;
+			break;
+		case 'q':
+		case 'Q':
+			if (wParam == 'q' || wParam == 'Q')dwDirection |= DIR_DOWN;
+			break;
+		case 'e':
+		case 'E':
+			if (wParam == 'e' || wParam == 'E') dwDirection |= DIR_UP;
+			break;
+		default:
+			break;
+		}
+		break;
+	case WM_KEYUP:
+		switch (wParam)
+		{
+		case 'w':
+		case 'W':
+			if (wParam == 'w' || wParam == 'W') dwDirection &= (~DIR_FORWARD);
+			break;
+		case 's':
+		case 'S':
+			if (wParam == 's' || wParam == 'S') dwDirection &= (~DIR_BACKWARD);
+			break;
+		case 'a':
+		case 'A':
+			if (wParam == 'a' || wParam == 'A') dwDirection &= (~DIR_LEFT);
+			break;
+		case 'd':
+		case 'D':
+			if (wParam == 'd' || wParam == 'D') dwDirection &= (~DIR_RIGHT);
+			break;
+		case 'q':
+		case 'Q':
+			if (wParam == 'q' || wParam == 'Q')dwDirection &= (~DIR_DOWN);
+			break;
+		case 'e':
+		case 'E':
+			if (wParam == 'e' || wParam == 'E') dwDirection &= (~DIR_UP);
+			break;
+		}
+	default:
+		break;
+	}
+
+	return 0;
+}
 void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	CreateGraphicsRootSignature(pd3dDevice);
@@ -330,6 +419,8 @@ void CMainTMPScene::AnimateObjects(float fTimeElapsed)
 }
 void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed, float fCurrentTime, CCamera* pCamera)
 {
+	if(pCamera) pCamera->OnPrepareRender(pd3dCommandList);
+
 	m_pLight->Render(pd3dCommandList);
 
 	CModelShader::GetInst()->Render(pd3dCommandList, 0);

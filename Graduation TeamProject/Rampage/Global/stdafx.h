@@ -97,7 +97,7 @@ extern int gnCurrentParticles;
 #define DIR_UP						0x10
 #define DIR_DOWN					0x20
 
-//#define ATTACK_SOUND
+#define ATTACK_SOUND
 
 #define DECLARE_SINGLE(MYType)\
 public:\

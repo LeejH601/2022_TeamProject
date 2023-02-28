@@ -1,5 +1,6 @@
 #include "GameFramework.h"
 #include "..\Global\Camera.h"
+#include "..\Scene\SceneManager.h"
 #include "..\Scene\MainScene.h"
 #include "..\Scene\SimulatorScene.h"
 #include "..\ImGui\ImGuiManager.h"
@@ -236,11 +237,7 @@ void CGameFramework::BuildObjects()
 {
 	m_pd3dCommandList->Reset(m_pd3dCommandAllocator.Get(), NULL);
 
-	// CScene 생성(RootSignature 생성)
-	m_pScene = std::make_unique<CMainTMPScene>();
-	m_pScene->BuildObjects(m_pd3dDevice.Get(), m_pd3dCommandList.Get());
-	
-	CSimulatorScene::GetInst()->BuildObjects(m_pd3dDevice.Get(), m_pd3dCommandList.Get());
+	m_pSceneManager = std::make_unique<CSceneManager>(m_pd3dDevice.Get(), m_pd3dCommandList.Get());
 
 	m_pFloatingCamera = std::make_unique<CFloatingCamera>();
 	m_pFloatingCamera->Init(m_pd3dDevice.Get(), m_pd3dCommandList.Get());
@@ -251,8 +248,7 @@ void CGameFramework::BuildObjects()
 	m_pCurrentCamera = m_pFloatingCamera.get();
 
 	m_pPlayer = std::make_unique<CPlayer>(m_pd3dDevice.Get(), m_pd3dCommandList.Get(), 1);
-
-	m_pScene->SetPlayer(m_pPlayer.get());
+	m_pSceneManager->SetPlayer((CPlayer*)m_pPlayer.get());
 	((CThirdPersonCamera*)(m_pFirstPersonCamera.get()))->SetPlayer((CPlayer*)m_pPlayer.get());
 }
 void CGameFramework::ReleaseObjects()
@@ -264,12 +260,6 @@ void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM
 	switch (nMessageID)
 	{
 	case WM_LBUTTONDOWN:
-		// 좌클릭시 사용자가 좌클릭 했음을 표현하는 변수를 true로 바꿔줌
-#ifndef ATTACK_SOUND
-		if (m_pPlayer)
-			((CPlayer*)m_pPlayer.get())->m_bAttack = true;
-#endif
-
 		::SetCapture(hWnd);
 		::GetCursorPos(&m_ptOldCursorPos);
 		break;
@@ -286,6 +276,8 @@ void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM
 	default:
 		break;
 	}
+
+	m_pSceneManager->OnProcessingMouseMessage(hWnd, nMessageID, wParam, lParam);
 }
 void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
 {
@@ -294,34 +286,6 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 	case WM_KEYDOWN:
 		switch (wParam)
 		{
-		case 'f':
-		case 'F':
-			((CPlayer*)m_pPlayer.get())->Tmp();
-			break;
-		case 'w':
-		case 'W':
-			if (wParam == 'w' || wParam == 'W') dwDirection |= DIR_FORWARD;
-			break;
-		case 's':
-		case 'S':
-			if (wParam == 's' || wParam == 'S') dwDirection |= DIR_BACKWARD;
-			break;
-		case 'a':
-		case 'A':
-			if (wParam == 'a' || wParam == 'A') dwDirection |= DIR_LEFT;
-			break;
-		case 'd':
-		case 'D':
-			if (wParam == 'd' || wParam == 'D') dwDirection |= DIR_RIGHT;
-			break;
-		case 'q':
-		case 'Q':
-			if (wParam == 'q' || wParam == 'Q')dwDirection |= DIR_DOWN;
-			break;
-		case 'e':
-		case 'E':
-			if (wParam == 'e' || wParam == 'E') dwDirection |= DIR_UP;
-			break;
 		case VK_ESCAPE:
 			::PostQuitMessage(0);
 			break;
@@ -337,38 +301,11 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 			break;
 		}
 		break;
-	case WM_KEYUP:
-		switch (wParam)
-		{
-		case 'w':
-		case 'W':
-			if (wParam == 'w' || wParam == 'W') dwDirection &= (~DIR_FORWARD);
-			break;
-		case 's':
-		case 'S':
-			if (wParam == 's' || wParam == 'S') dwDirection &= (~DIR_BACKWARD);
-			break;
-		case 'a':
-		case 'A':
-			if (wParam == 'a' || wParam == 'A') dwDirection &= (~DIR_LEFT);
-			break;
-		case 'd':
-		case 'D':
-			if (wParam == 'd' || wParam == 'D') dwDirection &= (~DIR_RIGHT);
-			break;
-		case 'q':
-		case 'Q':
-			if (wParam == 'q' || wParam == 'Q')dwDirection &= (~DIR_DOWN);
-			break;
-		case 'e':
-		case 'E':
-			if (wParam == 'e' || wParam == 'E') dwDirection &= (~DIR_UP);
-			break;
-		break;
-		}
 	default:
 		break;
 	}
+
+	m_pSceneManager->OnProcessingKeyboardMessage(hWnd, nMessageID, wParam, lParam, dwDirection);
 }
 LRESULT CALLBACK CGameFramework::OnProcessingWindowMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
 {
@@ -423,8 +360,7 @@ void CGameFramework::AnimateObjects()
 	// Object들의 애니메이션을 수행한다.
 	m_pFloatingCamera->Animate(m_GameTimer.GetFrameTimeElapsed());
 	m_pFirstPersonCamera->Animate(m_GameTimer.GetFrameTimeElapsed());
-	m_pScene->AnimateObjects(m_GameTimer.GetFrameTimeElapsed());
-	CSimulatorScene::GetInst()->AnimateObjects(m_GameTimer.GetFrameTimeElapsed());
+	m_pSceneManager->Animate(m_GameTimer.GetFrameTimeElapsed());
 }
 
 void CGameFramework::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
@@ -478,8 +414,7 @@ void CGameFramework::OnPrepareImGui()
 }
 void CGameFramework::OnPostRenderTarget()
 {
-	m_pScene->OnPostRenderTarget();
-	CImGuiManager::GetInst()->OnPostRenderTarget();
+	m_pSceneManager->OnPostRenderTarget();
 }
 void CGameFramework::MoveToNextFrame()
 {
@@ -526,21 +461,16 @@ void CGameFramework::FrameAdvance()
 	//명령 리스트를 리셋한다.
 	hResult = m_pd3dCommandList->Reset(m_pd3dCommandAllocator.Get(), NULL);
 
-	//CImGuiManager::GetInst()->DemoRendering();
-	CImGuiManager::GetInst()->SetUI();
-
 	::SynchronizeResourceTransition(m_pd3dCommandList.Get(), m_ppd3dRenderTargetBuffers[m_nSwapChainBufferIndex].Get(), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
 
-	m_pScene->OnPrepareRender(m_pd3dCommandList.Get());
-	m_pScene->OnPreRender(m_pd3dCommandList.Get(), m_GameTimer.GetFrameTimeElapsed());
+	m_pSceneManager->PreRender(m_pd3dCommandList.Get(), m_GameTimer.GetFrameTimeElapsed());
+	
 	m_pd3dCommandList->ClearDepthStencilView(m_d3dDsvDescriptorCPUHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
 	OnPrepareRenderTarget();
 	UpdateShaderVariables(m_pd3dCommandList.Get());
-	m_pCurrentCamera->OnPrepareRender(m_pd3dCommandList.Get());
-	m_pScene->Render(m_pd3dCommandList.Get(), m_GameTimer.GetFrameTimeElapsed(), m_GameTimer.GetTotalTime(), m_pFloatingCamera.get());
 
-	CImGuiManager::GetInst()->Render(m_pd3dCommandList.Get());
-
+	m_pSceneManager->Render(m_pd3dCommandList.Get(), m_GameTimer.GetFrameTimeElapsed(), m_GameTimer.GetTotalTime(), m_pCurrentCamera);
+	
 	::SynchronizeResourceTransition(m_pd3dCommandList.Get(), m_ppd3dRenderTargetBuffers[m_nSwapChainBufferIndex].Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
 
 	//명령 리스트를 닫힌 상태로 만든다. 
