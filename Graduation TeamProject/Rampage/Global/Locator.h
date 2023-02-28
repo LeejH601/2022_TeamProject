@@ -60,6 +60,7 @@ public:
 class CLocator
 {
 	std::unique_ptr<CCamera> m_pSimulaterCamera = NULL;
+	std::unique_ptr<CCamera> m_pMainSceneCamera = NULL;
 
 	std::set<CoptSetPair, Comp_ComponentSet> m_sComponentSets;
 	std::set<PlayerStatePair, Comp_PlayerState> m_sPlayerStateSet;
@@ -80,6 +81,9 @@ public:
 
 	void CreateSimulatorCamera(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	CCamera* GetSimulaterCamera() { return m_pSimulaterCamera.get(); };
+
+	void CreateMainSceneCamera(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+	CCamera* GetMainSceneCamera() { return m_pMainSceneCamera.get(); };
 
 	CComponentSet* GetComponentSet(int num)
 	{

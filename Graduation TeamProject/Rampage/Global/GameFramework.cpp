@@ -242,14 +242,14 @@ void CGameFramework::BuildObjects()
 	m_pFloatingCamera = std::make_unique<CFloatingCamera>();
 	m_pFloatingCamera->Init(m_pd3dDevice.Get(), m_pd3dCommandList.Get());
 
-	m_pFirstPersonCamera = std::make_unique<CThirdPersonCamera>();
-	m_pFirstPersonCamera->Init(m_pd3dDevice.Get(), m_pd3dCommandList.Get());
+	Locator.CreateMainSceneCamera(m_pd3dDevice.Get(), m_pd3dCommandList.Get());
+	
 
 	m_pCurrentCamera = m_pFloatingCamera.get();
 
 	m_pPlayer = std::make_unique<CPlayer>(m_pd3dDevice.Get(), m_pd3dCommandList.Get(), 1);
 	m_pSceneManager->SetPlayer((CPlayer*)m_pPlayer.get());
-	((CThirdPersonCamera*)(m_pFirstPersonCamera.get()))->SetPlayer((CPlayer*)m_pPlayer.get());
+	((CThirdPersonCamera*)Locator.GetMainSceneCamera())->SetPlayer((CPlayer*)m_pPlayer.get());
 }
 void CGameFramework::ReleaseObjects()
 {
@@ -293,7 +293,7 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 			m_pCurrentCamera = m_pFloatingCamera.get();
 			break;
 		case '2':
-			m_pCurrentCamera = m_pFirstPersonCamera.get();
+			m_pCurrentCamera = Locator.GetMainSceneCamera();
 			break;
 		case VK_F9:
 			ChangeSwapChainState();
@@ -359,7 +359,7 @@ void CGameFramework::AnimateObjects()
 {
 	// Object들의 애니메이션을 수행한다.
 	m_pFloatingCamera->Animate(m_GameTimer.GetFrameTimeElapsed());
-	m_pFirstPersonCamera->Animate(m_GameTimer.GetFrameTimeElapsed());
+	Locator.GetMainSceneCamera()->Animate(m_GameTimer.GetFrameTimeElapsed());
 	m_pSceneManager->Animate(m_GameTimer.GetFrameTimeElapsed());
 }
 

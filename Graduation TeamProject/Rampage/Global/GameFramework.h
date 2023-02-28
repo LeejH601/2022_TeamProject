@@ -65,7 +65,6 @@ private:
 	HANDLE m_hFenceEvent;
 
 	std::unique_ptr<CCamera> m_pFloatingCamera = NULL;
-	std::unique_ptr<CCamera> m_pFirstPersonCamera = NULL;
 	CCamera* m_pCurrentCamera = NULL;
 	std::unique_ptr<CGameObject> m_pPlayer = NULL;
 	std::unique_ptr<CSceneManager> m_pSceneManager = NULL;

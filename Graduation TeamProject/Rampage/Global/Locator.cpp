@@ -93,6 +93,12 @@ void CLocator::CreateSimulatorCamera(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 	m_pSimulaterCamera->RegenerateViewMatrix();
 }
 
+void CLocator::CreateMainSceneCamera(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	m_pMainSceneCamera = std::make_unique<CThirdPersonCamera>();
+	m_pMainSceneCamera->Init(pd3dDevice, pd3dCommandList);
+}
+
 CState<CPlayer>* CLocator::GetPlayerState(const std::type_info& type)
 {
 	/*auto comp = [](size_t hashcode, CState<CPlayer>& state) {
