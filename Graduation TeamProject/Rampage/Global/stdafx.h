@@ -47,6 +47,7 @@
 #include <typeinfo>
 #include <algorithm>
 #include <chrono>
+#include <atlstr.h>
 #include "..\ImGui\imgui.h"
 #include "..\ImGui\imgui_impl_dx12.h"
 #include "..\ImGui\imgui_impl_win32.h"
@@ -103,6 +104,8 @@ extern int gnCurrentParticles;
 #define DIR_RIGHT					0x08
 #define DIR_UP						0x10
 #define DIR_DOWN					0x20
+
+#define ATTACK_SOUND
 
 #define DECLARE_SINGLE(MYType)\
 public:\

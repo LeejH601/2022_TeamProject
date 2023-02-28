@@ -10,7 +10,8 @@
 #include "..\Sound\SoundManager.h"
 #include "EntityManager.h"
 #include "MessageDispatcher.h"
-
+#include "..\Object\BillBoardComponent.h"
+#include "..\Object\ParticleComponent.h"
 CLocator::~CLocator()
 {
 	m_pEntityManager->Clear();
@@ -100,12 +101,17 @@ bool CLocator::Init()
 		componentSet->AddComponent(component);
 		component = std::make_shared<CShootSoundComponent>(CSoundManager::GetInst()->GetSoundSystem());
 		componentSet->AddComponent(component);
+		
+		component = CDamageAnimationComponent::GetInst();
+		componentSet->AddComponent(component);
+		component = CShakeAnimationComponent::GetInst();
+		componentSet->AddComponent(component);
+		component = CStunAnimationComponent::GetInst();
+		componentSet->AddComponent(component);
 
-		component = std::make_shared<CDamageAnimationComponent>();
+		component = std::make_shared<CAttackSpriteComponent>();
 		componentSet->AddComponent(component);
-		component = std::make_shared<CShakeAnimationComponent>();
-		componentSet->AddComponent(component);
-		component = std::make_shared<CStunAnimationComponent>();
+		component = std::make_shared<CParticleComponent>();
 		componentSet->AddComponent(component);
 	}
 
@@ -117,7 +123,8 @@ bool CLocator::Init()
 	SetPlayerState(state);
 	state = std::make_shared<Atk3_Player>();
 	SetPlayerState(state);
-
+	state = std::make_shared<Run_Player>();
+	SetPlayerState(state);
 	m_pSoundPlayer = std::make_shared<CSoundPlayer>();
 	return true;
 }

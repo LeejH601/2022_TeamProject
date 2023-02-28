@@ -15,5 +15,6 @@ float4 PSParticleDraw(GS_PARTICLE_DRAW_OUTPUT input) : SV_TARGET
 	float4 cColor = gtxtParticleTexture.Sample(gSamplerState, input.uv);
 	cColor *= input.color;
 
+	//cColor = float4(1.f, 0.f, 0.f, 1.f);
 	return(cColor);
 }

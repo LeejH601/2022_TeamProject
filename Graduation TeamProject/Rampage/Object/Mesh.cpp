@@ -1168,24 +1168,18 @@ CTexturedRectMesh::~CTexturedRectMesh()
 {
 }
 
-CBillBoardMesh::CBillBoardMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+CBillBoardMesh::CBillBoardMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float m_fSize)
 {
 	m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_POINTLIST;
-	int nBillBoard = 5;
+	int nBillBoard = 1;
 	m_nStride = sizeof(CBillBoardVertex);
 	m_nVertices = nBillBoard;
-	XMFLOAT3 xmf3Position;
 	std::vector< CBillBoardVertex> m_BillBordVertices;
 	m_BillBordVertices.reserve(nBillBoard);
 
 	for (int i = 0; i < nBillBoard; i++)
 	{
-		float fxTerrain = 0.f;
-		float fzTerrain = 0.f;
-		xmf3Position.x = fxTerrain;
-		xmf3Position.z = fzTerrain + 15.f * i;
-		xmf3Position.y = 0.f;
-		m_BillBordVertices.push_back(CBillBoardVertex(xmf3Position, XMFLOAT2(5.f, 5.f)));
+		m_BillBordVertices.push_back(CBillBoardVertex(XMFLOAT3(0.f, 0.f, 0.f), XMFLOAT2(m_fSize, m_fSize)));
 	}
 
 	m_pd3dPositionBuffer = CreateBufferResource(pd3dDevice, pd3dCommandList, m_BillBordVertices.data(), m_nStride * m_nVertices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dPositionUploadBuffer);

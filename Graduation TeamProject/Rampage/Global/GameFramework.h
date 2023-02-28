@@ -5,6 +5,7 @@
 
 class CCamera;
 class CShader;
+class CGameObject;
 class CCameraMovementManager;
 
 struct CB_Parallax_Info
@@ -63,10 +64,10 @@ private:
 	HANDLE m_hFenceEvent;
 
 	std::unique_ptr<CScene> m_pScene = NULL;
-	std::unique_ptr<CCamera> m_pCamera = NULL;
-
-	
-
+	std::unique_ptr<CCamera> m_pFloatingCamera = NULL;
+	std::unique_ptr<CCamera> m_pFirstPersonCamera = NULL;
+	CCamera* m_pCurrentCamera = NULL;
+	std::unique_ptr<CGameObject> m_pPlayer = NULL;
 public:
 	CGameTimer					m_GameTimer;
 

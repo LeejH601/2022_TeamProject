@@ -8,15 +8,15 @@
 #include "..\Global\Camera.h"
 #include "..\Global\Locator.h"
 #include "..\Shader\DepthRenderShader.h"
+#include "..\Object\BillBoardComponent.h"
+#include "..\Object\ParticleComponent.h"
+#include "..\Object\TextureManager.h"
 
 void CSimulatorScene::OnPreRender(ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed)
 {
 	if (m_pDepthRenderShader)
 	{
-		for (int i = 0; i < m_pEnemys.size(); ++i)
-			m_pEnemys[i]->Update(fTimeElapsed);
-
-		((CDepthRenderShader*)m_pDepthRenderShader.get())->PrepareShadowMap(pd3dCommandList, fTimeElapsed);
+		((CDepthRenderShader*)m_pDepthRenderShader.get())->PrepareShadowMap(pd3dCommandList, 0.0f);
 		((CDepthRenderShader*)m_pDepthRenderShader.get())->UpdateDepthTexture(pd3dCommandList);
 		CheckCollide();
 	}
@@ -27,7 +27,7 @@ void CSimulatorScene::OnPrepareRender(ID3D12GraphicsCommandList* pd3dCommandList
 }
 void CSimulatorScene::CreateGraphicsRootSignature(ID3D12Device* pd3dDevice)
 {
-	D3D12_DESCRIPTOR_RANGE pd3dDescriptorRanges[3];
+	D3D12_DESCRIPTOR_RANGE pd3dDescriptorRanges[5];
 	pd3dDescriptorRanges[0].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
 	pd3dDescriptorRanges[0].NumDescriptors = 7;
 	pd3dDescriptorRanges[0].BaseShaderRegister = 0; //t0 ~ t6: MappingTexture
@@ -46,7 +46,19 @@ void CSimulatorScene::CreateGraphicsRootSignature(ID3D12Device* pd3dDevice)
 	pd3dDescriptorRanges[2].RegisterSpace = 0;
 	pd3dDescriptorRanges[2].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
-	D3D12_ROOT_PARAMETER pd3dRootParameters[10];
+	pd3dDescriptorRanges[3].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+	pd3dDescriptorRanges[3].NumDescriptors = 1;
+	pd3dDescriptorRanges[3].BaseShaderRegister = 30; //t30: gtxtTexture
+	pd3dDescriptorRanges[3].RegisterSpace = 0;
+	pd3dDescriptorRanges[3].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+
+	pd3dDescriptorRanges[4].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+	pd3dDescriptorRanges[4].NumDescriptors = 3;
+	pd3dDescriptorRanges[4].BaseShaderRegister = 31; //t31~33: gtxtParticleTexture
+	pd3dDescriptorRanges[4].RegisterSpace = 0;
+	pd3dDescriptorRanges[4].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+
+	D3D12_ROOT_PARAMETER pd3dRootParameters[13];
 
 	pd3dRootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
 	pd3dRootParameters[0].Constants.Num32BitValues = 33;
@@ -98,6 +110,21 @@ void CSimulatorScene::CreateGraphicsRootSignature(ID3D12Device* pd3dDevice)
 	pd3dRootParameters[9].DescriptorTable.NumDescriptorRanges = 1;
 	pd3dRootParameters[9].DescriptorTable.pDescriptorRanges = &pd3dDescriptorRanges[2]; //Depth Buffer
 	pd3dRootParameters[9].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+
+	pd3dRootParameters[10].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+	pd3dRootParameters[10].DescriptorTable.NumDescriptorRanges = 1;
+	pd3dRootParameters[10].DescriptorTable.pDescriptorRanges = &pd3dDescriptorRanges[3];
+	pd3dRootParameters[10].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+
+	pd3dRootParameters[11].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
+	pd3dRootParameters[11].Descriptor.ShaderRegister = 7; // cbFrameworkInfo
+	pd3dRootParameters[11].Descriptor.RegisterSpace = 0;
+	pd3dRootParameters[11].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+
+	pd3dRootParameters[12].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+	pd3dRootParameters[12].DescriptorTable.NumDescriptorRanges = 1;
+	pd3dRootParameters[12].DescriptorTable.pDescriptorRanges = &pd3dDescriptorRanges[4];
+	pd3dRootParameters[12].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 
 	D3D12_STATIC_SAMPLER_DESC d3dSamplerDesc[4];
 
@@ -196,24 +223,17 @@ void CSimulatorScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 
 	// 4->HIT
 	// 5->IDLE
-	std::unique_ptr<CMonster> m_pDummyEnemy = std::make_unique<CGoblinObject>(pd3dDevice, pd3dCommandList, 1);
+	std::shared_ptr<CMonster> m_pDummyEnemy = std::make_unique<CGoblinObject>(pd3dDevice, pd3dCommandList, 1);
 	m_pDummyEnemy->SetPosition(XMFLOAT3(8.0f, 0.0f, 0.0f));
 	m_pDummyEnemy->SetScale(14.0f, 14.0f, 14.0f);
 	m_pDummyEnemy->Rotate(0.0f, -90.0f, 0.0f);
 	m_pDummyEnemy->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 5);
-	m_pEnemys.push_back(std::move(m_pDummyEnemy));
+	m_pEnemys.push_back(m_pDummyEnemy);
 
 	// 3->IDLE
 	// 28->Attack
-	std::shared_ptr<CGameObject> knightObject = std::make_shared<CKnightObject>(pd3dDevice, pd3dCommandList, 1);
-	knightObject->SetPosition(XMFLOAT3(-8.0f, 0.0f, 0.0f));
-	knightObject->SetScale(14.0f, 14.0f, 14.0f);
-	knightObject->Rotate(0.0f, 90.0f, 0.0f);
-	knightObject->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 4);
-	knightObject->m_pSkinnedAnimationController->m_xmf3RootObjectScale = XMFLOAT3(14.0f, 14.0f, 14.0f);
-
-	m_pMainCharacter = std::make_unique<CPlayer>();
-	m_pMainCharacter->SetChild(knightObject, true);
+	
+	m_pMainCharacter = std::make_unique<CPlayer>(pd3dDevice, pd3dCommandList, 1);
 
 	((CDepthRenderShader*)m_pDepthRenderShader.get())->RegisterObject(m_pMainCharacter.get());
 	for (int i = 0; i < m_pEnemys.size(); ++i)
@@ -232,34 +252,66 @@ void CSimulatorScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 	XMFLOAT4 xmf4Color(0.0f, 0.5f, 0.0f, 0.0f);
 	m_pTerrain = std::make_unique<CSplatTerrain>(pd3dDevice, pd3dCommandList, GetGraphicsRootSignature(), _T("Terrain/terrainHeightMap257.raw"), 257, 257, 257, 257, xmf3Scale, xmf4Color, m_pTerrainShader.get());
 	m_pTerrain->SetPosition(XMFLOAT3(-800.f, -310.f, -800.f));
-	
+	m_pMainCharacter->SetPlayerUpdatedContext(m_pTerrain.get());
 
-	/*for (int i = 0; i < nAnimationSets; ++i)
+	/*std::unique_ptr<CGameObject> pDumpCharater = std::make_unique<CKnightObject>(pd3dDevice, pd3dCommandList, 1);
+
+	for (int i = 0; i < pDumpCharater->m_pSkinnedAnimationController->m_pAnimationSets->m_nAnimationSets; ++i)
 	{
 		std::unique_ptr<CGameObject> pCharater = std::make_unique<CKnightObject>(pd3dDevice, pd3dCommandList, 1);
+		pCharater = std::make_unique<CKnightObject>(pd3dDevice, pd3dCommandList, 1);
 		pCharater->SetPosition(XMFLOAT3(5.0f * i, 0.0f, 0.0f));
 		pCharater->SetScale(5.0f, 5.0f, 5.0f);
 		pCharater->Rotate(0.0f, -90.0f, 0.0f);
 		pCharater->m_pSkinnedAnimationController->SetTrackAnimationSet(0, i);
 		m_pMainCharacters.push_back(std::move(pCharater));
 	}*/
+
+	m_pBillBoardObjectShader = std::make_unique<CBillBoardObjectShader>();
+	m_pBillBoardObjectShader->CreateShader(pd3dDevice, GetGraphicsRootSignature(), 1, &pdxgiObjectRtvFormats, 0);
+	m_pBillBoardObjectShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 10);
+
+	CTextureManager::GetInst()->LoadTexture(pd3dDevice, pd3dCommandList, L"Image/Explode_8x8.dds", m_pBillBoardObjectShader.get(), 8, 8);
+	CTextureManager::GetInst()->LoadTexture(pd3dDevice, pd3dCommandList, L"Image/Fire_Effect.dds", m_pBillBoardObjectShader.get(), 5, 6);
+
+	m_pBillBoardObject = std::make_shared<CMultiSpriteObject>(CTextureManager::GetInst()->LoadTexture(L"Image/Fire_Effect.dds"), pd3dDevice, pd3dCommandList, m_pBillBoardObjectShader.get(), 5, 6, 8.f, 5.f);
+	CAttackSpriteComponent::GetInst()->Add_AttackComponent(std::make_pair(m_pEnemys[0], m_pBillBoardObject));
+
+	m_pParticleObjectShader = std::make_shared<CParticleShader>();
+	m_pParticleObject = std::make_shared<CParticleObject>(pd3dDevice, pd3dCommandList, GetGraphicsRootSignature(), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 65.0f, 0.0f), 2.0f, XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT2(2.0f, 2.0f), MAX_PARTICLES, m_pParticleObjectShader.get());
+	CParticleComponent::GetInst()->Set_ParticleComponent(m_pParticleObject);
 }
 void CSimulatorScene::AnimateObjects(float fTimeElapsed)
 {
+	UpdateObjects(fTimeElapsed);
+}
+void CSimulatorScene::UpdateObjects(float fTimeElapsed)
+{
+	m_pMainCharacter->Update(fTimeElapsed);
+
+	for (int i = 0; i < m_pEnemys.size(); ++i)
+		m_pEnemys[i]->Update(fTimeElapsed);
 }
 void CSimulatorScene::CheckCollide()
 {
-	for (int i = 0; i < m_pEnemys.size(); ++i)
+	for (int i = 0; i < m_pEnemys.size(); ++i) {
 		m_pMainCharacter->CheckCollision(m_pEnemys[i].get());
+	}
+
 }
-void CSimulatorScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed, CCamera* pCamera)
+void CSimulatorScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed, float fCurrentTime, CCamera* pCamera)
 {
 	m_pLight->Render(pd3dCommandList);
 
 	CModelShader::GetInst()->Render(pd3dCommandList, 1);
 
+	/*for (int i = 0; i < m_pMainCharacters.size(); ++i)
+	{
+		m_pMainCharacters[i]->Animate(fTimeElapsed);
+		m_pMainCharacters[i]->Render(pd3dCommandList, true);
+	}*/
+
 	m_pMainCharacter->Animate(0.0f);
-	m_pMainCharacter->Update(fTimeElapsed);
 	m_pMainCharacter->Render(pd3dCommandList, true);
 
 	for (int i = 0; i < m_pEnemys.size(); ++i)
@@ -275,6 +327,7 @@ void CSimulatorScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float f
 	if (!m_pDummyEnemy->m_pSkinnedAnimationController) m_pMainCharacter->UpdateTransform(NULL);
 	m_pMainCharacter->Render(pd3dCommandList);*/
 
+
 	Locator.GetSoundPlayer()->Update(fTimeElapsed);
 	/*for (int i = 0; i < m_pMainCharacters.size(); ++i)
 	{
@@ -282,7 +335,21 @@ void CSimulatorScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float f
 		if (!m_pDummyEnemy->m_pSkinnedAnimationController) m_pMainCharacters[i]->UpdateTransform(NULL);
 		m_pMainCharacters[i]->Render(pd3dCommandList);
 	}*/
+	CAttackSpriteComponent::GetInst()->Collision_Check();
+	m_pBillBoardObjectShader->Render(pd3dCommandList, 0);
+	m_pBillBoardObject->Animate(fTimeElapsed);
+	m_pBillBoardObject->UpdateShaderVariables(pd3dCommandList);
+	m_pBillBoardObject->Render(pd3dCommandList, true);
+
+	m_pParticleObject->UpdateShaderVariables(pd3dCommandList, fCurrentTime, fTimeElapsed);
+	m_pParticleObject->Render(pd3dCommandList, pCamera, m_pParticleObjectShader.get());
 }
+void CSimulatorScene::OnPostRenderTarget()
+{
+	if(m_pParticleObject)
+		m_pParticleObject->OnPostRender();
+}
+
 void CSimulatorScene::SetPlayerAnimationSet(int nSet)
 {
 	switch (nSet)

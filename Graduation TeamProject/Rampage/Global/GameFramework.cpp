@@ -251,10 +251,18 @@ void CGameFramework::BuildObjects()
 
 	CSimulatorScene::GetInst()->BuildObjects(m_pd3dDevice.Get(), m_pd3dCommandList.Get());
 
+	m_pFloatingCamera = std::make_unique<CFloatingCamera>();
+	m_pFloatingCamera->Init(m_pd3dDevice.Get(), m_pd3dCommandList.Get());
 
-	m_pCamera = std::make_unique<CFirstPersonCamera>();
-	m_pCamera->Init(m_pd3dDevice.Get(), m_pd3dCommandList.Get());
+	m_pFirstPersonCamera = std::make_unique<CThirdPersonCamera>();
+	m_pFirstPersonCamera->Init(m_pd3dDevice.Get(), m_pd3dCommandList.Get());
 
+	m_pCurrentCamera = m_pFloatingCamera.get();
+
+	m_pPlayer = std::make_unique<CPlayer>(m_pd3dDevice.Get(), m_pd3dCommandList.Get(), 1);
+
+	m_pScene->SetPlayer(m_pPlayer.get());
+	((CThirdPersonCamera*)(m_pFirstPersonCamera.get()))->SetPlayer((CPlayer*)m_pPlayer.get());
 }
 void CGameFramework::ReleaseObjects()
 {
@@ -265,6 +273,15 @@ void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM
 	switch (nMessageID)
 	{
 	case WM_LBUTTONDOWN:
+		// 좌클릭시 사용자가 좌클릭 했음을 표현하는 변수를 true로 바꿔줌
+#ifndef ATTACK_SOUND
+		if (m_pPlayer)
+			((CPlayer*)m_pPlayer.get())->m_bAttack = true;
+#endif
+
+		::SetCapture(hWnd);
+		::GetCursorPos(&m_ptOldCursorPos);
+		break;
 	case WM_RBUTTONDOWN:
 		::SetCapture(hWnd);
 		::GetCursorPos(&m_ptOldCursorPos);
@@ -286,6 +303,10 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 	case WM_KEYDOWN:
 		switch (wParam)
 		{
+		case 'f':
+		case 'F':
+			((CPlayer*)m_pPlayer.get())->Tmp();
+			break;
 		case 'w':
 		case 'W':
 			if (wParam == 'w' || wParam == 'W') dwDirection |= DIR_FORWARD;
@@ -312,6 +333,12 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 			break;
 		case VK_ESCAPE:
 			::PostQuitMessage(0);
+			break;
+		case '1':
+			m_pCurrentCamera = m_pFloatingCamera.get();
+			break;
+		case '2':
+			m_pCurrentCamera = m_pFirstPersonCamera.get();
 			break;
 		case VK_F9:
 			ChangeSwapChainState();
@@ -386,10 +413,6 @@ LRESULT CALLBACK CGameFramework::OnProcessingWindowMessage(HWND hWnd, UINT nMess
 }
 void CGameFramework::ProcessInput()
 {
-	static UCHAR pKeysBuffer[256];
-
-	GetKeyboardState(pKeysBuffer);
-
 	float cxDelta = 0.0f, cyDelta = 0.0f;
 	POINT ptCursorPos;
 	if (GetCapture() == m_hWnd)
@@ -401,50 +424,14 @@ void CGameFramework::ProcessInput()
 		SetCursorPos(m_ptOldCursorPos.x, m_ptOldCursorPos.y);
 	}
 
-	if (cxDelta || cyDelta)
-	{
-		/*if (pKeysBuffer[VK_RBUTTON] & 0xF0)
-			m_pCamera->Rotate(cyDelta, 0.0f, -cxDelta);
-		else
-			m_pCamera->Rotate(cyDelta, cxDelta, 0.0f);*/
-
-		if (pKeysBuffer[VK_RBUTTON] & 0xF0)
-			m_pCamera->Rotate(cyDelta, cxDelta, 0.0f);
-	}
-
-	m_pCamera->RegenerateViewMatrix();
-
-	if (pKeysBuffer[VK_RBUTTON] & 0xF0) {
-		if (dwDirection) {
-			if (dwDirection)
-			{
-				XMFLOAT3 xmf3Shift = XMFLOAT3(0, 0, 0);
-				float fDistance = 40.0f * m_GameTimer.GetFrameTimeElapsed();
-				if (pKeysBuffer[VK_SHIFT] & 0xF0)
-					fDistance *= 10.0f;
-				if (dwDirection & DIR_FORWARD) xmf3Shift = Vector3::Add(xmf3Shift, m_pCamera->GetLookVector(), fDistance);
-				if (dwDirection & DIR_BACKWARD) xmf3Shift = Vector3::Add(xmf3Shift, m_pCamera->GetLookVector(), -fDistance);
-				if (dwDirection & DIR_RIGHT) xmf3Shift = Vector3::Add(xmf3Shift, m_pCamera->GetRightVector(), fDistance);
-				if (dwDirection & DIR_LEFT) xmf3Shift = Vector3::Add(xmf3Shift, m_pCamera->GetRightVector(), -fDistance);
-				if (dwDirection & DIR_UP) xmf3Shift = Vector3::Add(xmf3Shift, m_pCamera->GetUpVector(), fDistance);
-				if (dwDirection & DIR_DOWN) xmf3Shift = Vector3::Add(xmf3Shift, m_pCamera->GetUpVector(), -fDistance);
-
-				m_pCamera->Move(xmf3Shift);
-			}
-		}
-	}
-
-
-
-
-	/*TCHAR pstrDebug[256] = { 0 };
-	_stprintf_s(pstrDebug, 256, _T("%f, %f, %f \n"), m_pCamera->GetLookVector().x, m_pCamera->GetLookVector().y, m_pCamera->GetLookVector().z);
-	OutputDebugString(pstrDebug);*/
+	m_pCurrentCamera->ProcessInput(dwDirection, cxDelta, cyDelta, m_GameTimer.GetFrameTimeElapsed());
+	((CPlayer*)(m_pPlayer.get()))->ProcessInput(dwDirection, cxDelta, cyDelta, m_GameTimer.GetFrameTimeElapsed(), m_pCurrentCamera);
 }
 void CGameFramework::AnimateObjects()
 {
 	// Object들의 애니메이션을 수행한다.
-	m_pCamera->Animate(m_GameTimer.GetFrameTimeElapsed());
+	m_pFloatingCamera->Animate(m_GameTimer.GetFrameTimeElapsed());
+	m_pFirstPersonCamera->Animate(m_GameTimer.GetFrameTimeElapsed());
 	m_pScene->AnimateObjects(m_GameTimer.GetFrameTimeElapsed());
 	CSimulatorScene::GetInst()->AnimateObjects(m_GameTimer.GetFrameTimeElapsed());
 }
@@ -486,7 +473,7 @@ void CGameFramework::OnPrepareImGui()
 {
 	HRESULT hResult = m_pd3dCommandList->Reset(m_pd3dCommandAllocator.Get(), NULL);
 
-	CImGuiManager::GetInst()->OnPrepareRender(m_pd3dCommandList.Get(), &m_d3dDsvDescriptorCPUHandle, m_GameTimer.GetFrameTimeElapsed(), m_pCamera.get());
+	CImGuiManager::GetInst()->OnPrepareRender(m_pd3dCommandList.Get(), &m_d3dDsvDescriptorCPUHandle, m_GameTimer.GetFrameTimeElapsed(), m_GameTimer.GetTotalTime(), m_pFloatingCamera.get());
 
 	//명령 리스트를 닫힌 상태로 만든다. 
 	hResult = m_pd3dCommandList->Close();
@@ -501,6 +488,7 @@ void CGameFramework::OnPrepareImGui()
 void CGameFramework::OnPostRenderTarget()
 {
 	m_pScene->OnPostRenderTarget();
+	CImGuiManager::GetInst()->OnPostRenderTarget();
 }
 void CGameFramework::MoveToNextFrame()
 {
@@ -550,6 +538,12 @@ void CGameFramework::FrameAdvance()
 
 	ProcessInput();
 	AnimateObjects();
+
+	XMFLOAT3 xmf3PlayerPos = m_pPlayer->GetPosition();
+	xmf3PlayerPos.y += 12.5f;
+
+	m_pCurrentCamera->Update(xmf3PlayerPos, 0.0f);
+
 	Locator.GetMessageDispather()->DispatchMessages();
 
 	//명령 할당자를 리셋한다.
@@ -570,8 +564,8 @@ void CGameFramework::FrameAdvance()
 	m_pd3dCommandList->ClearDepthStencilView(m_d3dDsvDescriptorCPUHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
 	OnPrepareRenderTarget();
 	UpdateShaderVariables(m_pd3dCommandList.Get());
-	m_pCamera->OnPrepareRender(m_pd3dCommandList.Get());
-	m_pScene->Render(m_pd3dCommandList.Get(), m_GameTimer.GetFrameTimeElapsed(), m_GameTimer.GetTotalTime(), m_pCamera.get());
+	m_pCurrentCamera->OnPrepareRender(m_pd3dCommandList.Get());
+	m_pScene->Render(m_pd3dCommandList.Get(), m_GameTimer.GetFrameTimeElapsed(), m_GameTimer.GetTotalTime(), m_pFloatingCamera.get());
 
 	CImGuiManager::GetInst()->Render(m_pd3dCommandList.Get());
 

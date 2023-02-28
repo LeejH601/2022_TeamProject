@@ -166,6 +166,15 @@
     <ClCompile Include="Object\ParticleObject.cpp">
       <Filter>Object</Filter>
     </ClCompile>
+    <ClCompile Include="Object\TextureManager.cpp">
+      <Filter>Object</Filter>
+    </ClCompile>
+    <ClCompile Include="Object\BillBoardComponent.cpp">
+      <Filter>Object</Filter>
+    </ClCompile>
+    <ClCompile Include="Object\ParticleComponent.cpp">
+      <Filter>Object</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Global\stdafx.h">
@@ -316,6 +325,15 @@
       <Filter>Global</Filter>
     </ClInclude>
     <ClInclude Include="Object\ParticleObject.h">
+      <Filter>Object</Filter>
+    </ClInclude>
+    <ClInclude Include="Object\TextureManager.h">
+      <Filter>Object</Filter>
+    </ClInclude>
+    <ClInclude Include="Object\BillBoardComponent.h">
+      <Filter>Object</Filter>
+    </ClInclude>
+    <ClInclude Include="Object\ParticleComponent.h">
       <Filter>Object</Filter>
     </ClInclude>
   </ItemGroup>

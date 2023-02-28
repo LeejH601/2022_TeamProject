@@ -21,7 +21,7 @@ public:
 	BoundingBox m_BodyBoundingBox;
 	BoundingBox m_WeaponBoundingBox;
 	BoundingBox m_TransformedBodyBoudningBox;
-	BoundingBox m_TransformedWeaponBoudningBox;
+	BoundingBox m_TransformedWeaponBoundingBox;
 	CGameObject* pBodyBoundingBoxMesh;
 	CGameObject* pWeaponBoundingBoxMesh;
 public:
@@ -40,7 +40,7 @@ public:
 		if (pTargetObject)
 		{
 			BoundingBox TargetBoundingBox = pTargetObject->GetBoundingBox();
-			if (m_TransformedWeaponBoudningBox.Intersects(TargetBoundingBox)) {
+			if (m_TransformedWeaponBoundingBox.Intersects(TargetBoundingBox)) {
 				pTargetObject->SetHit(this);
 				return true;
 			}

@@ -316,7 +316,7 @@ class CBillBoardMesh : public CMesh
 {
 
 public:
-	CBillBoardMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+	CBillBoardMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float m_fSize);
 	virtual ~CBillBoardMesh();
 };
 

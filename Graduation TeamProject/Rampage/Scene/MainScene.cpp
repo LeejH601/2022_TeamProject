@@ -1,6 +1,7 @@
 #include "MainScene.h"
 #include "..\Global\Timer.h"
 #include "..\Object\Texture.h"
+#include "..\Object\Player.h"
 #include "..\Object\ModelManager.h"
 #include "..\Shader\ModelShader.h"
 #include "..\Shader\ModelShader.h"
@@ -9,12 +10,22 @@
 #include "..\Shader\ParticleShader.h"
 #include "..\Shader\DepthRenderShader.h"
 #include "..\Object\Monster.h"
+#include "..\Object\TextureManager.h"
+
+void CMainTMPScene::SetPlayer(CGameObject* pPlayer)
+{
+	m_pPlayer = pPlayer;
+	((CPlayer*)m_pPlayer)->SetPlayerUpdatedContext(m_pTerrain.get());
+
+	if (m_pDepthRenderShader.get())
+		((CDepthRenderShader*)m_pDepthRenderShader.get())->RegisterObject(pPlayer);
+}
 
 void CMainTMPScene::OnPreRender(ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed)
 {
 	if (m_pDepthRenderShader)
 	{
-		((CDepthRenderShader*)m_pDepthRenderShader.get())->PrepareShadowMap(pd3dCommandList, fTimeElapsed);
+		((CDepthRenderShader*)m_pDepthRenderShader.get())->PrepareShadowMap(pd3dCommandList, 0.0f);
 		((CDepthRenderShader*)m_pDepthRenderShader.get())->UpdateDepthTexture(pd3dCommandList);
 	}
 }
@@ -221,19 +232,7 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	//CSoundManager::GetInst()->RegisterSound("Sound/mp3/David Bowie - Starman.mp3", false);
 	//CSoundManager::GetInst()->PlaySound("Sound/mp3/David Bowie - Starman.mp3");
 
-	//std::unique_ptr<CKnightObject> m_pObject = std::make_unique<CKnightObject>(pd3dDevice, pd3dCommandList, 1);
-	//m_pObject->SetPosition(XMFLOAT3(0.0f, 0.0f, 0.0f));
-	//m_pObject->SetScale(15.0f, 15.0f, 15.0f);
-	//m_pObject->Rotate(0.0f, 180.0f, 0.0f);
-	//m_pObject->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
-	//m_pObject->SetRigidDynamic();
-	//m_pObject->CreateArticulation(0.7f);
-	//physx::PxRigidDynamic* rigid = (physx::PxRigidDynamic*)m_pObject->Rigid;
-	//XMFLOAT3 pos = m_pObject->GetPosition();
-	//physx::PxTransform transform(physx::PxVec3(pos.x, pos.y, pos.z));
-	//rigid->setGlobalPose(transform);
-	////m_pObject->m_pArticulation->setRootGlobalPose(transform);
-	//m_pObjects.push_back(std::move(m_pObject));
+	std::unique_ptr<CKnightObject> m_pObject = std::make_unique<CKnightObject>(pd3dDevice, pd3dCommandList, 1);
 
 	//m_pObject = std::make_unique<CKnightObject>(pd3dDevice, pd3dCommandList, 1);
 	//m_pObject->SetPosition(XMFLOAT3(-15.0f, 15.0f, 15.0f));
@@ -449,27 +448,46 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pBillBoardObjectShader->CreateShader(pd3dDevice, GetGraphicsRootSignature(), 1, &pdxgiObjectRtvFormats, 0);
 	m_pBillBoardObjectShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 10);
 
-	std::unique_ptr<CBillBoardObject> pBillBoardObject = std::make_unique<CBillBoardObject>(m_pBillBoardObjectShader->Load_Texture(pd3dDevice, pd3dCommandList, L"Image/Grass01.dds"), pd3dDevice, pd3dCommandList, m_pBillBoardObjectShader.get());
-	pBillBoardObject->SetPosition(XMFLOAT3(0.f, -5.f, 0.f));
-	m_pBillBoardObjects.push_back(std::move(pBillBoardObject));
+	
+	//std::unique_ptr<CBillBoardObject> pBillBoardObject = std::make_unique<CBillBoardObject>(CTextureManager::GetInst()->LoadTexture(pd3dDevice, pd3dCommandList, L"Image/Grass01.dds"), pd3dDevice, pd3dCommandList, m_pBillBoardObjectShader.get(), 4.f);
+	//pBillBoardObject->SetPosition(XMFLOAT3(0.f, -5.f, 0.f));
+	//m_pBillBoardObjects.push_back(std::move(pBillBoardObject));
 
-	std::unique_ptr<CMultiSpriteObject> pSpriteAnimationObject = std::make_unique<CMultiSpriteObject>(m_pBillBoardObjectShader->Load_Texture(pd3dDevice, pd3dCommandList, L"Image/Explode_8x8.dds"), pd3dDevice, pd3dCommandList, m_pBillBoardObjectShader.get(), 8, 8, 0.05f);
-	pSpriteAnimationObject->SetPosition(XMFLOAT3(0.f, 5.f, 0.f));
-	m_pBillBoardObjects.push_back(std::move(pSpriteAnimationObject));
+	//std::unique_ptr<CMultiSpriteObject> pSpriteAnimationObject = std::make_unique<CMultiSpriteObject>(CTextureManager::GetInst()->LoadTexture(pd3dDevice, pd3dCommandList, L"Image/Explode_8x8.dds"), pd3dDevice, pd3dCommandList, m_pBillBoardObjectShader.get(), 8, 8, 4.f, 0.05f);
+	//pSpriteAnimationObject->SetPosition(XMFLOAT3(0.f, 5.f, 0.f));
+	//m_pBillBoardObjects.push_back(std::move(pSpriteAnimationObject));
+
+	//pSpriteAnimationObject = std::make_unique<CMultiSpriteObject>(CTextureManager::GetInst()->LoadTexture(pd3dDevice, pd3dCommandList, L"Image/Fire_Effect.dds"), pd3dDevice, pd3dCommandList, m_pBillBoardObjectShader.get(), 5, 6, 4.f, 0.05f);
+	//pSpriteAnimationObject->SetPosition(XMFLOAT3(-10.f, 15.f, 0.f));
+	//m_pBillBoardObjects.push_back(std::move(pSpriteAnimationObject));
 
 	m_pParticleShader = std::make_shared<CParticleShader>();
-	std::unique_ptr<CParticleObject> pParticleObject = std::make_unique<CParticleObject>(pd3dDevice, pd3dCommandList, GetGraphicsRootSignature(), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 65.0f, 0.0f), 2.0f, XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT2(2.0f, 2.0f), MAX_PARTICLES, m_pParticleShader.get());
-
+	std::unique_ptr<CParticleObject> pParticleObject = std::make_unique<CParticleObject>(pd3dDevice, pd3dCommandList, GetGraphicsRootSignature(), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 65.0f, 0.0f), 2.0f, XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT2(2.0f, 2.0f), MAX_PARTICLES, m_pParticleShader.get(), true);
+	
 	m_ppParticleObjects.push_back(std::move(pParticleObject));
+}
+void CMainTMPScene::UpdateObjects(float fTimeElapsed)
+{
+	m_pPlayer->Update(fTimeElapsed);
+
+	for (int i = 0; i < m_pObjects.size(); ++i)
+		m_pObjects[i]->Update(fTimeElapsed);
 }
 void CMainTMPScene::AnimateObjects(float fTimeElapsed)
 {
+	UpdateObjects(fTimeElapsed);
 }
 void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed, float fCurrentTime, CCamera* pCamera)
 {
 	m_pLight->Render(pd3dCommandList);
 
 	CModelShader::GetInst()->Render(pd3dCommandList, 0);
+
+	if (m_pPlayer)
+	{
+		m_pPlayer->Animate(0.0f);
+		m_pPlayer->Render(pd3dCommandList, true);
+	}
 
 	for (int i = 0; i < m_pObjects.size(); ++i)
 	{
@@ -483,16 +501,18 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 #ifdef RENDER_BOUNDING_BOX
 	CBoundingBoxShader::GetInst()->Render(pd3dCommandList, 0);
 #endif
-	m_pBillBoardObjectShader->Render(pd3dCommandList, 0);
+	/*m_pBillBoardObjectShader->Render(pd3dCommandList, 0);
 	for (int i = 0; i < m_pBillBoardObjects.size(); i++)
 	{
 		m_pBillBoardObjects[i]->Animate(fTimeElapsed);
-		m_pBillBoardObjects[i]->Render(pd3dCommandList, pCamera);
+		m_pBillBoardObjects[i]->Render(pd3dCommandList, true);
 	}
+	*/
 
 	for (int i = 0; i < m_ppParticleObjects.size(); i++)
 	{
-		m_pParticleShader->UpdateShaderVariables(pd3dCommandList, fCurrentTime, fTimeElapsed);
+		//m_pParticleShader->UpdateShaderVariables(pd3dCommandList, fCurrentTime, fTimeElapsed);
+		m_ppParticleObjects[i]->UpdateShaderVariables(pd3dCommandList, fCurrentTime, fTimeElapsed);
 		m_ppParticleObjects[i]->Render(pd3dCommandList, pCamera, m_pParticleShader.get());
 	}
 }
@@ -503,7 +523,6 @@ void CMainTMPScene::OnPostRenderTarget()
 	{
 		m_ppParticleObjects[i]->OnPostRender();
 	}
-
 }
 
 

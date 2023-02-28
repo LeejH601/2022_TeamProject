@@ -25,6 +25,8 @@ private:
 public:
 	CMainTMPScene() {}
 	virtual ~CMainTMPScene() {}
+	
+	virtual void SetPlayer(CGameObject* pPlayer);
 
 	virtual void OnPreRender(ID3D12GraphicsCommandList* pd3dCommandList) { }
 	virtual void OnPreRender(ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed);
@@ -43,6 +45,7 @@ public:
 	virtual void ReleaseObjects() {}
 
 	virtual bool ProcessInput(UCHAR* pKeysBuffer) { return false; }
+	virtual void UpdateObjects(float fTimeElapsed);
 	virtual void AnimateObjects(float fTimeElapsed);
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed, float fCurrentTime, CCamera* pCamera = NULL);
 	virtual void OnPostRenderTarget();

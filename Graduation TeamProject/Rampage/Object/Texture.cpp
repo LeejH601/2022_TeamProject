@@ -79,6 +79,22 @@ void CTexture::ReleaseUploadBuffers()
 	}
 }
 
+void CTexture::SetRowColumn(int iRow, int iColumn)
+{
+	m_iRow = iRow;
+	m_iColumn = iColumn;
+}
+
+int CTexture::GetRow()
+{
+	return m_iRow;
+}
+
+int CTexture::GetColumn()
+{
+	return m_iColumn;
+}
+
 
 
 void CTexture::LoadTextureFromDDSFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, const wchar_t* pszFileName, UINT nResourceType, UINT nIndex)

@@ -169,25 +169,3 @@ void CParticleShader::CreateGraphicsPipelineState(ID3D12Device* pd3dDevice, ID3D
 	CParticleShader::CreateShader(pd3dDevice, pd3dGraphicsRootSignature, 0, &pdxgiRtvFormats[0], 0); //Stream Output Pipeline State // DXGI_FORMAT_UNKNOWN
 	CParticleShader::CreateShader(pd3dDevice, pd3dGraphicsRootSignature, 1, &pdxgiRtvFormats[1], 1); //Draw Pipeline State // DXGI_FORMAT_R8G8B8A8_UNORM
 }
-
-void CParticleShader::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
-{
-	UINT ncbElementBytes = ((sizeof(CB_FRAMEWORK_INFO) + 255) & ~255); //256ÀÇ ¹è¼ö
-	m_pd3dcbFrameworkInfo = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, ncbElementBytes, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER | D3D12_RESOURCE_STATE_GENERIC_READ, NULL);
-
-	m_pd3dcbFrameworkInfo->Map(0, NULL, (void**)&m_pcbMappedFrameworkInfo);
-}
-
-void CParticleShader::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList, float fCurrentTime, float fElapsedTime)
-{
-	m_pcbMappedFrameworkInfo->m_fCurrentTime = fCurrentTime;
-	m_pcbMappedFrameworkInfo->m_fElapsedTime = fElapsedTime;
-	m_pcbMappedFrameworkInfo->m_fSecondsPerFirework = 0.4f;
-	m_pcbMappedFrameworkInfo->m_nFlareParticlesToEmit = 100;
-	m_pcbMappedFrameworkInfo->m_xmf3Gravity = XMFLOAT3(0.0f, -9.8f, 0.0f);
-	m_pcbMappedFrameworkInfo->m_nMaxFlareType2Particles = 15 * 1.5f;
-
-	D3D12_GPU_VIRTUAL_ADDRESS d3dGpuVirtualAddress = m_pd3dcbFrameworkInfo->GetGPUVirtualAddress();
-	pd3dCommandList->SetGraphicsRootConstantBufferView(11, d3dGpuVirtualAddress);
-}
-
