@@ -232,7 +232,7 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	//CSoundManager::GetInst()->RegisterSound("Sound/mp3/David Bowie - Starman.mp3", false);
 	//CSoundManager::GetInst()->PlaySound("Sound/mp3/David Bowie - Starman.mp3");
 
-	std::unique_ptr<CKnightObject> m_pObject = std::make_unique<CKnightObject>(pd3dDevice, pd3dCommandList, 1);
+	//std::unique_ptr<CKnightObject> m_pObject = std::make_unique<CKnightObject>(pd3dDevice, pd3dCommandList, 1);
 
 	//m_pObject = std::make_unique<CKnightObject>(pd3dDevice, pd3dCommandList, 1);
 	//m_pObject->SetPosition(XMFLOAT3(-15.0f, 15.0f, 15.0f));

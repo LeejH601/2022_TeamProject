@@ -104,7 +104,7 @@ void CMonster::UpdateTransformFromArticulation(XMFLOAT4X4* pxmf4x4Parent, std::v
 #ifdef RENDER_BOUNDING_BOX
 		pWeaponBoundingBoxMesh->SetWorld(pWeapon->GetWorld());
 #endif 
-		m_WeaponBoundingBox.Transform(m_TransformedWeaponBoudningBox, XMLoadFloat4x4(&pWeapon->GetWorld()));
+		m_WeaponBoundingBox.Transform(m_TransformedWeaponBoundingBox, XMLoadFloat4x4(&pWeapon->GetWorld()));
 	}
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////

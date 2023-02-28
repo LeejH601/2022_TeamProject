@@ -1492,7 +1492,7 @@ void CKnightObject::UpdateTransformFromArticulation(XMFLOAT4X4* pxmf4x4Parent)
 	if (m_pChild) m_pChild->UpdateTransformFromArticulation(&m_xmf4x4World, m_pArtiLinkNames, m_AritculatCacheMatrixs, m_xmf4x4Scale._11);
 
 	pBodyBoundingBoxMesh->SetWorld(m_xmf4x4Transform);
-	m_BodyBoundingBox.Transform(m_TransformedBodyBoudningBox, XMLoadFloat4x4(&m_xmf4x4Transform));
+	m_BodyBoundingBox.Transform(m_TransformedBodyBoundingBox, XMLoadFloat4x4(&m_xmf4x4Transform));
 
 	if (pWeapon)
 	{
@@ -1505,7 +1505,7 @@ void CKnightObject::UpdateTransformFromArticulation(XMFLOAT4X4* pxmf4x4Parent)
 		xmf4x4World._43 = xmf3Position.z;
 		pWeaponBoundingBoxMesh->SetWorld(xmf4x4World);
 
-		m_WeaponBoundingBox.Transform(m_TransformedWeaponBoudningBox, XMLoadFloat4x4(&xmf4x4World));
+		m_WeaponBoundingBox.Transform(m_TransformedWeaponBoundingBox, XMLoadFloat4x4(&xmf4x4World));
 	}
 }
 void CKnightObject::PrepareBoundingBox(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)

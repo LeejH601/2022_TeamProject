@@ -220,7 +220,7 @@ public:
 	virtual void SetRigidDynamic();
 	
 
-	virtual BoundingBox GetBoundingBox() { return m_TransformedBodyBoudningBox; }
+	virtual BoundingBox GetBoundingBox() { return m_TransformedBodyBoundingBox; }
 	virtual bool CheckCollision(CGameObject* pTargetObject);
 
 	virtual void Animate(float fTimeElapsed);
