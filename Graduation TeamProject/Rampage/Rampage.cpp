@@ -17,6 +17,7 @@ std::default_random_engine dre;
 CLocator Locator;
 physx::PxDefaultErrorCallback gDefaultErrorCallback;
 physx::PxDefaultAllocator gDefaultAllocatorCallback;
+bool b_simulation = false;
 
 // 이 코드 모듈에 포함된 함수의 선언을 전달합니다:
 ATOM                MyRegisterClass(HINSTANCE hInstance);

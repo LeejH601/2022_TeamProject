@@ -45,7 +45,7 @@ bool CGameFramework::OnCreate(HINSTANCE hInstance, HWND hMainWnd)
 	//CommandList를 실행하고 GPU 연산이 완료될 때까지 기다립니다.
 	ExecuteCommandLists();
 
-	
+
 
 
 	/*physx::PxPvd* mPvd = physx::PxCreatePvd(*mFoundation);
@@ -53,7 +53,7 @@ bool CGameFramework::OnCreate(HINSTANCE hInstance, HWND hMainWnd)
 
 	PxPvdTransport* transport = PxDefaultPvdSocketTransportCreate(PVD_HOST, 5425, 10);
 	mPvd->connect(*transport, PxPvdInstrumentationFlag::eALL);*/
-	
+
 	return(true);
 }
 void CGameFramework::OnDestroy()
@@ -248,7 +248,7 @@ void CGameFramework::BuildObjects()
 	// CScene 생성(RootSignature 생성)
 	m_pScene = std::make_unique<CMainTMPScene>();
 	m_pScene->BuildObjects(m_pd3dDevice.Get(), m_pd3dCommandList.Get());
-	
+
 	CSimulatorScene::GetInst()->BuildObjects(m_pd3dDevice.Get(), m_pd3dCommandList.Get());
 
 
@@ -346,7 +346,7 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 		case 'E':
 			if (wParam == 'e' || wParam == 'E') dwDirection &= (~DIR_UP);
 			break;
-		break;
+			break;
 		}
 	default:
 		break;
@@ -433,8 +433,8 @@ void CGameFramework::ProcessInput()
 			}
 		}
 	}
-	
-	
+
+
 
 
 	/*TCHAR pstrDebug[256] = { 0 };
@@ -461,11 +461,11 @@ void CGameFramework::OnPrepareRenderTarget()
 {
 	//ImVec4 clear_color = CImGuiManager::GetInst()->GetColor();
 	const float clear_color_with_alpha[4] = { 0.f, 0.f, 0.f, 0.f };
-	
+
 	/*FLOAT pfDefaultClearColor[4] = {0.0f, 0.0f, 0.0f, 1.0f};
 
 	D3D12_CPU_DESCRIPTOR_HANDLE* pd3dAllRtvCPUHandles = new D3D12_CPU_DESCRIPTOR_HANDLE[2];
-	
+
 	pd3dAllRtvCPUHandles[0] = m_pd3dSwapRTVCPUHandles[m_nSwapChainBufferIndex];
 	m_pd3dCommandList->ClearRenderTargetView(m_pd3dSwapRTVCPUHandles[m_nSwapChainBufferIndex], clear_color_with_alpha, 0, NULL);
 
@@ -474,10 +474,10 @@ void CGameFramework::OnPrepareRenderTarget()
 	D3D12_CPU_DESCRIPTOR_HANDLE d3dRtvCPUDescriptorHandle = CImGuiManager::GetInst()->GetRtvCPUDescriptorHandle();
 	m_pd3dCommandList->ClearRenderTargetView(d3dRtvCPUDescriptorHandle, pfDefaultClearColor, 0, NULL);
 	pd3dAllRtvCPUHandles[1] = d3dRtvCPUDescriptorHandle;
-	
+
 	m_pd3dCommandList->OMSetRenderTargets(2, pd3dAllRtvCPUHandles, FALSE, &m_d3dDsvDescriptorCPUHandle);
 
-	
+
 	if (pd3dAllRtvCPUHandles) delete[] pd3dAllRtvCPUHandles;*/
 	m_pd3dCommandList->ClearRenderTargetView(m_pd3dSwapRTVCPUHandles[m_nSwapChainBufferIndex], clear_color_with_alpha, 0, NULL);
 	m_pd3dCommandList->OMSetRenderTargets(1, &m_pd3dSwapRTVCPUHandles[m_nSwapChainBufferIndex], FALSE, &m_d3dDsvDescriptorCPUHandle);
@@ -525,12 +525,29 @@ void CGameFramework::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dComman
 	D3D12_GPU_VIRTUAL_ADDRESS d3dGpuVirtualAddress = m_pd3dcbParallax->GetGPUVirtualAddress();
 	pd3dCommandList->SetGraphicsRootConstantBufferView(7, d3dGpuVirtualAddress);*/
 }
-void CGameFramework::FrameAdvance() 
+void CGameFramework::FrameAdvance()
 {
 	m_GameTimer.Tick(0.0f);
-	Locator.GetPxScene()->simulate(m_GameTimer.GetFrameTimeElapsed());
-	//Locator.GetPxScene()->advance(m_GameTimer.GetFrameTimeElapsed());
-	Locator.GetPxScene()->fetchResults(true);
+	//if (started == 0) {
+	//	Locator.GetPxScene()->simulate(m_GameTimer.GetFrameTimeElapsed());
+	//	started++;
+	//}
+	static float SimulateElapsedTime = 0.0f;
+	////Locator.GetPxScene()->advance(m_GameTimer.GetFrameTimeElapsed());
+	//if (Locator.GetPxScene()->fetchResults(false)) {
+	//	Locator.GetPxScene()->simulate(m_GameTimer.GetFrameTimeElapsed());
+	//}
+	SimulateElapsedTime += m_GameTimer.GetFrameTimeElapsed();
+	if (!b_simulation) {
+		Locator.GetPxScene()->simulate(SimulateElapsedTime);
+		SimulateElapsedTime = 0.0f;
+		b_simulation = true;
+	}
+	if (Locator.GetPxScene()->fetchResults(false)) {
+		((CMainTMPScene*)m_pScene.get())->UpdateObjectArticulation();
+		b_simulation = false;
+	}
+
 	ProcessInput();
 	AnimateObjects();
 	Locator.GetMessageDispather()->DispatchMessages();

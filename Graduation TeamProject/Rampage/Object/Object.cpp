@@ -165,6 +165,7 @@ void CGameObject::SetScale(float x, float y, float z)
 	m_xmf4x4Transform = Matrix4x4::Multiply(mtxScale, m_xmf4x4Transform);
 
 	UpdateTransform(NULL);
+	XMStoreFloat4x4(&m_xmf4x4Scale, mtxScale);
 }
 void CGameObject::Rotate(float fPitch, float fYaw, float fRoll)
 {
@@ -188,6 +189,16 @@ void CGameObject::SetLookAt(XMFLOAT3& xmf3Target, XMFLOAT3& xmf3Up)
 	m_xmf4x4World._21 = mtxLookAt._12; m_xmf4x4World._22 = mtxLookAt._22; m_xmf4x4World._23 = mtxLookAt._32;
 	m_xmf4x4World._31 = mtxLookAt._13; m_xmf4x4World._32 = mtxLookAt._23; m_xmf4x4World._33 = mtxLookAt._33;
 }
+void CGameObject::updateArticulationMatrix()
+{
+	int index = 0;
+	for (XMFLOAT4X4& world : m_AritculatCacheMatrixs) {
+		physx::PxMat44 mat = m_pArticulationLinks[index++]->getGlobalPose();
+
+		memcpy(&world, &mat, sizeof(XMFLOAT4X4));
+		world = Matrix4x4::Multiply(XMMatrixScaling(m_xmf4x4Scale._11, m_xmf4x4Scale._11, m_xmf4x4Scale._11), world);
+	}
+}
 void CGameObject::UpdateTransform(XMFLOAT4X4* pxmf4x4Parent)
 {
 	m_xmf4x4World = (pxmf4x4Parent) ? Matrix4x4::Multiply(m_xmf4x4Transform, *pxmf4x4Parent) : m_xmf4x4Transform;
@@ -195,6 +206,48 @@ void CGameObject::UpdateTransform(XMFLOAT4X4* pxmf4x4Parent)
 	if (m_pSibling) m_pSibling->UpdateTransform(pxmf4x4Parent);
 	if (m_pChild) m_pChild->UpdateTransform(&m_xmf4x4World);
 }
+
+void CGameObject::UpdateTransformFromArticulation(XMFLOAT4X4* pxmf4x4Parent, std::vector<std::string> pArtiLinkNames, std::vector<physx::PxArticulationLink*> pArticulationLinks, float scale)
+{
+	std::string target = m_pstrFrameName;
+	auto it = std::find(pArtiLinkNames.begin(), pArtiLinkNames.end(), target);
+	int distance = std::distance(pArtiLinkNames.begin(), it);
+	if (distance < pArtiLinkNames.size()) {
+
+		physx::PxTransform transform = pArticulationLinks[distance]->getGlobalPose();
+		//physx::PxTransform transform = m_pArticulationLinks[index]->getInboundJoint()->getChildPose();
+		physx::PxMat44 World = physx::PxMat44(transform);
+
+		memcpy(&m_xmf4x4World, &World, sizeof(XMFLOAT4X4));
+		m_xmf4x4World = Matrix4x4::Multiply(XMMatrixScaling(scale, scale, scale), m_xmf4x4World);
+		/*m_xmf4x4World._41 = World.column3.x;
+		m_xmf4x4World._42 = World.column3.y;
+		m_xmf4x4World._43 = World.column3.z;*/
+	}
+	else {
+		m_xmf4x4World = (pxmf4x4Parent) ? Matrix4x4::Multiply(m_xmf4x4Transform, *pxmf4x4Parent) : m_xmf4x4Transform;
+	}
+
+	if (m_pSibling) m_pSibling->UpdateTransformFromArticulation(pxmf4x4Parent, pArtiLinkNames, pArticulationLinks, scale);
+	if (m_pChild) m_pChild->UpdateTransformFromArticulation(&m_xmf4x4World, pArtiLinkNames, pArticulationLinks, scale);
+}
+
+void CGameObject::UpdateTransformFromArticulation(XMFLOAT4X4* pxmf4x4Parent, std::vector<std::string> pArtiLinkNames, std::vector<XMFLOAT4X4>& AritculatCacheMatrixs, float scale)
+{
+	std::string target = m_pstrFrameName;
+	auto it = std::find(pArtiLinkNames.begin(), pArtiLinkNames.end(), target);
+	int distance = std::distance(pArtiLinkNames.begin(), it);
+	if (distance < pArtiLinkNames.size()) {
+		m_xmf4x4World = AritculatCacheMatrixs[distance];
+	}
+	else {
+		m_xmf4x4World = (pxmf4x4Parent) ? Matrix4x4::Multiply(m_xmf4x4Transform, *pxmf4x4Parent) : m_xmf4x4Transform;
+	}
+
+	if (m_pSibling) m_pSibling->UpdateTransformFromArticulation(pxmf4x4Parent, pArtiLinkNames, AritculatCacheMatrixs, scale);
+	if (m_pChild) m_pChild->UpdateTransformFromArticulation(&m_xmf4x4World, pArtiLinkNames, AritculatCacheMatrixs, scale);
+}
+
 CGameObject* CGameObject::FindFrame(const char* pstrFrameName)
 {
 	CGameObject* pFrameObject = NULL;
@@ -222,7 +275,7 @@ void CGameObject::LoadFrameHierarchyFromFile(ID3D12Device* pd3dDevice, ID3D12Gra
 			nFrame = ::ReadIntegerFromFile(pInFile);
 			nTextures = ::ReadIntegerFromFile(pInFile);
 
-			::ReadStringFromFile(pInFile, m_pstrFrameName);
+			int length = ::ReadStringFromFile(pInFile, m_pstrFrameName);
 		}
 		else if (!strcmp(pstrToken, "<Transform>:"))
 		{
@@ -275,9 +328,9 @@ void CGameObject::LoadFrameHierarchyFromFile(ID3D12Device* pd3dDevice, ID3D12Gra
 					_stprintf_s(pstrDebug, 256, "(Frame: %p) (Parent: %p)\n"), pChild, pGameObject);
 					OutputDebugString(pstrDebug);
 #endif
-				}
-			}
 		}
+	}
+}
 		else if (!strcmp(pstrToken, "</Frame>"))
 		{
 			break;
@@ -506,6 +559,133 @@ void CGameObject::CreateArticulation(physx::PxArticulationReducedCoordinate* art
 
 	}*/
 }
+physx::PxTransform CGameObject::MakeTransform(XMFLOAT4X4& xmf44, float scale)
+{
+	physx::PxMat44 mymatrix;
+	XMFLOAT4X4 myTransform = xmf44;
+	myTransform._41 = myTransform._41 * scale;
+	myTransform._42 = myTransform._42 * scale;
+	myTransform._43 = myTransform._43 * scale; // scale 매개변수화 필요함.
+
+	memcpy(&mymatrix, &myTransform, sizeof(physx::PxMat44));
+	physx::PxTransform transfrom = physx::PxTransform(mymatrix);
+	transfrom = transfrom.getNormalized();
+	return transfrom;
+}
+void CGameObject::SetJoint(physx::PxArticulationJointReducedCoordinate* joint, JointAxisDesc& JointDesc)
+{
+	int AxisCnt = 0;
+	switch (JointDesc.type)
+	{
+	case physx::PxArticulationJointType::eSPHERICAL:
+		joint->setJointType(physx::PxArticulationJointType::eSPHERICAL);
+		if (JointDesc.eSwing1) {
+			joint->setMotion(physx::PxArticulationAxis::eSWING1, physx::PxArticulationMotion::eLIMITED);
+			joint->setLimitParams(physx::PxArticulationAxis::eSWING1, JointDesc.eS1LImit);
+			joint->setDriveParams(physx::PxArticulationAxis::eSWING1, JointDesc.eS1Drive);
+			AxisCnt++;
+		}
+		if (JointDesc.eSwing2) {
+			joint->setMotion(physx::PxArticulationAxis::eSWING2, physx::PxArticulationMotion::eLIMITED);
+			joint->setLimitParams(physx::PxArticulationAxis::eSWING2, JointDesc.eS2LImit);
+			joint->setDriveParams(physx::PxArticulationAxis::eSWING2, JointDesc.eS2Drive);
+			AxisCnt++;
+		}
+		if (JointDesc.eTWIST) {
+			joint->setMotion(physx::PxArticulationAxis::eTWIST, physx::PxArticulationMotion::eLIMITED);
+			joint->setLimitParams(physx::PxArticulationAxis::eTWIST, JointDesc.eTLImit);
+			joint->setDriveParams(physx::PxArticulationAxis::eTWIST, JointDesc.eTDrive);
+			AxisCnt++;
+		}
+		if (AxisCnt < 2) {
+			TCHAR pstrDebug[256] = { 0 };
+			_stprintf_s(pstrDebug, 256, _T("error!!! Insufficient number of rotational axes set.\n"));
+			OutputDebugString(pstrDebug);
+		}
+		break;
+	case physx::PxArticulationJointType::eREVOLUTE:
+		joint->setJointType(physx::PxArticulationJointType::eREVOLUTE);
+		if (JointDesc.eSwing1) {
+			joint->setMotion(physx::PxArticulationAxis::eSWING1, physx::PxArticulationMotion::eLIMITED);
+			joint->setLimitParams(physx::PxArticulationAxis::eSWING1, JointDesc.eS1LImit);
+			joint->setDriveParams(physx::PxArticulationAxis::eSWING1, JointDesc.eS1Drive);
+			AxisCnt++;
+		}
+		if (JointDesc.eSwing2) {
+			joint->setMotion(physx::PxArticulationAxis::eSWING2, physx::PxArticulationMotion::eLIMITED);
+			joint->setLimitParams(physx::PxArticulationAxis::eSWING2, JointDesc.eS2LImit);
+			joint->setDriveParams(physx::PxArticulationAxis::eSWING2, JointDesc.eS2Drive);
+			AxisCnt++;
+		}
+		if (JointDesc.eTWIST) {
+			joint->setMotion(physx::PxArticulationAxis::eTWIST, physx::PxArticulationMotion::eLIMITED);
+			joint->setLimitParams(physx::PxArticulationAxis::eTWIST, JointDesc.eTLImit);
+			joint->setDriveParams(physx::PxArticulationAxis::eTWIST, JointDesc.eTDrive);
+			AxisCnt++;
+		}
+		if (AxisCnt > 1) {
+			TCHAR pstrDebug[256] = { 0 };
+			_stprintf_s(pstrDebug, 256, _T("error!!! Too many rotational axes set.\n"));
+			OutputDebugString(pstrDebug);
+		}
+		break;
+	case physx::PxArticulationJointType::eFIX:
+		joint->setJointType(physx::PxArticulationJointType::eFIX);
+		/*if (JointDesc.eSwing1) {
+			joint->setMotion(physx::PxArticulationAxis::eSWING1, physx::PxArticulationMotion::eLIMITED);
+			joint->setLimitParams(physx::PxArticulationAxis::eSWING1, JointDesc.eS1LImit);
+			joint->setDriveParams(physx::PxArticulationAxis::eSWING1, JointDesc.eS1Drive);
+			AxisCnt++;
+		}
+		if (JointDesc.eSwing2) {
+			joint->setMotion(physx::PxArticulationAxis::eSWING2, physx::PxArticulationMotion::eLIMITED);
+			joint->setLimitParams(physx::PxArticulationAxis::eSWING2, JointDesc.eS2LImit);
+			joint->setDriveParams(physx::PxArticulationAxis::eSWING2, JointDesc.eS2Drive);
+			AxisCnt++;
+		}
+		if (JointDesc.eTWIST) {
+			joint->setMotion(physx::PxArticulationAxis::eTWIST, physx::PxArticulationMotion::eLIMITED);
+			joint->setLimitParams(physx::PxArticulationAxis::eTWIST, JointDesc.eTLImit);
+			joint->setDriveParams(physx::PxArticulationAxis::eTWIST, JointDesc.eTDrive);
+			AxisCnt++;
+		}*/
+		if (AxisCnt > 0) {
+			TCHAR pstrDebug[256] = { 0 };
+			_stprintf_s(pstrDebug, 256, _T("error!!! Too many rotational axes set.\n"));
+			OutputDebugString(pstrDebug);
+		}
+		break;
+	default:
+		TCHAR pstrDebug[256] = { 0 };
+		_stprintf_s(pstrDebug, 256, _T("error!!! Invalid descriptor.\n"));
+		OutputDebugString(pstrDebug);
+		return;
+	}
+}
+physx::PxArticulationLink* CGameObject::SetLink(physx::PxArticulationReducedCoordinate* articulation, physx::PxArticulationLink* p_link, physx::PxTransform& parent, physx::PxTransform& child, float meshScale)
+{
+	physx::PxArticulationLink* link = articulation->createLink(p_link, child);
+	physx::PxVec3 distance = (child.p + parent.p) * 0.5f;
+	physx::PxReal len = distance.magnitude();
+	physx::PxTransform center = physx::PxTransform(physx::PxVec3(len / 2.0f, 0.0f, 0.0f));
+	float scale = m_xmf4x4Scale._11;
+	//physx::PxBoxGeometry linkGeometry = physx::PxBoxGeometry(0.05f * scale * meshScale, len / 2.0f/* * scale * meshScale*/, 0.05f * scale * meshScale);
+	physx::PxBoxGeometry linkGeometry = physx::PxBoxGeometry(0.05f * scale * meshScale, 0.05f * scale * meshScale, 0.05f * scale * meshScale);
+	//physx::PxBoxGeometry linkGeometry = physx::PxBoxGeometry(len / 2.0f/* * scale * meshScale*/, 0.05f * scale * meshScale, 0.05f * scale * meshScale);
+	physx::PxMaterial* material = Locator.GetPxPhysics()->createMaterial(0.9, 0.9f, 0.1);
+	//physx::PxShape* shape = Locator.GetPxPhysics()->createShape(linkGeometry, *material);
+	/*if(p_link)
+		shape->setLocalPose(physx::PxTransform((child.p + parent.p) * 0.5f));*/
+		//link->attachShape(*shape);
+	physx::PxShape* shape = physx::PxRigidActorExt::createExclusiveShape(*link, linkGeometry, *material);
+	physx::PxVec3 capsuleLocalPos = (child.p + parent.p) * 0.5f;
+	//shape->setLocalPose(physx::PxTransform(capsuleLocalPos));
+	physx::PxVec3 localpos = (child.p + parent.p) * 0.5f;
+	physx::PxRigidBodyExt::updateMassAndInertia(*link, 1.0f);
+	//physx::PxRigidBodyExt::updateMassAndInertia(*link, 1.0f, &localpos);
+
+	return link;
+}
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 CBoundingBoxObject::CBoundingBoxObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, XMFLOAT3 xmf3AABBCenter, XMFLOAT3 xmf3AABBExtents)
@@ -592,676 +772,23 @@ CKnightObject::CKnightObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 		return cnt;
 	};
 
-	auto MakeTransform = [](XMFLOAT4X4& xmf44) {
-		physx::PxMat44 mymatrix;
-		XMFLOAT4X4 myTransform = xmf44;
-		/*XMFLOAT3 mypos(xmf44._41, xmf44._42, xmf44._43);
-		myTransform._41 = 0;
-		myTransform._42 = 0;
-		myTransform._43 = 0;
-		memcpy(&mymatrix, &Matrix4x4::Inverse(myTransform), sizeof(physx::PxMat44));
 
-		mymatrix.column3.x = mypos.x;
-		mymatrix.column3.y = mypos.y;
-		mymatrix.column3.z = mypos.z;*/
 
-		physx::PxMat44 TransMatrix = physx::PxMat44(physx::PxIdentity);
-		TransMatrix.column1.y = 0.0f;
-		TransMatrix.column1.z = 1.0f;
-		TransMatrix.column2.y = -1.0f;
-		TransMatrix.column2.z = 0.0f;
+	//CSkinnedMesh* Mesh = (CSkinnedMesh*)obj->m_pMesh.get();
 
+	//static int test = 0;
 
-		memcpy(&mymatrix, &myTransform, sizeof(physx::PxMat44));
-		return physx::PxTransform(mymatrix);
 
-		mymatrix = mymatrix * TransMatrix;
+	//if (test == 0) {
+	//	m_pArticulation = Locator.GetPxPhysics()->createArticulationReducedCoordinate();
 
-		physx::PxTransform transform(mymatrix);
+	//	physx::PxTransform transform(physx::PxVec3(0.0f, 0.0f, 0.0f));
+	//	m_pChild->m_pChild->CreateArticulation(m_pArticulation, NULL, transform);
 
-		return transform;
-	};
+	//	Locator.GetPxScene()->addArticulation(*m_pArticulation);
 
-	auto SetLink = [](physx::PxArticulationReducedCoordinate* articulation, physx::PxArticulationLink* p_link, physx::PxTransform& parent, physx::PxTransform& child)
-	{
-		physx::PxArticulationLink* link = articulation->createLink(p_link, child);
-		physx::PxVec3 distance = child.p - parent.p;
-		physx::PxReal len = distance.magnitude();
-		physx::PxTransform center = physx::PxTransform(physx::PxVec3(len / 2.0f, 0.0f, 0.0f));
-		physx::PxBoxGeometry linkGeometry = physx::PxBoxGeometry(0.05f, 0.05f, 0.05f);
-		physx::PxMaterial* material = Locator.GetPxPhysics()->createMaterial(0.9, 0.9f, 0.1);
-		physx::PxShape* shape = Locator.GetPxPhysics()->createShape(linkGeometry, *material);
-		/*if(p_link)
-			shape->setLocalPose(center);*/
-		link->attachShape(*shape);
-		//physx::PxRigidActorExt::createExclusiveShape(*link, linkGeometry, *material);
-		physx::PxRigidBodyExt::updateMassAndInertia(*link, 1.0f);
-
-		return link;
-	};
-
-	auto SetJointRevolute = [](physx::PxArticulationJointReducedCoordinate* joint) {
-		joint->setJointType(physx::PxArticulationJointType::eREVOLUTE);
-		joint->setMotion(physx::PxArticulationAxis::eSWING1, physx::PxArticulationMotion::eLIMITED);
-
-		physx::PxArticulationLimit limits;
-		limits.low = -physx::PxPiDivFour;  // in rad for a rotational motion
-		limits.high = physx::PxPiDivFour;
-		joint->setLimitParams(physx::PxArticulationAxis::eSWING1, limits);
-
-
-		physx::PxArticulationDrive posDrive;
-		posDrive.stiffness = 0.5f;                      // the spring constant driving the joint to a target position
-		posDrive.damping = 0.5f;;                        // the damping coefficient driving the joint to a target velocity
-		posDrive.maxForce = FLT_MAX;                        // force limit for the drive
-		posDrive.driveType = physx::PxArticulationDriveType::eFORCE;    // make the drive output be a force/torque (default)
-		// apply and set targets (note again the consistent axis)
-		joint->setDriveParams(physx::PxArticulationAxis::eSWING1, posDrive);
-		joint->setDriveVelocity(physx::PxArticulationAxis::eSWING1, 0.0f);
-
-	};
-
-	struct JointAxisDesc {
-		physx::PxArticulationJointType::Enum type;
-
-		bool eSwing1;
-		bool eSwing2;
-		bool eTWIST;
-
-		physx::PxArticulationLimit eS1LImit;
-		physx::PxArticulationLimit eS2LImit;
-		physx::PxArticulationLimit eTLImit;
-
-		physx::PxArticulationDrive eS1Drive;
-		physx::PxArticulationDrive eS2Drive;
-		physx::PxArticulationDrive eTDrive;
-	};
-
-	auto SetJoint = [](physx::PxArticulationJointReducedCoordinate* joint, JointAxisDesc& JointDesc) {
-		int AxisCnt = 0;
-		switch (JointDesc.type)
-		{
-		case physx::PxArticulationJointType::eSPHERICAL:
-			joint->setJointType(physx::PxArticulationJointType::eSPHERICAL);
-			if (JointDesc.eSwing1) {
-				joint->setMotion(physx::PxArticulationAxis::eSWING1, physx::PxArticulationMotion::eLIMITED);
-				joint->setLimitParams(physx::PxArticulationAxis::eSWING1, JointDesc.eS1LImit);
-				joint->setDriveParams(physx::PxArticulationAxis::eSWING1, JointDesc.eS1Drive);
-				AxisCnt++;
-			}
-			if (JointDesc.eSwing2) {
-				joint->setMotion(physx::PxArticulationAxis::eSWING2, physx::PxArticulationMotion::eLIMITED);
-				joint->setLimitParams(physx::PxArticulationAxis::eSWING2, JointDesc.eS2LImit);
-				joint->setDriveParams(physx::PxArticulationAxis::eSWING2, JointDesc.eS2Drive);
-				AxisCnt++;
-			}
-			if (JointDesc.eTWIST) {
-				joint->setMotion(physx::PxArticulationAxis::eTWIST, physx::PxArticulationMotion::eLIMITED);
-				joint->setLimitParams(physx::PxArticulationAxis::eTWIST, JointDesc.eTLImit);
-				joint->setDriveParams(physx::PxArticulationAxis::eTWIST, JointDesc.eTDrive);
-				AxisCnt++;
-			}
-			if (AxisCnt < 2) {
-				TCHAR pstrDebug[256] = { 0 };
-				_stprintf_s(pstrDebug, 256, _T("error!!! Insufficient number of rotational axes set.\n"));
-				OutputDebugString(pstrDebug);
-			}
-			break;
-		case physx::PxArticulationJointType::eREVOLUTE:
-			joint->setJointType(physx::PxArticulationJointType::eREVOLUTE);
-			if (JointDesc.eSwing1) {
-				joint->setMotion(physx::PxArticulationAxis::eSWING1, physx::PxArticulationMotion::eLIMITED);
-				joint->setLimitParams(physx::PxArticulationAxis::eSWING1, JointDesc.eS1LImit);
-				joint->setDriveParams(physx::PxArticulationAxis::eSWING1, JointDesc.eS1Drive);
-				AxisCnt++;
-			}
-			if (JointDesc.eSwing2) {
-				joint->setMotion(physx::PxArticulationAxis::eSWING2, physx::PxArticulationMotion::eLIMITED);
-				joint->setLimitParams(physx::PxArticulationAxis::eSWING2, JointDesc.eS2LImit);
-				joint->setDriveParams(physx::PxArticulationAxis::eSWING2, JointDesc.eS2Drive);
-				AxisCnt++;
-			}
-			if (JointDesc.eTWIST) {
-				joint->setMotion(physx::PxArticulationAxis::eTWIST, physx::PxArticulationMotion::eLIMITED);
-				joint->setLimitParams(physx::PxArticulationAxis::eTWIST, JointDesc.eTLImit);
-				joint->setDriveParams(physx::PxArticulationAxis::eTWIST, JointDesc.eTDrive);
-				AxisCnt++;
-			}
-			if (AxisCnt > 1) {
-				TCHAR pstrDebug[256] = { 0 };
-				_stprintf_s(pstrDebug, 256, _T("error!!! Too many rotational axes set.\n"));
-				OutputDebugString(pstrDebug);
-			}
-			break;
-		case physx::PxArticulationJointType::eFIX:
-			joint->setJointType(physx::PxArticulationJointType::eFIX);
-			/*if (JointDesc.eSwing1) {
-				joint->setMotion(physx::PxArticulationAxis::eSWING1, physx::PxArticulationMotion::eLIMITED);
-				joint->setLimitParams(physx::PxArticulationAxis::eSWING1, JointDesc.eS1LImit);
-				joint->setDriveParams(physx::PxArticulationAxis::eSWING1, JointDesc.eS1Drive);
-				AxisCnt++;
-			}
-			if (JointDesc.eSwing2) {
-				joint->setMotion(physx::PxArticulationAxis::eSWING2, physx::PxArticulationMotion::eLIMITED);
-				joint->setLimitParams(physx::PxArticulationAxis::eSWING2, JointDesc.eS2LImit);
-				joint->setDriveParams(physx::PxArticulationAxis::eSWING2, JointDesc.eS2Drive);
-				AxisCnt++;
-			}
-			if (JointDesc.eTWIST) {
-				joint->setMotion(physx::PxArticulationAxis::eTWIST, physx::PxArticulationMotion::eLIMITED);
-				joint->setLimitParams(physx::PxArticulationAxis::eTWIST, JointDesc.eTLImit);
-				joint->setDriveParams(physx::PxArticulationAxis::eTWIST, JointDesc.eTDrive);
-				AxisCnt++;
-			}*/
-			if (AxisCnt > 0) {
-				TCHAR pstrDebug[256] = { 0 };
-				_stprintf_s(pstrDebug, 256, _T("error!!! Too many rotational axes set.\n"));
-				OutputDebugString(pstrDebug);
-			}
-			break;
-		default:
-			TCHAR pstrDebug[256] = { 0 };
-			_stprintf_s(pstrDebug, 256, _T("error!!! Invalid descriptor.\n"));
-			OutputDebugString(pstrDebug);
-			return;
-		}
-		//physx::PxArticulationLimit limits;
-		//limits.low = -physx::PxPiDivFour;  // in rad for a rotational motion
-		//limits.high = physx::PxPiDivFour;
-
-
-		//physx::PxArticulationDrive posDrive;
-		//posDrive.stiffness = 0.5f;                      // the spring constant driving the joint to a target position
-		//posDrive.damping = 0.5f;;                        // the damping coefficient driving the joint to a target velocity
-		//posDrive.maxForce = FLT_MAX;                        // force limit for the drive
-		//posDrive.driveType = physx::PxArticulationDriveType::eFORCE;    // make the drive output be a force/torque (default)
-		// apply and set targets (note again the consistent axis)
-
-	};
-
-	auto DebugJointDot = [](physx::PxArticulationLink* link) {
-		TCHAR pstrDebug[256] = { 0 };
-		_stprintf_s(pstrDebug, 256, _T("dof: %d\n"), link->getInboundJointDof());
-		OutputDebugString(pstrDebug);
-	};
-
-	CSkinnedMesh* Mesh = (CSkinnedMesh*)obj->m_pMesh.get();
-
-	static int test = 0;
-
-	if (test == 0) {
-		test++;
-		m_pArticulation = Locator.GetPxPhysics()->createArticulationReducedCoordinate();
-		m_pArticulation->setArticulationFlag(physx::PxArticulationFlag::eCOMPUTE_JOINT_FORCES, true);
-		m_pArticulation->setSolverIterationCounts(10, 10);
-		m_pArticulation->setMaxCOMLinearVelocity(40);
-
-		physx::PxMat44 scaleMatrix = physx::PxMat44(physx::PxIdentity);
-		physx::PxVec4 scale{ 1.0f, 1.0f,1.0f,1.0f };
-		scaleMatrix.scale(scale);
-
-		JointAxisDesc FixDesc;
-		FixDesc.type = physx::PxArticulationJointType::eFIX;
-		JointAxisDesc SPHERICALDesc;
-		SPHERICALDesc.type = physx::PxArticulationJointType::eSPHERICAL;
-		SPHERICALDesc.eSwing1 = true;
-		SPHERICALDesc.eSwing2 = true;
-		SPHERICALDesc.eTWIST = true;
-		JointAxisDesc REVOLUTEDesc;
-		REVOLUTEDesc.type = physx::PxArticulationJointType::eREVOLUTE;
-
-		std::string target{ "pelvis" };
-		CGameObject* pelvis = FindFrame("pelvis");
-		XMFLOAT4X4 ParentMt = Matrix4x4::Identity();
-		XMFLOAT4X4 ChildMt = pelvis->m_xmf4x4Transform;
-		physx::PxArticulationLink* pelvis_link = SetLink(m_pArticulation, nullptr, MakeTransform(ParentMt), MakeTransform(ChildMt));
-		physx::PxArticulationJointReducedCoordinate* joint = pelvis_link->getInboundJoint();
-		DebugJointDot(pelvis_link);
-		m_pArtiLinkNames.emplace_back(target);
-
-#define _test_ragdoll
-
-		target = "spine_01";
-		CGameObject* spine_01 = FindFrame("spine_01");
-		ParentMt = pelvis->m_xmf4x4Transform;
-		ChildMt = spine_01->m_xmf4x4Transform;
-		physx::PxArticulationLink* Spine01_link = SetLink(m_pArticulation, pelvis_link, MakeTransform(ParentMt), MakeTransform(ChildMt));
-		joint = Spine01_link->getInboundJoint();
-		SetJoint(joint, FixDesc);
-		DebugJointDot(Spine01_link);
-		m_pArtiLinkNames.emplace_back(target);
-
-		target = "spine_02";
-		CGameObject* spine_02 = FindFrame("spine_02");
-		ParentMt = spine_01->m_xmf4x4Transform;
-		ChildMt = spine_02->m_xmf4x4Transform;
-		physx::PxArticulationLink* Spine02_link = SetLink(m_pArticulation, Spine01_link, MakeTransform(ParentMt), MakeTransform(ChildMt));
-		joint = Spine02_link->getInboundJoint();
-		SetJoint(joint, FixDesc);
-		DebugJointDot(Spine02_link);
-		m_pArtiLinkNames.emplace_back(target);
-
-		target = "spine_03";
-		CGameObject* spine_03 = FindFrame("spine_03");
-		ParentMt = spine_02->m_xmf4x4Transform;
-		ChildMt = spine_03->m_xmf4x4Transform;
-		physx::PxArticulationLink* Spine03_link = SetLink(m_pArticulation, Spine02_link, MakeTransform(ParentMt), MakeTransform(ChildMt));
-		joint = Spine03_link->getInboundJoint();
-		SetJoint(joint, FixDesc);
-		DebugJointDot(Spine03_link);
-		m_pArtiLinkNames.emplace_back(target);
-
-		Mesh->m_ppstrSkinningBoneNames;
-
-		target = "neck_01";
-		CGameObject* neck_01 = FindFrame("neck_01");
-		ParentMt = spine_03->m_xmf4x4Transform;
-		ChildMt = neck_01->m_xmf4x4Transform;
-		physx::PxArticulationLink* neck_link = SetLink(m_pArticulation, Spine03_link, MakeTransform(ParentMt), MakeTransform(ChildMt));
-		joint = neck_link->getInboundJoint();
-		SPHERICALDesc.eTLImit.low = -40.0f * physx::PxPi / 180.0f;
-		SPHERICALDesc.eTLImit.high = 40.0f * physx::PxPi / 180.0f;
-		SPHERICALDesc.eS1LImit.low = -40.0f * physx::PxPi / 180.0f;
-		SPHERICALDesc.eS1LImit.high = 40.0f * physx::PxPi / 180.0f;
-		SPHERICALDesc.eS2LImit.low = -80.0f * physx::PxPi / 180.0f;  // x?
-		SPHERICALDesc.eS2LImit.high = 70.0f * physx::PxPi / 180.0f;
-		SPHERICALDesc.eTDrive.driveType = physx::PxArticulationDriveType::eNONE;
-		SPHERICALDesc.eTDrive.damping = 0.5f;
-		SPHERICALDesc.eTDrive.stiffness = 0.5f;
-		SPHERICALDesc.eS1Drive.driveType = physx::PxArticulationDriveType::eNONE;
-		SPHERICALDesc.eS1Drive.damping = 0.5f;
-		SPHERICALDesc.eS1Drive.stiffness = 0.5f;
-		SPHERICALDesc.eS2Drive.driveType = physx::PxArticulationDriveType::eNONE;
-		SPHERICALDesc.eS2Drive.damping = 0.5f;
-		SPHERICALDesc.eS2Drive.stiffness = 0.5f;
-#ifdef _test_ragdoll
-		SetJoint(joint, SPHERICALDesc);
-#else
-		SetJoint(joint, FixDesc);
-#endif // _test_ragdoll
-
-		DebugJointDot(neck_link);
-		m_pArtiLinkNames.emplace_back(target);
-
-		target = "head";
-		CGameObject* head = FindFrame("head");
-		ParentMt = neck_01->m_xmf4x4Transform;
-		ChildMt = head->m_xmf4x4Transform;
-		physx::PxArticulationLink* head_link = SetLink(m_pArticulation, neck_link, MakeTransform(ParentMt), MakeTransform(ChildMt));
-		joint = head_link->getInboundJoint();
-		SPHERICALDesc.eSwing1 = false;
-		SPHERICALDesc.eSwing2 = true;
-		SPHERICALDesc.eTWIST = true;
-		SPHERICALDesc.eTLImit.low = -40.0f * physx::PxPi / 180.0f;
-		SPHERICALDesc.eTLImit.high = 40.0f * physx::PxPi / 180.0f;
-		SPHERICALDesc.eS2LImit.low = -60.0f * physx::PxPi / 180.0f;
-		SPHERICALDesc.eS2LImit.high = 70.0f * physx::PxPi / 180.0f;
-#ifdef _test_ragdoll
-		SetJoint(joint, SPHERICALDesc);
-#else
-		SetJoint(joint, FixDesc);
-#endif // _test_ragdoll
-		DebugJointDot(head_link);
-		m_pArtiLinkNames.emplace_back(target);
-
-
-
-		target = "clavicle_l";
-		CGameObject* clavicle_l = FindFrame("clavicle_l");
-		ParentMt = spine_03->m_xmf4x4Transform;
-		ChildMt = clavicle_l->m_xmf4x4Transform;
-		physx::PxArticulationLink* clavicle_l_link = SetLink(m_pArticulation, Spine03_link, MakeTransform(ParentMt), MakeTransform(ChildMt));
-		joint = clavicle_l_link->getInboundJoint();
-		SetJoint(joint, FixDesc);
-		DebugJointDot(clavicle_l_link);
-		m_pArtiLinkNames.emplace_back(target);
-
-		target = "upperarm_l";
-		CGameObject* upperarm_l = FindFrame("upperarm_l");
-		ParentMt = clavicle_l->m_xmf4x4Transform;
-		ChildMt = upperarm_l->m_xmf4x4Transform;
-		physx::PxArticulationLink* upperarm_l_link = SetLink(m_pArticulation, clavicle_l_link, MakeTransform(ParentMt), MakeTransform(ChildMt));
-		joint = upperarm_l_link->getInboundJoint();
-		SPHERICALDesc.eSwing1 = true;
-		SPHERICALDesc.eSwing2 = true;
-		SPHERICALDesc.eTWIST = true;
-		SPHERICALDesc.eS1LImit.low = -90.0f * physx::PxPi / 180.0f;
-		SPHERICALDesc.eS1LImit.high = 90.0f * physx::PxPi / 180.0f;
-		SPHERICALDesc.eS2LImit.low = -90.0f * physx::PxPi / 180.0f;
-		SPHERICALDesc.eS2LImit.high = 90.0f * physx::PxPi / 180.0f;
-		SPHERICALDesc.eTLImit.low = -50.0f * physx::PxPi / 180.0f;
-		SPHERICALDesc.eTLImit.high = 150.0f * physx::PxPi / 180.0f;
-#ifdef _test_ragdoll
-		SetJoint(joint, SPHERICALDesc);
-#else
-		SetJoint(joint, FixDesc);
-#endif // _test_ragdoll
-		DebugJointDot(upperarm_l_link);
-		m_pArtiLinkNames.emplace_back(target);
-
-		target = "lowerarm_l";
-		CGameObject* lowerarm_l = FindFrame("lowerarm_l");
-		ParentMt = upperarm_l->m_xmf4x4Transform;
-		ChildMt = lowerarm_l->m_xmf4x4Transform;
-		physx::PxArticulationLink* lowerarm_l_link = SetLink(m_pArticulation, upperarm_l_link, MakeTransform(ParentMt), MakeTransform(ChildMt));
-		joint = lowerarm_l_link->getInboundJoint();
-		REVOLUTEDesc.eSwing1 = true;
-		REVOLUTEDesc.eSwing2 = false;
-		REVOLUTEDesc.eTWIST = false;
-		REVOLUTEDesc.eS1LImit.low = 0.0f * physx::PxPi / 180.0f;
-		REVOLUTEDesc.eS1LImit.high = 140.0f * physx::PxPi / 180.0f;
-		REVOLUTEDesc.eTDrive.driveType = physx::PxArticulationDriveType::eNONE;
-		REVOLUTEDesc.eTDrive.damping = 0.5f;
-		REVOLUTEDesc.eTDrive.stiffness = 0.5f;
-		REVOLUTEDesc.eS1Drive.driveType = physx::PxArticulationDriveType::eNONE;
-		REVOLUTEDesc.eS1Drive.damping = 0.5f;
-		REVOLUTEDesc.eS1Drive.stiffness = 0.5f;
-		REVOLUTEDesc.eS2Drive.driveType = physx::PxArticulationDriveType::eNONE;
-		REVOLUTEDesc.eS2Drive.damping = 0.5f;
-		REVOLUTEDesc.eS2Drive.stiffness = 0.5f;
-#ifdef _test_ragdoll
-		SetJoint(joint, REVOLUTEDesc);
-#else
-		SetJoint(joint, FixDesc);
-#endif // _test_ragdoll
-		DebugJointDot(lowerarm_l_link);
-		m_pArtiLinkNames.emplace_back(target);
-
-		target = "hand_l";
-		CGameObject* hand_l = FindFrame("hand_l");
-		ParentMt = lowerarm_l->m_xmf4x4Transform;
-		ChildMt = hand_l->m_xmf4x4Transform;
-		physx::PxArticulationLink* hand_l_link = SetLink(m_pArticulation, lowerarm_l_link, MakeTransform(ParentMt), MakeTransform(ChildMt));
-		joint = hand_l_link->getInboundJoint();
-		SPHERICALDesc.eSwing1 = true;
-		SPHERICALDesc.eSwing2 = true;
-		SPHERICALDesc.eTWIST = false;
-		SPHERICALDesc.eS1LImit.low = -20.0f * physx::PxPi / 180.0f;
-		SPHERICALDesc.eS1LImit.high = 20.0f * physx::PxPi / 180.0f;
-		SPHERICALDesc.eS2LImit.low = -70.0f * physx::PxPi / 180.0f;
-		SPHERICALDesc.eS2LImit.high = 80.0f * physx::PxPi / 180.0f;
-#ifdef _test_ragdoll
-		SetJoint(joint, SPHERICALDesc);
-#else
-		SetJoint(joint, FixDesc);
-#endif // _test_ragdoll
-		DebugJointDot(hand_l_link);
-		m_pArtiLinkNames.emplace_back(target);
-
-
-
-		target = "clavicle_r";
-		CGameObject* clavicle_r = FindFrame("clavicle_r");
-		ParentMt = spine_03->m_xmf4x4Transform;
-		ChildMt = clavicle_r->m_xmf4x4Transform;
-		physx::PxArticulationLink* clavicle_r_link = SetLink(m_pArticulation, Spine03_link, MakeTransform(ParentMt), MakeTransform(ChildMt));
-		joint = clavicle_r_link->getInboundJoint();
-		SetJoint(joint, FixDesc);
-		DebugJointDot(clavicle_r_link);
-		m_pArtiLinkNames.emplace_back(target);
-
-		target = "upperarm_r";
-		CGameObject* upperarm_r = FindFrame("upperarm_r");
-		ParentMt = clavicle_r->m_xmf4x4Transform;
-		ChildMt = upperarm_r->m_xmf4x4Transform;
-		physx::PxArticulationLink* upperarm_r_link = SetLink(m_pArticulation, clavicle_r_link, MakeTransform(ParentMt), MakeTransform(ChildMt));
-		joint = upperarm_r_link->getInboundJoint();
-		SPHERICALDesc.eSwing1 = true;
-		SPHERICALDesc.eSwing2 = true;
-		SPHERICALDesc.eTWIST = true;
-		SPHERICALDesc.eS1LImit.low = -90.0f * physx::PxPi / 180.0f;
-		SPHERICALDesc.eS1LImit.high = 90.0f * physx::PxPi / 180.0f;
-		SPHERICALDesc.eS2LImit.low = -90.0f * physx::PxPi / 180.0f;
-		SPHERICALDesc.eS2LImit.high = 90.0f * physx::PxPi / 180.0f;
-		SPHERICALDesc.eTLImit.low = -50.0f * physx::PxPi / 180.0f;
-		SPHERICALDesc.eTLImit.high = 150.0f * physx::PxPi / 180.0f;
-#ifdef _test_ragdoll
-		SetJoint(joint, SPHERICALDesc);
-#else
-		SetJoint(joint, FixDesc);
-#endif // _test_ragdoll
-		DebugJointDot(upperarm_r_link);
-		m_pArtiLinkNames.emplace_back(target);
-
-		target = "lowerarm_r";
-		CGameObject* lowerarm_r = FindFrame("lowerarm_r");
-		ParentMt = upperarm_r->m_xmf4x4Transform;
-		ChildMt = lowerarm_r->m_xmf4x4Transform;
-		physx::PxArticulationLink* lowerarm_r_link = SetLink(m_pArticulation, upperarm_r_link, MakeTransform(ParentMt), MakeTransform(ChildMt));
-		joint = lowerarm_r_link->getInboundJoint();
-		REVOLUTEDesc.eSwing1 = true;
-		REVOLUTEDesc.eSwing2 = false;
-		REVOLUTEDesc.eTWIST = false;
-		REVOLUTEDesc.eS1LImit.low = 0.0f * physx::PxPi / 180.0f;
-		REVOLUTEDesc.eS1LImit.high = 140.0f * physx::PxPi / 180.0f;
-		REVOLUTEDesc.eTDrive.driveType = physx::PxArticulationDriveType::eNONE;
-		REVOLUTEDesc.eTDrive.damping = 0.5f;
-		REVOLUTEDesc.eTDrive.stiffness = 0.5f;
-		REVOLUTEDesc.eS1Drive.driveType = physx::PxArticulationDriveType::eNONE;
-		REVOLUTEDesc.eS1Drive.damping = 0.5f;
-		REVOLUTEDesc.eS1Drive.stiffness = 0.5f;
-		REVOLUTEDesc.eS2Drive.driveType = physx::PxArticulationDriveType::eNONE;
-		REVOLUTEDesc.eS2Drive.damping = 0.5f;
-		REVOLUTEDesc.eS2Drive.stiffness = 0.5f;
-#ifdef _test_ragdoll
-		SetJoint(joint, REVOLUTEDesc);
-#else
-		SetJoint(joint, FixDesc);
-#endif // _test_ragdoll
-		DebugJointDot(lowerarm_r_link);
-		m_pArtiLinkNames.emplace_back(target);
-
-		target = "hand_r";
-		CGameObject* hand_r = FindFrame("hand_r");
-		ParentMt = lowerarm_r->m_xmf4x4Transform;
-		ChildMt = hand_r->m_xmf4x4Transform;
-		physx::PxArticulationLink* hand_r_ink = SetLink(m_pArticulation, lowerarm_r_link, MakeTransform(ParentMt), MakeTransform(ChildMt));
-		joint = hand_r_ink->getInboundJoint();
-		SPHERICALDesc.eSwing1 = true;
-		SPHERICALDesc.eSwing2 = true;
-		SPHERICALDesc.eTWIST = false;
-		SPHERICALDesc.eS1LImit.low = -20.0f * physx::PxPi / 180.0f;
-		SPHERICALDesc.eS1LImit.high = 20.0f * physx::PxPi / 180.0f;
-		SPHERICALDesc.eS2LImit.low = -70.0f * physx::PxPi / 180.0f;
-		SPHERICALDesc.eS2LImit.high = 80.0f * physx::PxPi / 180.0f;
-#ifdef _test_ragdoll
-		SetJoint(joint, SPHERICALDesc);
-#else
-		SetJoint(joint, FixDesc);
-#endif // _test_ragdoll
-		DebugJointDot(hand_r_ink);
-		m_pArtiLinkNames.emplace_back(target);
-
-
-		target = "thigh_l";
-		CGameObject* thigh_l = FindFrame("thigh_l");
-		ParentMt = pelvis->m_xmf4x4Transform;
-		ChildMt = thigh_l->m_xmf4x4Transform;
-		physx::PxArticulationLink* thigh_l_link = SetLink(m_pArticulation, pelvis_link, MakeTransform(ParentMt), MakeTransform(ChildMt));
-		joint = thigh_l_link->getInboundJoint();
-		SPHERICALDesc.eSwing1 = true;
-		SPHERICALDesc.eSwing2 = true;
-		SPHERICALDesc.eTWIST = true;
-		SPHERICALDesc.eS1LImit.low = -20.0f * physx::PxPi / 180.0f;
-		SPHERICALDesc.eS1LImit.high = 45.0f * physx::PxPi / 180.0f;
-		SPHERICALDesc.eS2LImit.low = -110.0f * physx::PxPi / 180.0f;
-		SPHERICALDesc.eS2LImit.high = 40.0f * physx::PxPi / 180.0f;
-		SPHERICALDesc.eTLImit.low = -40.0f * physx::PxPi / 180.0f;
-		SPHERICALDesc.eTLImit.high = 40.0f * physx::PxPi / 180.0f;
-#ifdef _test_ragdoll
-		SetJoint(joint, SPHERICALDesc);
-#else
-		SetJoint(joint, FixDesc);
-#endif
-		DebugJointDot(thigh_l_link);
-		m_pArtiLinkNames.emplace_back(target);
-
-		target = "calf_l";
-		CGameObject* calf_l = FindFrame("calf_l");
-		ParentMt = thigh_l->m_xmf4x4Transform;
-		ChildMt = calf_l->m_xmf4x4Transform;
-		physx::PxArticulationLink* calf_l_link = SetLink(m_pArticulation, thigh_l_link, MakeTransform(ParentMt), MakeTransform(ChildMt));
-		joint = calf_l_link->getInboundJoint();
-		REVOLUTEDesc.eSwing1 = false;
-		REVOLUTEDesc.eSwing2 = true;
-		REVOLUTEDesc.eTWIST = false;
-		REVOLUTEDesc.eS2LImit.low = 0.0f * physx::PxPi / 180.0f;
-		REVOLUTEDesc.eS2LImit.high = 140.0f * physx::PxPi / 180.0f;
-		REVOLUTEDesc.eTDrive.driveType = physx::PxArticulationDriveType::eNONE;
-		REVOLUTEDesc.eTDrive.damping = 0.5f;
-		REVOLUTEDesc.eTDrive.stiffness = 0.5f;
-		REVOLUTEDesc.eS1Drive.driveType = physx::PxArticulationDriveType::eNONE;
-		REVOLUTEDesc.eS1Drive.damping = 0.5f;
-		REVOLUTEDesc.eS1Drive.stiffness = 0.5f;
-		REVOLUTEDesc.eS2Drive.driveType = physx::PxArticulationDriveType::eNONE;
-		REVOLUTEDesc.eS2Drive.damping = 0.5f;
-		REVOLUTEDesc.eS2Drive.stiffness = 0.5f;
-#ifdef _test_ragdoll
-		SetJoint(joint, REVOLUTEDesc);
-#else
-		SetJoint(joint, FixDesc);
-#endif
-		DebugJointDot(calf_l_link);
-		m_pArtiLinkNames.emplace_back(target);
-
-		target = "foot_l";
-		CGameObject* foot_l = FindFrame("foot_l");
-		ParentMt = calf_l->m_xmf4x4Transform;
-		ChildMt = foot_l->m_xmf4x4Transform;
-		physx::PxArticulationLink* foot_l_link = SetLink(m_pArticulation, calf_l_link, MakeTransform(ParentMt), MakeTransform(ChildMt));
-		joint = foot_l_link->getInboundJoint();
-		SPHERICALDesc.eSwing1 = false;
-		SPHERICALDesc.eSwing2 = true;
-		SPHERICALDesc.eTWIST = true;
-		SPHERICALDesc.eS2LImit.low = -50.0f * physx::PxPi / 180.0f;
-		SPHERICALDesc.eS2LImit.high = 20.0f * physx::PxPi / 180.0f;
-		SPHERICALDesc.eTLImit.low = -30.0f * physx::PxPi / 180.0f;
-		SPHERICALDesc.eTLImit.high = 30.0f * physx::PxPi / 180.0f;
-#ifdef _test_ragdoll
-		SetJoint(joint, SPHERICALDesc);
-#else
-		SetJoint(joint, FixDesc);
-#endif
-		DebugJointDot(foot_l_link);
-		m_pArtiLinkNames.emplace_back(target);
-
-		target = "ball_l";
-		CGameObject* ball_l = FindFrame("ball_l");
-		ParentMt = foot_l->m_xmf4x4Transform;
-		ChildMt = ball_l->m_xmf4x4Transform;
-		physx::PxArticulationLink* ball_l_link = SetLink(m_pArticulation, foot_l_link, MakeTransform(ParentMt), MakeTransform(ChildMt));
-		joint = ball_l_link->getInboundJoint();
-		SetJoint(joint, FixDesc);
-		DebugJointDot(ball_l_link);
-		m_pArtiLinkNames.emplace_back(target);
-
-
-		target = "thigh_r";
-		CGameObject* thigh_r = FindFrame("thigh_r");
-		ParentMt = pelvis->m_xmf4x4Transform;
-		ChildMt = thigh_r->m_xmf4x4Transform;
-		physx::PxArticulationLink* thigh_r_link = SetLink(m_pArticulation, pelvis_link, MakeTransform(ParentMt), MakeTransform(ChildMt));
-		joint = thigh_r_link->getInboundJoint();
-		SPHERICALDesc.eSwing1 = true;
-		SPHERICALDesc.eSwing2 = true;
-		SPHERICALDesc.eTWIST = true;
-		SPHERICALDesc.eS1LImit.low = -20.0f * physx::PxPi / 180.0f;
-		SPHERICALDesc.eS1LImit.high = 45.0f * physx::PxPi / 180.0f;
-		SPHERICALDesc.eS2LImit.low = -110.0f * physx::PxPi / 180.0f;
-		SPHERICALDesc.eS2LImit.high = 40.0f * physx::PxPi / 180.0f;
-		SPHERICALDesc.eTLImit.low = -40.0f * physx::PxPi / 180.0f;
-		SPHERICALDesc.eTLImit.high = 40.0f * physx::PxPi / 180.0f;
-#ifdef _test_ragdoll
-		SetJoint(joint, SPHERICALDesc);
-#else
-		SetJoint(joint, FixDesc);
-#endif
-		DebugJointDot(thigh_r_link);
-		m_pArtiLinkNames.emplace_back(target);
-
-		target = "calf_r";
-		CGameObject* calf_r = FindFrame("calf_r");
-		ParentMt = thigh_r->m_xmf4x4Transform;
-		ChildMt = calf_r->m_xmf4x4Transform;
-		physx::PxArticulationLink* calf_r_link = SetLink(m_pArticulation, thigh_r_link, MakeTransform(ParentMt), MakeTransform(ChildMt));
-		joint = calf_r_link->getInboundJoint();
-		REVOLUTEDesc.eSwing1 = false;
-		REVOLUTEDesc.eSwing2 = true;
-		REVOLUTEDesc.eTWIST = false;
-		REVOLUTEDesc.eS2LImit.low = 0.0f * physx::PxPi / 180.0f;
-		REVOLUTEDesc.eS2LImit.high = 140.0f * physx::PxPi / 180.0f;
-		REVOLUTEDesc.eTDrive.driveType = physx::PxArticulationDriveType::eNONE;
-		REVOLUTEDesc.eTDrive.damping = 0.5f;
-		REVOLUTEDesc.eTDrive.stiffness = 0.5f;
-		REVOLUTEDesc.eS1Drive.driveType = physx::PxArticulationDriveType::eNONE;
-		REVOLUTEDesc.eS1Drive.damping = 0.5f;
-		REVOLUTEDesc.eS1Drive.stiffness = 0.5f;
-		REVOLUTEDesc.eS2Drive.driveType = physx::PxArticulationDriveType::eNONE;
-		REVOLUTEDesc.eS2Drive.damping = 0.5f;
-		REVOLUTEDesc.eS2Drive.stiffness = 0.5f;
-#ifdef _test_ragdoll
-		SetJoint(joint, REVOLUTEDesc);
-#else
-		SetJoint(joint, FixDesc);
-#endif
-		DebugJointDot(calf_r_link);
-		m_pArtiLinkNames.emplace_back(target);
-
-		target = "foot_r";
-		CGameObject* foot_r = FindFrame("foot_r");
-		ParentMt = calf_r->m_xmf4x4Transform;
-		ChildMt = foot_r->m_xmf4x4Transform;
-		physx::PxArticulationLink* foot_r_link = SetLink(m_pArticulation, calf_r_link, MakeTransform(ParentMt), MakeTransform(ChildMt));
-		joint = foot_r_link->getInboundJoint();
-		SPHERICALDesc.eSwing1 = false;
-		SPHERICALDesc.eSwing2 = true;
-		SPHERICALDesc.eTWIST = true;
-		SPHERICALDesc.eS2LImit.low = -50.0f * physx::PxPi / 180.0f;
-		SPHERICALDesc.eS2LImit.high = 20.0f * physx::PxPi / 180.0f;
-		SPHERICALDesc.eTLImit.low = -30.0f * physx::PxPi / 180.0f;
-		SPHERICALDesc.eTLImit.high = 30.0f * physx::PxPi / 180.0f;
-#ifdef _test_ragdoll
-		SetJoint(joint, SPHERICALDesc);
-#else
-		SetJoint(joint, FixDesc);
-#endif
-		DebugJointDot(foot_r_link);
-		m_pArtiLinkNames.emplace_back(target);
-
-		target = "ball_r";
-		CGameObject* ball_r = FindFrame("ball_r");
-		ParentMt = foot_r->m_xmf4x4Transform;
-		ChildMt = ball_r->m_xmf4x4Transform;
-		physx::PxArticulationLink* ball_r_link = SetLink(m_pArticulation, foot_r_link, MakeTransform(ParentMt), MakeTransform(ChildMt));
-		joint = ball_r_link->getInboundJoint();
-		SetJoint(joint, FixDesc);
-		DebugJointDot(ball_l_link);
-		m_pArtiLinkNames.emplace_back(target);
-
-
-
-
-		Locator.GetPxScene()->addArticulation(*m_pArticulation);
-
-		physx::PxU32 nbLinks = m_pArticulation->getNbLinks();
-		m_pArticulationLinks.resize(nbLinks);
-		m_pArticulation->getLinks(m_pArticulationLinks.data(), nbLinks, 0);
-
-		m_pArticulationCache = m_pArticulation->createCache();
-		m_nArtiCache = m_pArticulation->getCacheDataSize();
-		m_bSimulateArticulate = true;
-	}
-
-	if (test == 0) {
-		m_pArticulation = Locator.GetPxPhysics()->createArticulationReducedCoordinate();
-
-		physx::PxTransform transform(physx::PxVec3(0.0f, 0.0f, 0.0f));
-		m_pChild->m_pChild->CreateArticulation(m_pArticulation, NULL, transform);
-
-		Locator.GetPxScene()->addArticulation(*m_pArticulation);
-
-		test++;
-	}
+	//	test++;
+	//}
 
 
 	PrepareBoundingBox(pd3dDevice, pd3dCommandList);
@@ -1286,9 +813,9 @@ void CKnightObject::SetRigidDynamic()
 	physx::PxTransform transform(physx::PxVec3(0.0f, 10.0f, 0.0f));
 
 	physx::PxMaterial* material = pPhysics->createMaterial(0.5, 0.5, 0.5);
-	physx::PxShape* shape = pPhysics->createShape(physx::PxBoxGeometry(1.0f, 1.0f, 1.0f), *material);
+	physx::PxShape* shape = pPhysics->createShape(physx::PxBoxGeometry(3.0f, 5.0f, 3.0f), *material);
 
-	physx::PxRigidDynamic* actor = physx::PxCreateDynamic(*pPhysics, transform, physx::PxBoxGeometry(1.0f, 1.0f, 1.0f), *material, 1.0f);
+	physx::PxRigidDynamic* actor = physx::PxCreateDynamic(*pPhysics, transform, physx::PxBoxGeometry(3.0f, 5.0f, 3.0f), *material, 1.0f);
 
 	Rigid = actor;
 
@@ -1298,6 +825,548 @@ void CKnightObject::SetRigidDynamic()
 	//
 	//physx::PxArticulationReducedCoordinate* Articulation = pPhysics->createArticulationReducedCoordinate();
 	//Articulation->setArticulationFlag(physx::PxArticulationFlag::eFIX_BASE, true);
+
+}
+void CGameObject::CreateArticulation(float meshScale)
+{
+	auto DebugJointDot = [](physx::PxArticulationLink* link) {
+		TCHAR pstrDebug[256] = { 0 };
+		_stprintf_s(pstrDebug, 256, _T("dof: %d\n"), link->getInboundJointDof());
+		OutputDebugString(pstrDebug);
+	};
+
+	m_pArticulation = Locator.GetPxPhysics()->createArticulationReducedCoordinate();
+	m_pArticulation->setArticulationFlag(physx::PxArticulationFlag::eDISABLE_SELF_COLLISION, true);
+	m_pArticulation->setSolverIterationCounts(10, 4);
+	m_pArticulation->setMaxCOMLinearVelocity(40);
+
+	float scale = m_xmf4x4Scale._11;
+
+	JointAxisDesc FixDesc;
+	FixDesc.type = physx::PxArticulationJointType::eFIX;
+	JointAxisDesc SPHERICALDesc;
+	SPHERICALDesc.type = physx::PxArticulationJointType::eSPHERICAL;
+	SPHERICALDesc.eSwing1 = true;
+	SPHERICALDesc.eSwing2 = true;
+	SPHERICALDesc.eTWIST = true;
+	JointAxisDesc REVOLUTEDesc;
+	REVOLUTEDesc.type = physx::PxArticulationJointType::eREVOLUTE;
+
+	std::string target{ "pelvis" };
+	CGameObject* pelvis = FindFrame("pelvis");
+	XMFLOAT4X4 ParentMt = Matrix4x4::Identity();
+	//ParentMt = Matrix4x4::Multiply(ParentMt, XMMatrixRotationRollPitchYaw(90.0f * physx::PxPi / 180.0f, 0.f, 0.f));
+	XMFLOAT4X4 ChildMt = pelvis->m_xmf4x4Transform;
+	physx::PxArticulationLink* pelvis_link = SetLink(m_pArticulation, nullptr, MakeTransform(ParentMt, scale), MakeTransform(ChildMt, scale), meshScale);
+	physx::PxArticulationJointReducedCoordinate* joint = pelvis_link->getInboundJoint();
+	DebugJointDot(pelvis_link);
+	m_pArtiLinkNames.emplace_back(target);
+
+#define _test_ragdoll
+
+	target = "spine_01";
+	CGameObject* spine_01 = FindFrame("spine_01");
+	ParentMt = pelvis->m_xmf4x4Transform;
+	ChildMt = spine_01->m_xmf4x4Transform;
+	physx::PxArticulationLink* Spine01_link = SetLink(m_pArticulation, pelvis_link, MakeTransform(ParentMt, scale), MakeTransform(ChildMt, scale), meshScale);
+	joint = Spine01_link->getInboundJoint();
+	SPHERICALDesc.eSwing1 = true;
+	SPHERICALDesc.eSwing2 = true;
+	SPHERICALDesc.eTWIST = true;
+	SPHERICALDesc.eTLImit.low = -10.0f * physx::PxPi / 180.0f;
+	SPHERICALDesc.eTLImit.high = 10.0f * physx::PxPi / 180.0f;
+	SPHERICALDesc.eS1LImit.low = -10.0f * physx::PxPi / 180.0f;
+	SPHERICALDesc.eS1LImit.high = 10.0f * physx::PxPi / 180.0f;
+	SPHERICALDesc.eS2LImit.low = -10.0f * physx::PxPi / 180.0f;  // x?
+	SPHERICALDesc.eS2LImit.high = 10.0f * physx::PxPi / 180.0f;
+	SPHERICALDesc.eTDrive.driveType = physx::PxArticulationDriveType::eNONE;
+	SPHERICALDesc.eTDrive.damping = 0.5f;
+	SPHERICALDesc.eTDrive.stiffness = 0.5f;
+	SPHERICALDesc.eS1Drive.driveType = physx::PxArticulationDriveType::eNONE;
+	SPHERICALDesc.eS1Drive.damping = 0.5f;
+	SPHERICALDesc.eS1Drive.stiffness = 0.5f;
+	SPHERICALDesc.eS2Drive.driveType = physx::PxArticulationDriveType::eNONE;
+	SPHERICALDesc.eS2Drive.damping = 0.5f;
+	SPHERICALDesc.eS2Drive.stiffness = 0.5f;
+#ifdef _test_ragdoll
+	SetJoint(joint, SPHERICALDesc);
+#else
+	SetJoint(joint, FixDesc);
+#endif // _test_ragdoll
+	DebugJointDot(Spine01_link);
+	m_pArtiLinkNames.emplace_back(target);
+
+	target = "spine_02";
+	CGameObject* spine_02 = FindFrame("spine_02");
+	ParentMt = spine_01->m_xmf4x4Transform;
+	ChildMt = spine_02->m_xmf4x4Transform;
+	physx::PxArticulationLink* Spine02_link = SetLink(m_pArticulation, Spine01_link, MakeTransform(ParentMt, scale), MakeTransform(ChildMt, scale), meshScale);
+	joint = Spine02_link->getInboundJoint();
+	//SPHERICALDesc.eSwing1 = true;
+	//SPHERICALDesc.eSwing2 = true;
+	//SPHERICALDesc.eTWIST = true;
+	//SPHERICALDesc.eTLImit.low = -10.0f * physx::PxPi / 180.0f;
+	//SPHERICALDesc.eTLImit.high = 10.0f * physx::PxPi / 180.0f;
+	//SPHERICALDesc.eS1LImit.low = -10.0f * physx::PxPi / 180.0f;
+	//SPHERICALDesc.eS1LImit.high = 10.0f * physx::PxPi / 180.0f;
+	//SPHERICALDesc.eS2LImit.low = -10.0f * physx::PxPi / 180.0f;  // x?
+	//SPHERICALDesc.eS2LImit.high = 10.0f * physx::PxPi / 180.0f;
+	//SPHERICALDesc.eTDrive.driveType = physx::PxArticulationDriveType::eNONE;
+	//SPHERICALDesc.eTDrive.damping = 0.5f;
+	//SPHERICALDesc.eTDrive.stiffness = 0.5f;
+	//SPHERICALDesc.eS1Drive.driveType = physx::PxArticulationDriveType::eNONE;
+	//SPHERICALDesc.eS1Drive.damping = 0.5f;
+	//SPHERICALDesc.eS1Drive.stiffness = 0.5f;
+	//SPHERICALDesc.eS2Drive.driveType = physx::PxArticulationDriveType::eNONE;
+	//SPHERICALDesc.eS2Drive.damping = 0.5f;
+	//SPHERICALDesc.eS2Drive.stiffness = 0.5f;
+#ifdef _test_ragdoll
+	SetJoint(joint, FixDesc);
+#else
+	SetJoint(joint, FixDesc);
+#endif // _test_ragdoll
+	DebugJointDot(Spine02_link);
+	m_pArtiLinkNames.emplace_back(target);
+
+	target = "spine_03";
+	CGameObject* spine_03 = FindFrame("spine_03");
+	ParentMt = spine_02->m_xmf4x4Transform;
+	ChildMt = spine_03->m_xmf4x4Transform;
+	physx::PxArticulationLink* Spine03_link = SetLink(m_pArticulation, Spine02_link, MakeTransform(ParentMt, scale), MakeTransform(ChildMt, scale), meshScale);
+	joint = Spine03_link->getInboundJoint();
+	SPHERICALDesc.eSwing1 = true;
+	SPHERICALDesc.eSwing2 = true;
+	SPHERICALDesc.eTWIST = true;
+	SPHERICALDesc.eTLImit.low = -10.0f * physx::PxPi / 180.0f;
+	SPHERICALDesc.eTLImit.high = 10.0f * physx::PxPi / 180.0f;
+	SPHERICALDesc.eS1LImit.low = -10.0f * physx::PxPi / 180.0f;
+	SPHERICALDesc.eS1LImit.high = 10.0f * physx::PxPi / 180.0f;
+	SPHERICALDesc.eS2LImit.low = -10.0f * physx::PxPi / 180.0f;  // x?
+	SPHERICALDesc.eS2LImit.high = 10.0f * physx::PxPi / 180.0f;
+	SPHERICALDesc.eTDrive.driveType = physx::PxArticulationDriveType::eNONE;
+	SPHERICALDesc.eTDrive.damping = 0.5f;
+	SPHERICALDesc.eTDrive.stiffness = 0.5f;
+	SPHERICALDesc.eS1Drive.driveType = physx::PxArticulationDriveType::eNONE;
+	SPHERICALDesc.eS1Drive.damping = 0.5f;
+	SPHERICALDesc.eS1Drive.stiffness = 0.5f;
+	SPHERICALDesc.eS2Drive.driveType = physx::PxArticulationDriveType::eNONE;
+	SPHERICALDesc.eS2Drive.damping = 0.5f;
+	SPHERICALDesc.eS2Drive.stiffness = 0.5f;
+#ifdef _test_ragdoll
+	SetJoint(joint, SPHERICALDesc);
+#else
+	SetJoint(joint, FixDesc);
+#endif // _test_ragdoll
+	DebugJointDot(Spine03_link);
+	m_pArtiLinkNames.emplace_back(target);
+
+	target = "neck_01";
+	CGameObject* neck_01 = FindFrame("neck_01");
+	ParentMt = spine_03->m_xmf4x4Transform;
+	ChildMt = neck_01->m_xmf4x4Transform;
+	physx::PxArticulationLink* neck_link = SetLink(m_pArticulation, Spine03_link, MakeTransform(ParentMt, scale), MakeTransform(ChildMt, scale), meshScale);
+	joint = neck_link->getInboundJoint();
+	SPHERICALDesc.eTLImit.low = -10.0f * physx::PxPi / 180.0f;
+	SPHERICALDesc.eTLImit.high = 10.0f * physx::PxPi / 180.0f;
+	SPHERICALDesc.eS1LImit.low = -10.0f * physx::PxPi / 180.0f;
+	SPHERICALDesc.eS1LImit.high = 10.0f * physx::PxPi / 180.0f;
+	SPHERICALDesc.eS2LImit.low = -10.0f * physx::PxPi / 180.0f;  // x?
+	SPHERICALDesc.eS2LImit.high = 40.0f * physx::PxPi / 180.0f;
+	SPHERICALDesc.eTDrive.driveType = physx::PxArticulationDriveType::eNONE;
+	SPHERICALDesc.eTDrive.damping = 0.5f;
+	SPHERICALDesc.eTDrive.stiffness = 0.5f;
+	SPHERICALDesc.eS1Drive.driveType = physx::PxArticulationDriveType::eNONE;
+	SPHERICALDesc.eS1Drive.damping = 0.5f;
+	SPHERICALDesc.eS1Drive.stiffness = 0.5f;
+	SPHERICALDesc.eS2Drive.driveType = physx::PxArticulationDriveType::eNONE;
+	SPHERICALDesc.eS2Drive.damping = 0.5f;
+	SPHERICALDesc.eS2Drive.stiffness = 0.5f;
+#ifdef _test_ragdoll
+	SetJoint(joint, SPHERICALDesc);
+#else
+	SetJoint(joint, FixDesc);
+#endif // _test_ragdoll
+
+	DebugJointDot(neck_link);
+	m_pArtiLinkNames.emplace_back(target);
+
+	target = "head";
+	CGameObject* head = FindFrame("head");
+	ParentMt = neck_01->m_xmf4x4Transform;
+	ChildMt = head->m_xmf4x4Transform;
+	physx::PxArticulationLink* head_link = SetLink(m_pArticulation, neck_link, MakeTransform(ParentMt, scale), MakeTransform(ChildMt, scale), meshScale);
+	joint = head_link->getInboundJoint();
+	SPHERICALDesc.eSwing1 = false;
+	SPHERICALDesc.eSwing2 = true;
+	SPHERICALDesc.eTWIST = true;
+	SPHERICALDesc.eTLImit.low = -40.0f * physx::PxPi / 180.0f;
+	SPHERICALDesc.eTLImit.high = 40.0f * physx::PxPi / 180.0f;
+	SPHERICALDesc.eS2LImit.low = -15.0f * physx::PxPi / 180.0f;
+	SPHERICALDesc.eS2LImit.high = 30.0f * physx::PxPi / 180.0f;
+#ifdef _test_ragdoll
+	SetJoint(joint, SPHERICALDesc);
+#else
+	SetJoint(joint, FixDesc);
+#endif // _test_ragdoll
+	DebugJointDot(head_link);
+	m_pArtiLinkNames.emplace_back(target);
+
+
+
+	target = "clavicle_l";
+	CGameObject* clavicle_l = FindFrame("clavicle_l");
+	ParentMt = spine_03->m_xmf4x4Transform;
+	ChildMt = clavicle_l->m_xmf4x4Transform;
+	physx::PxArticulationLink* clavicle_l_link = SetLink(m_pArticulation, Spine03_link, MakeTransform(ParentMt, scale), MakeTransform(ChildMt, scale), meshScale);
+	joint = clavicle_l_link->getInboundJoint();
+	SetJoint(joint, FixDesc);
+	DebugJointDot(clavicle_l_link);
+	m_pArtiLinkNames.emplace_back(target);
+
+	target = "upperarm_l";
+	CGameObject* upperarm_l = FindFrame("upperarm_l");
+	ParentMt = clavicle_l->m_xmf4x4Transform;
+	ChildMt = upperarm_l->m_xmf4x4Transform;
+	physx::PxArticulationLink* upperarm_l_link = SetLink(m_pArticulation, clavicle_l_link, MakeTransform(ParentMt, scale), MakeTransform(ChildMt, scale), meshScale);
+	joint = upperarm_l_link->getInboundJoint();
+	SPHERICALDesc.eSwing1 = true;
+	SPHERICALDesc.eSwing2 = true;
+	SPHERICALDesc.eTWIST = true;
+	SPHERICALDesc.eS1LImit.low = -90.0f * physx::PxPi / 180.0f;
+	SPHERICALDesc.eS1LImit.high = 90.0f * physx::PxPi / 180.0f;
+	SPHERICALDesc.eS2LImit.low = -90.0f * physx::PxPi / 180.0f;
+	SPHERICALDesc.eS2LImit.high = 90.0f * physx::PxPi / 180.0f;
+	SPHERICALDesc.eTLImit.low = -20.0f * physx::PxPi / 180.0f;
+	SPHERICALDesc.eTLImit.high = 20.0f * physx::PxPi / 180.0f;
+#ifdef _test_ragdoll
+	SetJoint(joint, SPHERICALDesc);
+#else
+	SetJoint(joint, FixDesc);
+#endif // _test_ragdoll
+	DebugJointDot(upperarm_l_link);
+	m_pArtiLinkNames.emplace_back(target);
+
+	target = "lowerarm_l";
+	CGameObject* lowerarm_l = FindFrame("lowerarm_l");
+	ParentMt = upperarm_l->m_xmf4x4Transform;
+	ChildMt = lowerarm_l->m_xmf4x4Transform;
+	physx::PxArticulationLink* lowerarm_l_link = SetLink(m_pArticulation, upperarm_l_link, MakeTransform(ParentMt, scale), MakeTransform(ChildMt, scale), meshScale);
+	joint = lowerarm_l_link->getInboundJoint();
+	REVOLUTEDesc.eSwing1 = false;
+	REVOLUTEDesc.eSwing2 = true;
+	REVOLUTEDesc.eTWIST = false;
+	REVOLUTEDesc.eS2LImit.low = 0.0f * physx::PxPi / 180.0f;
+	REVOLUTEDesc.eS2LImit.high = 140.0f * physx::PxPi / 180.0f;
+	REVOLUTEDesc.eTDrive.driveType = physx::PxArticulationDriveType::eNONE;
+	REVOLUTEDesc.eTDrive.damping = 0.5f;
+	REVOLUTEDesc.eTDrive.stiffness = 0.5f;
+	REVOLUTEDesc.eS1Drive.driveType = physx::PxArticulationDriveType::eNONE;
+	REVOLUTEDesc.eS1Drive.damping = 0.5f;
+	REVOLUTEDesc.eS1Drive.stiffness = 0.5f;
+	REVOLUTEDesc.eS2Drive.driveType = physx::PxArticulationDriveType::eNONE;
+	REVOLUTEDesc.eS2Drive.damping = 0.5f;
+	REVOLUTEDesc.eS2Drive.stiffness = 0.5f;
+#ifdef _test_ragdoll
+	SetJoint(joint, REVOLUTEDesc);
+#else
+	SetJoint(joint, FixDesc);
+#endif // _test_ragdoll
+	DebugJointDot(lowerarm_l_link);
+	m_pArtiLinkNames.emplace_back(target);
+
+	target = "hand_l";
+	CGameObject* hand_l = FindFrame("hand_l");
+	ParentMt = lowerarm_l->m_xmf4x4Transform;
+	ChildMt = hand_l->m_xmf4x4Transform;
+	physx::PxArticulationLink* hand_l_link = SetLink(m_pArticulation, lowerarm_l_link, MakeTransform(ParentMt, scale), MakeTransform(ChildMt, scale), meshScale);
+	joint = hand_l_link->getInboundJoint();
+	SPHERICALDesc.eSwing1 = true;
+	SPHERICALDesc.eSwing2 = true;
+	SPHERICALDesc.eTWIST = false;
+	SPHERICALDesc.eS1LImit.low = -20.0f * physx::PxPi / 180.0f;
+	SPHERICALDesc.eS1LImit.high = 20.0f * physx::PxPi / 180.0f;
+	SPHERICALDesc.eS2LImit.low = -40.0f * physx::PxPi / 180.0f;
+	SPHERICALDesc.eS2LImit.high = 10.0f * physx::PxPi / 180.0f;
+#ifdef _test_ragdoll
+	SetJoint(joint, SPHERICALDesc);
+#else
+	SetJoint(joint, FixDesc);
+#endif // _test_ragdoll
+	DebugJointDot(hand_l_link);
+	m_pArtiLinkNames.emplace_back(target);
+
+
+
+	target = "clavicle_r";
+	CGameObject* clavicle_r = FindFrame("clavicle_r");
+	ParentMt = spine_03->m_xmf4x4Transform;
+	ChildMt = clavicle_r->m_xmf4x4Transform;
+	physx::PxArticulationLink* clavicle_r_link = SetLink(m_pArticulation, Spine03_link, MakeTransform(ParentMt, scale), MakeTransform(ChildMt, scale), meshScale);
+	joint = clavicle_r_link->getInboundJoint();
+	SetJoint(joint, FixDesc);
+	DebugJointDot(clavicle_r_link);
+	m_pArtiLinkNames.emplace_back(target);
+
+	target = "upperarm_r";
+	CGameObject* upperarm_r = FindFrame("upperarm_r");
+	ParentMt = clavicle_r->m_xmf4x4Transform;
+	ChildMt = upperarm_r->m_xmf4x4Transform;
+	physx::PxArticulationLink* upperarm_r_link = SetLink(m_pArticulation, clavicle_r_link, MakeTransform(ParentMt, scale), MakeTransform(ChildMt, scale), meshScale);
+	joint = upperarm_r_link->getInboundJoint();
+	SPHERICALDesc.eSwing1 = true;
+	SPHERICALDesc.eSwing2 = true;
+	SPHERICALDesc.eTWIST = true;
+	SPHERICALDesc.eS1LImit.low = -90.0f * physx::PxPi / 180.0f;
+	SPHERICALDesc.eS1LImit.high = 90.0f * physx::PxPi / 180.0f;
+	SPHERICALDesc.eS2LImit.low = -90.0f * physx::PxPi / 180.0f;
+	SPHERICALDesc.eS2LImit.high = 90.0f * physx::PxPi / 180.0f;
+	SPHERICALDesc.eTLImit.low = -20.0f * physx::PxPi / 180.0f;
+	SPHERICALDesc.eTLImit.high = 20.0f * physx::PxPi / 180.0f;
+#ifdef _test_ragdoll
+	SetJoint(joint, SPHERICALDesc);
+#else
+	SetJoint(joint, FixDesc);
+#endif // _test_ragdoll
+	DebugJointDot(upperarm_r_link);
+	m_pArtiLinkNames.emplace_back(target);
+
+	target = "lowerarm_r";
+	CGameObject* lowerarm_r = FindFrame("lowerarm_r");
+	ParentMt = upperarm_r->m_xmf4x4Transform;
+	ChildMt = lowerarm_r->m_xmf4x4Transform;
+	physx::PxArticulationLink* lowerarm_r_link = SetLink(m_pArticulation, upperarm_r_link, MakeTransform(ParentMt, scale), MakeTransform(ChildMt, scale), meshScale);
+	joint = lowerarm_r_link->getInboundJoint();
+	REVOLUTEDesc.eSwing1 = false;
+	REVOLUTEDesc.eSwing2 = true;
+	REVOLUTEDesc.eTWIST = false;
+	REVOLUTEDesc.eS2LImit.low = 0.0f * physx::PxPi / 180.0f;
+	REVOLUTEDesc.eS2LImit.high = 140.0f * physx::PxPi / 180.0f;
+	REVOLUTEDesc.eTDrive.driveType = physx::PxArticulationDriveType::eNONE;
+	REVOLUTEDesc.eTDrive.damping = 0.5f;
+	REVOLUTEDesc.eTDrive.stiffness = 0.5f;
+	REVOLUTEDesc.eS1Drive.driveType = physx::PxArticulationDriveType::eNONE;
+	REVOLUTEDesc.eS1Drive.damping = 0.5f;
+	REVOLUTEDesc.eS1Drive.stiffness = 0.5f;
+	REVOLUTEDesc.eS2Drive.driveType = physx::PxArticulationDriveType::eNONE;
+	REVOLUTEDesc.eS2Drive.damping = 0.5f;
+	REVOLUTEDesc.eS2Drive.stiffness = 0.5f;
+#ifdef _test_ragdoll
+	SetJoint(joint, REVOLUTEDesc);
+#else
+	SetJoint(joint, FixDesc);
+#endif // _test_ragdoll
+	DebugJointDot(lowerarm_r_link);
+	m_pArtiLinkNames.emplace_back(target);
+
+	target = "hand_r";
+	CGameObject* hand_r = FindFrame("hand_r");
+	ParentMt = lowerarm_r->m_xmf4x4Transform;
+	ChildMt = hand_r->m_xmf4x4Transform;
+	physx::PxArticulationLink* hand_r_ink = SetLink(m_pArticulation, lowerarm_r_link, MakeTransform(ParentMt, scale), MakeTransform(ChildMt, scale), meshScale);
+	joint = hand_r_ink->getInboundJoint();
+	SPHERICALDesc.eSwing1 = true;
+	SPHERICALDesc.eSwing2 = true;
+	SPHERICALDesc.eTWIST = false;
+	SPHERICALDesc.eS1LImit.low = -20.0f * physx::PxPi / 180.0f;
+	SPHERICALDesc.eS1LImit.high = 20.0f * physx::PxPi / 180.0f;
+	SPHERICALDesc.eS2LImit.low = -40.0f * physx::PxPi / 180.0f;
+	SPHERICALDesc.eS2LImit.high = 60.0f * physx::PxPi / 180.0f;
+#ifdef _test_ragdoll
+	SetJoint(joint, SPHERICALDesc);
+#else
+	SetJoint(joint, FixDesc);
+#endif // _test_ragdoll
+	DebugJointDot(hand_r_ink);
+	m_pArtiLinkNames.emplace_back(target);
+
+
+	target = "thigh_l";
+	CGameObject* thigh_l = FindFrame("thigh_l");
+	ParentMt = pelvis->m_xmf4x4Transform;
+	ChildMt = thigh_l->m_xmf4x4Transform;
+	physx::PxArticulationLink* thigh_l_link = SetLink(m_pArticulation, pelvis_link, MakeTransform(ParentMt, scale), MakeTransform(ChildMt, scale), meshScale);
+	joint = thigh_l_link->getInboundJoint();
+	SPHERICALDesc.eSwing1 = true;
+	SPHERICALDesc.eSwing2 = true;
+	SPHERICALDesc.eTWIST = true;
+	SPHERICALDesc.eS1LImit.low = -10.0f * physx::PxPi / 180.0f;
+	SPHERICALDesc.eS1LImit.high = 45.0f * physx::PxPi / 180.0f;
+	SPHERICALDesc.eS2LImit.low = -110.0f * physx::PxPi / 180.0f;
+	SPHERICALDesc.eS2LImit.high = 40.0f * physx::PxPi / 180.0f;
+	SPHERICALDesc.eTLImit.low = -40.0f * physx::PxPi / 180.0f;
+	SPHERICALDesc.eTLImit.high = 40.0f * physx::PxPi / 180.0f;
+#ifdef _test_ragdoll
+	SetJoint(joint, SPHERICALDesc);
+#else
+	SetJoint(joint, FixDesc);
+#endif
+	DebugJointDot(thigh_l_link);
+	m_pArtiLinkNames.emplace_back(target);
+
+	target = "calf_l";
+	CGameObject* calf_l = FindFrame("calf_l");
+	ParentMt = thigh_l->m_xmf4x4Transform;
+	ChildMt = calf_l->m_xmf4x4Transform;
+	physx::PxArticulationLink* calf_l_link = SetLink(m_pArticulation, thigh_l_link, MakeTransform(ParentMt, scale), MakeTransform(ChildMt, scale), meshScale);
+	joint = calf_l_link->getInboundJoint();
+	REVOLUTEDesc.eSwing1 = false;
+	REVOLUTEDesc.eSwing2 = true;
+	REVOLUTEDesc.eTWIST = false;
+	REVOLUTEDesc.eS2LImit.low = 0.0f * physx::PxPi / 180.0f;
+	REVOLUTEDesc.eS2LImit.high = 100.0f * physx::PxPi / 180.0f;
+	REVOLUTEDesc.eTDrive.driveType = physx::PxArticulationDriveType::eNONE;
+	REVOLUTEDesc.eTDrive.damping = 0.5f;
+	REVOLUTEDesc.eTDrive.stiffness = 0.5f;
+	REVOLUTEDesc.eS1Drive.driveType = physx::PxArticulationDriveType::eNONE;
+	REVOLUTEDesc.eS1Drive.damping = 0.5f;
+	REVOLUTEDesc.eS1Drive.stiffness = 0.5f;
+	REVOLUTEDesc.eS2Drive.driveType = physx::PxArticulationDriveType::eNONE;
+	REVOLUTEDesc.eS2Drive.damping = 0.5f;
+	REVOLUTEDesc.eS2Drive.stiffness = 0.5f;
+#ifdef _test_ragdoll
+	SetJoint(joint, REVOLUTEDesc);
+#else
+	SetJoint(joint, FixDesc);
+#endif
+	DebugJointDot(calf_l_link);
+	m_pArtiLinkNames.emplace_back(target);
+
+	target = "foot_l";
+	CGameObject* foot_l = FindFrame("foot_l");
+	ParentMt = calf_l->m_xmf4x4Transform;
+	ChildMt = foot_l->m_xmf4x4Transform;
+	physx::PxArticulationLink* foot_l_link = SetLink(m_pArticulation, calf_l_link, MakeTransform(ParentMt, scale), MakeTransform(ChildMt, scale), meshScale);
+	joint = foot_l_link->getInboundJoint();
+	SPHERICALDesc.eSwing1 = false;
+	SPHERICALDesc.eSwing2 = true;
+	SPHERICALDesc.eTWIST = true;
+	SPHERICALDesc.eS2LImit.low = -50.0f * physx::PxPi / 180.0f;
+	SPHERICALDesc.eS2LImit.high = 20.0f * physx::PxPi / 180.0f;
+	SPHERICALDesc.eTLImit.low = -30.0f * physx::PxPi / 180.0f;
+	SPHERICALDesc.eTLImit.high = 30.0f * physx::PxPi / 180.0f;
+#ifdef _test_ragdoll
+	SetJoint(joint, SPHERICALDesc);
+#else
+	SetJoint(joint, FixDesc);
+#endif
+	DebugJointDot(foot_l_link);
+	m_pArtiLinkNames.emplace_back(target);
+
+	target = "ball_l";
+	CGameObject* ball_l = FindFrame("ball_l");
+	ParentMt = foot_l->m_xmf4x4Transform;
+	ChildMt = ball_l->m_xmf4x4Transform;
+	physx::PxArticulationLink* ball_l_link = SetLink(m_pArticulation, foot_l_link, MakeTransform(ParentMt, scale), MakeTransform(ChildMt, scale), meshScale);
+	joint = ball_l_link->getInboundJoint();
+	SetJoint(joint, FixDesc);
+	DebugJointDot(ball_l_link);
+	m_pArtiLinkNames.emplace_back(target);
+
+
+	target = "thigh_r";
+	CGameObject* thigh_r = FindFrame("thigh_r");
+	ParentMt = pelvis->m_xmf4x4Transform;
+	ChildMt = thigh_r->m_xmf4x4Transform;
+	physx::PxArticulationLink* thigh_r_link = SetLink(m_pArticulation, pelvis_link, MakeTransform(ParentMt, scale), MakeTransform(ChildMt, scale), meshScale);
+	joint = thigh_r_link->getInboundJoint();
+	SPHERICALDesc.eSwing1 = true;
+	SPHERICALDesc.eSwing2 = true;
+	SPHERICALDesc.eTWIST = true;
+	SPHERICALDesc.eS1LImit.low = -10.0f * physx::PxPi / 180.0f;
+	SPHERICALDesc.eS1LImit.high = 45.0f * physx::PxPi / 180.0f;
+	SPHERICALDesc.eS2LImit.low = -110.0f * physx::PxPi / 180.0f;
+	SPHERICALDesc.eS2LImit.high = 40.0f * physx::PxPi / 180.0f;
+	SPHERICALDesc.eTLImit.low = -40.0f * physx::PxPi / 180.0f;
+	SPHERICALDesc.eTLImit.high = 40.0f * physx::PxPi / 180.0f;
+#ifdef _test_ragdoll
+	SetJoint(joint, SPHERICALDesc);
+#else
+	SetJoint(joint, FixDesc);
+#endif
+	DebugJointDot(thigh_r_link);
+	m_pArtiLinkNames.emplace_back(target);
+
+	target = "calf_r";
+	CGameObject* calf_r = FindFrame("calf_r");
+	ParentMt = thigh_r->m_xmf4x4Transform;
+	ChildMt = calf_r->m_xmf4x4Transform;
+	physx::PxArticulationLink* calf_r_link = SetLink(m_pArticulation, thigh_r_link, MakeTransform(ParentMt, scale), MakeTransform(ChildMt, scale), meshScale);
+	joint = calf_r_link->getInboundJoint();
+	REVOLUTEDesc.eSwing1 = false;
+	REVOLUTEDesc.eSwing2 = true;
+	REVOLUTEDesc.eTWIST = false;
+	REVOLUTEDesc.eS2LImit.low = 0.0f * physx::PxPi / 180.0f;
+	REVOLUTEDesc.eS2LImit.high = 100.0f * physx::PxPi / 180.0f;
+	REVOLUTEDesc.eTDrive.driveType = physx::PxArticulationDriveType::eNONE;
+	REVOLUTEDesc.eTDrive.damping = 0.5f;
+	REVOLUTEDesc.eTDrive.stiffness = 0.5f;
+	REVOLUTEDesc.eS1Drive.driveType = physx::PxArticulationDriveType::eNONE;
+	REVOLUTEDesc.eS1Drive.damping = 0.5f;
+	REVOLUTEDesc.eS1Drive.stiffness = 0.5f;
+	REVOLUTEDesc.eS2Drive.driveType = physx::PxArticulationDriveType::eNONE;
+	REVOLUTEDesc.eS2Drive.damping = 0.5f;
+	REVOLUTEDesc.eS2Drive.stiffness = 0.5f;
+#ifdef _test_ragdoll
+	SetJoint(joint, REVOLUTEDesc);
+#else
+	SetJoint(joint, FixDesc);
+#endif
+	DebugJointDot(calf_r_link);
+	m_pArtiLinkNames.emplace_back(target);
+
+	target = "foot_r";
+	CGameObject* foot_r = FindFrame("foot_r");
+	ParentMt = calf_r->m_xmf4x4Transform;
+	ChildMt = foot_r->m_xmf4x4Transform;
+	physx::PxArticulationLink* foot_r_link = SetLink(m_pArticulation, calf_r_link, MakeTransform(ParentMt, scale), MakeTransform(ChildMt, scale), meshScale);
+	joint = foot_r_link->getInboundJoint();
+	SPHERICALDesc.eSwing1 = false;
+	SPHERICALDesc.eSwing2 = true;
+	SPHERICALDesc.eTWIST = true;
+	SPHERICALDesc.eS2LImit.low = -50.0f * physx::PxPi / 180.0f;
+	SPHERICALDesc.eS2LImit.high = 20.0f * physx::PxPi / 180.0f;
+	SPHERICALDesc.eTLImit.low = -30.0f * physx::PxPi / 180.0f;
+	SPHERICALDesc.eTLImit.high = 30.0f * physx::PxPi / 180.0f;
+#ifdef _test_ragdoll
+	SetJoint(joint, SPHERICALDesc);
+#else
+	SetJoint(joint, FixDesc);
+#endif
+	DebugJointDot(foot_r_link);
+	m_pArtiLinkNames.emplace_back(target);
+
+	target = "ball_r";
+	CGameObject* ball_r = FindFrame("ball_r");
+	ParentMt = foot_r->m_xmf4x4Transform;
+	ChildMt = ball_r->m_xmf4x4Transform;
+	physx::PxArticulationLink* ball_r_link = SetLink(m_pArticulation, foot_r_link, MakeTransform(ParentMt, scale), MakeTransform(ChildMt, scale), meshScale);
+	joint = ball_r_link->getInboundJoint();
+	SetJoint(joint, FixDesc);
+	DebugJointDot(ball_l_link);
+	m_pArtiLinkNames.emplace_back(target);
+
+
+	m_pArticulation->setSleepThreshold(0.6f);
+
+	Locator.GetPxScene()->addArticulation(*m_pArticulation);
+
+	physx::PxU32 nbLinks = m_pArticulation->getNbLinks();
+	m_pArticulationLinks.resize(nbLinks);
+	m_pArticulation->getLinks(m_pArticulationLinks.data(), nbLinks, 0);
+	m_AritculatCacheMatrixs.resize(nbLinks);
+	int index = 0;
+	for (XMFLOAT4X4& world : m_AritculatCacheMatrixs) {
+		physx::PxMat44 mat = m_pArticulationLinks[index++]->getGlobalPose();
+
+		memcpy(&world, &mat, sizeof(XMFLOAT4X4));
+		world = Matrix4x4::Multiply(XMMatrixScaling(scale, scale, scale), world);
+	}
+
+
+	m_pArticulationCache = m_pArticulation->createCache();
+	m_nArtiCache = m_pArticulation->getCacheDataSize();
+	m_bSimulateArticulate = true;
+
 
 }
 bool CKnightObject::CheckCollision(CGameObject* pTargetObject)
@@ -1317,21 +1386,25 @@ bool CKnightObject::CheckCollision(CGameObject* pTargetObject)
 void CKnightObject::Animate(float fTimeElapsed)
 {
 	if (m_bSimulateArticulate) {
-		int index = 0;
-		UpdateTransform(NULL);
+		//int index = 0;
+		//UpdateTransform(NULL);
 
-		for (std::string& frameName : m_pArtiLinkNames) {
-			if (index == 0)
-				continue;
-			CGameObject* obj = FindFrame(frameName.c_str());
-			physx::PxTransform transform = m_pArticulationLinks[index]->getInboundJoint()->getChildPose();
-			physx::PxMat44 World = physx::PxMat44(transform);
+		//for (std::string& frameName : m_pArtiLinkNames) {
+		//	if (index == 0) {
+		//		index++;
+		//		continue;
+		//	}
+		//	CGameObject* obj = FindFrame(frameName.c_str());
+		//	physx::PxTransform transform = m_pArticulationLinks[index]->getGlobalPose();
+		//	//physx::PxTransform transform = m_pArticulationLinks[index]->getInboundJoint()->getChildPose();
+		//	physx::PxMat44 World = physx::PxMat44(transform);
 
-			memcpy(&obj->m_xmf4x4Transform, &World, sizeof(XMFLOAT4X4));
-			obj->m_xmf4x4Transform = Matrix4x4::Scale(obj->m_xmf4x4Transform, 5.0f);
-			index++;
-		}
-
+		//	memcpy(&obj->m_xmf4x4World, &World, sizeof(XMFLOAT4X4));
+		//	//obj->m_xmf4x4Transform = Matrix4x4::Scale(obj->m_xmf4x4Transform, 5.0f);
+		//	index++;
+		//}
+		//m_xmf4x4Transform = Matrix4x4::Scale(m_xmf4x4Transform, 15.0f);
+		UpdateTransformFromArticulation(NULL);
 	}
 	else {
 		CGameObject::Animate(fTimeElapsed);
@@ -1348,7 +1421,7 @@ void CKnightObject::Animate(float fTimeElapsed)
 			SetPosition(XMFLOAT3(transform.p.x, transform.p.y, transform.p.z));
 		}
 	}
-	
+
 }
 void CKnightObject::UpdateTransform(XMFLOAT4X4* pxmf4x4Parent)
 {
@@ -1356,6 +1429,32 @@ void CKnightObject::UpdateTransform(XMFLOAT4X4* pxmf4x4Parent)
 
 	if (m_pSibling) m_pSibling->UpdateTransform(pxmf4x4Parent);
 	if (m_pChild) m_pChild->UpdateTransform(&m_xmf4x4World);
+
+	pBodyBoundingBoxMesh->SetWorld(m_xmf4x4Transform);
+	m_BodyBoundingBox.Transform(m_TransformedBodyBoudningBox, XMLoadFloat4x4(&m_xmf4x4Transform));
+
+	if (pWeapon)
+	{
+		XMFLOAT4X4 xmf4x4World = pWeapon->GetWorld();
+		XMFLOAT3 xmf3Position = XMFLOAT3{ xmf4x4World._41, xmf4x4World._42, xmf4x4World._43 };
+		XMFLOAT3 xmf3Direction = XMFLOAT3{ xmf4x4World._31, xmf4x4World._32, xmf4x4World._33 };
+		xmf3Position = Vector3::Add(xmf3Position, xmf3Direction, -0.8f);
+		xmf4x4World._41 = xmf3Position.x;
+		xmf4x4World._42 = xmf3Position.y;
+		xmf4x4World._43 = xmf3Position.z;
+		pWeaponBoundingBoxMesh->SetWorld(xmf4x4World);
+
+		m_WeaponBoundingBox.Transform(m_TransformedWeaponBoudningBox, XMLoadFloat4x4(&xmf4x4World));
+	}
+}
+void CKnightObject::UpdateTransformFromArticulation(XMFLOAT4X4* pxmf4x4Parent)
+{
+
+	m_xmf4x4World = (pxmf4x4Parent) ? Matrix4x4::Multiply(m_xmf4x4Transform, *pxmf4x4Parent) : m_xmf4x4Transform;
+
+
+	if (m_pSibling) m_pSibling->UpdateTransformFromArticulation(pxmf4x4Parent, m_pArtiLinkNames, m_AritculatCacheMatrixs, m_xmf4x4Scale._11);
+	if (m_pChild) m_pChild->UpdateTransformFromArticulation(&m_xmf4x4World, m_pArtiLinkNames, m_AritculatCacheMatrixs, m_xmf4x4Scale._11);
 
 	pBodyBoundingBoxMesh->SetWorld(m_xmf4x4Transform);
 	m_BodyBoundingBox.Transform(m_TransformedBodyBoudningBox, XMLoadFloat4x4(&m_xmf4x4Transform));

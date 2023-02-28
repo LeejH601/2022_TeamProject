@@ -124,6 +124,7 @@ extern physx::PxDefaultAllocator gDefaultAllocatorCallback;
 extern int WriteIntegerFromFile(FILE* pInFile, const int value);
 extern float WriteFloatFromFile(FILE* pInFile, const float fValue);
 extern BYTE WriteStringFromFile(FILE* pInFile, std::string& pstrToken);
+extern bool b_simulation;
 
 extern int ReadIntegerFromFile(FILE* pInFile);
 extern float ReadFloatFromFile(FILE* pInFile);

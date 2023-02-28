@@ -101,6 +101,13 @@ CSplatTerrain::CSplatTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
+	m_xmf4x4ScaleNormalMatrix;
+
+	UINT ncbElementBytes = ((sizeof(XMFLOAT4X4) + 255) & ~255); //256ÀÇ ¹è¼ö
+	m_d3dcbScaleNormalMatrix = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, ncbElementBytes, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
+
+	m_d3dcbScaleNormalMatrix->Map(0, NULL, (void**)&m_xmf4x4ScaleNormalMatrix);
+
 	std::shared_ptr<CTexture> pTerrainTextures = std::make_shared<CTexture>(13, RESOURCE_TEXTURE2D, 0, 1);
 
 	pTerrainTextures->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Terrain/Grass.dds", RESOURCE_TEXTURE2D, 0);

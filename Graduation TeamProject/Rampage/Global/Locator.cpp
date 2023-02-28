@@ -27,10 +27,10 @@ bool CLocator::Init()
 
 	bool recordMemoryAllocations = true;
 
-	m_pPhysics = PxCreatePhysics(PX_PHYSICS_VERSION, *m_pFoundation, physx::PxTolerancesScale(), recordMemoryAllocations, m_pPxPvd);
+	m_pPhysics = PxCreatePhysics(PX_PHYSICS_VERSION, *m_pFoundation, physx::PxTolerancesScale(1.0f, 10.0f), recordMemoryAllocations, m_pPxPvd);
 
 	physx::PxSceneDesc SceneDesc(m_pPhysics->getTolerancesScale());
-	SceneDesc.cpuDispatcher = physx::PxDefaultCpuDispatcherCreate(2); // 이 세가지 파라미터가 반드시 필요함.
+	SceneDesc.cpuDispatcher = physx::PxDefaultCpuDispatcherCreate(8); // 이 세가지 파라미터가 반드시 필요함.
 	SceneDesc.filterShader = physx::PxDefaultSimulationFilterShader; // 각각 어떤 역할을 하는 지는 추가적으로 조사해볼 필요가 있음.
 	SceneDesc.gravity = physx::PxVec3(0.0f, -9.81f, 0.0f);
 	//SceneDesc.gravity = physx::PxVec3(0.0f, 0.0f, 0.0f);
@@ -59,112 +59,6 @@ bool CLocator::Init()
 		pvdClient->setScenePvdFlag(physx::PxPvdSceneFlag::eTRANSMIT_CONTACTS, true);
 		pvdClient->setScenePvdFlag(physx::PxPvdSceneFlag::eTRANSMIT_SCENEQUERIES, true);
 	}
-
-	////////////////////////////////////////////////
-
-	physx::PxArticulationReducedCoordinate* articulation = m_pPhysics->createArticulationReducedCoordinate();
-	//physx::PxArticulationJointReducedCoordinate* joint;
-	physx::PxArticulationLink* pelvislink;
-	physx::PxReal scale = 10.0f;
-
-	auto testlink = [scale](physx::PxArticulationLink* _link, physx::PxTransform& ParentPos, physx::PxTransform& ChildPos) {
-		physx::PxBoxGeometry linkGeometry = physx::PxBoxGeometry(0.01f * scale, 0.05f * scale, 0.01f * scale);
-		physx::PxMaterial* material = Locator.GetPxPhysics()->createMaterial(0.5, 0.5, 0.5);
-		physx::PxRigidActorExt::createExclusiveShape(*_link, linkGeometry, *material);
-		physx::PxRigidBodyExt::updateMassAndInertia(*_link, 1.0f);
-		physx::PxArticulationJointReducedCoordinate* joint = _link->getInboundJoint();
-		if (joint) {
-			joint->setJointType(physx::PxArticulationJointType::eSPHERICAL);
-			physx::PxArticulationDrive drive;
-			drive.damping = 2.0f;
-			drive.stiffness = 0.2f;
-			drive.driveType = physx::PxArticulationDriveType::eFORCE;
-			joint->setDriveParams(physx::PxArticulationAxis::eSWING2, drive);
-			joint->setDriveTarget(physx::PxArticulationAxis::eSWING2, 10.0f);
-
-			//joint->setMotion(physx::PxArticulationAxis::eTWIST, physx::PxArticulationMotion::eFREE);
-			
-			joint->setParentPose(ParentPos);
-			joint->setChildPose(ChildPos);
-		}
-	};
-
-	// Create the pelvis link
-	physx::PxTransform pelvisPose = physx::PxTransform(physx::PxIdentity);
-	pelvislink = articulation->createLink(nullptr, pelvisPose);
-	testlink(pelvislink, physx::PxTransform(physx::PxIdentity), pelvisPose);
-
-	// Create the spine links
-	physx::PxTransform spine1Pose = physx::PxTransform(physx::PxVec3(0.0f * scale, 0.1f * scale, 0.0f * scale));
-	pelvislink = articulation->createLink(pelvislink, spine1Pose);
-	testlink(pelvislink, pelvisPose, spine1Pose);
-
-	physx::PxTransform spine2Pose = physx::PxTransform(physx::PxVec3(0.0f * scale, 0.1f * scale, 0.0f * scale));
-	pelvislink = articulation->createLink(pelvislink, spine2Pose);
-	testlink(pelvislink, spine1Pose, spine2Pose);
-
-	physx::PxTransform spine3Pose = physx::PxTransform(physx::PxVec3(0.0f * scale, 0.1f * scale, 0.0f * scale));
-	pelvislink = articulation->createLink(pelvislink, spine3Pose);
-	testlink(pelvislink, spine2Pose, spine3Pose);
-
-	// Create the left leg links
-	physx::PxTransform leftLeg1Pose = physx::PxTransform(physx::PxVec3(-0.1f * scale, -0.2f * scale, 0.0f * scale));
-	physx::PxArticulationLink* LFlink = articulation->createLink(pelvislink, leftLeg1Pose);
-	testlink(LFlink, spine3Pose, leftLeg1Pose);
-
-	physx::PxTransform leftLeg2Pose = physx::PxTransform(physx::PxVec3(0.0f * scale, -0.2f * scale, 0.0f * scale));
-	LFlink = articulation->createLink(LFlink, leftLeg2Pose);
-	testlink(LFlink, leftLeg1Pose, leftLeg2Pose);
-
-	physx::PxTransform leftFootPose = physx::PxTransform(physx::PxVec3(0.0f * scale, -0.2f * scale, -0.1f * scale));
-	LFlink = articulation->createLink(LFlink, leftFootPose);
-	testlink(LFlink, leftLeg2Pose, leftFootPose);
-
-	// Create the right leg links
-	physx::PxTransform rightLeg1Pose = physx::PxTransform(physx::PxVec3(0.1f * scale, -0.2f * scale, 0.0f * scale));
-	physx::PxArticulationLink*  RPlink = articulation->createLink(pelvislink, rightLeg1Pose);
-	testlink(RPlink, spine3Pose, rightLeg1Pose);
-
-	physx::PxTransform rightLeg2Pose = physx::PxTransform(physx::PxVec3(0.0f * scale, -0.2f * scale, 0.0f * scale));
-	RPlink = articulation->createLink(RPlink, rightLeg2Pose);
-	testlink(RPlink, rightLeg1Pose, rightLeg2Pose);
-
-
-	physx::PxTransform rightFootPose = physx::PxTransform(physx::PxVec3(0.0f * scale, -0.2f * scale, -0.1f * scale));
-	RPlink = articulation->createLink(RPlink, rightFootPose);
-	testlink(RPlink, rightLeg2Pose, rightFootPose);
-
-	//// Create the left arm links
-	//physx::PxTransform leftArm1Pose = physx::PxTransform(physx::PxVec3(-0.2f, 0.1f, 0.0f));
-	//link = articulation->createLink(link, leftArm1Pose);
-
-	//physx::PxTransform leftArm2Pose = physx::PxTransform(physx::PxVec3(0.0f, 0.1f, 0.0f));
-	//link = articulation->createLink(link, leftArm2Pose);
-
-	//physx::PxTransform leftHandPose = physx::PxTransform(physx::PxVec3(0.0f, 0.1f, -0.1f));
-	//link = articulation->createLink(link, leftHandPose);
-
-	//// Create the right arm links
-	//physx::PxTransform rightArm1Pose = physx::PxTransform(physx::PxVec3(0.2f, 0.1f, 0.0f));
-	//link = articulation->createLink(link, rightArm1Pose);
-
-	//physx::PxTransform rightArm2Pose = physx::PxTransform(physx::PxVec3(0.0f, 0.1f, 0.0f));
-	//link = articulation->createLink(link, rightArm2Pose);
-
-	//physx::PxTransform rightHandPose = PxTransform
-	//m_pPxScene->addArticulation(*articulation);
-
-	//physx::PxArticulationReducedCoordinate* articulation = m_pPhysics->createArticulationReducedCoordinate();
-
-	//articulation->setArticulationFlag(physx::PxArticulationFlag::eFIX_BASE, true);
-	//articulation->setSolverIterationCounts(1);
-	////articulation->setMaxCOMLinearVelocity(maxCOMLinearVelocity);
-
-	//physx::PxArticulationLink* link = articulation->createLink(parent, PxTransform());
-	//physx::PxRigidActorExt::createExclusiveShape(*link, linkGeometry, material);
-	//physx::PxRigidBodyExt::updateMassAndInertia(*link, 1.0f);
-
-	/////////////////////////////////////////////////////
 
 
 	m_pMessageDispatcher = std::make_shared<CMessageDispatcher>();

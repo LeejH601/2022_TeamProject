@@ -58,6 +58,9 @@ public:
 	virtual void SetRigidStatic();
 
 private:
+	XMFLOAT4X4 m_xmf4x4ScaleNormalMatrix;
+	ComPtr<ID3D12Resource> m_d3dcbScaleNormalMatrix;
+
 	int m_nTerrainLayers;
 	std::vector<CTerrainLayer> m_vTerrainLayers;
 };
