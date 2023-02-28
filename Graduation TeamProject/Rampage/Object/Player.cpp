@@ -47,12 +47,10 @@ void CPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity, CCa
 
 		XMFLOAT3 xmf3Shift = XMFLOAT3{};
 
-		if (dwDirection & DIR_FORWARD)xmf3Shift = Vector3::Add(xmf3Shift, pCamera->GetLookVector(), fDistance);
-		if (dwDirection & DIR_BACKWARD)xmf3Shift = Vector3::Add(xmf3Shift, pCamera->GetLookVector(), -fDistance);
-		if (dwDirection & DIR_RIGHT)xmf3Shift = Vector3::Add(xmf3Shift, pCamera->GetRightVector(), fDistance);
-		if (dwDirection & DIR_LEFT)xmf3Shift = Vector3::Add(xmf3Shift, pCamera->GetRightVector(), -fDistance);
-		if (dwDirection & DIR_UP)xmf3Shift = Vector3::Add(xmf3Shift, pCamera->GetUpVector(), fDistance);
-		if (dwDirection & DIR_DOWN)xmf3Shift = Vector3::Add(xmf3Shift, pCamera->GetUpVector(), -fDistance);
+		if (dwDirection & DIR_FORWARD)xmf3Shift = Vector3::Add(xmf3Shift, Vector3::Normalize(XMFLOAT3(pCamera->GetLookVector().x, 0.0f, pCamera->GetLookVector().z)), fDistance);
+		if (dwDirection & DIR_BACKWARD)xmf3Shift = Vector3::Add(xmf3Shift, Vector3::Normalize(XMFLOAT3(pCamera->GetLookVector().x, 0.0f, pCamera->GetLookVector().z)), -fDistance);
+		if (dwDirection & DIR_RIGHT)xmf3Shift = Vector3::Add(xmf3Shift, Vector3::Normalize(XMFLOAT3(pCamera->GetRightVector().x, 0.0f, pCamera->GetRightVector().z)), fDistance);
+		if (dwDirection & DIR_LEFT)xmf3Shift = Vector3::Add(xmf3Shift, Vector3::Normalize(XMFLOAT3(pCamera->GetRightVector().x, 0.0f, pCamera->GetRightVector().z)), -fDistance);
 
 		Move(xmf3Shift, bUpdateVelocity);
 	}
