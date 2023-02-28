@@ -665,24 +665,26 @@ void CGameObject::SetJoint(physx::PxArticulationJointReducedCoordinate* joint, J
 physx::PxArticulationLink* CGameObject::SetLink(physx::PxArticulationReducedCoordinate* articulation, physx::PxArticulationLink* p_link, physx::PxTransform& parent, physx::PxTransform& child, float meshScale)
 {
 	physx::PxArticulationLink* link = articulation->createLink(p_link, child);
-	physx::PxVec3 distance = (child.p + parent.p) * 0.5f;
-	physx::PxReal len = distance.magnitude();
-	physx::PxTransform center = physx::PxTransform(physx::PxVec3(len / 2.0f, 0.0f, 0.0f));
-	float scale = m_xmf4x4Scale._11;
-	//physx::PxBoxGeometry linkGeometry = physx::PxBoxGeometry(0.05f * scale * meshScale, len / 2.0f/* * scale * meshScale*/, 0.05f * scale * meshScale);
-	physx::PxBoxGeometry linkGeometry = physx::PxBoxGeometry(0.05f * scale * meshScale, 0.05f * scale * meshScale, 0.05f * scale * meshScale);
-	//physx::PxBoxGeometry linkGeometry = physx::PxBoxGeometry(len / 2.0f/* * scale * meshScale*/, 0.05f * scale * meshScale, 0.05f * scale * meshScale);
-	physx::PxMaterial* material = Locator.GetPxPhysics()->createMaterial(0.9, 0.9f, 0.1);
-	//physx::PxShape* shape = Locator.GetPxPhysics()->createShape(linkGeometry, *material);
-	/*if(p_link)
-		shape->setLocalPose(physx::PxTransform((child.p + parent.p) * 0.5f));*/
-		//link->attachShape(*shape);
-	physx::PxShape* shape = physx::PxRigidActorExt::createExclusiveShape(*link, linkGeometry, *material);
-	physx::PxVec3 capsuleLocalPos = (child.p + parent.p) * 0.5f;
-	//shape->setLocalPose(physx::PxTransform(capsuleLocalPos));
-	physx::PxVec3 localpos = (child.p + parent.p) * 0.5f;
-	physx::PxRigidBodyExt::updateMassAndInertia(*link, 1.0f);
-	//physx::PxRigidBodyExt::updateMassAndInertia(*link, 1.0f, &localpos);
+	if (meshScale > 0.00001f) {
+		physx::PxVec3 distance = (child.p + parent.p) * 0.5f;
+		physx::PxReal len = distance.magnitude();
+		physx::PxTransform center = physx::PxTransform(physx::PxVec3(len / 2.0f, 0.0f, 0.0f));
+		float scale = m_xmf4x4Scale._11;
+		//physx::PxBoxGeometry linkGeometry = physx::PxBoxGeometry(0.05f * scale * meshScale, len / 2.0f/* * scale * meshScale*/, 0.05f * scale * meshScale);
+		physx::PxBoxGeometry linkGeometry = physx::PxBoxGeometry(0.05f * scale * meshScale, 0.05f * scale * meshScale, 0.05f * scale * meshScale);
+		//physx::PxBoxGeometry linkGeometry = physx::PxBoxGeometry(len / 2.0f/* * scale * meshScale*/, 0.05f * scale * meshScale, 0.05f * scale * meshScale);
+		physx::PxMaterial* material = Locator.GetPxPhysics()->createMaterial(0.9, 0.9f, 0.1);
+		//physx::PxShape* shape = Locator.GetPxPhysics()->createShape(linkGeometry, *material);
+		/*if(p_link)
+			shape->setLocalPose(physx::PxTransform((child.p + parent.p) * 0.5f));*/
+			//link->attachShape(*shape);
+		physx::PxShape* shape = physx::PxRigidActorExt::createExclusiveShape(*link, linkGeometry, *material);
+		physx::PxVec3 capsuleLocalPos = (child.p + parent.p) * 0.5f;
+		//shape->setLocalPose(physx::PxTransform(capsuleLocalPos));
+		physx::PxVec3 localpos = (child.p + parent.p) * 0.5f;
+		physx::PxRigidBodyExt::updateMassAndInertia(*link, 1.0f);
+		//physx::PxRigidBodyExt::updateMassAndInertia(*link, 1.0f, &localpos);
+	}
 
 	return link;
 }
@@ -852,14 +854,31 @@ void CGameObject::CreateArticulation(float meshScale)
 	JointAxisDesc REVOLUTEDesc;
 	REVOLUTEDesc.type = physx::PxArticulationJointType::eREVOLUTE;
 
-	std::string target{ "pelvis" };
-	CGameObject* pelvis = FindFrame("pelvis");
-	XMFLOAT4X4 ParentMt = Matrix4x4::Identity();
+	CGameObject::Animate(0.0f);
+
+	CGameObject* obj = FindFrame(m_pChild->m_pstrFrameName);
+	CGameObject* root = FindFrame("root");
+
+	std::string target{ "root" };
+	XMFLOAT4X4 ParentMt = obj->m_xmf4x4Transform;
 	//ParentMt = Matrix4x4::Multiply(ParentMt, XMMatrixRotationRollPitchYaw(90.0f * physx::PxPi / 180.0f, 0.f, 0.f));
-	XMFLOAT4X4 ChildMt = pelvis->m_xmf4x4Transform;
-	physx::PxArticulationLink* pelvis_link = SetLink(m_pArticulation, nullptr, MakeTransform(ParentMt, scale), MakeTransform(ChildMt, scale), meshScale);
-	physx::PxArticulationJointReducedCoordinate* joint = pelvis_link->getInboundJoint();
+	XMFLOAT4X4 ChildMt = root->m_xmf4x4Transform;
+	physx::PxArticulationLink* root_link = SetLink(m_pArticulation, nullptr, MakeTransform(ParentMt, scale), MakeTransform(ChildMt, scale), 0.0f);
+	physx::PxArticulationJointReducedCoordinate* joint = root_link->getInboundJoint();
+	DebugJointDot(root_link);
+	m_pArtiLinkNames.emplace_back(target);
+
+
+	target = "pelvis" ;
+	CGameObject* pelvis = FindFrame("pelvis");
+	ParentMt = root->m_xmf4x4Transform;
+	//ParentMt = Matrix4x4::Multiply(ParentMt, XMMatrixRotationRollPitchYaw(90.0f * physx::PxPi / 180.0f, 0.f, 0.f));
+	ChildMt = pelvis->m_xmf4x4Transform;
+	physx::PxArticulationLink* pelvis_link = SetLink(m_pArticulation, root_link, MakeTransform(ParentMt, scale), MakeTransform(ChildMt, scale), meshScale);
+	joint = pelvis_link->getInboundJoint();
+	SetJoint(joint, FixDesc);
 	DebugJointDot(pelvis_link);
+
 	m_pArtiLinkNames.emplace_back(target);
 
 #define _test_ragdoll

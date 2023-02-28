@@ -221,49 +221,49 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	//CSoundManager::GetInst()->RegisterSound("Sound/mp3/David Bowie - Starman.mp3", false);
 	//CSoundManager::GetInst()->PlaySound("Sound/mp3/David Bowie - Starman.mp3");
 
-	std::unique_ptr<CKnightObject> m_pObject = std::make_unique<CKnightObject>(pd3dDevice, pd3dCommandList, 1);
-	m_pObject->SetPosition(XMFLOAT3(0.0f, 0.0f, 0.0f));
-	m_pObject->SetScale(15.0f, 15.0f, 15.0f);
-	m_pObject->Rotate(0.0f, 180.0f, 0.0f);
-	m_pObject->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
-	m_pObject->SetRigidDynamic();
-	m_pObject->CreateArticulation(0.7f);
-	physx::PxRigidDynamic* rigid = (physx::PxRigidDynamic*)m_pObject->Rigid;
-	XMFLOAT3 pos = m_pObject->GetPosition();
-	physx::PxTransform transform(physx::PxVec3(pos.x, pos.y, pos.z));
-	rigid->setGlobalPose(transform);
-	//m_pObject->m_pArticulation->setRootGlobalPose(transform);
-	m_pObjects.push_back(std::move(m_pObject));
+	//std::unique_ptr<CKnightObject> m_pObject = std::make_unique<CKnightObject>(pd3dDevice, pd3dCommandList, 1);
+	//m_pObject->SetPosition(XMFLOAT3(0.0f, 0.0f, 0.0f));
+	//m_pObject->SetScale(15.0f, 15.0f, 15.0f);
+	//m_pObject->Rotate(0.0f, 180.0f, 0.0f);
+	//m_pObject->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
+	//m_pObject->SetRigidDynamic();
+	//m_pObject->CreateArticulation(0.7f);
+	//physx::PxRigidDynamic* rigid = (physx::PxRigidDynamic*)m_pObject->Rigid;
+	//XMFLOAT3 pos = m_pObject->GetPosition();
+	//physx::PxTransform transform(physx::PxVec3(pos.x, pos.y, pos.z));
+	//rigid->setGlobalPose(transform);
+	////m_pObject->m_pArticulation->setRootGlobalPose(transform);
+	//m_pObjects.push_back(std::move(m_pObject));
 
-	m_pObject = std::make_unique<CKnightObject>(pd3dDevice, pd3dCommandList, 1);
-	m_pObject->SetPosition(XMFLOAT3(-15.0f, 15.0f, 15.0f));
-	m_pObject->SetScale(5.0f, 5.0f, 5.0f);
-	m_pObject->Rotate(0.0f, 180.0f, 0.0f);
-	m_pObject->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 1);
-	m_pObject->m_pSkinnedAnimationController->m_xmf3RootObjectScale = XMFLOAT3(10.0f, 10.0f, 10.0f);
-	m_pObject->SetRigidDynamic();
-	rigid = (physx::PxRigidDynamic*)m_pObject->Rigid;
-	pos = m_pObject->GetPosition();
-	transform = physx::PxTransform(physx::PxVec3(pos.x, pos.y, pos.z));
-	rigid->setGlobalPose(transform);
-		//m_pObject->m_pArticulation->setRootGlobalPose(transform);
-	m_pObjects.push_back(std::move(m_pObject));
+	//m_pObject = std::make_unique<CKnightObject>(pd3dDevice, pd3dCommandList, 1);
+	//m_pObject->SetPosition(XMFLOAT3(-15.0f, 15.0f, 15.0f));
+	//m_pObject->SetScale(5.0f, 5.0f, 5.0f);
+	//m_pObject->Rotate(0.0f, 180.0f, 0.0f);
+	//m_pObject->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 1);
+	//m_pObject->m_pSkinnedAnimationController->m_xmf3RootObjectScale = XMFLOAT3(10.0f, 10.0f, 10.0f);
+	//m_pObject->SetRigidDynamic();
+	//rigid = (physx::PxRigidDynamic*)m_pObject->Rigid;
+	//pos = m_pObject->GetPosition();
+	//transform = physx::PxTransform(physx::PxVec3(pos.x, pos.y, pos.z));
+	//rigid->setGlobalPose(transform);
+	//	//m_pObject->m_pArticulation->setRootGlobalPose(transform);
+	//m_pObjects.push_back(std::move(m_pObject));
 
-	m_pObject = std::make_unique<CKnightObject>(pd3dDevice, pd3dCommandList, 1);
-	m_pObject->SetPosition(XMFLOAT3(15.0f, -15.0f, -15.0f));
-	m_pObject->SetScale(10.0f, 10.0f, 10.0f);
-	m_pObject->Rotate(0.0f, 180.0f, 0.0f);
-	m_pObject->SetRigidDynamic();
-	rigid = (physx::PxRigidDynamic*)m_pObject->Rigid;
-	pos = m_pObject->GetPosition();
-	transform = physx::PxTransform(physx::PxVec3(pos.x, pos.y, pos.z));
-	rigid->setGlobalPose(transform);
-	//m_pObject->m_pArticulation->setRootGlobalPose(transform);
-	m_pObject->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 4);
+	//m_pObject = std::make_unique<CKnightObject>(pd3dDevice, pd3dCommandList, 1);
+	//m_pObject->SetPosition(XMFLOAT3(15.0f, -15.0f, -15.0f));
+	//m_pObject->SetScale(10.0f, 10.0f, 10.0f);
+	//m_pObject->Rotate(0.0f, 180.0f, 0.0f);
+	//m_pObject->SetRigidDynamic();
+	//rigid = (physx::PxRigidDynamic*)m_pObject->Rigid;
+	//pos = m_pObject->GetPosition();
+	//transform = physx::PxTransform(physx::PxVec3(pos.x, pos.y, pos.z));
+	//rigid->setGlobalPose(transform);
+	////m_pObject->m_pArticulation->setRootGlobalPose(transform);
+	//m_pObject->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 4);
 
 	//int nAnimationSets = m_pObject->m_pSkinnedAnimationController->m_pAnimationSets->m_nAnimationSets;
 
-	m_pObjects.push_back(std::move(m_pObject));
+	//m_pObjects.push_back(std::move(m_pObject));
 
 	std::unique_ptr<COrcObject> m_pOrc = std::make_unique<COrcObject>(pd3dDevice, pd3dCommandList, 1);
 	m_pOrc->SetPosition(XMFLOAT3(120.0f, 0.0f, 90.0f));
@@ -275,52 +275,29 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pOrc->Animate(0.0f);
 	m_pOrc->m_bSimulateArticulate = true;
 	physx::PxMat44 mat = m_pOrc->m_pArticulation->getRootGlobalPose();
-	XMFLOAT4X4 rootWorld = m_pOrc->FindFrame("root")->m_xmf4x4Transform;
+	XMFLOAT4X4 rootWorld = m_pOrc->FindFrame("root")->m_xmf4x4World;
 	XMFLOAT4X4 gobworld = m_pOrc->FindFrame("pelvis")->m_xmf4x4World;
-	memcpy(&mat, &gobworld, sizeof(physx::PxMat44));
+	/*memcpy(&mat, &gobworld, sizeof(physx::PxMat44));
 	mat.column3.x = gobworld._41;
 	mat.column3.y = gobworld._42;
-	mat.column3.z = gobworld._43;
+	mat.column3.z = gobworld._43;*/
 	m_pOrc->m_pArticulation->copyInternalStateToCache(*m_pOrc->m_pArticulationCache, physx::PxArticulationCacheFlag::eALL);
 	physx::PxTransform* rootLInkTrans = &m_pOrc->m_pArticulationCache->rootLinkData->transform;
 	physx::PxMat44 tobonetrans = physx::PxMat44(*rootLInkTrans);
 
-	CSkinnedMesh* mesh = (CSkinnedMesh*)(m_pOrc->FindFrame("SK_Orc")->m_pMesh.get());
-	XMFLOAT4X4 w;
-	w = Matrix4x4::Multiply(rootWorld, Matrix4x4::Multiply(mesh->m_pxmf4x4BindPoseBoneOffsets[0], m_pOrc->m_pSkinnedAnimationController->m_pAnimationSets->m_ppAnimatedBoneFrameCaches[1]->m_xmf4x4Transform));
-	//w = Matrix4x4::Multiply(rootWorld, Matrix4x4::Multiply(m_pOrc->m_pSkinnedAnimationController->m_pAnimationSets->m_ppAnimatedBoneFrameCaches[1]->m_xmf4x4Transform ,mesh->m_pxmf4x4BindPoseBoneOffsets[0]));
-	w = Matrix4x4::Multiply(Matrix4x4::Multiply(rootWorld, mesh->m_pxmf4x4BindPoseBoneOffsets[1]), m_pOrc->m_pSkinnedAnimationController->m_pAnimationSets->m_ppAnimatedBoneFrameCaches[1]->m_xmf4x4Transform);
-	//w = Matrix4x4::Multiply(Matrix4x4::Multiply(rootWorld, m_pOrc->m_pSkinnedAnimationController->m_pAnimationSets->m_ppAnimatedBoneFrameCaches[1]->m_xmf4x4Transform), mesh->m_pxmf4x4BindPoseBoneOffsets[1]);
-	//w = Matrix4x4::Multiply(Matrix4x4::Multiply(m_pOrc->m_pSkinnedAnimationController->m_pAnimationSets->m_ppAnimatedBoneFrameCaches[1]->m_xmf4x4Transform, rootWorld), mesh->m_pxmf4x4BindPoseBoneOffsets[1]);
-	//w = Matrix4x4::Multiply(Matrix4x4::Multiply(mesh->m_pxmf4x4BindPoseBoneOffsets[1], rootWorld), m_pOrc->m_pSkinnedAnimationController->m_pAnimationSets->m_ppAnimatedBoneFrameCaches[1]->m_xmf4x4Transform);
-	//w = Matrix4x4::Multiply(Matrix4x4::Multiply(mesh->m_pxmf4x4BindPoseBoneOffsets[1], m_pOrc->m_pSkinnedAnimationController->m_pAnimationSets->m_ppAnimatedBoneFrameCaches[1]->m_xmf4x4Transform), rootWorld);
-	//w = Matrix4x4::Multiply(Matrix4x4::Multiply(m_pOrc->m_pSkinnedAnimationController->m_pAnimationSets->m_ppAnimatedBoneFrameCaches[1]->m_xmf4x4Transform, mesh->m_pxmf4x4BindPoseBoneOffsets[1]), rootWorld);
-	//w = Matrix4x4::Multiply(m_pOrc->m_pSkinnedAnimationController->m_pAnimationSets->m_ppAnimatedBoneFrameCaches[1]->m_xmf4x4Transform, Matrix4x4::Multiply(mesh->m_pxmf4x4BindPoseBoneOffsets[0], rootWorld));
-	//w = Matrix4x4::Multiply(mesh->m_pxmf4x4BindPoseBoneOffsets[1], Matrix4x4::Multiply(m_pOrc->m_pSkinnedAnimationController->m_pAnimationSets->m_ppAnimatedBoneFrameCaches[1]->m_xmf4x4Transform, rootWorld));
+	tobonetrans.column3.x += rootWorld._41;
+	tobonetrans.column3.y += rootWorld._42;
+	tobonetrans.column3.z += rootWorld._43;
 
-	//w = Matrix4x4::Multiply(rootWorld, Matrix4x4::Multiply(mesh->m_pxmf4x4BindPoseBoneOffsets[1], m_pOrc->m_pSkinnedAnimationController->m_pAnimationSets->m_ppAnimatedBoneFrameCaches[1]->m_xmf4x4World));
-	//w = Matrix4x4::Multiply(rootWorld, Matrix4x4::Multiply(m_pOrc->m_pSkinnedAnimationController->m_pAnimationSets->m_ppAnimatedBoneFrameCaches[1]->m_xmf4x4World, mesh->m_pxmf4x4BindPoseBoneOffsets[1]));
-	//w = Matrix4x4::Multiply(Matrix4x4::Multiply(rootWorld, mesh->m_pxmf4x4BindPoseBoneOffsets[1]), m_pOrc->m_pSkinnedAnimationController->m_pAnimationSets->m_ppAnimatedBoneFrameCaches[1]->m_xmf4x4World);
-	//rootWorld = Matrix4x4::Multiply(Matrix4x4::Multiply(rootWorld, m_pOrc->m_pSkinnedAnimationController->m_pAnimationSets->m_ppAnimatedBoneFrameCaches[1]->m_xmf4x4World), mesh->m_pxmf4x4BindPoseBoneOffsets[1]);
-	//rootWorld = Matrix4x4::Multiply(Matrix4x4::Multiply(m_pOrc->m_pSkinnedAnimationController->m_pAnimationSets->m_ppAnimatedBoneFrameCaches[1]->m_xmf4x4World, rootWorld), mesh->m_pxmf4x4BindPoseBoneOffsets[1]);
-	//rootWorld = Matrix4x4::Multiply(Matrix4x4::Multiply(mesh->m_pxmf4x4BindPoseBoneOffsets[1], rootWorld), m_pOrc->m_pSkinnedAnimationController->m_pAnimationSets->m_ppAnimatedBoneFrameCaches[1]->m_xmf4x4World);
-	//rootWorld = Matrix4x4::Multiply(Matrix4x4::Multiply(mesh->m_pxmf4x4BindPoseBoneOffsets[1], m_pOrc->m_pSkinnedAnimationController->m_pAnimationSets->m_ppAnimatedBoneFrameCaches[1]->m_xmf4x4World), rootWorld);
-	//rootWorld = Matrix4x4::Multiply(Matrix4x4::Multiply(m_pOrc->m_pSkinnedAnimationController->m_pAnimationSets->m_ppAnimatedBoneFrameCaches[1]->m_xmf4x4World, mesh->m_pxmf4x4BindPoseBoneOffsets[1]), rootWorld);
-	//rootWorld = Matrix4x4::Multiply(m_pOrc->m_pSkinnedAnimationController->m_pAnimationSets->m_ppAnimatedBoneFrameCaches[1]->m_xmf4x4World, Matrix4x4::Multiply(mesh->m_pxmf4x4BindPoseBoneOffsets[1], rootWorld));
-	//rootWorld = Matrix4x4::Multiply(mesh->m_pxmf4x4BindPoseBoneOffsets[1], Matrix4x4::Multiply(m_pOrc->m_pSkinnedAnimationController->m_pAnimationSets->m_ppAnimatedBoneFrameCaches[1]->m_xmf4x4World, rootWorld));
-	mat = physx::PxMat44(
-		(float*)&w
-	);
-
-	mat.column3.x += gobworld._41;
+	/*mat.column3.x += gobworld._41;
 	mat.column3.y += gobworld._42;
-	mat.column3.z += gobworld._43;
+	mat.column3.z += gobworld._43;*/
 	
 	physx::PxVec3 _pos = physx::PxVec3(mat.column3.getXYZ());
-	//mat = mat.getTranspose();
+	mat = mat.inverseRT();
 	physx::PxQuat quat{ physx::PxMat33(mat.column0.getXYZ(),mat.column1.getXYZ(),mat.column2.getXYZ())};
 	//quat.rotate(physx::PxVec3(0.0f, 90.0f, 0.0f));
-	*rootLInkTrans = physx::PxTransform(mat).getNormalized();
+	*rootLInkTrans = physx::PxTransform(tobonetrans).getNormalized();
 	//*rootLInkTrans = physx::PxTransform(_pos,quat.getNormalized());
 	m_pOrc->m_pArticulation->applyCache(*m_pOrc->m_pArticulationCache, physx::PxArticulationCacheFlag::eROOT_TRANSFORM);
 
