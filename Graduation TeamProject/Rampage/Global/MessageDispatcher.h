@@ -39,6 +39,7 @@ class CMessageDispatcher
 {
 	std::set<Telegram> PriorityQ;
 
+public:
 	void Discharge(IEntity* pReceiver, const Telegram& msg);
 
 public:

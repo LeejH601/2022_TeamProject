@@ -83,24 +83,28 @@ bool CPlayer::CheckCollision(CGameObject* pTargetObject)
 			msg.Msg = (int)MESSAGE_TYPE::Msg_CameraShakeStart;
 			msg.DispatchTime = Locator.GetTimer()->GetNowTime();
 			msg.Receiver = (IEntity*)Locator.GetSimulaterCamera();
-			Locator.GetMessageDispather()->RegisterMessage(msg);
+			//Locator.GetMessageDispather()->RegisterMessage(msg);
+			Locator.GetMessageDispather()->Discharge(msg.Receiver, msg);
 
 			msg.Msg = (int)MESSAGE_TYPE::Msg_CameraMoveStart;
 			msg.DispatchTime = Locator.GetTimer()->GetNowTime();
 			msg.Receiver = (IEntity*)Locator.GetSimulaterCamera();
 			msg.Sender = this;
-			Locator.GetMessageDispather()->RegisterMessage(msg);
+			//Locator.GetMessageDispather()->RegisterMessage(msg);
+			Locator.GetMessageDispather()->Discharge(msg.Receiver, msg);
 
 			msg.Msg = (int)MESSAGE_TYPE::Msg_CameraZoomStart;
 			msg.DispatchTime = Locator.GetTimer()->GetNowTime();
 			msg.Receiver = (IEntity*)Locator.GetSimulaterCamera();
 			msg.Sender = (IEntity*)pTargetObject;
-			Locator.GetMessageDispather()->RegisterMessage(msg);
+			//Locator.GetMessageDispather()->RegisterMessage(msg);
+			Locator.GetMessageDispather()->Discharge(msg.Receiver, msg);
 
 			msg.Msg = (int)MESSAGE_TYPE::Msg_SoundEffectReady;
 			msg.DispatchTime = Locator.GetTimer()->GetNowTime();
 			msg.Receiver = (IEntity*)Locator.GetSoundPlayer();
-			Locator.GetMessageDispather()->RegisterMessage(msg);
+			//Locator.GetMessageDispather()->RegisterMessage(msg);
+			Locator.GetMessageDispather()->Discharge(msg.Receiver, msg);
 
 			if (m_iAttack_Limit < 1)
 				m_bAttacked = true;
