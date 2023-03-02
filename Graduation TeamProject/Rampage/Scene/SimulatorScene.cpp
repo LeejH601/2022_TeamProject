@@ -271,14 +271,18 @@ void CSimulatorScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 	m_pBillBoardObjectShader->CreateShader(pd3dDevice, GetGraphicsRootSignature(), 1, &pdxgiObjectRtvFormats, 0);
 	m_pBillBoardObjectShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 10);
 
-	CTextureManager::GetInst()->LoadTexture(pd3dDevice, pd3dCommandList, L"Image/Explode_8x8.dds", m_pBillBoardObjectShader.get(), 8, 8);
-	CTextureManager::GetInst()->LoadTexture(pd3dDevice, pd3dCommandList, L"Image/Fire_Effect.dds", m_pBillBoardObjectShader.get(), 5, 6);
+	CTextureManager::GetInst()->LoadBillBoardTexture(pd3dDevice, pd3dCommandList, L"Image/Explode_8x8.dds", m_pBillBoardObjectShader.get(), 8, 8);
+	CTextureManager::GetInst()->LoadBillBoardTexture(pd3dDevice, pd3dCommandList, L"Image/Fire_Effect.dds", m_pBillBoardObjectShader.get(), 5, 6);
 
-	m_pBillBoardObject = std::make_shared<CMultiSpriteObject>(CTextureManager::GetInst()->LoadTexture(L"Image/Fire_Effect.dds"), pd3dDevice, pd3dCommandList, m_pBillBoardObjectShader.get(), 5, 6, 8.f, 5.f);
+	m_pBillBoardObject = std::make_shared<CMultiSpriteObject>(CTextureManager::GetInst()->LoadBillBoardTexture(L"Image/Fire_Effect.dds"), pd3dDevice, pd3dCommandList, m_pBillBoardObjectShader.get(), 5, 6, 8.f, 5.f);
 	CAttackSpriteComponent::GetInst()->Add_AttackComponent(std::make_pair(m_pEnemys[0], m_pBillBoardObject));
 
+
 	m_pParticleObjectShader = std::make_shared<CParticleShader>();
-	m_pParticleObject = std::make_shared<CParticleObject>(pd3dDevice, pd3dCommandList, GetGraphicsRootSignature(), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 65.0f, 0.0f), 2.0f, XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT2(2.0f, 2.0f), MAX_PARTICLES, m_pParticleObjectShader.get());
+	m_pParticleObjectShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 10);
+	CTextureManager::GetInst()->LoadParticleTexture(pd3dDevice, pd3dCommandList, L"ParticleImage/RoundSoftParticle.dds", m_pParticleObjectShader.get(), 0, 0);
+	CTextureManager::GetInst()->LoadParticleTexture(pd3dDevice, pd3dCommandList, L"Image/Flower01.dds", m_pParticleObjectShader.get(), 0, 0);
+	m_pParticleObject = std::make_shared<CParticleObject>(CTextureManager::GetInst()->LoadParticleTexture(L"ParticleImage/RoundSoftParticle.dds"), pd3dDevice, pd3dCommandList, GetGraphicsRootSignature(), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), 2.0f, XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT2(2.0f, 2.0f), MAX_PARTICLES, m_pParticleObjectShader.get());
 	CParticleComponent::GetInst()->Set_ParticleComponent(m_pParticleObject);
 }
 void CSimulatorScene::AnimateObjects(float fTimeElapsed)

@@ -116,7 +116,7 @@ void ShellParticles(VS_PARTICLE_INPUT input, inout PointStream<VS_PARTICLE_INPUT
 /////////////////////////////////////////////////////////////////////////////////////////////////
 float4 RandomDirectionOnSphere(float fOffset)
 {
-	int u = uint(gfCurrentTime + fOffset + frac(gfCurrentTime) * 1000.0f) % 256;
+	int u = uint(gfCurrentTime + fOffset /*+ frac(gfCurrentTime) * 1000.0f*/) % 256;
 	return(normalize(gRandomSphereBuffer.Load(u)));
 }
 
@@ -130,8 +130,10 @@ void OutputEmberParticles(VS_PARTICLE_INPUT input, inout PointStream<VS_PARTICLE
 
 void GenerateEmberParticles(VS_PARTICLE_INPUT input, inout PointStream<VS_PARTICLE_INPUT> output)
 {
-	if (input.lifetime <= 0.0f)
+	static bool start = true;
+	if (input.lifetime <= 0.0f && start)
 	{
+
 		VS_PARTICLE_INPUT particle = input;
 
 		particle.type = PARTICLE_TYPE_FLARE03;
@@ -142,8 +144,10 @@ void GenerateEmberParticles(VS_PARTICLE_INPUT input, inout PointStream<VS_PARTIC
 			float4 f4Random = RandomDirectionOnSphere(input.type + i);
 			particle.velocity = input.velocity + (f4Random.xyz * 25.0f);
 
+
 			output.Append(particle);
 		}
+		start = false;
 	}
 	else
 	{
@@ -151,19 +155,58 @@ void GenerateEmberParticles(VS_PARTICLE_INPUT input, inout PointStream<VS_PARTIC
 	}
 }
 /////////////////////////////////////////////////////////////////////////////////////////////////
+static bool start = false;
+void SphereParticles(VS_PARTICLE_INPUT input, inout PointStream<VS_PARTICLE_INPUT> output)
+{
 
+	if ((input.lifetime <= 0.0f) && (!start))
+	{
+		VS_PARTICLE_INPUT particle = input;
+		float4 f4Random = float4(0.0f, 0.0f, 0.0f, 0.0f);
+
+		particle.type = PARTICLE_TYPE_FLARE01;
+		particle.position = input.position + (input.velocity * gfElapsedTime * 2.0f);
+		if(!start)
+			particle.lifetime = gfLifeTime;
+
+		for (int i = 0; i < gnFlareParticlesToEmit; i++)
+		{
+			f4Random = RandomDirectionOnSphere(i);
+			particle.velocity = input.velocity + (f4Random.xyz * 18.0f);
+
+			output.Append(particle);
+		}
+		start = true;
+
+		//particle.type = PARTICLE_TYPE_FLARE02;
+		//particle.position = input.position + (input.velocity * gfElapsedTime);
+		//for (int j = 0; j < abs(f4Random.x) * gnMaxFlareType2Particles; j++)
+		//{
+		//	f4Random = RandomDirectionOnSphere(input.type + j);
+		//	particle.velocity = input.velocity + (f4Random.xyz * 10.0f);
+		//	particle.lifetime = gfLifeTime + (f4Random.x * 0.4f);
+
+		//	output.Append(particle);
+		//}
+		//start = false;
+	}
+	else
+	{
+		OutputParticleToStream(input, output);
+	}
+}
 
 [maxvertexcount(128)]
 void GSParticleStreamOutput(point VS_PARTICLE_INPUT input[1], inout PointStream<VS_PARTICLE_INPUT> output)
 {
 	VS_PARTICLE_INPUT particle = input[0];
-
-	if (particle.type == PARTICLE_TYPE_EMITTER) 
-		EmmitParticles(particle, output);
-	else if (particle.type == PARTICLE_TYPE_SHELL) 
-		ShellParticles(particle, output);
-	else if ((particle.type == PARTICLE_TYPE_FLARE01) || (particle.type == PARTICLE_TYPE_FLARE03)) 
-		OutputEmberParticles(particle, output);
-	else if (particle.type == PARTICLE_TYPE_FLARE02) 
-		GenerateEmberParticles(particle, output);
+	SphereParticles(particle, output);
+	//if (particle.type == PARTICLE_TYPE_EMITTER) 
+	//	EmmitParticles(particle, output);
+	//else if (particle.type == PARTICLE_TYPE_SHELL) 
+	//	ShellParticles(particle, output);
+	//else if ((particle.type == PARTICLE_TYPE_FLARE01) || (particle.type == PARTICLE_TYPE_FLARE03)) 
+	//	OutputEmberParticles(particle, output);
+	//else if (particle.type == PARTICLE_TYPE_FLARE02) 
+	//	GenerateEmberParticles(particle, output);
 }
