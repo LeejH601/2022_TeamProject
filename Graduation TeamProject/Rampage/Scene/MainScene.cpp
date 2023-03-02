@@ -397,6 +397,7 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 void CMainTMPScene::UpdateObjects(float fTimeElapsed)
 {
 	m_pPlayer->Update(fTimeElapsed);
+	m_pLight->Update((CPlayer*)m_pPlayer);
 
 	for (int i = 0; i < m_pObjects.size(); ++i)
 		m_pObjects[i]->Update(fTimeElapsed);

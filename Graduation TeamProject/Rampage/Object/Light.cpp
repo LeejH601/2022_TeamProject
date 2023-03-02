@@ -1,5 +1,5 @@
 #include "Light.h"
-
+#include "Player.h"
 
 CLight::CLight()
 {
@@ -62,5 +62,15 @@ void CLight::ReleaseLightVariables()
 	{
 		m_pd3dcbLights->Unmap(0, NULL);
 		m_pd3dcbLights->Release();
+	}
+}
+
+void CLight::Update(CPlayer* pPlayer)
+{
+	if (m_pLights && m_pLights[0].m_bEnable)
+	{
+		XMFLOAT3 xmf3Position = pPlayer->GetPosition();
+
+		m_pLights[0].m_xmf3Position = XMFLOAT3{ xmf3Position.x, xmf3Position.y + 128.0f, xmf3Position.z };
 	}
 }
