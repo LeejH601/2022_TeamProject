@@ -230,7 +230,7 @@ void CImGuiManager::SetUI()
 
 			ImGui::Checkbox("On/Off##ParticleEffect", &pParticleComponent->GetEnable());
 
-			std::vector<std::shared_ptr<CTexture>> vTexture = CTextureManager::GetInst()->GetTextureList();
+			std::vector<std::shared_ptr<CTexture>> vTexture = CTextureManager::GetInst()->GetParticleTextureList();
 			std::vector<const char*> items;
 			std::vector <std::string> str(100);
 			for (int i = 0; i < vTexture.size(); i++)
@@ -239,10 +239,51 @@ void CImGuiManager::SetUI()
 				str[i].assign(wstr.begin(), wstr.end());
 				items.emplace_back(str[i].c_str());
 			}
+
 			initial_curpos.y += 25.f;
 			ImGui::SetCursorPos(initial_curpos);
 			ImGui::SetNextItemWidth(190.f);
-			ImGui::DragFloat("Size", &pParticleComponent->m_fSize, 0.01f, 0.0f, 10.0f, "%.2f", 0);
+
+			int iParticleSpriteN = pParticleComponent->GetParticleNumber();
+			ImGui::Combo("Texture##ParticleEffect", (int*)(&pParticleComponent->GetParticleNumber()), items.data(), items.size());
+			if (iParticleSpriteN != pParticleComponent->GetParticleNumber())
+				pParticleComponent->SetTexture(0, ConverCtoWC(items[pParticleComponent->GetParticleNumber()]));
+
+			initial_curpos.y += 25.f;
+			ImGui::SetCursorPos(initial_curpos);
+			ImGui::SetNextItemWidth(190.f);
+			ImGui::DragFloat("Size##ParticleEffect", &pParticleComponent->m_fSize, 0.01f, 0.0f, 10.0f, "%.2f", 0);
+
+			initial_curpos.y += 25.f;
+			ImGui::SetCursorPos(initial_curpos);
+			ImGui::SetNextItemWidth(190.f);
+			ImGui::DragFloat("Alpha##ParticleEffect", &pParticleComponent->m_fAlpha, 0.01f, 0.0f, 10.0f, "%.2f", 0);
+
+			initial_curpos.y += 25.f;
+			ImGui::SetCursorPos(initial_curpos);
+			ImGui::SetNextItemWidth(190.f);
+			ImGui::DragFloat("LifeTime##ParticleEffect", &pParticleComponent->m_fLifeTime, 0.01f, 0.0f, 10.0f, "%.1f", 0);
+
+			//initial_curpos.y += 25.f;
+			//ImGui::SetCursorPos(initial_curpos);
+			//ImGui::SetNextItemWidth(190.f);
+			//ImGui::DragInt("MaxParticle##ParticleEffect", &pParticleComponent->m_nParticleNumber, 0.01f, 0.0f, 10.0f, "%d", 0);
+
+			initial_curpos.y += 25.f;
+			ImGui::SetCursorPos(initial_curpos);
+			ImGui::SetNextItemWidth(30.f);
+			ImGui::ColorEdit3("ParticleEffect", (float*)&pParticleComponent->m_f3Color); // Edit 3 floats representing a color
+
+			//initial_curpos.x += 35.f;
+			//ImGui::SetCursorPos(initial_curpos);
+			//ImGui::SetNextItemWidth(30.f);
+			//ImGui::DragFloat("Color-G##ParticleEffect", &pParticleComponent->m_f3Color.y, 0.01f, 0.0f, 10.0f, "%.2f", 0);
+
+			//initial_curpos.x += 35.f;
+			//ImGui::SetCursorPos(initial_curpos);
+			//ImGui::SetNextItemWidth(30.f);
+			//ImGui::DragFloat("Color-B##ParticleEffect", &pParticleComponent->m_f3Color.z, 0.01f, 0.0f, 10.0f, "%.2f", 0);
+
 			pParticleComponent->Update();
 		}
 
@@ -507,7 +548,7 @@ void CImGuiManager::SetUI()
 
 			ImGui::Checkbox("On/Off##SpriteEffect", &AttackSprite->m_vSprite[0].second->GetAnimation());
 
-			std::vector<std::shared_ptr<CTexture>> vTexture = CTextureManager::GetInst()->GetTextureList();
+			std::vector<std::shared_ptr<CTexture>> vTexture = CTextureManager::GetInst()->GetBillBoardTextureList();
 			std::vector<const char*> items;
 			std::vector <std::string> str(100);
 			for (int i = 0; i < vTexture.size(); i++)
@@ -524,7 +565,7 @@ void CImGuiManager::SetUI()
 			int iAttackSpriteN = AttackSprite->GetAttackNumber();
 			ImGui::Combo("##Attack", (int*)(&AttackSprite->GetAttackNumber()), items.data(), items.size());
 			if(iAttackSpriteN != AttackSprite->GetAttackNumber())
-				AttackSprite->SetTexture(0, ConverCtoWC(items[iAttackSpriteN]));
+				AttackSprite->SetTexture(0, ConverCtoWC(items[AttackSprite->GetAttackNumber()]));
 
 			initial_curpos.x += 200.f;
 			ImGui::SetCursorPos(initial_curpos);

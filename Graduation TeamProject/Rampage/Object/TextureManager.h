@@ -8,11 +8,19 @@ public:
 	DECLARE_SINGLE(CTextureManager);
 	CTextureManager() {}
 	~CTextureManager() {}
-	std::shared_ptr<CTexture> LoadTexture(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, LPCTSTR pszFileName, class CBillBoardObjectShader* pShader, int iRow, int Column);
-	std::shared_ptr<CTexture> LoadTexture(LPCTSTR pszFileName);
 
-	std::vector<std::shared_ptr<CTexture>>& GetTextureList();
+	// BillBoardTextures
+	std::shared_ptr<CTexture> LoadBillBoardTexture(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, LPCTSTR pszFileName, class CBillBoardObjectShader* pShader, int iRow, int Column);
+	std::shared_ptr<CTexture> LoadBillBoardTexture(LPCTSTR pszFileName);
 
+	std::vector<std::shared_ptr<CTexture>>& GetBillBoardTextureList();
+
+	// ParticleTextures
+	std::shared_ptr<CTexture> LoadParticleTexture(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, LPCTSTR pszFileName, class CParticleShader* pShader, int iRow, int Column);
+	std::shared_ptr<CTexture> LoadParticleTexture(LPCTSTR pszFileName);
+
+	std::vector<std::shared_ptr<CTexture>>& GetParticleTextureList();
 protected:
-	std::vector<std::shared_ptr<CTexture>> m_vTextures;
+	std::vector<std::shared_ptr<CTexture>> m_vBillBoardTextures;
+	std::vector<std::shared_ptr<CTexture>> m_vParticleTextures;
 };
