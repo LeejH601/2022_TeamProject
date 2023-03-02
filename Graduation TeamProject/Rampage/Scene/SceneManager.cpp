@@ -3,6 +3,7 @@
 #include "MainScene.h"
 #include "SimulatorScene.h"
 #include "LobbyScene.h"
+#include "..\Global\Locator.h"
 
 CSceneManager::CSceneManager()
 {

@@ -12,6 +12,7 @@
 #include "..\Shader\DepthRenderShader.h"
 #include "..\Object\Monster.h"
 #include "..\Object\TextureManager.h"
+#include "..\Global\Locator.h"
 
 void CMainTMPScene::SetPlayer(CGameObject* pPlayer)
 {
@@ -323,7 +324,7 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 
 	//std::unique_ptr<CKnightObject> m_pObject = std::make_unique<CKnightObject>(pd3dDevice, pd3dCommandList, 1);
 
-	m_pObject = std::make_unique<CKnightObject>(pd3dDevice, pd3dCommandList, 1);
+	std::unique_ptr<CKnightObject> m_pObject = std::make_unique<CKnightObject>(pd3dDevice, pd3dCommandList, 1);
 	m_pObject->SetPosition(XMFLOAT3(-15.0f, 350.0f, 15.0f));
 	m_pObject->SetScale(5.0f, 5.0f, 5.0f);
 	m_pObject->Rotate(0.0f, 180.0f, 0.0f);
@@ -342,7 +343,7 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	//m_pObjects.push_back(std::move(m_pObject));
 
 	std::unique_ptr<COrcObject> m_pOrc = std::make_unique<COrcObject>(pd3dDevice, pd3dCommandList, 1);
-	m_pOrc->SetPosition(XMFLOAT3(120.0f, 0.0f, 90.0f));
+	m_pOrc->SetPosition(XMFLOAT3(120.0f, 600.0f, 90.0f));
 	m_pOrc->SetScale(14.0f, 14.0f, 14.0f);
 	m_pOrc->Rotate(0.0f, 0.0f, 0.0f);
 	m_pOrc->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 5);
@@ -360,21 +361,10 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pOrc->m_pArticulation->copyInternalStateToCache(*m_pOrc->m_pArticulationCache, physx::PxArticulationCacheFlag::eALL);
 	physx::PxTransform* rootLInkTrans = &m_pOrc->m_pArticulationCache->rootLinkData->transform;
 	physx::PxMat44 tobonetrans = physx::PxMat44(*rootLInkTrans);
-
 	tobonetrans.column3.x += rootWorld._41;
 	tobonetrans.column3.y += rootWorld._42;
 	tobonetrans.column3.z += rootWorld._43;
-
-	/*mat.column3.x += gobworld._41;
-	mat.column3.y += gobworld._42;
-	mat.column3.z += gobworld._43;*/
-	
-	physx::PxVec3 _pos = physx::PxVec3(mat.column3.getXYZ());
-	mat = mat.inverseRT();
-	physx::PxQuat quat{ physx::PxMat33(mat.column0.getXYZ(),mat.column1.getXYZ(),mat.column2.getXYZ())};
-	//quat.rotate(physx::PxVec3(0.0f, 90.0f, 0.0f));
 	*rootLInkTrans = physx::PxTransform(tobonetrans).getNormalized();
-	//*rootLInkTrans = physx::PxTransform(_pos,quat.getNormalized());
 	m_pOrc->m_pArticulation->applyCache(*m_pOrc->m_pArticulationCache, physx::PxArticulationCacheFlag::eROOT_TRANSFORM);
 
 	m_pObjects.push_back(std::move(m_pOrc));
@@ -397,7 +387,7 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pObjects.push_back(std::move(m_pSkeleton));*/
 
 	std::unique_ptr<CGoblinObject> m_pGoblin = std::make_unique<CGoblinObject>(pd3dDevice, pd3dCommandList, 1);
-	m_pGoblin->SetPosition(XMFLOAT3(90.0f, 0.0f, 90.0f));
+	m_pGoblin->SetPosition(XMFLOAT3(90.0f, 600.0f, 90.0f));
 	m_pGoblin->SetScale(14.0f, 14.0f, 14.0f);
 	m_pGoblin->Rotate(0.0f, 0.0f, 0.0f);
 	m_pGoblin->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 5);
@@ -405,22 +395,20 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pGoblin->m_bSimulateArticulate = false;
 	m_pGoblin->Animate(0.0f);
 	m_pGoblin->m_bSimulateArticulate = true;
-	mat = m_pGoblin->m_pArticulation->getRootGlobalPose();
-	gobworld = m_pGoblin->FindFrame("root")->m_xmf4x4World;
-	mat.column3.x = gobworld._41;
-	mat.column3.y = gobworld._42;
-	mat.column3.z = gobworld._43;
-	physx::PxTransform test = m_pGoblin->m_pArticulation->getRootGlobalPose();
-
+	rootWorld = m_pGoblin->FindFrame("root")->m_xmf4x4World;
 	m_pGoblin->m_pArticulation->copyInternalStateToCache(*m_pGoblin->m_pArticulationCache, physx::PxArticulationCacheFlag::eALL);
 	rootLInkTrans = &m_pGoblin->m_pArticulationCache->rootLinkData->transform;
-	*rootLInkTrans = physx::PxTransform(mat).getNormalized();
-	m_pGoblin->m_pArticulation->applyCache(*m_pGoblin->m_pArticulationCache, physx::PxArticulationCacheFlag::eROOT_TRANSFORM);
+	tobonetrans = physx::PxMat44(*rootLInkTrans);
+	tobonetrans.column3.x += rootWorld._41;
+	tobonetrans.column3.y += rootWorld._42;
+	tobonetrans.column3.z += rootWorld._43;
+	*rootLInkTrans = physx::PxTransform(tobonetrans).getNormalized();
+	m_pGoblin->m_pArticulation->applyCache(*m_pGoblin->m_pArticulationCache, physx::PxArticulationCacheFlag::eALL);
 
 	m_pObjects.push_back(std::move(m_pGoblin));
 
 	m_pGoblin = std::make_unique<CGoblinObject>(pd3dDevice, pd3dCommandList, 1);
-	m_pGoblin->SetPosition(XMFLOAT3(30.0f, 0.0f, 90.0f));
+	m_pGoblin->SetPosition(XMFLOAT3(30.0f, 600.0f, 90.0f));
 	m_pGoblin->SetScale(14.0f, 14.0f, 14.0f);
 	m_pGoblin->Rotate(0.0f, 0.0f, 0.0f);
 	m_pGoblin->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 5);
@@ -428,17 +416,19 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pGoblin->m_bSimulateArticulate = false;
 	m_pGoblin->Animate(0.0f);
 	m_pGoblin->m_bSimulateArticulate = true;
-	mat = m_pGoblin->m_pArticulation->getRootGlobalPose();
-	gobworld = m_pGoblin->FindFrame("pelvis")->m_xmf4x4World;
-	mat.column3.x = gobworld._41;
-	mat.column3.y = gobworld._42;
-	mat.column3.z = gobworld._43;
-	m_pGoblin->m_pArticulation->setRootGlobalPose(physx::PxTransform(mat).getNormalized());
-	test = m_pGoblin->m_pArticulation->getRootGlobalPose();
+	rootWorld = m_pGoblin->FindFrame("root")->m_xmf4x4World;
+	m_pGoblin->m_pArticulation->copyInternalStateToCache(*m_pGoblin->m_pArticulationCache, physx::PxArticulationCacheFlag::eALL);
+	rootLInkTrans = &m_pGoblin->m_pArticulationCache->rootLinkData->transform;
+	tobonetrans = physx::PxMat44(*rootLInkTrans);
+	tobonetrans.column3.x += rootWorld._41;
+	tobonetrans.column3.y += rootWorld._42;
+	tobonetrans.column3.z += rootWorld._43;
+	*rootLInkTrans = physx::PxTransform(tobonetrans).getNormalized();
+	m_pGoblin->m_pArticulation->applyCache(*m_pGoblin->m_pArticulationCache, physx::PxArticulationCacheFlag::eALL);
 	m_pObjects.push_back(std::move(m_pGoblin));
 
 	m_pGoblin = std::make_unique<CGoblinObject>(pd3dDevice, pd3dCommandList, 1);
-	m_pGoblin->SetPosition(XMFLOAT3(30.0f, 0.0f, 30.0f));
+	m_pGoblin->SetPosition(XMFLOAT3(30.0f, 600.0f, 30.0f));
 	m_pGoblin->SetScale(14.0f, 14.0f, 14.0f);
 	m_pGoblin->Rotate(0.0f, 0.0f, 0.0f);
 	m_pGoblin->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 5);
@@ -446,18 +436,20 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pGoblin->m_bSimulateArticulate = false;
 	m_pGoblin->Animate(0.0f);
 	m_pGoblin->m_bSimulateArticulate = true;
-	mat = m_pGoblin->m_pArticulation->getRootGlobalPose();
-	gobworld = m_pGoblin->FindFrame("pelvis")->m_xmf4x4World;
-	mat.column3.x = gobworld._41;
-	mat.column3.y = gobworld._42;
-	mat.column3.z = gobworld._43;
-	m_pGoblin->m_pArticulation->setRootGlobalPose(physx::PxTransform(mat).getNormalized());
-	test = m_pGoblin->m_pArticulation->getRootGlobalPose();
+	rootWorld = m_pGoblin->FindFrame("root")->m_xmf4x4World;
+	m_pGoblin->m_pArticulation->copyInternalStateToCache(*m_pGoblin->m_pArticulationCache, physx::PxArticulationCacheFlag::eALL);
+	rootLInkTrans = &m_pGoblin->m_pArticulationCache->rootLinkData->transform;
+	tobonetrans = physx::PxMat44(*rootLInkTrans);
+	tobonetrans.column3.x += rootWorld._41;
+	tobonetrans.column3.y += rootWorld._42;
+	tobonetrans.column3.z += rootWorld._43;
+	*rootLInkTrans = physx::PxTransform(tobonetrans).getNormalized();
+	m_pGoblin->m_pArticulation->applyCache(*m_pGoblin->m_pArticulationCache, physx::PxArticulationCacheFlag::eALL);
 	m_pObjects.push_back(std::move(m_pGoblin));
 
-	XMFLOAT3 testpos = XMFLOAT3(300.0f, 0.0f, 0.0f);
+	XMFLOAT3 testpos = XMFLOAT3(300.0f, 600.0f, 0.0f);
 	for (int i = 0; i < 45; ++i) {
-		testpos.x -= 20.0f;
+		testpos.x -= 25.0f;
 		m_pGoblin = std::make_unique<CGoblinObject>(pd3dDevice, pd3dCommandList, 1);
 		m_pGoblin->SetPosition(testpos);
 		m_pGoblin->SetScale(14.0f, 14.0f, 14.0f);
@@ -467,13 +459,20 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 		m_pGoblin->m_bSimulateArticulate = false;
 		m_pGoblin->Animate(0.0f);
 		m_pGoblin->m_bSimulateArticulate = true;
-		mat = m_pGoblin->m_pArticulation->getRootGlobalPose();
-		gobworld = m_pGoblin->FindFrame("pelvis")->m_xmf4x4World;
-		mat.column3.x = gobworld._41;
-		mat.column3.y = gobworld._42;
-		mat.column3.z = gobworld._43;
-		m_pGoblin->m_pArticulation->setRootGlobalPose(physx::PxTransform(mat).getNormalized());
-		test = m_pGoblin->m_pArticulation->getRootGlobalPose();
+		rootWorld = m_pGoblin->FindFrame("root")->m_xmf4x4World;
+		m_pGoblin->m_pArticulation->copyInternalStateToCache(*m_pGoblin->m_pArticulationCache, physx::PxArticulationCacheFlag::eALL);
+		rootLInkTrans = &m_pGoblin->m_pArticulationCache->rootLinkData->transform;
+		tobonetrans = physx::PxMat44(*rootLInkTrans);
+		tobonetrans.column3.x += rootWorld._41;
+		tobonetrans.column3.y += rootWorld._42;
+		tobonetrans.column3.z += rootWorld._43;
+		*rootLInkTrans = physx::PxTransform(tobonetrans).getNormalized();
+		physx::PxVec3 randDir = physx::PxVec3(rand() % 10 - 5, rand() % 10 - 5, rand() % 10 - 5);
+		randDir.normalize();
+		randDir *= 10.0f;
+		memcpy(&m_pGoblin->m_pArticulationCache->jointForce[3], &randDir, sizeof(physx::PxVec3));
+		m_pGoblin->m_pArticulation->applyCache(*m_pGoblin->m_pArticulationCache, physx::PxArticulationCacheFlag::eALL);
+		
 		m_pObjects.push_back(std::move(m_pGoblin));
 	}
 
@@ -540,6 +539,19 @@ void CMainTMPScene::UpdateObjects(float fTimeElapsed)
 }
 void CMainTMPScene::AnimateObjects(float fTimeElapsed)
 {
+	static float SimulateElapsedTime = 0.0f;
+
+	SimulateElapsedTime += fTimeElapsed;
+	if (!b_simulation) {
+		Locator.GetPxScene()->simulate(SimulateElapsedTime);
+		SimulateElapsedTime = 0.0f;
+		b_simulation = true;
+	}
+	if (Locator.GetPxScene()->fetchResults(false)) {
+		UpdateObjectArticulation();
+		b_simulation = false;
+	}
+
 	UpdateObjects(fTimeElapsed);
 }
 void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed, float fCurrentTime, CCamera* pCamera)

@@ -58,8 +58,8 @@ bool CLocator::Init()
 	}
 
 
-	m_pMessageDispatcher = std::make_shared<CMessageDispatcher>();
-	m_pEntityManager = std::make_shared<CEntityManager>();
+	m_pMessageDispatcher = std::make_unique<CMessageDispatcher>();
+	m_pEntityManager = std::make_unique<CEntityManager>();
 
 	std::shared_ptr<CComponentSet> componentset = std::make_shared<CComponentSet>();
 	SetComponentSet(componentset);

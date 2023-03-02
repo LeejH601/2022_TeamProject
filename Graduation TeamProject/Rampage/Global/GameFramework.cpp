@@ -456,21 +456,7 @@ void CGameFramework::FrameAdvance()
 	//	Locator.GetPxScene()->simulate(m_GameTimer.GetFrameTimeElapsed());
 	//	started++;
 	//}
-	static float SimulateElapsedTime = 0.0f;
-	////Locator.GetPxScene()->advance(m_GameTimer.GetFrameTimeElapsed());
-	//if (Locator.GetPxScene()->fetchResults(false)) {
-	//	Locator.GetPxScene()->simulate(m_GameTimer.GetFrameTimeElapsed());
-	//}
-	SimulateElapsedTime += m_GameTimer.GetFrameTimeElapsed();
-	if (!b_simulation) {
-		Locator.GetPxScene()->simulate(SimulateElapsedTime);
-		SimulateElapsedTime = 0.0f;
-		b_simulation = true;
-	}
-	if (Locator.GetPxScene()->fetchResults(false)) {
-		((CMainTMPScene*)m_pScene.get())->UpdateObjectArticulation();
-		b_simulation = false;
-	}
+	
 
 	ProcessInput();
 	AnimateObjects();
