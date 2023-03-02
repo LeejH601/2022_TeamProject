@@ -1,17 +1,17 @@
 #pragma once
 #include "stdafx.h"
+#include "Camera.h"
+#include "EntityManager.h"
+#include "..\Sound\SoundPlayer.h"
+#include "..\Object\State.h"
+#include "MessageDispatcher.h"
 
 template <class entity_type> class CState;
 class CCamera;
 class CGameObject;
-class CSoundPlayer;
 class CComponentSet;
 class CPlayer;
-class CEntityManager;
-class CMessageDispatcher;
 class CGameTimer;
-
-
 
 typedef std::pair<int, std::shared_ptr<CComponentSet>> CoptSetPair;
 
@@ -59,17 +59,15 @@ public:
 
 class CLocator
 {
-	std::shared_ptr<CCamera> m_pSimulaterCamera;
-	std::shared_ptr<CGameObject> m_pSimulaterPlayer;
-	std::shared_ptr<CGameObject> m_pMainPlayer;
-	std::shared_ptr<CGameObject> m_pBillBoardObject;
+	std::unique_ptr<CCamera> m_pSimulaterCamera = NULL;
+	std::unique_ptr<CCamera> m_pMainSceneCamera = NULL;
 
 	std::set<CoptSetPair, Comp_ComponentSet> m_sComponentSets;
 	std::set<PlayerStatePair, Comp_PlayerState> m_sPlayerStateSet;
 
-	std::shared_ptr<CSoundPlayer> m_pSoundPlayer;
-	std::shared_ptr<CEntityManager> m_pEntityManager;
-	std::shared_ptr<CMessageDispatcher> m_pMessageDispatcher;
+	std::unique_ptr<CSoundPlayer> m_pSoundPlayer = NULL;
+	std::unique_ptr<CEntityManager> m_pEntityManager = NULL;
+	std::unique_ptr<CMessageDispatcher> m_pMessageDispatcher = NULL;
 
 	physx::PxFoundation* m_pFoundation;
 	physx::PxPhysics* m_pPhysics;
@@ -81,23 +79,17 @@ class CLocator
 
 	CoptSetPair dummy;
 	PlayerStatePair statedummy;
-
 public:
 	CLocator() = default;
 	~CLocator();
 
 	bool Init();
 
+	void CreateSimulatorCamera(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	CCamera* GetSimulaterCamera() { return m_pSimulaterCamera.get(); };
-	std::shared_ptr<CCamera>& GetSimulaterCameraWithShared() { return m_pSimulaterCamera; };
-	void SetSimulaterCamera(std::shared_ptr<CCamera> pCamera) { m_pSimulaterCamera = pCamera; };
 
-	CGameObject* GetSimulaterPlayer() { return m_pSimulaterPlayer.get(); };
-	void SetSimulaterPlayer(std::shared_ptr<CGameObject> pPlayer) { m_pSimulaterPlayer = pPlayer; };
-
-	CGameObject* GetMainPlayer() { return m_pMainPlayer.get(); };
-	void SetMainPlayer(std::shared_ptr<CGameObject> pPlayer) { m_pMainPlayer = pPlayer; };
-
+	void CreateMainSceneCamera(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+	CCamera* GetMainSceneCamera() { return m_pMainSceneCamera.get(); };
 
 	CComponentSet* GetComponentSet(int num)
 	{
@@ -122,7 +114,6 @@ public:
 
 	CSoundPlayer* GetSoundPlayer() { return m_pSoundPlayer.get(); };
 
-	void SetEntityManager(std::shared_ptr<CEntityManager>& entitymanager) { m_pEntityManager = entitymanager; };
 	CEntityManager* GetEntityManager() { return m_pEntityManager.get(); };
 	CMessageDispatcher* GetMessageDispather() { return m_pMessageDispatcher.get(); };
 

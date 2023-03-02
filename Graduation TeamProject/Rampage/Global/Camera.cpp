@@ -180,7 +180,7 @@ void CCamera::SetViewportsAndScissorRects(ID3D12GraphicsCommandList* pd3dCommand
 CThirdPersonCamera::CThirdPersonCamera() : CCamera()
 {
 	m_pPlayer = nullptr;
-	SetOffset(XMFLOAT3(0.0f, 10.0f, -15.0f));
+	SetOffset(XMFLOAT3(0.0f, 20.0f, -30.0f));
 }
 
 void CThirdPersonCamera::ProcessInput(DWORD dwDirection, float cxDelta, float cyDelta, float fTimeElapsed)
@@ -321,6 +321,10 @@ void CFloatingCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
 	RegenerateViewMatrix();
 }
 
+CSimulatorCamera::CSimulatorCamera() : CCamera()
+{
+}
+
 CPath::CPath(const CPath& path)
 {
 	m_vMovingPaths.resize(path.m_vMovingPaths.size());
@@ -363,15 +367,10 @@ CCameraShaker::CCameraShaker()
 	m_fMagnitude = 0.5f;
 }
 
-CCameraShaker::CCameraShaker(std::shared_ptr<CCamera> pCamera) : CCameraShaker()
-{
-	m_pCamera = pCamera;
-}
-
 void CCameraShaker::Update(float fElapsedTime)
 {
-	if (m_pCamera.get() == nullptr)
-		m_pCamera = Locator.GetSimulaterCameraWithShared();
+	if (!m_pCamera)
+		m_pCamera = Locator.GetSimulaterCamera();
 	if (!m_bEnable)
 		return;
 	if (m_bShakeEnd || !m_pCamera->m_bCameraShaking)
@@ -413,8 +412,9 @@ void CCameraShaker::Reset()
 
 bool CCameraShaker::HandleMessage(const Telegram& msg)
 {
-	if (m_pCamera.get() == nullptr)
-		m_pCamera = Locator.GetSimulaterCameraWithShared();
+	if (!m_pCamera)
+		m_pCamera = Locator.GetSimulaterCamera();
+
 	if (!m_pCamera->m_bCameraShaking && m_bEnable) {
 		m_pCamera->m_bCameraShaking = true;
 
@@ -438,15 +438,11 @@ CCameraMover::CCameraMover()
 	offset = XMFLOAT3(0.0f, 0.0f, 0.0f);
 }
 
-CCameraMover::CCameraMover(std::shared_ptr<CCamera> pCamera) : CCameraMover()
-{
-	m_pCamera = pCamera;
-}
-
 void CCameraMover::Update(float fElapsedTime)
 {
-	if (m_pCamera.get() == nullptr)
-		m_pCamera = Locator.GetSimulaterCameraWithShared();
+	if (!m_pCamera)
+		m_pCamera = Locator.GetSimulaterCamera();
+
 	if (!m_bEnable)
 		return;
 	if (m_bMoveEnd || !m_pCamera->m_bCameraMoving)
@@ -489,8 +485,9 @@ void CCameraMover::Reset()
 
 bool CCameraMover::HandleMessage(const Telegram& msg)
 {
-	if (m_pCamera.get() == nullptr)
-		m_pCamera = Locator.GetSimulaterCameraWithShared();
+	if (!m_pCamera)
+		m_pCamera = Locator.GetSimulaterCamera();
+
 	if (!m_pCamera->m_bCameraMoving && m_bEnable) {
 		m_pCamera->m_bCameraMoving = true;
 
@@ -520,19 +517,14 @@ CCameraZoomer::CCameraZoomer()
 	offset = XMFLOAT3(0.0f, 0.0f, 0.0f);
 }
 
-CCameraZoomer::CCameraZoomer(std::shared_ptr<CCamera> pCamera) : CCameraZoomer()
-{
-	m_pCamera = pCamera;
-}
-
 CCameraZoomer::~CCameraZoomer()
 {
 }
 
 void CCameraZoomer::Update(float fElapsedTime)
 {
-	if (m_pCamera.get() == nullptr)
-		m_pCamera = Locator.GetSimulaterCameraWithShared();
+	if (!m_pCamera)
+		m_pCamera = Locator.GetSimulaterCamera();
 	if (!m_bEnable)
 		return;
 	if (m_bZoomEnd || !m_pCamera->m_bCameraZooming)
@@ -576,8 +568,9 @@ void CCameraZoomer::Reset()
 
 bool CCameraZoomer::HandleMessage(const Telegram& msg)
 {
-	if (m_pCamera.get() == nullptr)
-		m_pCamera = Locator.GetSimulaterCameraWithShared();
+	if (!m_pCamera)
+		m_pCamera = Locator.GetSimulaterCamera();
+
 	if (!m_pCamera->m_bCameraZooming && m_bEnable) {
 		m_pCamera->m_bCameraZooming = true;
 

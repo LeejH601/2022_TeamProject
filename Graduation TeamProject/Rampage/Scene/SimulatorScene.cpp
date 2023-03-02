@@ -305,11 +305,11 @@ void CSimulatorScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float f
 
 	CModelShader::GetInst()->Render(pd3dCommandList, 1);
 
-	/*for (int i = 0; i < m_pMainCharacters.size(); ++i)
-	{
-		m_pMainCharacters[i]->Animate(fTimeElapsed);
-		m_pMainCharacters[i]->Render(pd3dCommandList, true);
-	}*/
+	///*for (int i = 0; i < m_pMainCharacters.size(); ++i)
+	//{
+	//	m_pMainCharacters[i]->Animate(fTimeElapsed);
+	//	m_pMainCharacters[i]->Render(pd3dCommandList, true);
+	//}*/
 
 	m_pMainCharacter->Animate(0.0f);
 	m_pMainCharacter->Render(pd3dCommandList, true);
@@ -322,19 +322,9 @@ void CSimulatorScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float f
 
 	m_pTerrainShader->Render(pd3dCommandList, 0);
 	m_pTerrain->Render(pd3dCommandList, true);
-	//m_pMainCharacter->Animate(fTimeElapsed);
-	/*m_pMainCharacter->Update(fTimeElapsed);
-	if (!m_pDummyEnemy->m_pSkinnedAnimationController) m_pMainCharacter->UpdateTransform(NULL);
-	m_pMainCharacter->Render(pd3dCommandList);*/
-
 
 	Locator.GetSoundPlayer()->Update(fTimeElapsed);
-	/*for (int i = 0; i < m_pMainCharacters.size(); ++i)
-	{
-		m_pMainCharacters[i]->Animate(fTimeElapsed);
-		if (!m_pDummyEnemy->m_pSkinnedAnimationController) m_pMainCharacters[i]->UpdateTransform(NULL);
-		m_pMainCharacters[i]->Render(pd3dCommandList);
-	}*/
+
 	CAttackSpriteComponent::GetInst()->Collision_Check();
 	m_pBillBoardObjectShader->Render(pd3dCommandList, 0);
 	m_pBillBoardObject->Animate(fTimeElapsed);

@@ -106,18 +106,8 @@ void CImGuiManager::Init(HWND hWnd, ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 		m_pd3dSrvDescHeap->GetCPUDescriptorHandleForHeapStart(),
 		m_pd3dSrvDescHeap->GetGPUDescriptorHandleForHeapStart());
 
-	m_pCamera = std::make_shared<CThirdPersonCamera>();
-	m_pCamera->Init(pd3dDevice, pd3dCommandList);
-	/*std::shared_ptr<CComponent> com = std::make_shared<CCameraMover>(m_pCamera);
-	m_pCamera->m_vComponentSet.emplace_back(com);
-	com = std::make_shared<CCameraShaker>(m_pCamera);
-	m_pCamera->m_vComponentSet.emplace_back(com);
-	com = std::make_shared<CCameraZoomer>(m_pCamera);
-	m_pCamera->m_vComponentSet.emplace_back(com);*/
-	m_pCamera->SetPosition(XMFLOAT3(-18.5f, 37.5f, -18.5f));
-	m_pCamera->SetLookAt(XMFLOAT3(0.0f, 0.0f, 0.0f));
-	m_pCamera->RegenerateViewMatrix();
-	Locator.SetSimulaterCamera(m_pCamera);
+	Locator.CreateSimulatorCamera(pd3dDevice, pd3dCommandList);
+	m_pCamera = Locator.GetSimulaterCamera();
 
 	D3D12_CLEAR_VALUE d3dClearValue = { DXGI_FORMAT_R8G8B8A8_UNORM, { 0.0f, 0.0f, 0.0f, 1.0f } };
 	m_pRTTexture = std::make_unique<CTexture>(1, RESOURCE_TEXTURE2D, 0, 1);
@@ -334,8 +324,6 @@ void CImGuiManager::SetUI()
 		ImGui::SetCursorPos(initial_curpos);
 
 		CCamera* pCamera = Locator.GetSimulaterCamera();
-		if (pCamera == nullptr)
-			pCamera = m_pCamera.get();
 
 		if (ImGui::CollapsingHeader("Camera Move"))
 		{

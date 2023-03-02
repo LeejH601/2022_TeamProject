@@ -23,3 +23,9 @@ enum class SOUND_CATEGORY
 	SOUND_SHOOT,
 	SOUND_EFFECT,
 };
+
+enum class SCENE_TYPE
+{
+	LOBBY_SCENE,
+	MAIN_SCENE,
+};

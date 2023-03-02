@@ -2,16 +2,12 @@
 #include "Locator.h"
 #include "Global.h"
 #include "Component.h"
-#include "Camera.h"
-#include "..\Object\State.h"
 #include "..\Object\AnimationComponent.h"
 #include "..\Sound\SoundComponent.h"
-#include "..\Sound\SoundPlayer.h"
 #include "..\Sound\SoundManager.h"
-#include "EntityManager.h"
-#include "MessageDispatcher.h"
 #include "..\Object\BillBoardComponent.h"
 #include "..\Object\ParticleComponent.h"
+
 CLocator::~CLocator()
 {
 	m_pEntityManager->Clear();
@@ -125,11 +121,28 @@ bool CLocator::Init()
 	SetPlayerState(state);
 	state = std::make_shared<Run_Player>();
 	SetPlayerState(state);
-	m_pSoundPlayer = std::make_shared<CSoundPlayer>();
+
+	m_pMessageDispatcher = std::make_unique<CMessageDispatcher>();
+	m_pEntityManager = std::make_unique<CEntityManager>();
+	m_pSoundPlayer = std::make_unique<CSoundPlayer>();
+
 	return true;
 }
 
+void CLocator::CreateSimulatorCamera(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	m_pSimulaterCamera = std::make_unique<CSimulatorCamera>();
+	m_pSimulaterCamera->Init(pd3dDevice, pd3dCommandList);
+	m_pSimulaterCamera->SetPosition(XMFLOAT3(-18.5f, 37.5f, -18.5f));
+	m_pSimulaterCamera->SetLookAt(XMFLOAT3(0.0f, 0.0f, 0.0f));
+	m_pSimulaterCamera->RegenerateViewMatrix();
+}
 
+void CLocator::CreateMainSceneCamera(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	m_pMainSceneCamera = std::make_unique<CThirdPersonCamera>();
+	m_pMainSceneCamera->Init(pd3dDevice, pd3dCommandList);
+}
 
 CState<CPlayer>* CLocator::GetPlayerState(const std::type_info& type)
 {

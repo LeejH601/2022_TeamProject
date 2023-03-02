@@ -14,18 +14,17 @@ CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 
 	m_xmf3Velocity = XMFLOAT3{};
 
-	SetPosition(XMFLOAT3(-15.0f, 0.0f, 0.0f));
-	SetScale(15.0f, 15.0f, 15.0f);
-	Rotate(0.0f, 90.0f, 0.0f);
-
 	std::shared_ptr<CGameObject> knightObject = std::make_shared<CKnightObject>(pd3dDevice, pd3dCommandList, 1);
-	knightObject->m_pSkinnedAnimationController->m_xmf3RootObjectScale = XMFLOAT3(15.0f, 15.0f, 15.0f);
 	
 	SetChild(knightObject);
 
 	m_pStateMachine = std::make_unique<CStateMachine<CPlayer>>(this);
 	m_pStateMachine->SetCurrentState(Locator.GetPlayerState(typeid(Idle_Player)));
 	m_pStateMachine->ChangeState(Locator.GetPlayerState(typeid(Idle_Player)));
+
+	SetPosition(XMFLOAT3(-15.0f, 150.0f, 0.0f));
+	SetScale(15.0f, 15.0f, 15.0f);
+	Rotate(0.0f, 90.0f, 0.0f);
 }
 
 CPlayer::~CPlayer()
@@ -48,12 +47,10 @@ void CPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity, CCa
 
 		XMFLOAT3 xmf3Shift = XMFLOAT3{};
 
-		if (dwDirection & DIR_FORWARD)xmf3Shift = Vector3::Add(xmf3Shift, pCamera->GetLookVector(), fDistance);
-		if (dwDirection & DIR_BACKWARD)xmf3Shift = Vector3::Add(xmf3Shift, pCamera->GetLookVector(), -fDistance);
-		if (dwDirection & DIR_RIGHT)xmf3Shift = Vector3::Add(xmf3Shift, pCamera->GetRightVector(), fDistance);
-		if (dwDirection & DIR_LEFT)xmf3Shift = Vector3::Add(xmf3Shift, pCamera->GetRightVector(), -fDistance);
-		if (dwDirection & DIR_UP)xmf3Shift = Vector3::Add(xmf3Shift, pCamera->GetUpVector(), fDistance);
-		if (dwDirection & DIR_DOWN)xmf3Shift = Vector3::Add(xmf3Shift, pCamera->GetUpVector(), -fDistance);
+		if (dwDirection & DIR_FORWARD)xmf3Shift = Vector3::Add(xmf3Shift, Vector3::Normalize(XMFLOAT3(pCamera->GetLookVector().x, 0.0f, pCamera->GetLookVector().z)), fDistance);
+		if (dwDirection & DIR_BACKWARD)xmf3Shift = Vector3::Add(xmf3Shift, Vector3::Normalize(XMFLOAT3(pCamera->GetLookVector().x, 0.0f, pCamera->GetLookVector().z)), -fDistance);
+		if (dwDirection & DIR_RIGHT)xmf3Shift = Vector3::Add(xmf3Shift, Vector3::Normalize(XMFLOAT3(pCamera->GetRightVector().x, 0.0f, pCamera->GetRightVector().z)), fDistance);
+		if (dwDirection & DIR_LEFT)xmf3Shift = Vector3::Add(xmf3Shift, Vector3::Normalize(XMFLOAT3(pCamera->GetRightVector().x, 0.0f, pCamera->GetRightVector().z)), -fDistance);
 
 		Move(xmf3Shift, bUpdateVelocity);
 	}
@@ -178,7 +175,7 @@ void CPlayer::ProcessInput(DWORD dwDirection, float cxDelta, float cyDelta, floa
 	{
 		if (dwDirection)
 		{
-			Move(dwDirection, 50.0f * fTimeElapsed, true, pCamera);
+			Move(dwDirection, 115.0f * fTimeElapsed, true, pCamera);
 		}
 	}
 }
@@ -191,8 +188,6 @@ void CPlayer::SetLookAt(XMFLOAT3& xmf3LookAt)
 	m_xmf3Right.x = mtxLookAt._11, m_xmf3Right.y = mtxLookAt._21, m_xmf3Right.z = mtxLookAt._31;
 	m_xmf3Up.x = mtxLookAt._12, m_xmf3Up.y = mtxLookAt._22, m_xmf3Up.z = mtxLookAt._32;
 	m_xmf3Look.x = mtxLookAt._13, m_xmf3Look.y = mtxLookAt._23, m_xmf3Look.z = mtxLookAt._33;
-
-	SetScale(8.0f, 8.0f, 8.0f);
 }
 
 void CPlayer::SetPosition(float x, float y, float z)
@@ -239,6 +234,15 @@ void CPlayer::SetPosition(XMFLOAT3 xmf3Position)
 	m_xmf3Position = xmf3Position;
 }
 
+void CPlayer::SetScale(float x, float y, float z)
+{
+	m_xmf3Scale.x = x;
+	m_xmf3Scale.y = y;
+	m_xmf3Scale.z = z;
+
+	m_pChild->m_pSkinnedAnimationController->m_xmf3RootObjectScale = m_xmf3Scale;
+}
+
 XMFLOAT3 CPlayer::GetPosition()
 {
 	return m_xmf3Position;
@@ -266,7 +270,8 @@ void CPlayer::OnPrepareRender()
 	m_xmf4x4Transform._31 = m_xmf3Look.x; m_xmf4x4Transform._32 = m_xmf3Look.y; m_xmf4x4Transform._33 = m_xmf3Look.z;
 	m_xmf4x4Transform._41 = m_xmf3Position.x; m_xmf4x4Transform._42 = m_xmf3Position.y; m_xmf4x4Transform._43 = m_xmf3Position.z;
 	
-	SetScale(8.0f, 8.0f, 8.0f);
+	XMMATRIX mtxScale = XMMatrixScaling(m_xmf3Scale.x, m_xmf3Scale.y, m_xmf3Scale.z);
+	m_xmf4x4Transform = Matrix4x4::Multiply(mtxScale, m_xmf4x4Transform);
 
 	UpdateTransform(NULL);
 }

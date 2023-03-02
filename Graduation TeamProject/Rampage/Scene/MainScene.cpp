@@ -1,5 +1,6 @@
 #include "MainScene.h"
 #include "..\Global\Timer.h"
+#include "..\Global\Camera.h"
 #include "..\Object\Texture.h"
 #include "..\Object\Player.h"
 #include "..\Object\ModelManager.h"
@@ -209,6 +210,94 @@ void CMainTMPScene::CreateGraphicsRootSignature(ID3D12Device* pd3dDevice)
 	if (pd3dSignatureBlob) pd3dSignatureBlob->Release();
 	if (pd3dErrorBlob) pd3dErrorBlob->Release();
 }
+bool CMainTMPScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
+{
+	switch (nMessageID)
+	{
+	case WM_LBUTTONDOWN:
+		// 좌클릭시 사용자가 좌클릭 했음을 표현하는 변수를 true로 바꿔줌
+		if (m_pPlayer)
+			((CPlayer*)m_pPlayer)->m_bAttack = true;
+		break;
+	default:
+		break;
+	}
+
+	return 0;
+}
+bool CMainTMPScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam, DWORD& dwDirection)
+{
+	switch (nMessageID)
+	{
+	case WM_KEYDOWN:
+		switch (wParam)
+		{
+		case 'f':
+		case 'F':
+			((CPlayer*)m_pPlayer)->Tmp();
+			break;
+		case 'w':
+		case 'W':
+			if (wParam == 'w' || wParam == 'W') dwDirection |= DIR_FORWARD;
+			break;
+		case 's':
+		case 'S':
+			if (wParam == 's' || wParam == 'S') dwDirection |= DIR_BACKWARD;
+			break;
+		case 'a':
+		case 'A':
+			if (wParam == 'a' || wParam == 'A') dwDirection |= DIR_LEFT;
+			break;
+		case 'd':
+		case 'D':
+			if (wParam == 'd' || wParam == 'D') dwDirection |= DIR_RIGHT;
+			break;
+		case 'q':
+		case 'Q':
+			if (wParam == 'q' || wParam == 'Q')dwDirection |= DIR_DOWN;
+			break;
+		case 'e':
+		case 'E':
+			if (wParam == 'e' || wParam == 'E') dwDirection |= DIR_UP;
+			break;
+		default:
+			break;
+		}
+		break;
+	case WM_KEYUP:
+		switch (wParam)
+		{
+		case 'w':
+		case 'W':
+			if (wParam == 'w' || wParam == 'W') dwDirection &= (~DIR_FORWARD);
+			break;
+		case 's':
+		case 'S':
+			if (wParam == 's' || wParam == 'S') dwDirection &= (~DIR_BACKWARD);
+			break;
+		case 'a':
+		case 'A':
+			if (wParam == 'a' || wParam == 'A') dwDirection &= (~DIR_LEFT);
+			break;
+		case 'd':
+		case 'D':
+			if (wParam == 'd' || wParam == 'D') dwDirection &= (~DIR_RIGHT);
+			break;
+		case 'q':
+		case 'Q':
+			if (wParam == 'q' || wParam == 'Q')dwDirection &= (~DIR_DOWN);
+			break;
+		case 'e':
+		case 'E':
+			if (wParam == 'e' || wParam == 'E') dwDirection &= (~DIR_UP);
+			break;
+		}
+	default:
+		break;
+	}
+
+	return 0;
+}
 void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	CreateGraphicsRootSignature(pd3dDevice);
@@ -234,31 +323,19 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 
 	//std::unique_ptr<CKnightObject> m_pObject = std::make_unique<CKnightObject>(pd3dDevice, pd3dCommandList, 1);
 
-	//m_pObject = std::make_unique<CKnightObject>(pd3dDevice, pd3dCommandList, 1);
-	//m_pObject->SetPosition(XMFLOAT3(-15.0f, 15.0f, 15.0f));
-	//m_pObject->SetScale(5.0f, 5.0f, 5.0f);
-	//m_pObject->Rotate(0.0f, 180.0f, 0.0f);
-	//m_pObject->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 1);
-	//m_pObject->m_pSkinnedAnimationController->m_xmf3RootObjectScale = XMFLOAT3(10.0f, 10.0f, 10.0f);
-	//m_pObject->SetRigidDynamic();
-	//rigid = (physx::PxRigidDynamic*)m_pObject->Rigid;
-	//pos = m_pObject->GetPosition();
-	//transform = physx::PxTransform(physx::PxVec3(pos.x, pos.y, pos.z));
-	//rigid->setGlobalPose(transform);
-	//	//m_pObject->m_pArticulation->setRootGlobalPose(transform);
-	//m_pObjects.push_back(std::move(m_pObject));
+	m_pObject = std::make_unique<CKnightObject>(pd3dDevice, pd3dCommandList, 1);
+	m_pObject->SetPosition(XMFLOAT3(-15.0f, 350.0f, 15.0f));
+	m_pObject->SetScale(5.0f, 5.0f, 5.0f);
+	m_pObject->Rotate(0.0f, 180.0f, 0.0f);
+	m_pObject->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 1);
+	m_pObject->m_pSkinnedAnimationController->m_xmf3RootObjectScale = XMFLOAT3(10.0f, 10.0f, 10.0f);
+	m_pObjects.push_back(std::move(m_pObject));
 
-	//m_pObject = std::make_unique<CKnightObject>(pd3dDevice, pd3dCommandList, 1);
-	//m_pObject->SetPosition(XMFLOAT3(15.0f, -15.0f, -15.0f));
-	//m_pObject->SetScale(10.0f, 10.0f, 10.0f);
-	//m_pObject->Rotate(0.0f, 180.0f, 0.0f);
-	//m_pObject->SetRigidDynamic();
-	//rigid = (physx::PxRigidDynamic*)m_pObject->Rigid;
-	//pos = m_pObject->GetPosition();
-	//transform = physx::PxTransform(physx::PxVec3(pos.x, pos.y, pos.z));
-	//rigid->setGlobalPose(transform);
-	////m_pObject->m_pArticulation->setRootGlobalPose(transform);
-	//m_pObject->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 4);
+	m_pObject = std::make_unique<CKnightObject>(pd3dDevice, pd3dCommandList, 1);
+	m_pObject->SetPosition(XMFLOAT3(15.0f, 350.0f, -15.0f));
+	m_pObject->SetScale(10.0f, 10.0f, 10.0f);
+	m_pObject->Rotate(0.0f, 180.0f, 0.0f);
+	m_pObject->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 4);
 
 	//int nAnimationSets = m_pObject->m_pSkinnedAnimationController->m_pAnimationSets->m_nAnimationSets;
 
@@ -414,19 +491,6 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pLight = std::make_unique<CLight>();
 	m_pLight->CreateLightVariables(pd3dDevice, pd3dCommandList);
 
-	//// Terrain Shader 생성
-	//m_pTerrainShader = std::make_unique<CTerrainShader>();
-	//m_pTerrainShader->CreateShader(pd3dDevice, GetGraphicsRootSignature(), 2, pdxgiObjectRtvFormats, 0);
-	//m_pTerrainShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 3);
-	//m_pTerrainShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
-
-	//// Terrain 생성
-	//XMFLOAT3 xmf3Scale(18.0f, 6.0f, 18.0f);
-	//XMFLOAT4 xmf4Color(0.0f, 0.5f, 0.0f, 0.0f);
-	//m_pTerrain = std::make_unique<CHeightMapTerrain>(pd3dDevice, pd3dCommandList, GetGraphicsRootSignature(), _T("Image/HeightMap.raw"), 257, 257, 257, 257, xmf3Scale, xmf4Color, m_pTerrainShader.get());
-	//m_pTerrain->SetPosition(XMFLOAT3(-800.f, -750.f, -800.f));
-	////m_pTerrain->SetPosition(XMFLOAT3(0.f, 0.f, 0.f));
-
 	m_pTerrainShader = std::make_unique<CSplatTerrainShader>();
 	m_pTerrainShader->CreateShader(pd3dDevice, GetGraphicsRootSignature(), 1, &pdxgiObjectRtvFormats, DXGI_FORMAT_D32_FLOAT, 0);
 	m_pTerrainShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 13);
@@ -437,7 +501,7 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	XMFLOAT3 xmf3Scale(6.0f, 3.0f, 6.0f);
 	XMFLOAT4 xmf4Color(0.0f, 0.5f, 0.0f, 0.0f);
 	m_pTerrain = std::make_unique<CSplatTerrain>(pd3dDevice, pd3dCommandList, GetGraphicsRootSignature(), _T("Terrain/terrainHeightMap257.raw"), 257, 257, 257, 257, xmf3Scale, xmf4Color, m_pTerrainShader.get());
-	m_pTerrain->SetPosition(XMFLOAT3(-800.f, -600.f, -800.f));
+	m_pTerrain->SetPosition(XMFLOAT3(-800.f, 0.f, -800.f));
 	m_pTerrain->SetRigidStatic();
 	for (int i = 0; i < m_pObjects.size(); ++i)
 		((CDepthRenderShader*)m_pDepthRenderShader.get())->RegisterObject(m_pObjects[i].get());
@@ -462,8 +526,9 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	//m_pBillBoardObjects.push_back(std::move(pSpriteAnimationObject));
 
 	m_pParticleShader = std::make_shared<CParticleShader>();
-	std::unique_ptr<CParticleObject> pParticleObject = std::make_unique<CParticleObject>(pd3dDevice, pd3dCommandList, GetGraphicsRootSignature(), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 65.0f, 0.0f), 2.0f, XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT2(2.0f, 2.0f), MAX_PARTICLES, m_pParticleShader.get(), true);
 	
+	std::unique_ptr<CParticleObject> pParticleObject = std::make_unique<CParticleObject>(pd3dDevice, pd3dCommandList, GetGraphicsRootSignature(), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 65.0f, 0.0f), 2.0f, XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT2(2.0f, 2.0f), MAX_PARTICLES, m_pParticleShader.get(), true);
+
 	m_ppParticleObjects.push_back(std::move(pParticleObject));
 }
 void CMainTMPScene::UpdateObjects(float fTimeElapsed)
@@ -479,6 +544,8 @@ void CMainTMPScene::AnimateObjects(float fTimeElapsed)
 }
 void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed, float fCurrentTime, CCamera* pCamera)
 {
+	if(pCamera) pCamera->OnPrepareRender(pd3dCommandList);
+
 	m_pLight->Render(pd3dCommandList);
 
 	CModelShader::GetInst()->Render(pd3dCommandList, 0);
