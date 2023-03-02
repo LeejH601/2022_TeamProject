@@ -858,16 +858,34 @@ void CGameObject::CreateArticulation(float meshScale)
 
 	JointAxisDesc FixDesc;
 	FixDesc.type = physx::PxArticulationJointType::eFIX;
+	FixDesc.eS1LImit.low = 0.0f;
+	FixDesc.eS1LImit.high = 0.1f;
+	FixDesc.eS2LImit.low = 0.0f;
+	FixDesc.eS2LImit.high = 0.1f;
+	FixDesc.eTLImit.low = 0.0f;
+	FixDesc.eTLImit.high = 0.1f;
 	JointAxisDesc SPHERICALDesc;
 	SPHERICALDesc.type = physx::PxArticulationJointType::eSPHERICAL;
 	SPHERICALDesc.eSwing1 = true;
 	SPHERICALDesc.eSwing2 = true;
 	SPHERICALDesc.eTWIST = true;
+	SPHERICALDesc.eS1LImit.low = 0.0f;
+	SPHERICALDesc.eS1LImit.high = 0.1f;
+	SPHERICALDesc.eS2LImit.low = 0.0f;
+	SPHERICALDesc.eS2LImit.high = 0.1f;
+	SPHERICALDesc.eTLImit.low = 0.0f;
+	SPHERICALDesc.eTLImit.high = 0.1f;
 	/*SPHERICALDesc.eS1Drive.maxForce = 10.f;
 	SPHERICALDesc.eS2Drive.maxForce = 10.f;
 	SPHERICALDesc.eTDrive.maxForce = 10.f;*/
 	JointAxisDesc REVOLUTEDesc;
 	REVOLUTEDesc.type = physx::PxArticulationJointType::eREVOLUTE;
+	REVOLUTEDesc.eS1LImit.low = 0.0f;
+	REVOLUTEDesc.eS1LImit.high = 0.1f;
+	REVOLUTEDesc.eS2LImit.low = 0.0f;
+	REVOLUTEDesc.eS2LImit.high = 0.1f;
+	REVOLUTEDesc.eTLImit.low = 0.0f;
+	REVOLUTEDesc.eTLImit.high = 0.1f;
 	/*REVOLUTEDesc.eS1Drive.maxForce = 10.f;
 	REVOLUTEDesc.eS2Drive.maxForce = 10.f;
 	REVOLUTEDesc.eTDrive.maxForce = 10.f;*/
@@ -883,7 +901,7 @@ void CGameObject::CreateArticulation(float meshScale)
 	XMFLOAT4X4 ChildMt = root->m_xmf4x4Transform;
 	physx::PxArticulationLink* root_link = SetLink(m_pArticulation, nullptr, MakeTransform(ParentMt, scale), MakeTransform(ChildMt, scale), 0.0f);
 	physx::PxArticulationJointReducedCoordinate* joint = root_link->getInboundJoint();
-	DebugJointDot(root_link);
+	////DebugJointDot(root_link);
 	m_pArtiLinkNames.emplace_back(target);
 
 
@@ -895,7 +913,7 @@ void CGameObject::CreateArticulation(float meshScale)
 	physx::PxArticulationLink* pelvis_link = SetLink(m_pArticulation, root_link, MakeTransform(ParentMt, scale), MakeTransform(ChildMt, scale), meshScale);
 	joint = pelvis_link->getInboundJoint();
 	SetJoint(joint, FixDesc);
-	DebugJointDot(pelvis_link);
+	//DebugJointDot(pelvis_link);
 
 	m_pArtiLinkNames.emplace_back(target);
 
@@ -930,7 +948,7 @@ void CGameObject::CreateArticulation(float meshScale)
 #else
 	SetJoint(joint, FixDesc);
 #endif // _test_ragdoll
-	DebugJointDot(Spine01_link);
+	//DebugJointDot(Spine01_link);
 	m_pArtiLinkNames.emplace_back(target);
 
 	target = "spine_02";
@@ -962,7 +980,7 @@ void CGameObject::CreateArticulation(float meshScale)
 #else
 	SetJoint(joint, FixDesc);
 #endif // _test_ragdoll
-	DebugJointDot(Spine02_link);
+	//DebugJointDot(Spine02_link);
 	m_pArtiLinkNames.emplace_back(target);
 
 	target = "spine_03";
@@ -994,7 +1012,7 @@ void CGameObject::CreateArticulation(float meshScale)
 #else
 	SetJoint(joint, FixDesc);
 #endif // _test_ragdoll
-	DebugJointDot(Spine03_link);
+	//DebugJointDot(Spine03_link);
 	m_pArtiLinkNames.emplace_back(target);
 
 	target = "neck_01";
@@ -1024,7 +1042,7 @@ void CGameObject::CreateArticulation(float meshScale)
 	SetJoint(joint, FixDesc);
 #endif // _test_ragdoll
 
-	DebugJointDot(neck_link);
+	//DebugJointDot(neck_link);
 	m_pArtiLinkNames.emplace_back(target);
 
 	target = "head";
@@ -1045,7 +1063,7 @@ void CGameObject::CreateArticulation(float meshScale)
 #else
 	SetJoint(joint, FixDesc);
 #endif // _test_ragdoll
-	DebugJointDot(head_link);
+	//DebugJointDot(head_link);
 	m_pArtiLinkNames.emplace_back(target);
 
 
@@ -1057,7 +1075,7 @@ void CGameObject::CreateArticulation(float meshScale)
 	physx::PxArticulationLink* clavicle_l_link = SetLink(m_pArticulation, Spine03_link, MakeTransform(ParentMt, scale), MakeTransform(ChildMt, scale), meshScale);
 	joint = clavicle_l_link->getInboundJoint();
 	SetJoint(joint, FixDesc);
-	DebugJointDot(clavicle_l_link);
+	//DebugJointDot(clavicle_l_link);
 	m_pArtiLinkNames.emplace_back(target);
 
 	target = "upperarm_l";
@@ -1080,7 +1098,7 @@ void CGameObject::CreateArticulation(float meshScale)
 #else
 	SetJoint(joint, FixDesc);
 #endif // _test_ragdoll
-	DebugJointDot(upperarm_l_link);
+	//DebugJointDot(upperarm_l_link);
 	m_pArtiLinkNames.emplace_back(target);
 
 	target = "lowerarm_l";
@@ -1108,7 +1126,7 @@ void CGameObject::CreateArticulation(float meshScale)
 #else
 	SetJoint(joint, FixDesc);
 #endif // _test_ragdoll
-	DebugJointDot(lowerarm_l_link);
+	//DebugJointDot(lowerarm_l_link);
 	m_pArtiLinkNames.emplace_back(target);
 
 	target = "hand_l";
@@ -1129,7 +1147,7 @@ void CGameObject::CreateArticulation(float meshScale)
 #else
 	SetJoint(joint, FixDesc);
 #endif // _test_ragdoll
-	DebugJointDot(hand_l_link);
+	//DebugJointDot(hand_l_link);
 	m_pArtiLinkNames.emplace_back(target);
 
 
@@ -1141,7 +1159,7 @@ void CGameObject::CreateArticulation(float meshScale)
 	physx::PxArticulationLink* clavicle_r_link = SetLink(m_pArticulation, Spine03_link, MakeTransform(ParentMt, scale), MakeTransform(ChildMt, scale), meshScale);
 	joint = clavicle_r_link->getInboundJoint();
 	SetJoint(joint, FixDesc);
-	DebugJointDot(clavicle_r_link);
+	//DebugJointDot(clavicle_r_link);
 	m_pArtiLinkNames.emplace_back(target);
 
 	target = "upperarm_r";
@@ -1164,7 +1182,7 @@ void CGameObject::CreateArticulation(float meshScale)
 #else
 	SetJoint(joint, FixDesc);
 #endif // _test_ragdoll
-	DebugJointDot(upperarm_r_link);
+	//DebugJointDot(upperarm_r_link);
 	m_pArtiLinkNames.emplace_back(target);
 
 	target = "lowerarm_r";
@@ -1192,7 +1210,7 @@ void CGameObject::CreateArticulation(float meshScale)
 #else
 	SetJoint(joint, FixDesc);
 #endif // _test_ragdoll
-	DebugJointDot(lowerarm_r_link);
+	//DebugJointDot(lowerarm_r_link);
 	m_pArtiLinkNames.emplace_back(target);
 
 	target = "hand_r";
@@ -1213,7 +1231,7 @@ void CGameObject::CreateArticulation(float meshScale)
 #else
 	SetJoint(joint, FixDesc);
 #endif // _test_ragdoll
-	DebugJointDot(hand_r_ink);
+	//DebugJointDot(hand_r_ink);
 	m_pArtiLinkNames.emplace_back(target);
 
 
@@ -1237,7 +1255,7 @@ void CGameObject::CreateArticulation(float meshScale)
 #else
 	SetJoint(joint, FixDesc);
 #endif
-	DebugJointDot(thigh_l_link);
+	//DebugJointDot(thigh_l_link);
 	m_pArtiLinkNames.emplace_back(target);
 
 	target = "calf_l";
@@ -1265,7 +1283,7 @@ void CGameObject::CreateArticulation(float meshScale)
 #else
 	SetJoint(joint, FixDesc);
 #endif
-	DebugJointDot(calf_l_link);
+	//DebugJointDot(calf_l_link);
 	m_pArtiLinkNames.emplace_back(target);
 
 	target = "foot_l";
@@ -1286,7 +1304,7 @@ void CGameObject::CreateArticulation(float meshScale)
 #else
 	SetJoint(joint, FixDesc);
 #endif
-	DebugJointDot(foot_l_link);
+	//DebugJointDot(foot_l_link);
 	m_pArtiLinkNames.emplace_back(target);
 
 	target = "ball_l";
@@ -1296,7 +1314,7 @@ void CGameObject::CreateArticulation(float meshScale)
 	physx::PxArticulationLink* ball_l_link = SetLink(m_pArticulation, foot_l_link, MakeTransform(ParentMt, scale), MakeTransform(ChildMt, scale), meshScale);
 	joint = ball_l_link->getInboundJoint();
 	SetJoint(joint, FixDesc);
-	DebugJointDot(ball_l_link);
+	//DebugJointDot(ball_l_link);
 	m_pArtiLinkNames.emplace_back(target);
 
 
@@ -1320,7 +1338,7 @@ void CGameObject::CreateArticulation(float meshScale)
 #else
 	SetJoint(joint, FixDesc);
 #endif
-	DebugJointDot(thigh_r_link);
+	//DebugJointDot(thigh_r_link);
 	m_pArtiLinkNames.emplace_back(target);
 
 	target = "calf_r";
@@ -1348,7 +1366,7 @@ void CGameObject::CreateArticulation(float meshScale)
 #else
 	SetJoint(joint, FixDesc);
 #endif
-	DebugJointDot(calf_r_link);
+	//DebugJointDot(calf_r_link);
 	m_pArtiLinkNames.emplace_back(target);
 
 	target = "foot_r";
@@ -1369,7 +1387,7 @@ void CGameObject::CreateArticulation(float meshScale)
 #else
 	SetJoint(joint, FixDesc);
 #endif
-	DebugJointDot(foot_r_link);
+	//DebugJointDot(foot_r_link);
 	m_pArtiLinkNames.emplace_back(target);
 
 	target = "ball_r";
@@ -1379,7 +1397,7 @@ void CGameObject::CreateArticulation(float meshScale)
 	physx::PxArticulationLink* ball_r_link = SetLink(m_pArticulation, foot_r_link, MakeTransform(ParentMt, scale), MakeTransform(ChildMt, scale), meshScale);
 	joint = ball_r_link->getInboundJoint();
 	SetJoint(joint, FixDesc);
-	DebugJointDot(ball_l_link);
+	//DebugJointDot(ball_l_link);
 	m_pArtiLinkNames.emplace_back(target);
 
 
