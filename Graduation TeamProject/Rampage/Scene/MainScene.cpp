@@ -476,6 +476,40 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 		m_pObjects.push_back(std::move(m_pGoblin));
 	}
 
+	std::unique_ptr<physx::PxMat44> m_pArticulationGpuRootTransforms;
+	std::unique_ptr<physx::PxReal> m_pArticulationGpuCaches;
+	std::vector<physx::PxU32> m_iArticulationIndexs;
+	physx::PxU32 MaxIndex = 0;
+	physx::PxU32 size = 0;
+	for (int i = 0; i < m_pObjects.size(); ++i) {
+		CGameObject* obj = m_pObjects[i].get();
+		if (obj->m_pArticulation) {
+			m_iArticulationIndexs.push_back(MaxIndex);
+			MaxIndex++;
+			size += obj->m_pArticulation->getDofs();
+		}
+	}
+	m_pArticulationGpuRootTransforms = std::make_unique<physx::PxMat44>(MaxIndex);
+	m_pArticulationGpuCaches = std::make_unique<physx::PxReal>(MaxIndex * size);
+	Locator.GetPxScene()->copyArticulationData(m_pArticulationGpuCaches.get(), m_iArticulationIndexs.data(), physx::PxArticulationGpuDataType::eJOINT_POSITION, (physx::PxU32)m_iArticulationIndexs.size());
+	Locator.GetPxScene()->copyArticulationData(m_pArticulationGpuRootTransforms.get(), m_iArticulationIndexs.data(), physx::PxArticulationGpuDataType::eROOT_TRANSFORM, (physx::PxU32)m_iArticulationIndexs.size());
+
+	for (int i = 0; i < m_pObjects.size(); ++i) {
+		CGameObject* obj = m_pObjects[i].get();
+		if (obj->m_pArticulation) {
+			physx::PxMat44* r_trans = m_pArticulationGpuRootTransforms.get() + obj->m_pArticulation->getGpuArticulationIndex();
+			obj->m_bSimulateArticulate = false;
+			obj->Animate(0.0f);
+			obj->m_bSimulateArticulate = true;
+			rootWorld = obj->FindFrame("root")->m_xmf4x4World;
+			r_trans->column3.x += rootWorld._41;
+			r_trans->column3.y += rootWorld._42;
+			r_trans->column3.z += rootWorld._43;
+		}
+	}
+	Locator.GetPxScene()->applyArticulationData(m_pArticulationGpuRootTransforms.get(), m_iArticulationIndexs.data(), physx::PxArticulationGpuDataType::eROOT_TRANSFORM, (physx::PxU32)m_iArticulationIndexs.size());
+
+
 	/*for (int i = 0; i < nAnimationSets; ++i)
 	{
 		std::unique_ptr<CGameObject> pCharater = std::make_unique<CKnightObject>(pd3dDevice, pd3dCommandList, 1);

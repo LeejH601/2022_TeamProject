@@ -26,10 +26,21 @@ bool CLocator::Init()
 
 	m_pPhysics = PxCreatePhysics(PX_PHYSICS_VERSION, *m_pFoundation, physx::PxTolerancesScale(1.0f, 10.0f), recordMemoryAllocations, m_pPxPvd);
 
+	physx::PxCudaContextManagerDesc cudaContextManagerDesc;
+
+	m_pCudaContextManager = PxCreateCudaContextManager(*m_pFoundation, cudaContextManagerDesc, PxGetProfilerCallback());
+
 	physx::PxSceneDesc SceneDesc(m_pPhysics->getTolerancesScale());
 	SceneDesc.cpuDispatcher = physx::PxDefaultCpuDispatcherCreate(8); // 이 세가지 파라미터가 반드시 필요함.
 	SceneDesc.filterShader = physx::PxDefaultSimulationFilterShader; // 각각 어떤 역할을 하는 지는 추가적으로 조사해볼 필요가 있음.
+	SceneDesc.cudaContextManager = m_pCudaContextManager;
+
+	SceneDesc.flags |= physx::PxSceneFlag::eENABLE_GPU_DYNAMICS;
+	SceneDesc.flags |= physx::PxSceneFlag::eSUPPRESS_READBACK;
+	SceneDesc.broadPhaseType = physx::PxBroadPhaseType::eGPU;
+
 	SceneDesc.gravity = physx::PxVec3(0.0f, -9.81f, 0.0f);
+	//SceneDesc.gravity = physx::PxVec3(0.0f, -981.0f, 0.0f);
 	//SceneDesc.gravity = physx::PxVec3(0.0f, 0.0f, 0.0f);
 
 	m_pPxScene = m_pPhysics->createScene(SceneDesc);

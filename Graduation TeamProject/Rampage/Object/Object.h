@@ -65,12 +65,13 @@ public:
 	std::shared_ptr<CGameObject> m_pSibling = nullptr;
 
 	physx::PxActor* Rigid = nullptr;
-	physx::PxArticulationReducedCoordinate* m_pArticulation;
+	physx::PxArticulationReducedCoordinate* m_pArticulation = nullptr;
 	physx::PxArticulationCache* m_pArticulationCache;
 	physx::PxU32 m_nArtiCache;
 	std::vector<std::string> m_pArtiLinkNames;
 	std::vector<physx::PxArticulationLink*> m_pArticulationLinks;
 	std::vector<XMFLOAT4X4> m_AritculatCacheMatrixs;
+	std::vector<physx::PxU32> dofStarts;
 
 	bool m_bSimulateArticulate = false;
 

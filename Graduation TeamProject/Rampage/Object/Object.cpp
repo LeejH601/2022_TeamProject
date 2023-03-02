@@ -851,23 +851,41 @@ void CGameObject::CreateArticulation(float meshScale)
 
 	m_pArticulation = Locator.GetPxPhysics()->createArticulationReducedCoordinate();
 	m_pArticulation->setArticulationFlag(physx::PxArticulationFlag::eDISABLE_SELF_COLLISION, true);
-	m_pArticulation->setSolverIterationCounts(10, 4);
-	m_pArticulation->setMaxCOMLinearVelocity(40);
+	m_pArticulation->setSolverIterationCounts(20, 10);
+	m_pArticulation->setMaxCOMLinearVelocity(20);
 
 	float scale = m_xmf4x4Scale._11;
 
 	JointAxisDesc FixDesc;
 	FixDesc.type = physx::PxArticulationJointType::eFIX;
+	FixDesc.eS1LImit.low = 0.0f;
+	FixDesc.eS1LImit.high = 0.1f;
+	FixDesc.eS2LImit.low = 0.0f;
+	FixDesc.eS2LImit.high = 0.1f;
+	FixDesc.eTLImit.low = 0.0f;
+	FixDesc.eTLImit.high = 0.1f;
 	JointAxisDesc SPHERICALDesc;
 	SPHERICALDesc.type = physx::PxArticulationJointType::eSPHERICAL;
 	SPHERICALDesc.eSwing1 = true;
 	SPHERICALDesc.eSwing2 = true;
 	SPHERICALDesc.eTWIST = true;
+	SPHERICALDesc.eS1LImit.low = 0.0f;
+	SPHERICALDesc.eS1LImit.high = 0.1f;
+	SPHERICALDesc.eS2LImit.low = 0.0f;
+	SPHERICALDesc.eS2LImit.high = 0.1f;
+	SPHERICALDesc.eTLImit.low = 0.0f;
+	SPHERICALDesc.eTLImit.high = 0.1f;
 	/*SPHERICALDesc.eS1Drive.maxForce = 10.f;
 	SPHERICALDesc.eS2Drive.maxForce = 10.f;
 	SPHERICALDesc.eTDrive.maxForce = 10.f;*/
 	JointAxisDesc REVOLUTEDesc;
 	REVOLUTEDesc.type = physx::PxArticulationJointType::eREVOLUTE;
+	REVOLUTEDesc.eS1LImit.low = 0.0f;
+	REVOLUTEDesc.eS1LImit.high = 0.1f;
+	REVOLUTEDesc.eS2LImit.low = 0.0f;
+	REVOLUTEDesc.eS2LImit.high = 0.1f;
+	REVOLUTEDesc.eTLImit.low = 0.0f;
+	REVOLUTEDesc.eTLImit.high = 0.1f;
 	/*REVOLUTEDesc.eS1Drive.maxForce = 10.f;
 	REVOLUTEDesc.eS2Drive.maxForce = 10.f;
 	REVOLUTEDesc.eTDrive.maxForce = 10.f;*/
@@ -1382,14 +1400,38 @@ void CGameObject::CreateArticulation(float meshScale)
 	DebugJointDot(ball_l_link);
 	m_pArtiLinkNames.emplace_back(target);
 
+	
+
 
 	m_pArticulation->setSleepThreshold(0.6f);
 
 	Locator.GetPxScene()->addArticulation(*m_pArticulation);
 
+	physx::PxU32 gpu_index = m_pArticulation->getGpuArticulationIndex();
+	m_pArticulation->getDofs();
+	//Locator.GetPxScene()->copyArticulationData()
+
 	physx::PxU32 nbLinks = m_pArticulation->getNbLinks();
 	m_pArticulationLinks.resize(nbLinks);
 	m_pArticulation->getLinks(m_pArticulationLinks.data(), nbLinks, 0);
+
+	dofStarts.resize(nbLinks);
+	dofStarts[0] = 0;
+	for (physx::PxU32 i = 1; i < nbLinks; ++i)
+	{
+		physx::PxU32 lowLevelIndex = m_pArticulationLinks[i]->getLinkIndex();
+		physx::PxU32 dofs = m_pArticulationLinks[i]->getInboundJointDof();
+		dofStarts[lowLevelIndex] = dofs;
+	}
+
+	physx::PxU32 count = 0;
+	for (physx::PxU32 i = 1; i < nbLinks; ++i)
+	{
+		physx::PxU32 dofs = dofStarts[i];
+		dofStarts[i] = count;
+		count += dofs;
+	}
+	
 	m_AritculatCacheMatrixs.resize(nbLinks);
 	int index = 0;
 	for (XMFLOAT4X4& world : m_AritculatCacheMatrixs) {

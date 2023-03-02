@@ -74,6 +74,10 @@ class CLocator
 	physx::PxScene* m_pPxScene;
 	physx::PxPvd* m_pPxPvd;
 	physx::PxPvdSceneClient* pvdClient = nullptr;
+	physx::PxCudaContextManager* m_pCudaContextManager = nullptr;
+	physx::PxReal* m_pArticulationGpuData = nullptr;
+	physx::PxU32 m_nArticulations;
+	//physx::PxU32
 
 	CGameTimer* m_pTimer;
 
