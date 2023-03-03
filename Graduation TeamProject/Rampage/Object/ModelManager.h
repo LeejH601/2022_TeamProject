@@ -32,6 +32,7 @@ public:
 	~CModelManager() {}
 	void LoadModel(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, const char* pstrFileName);
 	CLoadedModelInfo* LoadGeometryAndAnimationFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, const char* pstrFileName);
+	CLoadedModelInfo* LoadGeometryFromFileOfScene(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, FILE* pInFile);
 	void LoadAnimationFromFile(FILE* pInFile, CLoadedModelInfo* pLoadedModel);
 	CLoadedModelInfo* GetModelInfo(const char* pstrFileName);
 };

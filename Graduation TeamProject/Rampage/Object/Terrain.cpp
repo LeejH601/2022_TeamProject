@@ -219,7 +219,7 @@ void CSplatTerrain::SetRigidStatic()
 
 	//physx::PxVec3 pos = convertToPhysXCoordSystem(matrix).column3.getXYZ();
 
-	physx::PxTransform transform(physx::PxVec3(-800.f, 0.f, -800.f));
+	physx::PxTransform transform(physx::PxVec3(0.f, 0.f, 0.f));
 
 	physx::PxMaterial* material = pPhysics->createMaterial(0.7, 0.5, 0.0);
 	physx::PxRigidStatic* plane = pPhysics->createRigidStatic(transform);

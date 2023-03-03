@@ -448,7 +448,7 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pObjects.push_back(std::move(m_pGoblin));
 
 	XMFLOAT3 testpos = XMFLOAT3(300.0f, 600.0f, 0.0f);
-	for (int i = 0; i < 45; ++i) {
+	for (int i = 0; i < 0; ++i) {
 		testpos.x -= 25.0f;
 		m_pGoblin = std::make_unique<CGoblinObject>(pd3dDevice, pd3dCommandList, 1);
 		m_pGoblin->SetPosition(testpos);
@@ -497,10 +497,10 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 
 
 	// Terrain »ý¼º
-	XMFLOAT3 xmf3Scale(6.0f, 3.0f, 6.0f);
+	XMFLOAT3 xmf3Scale(1.0f, 1.0f, 1.0f);
 	XMFLOAT4 xmf4Color(0.0f, 0.5f, 0.0f, 0.0f);
 	m_pTerrain = std::make_unique<CSplatTerrain>(pd3dDevice, pd3dCommandList, GetGraphicsRootSignature(), _T("Terrain/terrainHeightMap257.raw"), 257, 257, 257, 257, xmf3Scale, xmf4Color, m_pTerrainShader.get());
-	m_pTerrain->SetPosition(XMFLOAT3(-800.f, 0.f, -800.f));
+	m_pTerrain->SetPosition(XMFLOAT3(0.f, 0.f, 0.f));
 	m_pTerrain->SetRigidStatic();
 	for (int i = 0; i < m_pObjects.size(); ++i)
 		((CDepthRenderShader*)m_pDepthRenderShader.get())->RegisterObject(m_pObjects[i].get());
@@ -511,6 +511,8 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pBillBoardObjectShader->CreateShader(pd3dDevice, GetGraphicsRootSignature(), 1, &pdxgiObjectRtvFormats, 0);
 	m_pBillBoardObjectShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 10);
 
+	LoadSceneFromFile(pd3dDevice, pd3dCommandList, "Object/Scene/Scene.bin");
+	printf("sdfgs");
 	
 	//std::unique_ptr<CBillBoardObject> pBillBoardObject = std::make_unique<CBillBoardObject>(CTextureManager::GetInst()->LoadBillBoardTexture(pd3dDevice, pd3dCommandList, L"Image/Grass01.dds"), pd3dDevice, pd3dCommandList, m_pBillBoardObjectShader.get(), 4.f);
 	//pBillBoardObject->SetPosition(XMFLOAT3(0.f, -5.f, 0.f));
@@ -602,6 +604,145 @@ void CMainTMPScene::OnPostRenderTarget()
 	//	m_ppParticleObjects[i]->OnPostRender();
 	//}
 
+}
+
+void CMainTMPScene::LoadSceneFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, char* pstrFileName)
+{
+	FILE* pInFile = NULL;
+	::fopen_s(&pInFile, pstrFileName, "rb");
+	::rewind(pInFile);
+
+	CMainTMPScene* pScene = this;
+	//pScene->BuildObjects(pd3dDevice, pd3dCommandList);
+	//pScene->m_pd3dGraphicsRootSignature = pScene->CreateGraphicsRootSignature(pd3dDevice);
+	char pstrToken[64] = { '\0' };
+
+	int nGameObjects;
+
+	UINT nRead;
+
+	::ReadStringFromFile(pInFile, pstrToken);
+
+	if (!strcmp(pstrToken, "<GameObjects>:"))
+	{
+		int nObjects = ReadIntegerFromFile(pInFile);
+		//pScene->m_ppGameObjects = new CGameObject * [pScene->m_nGameObjects];
+		for (int i = 0; i < nObjects; ++i) {
+			ReadStringFromFile(pInFile, pstrToken);
+			nRead = ReadStringFromFile(pInFile, pstrToken);
+
+			float buffer[16];
+			std::string objPath{ "Object/Scene/" };
+			objPath += static_cast<std::string>(pstrToken) + ".bin";
+			/*memcpy(pScene->m_ppGameObjects[i]->m_pstrFrameName, pstrToken, (nRead + 1));*/
+			FILE* objFile = NULL;
+			::fopen_s(&objFile, objPath.data(), "rb");
+			::rewind(objFile);
+
+			std::unique_ptr<CGameObject> pObject = std::make_unique<CGameObject>();
+
+			//ReadStringFromFile(pInFile, pstrToken);
+			////MATERIALSLOADINFO* pMaterialsInfo = new MATERIALSLOADINFO;
+			//{
+			//	pMaterialsInfo->m_nMaterials = ::ReadIntegerFromFile(pInFile);
+			//	pMaterialsInfo->m_pMaterials = new MATERIALLOADINFO[pMaterialsInfo->m_nMaterials];
+
+			//	for (int j = 0; j < pMaterialsInfo->m_nMaterials; ++j) {
+			//		nRead = (UINT)::fread(&pMaterialsInfo->m_pMaterials[j].m_xmf4AlbedoColor, sizeof(float), 4, pInFile);
+			//		nRead = (UINT)::fread(&pMaterialsInfo->m_pMaterials[j].m_xmf4EmissiveColor, sizeof(float), 4, pInFile);
+			//	}
+			//}
+
+			nRead = (UINT)::fread(&buffer, sizeof(float), 16, pInFile);
+
+			pObject->m_xmf4x4World = {
+				buffer[0],buffer[1],buffer[2],buffer[3],
+				buffer[4],buffer[5],buffer[6],buffer[7],
+				buffer[8],buffer[9],buffer[10],buffer[11],
+				buffer[12],buffer[13],buffer[14],buffer[15]
+			};
+
+			CLoadedModelInfo* rootObj = CModelManager::GetInst()->LoadGeometryFromFileOfScene(pd3dDevice, pd3dCommandList, objFile);
+			XMFLOAT4 pos = {
+				rootObj->m_pModelRootObject->m_xmf4x4Transform._41,
+				rootObj->m_pModelRootObject->m_xmf4x4Transform._42,
+				rootObj->m_pModelRootObject->m_xmf4x4Transform._43,
+				rootObj->m_pModelRootObject->m_xmf4x4Transform._44,
+			};
+			rootObj->m_pModelRootObject->m_xmf4x4Transform = Matrix4x4::Scale(pObject->m_xmf4x4Transform, 2.0f);
+			rootObj->m_pModelRootObject->m_xmf4x4Transform._41 = pos.x;
+			rootObj->m_pModelRootObject->m_xmf4x4Transform._42 = pos.y;
+			rootObj->m_pModelRootObject->m_xmf4x4Transform._43 = pos.z;
+			rootObj->m_pModelRootObject->m_xmf4x4Transform._44 = pos.w;
+			pObject->SetChild(rootObj->m_pModelRootObject, true);
+			XMFLOAT4X4 matrix_scale = {
+					10, 0, 0, 0,
+					0, 10, 0, 0,
+					0, 0, 10, 0,
+					0, 0, 0, 1,
+			};
+			pObject->m_xmf4x4World = Matrix4x4::Scale(pObject->m_xmf4x4World, 3.0f);
+			pObject->m_xmf4x4World._42 += 50.0f;
+			pObject->m_xmf4x4World._41 += 150.0f;
+			pObject->m_xmf4x4World._43 += 150.0f;
+			pObject->m_xmf4x4Transform = pObject->m_xmf4x4World;
+			pObject->UpdateTransform(NULL);
+
+			m_pObjects.push_back(std::move(pObject));
+
+			//CMeshLoadInfo* pMeshInfo = CGameObject::LoadMeshInfoFromFile_2(objFile);
+			//if (pMeshInfo) {
+			//	//pMeshInfo->m_pxmf4Colors = new XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f);
+			//	CMesh* pMesh = NULL;
+			//	if (pMeshInfo->m_nType & VERTEXT_NORMAL) {
+			//		pMesh = new CMeshIlluminatedFromFile(pd3dDevice, pd3dCommandList, pMeshInfo);
+			//	}
+			//	if (pMesh) {
+			//		pScene->m_ppGameObjects[i]->SetMesh(pMesh);
+			//		pScene->m_ppGameObjects[i]->m_pMesh->m_xmOOBB.Center = pMeshInfo->m_xmf3AABBCenter;
+			//		pScene->m_ppGameObjects[i]->m_pMesh->m_xmOOBB.Extents = pMeshInfo->m_xmf3AABBExtents;
+			//	}
+			//	delete pMeshInfo;
+			//}
+
+			/*pScene->m_ppGameObjects[i]->m_nMaterials = pMaterialsInfo->m_nMaterials;
+			pScene->m_ppGameObjects[i]->m_ppMaterials = new CMaterial * [pMaterialsInfo->m_nMaterials];
+
+			for (int k = 0; k < pMaterialsInfo->m_nMaterials; k++)
+			{
+				pScene->m_ppGameObjects[i]->m_ppMaterials[k] = NULL;
+
+				CMaterial* pMaterial = new CMaterial();
+
+				CMaterialColors* pMaterialColors = new CMaterialColors(&pMaterialsInfo->m_pMaterials[k]);
+				pMaterial->SetMaterialColors(pMaterialColors);
+
+				if (pScene->m_ppGameObjects[i]->GetMeshType() & VERTEXT_NORMAL) pMaterial->SetIlluminatedShader();
+
+				pScene->m_ppGameObjects[i]->SetMaterial(k, pMaterial);
+			}*/
+
+			
+			
+
+			//XMFLOAT4X4 matrix_scale = {
+			//	10, 0, 0, 0,
+			//	0, 10, 0, 0,
+			//	0, 0, 10, 0,
+			//	0, 0, 0, 1,
+			//};
+			//pScene->m_ppGameObjects[i]->m_xmf4x4Transform = Matrix4x4::Multiply(pScene->m_ppGameObjects[i]->m_xmf4x4Transform, matrix_scale);
+			//pScene->m_ppGameObjects[i]->m_xmf4x4World = pScene->m_ppGameObjects[i]->m_xmf4x4Transform;
+			//pScene->m_ppGameObjects[i]->UpdateBoundingBox();
+			//pScene->m_ppGameObjects[i]->m_xmOOBB.Extents = Vector3::ScalarProduct(pScene->m_ppGameObjects[i]->m_xmOOBB.Extents, 10.0f, false);
+			////std::string temp_str = { pScene->m_ppGameObjects[i]->m_pstrFrameName };
+			//if (objPath.contains("lamp")) {
+			//	pScene->m_xmfLampsPositions.push_back(pScene->m_ppGameObjects[i]->GetPosition());
+			//	pScene->m_xmfLampsPositions.back().y += 20.0f;
+			//}
+			fclose(objFile);
+		}
+	}
 }
 
 

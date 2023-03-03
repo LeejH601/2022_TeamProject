@@ -60,6 +60,34 @@ CLoadedModelInfo* CModelManager::LoadGeometryAndAnimationFromFile(ID3D12Device* 
 	vModels.push_back(std::move(pLoadedModel));
 	return (vModels.back()).get();
 }
+CLoadedModelInfo* CModelManager::LoadGeometryFromFileOfScene(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, FILE* pInFile)
+{
+	std::unique_ptr<CLoadedModelInfo> pLoadedModel = std::make_unique<CLoadedModelInfo>();
+
+	//pLoadedModel->pFilePath = pstrFileName;
+	pLoadedModel->m_pModelRootObject = std::make_shared<CGameObject>();
+
+	char pstrToken[64] = { '\0' };
+
+	for (; ; )
+	{
+		if (::ReadStringFromFile(pInFile, pstrToken))
+		{
+			if (!strcmp(pstrToken, "<Hierarchy>:"))
+			{
+				pLoadedModel->m_pModelRootObject->LoadFrameHierarchyFromFile(pd3dDevice, pd3dCommandList, NULL, pInFile, &pLoadedModel->m_nSkinnedMeshes);
+				::ReadStringFromFile(pInFile, pstrToken); //"</Hierarchy>"
+			}
+		}
+		else
+		{
+			break;
+		}
+	}
+
+	vModels.push_back(std::move(pLoadedModel));
+	return (vModels.back()).get();
+}
 void CModelManager::LoadAnimationFromFile(FILE* pInFile, CLoadedModelInfo* pLoadedModel)
 {
 	char pstrToken[64] = { '\0' };

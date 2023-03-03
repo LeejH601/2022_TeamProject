@@ -107,5 +107,6 @@ float4 PS_Player(VS_OUTPUT input) : SV_TARGET
 		cIllumination = Lighting(input.positionW, normalize(input.normalW), cColor, true, input.uvs);
 	//float4 cIllumination = Lighting(input.positionW, normalize(input.normalW), cColor, true, input.uvs);
 
+	//return float4(1.0f, 0.0f, 0.0f, 1.0f);
 	return (cIllumination);
 }
