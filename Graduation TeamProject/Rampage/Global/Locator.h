@@ -69,6 +69,12 @@ class CLocator
 	std::unique_ptr<CEntityManager> m_pEntityManager = NULL;
 	std::unique_ptr<CMessageDispatcher> m_pMessageDispatcher = NULL;
 
+	physx::PxFoundation* m_pFoundation;
+	physx::PxPhysics* m_pPhysics;
+	physx::PxScene* m_pPxScene;
+	physx::PxPvd* m_pPxPvd;
+	physx::PxPvdSceneClient* pvdClient = nullptr;
+
 	CGameTimer* m_pTimer;
 
 	CoptSetPair dummy;
@@ -115,6 +121,10 @@ public:
 	CGameTimer* GetTimer() { return m_pTimer; };
 
 	std::set<CoptSetPair, Comp_ComponentSet>& GetComponentSetRoot() { return m_sComponentSets; };
+
+	physx::PxFoundation* GetPxFoundation() { return m_pFoundation; };
+	physx::PxPhysics* GetPxPhysics() { return m_pPhysics; };
+	physx::PxScene* GetPxScene() { return m_pPxScene; };
 };
 
 extern CLocator Locator;

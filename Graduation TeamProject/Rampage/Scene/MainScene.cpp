@@ -10,7 +10,9 @@
 #include "..\Shader\BoundingBoxShader.h"
 #include "..\Shader\ParticleShader.h"
 #include "..\Shader\DepthRenderShader.h"
+#include "..\Object\Monster.h"
 #include "..\Object\TextureManager.h"
+#include "..\Global\Locator.h"
 
 void CMainTMPScene::SetPlayer(CGameObject* pPlayer)
 {
@@ -314,15 +316,15 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pDepthRenderShader->CreateShaderResourceViews(pd3dDevice, ((CDepthRenderShader*)m_pDepthRenderShader.get())->GetDepthTexture(), 0, 9);
 
 	CModelShader::GetInst()->CreateShader(pd3dDevice, GetGraphicsRootSignature(), 1, &pdxgiObjectRtvFormats, DXGI_FORMAT_D32_FLOAT, 0);
-	CModelShader::GetInst()->CreateShaderVariables(pd3dDevice,pd3dCommandList);
+	CModelShader::GetInst()->CreateShaderVariables(pd3dDevice, pd3dCommandList);
 	CModelShader::GetInst()->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 100);
-	
+
 	//CSoundManager::GetInst()->RegisterSound("Sound/mp3/David Bowie - Starman.mp3", false);
 	//CSoundManager::GetInst()->PlaySound("Sound/mp3/David Bowie - Starman.mp3");
 
-	std::unique_ptr<CKnightObject> m_pObject = std::make_unique<CKnightObject>(pd3dDevice, pd3dCommandList, 1);
+	//std::unique_ptr<CKnightObject> m_pObject = std::make_unique<CKnightObject>(pd3dDevice, pd3dCommandList, 1);
 
-	m_pObject = std::make_unique<CKnightObject>(pd3dDevice, pd3dCommandList, 1);
+	std::unique_ptr<CKnightObject> m_pObject = std::make_unique<CKnightObject>(pd3dDevice, pd3dCommandList, 1);
 	m_pObject->SetPosition(XMFLOAT3(-15.0f, 350.0f, 15.0f));
 	m_pObject->SetScale(5.0f, 5.0f, 5.0f);
 	m_pObject->Rotate(0.0f, 180.0f, 0.0f);
@@ -338,8 +340,141 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 
 	//int nAnimationSets = m_pObject->m_pSkinnedAnimationController->m_pAnimationSets->m_nAnimationSets;
 
-	m_pObjects.push_back(std::move(m_pObject));
+	//m_pObjects.push_back(std::move(m_pObject));
 
+	std::unique_ptr<COrcObject> m_pOrc = std::make_unique<COrcObject>(pd3dDevice, pd3dCommandList, 1);
+	m_pOrc->SetPosition(XMFLOAT3(120.0f, 600.0f, 90.0f));
+	m_pOrc->SetScale(14.0f, 14.0f, 14.0f);
+	m_pOrc->Rotate(0.0f, 0.0f, 0.0f);
+	m_pOrc->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 5);
+	m_pOrc->CreateArticulation(1.0f);
+	m_pOrc->m_bSimulateArticulate = false;
+	m_pOrc->Animate(0.0f);
+	m_pOrc->m_bSimulateArticulate = true;
+	physx::PxMat44 mat = m_pOrc->m_pArticulation->getRootGlobalPose();
+	XMFLOAT4X4 rootWorld = m_pOrc->FindFrame("root")->m_xmf4x4World;
+	XMFLOAT4X4 gobworld = m_pOrc->FindFrame("pelvis")->m_xmf4x4World;
+	/*memcpy(&mat, &gobworld, sizeof(physx::PxMat44));
+	mat.column3.x = gobworld._41;
+	mat.column3.y = gobworld._42;
+	mat.column3.z = gobworld._43;*/
+	m_pOrc->m_pArticulation->copyInternalStateToCache(*m_pOrc->m_pArticulationCache, physx::PxArticulationCacheFlag::eALL);
+	physx::PxTransform* rootLInkTrans = &m_pOrc->m_pArticulationCache->rootLinkData->transform;
+	physx::PxMat44 tobonetrans = physx::PxMat44(*rootLInkTrans);
+	tobonetrans.column3.x += rootWorld._41;
+	tobonetrans.column3.y += rootWorld._42;
+	tobonetrans.column3.z += rootWorld._43;
+	*rootLInkTrans = physx::PxTransform(tobonetrans).getNormalized();
+	m_pOrc->m_pArticulation->applyCache(*m_pOrc->m_pArticulationCache, physx::PxArticulationCacheFlag::eROOT_TRANSFORM);
+
+	m_pObjects.push_back(std::move(m_pOrc));
+
+	/*std::unique_ptr<CSkeletonObject> m_pSkeleton = std::make_unique<CSkeletonObject>(pd3dDevice, pd3dCommandList, 1);
+	m_pSkeleton->SetPosition(XMFLOAT3(150.0f, 0.0f, 90.0f));
+	m_pSkeleton->SetScale(14.0f, 14.0f, 14.0f);
+	m_pSkeleton->Rotate(0.0f, 0.0f, 0.0f);
+	m_pSkeleton->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 5);
+	m_pSkeleton->CreateArticulation(0.5f);
+	m_pSkeleton->m_bSimulateArticulate = false;
+	m_pSkeleton->Animate(0.0f);
+	m_pSkeleton->m_bSimulateArticulate = true;
+	mat = m_pSkeleton->m_pArticulation->getRootGlobalPose();
+	gobworld = m_pSkeleton->FindFrame("pelvis")->m_xmf4x4World;
+	mat.column3.x = gobworld._41;
+	mat.column3.y = gobworld._42;
+	mat.column3.z = gobworld._43;
+	m_pSkeleton->m_pArticulation->setRootGlobalPose(physx::PxTransform(mat));
+	m_pObjects.push_back(std::move(m_pSkeleton));*/
+
+	std::unique_ptr<CGoblinObject> m_pGoblin = std::make_unique<CGoblinObject>(pd3dDevice, pd3dCommandList, 1);
+	m_pGoblin->SetPosition(XMFLOAT3(90.0f, 600.0f, 90.0f));
+	m_pGoblin->SetScale(14.0f, 14.0f, 14.0f);
+	m_pGoblin->Rotate(0.0f, 0.0f, 0.0f);
+	m_pGoblin->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 5);
+	m_pGoblin->CreateArticulation(0.5f);
+	m_pGoblin->m_bSimulateArticulate = false;
+	m_pGoblin->Animate(0.0f);
+	m_pGoblin->m_bSimulateArticulate = true;
+	rootWorld = m_pGoblin->FindFrame("root")->m_xmf4x4World;
+	m_pGoblin->m_pArticulation->copyInternalStateToCache(*m_pGoblin->m_pArticulationCache, physx::PxArticulationCacheFlag::eALL);
+	rootLInkTrans = &m_pGoblin->m_pArticulationCache->rootLinkData->transform;
+	tobonetrans = physx::PxMat44(*rootLInkTrans);
+	tobonetrans.column3.x += rootWorld._41;
+	tobonetrans.column3.y += rootWorld._42;
+	tobonetrans.column3.z += rootWorld._43;
+	*rootLInkTrans = physx::PxTransform(tobonetrans).getNormalized();
+	m_pGoblin->m_pArticulation->applyCache(*m_pGoblin->m_pArticulationCache, physx::PxArticulationCacheFlag::eALL);
+
+	m_pObjects.push_back(std::move(m_pGoblin));
+
+	m_pGoblin = std::make_unique<CGoblinObject>(pd3dDevice, pd3dCommandList, 1);
+	m_pGoblin->SetPosition(XMFLOAT3(30.0f, 600.0f, 90.0f));
+	m_pGoblin->SetScale(14.0f, 14.0f, 14.0f);
+	m_pGoblin->Rotate(0.0f, 0.0f, 0.0f);
+	m_pGoblin->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 5);
+	m_pGoblin->CreateArticulation(0.5f);
+	m_pGoblin->m_bSimulateArticulate = false;
+	m_pGoblin->Animate(0.0f);
+	m_pGoblin->m_bSimulateArticulate = true;
+	rootWorld = m_pGoblin->FindFrame("root")->m_xmf4x4World;
+	m_pGoblin->m_pArticulation->copyInternalStateToCache(*m_pGoblin->m_pArticulationCache, physx::PxArticulationCacheFlag::eALL);
+	rootLInkTrans = &m_pGoblin->m_pArticulationCache->rootLinkData->transform;
+	tobonetrans = physx::PxMat44(*rootLInkTrans);
+	tobonetrans.column3.x += rootWorld._41;
+	tobonetrans.column3.y += rootWorld._42;
+	tobonetrans.column3.z += rootWorld._43;
+	*rootLInkTrans = physx::PxTransform(tobonetrans).getNormalized();
+	m_pGoblin->m_pArticulation->applyCache(*m_pGoblin->m_pArticulationCache, physx::PxArticulationCacheFlag::eALL);
+	m_pObjects.push_back(std::move(m_pGoblin));
+
+	m_pGoblin = std::make_unique<CGoblinObject>(pd3dDevice, pd3dCommandList, 1);
+	m_pGoblin->SetPosition(XMFLOAT3(30.0f, 600.0f, 30.0f));
+	m_pGoblin->SetScale(14.0f, 14.0f, 14.0f);
+	m_pGoblin->Rotate(0.0f, 0.0f, 0.0f);
+	m_pGoblin->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 5);
+	m_pGoblin->CreateArticulation(0.5f);
+	m_pGoblin->m_bSimulateArticulate = false;
+	m_pGoblin->Animate(0.0f);
+	m_pGoblin->m_bSimulateArticulate = true;
+	rootWorld = m_pGoblin->FindFrame("root")->m_xmf4x4World;
+	m_pGoblin->m_pArticulation->copyInternalStateToCache(*m_pGoblin->m_pArticulationCache, physx::PxArticulationCacheFlag::eALL);
+	rootLInkTrans = &m_pGoblin->m_pArticulationCache->rootLinkData->transform;
+	tobonetrans = physx::PxMat44(*rootLInkTrans);
+	tobonetrans.column3.x += rootWorld._41;
+	tobonetrans.column3.y += rootWorld._42;
+	tobonetrans.column3.z += rootWorld._43;
+	*rootLInkTrans = physx::PxTransform(tobonetrans).getNormalized();
+	m_pGoblin->m_pArticulation->applyCache(*m_pGoblin->m_pArticulationCache, physx::PxArticulationCacheFlag::eALL);
+	m_pObjects.push_back(std::move(m_pGoblin));
+
+	XMFLOAT3 testpos = XMFLOAT3(300.0f, 600.0f, 0.0f);
+	for (int i = 0; i < 45; ++i) {
+		testpos.x -= 25.0f;
+		m_pGoblin = std::make_unique<CGoblinObject>(pd3dDevice, pd3dCommandList, 1);
+		m_pGoblin->SetPosition(testpos);
+		m_pGoblin->SetScale(14.0f, 14.0f, 14.0f);
+		m_pGoblin->Rotate(0.0f, 0.0f, 0.0f);
+		m_pGoblin->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 5);
+		m_pGoblin->CreateArticulation(0.5f);
+		m_pGoblin->m_bSimulateArticulate = false;
+		m_pGoblin->Animate(0.0f);
+		m_pGoblin->m_bSimulateArticulate = true;
+		rootWorld = m_pGoblin->FindFrame("root")->m_xmf4x4World;
+		m_pGoblin->m_pArticulation->copyInternalStateToCache(*m_pGoblin->m_pArticulationCache, physx::PxArticulationCacheFlag::eALL);
+		rootLInkTrans = &m_pGoblin->m_pArticulationCache->rootLinkData->transform;
+		tobonetrans = physx::PxMat44(*rootLInkTrans);
+		tobonetrans.column3.x += rootWorld._41;
+		tobonetrans.column3.y += rootWorld._42;
+		tobonetrans.column3.z += rootWorld._43;
+		*rootLInkTrans = physx::PxTransform(tobonetrans).getNormalized();
+		physx::PxVec3 randDir = physx::PxVec3(rand() % 10 - 5, rand() % 10 - 5, rand() % 10 - 5);
+		randDir.normalize();
+		randDir *= 10.0f;
+		memcpy(&m_pGoblin->m_pArticulationCache->jointForce[3], &randDir, sizeof(physx::PxVec3));
+		m_pGoblin->m_pArticulation->applyCache(*m_pGoblin->m_pArticulationCache, physx::PxArticulationCacheFlag::eALL);
+		
+		m_pObjects.push_back(std::move(m_pGoblin));
+	}
 
 	/*for (int i = 0; i < nAnimationSets; ++i)
 	{
@@ -359,13 +494,14 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pTerrainShader->CreateShader(pd3dDevice, GetGraphicsRootSignature(), 1, &pdxgiObjectRtvFormats, DXGI_FORMAT_D32_FLOAT, 0);
 	m_pTerrainShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 13);
 	m_pTerrainShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
-	
+
 
 	// Terrain »ý¼º
-	XMFLOAT3 xmf3Scale(18.0f, 6.0f, 18.0f);
+	XMFLOAT3 xmf3Scale(6.0f, 3.0f, 6.0f);
 	XMFLOAT4 xmf4Color(0.0f, 0.5f, 0.0f, 0.0f);
 	m_pTerrain = std::make_unique<CSplatTerrain>(pd3dDevice, pd3dCommandList, GetGraphicsRootSignature(), _T("Terrain/terrainHeightMap257.raw"), 257, 257, 257, 257, xmf3Scale, xmf4Color, m_pTerrainShader.get());
 	m_pTerrain->SetPosition(XMFLOAT3(-800.f, 0.f, -800.f));
+	m_pTerrain->SetRigidStatic();
 	for (int i = 0; i < m_pObjects.size(); ++i)
 		((CDepthRenderShader*)m_pDepthRenderShader.get())->RegisterObject(m_pObjects[i].get());
 	((CDepthRenderShader*)m_pDepthRenderShader.get())->SetLight(m_pLight->GetLights());
@@ -376,23 +512,22 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pBillBoardObjectShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 10);
 
 	
-	//std::unique_ptr<CBillBoardObject> pBillBoardObject = std::make_unique<CBillBoardObject>(CTextureManager::GetInst()->LoadTexture(pd3dDevice, pd3dCommandList, L"Image/Grass01.dds"), pd3dDevice, pd3dCommandList, m_pBillBoardObjectShader.get(), 4.f);
+	//std::unique_ptr<CBillBoardObject> pBillBoardObject = std::make_unique<CBillBoardObject>(CTextureManager::GetInst()->LoadBillBoardTexture(pd3dDevice, pd3dCommandList, L"Image/Grass01.dds"), pd3dDevice, pd3dCommandList, m_pBillBoardObjectShader.get(), 4.f);
 	//pBillBoardObject->SetPosition(XMFLOAT3(0.f, -5.f, 0.f));
 	//m_pBillBoardObjects.push_back(std::move(pBillBoardObject));
 
-	//std::unique_ptr<CMultiSpriteObject> pSpriteAnimationObject = std::make_unique<CMultiSpriteObject>(CTextureManager::GetInst()->LoadTexture(pd3dDevice, pd3dCommandList, L"Image/Explode_8x8.dds"), pd3dDevice, pd3dCommandList, m_pBillBoardObjectShader.get(), 8, 8, 4.f, 0.05f);
+	//std::unique_ptr<CMultiSpriteObject> pSpriteAnimationObject = std::make_unique<CMultiSpriteObject>(CTextureManager::GetInst()->LoadBillBoardTexture(pd3dDevice, pd3dCommandList, L"Image/Explode_8x8.dds"), pd3dDevice, pd3dCommandList, m_pBillBoardObjectShader.get(), 8, 8, 4.f, 0.05f);
 	//pSpriteAnimationObject->SetPosition(XMFLOAT3(0.f, 5.f, 0.f));
 	//m_pBillBoardObjects.push_back(std::move(pSpriteAnimationObject));
 
-	//pSpriteAnimationObject = std::make_unique<CMultiSpriteObject>(CTextureManager::GetInst()->LoadTexture(pd3dDevice, pd3dCommandList, L"Image/Fire_Effect.dds"), pd3dDevice, pd3dCommandList, m_pBillBoardObjectShader.get(), 5, 6, 4.f, 0.05f);
+	//pSpriteAnimationObject = std::make_unique<CMultiSpriteObject>(CTextureManager::GetInst()->LoadBillBoardTexture(pd3dDevice, pd3dCommandList, L"Image/Fire_Effect.dds"), pd3dDevice, pd3dCommandList, m_pBillBoardObjectShader.get(), 5, 6, 4.f, 0.05f);
 	//pSpriteAnimationObject->SetPosition(XMFLOAT3(-10.f, 15.f, 0.f));
 	//m_pBillBoardObjects.push_back(std::move(pSpriteAnimationObject));
 
-	m_pParticleShader = std::make_shared<CParticleShader>();
-	
-	std::unique_ptr<CParticleObject> pParticleObject = std::make_unique<CParticleObject>(pd3dDevice, pd3dCommandList, GetGraphicsRootSignature(), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 65.0f, 0.0f), 2.0f, XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT2(2.0f, 2.0f), MAX_PARTICLES, m_pParticleShader.get(), true);
-
-	m_ppParticleObjects.push_back(std::move(pParticleObject));
+	//m_pParticleShader = std::make_shared<CParticleShader>();
+	//std::unique_ptr<CParticleObject> pParticleObject = std::make_unique<CParticleObject>(pd3dDevice, pd3dCommandList, GetGraphicsRootSignature(), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.f, 0.0f), 2.0f, XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT2(2.0f, 2.0f), MAX_PARTICLES, m_pParticleShader.get(), true);
+	//
+	//m_ppParticleObjects.push_back(std::move(pParticleObject));
 }
 void CMainTMPScene::UpdateObjects(float fTimeElapsed)
 {
@@ -404,6 +539,19 @@ void CMainTMPScene::UpdateObjects(float fTimeElapsed)
 }
 void CMainTMPScene::AnimateObjects(float fTimeElapsed)
 {
+	static float SimulateElapsedTime = 0.0f;
+
+	SimulateElapsedTime += fTimeElapsed;
+	if (!b_simulation) {
+		Locator.GetPxScene()->simulate(SimulateElapsedTime);
+		SimulateElapsedTime = 0.0f;
+		b_simulation = true;
+	}
+	if (Locator.GetPxScene()->fetchResults(false)) {
+		UpdateObjectArticulation();
+		b_simulation = false;
+	}
+
 	UpdateObjects(fTimeElapsed);
 }
 void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed, float fCurrentTime, CCamera* pCamera)
@@ -440,20 +588,21 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 	}
 	*/
 
-	for (int i = 0; i < m_ppParticleObjects.size(); i++)
-	{
-		//m_pParticleShader->UpdateShaderVariables(pd3dCommandList, fCurrentTime, fTimeElapsed);
-		m_ppParticleObjects[i]->UpdateShaderVariables(pd3dCommandList, fCurrentTime, fTimeElapsed);
-		m_ppParticleObjects[i]->Render(pd3dCommandList, pCamera, m_pParticleShader.get());
-	}
+	//for (int i = 0; i < m_ppParticleObjects.size(); i++)
+	//{
+	//	//m_pParticleShader->UpdateShaderVariables(pd3dCommandList, fCurrentTime, fTimeElapsed);
+	//	m_ppParticleObjects[i]->UpdateShaderVariables(pd3dCommandList, fCurrentTime, fTimeElapsed);
+	//	m_ppParticleObjects[i]->Render(pd3dCommandList, pCamera, m_pParticleShader.get());
+	//}
 }
 
 void CMainTMPScene::OnPostRenderTarget()
 {
-	for (int i = 0; i < m_ppParticleObjects.size(); i++)
-	{
-		m_ppParticleObjects[i]->OnPostRender();
-	}
+	//for (int i = 0; i < m_ppParticleObjects.size(); i++)
+	//{
+	//	m_ppParticleObjects[i]->OnPostRender();
+	//}
+
 }
 
 

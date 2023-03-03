@@ -44,6 +44,7 @@ struct VS_TERRAIN_OUTPUT
 	float2 uv1 : TEXCOORD1;
 	float3 normal : NORMAL0;
 	float3 normalW : NORMAL1;
+	float3 tangent : TANGENT;
 	float3 toCamera : TEXCOORD2;
 	float3 toLight : TEXCOORD3;
 	float4 uvs[MAX_LIGHTS] : TEXCOORD4;
@@ -83,22 +84,29 @@ float4 PSParallaxTerrain(VS_TERRAIN_OUTPUT input) : SV_TARGET
 	float4 cNormalColor[4];
 	float4 cHeightColor[4];
 	float4 FHeightColor;
+	/*int HighestAlpha = 0;
+	for (int i = 1; i < 4; ++i) {
+		if (cAlphaColor[HighestAlpha] < cAlphaColor[i])
+			HighestAlpha = i;
+	}*/
+
+
 
 	[unroll(20)]
 	while (nCurrSample < nSamples) {
 		for (int i = 0; i < 4; ++i) {
 			cHeightColor[i] = gtxTerrainTextures[8 + i].SampleGrad(gSamplerState, input.uv0 + vCurrOffset, dx, dy);
 
-			if (i == 0) {
+			if (i == 0 && cAlphaColor.r > 0.0f) {
 				FHeightColor += cHeightColor[i] * cAlphaColor.r;
 			}
-			else if (i == 1) {
+			else if (i == 1 && cAlphaColor.g > 0.0f) {
 				FHeightColor += cHeightColor[i] * cAlphaColor.g;
 			}
-			else if (i == 2) {
+			else if (i == 2 && cAlphaColor.b > 0.0f) {
 				FHeightColor += cHeightColor[i] * cAlphaColor.b;
 			}
-			else if (i == 3) {
+			else if (i == 3 && cAlphaColor.a > 0.0f) {
 				FHeightColor += cHeightColor[i] * cAlphaColor.a;
 			}
 		}
@@ -108,7 +116,7 @@ float4 PSParallaxTerrain(VS_TERRAIN_OUTPUT input) : SV_TARGET
 			float fDelta1 = fCurrSampleHeight - fCurryRayHeight;
 			float fDelta2 = (fCurryRayHeight + fStepSize) - fLastSampleHeight;
 			float fRatio = fDelta1 / (fDelta1 + fDelta2);
-			vCurrOffset = (fRatio) * vLastOffset + (1.0f - fRatio) * vCurrOffset;
+			vCurrOffset = (fRatio)*vLastOffset + (1.0f - fRatio) * vCurrOffset;
 			nCurrSample = nSamples + 1;
 		}
 		else {
@@ -119,6 +127,7 @@ float4 PSParallaxTerrain(VS_TERRAIN_OUTPUT input) : SV_TARGET
 			fLastSampleHeight = fCurrSampleHeight;
 		}
 	}
+
 	float2 vFinalCoords = input.uv0 + vCurrOffset;
 	float4 vFinalNormal;
 	float4 vFinalColor;
@@ -128,30 +137,44 @@ float4 PSParallaxTerrain(VS_TERRAIN_OUTPUT input) : SV_TARGET
 		cBaseTexColor[i] = gtxTerrainTextures[i].Sample(gSamplerState, vFinalCoords);
 		cNormalColor[i] = gtxTerrainTextures[4 + i].Sample(gSamplerState, vFinalCoords);
 
-		if (i == 0) {
+		if (i == 0 && cAlphaColor.r > 0.0f) {
 			vFinalColor += cBaseTexColor[i] * cAlphaColor.r;
-			vFinalNormal += cNormalColor[i] * cAlphaColor.r;
+				vFinalNormal += cNormalColor[i] * cAlphaColor.r;
 		}
-		else if (i == 1) {
+		else if (i == 1 && cAlphaColor.g > 0.0f) {
 			vFinalColor += cBaseTexColor[i] * cAlphaColor.g;
-			vFinalNormal += cNormalColor[i] * cAlphaColor.g;
+				vFinalNormal += cNormalColor[i] * cAlphaColor.g;
 		}
-		else if (i == 2) {
+		else if (i == 2 && cAlphaColor.b > 0.0f) {
 			vFinalColor += cBaseTexColor[i] * cAlphaColor.b;
-			vFinalNormal += cNormalColor[i] * cAlphaColor.b;
+				vFinalNormal += cNormalColor[i] * cAlphaColor.b;
 		}
-		else if (i == 3) {
+		else if (i == 3 && cAlphaColor.a > 0.0f) {
 			vFinalColor += cBaseTexColor[i] * cAlphaColor.a;
-			vFinalNormal += cNormalColor[i] * cAlphaColor.a;
+				vFinalNormal += cNormalColor[i] * cAlphaColor.a;
 		}
 	}
+
+
+	float3x3 mtxTangentToWorld;
+	mtxTangentToWorld[0] = normalize(input.tangent);
+	mtxTangentToWorld[2] = normalize(input.normal);
+	mtxTangentToWorld[1] = normalize(cross(input.tangent, input.normal));
+
 	vFinalNormal = vFinalNormal * 2.0f - 1.0f;
 	float3 toLight = float3(0.0f, 1.0f, 0.0f);
-	float4 cIllumination = Lighting(input.positionW, normalize(input.normalW), vFinalColor, true, input.uvs);
+	float3 Normal = mul(vFinalNormal, mtxTangentToWorld);
+	/*float3 vAmbient = vFinalColor.rgb * 0.2f;
+	vFinalColor.rgb = vFinalColor.rgb + vAmbient;*/
+	vFinalColor.rgb = vFinalColor.rgb * 2.0f;
+	float4 cIllumination = Lighting(input.positionW, Normal, vFinalColor, true, input.uvs);
+	//float4 cIllumination = Lighting(input.positionW, normalize(Normal), vFinalColor);
 
-	float3 vDiffuse = (lerp(vFinalColor, cIllumination, 0.2f).xyz);
+	/*float3 vAmbient = vFinalColor.rgb * 1.0f;
+	cIllumination = cIllumination + float4(vAmbient, 0.0f);*/
+
+	//float3 vDiffuse = (lerp(vFinalColor, cIllumination, 0.2f).xyz);
 	//float3 vDiffuse = vFinalColor.rgb * max(0.0f, dot(input.toLight, vFinalNormal.xyz)) * 0.5;
-	//float3 vAmbient = vFinalColor.rgb * 1.0f;
 	//vFinalColor.rgb = vAmbient + vDiffuse;
 
 	return (cIllumination);

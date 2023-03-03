@@ -5,6 +5,7 @@
 #pragma comment(lib, "dxgi.lib")
 #pragma comment(lib, "dxguid.lib")
 
+
 #define WIN32_LEAN_AND_MEAN		// 거의 사용되지 않는 내용은 Windows 헤더에서 제외합니다.
 
 // Windows 헤더 파일:
@@ -29,6 +30,14 @@
 #include <DirectXColors.h>
 #include <DirectXCollision.h>
 #include <DXGIDebug.h>
+
+#include <foundation/PxFoundation.h>
+#include <cooking/PxCooking.h>
+#include <geometry/PxTriangleMeshGeometry.h>
+#include <geometry/PxHeightField.h>
+#include <pvd/PxPvd.h>
+#include <pvd/PxPvdTransport.h>
+#include <PxPhysicsAPI.h>
 
 //--------------------------
 #include <iostream>
@@ -113,9 +122,13 @@ extern UINT	gnCbvSrvDescriptorIncrementSize;
 extern UINT gnRtvDescriptorIncrementSize;
 extern std::default_random_engine dre;
 
+extern physx::PxDefaultErrorCallback gDefaultErrorCallback;
+extern physx::PxDefaultAllocator gDefaultAllocatorCallback;
+
 extern int WriteIntegerFromFile(FILE* pInFile, const int value);
 extern float WriteFloatFromFile(FILE* pInFile, const float fValue);
 extern BYTE WriteStringFromFile(FILE* pInFile, std::string& pstrToken);
+extern bool b_simulation;
 
 extern int ReadIntegerFromFile(FILE* pInFile);
 extern float ReadFloatFromFile(FILE* pInFile);
@@ -127,6 +140,8 @@ extern ComPtr<ID3D12Resource> CreateTextureResourceFromDDSFile(ID3D12Device* pd3
 extern ComPtr<ID3D12Resource> CreateTexture2DResource(ID3D12Device* pd3dDevice, UINT nWidth, UINT nHeight, UINT nElements, UINT nMipLevels, DXGI_FORMAT dxgiFormat, D3D12_RESOURCE_FLAGS d3dResourceFlags, D3D12_RESOURCE_STATES d3dResourceStates, D3D12_CLEAR_VALUE* pd3dClearValue);
 extern void SynchronizeResourceTransition(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Resource* pd3dResource, D3D12_RESOURCE_STATES d3dStateBefore, D3D12_RESOURCE_STATES d3dStateAfter);
 extern void SwapResourcePointer(ID3D12Resource** ppd3dResourceA, ID3D12Resource** ppd3dResourceB);
+extern physx::PxMat44 convertToPhysXCoordSystem(const DirectX::XMFLOAT4X4& matrix);
+extern DirectX::XMFLOAT4X4 convertToDirectXCoordSystem(const physx::PxMat44& matrix);
 
 // Forward declare message handler from imgui_impl_win32.cpp
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);

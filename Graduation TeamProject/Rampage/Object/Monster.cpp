@@ -61,6 +61,52 @@ void CMonster::UpdateTransform(XMFLOAT4X4* pxmf4x4Parent)
 		m_WeaponBoundingBox.Transform(m_TransformedWeaponBoundingBox, XMLoadFloat4x4(&pWeapon->GetWorld()));
 	}
 }
+void CMonster::UpdateTransformFromArticulation(XMFLOAT4X4* pxmf4x4Parent, std::vector<std::string> m_pArtiLinkNames, std::vector<physx::PxArticulationLink*> m_pArticulationLinks, float scale)
+{
+	std::string target = CGameObject::GetFrameName();
+	auto it = std::find(m_pArtiLinkNames.begin(), m_pArtiLinkNames.end(), target);
+	int distance = std::distance(m_pArtiLinkNames.begin(), it);
+	if (distance < m_pArtiLinkNames.size()) {
+		CGameObject* obj = FindFrame(it->c_str());
+		physx::PxTransform transform = m_pArticulationLinks[distance]->getGlobalPose();
+		//physx::PxTransform transform = m_pArticulationLinks[index]->getInboundJoint()->getChildPose();
+		physx::PxMat44 World = physx::PxMat44(transform);
+
+		memcpy(&obj->m_xmf4x4World, &World, sizeof(XMFLOAT4X4));
+	}
+	else {
+		if (m_pStateMachine->GetCurrentState() == Damaged_Monster::GetInst() ||
+			m_pStateMachine->GetCurrentState() == Stun_Monster::GetInst())
+		{
+			XMFLOAT3 xmf3ShakeVec = Vector3::ScalarProduct(GetRight(), m_fShakeDistance, false);
+			XMFLOAT3 xmf3DamageVec = Vector3::ScalarProduct(m_xmf3HitterVec, m_fDamageDistance, false);
+			//XMFLOAT3 xmf3DamageVec = XMFLOAT3{};
+			XMFLOAT3 xmf3Pos = Vector3::Add(Vector3::Add(GetPosition(), xmf3ShakeVec), xmf3DamageVec);
+
+			m_xmf4x4Transform._41 = xmf3Pos.x;
+			m_xmf4x4Transform._42 = xmf3Pos.y;
+			m_xmf4x4Transform._43 = xmf3Pos.z;
+		}
+
+		m_xmf4x4World = (pxmf4x4Parent) ? Matrix4x4::Multiply(m_xmf4x4Transform, *pxmf4x4Parent) : m_xmf4x4Transform;
+	}
+
+	if (m_pSibling) m_pSibling->UpdateTransformFromArticulation(pxmf4x4Parent, m_pArtiLinkNames, m_AritculatCacheMatrixs, m_xmf4x4Scale._11);
+	if (m_pChild) m_pChild->UpdateTransformFromArticulation(&m_xmf4x4World, m_pArtiLinkNames, m_AritculatCacheMatrixs, m_xmf4x4Scale._11);
+
+	m_BodyBoundingBox.Transform(m_TransformedBodyBoudningBox, XMLoadFloat4x4(&m_xmf4x4Transform));
+#ifdef RENDER_BOUNDING_BOX
+	pBodyBoundingBoxMesh->SetWorld(m_xmf4x4Transform);
+#endif // RENDER_BOUNDING_BOX
+
+	if (pWeapon)
+	{
+#ifdef RENDER_BOUNDING_BOX
+		pWeaponBoundingBoxMesh->SetWorld(pWeapon->GetWorld());
+#endif 
+		m_WeaponBoundingBox.Transform(m_TransformedWeaponBoundingBox, XMLoadFloat4x4(&pWeapon->GetWorld()));
+	}
+}
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 COrcObject::COrcObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks)
@@ -78,7 +124,12 @@ COrcObject::~COrcObject()
 }
 void COrcObject::Animate(float fTimeElapsed)
 {
-	CGameObject::Animate(fTimeElapsed);
+	if (m_bSimulateArticulate) {
+		UpdateTransformFromArticulation(NULL, m_pArtiLinkNames, m_pArticulationLinks, m_xmf4x4Scale._11);
+	}
+	else {
+		CGameObject::Animate(fTimeElapsed);
+	}
 }
 void COrcObject::UpdateTransform(XMFLOAT4X4* pxmf4x4Parent)
 {
@@ -129,8 +180,14 @@ void CGoblinObject::Animate(float fTimeElapsed)
 		CGameObject::Animate(0.0f);
 	}
 
-	else
-		CGameObject::Animate(fTimeElapsed);
+	else {
+		if (m_bSimulateArticulate) {
+				UpdateTransformFromArticulation(NULL, m_pArtiLinkNames, m_pArticulationLinks, m_xmf4x4Scale._11);
+		}
+		else {
+			CGameObject::Animate(fTimeElapsed);
+		}
+	}
 }
 void CGoblinObject::UpdateTransform(XMFLOAT4X4* pxmf4x4Parent)
 {
@@ -168,7 +225,12 @@ CSkeletonObject::~CSkeletonObject()
 }
 void CSkeletonObject::Animate(float fTimeElapsed)
 {
-	CGameObject::Animate(fTimeElapsed);
+	if (m_bSimulateArticulate) {
+		UpdateTransformFromArticulation(NULL, m_pArtiLinkNames, m_pArticulationLinks, m_xmf4x4Scale._11);
+	}
+	else {
+		CGameObject::Animate(fTimeElapsed);
+	}
 }
 void CSkeletonObject::UpdateTransform(XMFLOAT4X4* pxmf4x4Parent)
 {

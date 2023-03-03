@@ -38,7 +38,7 @@ void CAttackSpriteComponent::SetTexture(int iIndex, LPCTSTR pszFileName)
 {
 	if (m_vSprite.size() <= iIndex)
 		return;
-	std::shared_ptr pTexture = CTextureManager::GetInst()->LoadTexture(pszFileName);
+	std::shared_ptr pTexture = CTextureManager::GetInst()->LoadBillBoardTexture(pszFileName);
 	if(pTexture)
 		m_vSprite[iIndex].second->ChangeTexture(pTexture);
 }

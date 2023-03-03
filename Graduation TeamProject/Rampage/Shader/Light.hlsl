@@ -50,7 +50,7 @@ float4 DirectionalLight(int nIndex, float4 fColor, float3 vNormal, float3 vToCam
 {
 	float3 vToLight = -gLights[nIndex].m_vDirection;
 	float fDiffuseFactor = dot(vToLight, vNormal);
-	
+
 	return(gLights[nIndex].m_cDiffuse * fDiffuseFactor * fColor);
 }
 
@@ -116,29 +116,36 @@ float4 Lighting(float3 vPosition, float3 vNormal, float4 fColor, bool bShadow, f
 	float3 vToCamera = normalize(gf3_CameraPosition - vPosition);
 	float4 cColor = float4(0.0f, 0.0f, 0.0f, 0.0f);
 
+
 	[unroll(MAX_LIGHTS)] for (int i = 0; i < gnLights; i++)
 	{
 		if (gLights[i].m_bEnable)
 		{
-			float fShadowFactor = 0.1f;
+			float fShadowFactor = 0.0f;
 #ifdef _WITH_PCF_FILTERING
 			if (bShadow) fShadowFactor = Compute3x3ShadowFactor(uvs[i].xy / uvs[i].ww, uvs[i].z / uvs[i].w, i);
 #else
-			if (bShadow) fShadowFactor = gtxtDepthTextures[i].SampleCmpLevelZero(gssComparisonPCFShadow, uvs[i].xy / uvs[i].ww, uvs[i].z / uvs[i].w).r;			
+			if (bShadow) fShadowFactor = gtxtDepthTextures[i].SampleCmpLevelZero(gssComparisonPCFShadow, uvs[i].xy / uvs[i].ww, uvs[i].z / uvs[i].w).r;
 #endif
+			cColor += gLights[i].m_cAmbient * fColor;
 			if (gLights[i].m_nType == DIRECTIONAL_LIGHT)
 			{
-				cColor += DirectionalLight(i, fColor, vNormal, vToCamera) * fShadowFactor;
+				cColor += DirectionalLight(i, fColor, vNormal, vToCamera);
+				//cColor += DirectionalLight(i, fColor, vNormal, vToCamera) * fShadowFactor;
+				//cColor.rgb += DirectionalLight(i, fColor, vNormal, vToCamera).rgb * fShadowFactor;
 			}
 			else if (gLights[i].m_nType == POINT_LIGHT)
 			{
-				cColor += PointLight(i, vPosition, vNormal, vToCamera) * fShadowFactor;
+				cColor += lerp(PointLight(i, fColor, vNormal, vToCamera), float4(0.f, 0.f, 0.f, 1.f), 1.0f - fShadowFactor);
+				//cColor += PointLight(i, vPosition, vNormal, vToCamera) * fShadowFactor;
 			}
 			else if (gLights[i].m_nType == SPOT_LIGHT)
 			{
 				cColor += SpotLight(i, vPosition, vNormal, vToCamera) * fShadowFactor;
 			}
-			cColor += gLights[i].m_cAmbient * fColor;
+			/*float4 ShadowColor = lerp(float4(0.f, 0.f, 0.f, 1.f), cColor, fShadowFactor);
+			cColor = lerp(cColor, ShadowColor, 1.0f - fShadowFactor);*/
+			cColor.rgb = cColor.rgb * fShadowFactor;
 		}
 	}
 

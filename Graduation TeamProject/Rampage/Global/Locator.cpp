@@ -16,6 +16,51 @@ CLocator::~CLocator()
 
 bool CLocator::Init()
 {
+	m_pFoundation = PxCreateFoundation(PX_PHYSICS_VERSION, gDefaultAllocatorCallback, gDefaultErrorCallback);
+
+	m_pPxPvd = physx::PxCreatePvd(*m_pFoundation);
+	physx::PxPvdTransport* transport = physx::PxDefaultPvdSocketTransportCreate("127.0.0.1", 5425, 100);
+	m_pPxPvd->connect(*transport, physx::PxPvdInstrumentationFlag::eALL);
+
+	bool recordMemoryAllocations = true;
+
+	m_pPhysics = PxCreatePhysics(PX_PHYSICS_VERSION, *m_pFoundation, physx::PxTolerancesScale(1.0f, 10.0f), recordMemoryAllocations, m_pPxPvd);
+
+	physx::PxSceneDesc SceneDesc(m_pPhysics->getTolerancesScale());
+	SceneDesc.cpuDispatcher = physx::PxDefaultCpuDispatcherCreate(8); // 이 세가지 파라미터가 반드시 필요함.
+	SceneDesc.filterShader = physx::PxDefaultSimulationFilterShader; // 각각 어떤 역할을 하는 지는 추가적으로 조사해볼 필요가 있음.
+	SceneDesc.gravity = physx::PxVec3(0.0f, -9.81f, 0.0f);
+	//SceneDesc.gravity = physx::PxVec3(0.0f, 0.0f, 0.0f);
+
+	m_pPxScene = m_pPhysics->createScene(SceneDesc);
+
+	//physx::PxTransform transform(physx::PxVec3(0.0f, 10.0f, 0.0f));
+
+	//physx::PxMaterial* material = m_pPhysics->createMaterial(0.5, 0.5, 0.5);
+	//physx::PxShape* shape = m_pPhysics->createShape(physx::PxBoxGeometry(1.0f, 1.0f, 1.0f), *material);
+
+	//physx::PxRigidDynamic* actor = physx::PxCreateDynamic(*m_pPhysics, transform, physx::PxBoxGeometry(1.0f, 1.0f, 1.0f), *material, 1.0f);
+
+
+	//physx::PxRigidStatic* plane = physx::PxCreateStatic(*m_pPhysics, physx::PxTransform(physx::PxVec3(0.0f), physx::PxQuat(physx::PxHalfPi, physx::PxVec3(0.0f, 0.0f, 1.0f))), physx::PxPlaneGeometry(), *material);
+
+	////physx::PxActor* actor = m_pPhysics->createRigidDynamic(transform);
+
+	////actor->attachShape(*actor);
+	//m_pPxScene->addActor(*plane);
+	//m_pPxScene->addActor(*actor);
+
+	pvdClient = m_pPxScene->getScenePvdClient();
+	if (pvdClient) {
+		pvdClient->setScenePvdFlag(physx::PxPvdSceneFlag::eTRANSMIT_CONSTRAINTS, true);
+		pvdClient->setScenePvdFlag(physx::PxPvdSceneFlag::eTRANSMIT_CONTACTS, true);
+		pvdClient->setScenePvdFlag(physx::PxPvdSceneFlag::eTRANSMIT_SCENEQUERIES, true);
+	}
+
+
+	m_pMessageDispatcher = std::make_unique<CMessageDispatcher>();
+	m_pEntityManager = std::make_unique<CEntityManager>();
+
 	std::shared_ptr<CComponentSet> componentset = std::make_shared<CComponentSet>();
 	SetComponentSet(componentset);
 	componentset = std::make_shared<CComponentSet>();
@@ -366,63 +411,63 @@ void DataLoader::LoadComponentSet(FILE* pInFile, CComponentSet* componentset)
 		}
 		else if (!strcmp(buf, "<CShootSoundComponent>:"))
 		{
-		CShootSoundComponent* component = (CShootSoundComponent*)componentset->FindComponent(typeid(CShootSoundComponent));
+			CShootSoundComponent* component = (CShootSoundComponent*)componentset->FindComponent(typeid(CShootSoundComponent));
 
-		for (; ; )
-		{
-			ReadStringFromFile(pInFile, buf);
+			for (; ; )
+			{
+				ReadStringFromFile(pInFile, buf);
 
-			if (!strcmp(buf, "<Enable>:"))
-			{
-				component->SetEnable(ReadIntegerFromFile(pInFile));
+				if (!strcmp(buf, "<Enable>:"))
+				{
+					component->SetEnable(ReadIntegerFromFile(pInFile));
+				}
+				else if (!strcmp(buf, "<Sound>:"))
+				{
+					component->m_nSoundNumber = ReadIntegerFromFile(pInFile);
+				}
+				else if (!strcmp(buf, "<Delay>:"))
+				{
+					component->m_fDelay = ReadFloatFromFile(pInFile);
+				}
+				else if (!strcmp(buf, "<Volume>:"))
+				{
+					component->m_fVolume = ReadFloatFromFile(pInFile);
+				}
+				else if (!strcmp(buf, "</CShootSoundComponent>:"))
+				{
+					break;
+				}
 			}
-			else if (!strcmp(buf, "<Sound>:"))
-			{
-				component->m_nSoundNumber = ReadIntegerFromFile(pInFile);
-			}
-			else if (!strcmp(buf, "<Delay>:"))
-			{
-				component->m_fDelay = ReadFloatFromFile(pInFile);
-			}
-			else if (!strcmp(buf, "<Volume>:"))
-			{
-				component->m_fVolume = ReadFloatFromFile(pInFile);
-			}
-			else if (!strcmp(buf, "</CShootSoundComponent>:"))
-			{
-				break;
-			}
-		}
 		}
 		else if (!strcmp(buf, "<CDamageSoundComponent>:"))
 		{
-		CDamageSoundComponent* component = (CDamageSoundComponent*)componentset->FindComponent(typeid(CDamageSoundComponent));
+			CDamageSoundComponent* component = (CDamageSoundComponent*)componentset->FindComponent(typeid(CDamageSoundComponent));
 
-		for (; ; )
-		{
-			ReadStringFromFile(pInFile, buf);
+			for (; ; )
+			{
+				ReadStringFromFile(pInFile, buf);
 
-			if (!strcmp(buf, "<Enable>:"))
-			{
-				component->SetEnable(ReadIntegerFromFile(pInFile));
+				if (!strcmp(buf, "<Enable>:"))
+				{
+					component->SetEnable(ReadIntegerFromFile(pInFile));
+				}
+				else if (!strcmp(buf, "<Sound>:"))
+				{
+					component->m_nSoundNumber = ReadIntegerFromFile(pInFile);
+				}
+				else if (!strcmp(buf, "<Delay>:"))
+				{
+					component->m_fDelay = ReadFloatFromFile(pInFile);
+				}
+				else if (!strcmp(buf, "<Volume>:"))
+				{
+					component->m_fVolume = ReadFloatFromFile(pInFile);
+				}
+				else if (!strcmp(buf, "</CDamageSoundComponent>:"))
+				{
+					break;
+				}
 			}
-			else if (!strcmp(buf, "<Sound>:"))
-			{
-				component->m_nSoundNumber = ReadIntegerFromFile(pInFile);
-			}
-			else if (!strcmp(buf, "<Delay>:"))
-			{
-				component->m_fDelay = ReadFloatFromFile(pInFile);
-			}
-			else if (!strcmp(buf, "<Volume>:"))
-			{
-				component->m_fVolume = ReadFloatFromFile(pInFile);
-			}
-			else if (!strcmp(buf, "</CDamageSoundComponent>:"))
-			{
-				break;
-			}
-		}
 		}
 		else if (!strcmp(buf, "</Components>:"))
 		{

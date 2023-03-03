@@ -317,3 +317,28 @@ void SwapResourcePointer(ID3D12Resource** ppd3dResourceA, ID3D12Resource** ppd3d
 	*ppd3dResourceA = *ppd3dResourceB;
 	*ppd3dResourceB = pd3dTempResource;
 }
+
+
+physx::PxMat44 convertToPhysXCoordSystem(const DirectX::XMFLOAT4X4& matrix)
+{
+	DirectX::XMMATRIX directXMatrix = DirectX::XMLoadFloat4x4(&matrix);
+	directXMatrix = DirectX::XMMatrixTranspose(directXMatrix);
+
+	physx::PxMat44 physXMatrix;
+	std::memcpy((void*)physXMatrix.front(), &directXMatrix, sizeof(physx::PxMat44));
+	physXMatrix = physXMatrix.inverseRT();
+
+	return physXMatrix;
+}
+
+// Convert a matrix from PhysX coordinate system to DirectX 12 coordinate system
+DirectX::XMFLOAT4X4 convertToDirectXCoordSystem(const physx::PxMat44& matrix)
+{
+	physx::PxMat44 physXMatrix = matrix.inverseRT();
+	physXMatrix = physXMatrix.getTranspose();
+
+	DirectX::XMFLOAT4X4 directXMatrix;
+	std::memcpy(&directXMatrix, physXMatrix.front(), sizeof(DirectX::XMFLOAT4X4));
+
+	return directXMatrix;
+}

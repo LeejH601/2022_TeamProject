@@ -45,7 +45,16 @@ bool CGameFramework::OnCreate(HINSTANCE hInstance, HWND hMainWnd)
 
 	//CommandList를 실행하고 GPU 연산이 완료될 때까지 기다립니다.
 	ExecuteCommandLists();
-	
+
+
+
+
+	/*physx::PxPvd* mPvd = physx::PxCreatePvd(*mFoundation);
+	physx::PxPvdTransport* transport = physx::PxDefaultPvdSocketTransportCreate(PVD_HOST, 5425, 10);
+
+	PxPvdTransport* transport = PxDefaultPvdSocketTransportCreate(PVD_HOST, 5425, 10);
+	mPvd->connect(*transport, PxPvdInstrumentationFlag::eALL);*/
+
 	return(true);
 }
 void CGameFramework::OnDestroy()
@@ -376,11 +385,11 @@ void CGameFramework::OnPrepareRenderTarget()
 {
 	//ImVec4 clear_color = CImGuiManager::GetInst()->GetColor();
 	const float clear_color_with_alpha[4] = { 0.f, 0.f, 0.f, 0.f };
-	
+
 	/*FLOAT pfDefaultClearColor[4] = {0.0f, 0.0f, 0.0f, 1.0f};
 
 	D3D12_CPU_DESCRIPTOR_HANDLE* pd3dAllRtvCPUHandles = new D3D12_CPU_DESCRIPTOR_HANDLE[2];
-	
+
 	pd3dAllRtvCPUHandles[0] = m_pd3dSwapRTVCPUHandles[m_nSwapChainBufferIndex];
 	m_pd3dCommandList->ClearRenderTargetView(m_pd3dSwapRTVCPUHandles[m_nSwapChainBufferIndex], clear_color_with_alpha, 0, NULL);
 
@@ -389,10 +398,10 @@ void CGameFramework::OnPrepareRenderTarget()
 	D3D12_CPU_DESCRIPTOR_HANDLE d3dRtvCPUDescriptorHandle = CImGuiManager::GetInst()->GetRtvCPUDescriptorHandle();
 	m_pd3dCommandList->ClearRenderTargetView(d3dRtvCPUDescriptorHandle, pfDefaultClearColor, 0, NULL);
 	pd3dAllRtvCPUHandles[1] = d3dRtvCPUDescriptorHandle;
-	
+
 	m_pd3dCommandList->OMSetRenderTargets(2, pd3dAllRtvCPUHandles, FALSE, &m_d3dDsvDescriptorCPUHandle);
 
-	
+
 	if (pd3dAllRtvCPUHandles) delete[] pd3dAllRtvCPUHandles;*/
 	m_pd3dCommandList->ClearRenderTargetView(m_pd3dSwapRTVCPUHandles[m_nSwapChainBufferIndex], clear_color_with_alpha, 0, NULL);
 	m_pd3dCommandList->OMSetRenderTargets(1, &m_pd3dSwapRTVCPUHandles[m_nSwapChainBufferIndex], FALSE, &m_d3dDsvDescriptorCPUHandle);
@@ -440,9 +449,14 @@ void CGameFramework::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dComman
 	D3D12_GPU_VIRTUAL_ADDRESS d3dGpuVirtualAddress = m_pd3dcbParallax->GetGPUVirtualAddress();
 	pd3dCommandList->SetGraphicsRootConstantBufferView(7, d3dGpuVirtualAddress);*/
 }
-void CGameFramework::FrameAdvance() 
+void CGameFramework::FrameAdvance()
 {
 	m_GameTimer.Tick(0.0f);
+	//if (started == 0) {
+	//	Locator.GetPxScene()->simulate(m_GameTimer.GetFrameTimeElapsed());
+	//	started++;
+	//}
+	
 
 	ProcessInput();
 	AnimateObjects();

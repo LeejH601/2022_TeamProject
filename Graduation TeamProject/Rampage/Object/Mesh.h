@@ -166,6 +166,8 @@ public:
 
 	int GetRawImageWidth() { return(m_nWidth); }
 	int GetRawImageLength() { return(m_nLength); }
+
+	BYTE* GetAllPixels() { return m_pRawImagePixels; };
 };
 class CHeightMapImage : public CRawFormatImage
 {
@@ -338,7 +340,7 @@ public:
 #define PARTICLE_TYPE_FLARE02		3
 #define PARTICLE_TYPE_FLARE03		4
 
-#define MAX_PARTICLES				100000
+#define MAX_PARTICLES				5000
 
 //#define _WITH_QUERY_DATA_SO_STATISTICS
 

@@ -32,6 +32,11 @@ public:
 	virtual void OnPreRender(ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed);
 	virtual void OnPrepareRender(ID3D12GraphicsCommandList* pd3dCommandList);
 	virtual void CreateGraphicsRootSignature(ID3D12Device* pd3dDevice);
+	virtual void UpdateObjectArticulation() {
+		for (int i = 0; i < m_pObjects.size(); ++i) {
+			m_pObjects[i]->updateArticulationMatrix();
+		}
+	}
 
 	virtual bool OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
 	virtual bool OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam, DWORD& dwDirection);
