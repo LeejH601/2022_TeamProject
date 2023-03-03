@@ -66,6 +66,13 @@ float4 PS_Player(VS_OUTPUT input) : SV_TARGET
 	if (gnTexturesMask & MATERIAL_METALLIC_MAP) cMetallicColor = gtxMappedTexture[3].Sample(gSamplerState, input.uv);
 	if (gnTexturesMask & MATERIAL_EMISSION_MAP) cEmissionColor = gtxMappedTexture[4].Sample(gSamplerState, input.uv);
 
+	/*float3 NormalW = input.normalW;
+	NormalW.x = -NormalW.x;
+	NormalW.y = -NormalW.y;
+	NormalW.z = -NormalW.z;*/
+
+	//float3 NormalW = float3(input.normalW.x, -input.normalW.z, input.normalW.y);
+	
 
 	float3 N = normalize(input.normalW);
 	float3 T = normalize(input.tangentW);
@@ -76,7 +83,10 @@ float4 PS_Player(VS_OUTPUT input) : SV_TARGET
 	float3x3 TBN = float3x3(T, B, N);
 
 	float3 normal = cNormalColor.rgb;
+	//float3 normal = float3(cNormalColor.r, -cNormalColor.b, cNormalColor.g);
 	normal = (2.0f * normal) - 1.0f;
+	/*normal.y = -normal.y;
+	normal.z = -normal.z;*/
 
 	float4 cColor = cAlbedoColor + cSpecularColor + cEmissionColor;
 

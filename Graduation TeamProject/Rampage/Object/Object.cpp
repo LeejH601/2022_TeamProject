@@ -768,9 +768,9 @@ CKnightObject::CKnightObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 
 	CGameObject* obj = pKnightModel->m_pModelRootObject->FindFrame("SK_FKnightB_05");
 	//obj->m_ppMaterials[8]->m_pTexture->m_nTextureType = 1;
-	obj->m_ppMaterials[5]->m_nType = 1; // ¸Ó¸® ³ë¸Ö ¸Ê »ç¿ë x
-	obj->m_ppMaterials[7]->m_nType = 1; // °¡½¿ ¹êµå ³ë¸Ö ¸Ê »ç¿ë x
-	obj->m_ppMaterials[8]->m_nType = 1; // ÇÇºÎ ³ë¸Ö ¸Ê »ç¿ë x
+	//obj->m_ppMaterials[5]->m_nType = 1; // ¸Ó¸® ³ë¸Ö ¸Ê »ç¿ë x
+	//obj->m_ppMaterials[7]->m_nType = 1; // °¡½¿ ¹êµå ³ë¸Ö ¸Ê »ç¿ë x
+	//obj->m_ppMaterials[8]->m_nType = 1; // ÇÇºÎ ³ë¸Ö ¸Ê »ç¿ë x
 
 	SetChild(pKnightModel->m_pModelRootObject, true);
 	//m_pSkinnedAnimationController = std::make_unique<CKightRootRollBackAnimationController>(pd3dDevice, pd3dCommandList, nAnimationTracks, pKnightModel);
@@ -851,41 +851,50 @@ void CGameObject::CreateArticulation(float meshScale)
 
 	m_pArticulation = Locator.GetPxPhysics()->createArticulationReducedCoordinate();
 	m_pArticulation->setArticulationFlag(physx::PxArticulationFlag::eDISABLE_SELF_COLLISION, true);
-	m_pArticulation->setSolverIterationCounts(10, 4);
+	m_pArticulation->setSolverIterationCounts(30, 10);
 	m_pArticulation->setMaxCOMLinearVelocity(40);
 
 	float scale = m_xmf4x4Scale._11;
 
 	JointAxisDesc FixDesc;
 	FixDesc.type = physx::PxArticulationJointType::eFIX;
-	FixDesc.eS1LImit.low = 0.0f;
-	FixDesc.eS1LImit.high = 0.1f;
-	FixDesc.eS2LImit.low = 0.0f;
-	FixDesc.eS2LImit.high = 0.1f;
-	FixDesc.eTLImit.low = 0.0f;
-	FixDesc.eTLImit.high = 0.1f;
+	FixDesc.eS1LImit.low = -FLT_MAX;
+	FixDesc.eS1LImit.high = FLT_MAX;
+	FixDesc.eS2LImit.low = -FLT_MAX;
+	FixDesc.eS2LImit.high = FLT_MAX;
+	FixDesc.eTLImit.low = -FLT_MAX;
+	FixDesc.eTLImit.high = FLT_MAX;
+	FixDesc.eS1Drive.maxForce = FLT_MAX;
+	FixDesc.eS2Drive.maxForce = FLT_MAX;
+	FixDesc.eTDrive.maxForce = FLT_MAX;
 	JointAxisDesc SPHERICALDesc;
 	SPHERICALDesc.type = physx::PxArticulationJointType::eSPHERICAL;
 	SPHERICALDesc.eSwing1 = true;
 	SPHERICALDesc.eSwing2 = true;
 	SPHERICALDesc.eTWIST = true;
-	SPHERICALDesc.eS1LImit.low = 0.0f;
-	SPHERICALDesc.eS1LImit.high = 0.1f;
-	SPHERICALDesc.eS2LImit.low = 0.0f;
-	SPHERICALDesc.eS2LImit.high = 0.1f;
-	SPHERICALDesc.eTLImit.low = 0.0f;
-	SPHERICALDesc.eTLImit.high = 0.1f;
+	SPHERICALDesc.eS1LImit.low = -FLT_MAX;
+	SPHERICALDesc.eS1LImit.high = FLT_MAX;
+	SPHERICALDesc.eS2LImit.low = -FLT_MAX;
+	SPHERICALDesc.eS2LImit.high = FLT_MAX;
+	SPHERICALDesc.eTLImit.low = -FLT_MAX;
+	SPHERICALDesc.eTLImit.high = FLT_MAX;
+	SPHERICALDesc.eS1Drive.maxForce = FLT_MAX;
+	SPHERICALDesc.eS2Drive.maxForce = FLT_MAX;
+	SPHERICALDesc.eTDrive.maxForce = FLT_MAX;
 	/*SPHERICALDesc.eS1Drive.maxForce = 10.f;
 	SPHERICALDesc.eS2Drive.maxForce = 10.f;
 	SPHERICALDesc.eTDrive.maxForce = 10.f;*/
 	JointAxisDesc REVOLUTEDesc;
 	REVOLUTEDesc.type = physx::PxArticulationJointType::eREVOLUTE;
-	REVOLUTEDesc.eS1LImit.low = 0.0f;
-	REVOLUTEDesc.eS1LImit.high = 0.1f;
-	REVOLUTEDesc.eS2LImit.low = 0.0f;
-	REVOLUTEDesc.eS2LImit.high = 0.1f;
-	REVOLUTEDesc.eTLImit.low = 0.0f;
-	REVOLUTEDesc.eTLImit.high = 0.1f;
+	REVOLUTEDesc.eS1LImit.low = -FLT_MAX;
+	REVOLUTEDesc.eS1LImit.high = FLT_MAX;
+	REVOLUTEDesc.eS2LImit.low = -FLT_MAX;
+	REVOLUTEDesc.eS2LImit.high = FLT_MAX;
+	REVOLUTEDesc.eTLImit.low = -FLT_MAX;
+	REVOLUTEDesc.eTLImit.high = FLT_MAX;
+	REVOLUTEDesc.eS1Drive.maxForce = FLT_MAX;
+	REVOLUTEDesc.eS2Drive.maxForce = FLT_MAX;
+	REVOLUTEDesc.eTDrive.maxForce = FLT_MAX;
 	/*REVOLUTEDesc.eS1Drive.maxForce = 10.f;
 	REVOLUTEDesc.eS2Drive.maxForce = 10.f;
 	REVOLUTEDesc.eTDrive.maxForce = 10.f;*/
@@ -935,13 +944,13 @@ void CGameObject::CreateArticulation(float meshScale)
 	SPHERICALDesc.eS2LImit.low = -10.0f * physx::PxPi / 180.0f;  // x?
 	SPHERICALDesc.eS2LImit.high = 10.0f * physx::PxPi / 180.0f;
 	SPHERICALDesc.eTDrive.driveType = physx::PxArticulationDriveType::eFORCE;
-	SPHERICALDesc.eTDrive.damping = 0.5f;
+	SPHERICALDesc.eTDrive.damping = 100.0f;
 	SPHERICALDesc.eTDrive.stiffness = 0.5f;
 	SPHERICALDesc.eS1Drive.driveType = physx::PxArticulationDriveType::eFORCE;
-	SPHERICALDesc.eS1Drive.damping = 0.5f;
+	SPHERICALDesc.eS1Drive.damping = 100.0f;
 	SPHERICALDesc.eS1Drive.stiffness = 0.5f;
 	SPHERICALDesc.eS2Drive.driveType = physx::PxArticulationDriveType::eFORCE;
-	SPHERICALDesc.eS2Drive.damping = 0.5f;
+	SPHERICALDesc.eS2Drive.damping = 100.0f;
 	SPHERICALDesc.eS2Drive.stiffness = 0.5f;
 #ifdef _test_ragdoll
 	SetJoint(joint, SPHERICALDesc);
@@ -999,13 +1008,13 @@ void CGameObject::CreateArticulation(float meshScale)
 	SPHERICALDesc.eS2LImit.low = -10.0f * physx::PxPi / 180.0f;  // x?
 	SPHERICALDesc.eS2LImit.high = 10.0f * physx::PxPi / 180.0f;
 	SPHERICALDesc.eTDrive.driveType = physx::PxArticulationDriveType::eFORCE;
-	SPHERICALDesc.eTDrive.damping = 0.5f;
+	SPHERICALDesc.eTDrive.damping = 100.0f;
 	SPHERICALDesc.eTDrive.stiffness = 0.5f;
 	SPHERICALDesc.eS1Drive.driveType = physx::PxArticulationDriveType::eFORCE;
-	SPHERICALDesc.eS1Drive.damping = 0.5f;
+	SPHERICALDesc.eS1Drive.damping = 100.0f;
 	SPHERICALDesc.eS1Drive.stiffness = 0.5f;
 	SPHERICALDesc.eS2Drive.driveType = physx::PxArticulationDriveType::eFORCE;
-	SPHERICALDesc.eS2Drive.damping = 0.5f;
+	SPHERICALDesc.eS2Drive.damping = 100.0f;
 	SPHERICALDesc.eS2Drive.stiffness = 0.5f;
 #ifdef _test_ragdoll
 	SetJoint(joint, SPHERICALDesc);
@@ -1028,13 +1037,13 @@ void CGameObject::CreateArticulation(float meshScale)
 	SPHERICALDesc.eS2LImit.low = -10.0f * physx::PxPi / 180.0f;  // x?
 	SPHERICALDesc.eS2LImit.high = 40.0f * physx::PxPi / 180.0f;
 	SPHERICALDesc.eTDrive.driveType = physx::PxArticulationDriveType::eFORCE;
-	SPHERICALDesc.eTDrive.damping = 0.5f;
+	SPHERICALDesc.eTDrive.damping = 100.0f;
 	SPHERICALDesc.eTDrive.stiffness = 0.5f;
 	SPHERICALDesc.eS1Drive.driveType = physx::PxArticulationDriveType::eFORCE;
-	SPHERICALDesc.eS1Drive.damping = 0.5f;
+	SPHERICALDesc.eS1Drive.damping = 100.0f;
 	SPHERICALDesc.eS1Drive.stiffness = 0.5f;
 	SPHERICALDesc.eS2Drive.driveType = physx::PxArticulationDriveType::eFORCE;
-	SPHERICALDesc.eS2Drive.damping = 0.5f;
+	SPHERICALDesc.eS2Drive.damping = 100.0f;
 	SPHERICALDesc.eS2Drive.stiffness = 0.5f;
 #ifdef _test_ragdoll
 	SetJoint(joint, SPHERICALDesc);
@@ -1113,13 +1122,13 @@ void CGameObject::CreateArticulation(float meshScale)
 	REVOLUTEDesc.eS2LImit.low = 0.0f * physx::PxPi / 180.0f;
 	REVOLUTEDesc.eS2LImit.high = 140.0f * physx::PxPi / 180.0f;
 	REVOLUTEDesc.eTDrive.driveType = physx::PxArticulationDriveType::eFORCE;
-	REVOLUTEDesc.eTDrive.damping = 0.2f;
+	REVOLUTEDesc.eTDrive.damping = 100.0f;
 	REVOLUTEDesc.eTDrive.stiffness = 0.7f;
 	REVOLUTEDesc.eS1Drive.driveType = physx::PxArticulationDriveType::eFORCE;
-	REVOLUTEDesc.eS1Drive.damping = 0.2f;
+	REVOLUTEDesc.eS1Drive.damping = 100.0f;
 	REVOLUTEDesc.eS1Drive.stiffness = 0.7f;
 	REVOLUTEDesc.eS2Drive.driveType = physx::PxArticulationDriveType::eFORCE;
-	REVOLUTEDesc.eS2Drive.damping = 0.2f;
+	REVOLUTEDesc.eS2Drive.damping = 100.0f;
 	REVOLUTEDesc.eS2Drive.stiffness = 0.7f;
 #ifdef _test_ragdoll
 	SetJoint(joint, REVOLUTEDesc);
@@ -1197,13 +1206,13 @@ void CGameObject::CreateArticulation(float meshScale)
 	REVOLUTEDesc.eS2LImit.low = 0.0f * physx::PxPi / 180.0f;
 	REVOLUTEDesc.eS2LImit.high = 140.0f * physx::PxPi / 180.0f;
 	REVOLUTEDesc.eTDrive.driveType = physx::PxArticulationDriveType::eFORCE;
-	REVOLUTEDesc.eTDrive.damping = 0.2f;
+	REVOLUTEDesc.eTDrive.damping = 100.0f;
 	REVOLUTEDesc.eTDrive.stiffness = 0.7f;
 	REVOLUTEDesc.eS1Drive.driveType = physx::PxArticulationDriveType::eFORCE;
-	REVOLUTEDesc.eS1Drive.damping = 0.2f;
+	REVOLUTEDesc.eS1Drive.damping = 100.0f;
 	REVOLUTEDesc.eS1Drive.stiffness = 0.7f;
 	REVOLUTEDesc.eS2Drive.driveType = physx::PxArticulationDriveType::eFORCE;
-	REVOLUTEDesc.eS2Drive.damping = 0.2f;
+	REVOLUTEDesc.eS2Drive.damping = 100.0f;
 	REVOLUTEDesc.eS2Drive.stiffness = 0.7f;
 #ifdef _test_ragdoll
 	SetJoint(joint, REVOLUTEDesc);
@@ -1270,13 +1279,13 @@ void CGameObject::CreateArticulation(float meshScale)
 	REVOLUTEDesc.eS2LImit.low = 0.0f * physx::PxPi / 180.0f;
 	REVOLUTEDesc.eS2LImit.high = 100.0f * physx::PxPi / 180.0f;
 	REVOLUTEDesc.eTDrive.driveType = physx::PxArticulationDriveType::eFORCE;
-	REVOLUTEDesc.eTDrive.damping = 0.5f;
+	REVOLUTEDesc.eTDrive.damping = 100.0f;
 	REVOLUTEDesc.eTDrive.stiffness = 0.5f;
 	REVOLUTEDesc.eS1Drive.driveType = physx::PxArticulationDriveType::eFORCE;
-	REVOLUTEDesc.eS1Drive.damping = 0.5f;
+	REVOLUTEDesc.eS1Drive.damping = 100.0f;
 	REVOLUTEDesc.eS1Drive.stiffness = 0.5f;
 	REVOLUTEDesc.eS2Drive.driveType = physx::PxArticulationDriveType::eFORCE;
-	REVOLUTEDesc.eS2Drive.damping = 0.5f;
+	REVOLUTEDesc.eS2Drive.damping = 100.0f;
 	REVOLUTEDesc.eS2Drive.stiffness = 0.5f;
 #ifdef _test_ragdoll
 	SetJoint(joint, REVOLUTEDesc);
@@ -1353,13 +1362,13 @@ void CGameObject::CreateArticulation(float meshScale)
 	REVOLUTEDesc.eS2LImit.low = 0.0f * physx::PxPi / 180.0f;
 	REVOLUTEDesc.eS2LImit.high = 100.0f * physx::PxPi / 180.0f;
 	REVOLUTEDesc.eTDrive.driveType = physx::PxArticulationDriveType::eFORCE;
-	REVOLUTEDesc.eTDrive.damping = 0.5f;
+	REVOLUTEDesc.eTDrive.damping = 100.0f;
 	REVOLUTEDesc.eTDrive.stiffness = 0.5f;
 	REVOLUTEDesc.eS1Drive.driveType = physx::PxArticulationDriveType::eFORCE;
-	REVOLUTEDesc.eS1Drive.damping = 0.5f;
+	REVOLUTEDesc.eS1Drive.damping = 100.0f;
 	REVOLUTEDesc.eS1Drive.stiffness = 0.5f;
 	REVOLUTEDesc.eS2Drive.driveType = physx::PxArticulationDriveType::eFORCE;
-	REVOLUTEDesc.eS2Drive.damping = 0.5f;
+	REVOLUTEDesc.eS2Drive.damping = 100.0f;
 	REVOLUTEDesc.eS2Drive.stiffness = 0.5f;
 #ifdef _test_ragdoll
 	SetJoint(joint, REVOLUTEDesc);
