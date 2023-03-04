@@ -23,7 +23,7 @@ CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 	m_pStateMachine->ChangeState(Locator.GetPlayerState(typeid(Idle_Player)));
 
 	SetPosition(XMFLOAT3(-15.0f, 150.0f, 0.0f));
-	SetScale(15.0f, 15.0f, 15.0f);
+	SetScale(4.0f, 4.0f, 4.0f);
 	Rotate(0.0f, 90.0f, 0.0f);
 }
 
@@ -175,7 +175,7 @@ void CPlayer::ProcessInput(DWORD dwDirection, float cxDelta, float cyDelta, floa
 	{
 		if (dwDirection)
 		{
-			Move(dwDirection, 115.0f * fTimeElapsed, true, pCamera);
+			Move(dwDirection, 40.0f * fTimeElapsed, true, pCamera);
 		}
 	}
 }

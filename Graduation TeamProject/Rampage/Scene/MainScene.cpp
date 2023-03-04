@@ -499,9 +499,19 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	// Terrain »ý¼º
 	XMFLOAT3 xmf3Scale(1.0f, 1.0f, 1.0f);
 	XMFLOAT4 xmf4Color(0.0f, 0.5f, 0.0f, 0.0f);
-	m_pTerrain = std::make_unique<CSplatTerrain>(pd3dDevice, pd3dCommandList, GetGraphicsRootSignature(), _T("Terrain/terrainHeightMap257.raw"), 257, 257, 257, 257, xmf3Scale, xmf4Color, m_pTerrainShader.get());
-	m_pTerrain->SetPosition(XMFLOAT3(0.f, 0.f, 0.f));
+	m_pTerrain = std::make_unique<CSplatTerrain>(pd3dDevice, pd3dCommandList, GetGraphicsRootSignature(), _T("Terrain/terrainHeightMap_5.raw"), 513, 513, 513, 513, xmf3Scale, xmf4Color, m_pTerrainShader.get());
+	float minHeight = FLT_MAX;
+	for (int x = 0; x < m_pTerrain->GetWidth(); ++x) {
+		for (int z = 0; z < m_pTerrain->GetLength(); ++z) {
+			if (minHeight > m_pTerrain->GetHeight(x, z)) {
+				minHeight = m_pTerrain->GetHeight(x, z);
+			}
+		}
+	}
+	m_pTerrain->SetPosition(XMFLOAT3(86.4804, -46.8876 -46.8876 * 0.38819 + 6.5f, -183.7856));
 	m_pTerrain->SetRigidStatic();
+	LoadSceneFromFile(pd3dDevice, pd3dCommandList, "Object/Scene/Scene.bin");
+
 	for (int i = 0; i < m_pObjects.size(); ++i)
 		((CDepthRenderShader*)m_pDepthRenderShader.get())->RegisterObject(m_pObjects[i].get());
 	((CDepthRenderShader*)m_pDepthRenderShader.get())->SetLight(m_pLight->GetLights());
@@ -511,7 +521,6 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pBillBoardObjectShader->CreateShader(pd3dDevice, GetGraphicsRootSignature(), 1, &pdxgiObjectRtvFormats, 0);
 	m_pBillBoardObjectShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 10);
 
-	LoadSceneFromFile(pd3dDevice, pd3dCommandList, "Object/Scene/Scene.bin");
 	printf("sdfgs");
 	
 	//std::unique_ptr<CBillBoardObject> pBillBoardObject = std::make_unique<CBillBoardObject>(CTextureManager::GetInst()->LoadBillBoardTexture(pd3dDevice, pd3dCommandList, L"Image/Grass01.dds"), pd3dDevice, pd3dCommandList, m_pBillBoardObjectShader.get(), 4.f);
@@ -655,7 +664,8 @@ void CMainTMPScene::LoadSceneFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 
 			nRead = (UINT)::fread(&buffer, sizeof(float), 16, pInFile);
 
-			pObject->m_xmf4x4World = {
+			
+			XMFLOAT4X4 xmfWorld = {
 				buffer[0],buffer[1],buffer[2],buffer[3],
 				buffer[4],buffer[5],buffer[6],buffer[7],
 				buffer[8],buffer[9],buffer[10],buffer[11],
@@ -669,11 +679,12 @@ void CMainTMPScene::LoadSceneFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 				rootObj->m_pModelRootObject->m_xmf4x4Transform._43,
 				rootObj->m_pModelRootObject->m_xmf4x4Transform._44,
 			};
-			rootObj->m_pModelRootObject->m_xmf4x4Transform = Matrix4x4::Scale(pObject->m_xmf4x4Transform, 2.0f);
+			rootObj->m_pModelRootObject->m_xmf4x4Transform = xmfWorld;
+			/*rootObj->m_pModelRootObject->m_xmf4x4Transform = Matrix4x4::Scale(pObject->m_xmf4x4Transform, 6.0f);
 			rootObj->m_pModelRootObject->m_xmf4x4Transform._41 = pos.x;
 			rootObj->m_pModelRootObject->m_xmf4x4Transform._42 = pos.y;
 			rootObj->m_pModelRootObject->m_xmf4x4Transform._43 = pos.z;
-			rootObj->m_pModelRootObject->m_xmf4x4Transform._44 = pos.w;
+			rootObj->m_pModelRootObject->m_xmf4x4Transform._44 = pos.w;*/
 			pObject->SetChild(rootObj->m_pModelRootObject, true);
 			XMFLOAT4X4 matrix_scale = {
 					10, 0, 0, 0,
@@ -681,11 +692,11 @@ void CMainTMPScene::LoadSceneFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 					0, 0, 10, 0,
 					0, 0, 0, 1,
 			};
-			pObject->m_xmf4x4World = Matrix4x4::Scale(pObject->m_xmf4x4World, 3.0f);
+			/*pObject->m_xmf4x4World = Matrix4x4::Scale(pObject->m_xmf4x4World, 3.0f);
 			pObject->m_xmf4x4World._42 += 50.0f;
 			pObject->m_xmf4x4World._41 += 150.0f;
-			pObject->m_xmf4x4World._43 += 150.0f;
-			pObject->m_xmf4x4Transform = pObject->m_xmf4x4World;
+			pObject->m_xmf4x4World._43 += 150.0f;*/
+			//pObject->m_xmf4x4Transform = pObject->m_xmf4x4World;
 			pObject->UpdateTransform(NULL);
 
 			m_pObjects.push_back(std::move(pObject));

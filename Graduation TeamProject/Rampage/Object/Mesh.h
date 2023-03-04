@@ -160,7 +160,9 @@ public:
 	~CRawFormatImage(void);
 
 	BYTE GetRawImagePixel(int x, int z) { return(m_pRawImagePixels[x + (z * m_nWidth)]); }
-	void SetRawImagePixel(int x, int z, BYTE nPixel) { m_pRawImagePixels[x + (z * m_nWidth)] = nPixel; }
+	void SetRawImagePixel(int x, int z, BYTE nPixel) { 
+		m_pRawImagePixels[x + (z * m_nWidth)] = nPixel; 
+	}
 
 	BYTE* GetRawImagePixels() { return(m_pRawImagePixels); }
 
@@ -218,7 +220,7 @@ public:
 	int GetWidth() { return(m_nWidth); }
 	int GetLength() { return(m_nLength); }
 
-	virtual float OnGetHeight(int x, int z, void* pContext);
+	virtual float OnGetHeight(int x, int z, void* pContext, bool SampleByImage = false);
 	virtual XMFLOAT4 OnGetColor(int x, int z, void* pContext);
 };
 //-------------------------------------------------------------------

@@ -180,7 +180,7 @@ void CCamera::SetViewportsAndScissorRects(ID3D12GraphicsCommandList* pd3dCommand
 CThirdPersonCamera::CThirdPersonCamera() : CCamera()
 {
 	m_pPlayer = nullptr;
-	SetOffset(XMFLOAT3(0.0f, 20.0f, -30.0f));
+	SetOffset(XMFLOAT3(0.0f, 0.0f,-10.0f));
 }
 
 void CThirdPersonCamera::ProcessInput(DWORD dwDirection, float cxDelta, float cyDelta, float fTimeElapsed)

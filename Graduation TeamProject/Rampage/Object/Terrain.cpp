@@ -75,8 +75,10 @@ CSplatTerrain::CSplatTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 	int czQuadsPerBlock = nBlockLength - 1;
 
 	m_xmf3Scale = xmf3Scale;
+	XMStoreFloat3(&m_xmf3Scale, XMVectorScale(XMLoadFloat3(&m_xmf3Scale), 0.38819f));
+	m_xmf3Scale.y = xmf3Scale.y;
 
-	m_pHeightMapImage = new CHeightMapImage(pFileName, nWidth, nLength, xmf3Scale);
+	m_pHeightMapImage = new CHeightMapImage(pFileName, nWidth, nLength, m_xmf3Scale);
 
 	long cxBlocks = (m_nWidth - 1) / cxQuadsPerBlock;
 	long czBlocks = (m_nLength - 1) / czQuadsPerBlock;
@@ -93,7 +95,7 @@ CSplatTerrain::CSplatTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 		{
 			xStart = x * (nBlockWidth - 1);
 			zStart = z * (nBlockLength - 1);
-			pHeightMapGridMesh = new CSplatGridMesh(pd3dDevice, pd3dCommandList, xStart, zStart, nBlockWidth, nBlockLength, xmf3Scale, xmf4Color, m_pHeightMapImage);
+			pHeightMapGridMesh = new CSplatGridMesh(pd3dDevice, pd3dCommandList, xStart, zStart, nBlockWidth, nBlockLength, m_xmf3Scale, xmf4Color, m_pHeightMapImage);
 			SetMesh(std::static_pointer_cast<CMesh>(std::shared_ptr<CSplatGridMesh>(pHeightMapGridMesh)));
 
 		}
@@ -219,7 +221,7 @@ void CSplatTerrain::SetRigidStatic()
 
 	//physx::PxVec3 pos = convertToPhysXCoordSystem(matrix).column3.getXYZ();
 
-	physx::PxTransform transform(physx::PxVec3(0.f, 0.f, 0.f));
+	physx::PxTransform transform(physx::PxVec3(86.4804, -46.8876 , -183.7856));
 
 	physx::PxMaterial* material = pPhysics->createMaterial(0.7, 0.5, 0.0);
 	physx::PxRigidStatic* plane = pPhysics->createRigidStatic(transform);
