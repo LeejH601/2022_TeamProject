@@ -61,6 +61,8 @@ public:
 	virtual void PreRender(ID3D12GraphicsCommandList* pd3dCommandList, int nPipelineState) {};
 	virtual void PostRender(ID3D12GraphicsCommandList* pd3dCommandList, int nPipelineState) {};
 	virtual void OnPostRender(int nPipelineState) {};
+	std::vector<XMFLOAT3>& GetVertexs() { return m_pxmf3Positions; };
+	std::vector<UINT>& GetIndices() { return m_ppnSubSetIndices[0]; };
 
 	UINT GetType() { return(m_nType); }
 	XMFLOAT3 GetBoundingCenter() { return(m_xmf3AABBCenter); }

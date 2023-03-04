@@ -343,8 +343,8 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	//m_pObjects.push_back(std::move(m_pObject));
 
 	std::unique_ptr<COrcObject> m_pOrc = std::make_unique<COrcObject>(pd3dDevice, pd3dCommandList, 1);
-	m_pOrc->SetPosition(XMFLOAT3(120.0f, 600.0f, 90.0f));
-	m_pOrc->SetScale(14.0f, 14.0f, 14.0f);
+	m_pOrc->SetPosition(XMFLOAT3(150, 300, -90));
+	m_pOrc->SetScale(4.0f, 4.0f, 4.0f);
 	m_pOrc->Rotate(0.0f, 0.0f, 0.0f);
 	m_pOrc->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 5);
 	m_pOrc->CreateArticulation(1.0f);
@@ -387,11 +387,11 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pObjects.push_back(std::move(m_pSkeleton));*/
 
 	std::unique_ptr<CGoblinObject> m_pGoblin = std::make_unique<CGoblinObject>(pd3dDevice, pd3dCommandList, 1);
-	m_pGoblin->SetPosition(XMFLOAT3(90.0f, 600.0f, 90.0f));
-	m_pGoblin->SetScale(14.0f, 14.0f, 14.0f);
+	m_pGoblin->SetPosition(XMFLOAT3(150, 300, -120));
+	m_pGoblin->SetScale(4.0f, 4.0f, 4.0f);
 	m_pGoblin->Rotate(0.0f, 0.0f, 0.0f);
 	m_pGoblin->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 5);
-	m_pGoblin->CreateArticulation(0.5f);
+	m_pGoblin->CreateArticulation(1.0f);
 	m_pGoblin->m_bSimulateArticulate = false;
 	m_pGoblin->Animate(0.0f);
 	m_pGoblin->m_bSimulateArticulate = true;
@@ -408,11 +408,11 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pObjects.push_back(std::move(m_pGoblin));
 
 	m_pGoblin = std::make_unique<CGoblinObject>(pd3dDevice, pd3dCommandList, 1);
-	m_pGoblin->SetPosition(XMFLOAT3(30.0f, 600.0f, 90.0f));
-	m_pGoblin->SetScale(14.0f, 14.0f, 14.0f);
+	m_pGoblin->SetPosition(XMFLOAT3(150, 300, -150));
+	m_pGoblin->SetScale(4.0f, 4.0f, 4.0f);
 	m_pGoblin->Rotate(0.0f, 0.0f, 0.0f);
 	m_pGoblin->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 5);
-	m_pGoblin->CreateArticulation(0.5f);
+	m_pGoblin->CreateArticulation(1.0f);
 	m_pGoblin->m_bSimulateArticulate = false;
 	m_pGoblin->Animate(0.0f);
 	m_pGoblin->m_bSimulateArticulate = true;
@@ -428,11 +428,11 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pObjects.push_back(std::move(m_pGoblin));
 
 	m_pGoblin = std::make_unique<CGoblinObject>(pd3dDevice, pd3dCommandList, 1);
-	m_pGoblin->SetPosition(XMFLOAT3(30.0f, 600.0f, 30.0f));
-	m_pGoblin->SetScale(14.0f, 14.0f, 14.0f);
+	m_pGoblin->SetPosition(XMFLOAT3(150, 300, -180));
+	m_pGoblin->SetScale(4.0f, 4.0f, 4.0f);
 	m_pGoblin->Rotate(0.0f, 0.0f, 0.0f);
 	m_pGoblin->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 5);
-	m_pGoblin->CreateArticulation(0.5f);
+	m_pGoblin->CreateArticulation(1.0f);
 	m_pGoblin->m_bSimulateArticulate = false;
 	m_pGoblin->Animate(0.0f);
 	m_pGoblin->m_bSimulateArticulate = true;
@@ -455,7 +455,7 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 		m_pGoblin->SetScale(14.0f, 14.0f, 14.0f);
 		m_pGoblin->Rotate(0.0f, 0.0f, 0.0f);
 		m_pGoblin->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 5);
-		m_pGoblin->CreateArticulation(0.5f);
+		m_pGoblin->CreateArticulation(1.0f);
 		m_pGoblin->m_bSimulateArticulate = false;
 		m_pGoblin->Animate(0.0f);
 		m_pGoblin->m_bSimulateArticulate = true;
@@ -472,7 +472,7 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 		randDir *= 10.0f;
 		memcpy(&m_pGoblin->m_pArticulationCache->jointForce[3], &randDir, sizeof(physx::PxVec3));
 		m_pGoblin->m_pArticulation->applyCache(*m_pGoblin->m_pArticulationCache, physx::PxArticulationCacheFlag::eALL);
-		
+
 		m_pObjects.push_back(std::move(m_pGoblin));
 	}
 
@@ -508,7 +508,7 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 			}
 		}
 	}
-	m_pTerrain->SetPosition(XMFLOAT3(86.4804, -46.8876 -46.8876 * 0.38819 + 6.5f, -183.7856));
+	m_pTerrain->SetPosition(XMFLOAT3(86.4804, -46.8876 - 46.8876 * 0.38819 + 6.5f, -183.7856));
 	m_pTerrain->SetRigidStatic();
 	LoadSceneFromFile(pd3dDevice, pd3dCommandList, "Object/Scene/Scene.bin");
 
@@ -522,7 +522,7 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pBillBoardObjectShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 10);
 
 	printf("sdfgs");
-	
+
 	//std::unique_ptr<CBillBoardObject> pBillBoardObject = std::make_unique<CBillBoardObject>(CTextureManager::GetInst()->LoadBillBoardTexture(pd3dDevice, pd3dCommandList, L"Image/Grass01.dds"), pd3dDevice, pd3dCommandList, m_pBillBoardObjectShader.get(), 4.f);
 	//pBillBoardObject->SetPosition(XMFLOAT3(0.f, -5.f, 0.f));
 	//m_pBillBoardObjects.push_back(std::move(pBillBoardObject));
@@ -566,7 +566,7 @@ void CMainTMPScene::AnimateObjects(float fTimeElapsed)
 }
 void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed, float fCurrentTime, CCamera* pCamera)
 {
-	if(pCamera) pCamera->OnPrepareRender(pd3dCommandList);
+	if (pCamera) pCamera->OnPrepareRender(pd3dCommandList);
 
 	m_pLight->Render(pd3dCommandList);
 
@@ -664,7 +664,7 @@ void CMainTMPScene::LoadSceneFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 
 			nRead = (UINT)::fread(&buffer, sizeof(float), 16, pInFile);
 
-			
+
 			XMFLOAT4X4 xmfWorld = {
 				buffer[0],buffer[1],buffer[2],buffer[3],
 				buffer[4],buffer[5],buffer[6],buffer[7],
@@ -673,13 +673,67 @@ void CMainTMPScene::LoadSceneFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 			};
 
 			CLoadedModelInfo* rootObj = CModelManager::GetInst()->LoadGeometryFromFileOfScene(pd3dDevice, pd3dCommandList, objFile);
-			XMFLOAT4 pos = {
+			/*XMFLOAT4 pos = {
 				rootObj->m_pModelRootObject->m_xmf4x4Transform._41,
 				rootObj->m_pModelRootObject->m_xmf4x4Transform._42,
 				rootObj->m_pModelRootObject->m_xmf4x4Transform._43,
 				rootObj->m_pModelRootObject->m_xmf4x4Transform._44,
-			};
+			};*/
 			rootObj->m_pModelRootObject->m_xmf4x4Transform = xmfWorld;
+
+			std::string name{ pstrToken };
+			if (name.find("Tree") != std::string::npos || name.find("Rock") != std::string::npos)
+			{
+				physx::PxTolerancesScale scale = Locator.GetPxPhysics()->getTolerancesScale();
+				physx::PxCookingParams params(scale);
+				// disable mesh cleaning - perform mesh validation on development configurations
+				params.meshPreprocessParams |= physx::PxMeshPreprocessingFlag::eDISABLE_CLEAN_MESH;
+				// disable edge precompute, edges are set for each triangle, slows contact generation
+				//params.meshPreprocessParams |= physx::PxMeshPreprocessingFlag::eDISABLE_ACTIVE_EDGES_PRECOMPUTE;
+				// lower hierarchy for internal mesh
+				//params.meshCookingHint = physx::PxMeshCookingHint::eCOOKING_PERFORMANCE;
+
+				physx::PxTriangleMeshDesc meshDesc;
+				std::vector<XMFLOAT3> vertexs = rootObj->m_pModelRootObject->m_pMesh->GetVertexs();
+				std::vector<XMFLOAT3> world_vertexs; world_vertexs.resize(vertexs.size());
+				XMMATRIX trans = XMLoadFloat4x4(&rootObj->m_pModelRootObject->m_xmf4x4Transform);
+
+				XMVECTOR scaling;
+				XMVECTOR rotation;
+				XMVECTOR translation;
+				XMMatrixDecompose(&scaling, &rotation, &translation, XMLoadFloat4x4(&rootObj->m_pModelRootObject->m_xmf4x4Transform));
+				XMMATRIX rotationMatrix = XMMatrixRotationQuaternion(rotation);
+				XMMATRIX scalingMatrix = XMMatrixScalingFromVector(scaling);
+				XMMATRIX transformMatrix = scalingMatrix * rotationMatrix;
+
+				trans.r[3] = XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f);
+				int index = 0;
+				for (XMFLOAT3 pos : vertexs) {
+					XMFLOAT3 point = Vector3::TransformCoord(pos, transformMatrix);
+					world_vertexs[index++] = point;
+				}
+				meshDesc.points.count = vertexs.size();
+				meshDesc.points.stride = sizeof(physx::PxVec3);
+				meshDesc.points.data = world_vertexs.data();
+
+				std::vector<UINT> Indices = rootObj->m_pModelRootObject->m_pMesh->GetIndices();
+				meshDesc.triangles.count = Indices.size() / 3;
+				meshDesc.triangles.stride = 3 * sizeof(physx::PxU32);
+				meshDesc.triangles.data = Indices.data();
+
+				
+				physx::PxTriangleMesh* aTriangleMesh = PxCreateTriangleMesh(params, meshDesc, Locator.GetPxPhysics()->getPhysicsInsertionCallback());
+
+				physx::PxTransform transform = physx::PxTransform(buffer[12], buffer[13], buffer[14]);
+				transform.q.normalize();
+				physx::PxMaterial* material = Locator.GetPxPhysics()->createMaterial(0.5, 0.5, 0.5);
+
+				physx::PxRigidStatic* actor = physx::PxCreateStatic(*Locator.GetPxPhysics(), transform, physx::PxTriangleMeshGeometry(aTriangleMesh), *material);
+				Locator.GetPxScene()->addActor(*actor);
+			
+			}
+
+
 			/*rootObj->m_pModelRootObject->m_xmf4x4Transform = Matrix4x4::Scale(pObject->m_xmf4x4Transform, 6.0f);
 			rootObj->m_pModelRootObject->m_xmf4x4Transform._41 = pos.x;
 			rootObj->m_pModelRootObject->m_xmf4x4Transform._42 = pos.y;
@@ -700,6 +754,7 @@ void CMainTMPScene::LoadSceneFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 			pObject->UpdateTransform(NULL);
 
 			m_pObjects.push_back(std::move(pObject));
+
 
 			//CMeshLoadInfo* pMeshInfo = CGameObject::LoadMeshInfoFromFile_2(objFile);
 			//if (pMeshInfo) {
@@ -733,8 +788,8 @@ void CMainTMPScene::LoadSceneFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 				pScene->m_ppGameObjects[i]->SetMaterial(k, pMaterial);
 			}*/
 
-			
-			
+
+
 
 			//XMFLOAT4X4 matrix_scale = {
 			//	10, 0, 0, 0,
