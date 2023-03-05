@@ -129,6 +129,7 @@ float4 PSParallaxTerrain(VS_TERRAIN_OUTPUT input) : SV_TARGET
 	}
 
 	float2 vFinalCoords = input.uv0 + vCurrOffset;
+	//float2 vFinalCoords = input.uv0;
 	float4 vFinalNormal;
 	float4 vFinalColor;
 	float4 cBaseTexColor[4];

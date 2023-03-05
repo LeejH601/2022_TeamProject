@@ -24,6 +24,10 @@ public:
 	float m_fPitch;
 	float m_fRoll;
 	float m_fYaw;
+	
+	float m_fSpeedKperH = 10.0f;
+	float m_fSpeedMperS;
+	float m_fSpeedUperS;
 
 	LPVOID m_pPlayerUpdatedContext = NULL;
 
