@@ -305,4 +305,5 @@ void CShader::CreateShaderResourceView(ID3D12Device* pd3dDevice, CTexture* pText
 		pTexture->SetGpuDescriptorHandle(nIndex, m_d3dSrvGPUDescriptorNextHandle);
 		m_d3dSrvGPUDescriptorNextHandle.ptr += ::gnCbvSrvDescriptorIncrementSize;
 	}
+	
 }

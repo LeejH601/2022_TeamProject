@@ -10,7 +10,8 @@ cbuffer cbGameObjectInfo : register(b0)
 {
 	matrix gmtxGameObject : packoffset(c0);
 	matrix gmtxTexture : packoffset(c4);
-	uint gnTexturesMask : packoffset(c8);
+	uint gnTexturesMask : packoffset(c8.x);
+	float gfDissolveThreshHold : packoffset(c8.y);
 }
 
 cbuffer cbCameraInfo : register(b1)
@@ -22,10 +23,20 @@ cbuffer cbCameraInfo : register(b1)
 	float3 gf3CameraPosition : packoffset(c16);
 	//float3 gf3CameraDirection : packoffset(c17);
 };
+//
+//cbuffer cbParallax : register(b5)
+//{
+//	bool gbDissolved;
+//	float gfDissolveThreshHold;
+//}
 
-Texture2D gtxMappedTexture[7] : register(t0);
+Texture2D gtxMappedTexture[8] : register(t0);
 SamplerState gSamplerState : register(s0);
 
+
+//
+Texture2D gtxDissolveNoiseTexture : register(t35);
+//
 #include "Light.hlsl"
 
 struct VS_OUTPUT
@@ -50,19 +61,29 @@ cbuffer cbToLightSpace : register(b6)
 	CB_TOOBJECTSPACE gcbToLightSpaces[MAX_LIGHTS];
 };
 
-[earlydepthstencil]
+
+float CalculateDissolve(float2 uv, float ThreshHold) {
+	float4 NoiseColor = gtxMappedTexture[2].Sample(gSamplerState, uv);
+	float Alpha = 1.0f;
+	if (NoiseColor.r <= gfDissolveThreshHold) {
+		Alpha = 0.0f;
+	}
+	return Alpha;
+}
+
+//[earlydepthstencil]
 float4 PS_Player(VS_OUTPUT input) : SV_TARGET
 {
 	float4 cAlbedoColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
 	float4 cSpecularColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
-	float4 cNormalColor = float4(0.0f, 0.0f, 1.0f, 1.0f);
+	float4 cNormalColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
 	float4 cMetallicColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
 	float4 cEmissionColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
 
 
 	if (gnTexturesMask & MATERIAL_ALBEDO_MAP) cAlbedoColor = gtxMappedTexture[0].Sample(gSamplerState, input.uv);
 	if (gnTexturesMask & MATERIAL_SPECULAR_MAP) cSpecularColor = gtxMappedTexture[1].Sample(gSamplerState, input.uv);
-	if (gnTexturesMask & MATERIAL_NORMAL_MAP) cNormalColor = gtxMappedTexture[2].Sample(gSamplerState, input.uv);
+	if (gnTexturesMask & MATERIAL_NORMAL_MAP) cNormalColor = gtxMappedTexture[1].Sample(gSamplerState, input.uv);
 	if (gnTexturesMask & MATERIAL_METALLIC_MAP) cMetallicColor = gtxMappedTexture[3].Sample(gSamplerState, input.uv);
 	if (gnTexturesMask & MATERIAL_EMISSION_MAP) cEmissionColor = gtxMappedTexture[4].Sample(gSamplerState, input.uv);
 
@@ -107,6 +128,15 @@ float4 PS_Player(VS_OUTPUT input) : SV_TARGET
 		cIllumination = Lighting(input.positionW, normalize(input.normalW), cColor, true, input.uvs);
 	//float4 cIllumination = Lighting(input.positionW, normalize(input.normalW), cColor, true, input.uvs);
 
+	//cIllumination = gtxMappedTexture[2].Sample(gSamplerState, input.uv);
+	/*if(gbDissolved)
+		cIllumination.a = CalculateDissolve(input.uv, gfDissolveThreshHold);
+	else {
+		cIllumination.a = 1 - gfDissolveThreshHold;
+	}*/
+	cIllumination.a = CalculateDissolve(input.uv, gfDissolveThreshHold);
+
 	//return float4(1.0f, 0.0f, 0.0f, 1.0f);
 	return (cIllumination);
 }
+

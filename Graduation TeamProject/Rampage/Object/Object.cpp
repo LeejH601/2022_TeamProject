@@ -385,7 +385,8 @@ void CGameObject::LoadMaterialsFromFile(ID3D12Device* pd3dDevice, ID3D12Graphics
 			nReads = (UINT)::fread(&nMaterial, sizeof(int), 1, pInFile);
 
 			pMaterial = std::make_shared<CMaterial>();
-			pTexture = std::make_shared<CTexture>(7, RESOURCE_TEXTURE2D, 0, 1); //0:Albedo, 1:Specular, 2:Metallic, 3:Normal, 4:Emission, 5:DetailAlbedo, 6:DetailNormal
+			pTexture = std::make_shared<CTexture>(8, RESOURCE_TEXTURE2D, 0, 1); //0:Albedo, 1:Specular, 2:Metallic, 3:Normal, 4:Emission, 5:DetailAlbedo, 6:DetailNormal 7:NoiseTexture
+			//pTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Object/Textures/Perlin9.dds", RESOURCE_TEXTURE2D, 7);
 			pTexture->SetRootParameterIndex(0, 2);
 
 			pMaterial->SetTexture(pTexture);
@@ -429,15 +430,17 @@ void CGameObject::LoadMaterialsFromFile(ID3D12Device* pd3dDevice, ID3D12Graphics
 		{
 			if (pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, pParent, pInFile, CModelShader::GetInst(), 0)) pMaterial->SetMaterialType(MATERIAL_ALBEDO_MAP);
 		}
-		else if (!strcmp(pstrToken, "<SpecularMap>:"))
+		/*else if (!strcmp(pstrToken, "<SpecularMap>:"))
 		{
 			if (pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, pParent, pInFile, CModelShader::GetInst(), 1)) pMaterial->SetMaterialType(MATERIAL_SPECULAR_MAP);
-		}
+		}*/
 		else if (!strcmp(pstrToken, "<NormalMap>:"))
 		{
 			if (pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, pParent, pInFile, CModelShader::GetInst(), 2)) pMaterial->SetMaterialType(MATERIAL_NORMAL_MAP);
+			pTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Object/Textures/Perlin9.dds", RESOURCE_TEXTURE2D, 3);
+			CModelShader::GetInst()->CreateShaderResourceView(pd3dDevice, pTexture.get(), 3);
 		}
-		else if (!strcmp(pstrToken, "<MetallicMap>:"))
+		/*else if (!strcmp(pstrToken, "<MetallicMap>:"))
 		{
 			if (pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, pParent, pInFile, CModelShader::GetInst(), 3)) pMaterial->SetMaterialType(MATERIAL_METALLIC_MAP);
 		}
@@ -452,7 +455,7 @@ void CGameObject::LoadMaterialsFromFile(ID3D12Device* pd3dDevice, ID3D12Graphics
 		else if (!strcmp(pstrToken, "<DetailNormalMap>:"))
 		{
 			if (pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, pParent, pInFile, CModelShader::GetInst(), 6)) pMaterial->SetMaterialType(MATERIAL_DETAIL_NORMAL_MAP);
-		}
+		}*/
 		else if (!strcmp(pstrToken, "</Materials>"))
 		{
 			break;
@@ -470,7 +473,7 @@ int CGameObject::FindReplicatedTexture(_TCHAR* pstrTextureName, D3D12_GPU_DESCRI
 			int nTextures = m_ppMaterials[i]->m_pTexture->GetTextures();
 			for (int j = 0; j < nTextures; j++)
 			{
-				if (!_tcsncmp(m_ppMaterials[i]->m_pTexture->GetTextureName(j), pstrTextureName, _tcslen(pstrTextureName)))
+				if (!_tcscmp(m_ppMaterials[i]->m_pTexture->GetTextureName(j), pstrTextureName))
 				{
 					*pd3dSrvGpuDescriptorHandle = m_ppMaterials[i]->m_pTexture->GetGpuDescriptorHandle(j);
 					nParameterIndex = m_ppMaterials[i]->m_pTexture->GetRootParameter(j);
@@ -769,9 +772,9 @@ CKnightObject::CKnightObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 
 	CGameObject* obj = pKnightModel->m_pModelRootObject->FindFrame("SK_FKnightB_05");
 	//obj->m_ppMaterials[8]->m_pTexture->m_nTextureType = 1;
-	obj->m_ppMaterials[5]->m_nType = 1; // ¸Ó¸® ³ë¸Ö ¸Ê »ç¿ë x
-	obj->m_ppMaterials[7]->m_nType = 1; // °¡½¿ ¹êµå ³ë¸Ö ¸Ê »ç¿ë x
-	obj->m_ppMaterials[8]->m_nType = 1; // ÇÇºÎ ³ë¸Ö ¸Ê »ç¿ë x
+	//obj->m_ppMaterials[5]->m_nType = 1; // ¸Ó¸® ³ë¸Ö ¸Ê »ç¿ë x
+	//obj->m_ppMaterials[7]->m_nType = 1; // °¡½¿ ¹êµå ³ë¸Ö ¸Ê »ç¿ë x
+	//obj->m_ppMaterials[8]->m_nType = 1; // ÇÇºÎ ³ë¸Ö ¸Ê »ç¿ë x
 
 	SetChild(pKnightModel->m_pModelRootObject, true);
 	//m_pSkinnedAnimationController = std::make_unique<CKightRootRollBackAnimationController>(pd3dDevice, pd3dCommandList, nAnimationTracks, pKnightModel);
