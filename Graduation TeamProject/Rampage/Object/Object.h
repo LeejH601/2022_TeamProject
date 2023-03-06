@@ -74,7 +74,7 @@ public:
 
 	bool m_bSimulateArticulate = false;
 	bool m_bDissolved = false;
-	float m_fDissolveThrethHold = 1.0f;
+	float m_fDissolveThrethHold = 0.0f;
 	float m_fDissolveTime;
 	float m_fMaxDissolveTime;
 

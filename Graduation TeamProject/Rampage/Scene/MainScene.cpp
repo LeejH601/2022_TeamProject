@@ -315,7 +315,10 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 {
 	CreateGraphicsRootSignature(pd3dDevice);
 
-	
+	UINT ncbElementBytes = ((sizeof(DissolveParams) + 255) & ~255); //256ÀÇ ¹è¼ö
+	m_pd3dcbDisolveParams = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, ncbElementBytes, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
+
+	m_pd3dcbDisolveParams->Map(0, NULL, (void**)&m_pcbMappedDisolveParams);
 
 	DXGI_FORMAT pdxgiObjectRtvFormats = { DXGI_FORMAT_R8G8B8A8_UNORM };
 
@@ -535,8 +538,6 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pBillBoardObjectShader->CreateShader(pd3dDevice, GetGraphicsRootSignature(), 1, &pdxgiObjectRtvFormats, 0);
 	m_pBillBoardObjectShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 10);
 
-	printf("sdfgs");
-
 	//std::unique_ptr<CBillBoardObject> pBillBoardObject = std::make_unique<CBillBoardObject>(CTextureManager::GetInst()->LoadBillBoardTexture(pd3dDevice, pd3dCommandList, L"Image/Grass01.dds"), pd3dDevice, pd3dCommandList, m_pBillBoardObjectShader.get(), 4.f);
 	//pBillBoardObject->SetPosition(XMFLOAT3(0.f, -5.f, 0.f));
 	//m_pBillBoardObjects.push_back(std::move(pBillBoardObject));
@@ -558,8 +559,10 @@ void CMainTMPScene::UpdateObjects(float fTimeElapsed)
 {
 	m_pPlayer->Update(fTimeElapsed);
 
-	for (int i = 0; i < m_pObjects.size(); ++i)
+	for (int i = 0; i < m_pObjects.size(); ++i) {
 		m_pObjects[i]->Update(fTimeElapsed);
+		m_pcbMappedDisolveParams->dissolveThreshold[i] = m_pObjects[i]->m_fDissolveThrethHold;
+	}
 }
 void CMainTMPScene::AnimateObjects(float fTimeElapsed)
 {
@@ -582,6 +585,9 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 {
 	if (pCamera) pCamera->OnPrepareRender(pd3dCommandList);
 
+	D3D12_GPU_VIRTUAL_ADDRESS d3dGpuVirtualAddress = m_pd3dcbDisolveParams->GetGPUVirtualAddress();
+	pd3dCommandList->SetGraphicsRootConstantBufferView(7, d3dGpuVirtualAddress);
+
 	m_pLight->Render(pd3dCommandList);
 
 	m_pTerrainShader->Render(pd3dCommandList, 0);
@@ -597,6 +603,8 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 
 	for (int i = 0; i < m_pObjects.size(); ++i)
 	{
+		UINT index = i;
+		pd3dCommandList->SetGraphicsRoot32BitConstants(0, 1, &index, 33);
 		m_pObjects[i]->Animate(0.0f);
 		m_pObjects[i]->Render(pd3dCommandList, true);
 	}

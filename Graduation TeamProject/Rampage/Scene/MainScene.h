@@ -8,6 +8,11 @@
 #include "..\Object\ParticleObject.h"
 #include "..\Shader\ParticleShader.h"
 
+#define MAX_OBJECT 1000
+struct DissolveParams {
+	float dissolveThreshold[MAX_OBJECT];
+};
+
 class CMainTMPScene : public CScene
 {
 private:
@@ -21,6 +26,10 @@ private:
 
 	std::vector<std::unique_ptr<CParticleObject>> m_ppParticleObjects;
 	std::shared_ptr<CParticleShader> m_pParticleShader;
+
+	
+	DissolveParams* m_pcbMappedDisolveParams = nullptr;
+	ComPtr<ID3D12Resource> m_pd3dcbDisolveParams = nullptr;
 
 public:
 	CMainTMPScene() {}

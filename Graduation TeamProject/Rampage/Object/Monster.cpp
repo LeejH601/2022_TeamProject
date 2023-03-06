@@ -42,7 +42,7 @@ void CMonster::Update(float fTimeElapsed)
 	static float time = 0.0f;
 	if (!m_bDissolved) {
 		time += fTimeElapsed;
-		if (time > 15.0f)
+		if (time > 20.0f)
 			m_bDissolved = true;
 	}
 	else{
