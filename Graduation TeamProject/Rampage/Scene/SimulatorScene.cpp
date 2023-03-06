@@ -252,7 +252,7 @@ void CSimulatorScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 	XMFLOAT4 xmf4Color(0.0f, 0.5f, 0.0f, 0.0f);
 	m_pTerrain = std::make_unique<CSplatTerrain>(pd3dDevice, pd3dCommandList, GetGraphicsRootSignature(), _T("Terrain/terrainHeightMap257.raw"), 257, 257, 257, 257, xmf3Scale, xmf4Color, m_pTerrainShader.get());
 	m_pTerrain->SetPosition(XMFLOAT3(-800.f, -310.f, -800.f));
-	m_pMainCharacter->SetPlayerUpdatedContext(m_pTerrain.get());
+	m_pMainCharacter->SetUpdatedContext(m_pTerrain.get());
 
 	/*std::unique_ptr<CGameObject> pDumpCharater = std::make_unique<CKnightObject>(pd3dDevice, pd3dCommandList, 1);
 
@@ -330,6 +330,7 @@ void CSimulatorScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float f
 	Locator.GetSoundPlayer()->Update(fTimeElapsed);
 
 	CAttackSpriteComponent::GetInst()->Collision_Check();
+
 	m_pBillBoardObjectShader->Render(pd3dCommandList, 0);
 	m_pBillBoardObject->Animate(fTimeElapsed);
 	m_pBillBoardObject->UpdateShaderVariables(pd3dCommandList);

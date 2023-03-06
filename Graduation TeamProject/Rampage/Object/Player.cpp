@@ -4,7 +4,6 @@
 #include "..\Global\Global.h"
 #include "..\Global\MessageDispatcher.h"
 #include "..\Global\Timer.h"
-#include "Terrain.h"
 
 CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks)
 {
@@ -52,19 +51,7 @@ void CPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity, CCa
 		if (dwDirection & DIR_RIGHT)xmf3Shift = Vector3::Add(xmf3Shift, Vector3::Normalize(XMFLOAT3(pCamera->GetRightVector().x, 0.0f, pCamera->GetRightVector().z)), fDistance);
 		if (dwDirection & DIR_LEFT)xmf3Shift = Vector3::Add(xmf3Shift, Vector3::Normalize(XMFLOAT3(pCamera->GetRightVector().x, 0.0f, pCamera->GetRightVector().z)), -fDistance);
 
-		Move(xmf3Shift, bUpdateVelocity);
-	}
-}
-
-void CPlayer::Move(const XMFLOAT3& xmf3Shift, bool bUpdateVelocity)
-{
-	if (bUpdateVelocity)
-	{
-		m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, xmf3Shift);
-	}
-	else
-	{
-		m_xmf3Position = Vector3::Add(m_xmf3Position, xmf3Shift);
+		CPhysicsObject::Move(xmf3Shift, bUpdateVelocity);
 	}
 }
 
@@ -110,20 +97,6 @@ bool CPlayer::CheckCollision(CGameObject* pTargetObject)
 	return flag;
 }
 
-void CPlayer::OnPlayerUpdateCallback(float fTimeElapsed)
-{
-	if (m_pPlayerUpdatedContext)
-	{
-		CSplatTerrain* pTerrain = (CSplatTerrain*)m_pPlayerUpdatedContext;
-		XMFLOAT3 xmf3TerrainPos = pTerrain->GetPosition();
-
-		float fTerrainY = pTerrain->GetHeight(GetPosition().x - (xmf3TerrainPos.x), GetPosition().z - (xmf3TerrainPos.z));
-		
-		if (GetPosition().y < fTerrainY + xmf3TerrainPos.y)
-			SetPosition(XMFLOAT3(GetPosition().x, fTerrainY + xmf3TerrainPos.y, GetPosition().z));
-	}
-}
-
 void CPlayer::Update(float fTimeElapsed)
 {
 	m_pStateMachine->Update(fTimeElapsed);
@@ -135,34 +108,27 @@ void CPlayer::Update(float fTimeElapsed)
 	// Run 상태일때 플레이어를 이동시키고 방향전환 시켜주는 코드
 	if (m_pStateMachine->GetCurrentState() == Locator.GetPlayerState(typeid(Run_Player)))
 	{
-		m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, Vector3::ScalarProduct(XMFLOAT3(0.0f, -100.0f, 0.0f), fTimeElapsed, false));
+		CPhysicsObject::Apply_Gravity(fTimeElapsed);
 
 		if (m_xmf3Velocity.x + m_xmf3Velocity.z)
 			SetLookAt(Vector3::Add(GetPosition(), Vector3::Normalize(XMFLOAT3{ m_xmf3Velocity.x, 0.0f, m_xmf3Velocity.z })));
 		
-		Move(m_xmf3Velocity, false);
+		CPhysicsObject::Move(m_xmf3Velocity, false);
 	}
 	// Run 상태가 아닐때 플레이어에게 중력만 작용하는 코드
 	else
 	{
 		m_xmf3Velocity = XMFLOAT3{};
-		m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, Vector3::ScalarProduct(XMFLOAT3(0.0f, -100.0f, 0.0f), fTimeElapsed, false));
-		Move(m_xmf3Velocity, false);
+		CPhysicsObject::Apply_Gravity(fTimeElapsed);
+		CPhysicsObject::Move(m_xmf3Velocity, false);
 	}
+
 	// 플레이어가 터레인보다 아래에 있지 않도록 하는 코드
-	if (m_pPlayerUpdatedContext)OnPlayerUpdateCallback(fTimeElapsed);
+	if (m_pUpdatedContext) CPhysicsObject::OnUpdateCallback(fTimeElapsed);
 
 	Animate(fTimeElapsed);
 
-	float fLength = Vector3::Length(m_xmf3Velocity);
-	float fDeceleration = (300.0f * fTimeElapsed);
-
-	// 마찰력을 적용하는 코드, 마찰력이 속도의 크기보다 크면 속도를 표현하는 m_xmf3Velocity를 {0.0f, 0.0f, 0.0f}로 초기화
-	// 이외에는 마찰로 인한 감속
-	if (fDeceleration > fLength)
-		m_xmf3Velocity = XMFLOAT3{};
-	else
-		m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, Vector3::ScalarProduct(m_xmf3Velocity, -fDeceleration, true));
+	CPhysicsObject::Apply_Friction(fTimeElapsed);
 }
 
 void CPlayer::ProcessInput(DWORD dwDirection, float cxDelta, float cyDelta, float fTimeElapsed, CCamera* pCamera)
@@ -188,92 +154,6 @@ void CPlayer::SetLookAt(XMFLOAT3& xmf3LookAt)
 	m_xmf3Right.x = mtxLookAt._11, m_xmf3Right.y = mtxLookAt._21, m_xmf3Right.z = mtxLookAt._31;
 	m_xmf3Up.x = mtxLookAt._12, m_xmf3Up.y = mtxLookAt._22, m_xmf3Up.z = mtxLookAt._32;
 	m_xmf3Look.x = mtxLookAt._13, m_xmf3Look.y = mtxLookAt._23, m_xmf3Look.z = mtxLookAt._33;
-}
-
-void CPlayer::SetPosition(float x, float y, float z)
-{
-	m_xmf3Position = XMFLOAT3(x, y, z);
-}
-
-void CPlayer::Rotate(float fPitch, float fYaw, float fRoll)
-{
-	{
-		if (fPitch != 0.0f)
-		{
-			m_fPitch += fPitch;
-			if (m_fPitch > +89.0f) { fPitch -= (m_fPitch - 89.0f); m_fPitch = +89.0f; }
-			if (m_fPitch < -89.0f) { fPitch -= (m_fPitch + 89.0f); m_fPitch = -89.0f; }
-		}
-		if (fYaw != 0.0f)
-		{
-			m_fYaw += fYaw;
-			if (m_fYaw > 360.0f) m_fYaw -= 360.0f;
-			if (m_fYaw < 0.0f) m_fYaw += 360.0f;
-		}
-		if (fRoll != 0.0f)
-		{
-			m_fRoll += fRoll;
-			if (m_fRoll > +20.0f) { fRoll -= (m_fRoll - 20.0f); m_fRoll = +20.0f; }
-			if (m_fRoll < -20.0f) { fRoll -= (m_fRoll + 20.0f); m_fRoll = -20.0f; }
-		}
-		if (fYaw != 0.0f)
-		{
-			XMMATRIX xmmtxRotate = XMMatrixRotationAxis(XMLoadFloat3(&m_xmf3Up), XMConvertToRadians(fYaw));
-			m_xmf3Look = Vector3::TransformNormal(m_xmf3Look, xmmtxRotate);
-			m_xmf3Right = Vector3::TransformNormal(m_xmf3Right, xmmtxRotate);
-		}
-	}
-
-	m_xmf3Look = Vector3::Normalize(m_xmf3Look);
-	m_xmf3Right = Vector3::CrossProduct(m_xmf3Up, m_xmf3Look, true);
-	m_xmf3Up = Vector3::CrossProduct(m_xmf3Look, m_xmf3Right, true);
-}
-
-void CPlayer::SetPosition(XMFLOAT3 xmf3Position)
-{
-	m_xmf3Position = xmf3Position;
-}
-
-void CPlayer::SetScale(float x, float y, float z)
-{
-	m_xmf3Scale.x = x;
-	m_xmf3Scale.y = y;
-	m_xmf3Scale.z = z;
-
-	m_pChild->m_pSkinnedAnimationController->m_xmf3RootObjectScale = m_xmf3Scale;
-}
-
-XMFLOAT3 CPlayer::GetPosition()
-{
-	return m_xmf3Position;
-}
-
-XMFLOAT3 CPlayer::GetLook()
-{
-	return m_xmf3Look;
-}
-
-XMFLOAT3 CPlayer::GetUp()
-{
-	return m_xmf3Up;
-}
-
-XMFLOAT3 CPlayer::GetRight()
-{
-	return m_xmf3Right;
-}
-
-void CPlayer::OnPrepareRender()
-{
-	m_xmf4x4Transform._11 = m_xmf3Right.x; m_xmf4x4Transform._12 = m_xmf3Right.y; m_xmf4x4Transform._13 = m_xmf3Right.z;
-	m_xmf4x4Transform._21 = m_xmf3Up.x; m_xmf4x4Transform._22 = m_xmf3Up.y; m_xmf4x4Transform._23 = m_xmf3Up.z;
-	m_xmf4x4Transform._31 = m_xmf3Look.x; m_xmf4x4Transform._32 = m_xmf3Look.y; m_xmf4x4Transform._33 = m_xmf3Look.z;
-	m_xmf4x4Transform._41 = m_xmf3Position.x; m_xmf4x4Transform._42 = m_xmf3Position.y; m_xmf4x4Transform._43 = m_xmf3Position.z;
-	
-	XMMATRIX mtxScale = XMMatrixScaling(m_xmf3Scale.x, m_xmf3Scale.y, m_xmf3Scale.z);
-	m_xmf4x4Transform = Matrix4x4::Multiply(mtxScale, m_xmf4x4Transform);
-
-	UpdateTransform(NULL);
 }
 
 void CPlayer::Tmp()
