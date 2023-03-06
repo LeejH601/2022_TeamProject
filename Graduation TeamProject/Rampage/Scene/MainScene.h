@@ -17,6 +17,7 @@ class CMainTMPScene : public CScene
 {
 private:
 	std::vector<std::unique_ptr<CGameObject>> m_pObjects;
+	std::vector<UINT> m_IObjectIndexs;
 	std::unique_ptr<CLight> m_pLight;
 	std::unique_ptr<CSplatTerrain> m_pTerrain;
 	std::unique_ptr<CShader> m_pTerrainShader;
@@ -27,7 +28,6 @@ private:
 	std::vector<std::unique_ptr<CParticleObject>> m_ppParticleObjects;
 	std::shared_ptr<CParticleShader> m_pParticleShader;
 
-	
 	DissolveParams* m_pcbMappedDisolveParams = nullptr;
 	ComPtr<ID3D12Resource> m_pd3dcbDisolveParams = nullptr;
 

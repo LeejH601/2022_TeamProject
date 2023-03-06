@@ -115,7 +115,7 @@ void CMainTMPScene::CreateGraphicsRootSignature(ID3D12Device* pd3dDevice)
 	pd3dRootParameters[7].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
 	pd3dRootParameters[7].Descriptor.ShaderRegister = 5; // b5 : Parallex constant
 	pd3dRootParameters[7].Descriptor.RegisterSpace = 0;
-	pd3dRootParameters[7].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+	pd3dRootParameters[7].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
 
 	pd3dRootParameters[8].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
 	pd3dRootParameters[8].Descriptor.ShaderRegister = 6; // b6 : ToLight
@@ -341,7 +341,7 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 
 	//std::unique_ptr<CKnightObject> m_pObject = std::make_unique<CKnightObject>(pd3dDevice, pd3dCommandList, 1);
 
-	std::unique_ptr<CKnightObject> m_pObject = std::make_unique<CKnightObject>(pd3dDevice, pd3dCommandList, 1);
+	/*std::unique_ptr<CKnightObject> m_pObject = std::make_unique<CKnightObject>(pd3dDevice, pd3dCommandList, 1);
 	m_pObject->SetPosition(XMFLOAT3(-15.0f, 350.0f, 15.0f));
 	m_pObject->SetScale(5.0f, 5.0f, 5.0f);
 	m_pObject->Rotate(0.0f, 180.0f, 0.0f);
@@ -353,11 +353,35 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pObject->SetPosition(XMFLOAT3(15.0f, 350.0f, -15.0f));
 	m_pObject->SetScale(10.0f, 10.0f, 10.0f);
 	m_pObject->Rotate(0.0f, 180.0f, 0.0f);
-	m_pObject->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 4);
+	m_pObject->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 4);*/
 
 	//int nAnimationSets = m_pObject->m_pSkinnedAnimationController->m_pAnimationSets->m_nAnimationSets;
-
 	//m_pObjects.push_back(std::move(m_pObject));
+
+	std::unique_ptr<CGoblinObject> m_pGoblin = std::make_unique<CGoblinObject>(pd3dDevice, pd3dCommandList, 1);
+
+	{
+		m_pGoblin->SetPosition(XMFLOAT3(150, 300, -120));
+		m_pGoblin->SetScale(4.0f, 4.0f, 4.0f);
+		m_pGoblin->Rotate(0.0f, 0.0f, 0.0f);
+		m_pGoblin->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 5);
+		m_pGoblin->CreateArticulation(1.0f);
+		m_pGoblin->m_bSimulateArticulate = false;
+		m_pGoblin->Animate(0.0f);
+		m_pGoblin->m_bSimulateArticulate = true;
+		XMFLOAT4X4 rootWorld = m_pGoblin->FindFrame("root")->m_xmf4x4World;
+		m_pGoblin->m_pArticulation->copyInternalStateToCache(*m_pGoblin->m_pArticulationCache, physx::PxArticulationCacheFlag::eALL);
+		physx::PxTransform* rootLInkTrans = &m_pGoblin->m_pArticulationCache->rootLinkData->transform;
+		physx::PxMat44 tobonetrans = physx::PxMat44(*rootLInkTrans);
+		tobonetrans.column3.x += rootWorld._41;
+		tobonetrans.column3.y += rootWorld._42;
+		tobonetrans.column3.z += rootWorld._43;
+		*rootLInkTrans = physx::PxTransform(tobonetrans).getNormalized();
+		m_pGoblin->m_pArticulation->applyCache(*m_pGoblin->m_pArticulationCache, physx::PxArticulationCacheFlag::eALL);
+
+		m_pObjects.push_back(std::move(m_pGoblin));
+	}
+
 
 	std::unique_ptr<COrcObject> m_pOrc = std::make_unique<COrcObject>(pd3dDevice, pd3dCommandList, 1);
 	m_pOrc->SetPosition(XMFLOAT3(150, 300, -90));
@@ -403,26 +427,7 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pSkeleton->m_pArticulation->setRootGlobalPose(physx::PxTransform(mat));
 	m_pObjects.push_back(std::move(m_pSkeleton));*/
 
-	std::unique_ptr<CGoblinObject> m_pGoblin = std::make_unique<CGoblinObject>(pd3dDevice, pd3dCommandList, 1);
-	m_pGoblin->SetPosition(XMFLOAT3(150, 300, -120));
-	m_pGoblin->SetScale(4.0f, 4.0f, 4.0f);
-	m_pGoblin->Rotate(0.0f, 0.0f, 0.0f);
-	m_pGoblin->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 5);
-	m_pGoblin->CreateArticulation(1.0f);
-	m_pGoblin->m_bSimulateArticulate = false;
-	m_pGoblin->Animate(0.0f);
-	m_pGoblin->m_bSimulateArticulate = true;
-	rootWorld = m_pGoblin->FindFrame("root")->m_xmf4x4World;
-	m_pGoblin->m_pArticulation->copyInternalStateToCache(*m_pGoblin->m_pArticulationCache, physx::PxArticulationCacheFlag::eALL);
-	rootLInkTrans = &m_pGoblin->m_pArticulationCache->rootLinkData->transform;
-	tobonetrans = physx::PxMat44(*rootLInkTrans);
-	tobonetrans.column3.x += rootWorld._41;
-	tobonetrans.column3.y += rootWorld._42;
-	tobonetrans.column3.z += rootWorld._43;
-	*rootLInkTrans = physx::PxTransform(tobonetrans).getNormalized();
-	m_pGoblin->m_pArticulation->applyCache(*m_pGoblin->m_pArticulationCache, physx::PxArticulationCacheFlag::eALL);
 
-	m_pObjects.push_back(std::move(m_pGoblin));
 
 	m_pGoblin = std::make_unique<CGoblinObject>(pd3dDevice, pd3dCommandList, 1);
 	m_pGoblin->SetPosition(XMFLOAT3(150, 300, -150));
@@ -528,9 +533,11 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pTerrain->SetPosition(XMFLOAT3(86.4804, -46.8876 - 46.8876 * 0.38819 + 6.5f, -183.7856));
 	m_pTerrain->SetRigidStatic();
 	LoadSceneFromFile(pd3dDevice, pd3dCommandList, "Object/Scene/Scene.bin");
-
-	for (int i = 0; i < m_pObjects.size(); ++i)
+	m_IObjectIndexs.resize(m_pObjects.size());
+	for (int i = 0; i < m_pObjects.size(); ++i) {
 		((CDepthRenderShader*)m_pDepthRenderShader.get())->RegisterObject(m_pObjects[i].get());
+		m_IObjectIndexs[i] = i;
+	}
 	((CDepthRenderShader*)m_pDepthRenderShader.get())->SetLight(m_pLight->GetLights());
 	((CDepthRenderShader*)m_pDepthRenderShader.get())->SetTerrain(m_pTerrain.get());
 
@@ -585,9 +592,6 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 {
 	if (pCamera) pCamera->OnPrepareRender(pd3dCommandList);
 
-	D3D12_GPU_VIRTUAL_ADDRESS d3dGpuVirtualAddress = m_pd3dcbDisolveParams->GetGPUVirtualAddress();
-	pd3dCommandList->SetGraphicsRootConstantBufferView(7, d3dGpuVirtualAddress);
-
 	m_pLight->Render(pd3dCommandList);
 
 	m_pTerrainShader->Render(pd3dCommandList, 0);
@@ -595,21 +599,25 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 
 	CModelShader::GetInst()->Render(pd3dCommandList, 0);
 
+
 	if (m_pPlayer)
 	{
 		m_pPlayer->Animate(0.0f);
 		m_pPlayer->Render(pd3dCommandList, true);
 	}
 
+
+	D3D12_GPU_VIRTUAL_ADDRESS d3dGpuVirtualAddress = m_pd3dcbDisolveParams->GetGPUVirtualAddress();
+	pd3dCommandList->SetGraphicsRootConstantBufferView(7, d3dGpuVirtualAddress);
+	
+	UINT index = 0;
 	for (int i = 0; i < m_pObjects.size(); ++i)
 	{
-		UINT index = i;
-		pd3dCommandList->SetGraphicsRoot32BitConstants(0, 1, &index, 33);
+		pd3dCommandList->SetGraphicsRoot32BitConstants(0, 1, &i, 33);
 		m_pObjects[i]->Animate(0.0f);
 		m_pObjects[i]->Render(pd3dCommandList, true);
 	}
 
-	
 
 #ifdef RENDER_BOUNDING_BOX
 	CBoundingBoxShader::GetInst()->Render(pd3dCommandList, 0);

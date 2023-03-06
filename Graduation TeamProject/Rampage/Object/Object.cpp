@@ -15,6 +15,8 @@ CGameObject::CGameObject()
 	m_xmf4x4World = Matrix4x4::Identity();
 	m_xmf4x4Transform = Matrix4x4::Identity();
 	m_xmf4x4Texture = Matrix4x4::Identity();
+
+	//m_fDissolveThrethHold = 1.0f;
 }
 CGameObject::CGameObject(int nMaterials)
 {

@@ -3,12 +3,6 @@
 #include "Object.h"
 #include "StateMachine.h"
 
-struct CB_DISSOLVE_INFO
-{
-	float m_fThreshHold;
-	bool m_bDissolved;
-};
-
 class CMonster : public CGameObject, public IEntity
 {
 public:
@@ -20,9 +14,7 @@ public:
 	float m_fShakeDistance;
 	float m_fDamageDistance;
 	float m_fTotalDamageDistance;
-
-	CB_DISSOLVE_INFO* m_pcbMappedDissolveInfo = nullptr;
-	ComPtr<ID3D12Resource> m_pd3dcbDissolveInfo = nullptr;
+	float TestDissolvetime = 0.0f;
 
 	std::unique_ptr<CStateMachine<CMonster>> m_pStateMachine;
 

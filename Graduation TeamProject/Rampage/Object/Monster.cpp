@@ -13,10 +13,10 @@ CMonster::CMonster()
 	m_fStunStartTime = 0.0f;
 	m_fShakeDistance = 0.0f;
 	m_fStunTime = 0.0f;
-	m_fMaxDissolveTime = 3.0f;
+	m_fMaxDissolveTime = 10.0f;
 	m_fDissolveThrethHold = 0.0f;
 	m_fDissolveTime = 0.0f;
-
+	TestDissolvetime = 0.0f;
 
 }
 
@@ -29,7 +29,7 @@ void CMonster::Render(ID3D12GraphicsCommandList* pd3dCommandList, bool b_UseText
 	/*int a = m_bDissolved;
 	pd3dCommandList->SetGraphicsRoot32BitConstants(0, 1, &m_fDissolveThrethHold, 33);
 	pd3dCommandList->SetGraphicsRoot32BitConstants(0, 1, &a, 34);*/
-	pd3dCommandList->SetGraphicsRoot32BitConstants(0, 1, &m_fDissolveThrethHold, 33);
+	//pd3dCommandList->SetGraphicsRoot32BitConstants(0, 1, &m_fDissolveThrethHold, 33);
 	CGameObject::Render(pd3dCommandList, b_UseTexture, pCamera);
 	/*m_fDissolveThrethHold = 0.0f;
 	pd3dCommandList->SetGraphicsRoot32BitConstants(0, 1, &m_fDissolveThrethHold, 33);*/
@@ -39,10 +39,10 @@ void CMonster::Update(float fTimeElapsed)
 {
 	m_pStateMachine->Update(fTimeElapsed);
 	Animate(fTimeElapsed);
-	static float time = 0.0f;
+
 	if (!m_bDissolved) {
-		time += fTimeElapsed;
-		if (time > 20.0f)
+		TestDissolvetime += fTimeElapsed;
+		if (TestDissolvetime > 5.0f)
 			m_bDissolved = true;
 	}
 	else{
@@ -55,10 +55,6 @@ void CMonster::Update(float fTimeElapsed)
 }
 void CMonster::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
-	UINT ncbElementBytes = ((sizeof(CB_DISSOLVE_INFO) + 255) & ~255); //256ÀÇ ¹è¼ö
-	m_pd3dcbDissolveInfo = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, ncbElementBytes, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
-
-	m_pd3dcbDissolveInfo->Map(0, NULL, (void**)&m_pcbMappedDissolveInfo);
 }
 void CMonster::UpdateTransform(XMFLOAT4X4* pxmf4x4Parent)
 {

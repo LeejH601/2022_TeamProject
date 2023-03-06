@@ -355,7 +355,6 @@
     <FxCompile Include="Shader\Light.hlsl" />
     <FxCompile Include="TerrainPixelShader.hlsl" />
     <FxCompile Include="TerrainVertexShader.hlsl" />
-    <FxCompile Include="Shader\TerrainSplatPixelShader.hlsl" />
     <FxCompile Include="Shader\TerrainParallaxVertexShader.hlsl" />
     <FxCompile Include="Shader\TerrainParallaxPixelShader.hlsl" />
     <FxCompile Include="Shader\BoundVertexShader.hlsl" />
@@ -370,5 +369,6 @@
     <FxCompile Include="Shader\ParticleDrawGSShader.hlsl" />
     <FxCompile Include="Shader\ParticleSteamOutputGeometryShader.hlsl" />
     <FxCompile Include="Shader\ParticleStreamOutputVertexShader.hlsl" />
+    <FxCompile Include="TreePixelShader.hlsl" />
   </ItemGroup>
 </Project>

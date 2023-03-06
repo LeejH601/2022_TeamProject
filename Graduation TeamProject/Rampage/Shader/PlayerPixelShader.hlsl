@@ -5,7 +5,8 @@
 #define MATERIAL_EMISSION_MAP		0x10
 #define MATERIAL_DETAIL_ALBEDO_MAP	0x20
 #define MATERIAL_DETAIL_NORMAL_MAP	0x40
-#define MAX_OJBECT 1000
+
+#define MAX_OJBECT_DISSOLVE 250
 
 cbuffer cbGameObjectInfo : register(b0)
 {
@@ -32,9 +33,11 @@ cbuffer cbCameraInfo : register(b1)
 //	float gfDissolveThreshHold;
 //}
 
+
+
 cbuffer cbDissolveParam : register(b5)
 {
-	float gfDissolveThreshHold[MAX_OJBECT];
+	float4 gfDissolveThreshHold[MAX_OJBECT_DISSOLVE] : packoffset(c0);
 }
 
 Texture2D gtxMappedTexture[8] : register(t0);
@@ -69,10 +72,12 @@ cbuffer cbToLightSpace : register(b6)
 };
 
 
-float CalculateDissolve(float2 uv) {
+
+
+float CalculateDissolve(float2 uv, float ThreshHold) {
 	float4 NoiseColor = gtxMappedTexture[2].Sample(gSamplerState, uv);
 	float Alpha = 1.0f;
-	if (NoiseColor.r <= gfDissolveThreshHold[gnInstanceID]) {
+	if (NoiseColor.r <= ThreshHold) {
 		Alpha = 0.0f;
 	}
 	return Alpha;
@@ -141,9 +146,9 @@ float4 PS_Player(VS_OUTPUT input) : SV_TARGET
 	else {
 		cIllumination.a = 1 - gfDissolveThreshHold;
 	}*/
-	cIllumination.a = CalculateDissolve(input.uv);
+	cIllumination.a = CalculateDissolve(input.uv, gfDissolveThreshHold[gnInstanceID/4][gnInstanceID%4]);
 
-	//return float4(1.0f, 0.0f, 0.0f, 1.0f);
+	//return float4(gfDissolveThreshHold[0], 0.0f, 0.0f, 1.0f);
 	return (cIllumination);
 }
 
