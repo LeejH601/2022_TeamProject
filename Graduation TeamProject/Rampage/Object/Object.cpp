@@ -439,7 +439,7 @@ void CGameObject::LoadMaterialsFromFile(ID3D12Device* pd3dDevice, ID3D12Graphics
 		else if (!strcmp(pstrToken, "<NormalMap>:"))
 		{
 			if (pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, pParent, pInFile, CModelShader::GetInst(), 2)) pMaterial->SetMaterialType(MATERIAL_NORMAL_MAP);
-			pTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Object/Textures/Perlin9.dds", RESOURCE_TEXTURE2D, 3);
+			pTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Object/Textures/Grainy10.dds", RESOURCE_TEXTURE2D, 3);
 			CModelShader::GetInst()->CreateShaderResourceView(pd3dDevice, pTexture.get(), 3);
 		}
 		/*else if (!strcmp(pstrToken, "<MetallicMap>:"))

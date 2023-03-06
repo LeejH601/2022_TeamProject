@@ -13,7 +13,7 @@ CMonster::CMonster()
 	m_fStunStartTime = 0.0f;
 	m_fShakeDistance = 0.0f;
 	m_fStunTime = 0.0f;
-	m_fMaxDissolveTime = 10.0f;
+	m_fMaxDissolveTime = 3.0f;
 	m_fDissolveThrethHold = 0.0f;
 	m_fDissolveTime = 0.0f;
 	TestDissolvetime = 0.0f;
@@ -42,15 +42,15 @@ void CMonster::Update(float fTimeElapsed)
 
 	if (!m_bDissolved) {
 		TestDissolvetime += fTimeElapsed;
-		if (TestDissolvetime > 5.0f)
+		if (TestDissolvetime > 10.0f)
 			m_bDissolved = true;
 	}
 	else{
 		m_fDissolveTime += fTimeElapsed;
 		m_fDissolveThrethHold = m_fDissolveTime / m_fMaxDissolveTime;
-		if (m_fDissolveThrethHold > 1.0f) {
+		/*if (m_fDissolveThrethHold > 1.0f) {
 			m_fDissolveThrethHold = 1.0f;
-		}
+		}*/
 	}
 }
 void CMonster::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)

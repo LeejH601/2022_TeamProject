@@ -74,13 +74,27 @@ cbuffer cbToLightSpace : register(b6)
 
 
 
-float CalculateDissolve(float2 uv, float ThreshHold) {
-	float4 NoiseColor = gtxMappedTexture[2].Sample(gSamplerState, uv);
+float4 CalculateDissolve(float4 color, float2 uv, float ThreshHold) {
+	float4 NoiseColor = gtxMappedTexture[2].Sample(gSamplerState, uv / 16 + 0.5f);
+	float step = 0.15f;
+	float step2 = step + 0.05f;
 	float Alpha = 1.0f;
+
+	if (ThreshHold <= 0.0f)
+		return color;
+
 	if (NoiseColor.r <= ThreshHold) {
-		Alpha = 0.0f;
+		float4 emissionColor = float4(0.3125, 0.734f, 0.871f, 0.6f);
+		color = emissionColor;
 	}
-	return Alpha;
+	if (NoiseColor.r <= ThreshHold - step) {
+		float4 emissionColor = float4(0.117, 0.562, 1.0f, 0.2f);
+		color = emissionColor;
+	}
+	if (NoiseColor.r <= ThreshHold - step2) {
+		color.a = 0.0f;
+	}
+	return color;
 }
 
 //[earlydepthstencil]
@@ -105,7 +119,7 @@ float4 PS_Player(VS_OUTPUT input) : SV_TARGET
 	NormalW.z = -NormalW.z;*/
 
 	//float3 NormalW = float3(input.normalW.x, -input.normalW.z, input.normalW.y);
-	
+
 
 	float3 N = normalize(input.normalW);
 	float3 T = normalize(input.tangentW);
@@ -130,25 +144,25 @@ float4 PS_Player(VS_OUTPUT input) : SV_TARGET
 	}
 		 */
 
-	//float3 normalW = normalize(input.normalW);
-	float3 normalW = mul(normal, TBN);
+		 //float3 normalW = normalize(input.normalW);
+		 float3 normalW = mul(normal, TBN);
 
-	float4 cIllumination;
-	if (gnTexturesMask & MATERIAL_NORMAL_MAP)
-		cIllumination = Lighting(input.positionW, normalize(normalW), cColor, true, input.uvs);
-	else
-		cIllumination = Lighting(input.positionW, normalize(input.normalW), cColor, true, input.uvs);
-	//float4 cIllumination = Lighting(input.positionW, normalize(input.normalW), cColor, true, input.uvs);
+		 float4 cIllumination;
+		 if (gnTexturesMask & MATERIAL_NORMAL_MAP)
+			 cIllumination = Lighting(input.positionW, normalize(normalW), cColor, true, input.uvs);
+		 else
+			 cIllumination = Lighting(input.positionW, normalize(input.normalW), cColor, true, input.uvs);
+		 //float4 cIllumination = Lighting(input.positionW, normalize(input.normalW), cColor, true, input.uvs);
 
-	//cIllumination = gtxMappedTexture[2].Sample(gSamplerState, input.uv);
-	/*if(gbDissolved)
-		cIllumination.a = CalculateDissolve(input.uv, gfDissolveThreshHold);
-	else {
-		cIllumination.a = 1 - gfDissolveThreshHold;
-	}*/
-	cIllumination.a = CalculateDissolve(input.uv, gfDissolveThreshHold[gnInstanceID/4][gnInstanceID%4]);
+		 //cIllumination = gtxMappedTexture[2].Sample(gSamplerState, input.uv);
+		 /*if(gbDissolved)
+			 cIllumination.a = CalculateDissolve(input.uv, gfDissolveThreshHold);
+		 else {
+			 cIllumination.a = 1 - gfDissolveThreshHold;
+		 }*/
+		 cIllumination = CalculateDissolve(cIllumination, input.uv, gfDissolveThreshHold[gnInstanceID / 4][gnInstanceID % 4]);
 
-	//return float4(gfDissolveThreshHold[0], 0.0f, 0.0f, 1.0f);
-	return (cIllumination);
+		 //return float4(gfDissolveThreshHold[0], 0.0f, 0.0f, 1.0f);
+		 return (cIllumination);
 }
 
