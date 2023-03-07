@@ -19,18 +19,18 @@ CMonster::~CMonster()
 {
 }
 
-void CMonster::Render(ID3D12GraphicsCommandList* pd3dCommandList, bool b_UseTexture, CCamera* pCamera)
+void CMonster::SetScale(float x, float y, float z)
 {
-	CGameObject::Render(pd3dCommandList, b_UseTexture, pCamera);
+	CPhysicsObject::SetScale(x, y, z);
+	m_pSkinnedAnimationController->m_xmf3RootObjectScale = m_xmf3Scale;
 }
 
 void CMonster::Update(float fTimeElapsed)
 {
 	m_pStateMachine->Update(fTimeElapsed);
-	Animate(fTimeElapsed);
-}
-void CMonster::UpdateTransform(XMFLOAT4X4* pxmf4x4Parent)
-{
+
+	CPhysicsObject::Apply_Gravity(fTimeElapsed);
+
 	if (m_pStateMachine->GetCurrentState() == Damaged_Monster::GetInst() ||
 		m_pStateMachine->GetCurrentState() == Stun_Monster::GetInst())
 	{
@@ -38,11 +38,20 @@ void CMonster::UpdateTransform(XMFLOAT4X4* pxmf4x4Parent)
 		XMFLOAT3 xmf3DamageVec = Vector3::ScalarProduct(m_xmf3HitterVec, m_fDamageDistance, false);
 		XMFLOAT3 xmf3Pos = Vector3::Add(Vector3::Add(GetPosition(), xmf3ShakeVec), xmf3DamageVec);
 
-		m_xmf4x4Transform._41 = xmf3Pos.x;
-		m_xmf4x4Transform._42 = xmf3Pos.y;
-		m_xmf4x4Transform._43 = xmf3Pos.z;
+		SetPosition(xmf3Pos);
 	}
 
+	CPhysicsObject::Move(m_xmf3Velocity, false);
+
+	// 플레이어가 터레인보다 아래에 있지 않도록 하는 코드
+	if (m_pUpdatedContext) CPhysicsObject::OnUpdateCallback(fTimeElapsed);
+
+	Animate(fTimeElapsed);
+
+	CPhysicsObject::Apply_Friction(fTimeElapsed);
+}
+void CMonster::UpdateTransform(XMFLOAT4X4* pxmf4x4Parent)
+{
 	m_xmf4x4World = (pxmf4x4Parent) ? Matrix4x4::Multiply(m_xmf4x4Transform, *pxmf4x4Parent) : m_xmf4x4Transform;
 
 	if (m_pSibling) m_pSibling->UpdateTransform(pxmf4x4Parent);

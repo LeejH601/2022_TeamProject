@@ -23,11 +23,10 @@ public:
 
 	void ProcessInput(DWORD dwDirection, float cxDelta, float cyDelta, float fTimeElapsed, CCamera* pCamera);
 	virtual void Update(float fTimeElapsed);
-	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, bool b_UseTexture, CCamera* pCamera = NULL);
-
 	virtual bool CheckCollision(CGameObject* pTargetObject);
 
 	void SetLookAt(XMFLOAT3& xmf3LookAt);
+	virtual void SetScale(float x, float y, float z);
 	void Tmp();
 
 	virtual void Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity, CCamera* pCamera);

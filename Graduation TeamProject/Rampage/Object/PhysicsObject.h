@@ -43,5 +43,7 @@ public:
 	float& GetRoll() { return(m_fRoll); }
 	float& GetYaw() { return(m_fYaw); }
 
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, bool b_UseTexture, CCamera* pCamera = NULL);
+
 	virtual void Move(const XMFLOAT3& xmf3Shift, bool bUpdateVelocity);
 };

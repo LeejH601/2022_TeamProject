@@ -1,9 +1,9 @@
 #pragma once
 #pragma once
-#include "Object.h"
+#include "PhysicsObject.h"
 #include "StateMachine.h"
 
-class CMonster : public CGameObject, public IEntity
+class CMonster : public CPhysicsObject , public IEntity
 {
 public:
 	XMFLOAT3 m_xmf3HitterVec;
@@ -27,7 +27,8 @@ public:
 public:
 	CMonster();
 	virtual ~CMonster();
-	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, bool b_UseTexture, CCamera* pCamera = NULL);
+
+	virtual void SetScale(float x, float y, float z);
 	virtual void Update(float fTimeElapsed);
 	virtual void UpdateTransform(XMFLOAT4X4* pxmf4x4Parent = NULL);
 	virtual void UpdateTransformFromArticulation(XMFLOAT4X4* pxmf4x4Parent, std::vector<std::string> m_pArtiLinkNames, std::vector<physx::PxArticulationLink*> m_pArticulationLinks, float scale = 1.0f);

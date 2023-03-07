@@ -110,8 +110,6 @@ void CPhysicsObject::SetScale(float x, float y, float z)
 	m_xmf3Scale.x = x;
 	m_xmf3Scale.y = y;
 	m_xmf3Scale.z = z;
-
-	m_pChild->m_pSkinnedAnimationController->m_xmf3RootObjectScale = m_xmf3Scale;
 }
 
 XMFLOAT3 CPhysicsObject::GetPosition()
@@ -132,6 +130,12 @@ XMFLOAT3 CPhysicsObject::GetUp()
 XMFLOAT3 CPhysicsObject::GetRight()
 {
 	return m_xmf3Right;
+}
+
+void CPhysicsObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, bool b_UseTexture, CCamera* pCamera)
+{
+	OnPrepareRender();
+	CGameObject::Render(pd3dCommandList, b_UseTexture, pCamera);
 }
 
 void CPhysicsObject::Move(const XMFLOAT3& xmf3Shift, bool bUpdateVelocity)

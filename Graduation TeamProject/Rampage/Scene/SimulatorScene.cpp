@@ -224,7 +224,7 @@ void CSimulatorScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 	// 4->HIT
 	// 5->IDLE
 	std::shared_ptr<CMonster> m_pDummyEnemy = std::make_unique<CGoblinObject>(pd3dDevice, pd3dCommandList, 1);
-	m_pDummyEnemy->SetPosition(XMFLOAT3(8.0f, 0.0f, 0.0f));
+	m_pDummyEnemy->SetPosition(XMFLOAT3(8.0f, 250.0f, 0.0f));
 	m_pDummyEnemy->SetScale(14.0f, 14.0f, 14.0f);
 	m_pDummyEnemy->Rotate(0.0f, -90.0f, 0.0f);
 	m_pDummyEnemy->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 5);
@@ -232,12 +232,7 @@ void CSimulatorScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 
 	// 3->IDLE
 	// 28->Attack
-	
 	m_pMainCharacter = std::make_unique<CPlayer>(pd3dDevice, pd3dCommandList, 1);
-
-	((CDepthRenderShader*)m_pDepthRenderShader.get())->RegisterObject(m_pMainCharacter.get());
-	for (int i = 0; i < m_pEnemys.size(); ++i)
-		((CDepthRenderShader*)m_pDepthRenderShader.get())->RegisterObject(m_pEnemys[i].get());
 
 	((CDepthRenderShader*)m_pDepthRenderShader.get())->SetLight(m_pLight->GetLights());
 	((CDepthRenderShader*)m_pDepthRenderShader.get())->SetTerrain(m_pTerrain.get());
@@ -252,7 +247,15 @@ void CSimulatorScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 	XMFLOAT4 xmf4Color(0.0f, 0.5f, 0.0f, 0.0f);
 	m_pTerrain = std::make_unique<CSplatTerrain>(pd3dDevice, pd3dCommandList, GetGraphicsRootSignature(), _T("Terrain/terrainHeightMap257.raw"), 257, 257, 257, 257, xmf3Scale, xmf4Color, m_pTerrainShader.get());
 	m_pTerrain->SetPosition(XMFLOAT3(-800.f, -310.f, -800.f));
+
+	((CDepthRenderShader*)m_pDepthRenderShader.get())->RegisterObject(m_pMainCharacter.get());
 	m_pMainCharacter->SetUpdatedContext(m_pTerrain.get());
+
+	for (int i = 0; i < m_pEnemys.size(); ++i)
+	{
+		((CDepthRenderShader*)m_pDepthRenderShader.get())->RegisterObject(m_pEnemys[i].get());
+		m_pEnemys[i]->SetUpdatedContext(m_pTerrain.get());
+	}
 
 	/*std::unique_ptr<CGameObject> pDumpCharater = std::make_unique<CKnightObject>(pd3dDevice, pd3dCommandList, 1);
 

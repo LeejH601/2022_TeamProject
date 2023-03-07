@@ -31,12 +31,6 @@ CPlayer::~CPlayer()
 	ReleaseShaderVariables();
 }
 
-void CPlayer::Render(ID3D12GraphicsCommandList* pd3dCommandList, bool b_UseTexture, CCamera* pCamera)
-{
-	OnPrepareRender();
-	CGameObject::Render(pd3dCommandList, b_UseTexture, pCamera);
-}
-
 void CPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity, CCamera* pCamera)
 {
 	if (dwDirection)
@@ -154,6 +148,13 @@ void CPlayer::SetLookAt(XMFLOAT3& xmf3LookAt)
 	m_xmf3Right.x = mtxLookAt._11, m_xmf3Right.y = mtxLookAt._21, m_xmf3Right.z = mtxLookAt._31;
 	m_xmf3Up.x = mtxLookAt._12, m_xmf3Up.y = mtxLookAt._22, m_xmf3Up.z = mtxLookAt._32;
 	m_xmf3Look.x = mtxLookAt._13, m_xmf3Look.y = mtxLookAt._23, m_xmf3Look.z = mtxLookAt._33;
+}
+
+void CPlayer::SetScale(float x, float y, float z)
+{
+	CPhysicsObject::SetScale(x, y, z);
+	
+	m_pChild->m_pSkinnedAnimationController->m_xmf3RootObjectScale = m_xmf3Scale;
 }
 
 void CPlayer::Tmp()

@@ -357,7 +357,12 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pTerrain->SetPosition(XMFLOAT3(-800.f, 0.f, -800.f));
 	m_pTerrain->SetRigidStatic();
 	for (int i = 0; i < m_pObjects.size(); ++i)
+	{
 		((CDepthRenderShader*)m_pDepthRenderShader.get())->RegisterObject(m_pObjects[i].get());
+
+		if(dynamic_cast<CPhysicsObject*>(m_pObjects[i].get()))
+			((CPhysicsObject*)m_pObjects[i].get())->SetUpdatedContext(m_pTerrain.get());
+	}
 	((CDepthRenderShader*)m_pDepthRenderShader.get())->SetLight(m_pLight->GetLights());
 	((CDepthRenderShader*)m_pDepthRenderShader.get())->SetTerrain(m_pTerrain.get());
 
