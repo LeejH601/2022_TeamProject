@@ -54,6 +54,9 @@ bool CPlayer::CheckCollision(CGameObject* pTargetObject)
 	bool flag = false;
 	if (m_pChild.get()) {
 		if (!m_bAttacked && m_pChild->CheckCollision(pTargetObject)) {
+
+			pTargetObject->SetHit(this);
+
 			flag = true;
 			m_iAttack_Limit--;
 
@@ -138,16 +141,6 @@ void CPlayer::ProcessInput(DWORD dwDirection, float cxDelta, float cyDelta, floa
 			Move(dwDirection, 115.0f * fTimeElapsed, true, pCamera);
 		}
 	}
-}
-
-void CPlayer::SetLookAt(XMFLOAT3& xmf3LookAt)
-{
-	XMFLOAT3 UpVec = XMFLOAT3(0.0f, 1.0f, 0.0f);
-	XMFLOAT4X4 mtxLookAt = Matrix4x4::LookAtLH(GetPosition(), xmf3LookAt, UpVec);
-	
-	m_xmf3Right.x = mtxLookAt._11, m_xmf3Right.y = mtxLookAt._21, m_xmf3Right.z = mtxLookAt._31;
-	m_xmf3Up.x = mtxLookAt._12, m_xmf3Up.y = mtxLookAt._22, m_xmf3Up.z = mtxLookAt._32;
-	m_xmf3Look.x = mtxLookAt._13, m_xmf3Look.y = mtxLookAt._23, m_xmf3Look.z = mtxLookAt._33;
 }
 
 void CPlayer::SetScale(float x, float y, float z)

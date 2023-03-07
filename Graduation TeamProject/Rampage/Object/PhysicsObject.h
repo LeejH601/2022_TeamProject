@@ -33,6 +33,7 @@ public:
 	virtual void SetScale(float x, float y, float z);
 	virtual void SetPosition(float x, float y, float z);
 	virtual void SetPosition(XMFLOAT3 xmf3Position);
+	void SetLookAt(XMFLOAT3& xmf3LookAt);
 
 	virtual XMFLOAT3 GetPosition();
 	virtual XMFLOAT3 GetLook();

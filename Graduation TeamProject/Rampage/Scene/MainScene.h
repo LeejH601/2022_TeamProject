@@ -46,6 +46,7 @@ public:
 
 	virtual bool ProcessInput(UCHAR* pKeysBuffer) { return false; }
 	virtual void UpdateObjects(float fTimeElapsed);
+	virtual void CheckCollide();
 	virtual void AnimateObjects(float fTimeElapsed);
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed, float fCurrentTime, CCamera* pCamera = NULL);
 	virtual void OnPostRenderTarget();

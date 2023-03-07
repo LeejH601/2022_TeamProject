@@ -25,7 +25,6 @@ public:
 	virtual void Update(float fTimeElapsed);
 	virtual bool CheckCollision(CGameObject* pTargetObject);
 
-	void SetLookAt(XMFLOAT3& xmf3LookAt);
 	virtual void SetScale(float x, float y, float z);
 	void Tmp();
 

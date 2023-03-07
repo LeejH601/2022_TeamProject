@@ -28,6 +28,7 @@ void CMainTMPScene::OnPreRender(ID3D12GraphicsCommandList* pd3dCommandList, floa
 	{
 		((CDepthRenderShader*)m_pDepthRenderShader.get())->PrepareShadowMap(pd3dCommandList, 0.0f);
 		((CDepthRenderShader*)m_pDepthRenderShader.get())->UpdateDepthTexture(pd3dCommandList);
+		CheckCollide();
 	}
 }
 void CMainTMPScene::OnPrepareRender(ID3D12GraphicsCommandList* pd3dCommandList)
@@ -318,24 +319,24 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	CModelShader::GetInst()->CreateShaderVariables(pd3dDevice, pd3dCommandList);
 	CModelShader::GetInst()->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 100);
 
-	std::unique_ptr<CKnightObject> m_pKnightObject = std::make_unique<CKnightObject>(pd3dDevice, pd3dCommandList, 1);
-	m_pKnightObject->SetPosition(XMFLOAT3(-15.0f, 200.0f, 15.0f));
-	m_pKnightObject->SetScale(5.0f, 5.0f, 5.0f);
-	m_pKnightObject->Rotate(0.0f, 180.0f, 0.0f);
-	m_pKnightObject->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 1);
-	m_pKnightObject->m_pSkinnedAnimationController->m_xmf3RootObjectScale = XMFLOAT3(10.0f, 10.0f, 10.0f);
-	m_pObjects.push_back(std::move(m_pKnightObject));
-
-	m_pKnightObject = std::make_unique<CKnightObject>(pd3dDevice, pd3dCommandList, 1);
-	m_pKnightObject->SetPosition(XMFLOAT3(15.0f, 200.0f, -15.0f));
-	m_pKnightObject->SetScale(10.0f, 10.0f, 10.0f);
-	m_pKnightObject->Rotate(0.0f, 180.0f, 0.0f);
-	m_pKnightObject->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 4);
-	m_pObjects.push_back(std::move(m_pKnightObject));
-
 	std::unique_ptr<CGoblinObject> m_pGoblinObject = std::make_unique<CGoblinObject>(pd3dDevice, pd3dCommandList, 1);
+	m_pGoblinObject->SetPosition(XMFLOAT3(-15.0f, 200.0f, 15.0f));
+	m_pGoblinObject->SetScale(15.0f, 15.0f, 15.0f);
+	m_pGoblinObject->Rotate(0.0f, 180.0f, 0.0f);
+	m_pGoblinObject->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 5);
+	m_pGoblinObject->m_pSkinnedAnimationController->m_xmf3RootObjectScale = XMFLOAT3(10.0f, 10.0f, 10.0f);
+	m_pObjects.push_back(std::move(m_pGoblinObject));
+
+	m_pGoblinObject = std::make_unique<CGoblinObject>(pd3dDevice, pd3dCommandList, 1);
+	m_pGoblinObject->SetPosition(XMFLOAT3(15.0f, 200.0f, -15.0f));
+	m_pGoblinObject->SetScale(15.0f, 15.0f, 15.0f);
+	m_pGoblinObject->Rotate(0.0f, 180.0f, 0.0f);
+	m_pGoblinObject->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 5);
+	m_pObjects.push_back(std::move(m_pGoblinObject));
+
+	m_pGoblinObject = std::make_unique<CGoblinObject>(pd3dDevice, pd3dCommandList, 1);
 	m_pGoblinObject->SetPosition(XMFLOAT3(30.0f, 200.0f, 0.0f));
-	m_pGoblinObject->SetScale(10.0f, 10.0f, 10.0f);
+	m_pGoblinObject->SetScale(15.0f, 15.0f, 15.0f);
 	m_pGoblinObject->Rotate(0.0f, 180.0f, 0.0f);
 	m_pGoblinObject->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 5);
 	m_pObjects.push_back(std::move(m_pGoblinObject));
@@ -395,6 +396,15 @@ void CMainTMPScene::UpdateObjects(float fTimeElapsed)
 
 	for (int i = 0; i < m_pObjects.size(); ++i)
 		m_pObjects[i]->Update(fTimeElapsed);
+}
+
+void CMainTMPScene::CheckCollide()
+{
+	for (int i = 0; i < m_pObjects.size(); ++i) {
+		if(((CPlayer*)m_pPlayer)->m_pStateMachine->GetCurrentState() != Locator.GetPlayerState(typeid(Run_Player)) &&
+			((CPlayer*)m_pPlayer)->m_pStateMachine->GetCurrentState() != Locator.GetPlayerState(typeid(Idle_Player)))
+			m_pPlayer->CheckCollision(m_pObjects[i].get());
+	}
 }
 
 #define WITH_LAG_DOLL_SIMULATION

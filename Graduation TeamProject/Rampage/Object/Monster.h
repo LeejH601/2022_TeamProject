@@ -36,6 +36,9 @@ public:
 	{
 		bHit = true;
 		m_xmf3HitterVec = Vector3::Normalize(Vector3::Subtract(GetPosition(), pHitter->GetPosition()));
+		m_xmf3HitterVec.y = 0.0f;
+
+		SetLookAt(Vector3::Add(GetPosition(), XMFLOAT3(-m_xmf3HitterVec.x, 0.0f, -m_xmf3HitterVec.z)));
 	}
 	virtual bool CheckCollision(CGameObject* pTargetObject) {
 		if (pTargetObject)
@@ -46,6 +49,7 @@ public:
 				return true;
 			}
 		}
+		return false;
 	}
 };
 

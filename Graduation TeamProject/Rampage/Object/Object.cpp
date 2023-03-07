@@ -1440,7 +1440,6 @@ bool CKnightObject::CheckCollision(CGameObject* pTargetObject)
 	{
 		BoundingBox TargetBoundingBox = pTargetObject->GetBoundingBox();
 		if (m_TransformedWeaponBoundingBox.Intersects(TargetBoundingBox)) {
-			pTargetObject->SetHit(this);
 
 			TCHAR pstrDebug[256] = { 0 };
 			_stprintf_s(pstrDebug, 256, _T("Collide\n"));
