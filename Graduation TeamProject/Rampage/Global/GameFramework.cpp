@@ -536,7 +536,7 @@ void CGameFramework::FrameAdvance()
 	m_pSceneManager->OnPrepareRenderTarget(m_pd3dCommandList.Get(), 1, &m_pd3dSwapRTVCPUHandles[m_nSwapChainBufferIndex], m_d3dDsvDescriptorCPUHandle);
 
 	m_pd3dCommandList->ClearDepthStencilView(m_d3dDsvDescriptorCPUHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
-	OnPrepareRenderTarget();
+	//OnPrepareRenderTarget();
 	UpdateShaderVariables(m_pd3dCommandList.Get());
 
 	m_pSceneManager->Render(m_pd3dCommandList.Get(), m_GameTimer.GetFrameTimeElapsed(), m_GameTimer.GetTotalTime(), m_pCurrentCamera);

@@ -1,3 +1,4 @@
+#include "Header.hlsli"
 #define MATERIAL_ALBEDO_MAP			0x01
 #define MATERIAL_SPECULAR_MAP		0x02
 #define MATERIAL_NORMAL_MAP			0x04
@@ -100,8 +101,9 @@ float4 CalculateDissolve(float4 color, float2 uv, float ThreshHold) {
 }
 
 //[earlydepthstencil]
-float4 PS_Player(VS_OUTPUT input) : SV_TARGET
+PS_MULTIPLE_RENDER_TARGETS_OUTPUT PS_Player(VS_OUTPUT input) : SV_TARGET
 {
+	PS_MULTIPLE_RENDER_TARGETS_OUTPUT output;
 	float4 cAlbedoColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
 	float4 cSpecularColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
 	float4 cNormalColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
@@ -164,7 +166,10 @@ float4 PS_Player(VS_OUTPUT input) : SV_TARGET
 		 }*/
 		 cIllumination = CalculateDissolve(cIllumination, input.uv, gfDissolveThreshHold[gnInstanceID / 4][gnInstanceID % 4]);
 
+		 output.f4Scene = cIllumination;
+		 output.f4Color = cIllumination;
+
 		 //return float4(gfDissolveThreshHold[0], 0.0f, 0.0f, 1.0f);
-		 return (cIllumination);
+		 return (output);
 }
 
