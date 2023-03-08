@@ -31,7 +31,6 @@ public:
 
 	virtual void SetScale(float x, float y, float z);
 	virtual void Update(float fTimeElapsed);
-	virtual void CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	virtual void UpdateTransform(XMFLOAT4X4* pxmf4x4Parent = NULL);
 	virtual void UpdateTransformFromArticulation(XMFLOAT4X4* pxmf4x4Parent, std::vector<std::string> m_pArtiLinkNames, std::vector<physx::PxArticulationLink*> m_pArticulationLinks, float scale = 1.0f);
 	virtual void SetHit(CGameObject* pHitter)

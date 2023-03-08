@@ -181,6 +181,9 @@
     <ClCompile Include="Scene\LobbyScene.cpp">
       <Filter>Scene</Filter>
     </ClCompile>
+    <ClCompile Include="Object\PhysicsObject.cpp">
+      <Filter>Object</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Global\stdafx.h">
@@ -347,6 +350,9 @@
     </ClInclude>
     <ClInclude Include="Scene\LobbyScene.h">
       <Filter>Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Object\PhysicsObject.h">
+      <Filter>Object</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

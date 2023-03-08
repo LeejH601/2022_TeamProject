@@ -16,7 +16,9 @@ protected:
 	float m_fPitch;
 	float m_fRoll;
 	float m_fYaw;
-
+	float m_fSpeedKperH;
+	float m_fSpeedMperS;
+	float m_fSpeedUperS;
 	LPVOID m_pUpdatedContext = NULL;
 public:
 	void OnPrepareRender();
