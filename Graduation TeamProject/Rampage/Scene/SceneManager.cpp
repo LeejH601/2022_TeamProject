@@ -49,6 +49,11 @@ void CSceneManager::PreRender(ID3D12GraphicsCommandList* pd3dCommandList, float 
 	m_pCurrentScene->OnPreRender(pd3dCommandList, fTimeElapsed);
 }
 
+void CSceneManager::OnPrepareRenderTarget(ID3D12GraphicsCommandList* pd3dCommandList, int nRenderTargets, D3D12_CPU_DESCRIPTOR_HANDLE* pd3dRtvCPUHandles, D3D12_CPU_DESCRIPTOR_HANDLE d3dDepthStencilBufferDSVCPUHandle)
+{
+	m_pCurrentScene->OnPrepareRenderTarget(pd3dCommandList, nRenderTargets, pd3dRtvCPUHandles, d3dDepthStencilBufferDSVCPUHandle);
+}
+
 void CSceneManager::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed, float fCurrentTime, CCamera* pCamera)
 {
 	m_pCurrentScene->Render(pd3dCommandList, fTimeElapsed, fCurrentTime, pCamera);

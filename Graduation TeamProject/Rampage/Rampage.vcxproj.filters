@@ -181,6 +181,9 @@
     <ClCompile Include="Scene\LobbyScene.cpp">
       <Filter>Scene</Filter>
     </ClCompile>
+    <ClCompile Include="Shader\PostProcessShader.cpp">
+      <Filter>Shader</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Global\stdafx.h">
@@ -348,6 +351,9 @@
     <ClInclude Include="Scene\LobbyScene.h">
       <Filter>Scene</Filter>
     </ClInclude>
+    <ClInclude Include="Shader\PostProcessShader.h">
+      <Filter>Shader</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shader\PlayerPixelShader.hlsl" />
@@ -370,5 +376,7 @@
     <FxCompile Include="Shader\ParticleSteamOutputGeometryShader.hlsl" />
     <FxCompile Include="Shader\ParticleStreamOutputVertexShader.hlsl" />
     <FxCompile Include="TreePixelShader.hlsl" />
+    <FxCompile Include="Shader\PostProcessingPixelShader.hlsl" />
+    <FxCompile Include="Shader\PostProcessingVertexShader.hlsl" />
   </ItemGroup>
 </Project>

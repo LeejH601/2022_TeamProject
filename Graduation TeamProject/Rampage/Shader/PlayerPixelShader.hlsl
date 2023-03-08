@@ -43,10 +43,6 @@ cbuffer cbDissolveParam : register(b5)
 Texture2D gtxMappedTexture[8] : register(t0);
 SamplerState gSamplerState : register(s0);
 
-
-//
-Texture2D gtxDissolveNoiseTexture : register(t35);
-//
 #include "Light.hlsl"
 
 struct VS_OUTPUT

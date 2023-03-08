@@ -59,7 +59,7 @@ void CSimulatorScene::CreateGraphicsRootSignature(ID3D12Device* pd3dDevice)
 	pd3dDescriptorRanges[4].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
 	pd3dDescriptorRanges[5].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
-	pd3dDescriptorRanges[5].NumDescriptors = 1;
+	pd3dDescriptorRanges[5].NumDescriptors = 7;
 	pd3dDescriptorRanges[5].BaseShaderRegister = 35; //t35: gtxtParticleTexture
 	pd3dDescriptorRanges[5].RegisterSpace = 0;
 	pd3dDescriptorRanges[5].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;

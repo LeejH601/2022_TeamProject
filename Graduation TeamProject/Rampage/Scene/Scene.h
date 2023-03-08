@@ -1,5 +1,6 @@
 #pragma once
 #include "../Global/stdafx.h"
+#include "..\Shader\PostProcessShader.h"
 
 class CCamera;
 class CGameObject;
@@ -10,10 +11,15 @@ protected:
 
 	CGameObject* m_pPlayer = nullptr;
 public:
+	std::unique_ptr<CPostProcessShader> m_pPostProcessShader = NULL;
+
+public:
 	CScene() {}
 	virtual ~CScene() {}
 	
-	ID3D12RootSignature* GetGraphicsRootSignature() { return(m_pd3dGraphicsRootSignature.Get()); }
+	ID3D12RootSignature* GetGraphicsRootSignature() { 
+		return(m_pd3dGraphicsRootSignature.Get()); 
+	}
 	virtual void SetPlayer(CGameObject* pPlayer) { m_pPlayer = pPlayer; }
 
 	virtual void OnPreRender(ID3D12GraphicsCommandList* pd3dCommandList) {}
@@ -30,6 +36,7 @@ public:
 	virtual bool ProcessInput(UCHAR* pKeysBuffer) { return false; }
 	virtual void AnimateObjects(float fTimeElapsed) {}
 	virtual void UpdateObjects(float fTimeElapsed) {}
+	virtual void OnPrepareRenderTarget(ID3D12GraphicsCommandList* pd3dCommandList, int nRenderTargets, D3D12_CPU_DESCRIPTOR_HANDLE* pd3dRtvCPUHandles, D3D12_CPU_DESCRIPTOR_HANDLE d3dDepthStencilBufferDSVCPUHandle){}
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed, float fCurrentTime, CCamera* pCamera = NULL) {}
 	virtual void OnPostRenderTarget() {};
 	virtual void CheckCollide() {}

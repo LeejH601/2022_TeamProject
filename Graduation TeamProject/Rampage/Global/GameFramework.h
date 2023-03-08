@@ -3,11 +3,13 @@
 #include "Timer.h"
 #include "..\Scene\Scene.h"
 #include "..\Scene\SceneManager.h"
+#include "..\Shader\PostProcessShader.h"
 
 class CCamera;
-class CShader;
+//class CShader;
 class CGameObject;
 class CCameraMovementManager;
+//class CPostProcessShader;
 
 struct CB_Parallax_Info
 {

@@ -7,6 +7,7 @@
 #include "..\Object\BillBoardObject.h"
 #include "..\Object\ParticleObject.h"
 #include "..\Shader\ParticleShader.h"
+#include "..\Shader\PostProcessShader.h"
 
 #define MAX_OBJECT 1000
 struct DissolveParams {
@@ -28,6 +29,8 @@ private:
 	std::vector<std::unique_ptr<CParticleObject>> m_ppParticleObjects;
 	std::shared_ptr<CParticleShader> m_pParticleShader;
 
+
+private:
 	DissolveParams* m_pcbMappedDisolveParams = nullptr;
 	ComPtr<ID3D12Resource> m_pd3dcbDisolveParams = nullptr;
 
@@ -56,6 +59,7 @@ public:
 	virtual bool ProcessInput(UCHAR* pKeysBuffer) { return false; }
 	virtual void UpdateObjects(float fTimeElapsed);
 	virtual void AnimateObjects(float fTimeElapsed);
+	virtual void OnPrepareRenderTarget(ID3D12GraphicsCommandList* pd3dCommandList, int nRenderTargets, D3D12_CPU_DESCRIPTOR_HANDLE* pd3dRtvCPUHandles, D3D12_CPU_DESCRIPTOR_HANDLE d3dDepthStencilBufferDSVCPUHandle);
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed, float fCurrentTime, CCamera* pCamera = NULL);
 	virtual void OnPostRenderTarget();
 

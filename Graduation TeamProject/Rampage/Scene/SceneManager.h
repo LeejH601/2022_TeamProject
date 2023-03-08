@@ -20,10 +20,16 @@ public:
 	void SetPlayer(CPlayer* pPlayer);
 	void SetCurrentScene(SCENE_TYPE scene_type);
 	void PreRender(ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed);
+	void OnPrepareRenderTarget(ID3D12GraphicsCommandList* pd3dCommandList, int nRenderTargets, D3D12_CPU_DESCRIPTOR_HANDLE* pd3dRtvCPUHandles, D3D12_CPU_DESCRIPTOR_HANDLE d3dDepthStencilBufferDSVCPUHandle);
 	void Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed, float fCurrentTime, CCamera* pCamera = NULL);
 	void OnPostRenderTarget();
 	void Animate(float fTimeElapsed);
 
 	bool OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
 	bool OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam, DWORD& dwDirection);
+
+	CScene* GetCurrentScene() { return m_pCurrentScene; };
+	CScene* GetMainScene() { 
+		return m_pMainScene.get(); 
+	};
 };

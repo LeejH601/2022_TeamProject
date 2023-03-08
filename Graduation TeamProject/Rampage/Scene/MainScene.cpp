@@ -69,8 +69,8 @@ void CMainTMPScene::CreateGraphicsRootSignature(ID3D12Device* pd3dDevice)
 	pd3dDescriptorRanges[4].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
 	pd3dDescriptorRanges[5].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
-	pd3dDescriptorRanges[5].NumDescriptors = 1;
-	pd3dDescriptorRanges[5].BaseShaderRegister = 35; //t35: gtxtParticleTexture
+	pd3dDescriptorRanges[5].NumDescriptors = 7;
+	pd3dDescriptorRanges[5].BaseShaderRegister = 35; //t35: gtxMultiRenderTargetTextures
 	pd3dDescriptorRanges[5].RegisterSpace = 0;
 	pd3dDescriptorRanges[5].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
@@ -545,6 +545,10 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pBillBoardObjectShader->CreateShader(pd3dDevice, GetGraphicsRootSignature(), 1, &pdxgiObjectRtvFormats, 0);
 	m_pBillBoardObjectShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 10);
 
+	m_pPostProcessShader = std::make_unique<CPostProcessShader>();
+	m_pPostProcessShader->CreateShader(pd3dDevice, GetGraphicsRootSignature(), 1, NULL, DXGI_FORMAT_D32_FLOAT, 0);
+	m_pPostProcessShader->BuildObjects(pd3dDevice, pd3dCommandList);
+
 	//std::unique_ptr<CBillBoardObject> pBillBoardObject = std::make_unique<CBillBoardObject>(CTextureManager::GetInst()->LoadBillBoardTexture(pd3dDevice, pd3dCommandList, L"Image/Grass01.dds"), pd3dDevice, pd3dCommandList, m_pBillBoardObjectShader.get(), 4.f);
 	//pBillBoardObject->SetPosition(XMFLOAT3(0.f, -5.f, 0.f));
 	//m_pBillBoardObjects.push_back(std::move(pBillBoardObject));
@@ -588,8 +592,13 @@ void CMainTMPScene::AnimateObjects(float fTimeElapsed)
 
 	UpdateObjects(fTimeElapsed);
 }
+void CMainTMPScene::OnPrepareRenderTarget(ID3D12GraphicsCommandList* pd3dCommandList, int nRenderTargets, D3D12_CPU_DESCRIPTOR_HANDLE* pd3dRtvCPUHandles, D3D12_CPU_DESCRIPTOR_HANDLE d3dDepthStencilBufferDSVCPUHandle)
+{
+	m_pPostProcessShader->OnPrepareRenderTarget(pd3dCommandList, 1, pd3dRtvCPUHandles, d3dDepthStencilBufferDSVCPUHandle);
+}
 void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed, float fCurrentTime, CCamera* pCamera)
 {
+
 	if (pCamera) pCamera->OnPrepareRender(pd3dCommandList);
 
 	m_pLight->Render(pd3dCommandList);
@@ -636,6 +645,13 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 	//	m_ppParticleObjects[i]->UpdateShaderVariables(pd3dCommandList, fCurrentTime, fTimeElapsed);
 	//	m_ppParticleObjects[i]->Render(pd3dCommandList, pCamera, m_pParticleShader.get());
 	//}
+
+#define PostProcessing
+#ifdef PostProcessing
+	m_pPostProcessShader->OnPostRenderTarget(pd3dCommandList);
+
+	m_pPostProcessShader->Render(pd3dCommandList, pCamera);
+#endif // PostProcessing
 }
 
 void CMainTMPScene::OnPostRenderTarget()

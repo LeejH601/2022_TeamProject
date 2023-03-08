@@ -31,6 +31,11 @@ private:
 public:
 	std::vector<D3D12_GPU_DESCRIPTOR_HANDLE> m_pd3dSrvGpuDescriptorHandles;	// Srv 디스크립터 핸들
 public:
+
+	ID3D12Resource* CreateTexture(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, UINT nIndex, UINT nResourceType, UINT nWidth,
+		UINT nHeight, UINT nElements, UINT nMipLevels, DXGI_FORMAT dxgiFormat, D3D12_RESOURCE_FLAGS d3dResourceFlags,
+		D3D12_RESOURCE_STATES d3dResourceStates, D3D12_CLEAR_VALUE* pd3dClearValue);
+
 	int GetTextures() { return(m_nTextures); }
 	ID3D12Resource* GetResource(int nIndex) { return(m_ppd3dTextures[nIndex].Get()); }
 	const wchar_t* GetTextureName(int nIndex) 

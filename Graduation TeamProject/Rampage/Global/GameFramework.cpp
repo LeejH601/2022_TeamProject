@@ -8,6 +8,7 @@
 #include "..\Shader\DepthRenderShader.h"
 #include "Locator.h"
 #include "MessageDispatcher.h"
+#include "..\Shader\PostProcessShader.h"
 #include <windowsx.h>
 
 CGameFramework::CGameFramework()
@@ -175,7 +176,7 @@ void CGameFramework::CreateRtvAndDsvDescriptorHeaps()
 {
 	D3D12_DESCRIPTOR_HEAP_DESC d3dDescriptorHeapDesc;
 	::ZeroMemory(&d3dDescriptorHeapDesc, sizeof(D3D12_DESCRIPTOR_HEAP_DESC));
-	d3dDescriptorHeapDesc.NumDescriptors = m_nSwapChainBuffers + 1;
+	d3dDescriptorHeapDesc.NumDescriptors = m_nSwapChainBuffers + 6 + 1;
 	d3dDescriptorHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
 	d3dDescriptorHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
 	d3dDescriptorHeapDesc.NodeMask = 0;
@@ -249,12 +250,23 @@ void CGameFramework::BuildObjects()
 
 	m_pSceneManager = std::make_unique<CSceneManager>(m_pd3dDevice.Get(), m_pd3dCommandList.Get());
 
+	{
+		D3D12_CPU_DESCRIPTOR_HANDLE d3dRtvCPUDescriptorHandle = m_pd3dRtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
+		d3dRtvCPUDescriptorHandle.ptr += (::gnRtvDescriptorIncrementSize * (m_nSwapChainBuffers + 1));
+
+		DXGI_FORMAT pdxgiResourceFormats[6] = { DXGI_FORMAT_R8G8B8A8_UNORM, DXGI_FORMAT_R8G8B8A8_UNORM, DXGI_FORMAT_R8G8B8A8_UNORM, DXGI_FORMAT_R8G8B8A8_UNORM, DXGI_FORMAT_R32_FLOAT, DXGI_FORMAT_R32_FLOAT };
+		m_pSceneManager->GetMainScene()->m_pPostProcessShader->CreateResourcesAndViews(m_pd3dDevice.Get(), m_pd3dCommandList.Get(), 6, pdxgiResourceFormats, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, d3dRtvCPUDescriptorHandle, 6 + 1); //SRV to (Render Targets) + (Depth Buffer)
+
+		//DXGI_FORMAT pdxgiDepthSrvFormats[1] = { DXGI_FORMAT_R32_FLOAT };
+		//m_pPostProcessShader->CreateShaderResourceViews(m_pd3dDevice.Get(), 1, &m_pd3dDepthStencilBuffer, pdxgiDepthSrvFormats);
+	}
+
 	m_pFloatingCamera = std::make_unique<CFloatingCamera>();
 	m_pFloatingCamera->Init(m_pd3dDevice.Get(), m_pd3dCommandList.Get());
 	m_pFloatingCamera->SetPosition(XMFLOAT3(0.0f, 400.0f, -100.0f));
 
 	Locator.CreateMainSceneCamera(m_pd3dDevice.Get(), m_pd3dCommandList.Get());
-	
+
 	m_pCurrentCamera = m_pFloatingCamera.get();
 
 	m_pPlayer = std::make_unique<CPlayer>(m_pd3dDevice.Get(), m_pd3dCommandList.Get(), 1);
@@ -497,7 +509,7 @@ void CGameFramework::FrameAdvance()
 	//	Locator.GetPxScene()->simulate(m_GameTimer.GetFrameTimeElapsed());
 	//	started++;
 	//}
-	
+
 
 	ProcessInput();
 	AnimateObjects();
@@ -520,13 +532,16 @@ void CGameFramework::FrameAdvance()
 	::SynchronizeResourceTransition(m_pd3dCommandList.Get(), m_ppd3dRenderTargetBuffers[m_nSwapChainBufferIndex].Get(), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
 
 	m_pSceneManager->PreRender(m_pd3dCommandList.Get(), m_GameTimer.GetFrameTimeElapsed());
-	
+
+	m_pSceneManager->OnPrepareRenderTarget(m_pd3dCommandList.Get(), 1, &m_pd3dSwapRTVCPUHandles[m_nSwapChainBufferIndex], m_d3dDsvDescriptorCPUHandle);
+
 	m_pd3dCommandList->ClearDepthStencilView(m_d3dDsvDescriptorCPUHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
 	OnPrepareRenderTarget();
 	UpdateShaderVariables(m_pd3dCommandList.Get());
 
 	m_pSceneManager->Render(m_pd3dCommandList.Get(), m_GameTimer.GetFrameTimeElapsed(), m_GameTimer.GetTotalTime(), m_pCurrentCamera);
-	
+
+
 	::SynchronizeResourceTransition(m_pd3dCommandList.Get(), m_ppd3dRenderTargetBuffers[m_nSwapChainBufferIndex].Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
 
 	//명령 리스트를 닫힌 상태로 만든다. 
