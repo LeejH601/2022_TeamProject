@@ -51,7 +51,8 @@ public:
 
 	virtual void Move(const XMFLOAT3& xmf3Shift, bool bUpdateVelocity);
 
-	physx::PxTransform MakeTransform(XMFLOAT4X4& xmf44, float scale);
+	virtual void updateArticulationMatrix();
+	physx::PxTransform MakeTransform(XMFLOAT4X4& xmf44);
 	void SetJoint(physx::PxArticulationJointReducedCoordinate* joint, JointAxisDesc& JointDesc);
 	physx::PxArticulationLink* SetLink(physx::PxArticulationReducedCoordinate* articulation, physx::PxArticulationLink* p_link, physx::PxTransform& parent, physx::PxTransform& child, float meshScale = 1.0f);
 	virtual void CreateArticulation(float meshScale = 1.0f);

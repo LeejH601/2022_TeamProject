@@ -108,6 +108,27 @@ void CMonster::UpdateTransform(XMFLOAT4X4* pxmf4x4Parent)
 		m_WeaponBoundingBox.Transform(m_TransformedWeaponBoundingBox, XMLoadFloat4x4(&pWeapon->GetWorld()));
 	}
 }
+void CMonster::UpdateTransformFromArticulation(XMFLOAT4X4* pxmf4x4Parent, std::vector<std::string> pArtiLinkNames, std::vector<XMFLOAT4X4>& AritculatCacheMatrixs, float scale)
+{
+	std::string target = m_pstrFrameName;
+	auto it = std::find(pArtiLinkNames.begin(), pArtiLinkNames.end(), target);
+	int distance = std::distance(pArtiLinkNames.begin(), it);
+	if (distance < pArtiLinkNames.size()) {
+		m_xmf4x4World = AritculatCacheMatrixs[distance];
+	}
+	else {
+		m_xmf4x4World = (pxmf4x4Parent) ? Matrix4x4::Multiply(m_xmf4x4Transform, *pxmf4x4Parent) : m_xmf4x4Transform;
+	}
+
+	XMFLOAT3 xAxis = XMFLOAT3(1.0f, 0.0f, 0.0f);
+	
+	m_BodyBoundingBox.Transform(m_TransformedBodyBoudningBox, XMLoadFloat4x4(&Matrix4x4::Multiply(XMMatrixRotationAxis(XMLoadFloat3(&xAxis), XMConvertToRadians(90.0f)), AritculatCacheMatrixs[0])));
+#ifdef RENDER_BOUNDING_BOX
+	pBodyBoundingBoxMesh->SetWorld(Matrix4x4::Multiply(XMMatrixRotationAxis(XMLoadFloat3(&xAxis), XMConvertToRadians(90.0f)), AritculatCacheMatrixs[0]));
+#endif // RENDER_BOUNDING_BOX
+	if (m_pSibling) m_pSibling->UpdateTransformFromArticulation(pxmf4x4Parent, pArtiLinkNames, AritculatCacheMatrixs, scale);
+	if (m_pChild) m_pChild->UpdateTransformFromArticulation(&m_xmf4x4World, pArtiLinkNames, AritculatCacheMatrixs, scale);
+}
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 COrcObject::COrcObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks)

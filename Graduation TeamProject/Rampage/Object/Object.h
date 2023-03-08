@@ -122,10 +122,10 @@ public:
 
 	void SetLookAt(XMFLOAT3& xmf3Target, XMFLOAT3& xmf3Up = XMFLOAT3(0.0f, 1.0f, 0.0f));
 
-	void updateArticulationMatrix();
+	virtual void updateArticulationMatrix();
 	virtual void UpdateTransform(XMFLOAT4X4* pxmf4x4Parent = NULL);
-	virtual void UpdateTransformFromArticulation(XMFLOAT4X4* pxmf4x4Parent, std::vector<std::string> m_pArtiLinkNames, std::vector<physx::PxArticulationLink*> m_pArticulationLinks, float scale = 1.0f);
-	virtual void UpdateTransformFromArticulation(XMFLOAT4X4* pxmf4x4Parent, std::vector<std::string> m_pArtiLinkNames, std::vector<XMFLOAT4X4>& m_AritculatCacheMatrixs, float scale = 1.0f);
+	virtual void UpdateTransformFromArticulation(XMFLOAT4X4* pxmf4x4Parent, std::vector<std::string> pArtiLinkNames, std::vector<physx::PxArticulationLink*> pArticulationLinks, float scale = 1.0f);
+	virtual void UpdateTransformFromArticulation(XMFLOAT4X4* pxmf4x4Parent, std::vector<std::string> pArtiLinkNames, std::vector<XMFLOAT4X4>& AritculatCacheMatrixs, float scale = 1.0f);
 	void PrintFrameInfo(CGameObject* pGameObject, CGameObject* pParent);
 	CGameObject* FindFrame(const char* pstrFrameName);
 	virtual void CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList) {}

@@ -378,6 +378,7 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 		m_pGoblin->CreateArticulation(1.0f);
 		m_pGoblin->m_bSimulateArticulate = false;
 		m_pGoblin->Animate(0.0f);
+		m_pGoblin->OnPrepareRender();
 		m_pGoblin->m_bSimulateArticulate = true;
 		XMFLOAT4X4 rootWorld = m_pGoblin->FindFrame("root")->m_xmf4x4World;
 		m_pGoblin->m_pArticulation->copyInternalStateToCache(*m_pGoblin->m_pArticulationCache, physx::PxArticulationCacheFlag::eALL);
@@ -401,6 +402,7 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pOrc->CreateArticulation(1.0f);
 	m_pOrc->m_bSimulateArticulate = false;
 	m_pOrc->Animate(0.0f);
+	m_pOrc->OnPrepareRender();
 	m_pOrc->m_bSimulateArticulate = true;
 	physx::PxMat44 mat = m_pOrc->m_pArticulation->getRootGlobalPose();
 	XMFLOAT4X4 rootWorld = m_pOrc->FindFrame("root")->m_xmf4x4World;
@@ -447,6 +449,7 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pGoblin->CreateArticulation(1.0f);
 	m_pGoblin->m_bSimulateArticulate = false;
 	m_pGoblin->Animate(0.0f);
+	m_pGoblin->OnPrepareRender();
 	m_pGoblin->m_bSimulateArticulate = true;
 	rootWorld = m_pGoblin->FindFrame("root")->m_xmf4x4World;
 	m_pGoblin->m_pArticulation->copyInternalStateToCache(*m_pGoblin->m_pArticulationCache, physx::PxArticulationCacheFlag::eALL);
@@ -467,6 +470,7 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pGoblin->CreateArticulation(1.0f);
 	m_pGoblin->m_bSimulateArticulate = false;
 	m_pGoblin->Animate(0.0f);
+	m_pGoblin->OnPrepareRender();
 	m_pGoblin->m_bSimulateArticulate = true;
 	rootWorld = m_pGoblin->FindFrame("root")->m_xmf4x4World;
 	m_pGoblin->m_pArticulation->copyInternalStateToCache(*m_pGoblin->m_pArticulationCache, physx::PxArticulationCacheFlag::eALL);
@@ -490,6 +494,7 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 		m_pGoblin->CreateArticulation(1.0f);
 		m_pGoblin->m_bSimulateArticulate = false;
 		m_pGoblin->Animate(0.0f);
+		m_pGoblin->OnPrepareRender();
 		m_pGoblin->m_bSimulateArticulate = true;
 		rootWorld = m_pGoblin->FindFrame("root")->m_xmf4x4World;
 		m_pGoblin->m_pArticulation->copyInternalStateToCache(*m_pGoblin->m_pArticulationCache, physx::PxArticulationCacheFlag::eALL);
@@ -600,7 +605,6 @@ void CMainTMPScene::CheckCollide()
 
 void CMainTMPScene::AnimateObjects(float fTimeElapsed)
 {
-	
 #ifdef WITH_LAG_DOLL_SIMULATION
 	static float SimulateElapsedTime = 0.0f;
 
