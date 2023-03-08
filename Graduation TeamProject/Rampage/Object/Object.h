@@ -147,10 +147,6 @@ public:
 	void FindAndSetSkinnedMesh(CSkinnedMesh** ppSkinnedMeshes, int* pnSkinnedMesh);
 
 	void CreateArticulation(physx::PxArticulationReducedCoordinate* articulation, physx::PxArticulationLink* Parent, const physx::PxTransform& pos);
-	physx::PxTransform MakeTransform(XMFLOAT4X4& xmf44, float scale);
-	void SetJoint(physx::PxArticulationJointReducedCoordinate* joint, JointAxisDesc& JointDesc);
-	physx::PxArticulationLink* SetLink(physx::PxArticulationReducedCoordinate* articulation, physx::PxArticulationLink* p_link, physx::PxTransform& parent, physx::PxTransform& child, float meshScale = 1.0f);
-	virtual void CreateArticulation(float meshScale = 1.0f);
 };
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -229,7 +225,6 @@ public:
 
 	virtual void Animate(float fTimeElapsed);
 	virtual void UpdateTransform(XMFLOAT4X4* pxmf4x4Parent = NULL);
-	virtual void UpdateTransformFromArticulation(XMFLOAT4X4* pxmf4x4Parent = NULL);
 	virtual void PrepareBoundingBox(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 };
 

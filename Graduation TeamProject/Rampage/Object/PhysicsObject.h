@@ -46,7 +46,13 @@ public:
 	float& GetRoll() { return(m_fRoll); }
 	float& GetYaw() { return(m_fYaw); }
 
+	virtual void Animate(float fTimeElapsed);
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, bool b_UseTexture, CCamera* pCamera = NULL);
 
 	virtual void Move(const XMFLOAT3& xmf3Shift, bool bUpdateVelocity);
+
+	physx::PxTransform MakeTransform(XMFLOAT4X4& xmf44, float scale);
+	void SetJoint(physx::PxArticulationJointReducedCoordinate* joint, JointAxisDesc& JointDesc);
+	physx::PxArticulationLink* SetLink(physx::PxArticulationReducedCoordinate* articulation, physx::PxArticulationLink* p_link, physx::PxTransform& parent, physx::PxTransform& child, float meshScale = 1.0f);
+	virtual void CreateArticulation(float meshScale = 1.0f);
 };
