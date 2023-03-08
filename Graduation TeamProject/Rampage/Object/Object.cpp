@@ -15,6 +15,8 @@ CGameObject::CGameObject()
 	m_xmf4x4World = Matrix4x4::Identity();
 	m_xmf4x4Transform = Matrix4x4::Identity();
 	m_xmf4x4Texture = Matrix4x4::Identity();
+
+	//m_fDissolveThrethHold = 1.0f;
 }
 CGameObject::CGameObject(int nMaterials)
 {
@@ -340,9 +342,9 @@ void CGameObject::LoadFrameHierarchyFromFile(ID3D12Device* pd3dDevice, ID3D12Gra
 					_stprintf_s(pstrDebug, 256, "(Frame: %p) (Parent: %p)\n"), pChild, pGameObject);
 					OutputDebugString(pstrDebug);
 #endif
+				}
+			}
 		}
-	}
-}
 		else if (!strcmp(pstrToken, "</Frame>"))
 		{
 			break;
@@ -385,7 +387,8 @@ void CGameObject::LoadMaterialsFromFile(ID3D12Device* pd3dDevice, ID3D12Graphics
 			nReads = (UINT)::fread(&nMaterial, sizeof(int), 1, pInFile);
 
 			pMaterial = std::make_shared<CMaterial>();
-			pTexture = std::make_shared<CTexture>(7, RESOURCE_TEXTURE2D, 0, 1); //0:Albedo, 1:Specular, 2:Metallic, 3:Normal, 4:Emission, 5:DetailAlbedo, 6:DetailNormal
+			pTexture = std::make_shared<CTexture>(8, RESOURCE_TEXTURE2D, 0, 1); //0:Albedo, 1:Specular, 2:Metallic, 3:Normal, 4:Emission, 5:DetailAlbedo, 6:DetailNormal 7:NoiseTexture
+			//pTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Object/Textures/Perlin9.dds", RESOURCE_TEXTURE2D, 7);
 			pTexture->SetRootParameterIndex(0, 2);
 
 			pMaterial->SetTexture(pTexture);
@@ -429,15 +432,17 @@ void CGameObject::LoadMaterialsFromFile(ID3D12Device* pd3dDevice, ID3D12Graphics
 		{
 			if (pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, pParent, pInFile, CModelShader::GetInst(), 0)) pMaterial->SetMaterialType(MATERIAL_ALBEDO_MAP);
 		}
-		else if (!strcmp(pstrToken, "<SpecularMap>:"))
+		/*else if (!strcmp(pstrToken, "<SpecularMap>:"))
 		{
 			if (pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, pParent, pInFile, CModelShader::GetInst(), 1)) pMaterial->SetMaterialType(MATERIAL_SPECULAR_MAP);
-		}
+		}*/
 		else if (!strcmp(pstrToken, "<NormalMap>:"))
 		{
 			if (pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, pParent, pInFile, CModelShader::GetInst(), 2)) pMaterial->SetMaterialType(MATERIAL_NORMAL_MAP);
+			pTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Object/Textures/Grainy10.dds", RESOURCE_TEXTURE2D, 3);
+			CModelShader::GetInst()->CreateShaderResourceView(pd3dDevice, pTexture.get(), 3);
 		}
-		else if (!strcmp(pstrToken, "<MetallicMap>:"))
+		/*else if (!strcmp(pstrToken, "<MetallicMap>:"))
 		{
 			if (pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, pParent, pInFile, CModelShader::GetInst(), 3)) pMaterial->SetMaterialType(MATERIAL_METALLIC_MAP);
 		}
@@ -452,7 +457,7 @@ void CGameObject::LoadMaterialsFromFile(ID3D12Device* pd3dDevice, ID3D12Graphics
 		else if (!strcmp(pstrToken, "<DetailNormalMap>:"))
 		{
 			if (pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, pParent, pInFile, CModelShader::GetInst(), 6)) pMaterial->SetMaterialType(MATERIAL_DETAIL_NORMAL_MAP);
-		}
+		}*/
 		else if (!strcmp(pstrToken, "</Materials>"))
 		{
 			break;
@@ -470,7 +475,7 @@ int CGameObject::FindReplicatedTexture(_TCHAR* pstrTextureName, D3D12_GPU_DESCRI
 			int nTextures = m_ppMaterials[i]->m_pTexture->GetTextures();
 			for (int j = 0; j < nTextures; j++)
 			{
-				if (!_tcsncmp(m_ppMaterials[i]->m_pTexture->GetTextureName(j), pstrTextureName, _tcslen(pstrTextureName)))
+				if (!_tcscmp(m_ppMaterials[i]->m_pTexture->GetTextureName(j), pstrTextureName))
 				{
 					*pd3dSrvGpuDescriptorHandle = m_ppMaterials[i]->m_pTexture->GetGpuDescriptorHandle(j);
 					nParameterIndex = m_ppMaterials[i]->m_pTexture->GetRootParameter(j);
@@ -678,20 +683,21 @@ physx::PxArticulationLink* CGameObject::SetLink(physx::PxArticulationReducedCoor
 {
 	physx::PxArticulationLink* link = articulation->createLink(p_link, child);
 	if (meshScale > 0.00001f) {
-		physx::PxVec3 distance = (child.p + parent.p) * 0.5f;
+		physx::PxVec3 distance = (child.p) * 0.5f;
 		physx::PxReal len = distance.magnitude();
 		physx::PxTransform center = physx::PxTransform(physx::PxVec3(len / 2.0f, 0.0f, 0.0f));
 		float scale = m_xmf4x4Scale._11;
 		//physx::PxBoxGeometry linkGeometry = physx::PxBoxGeometry(0.05f * scale * meshScale, len / 2.0f/* * scale * meshScale*/, 0.05f * scale * meshScale);
 		physx::PxBoxGeometry linkGeometry = physx::PxBoxGeometry(0.05f * scale * meshScale, 0.05f * scale * meshScale, 0.05f * scale * meshScale);
+		physx::PxCapsuleGeometry linkCapsuleGeometry = physx::PxCapsuleGeometry(0.1f * scale * meshScale, len / 2.0f * meshScale);
 		//physx::PxBoxGeometry linkGeometry = physx::PxBoxGeometry(len / 2.0f/* * scale * meshScale*/, 0.05f * scale * meshScale, 0.05f * scale * meshScale);
 		physx::PxMaterial* material = Locator.GetPxPhysics()->createMaterial(0.9, 0.9f, 0.1);
 		//physx::PxShape* shape = Locator.GetPxPhysics()->createShape(linkGeometry, *material);
 		/*if(p_link)
 			shape->setLocalPose(physx::PxTransform((child.p + parent.p) * 0.5f));*/
 			//link->attachShape(*shape);
-		physx::PxShape* shape = physx::PxRigidActorExt::createExclusiveShape(*link, linkGeometry, *material);
-		physx::PxVec3 capsuleLocalPos = (child.p + parent.p) * 0.5f;
+		physx::PxShape* shape = physx::PxRigidActorExt::createExclusiveShape(*link, linkCapsuleGeometry, *material);
+		//physx::PxVec3 capsuleLocalPos = (child.p + parent.p) * 0.5f;
 		//shape->setLocalPose(physx::PxTransform(capsuleLocalPos));
 		physx::PxVec3 localpos = (child.p + parent.p) * 0.5f;
 		physx::PxRigidBodyExt::updateMassAndInertia(*link, 1.0f);
@@ -852,7 +858,7 @@ void CGameObject::CreateArticulation(float meshScale)
 	m_pArticulation = Locator.GetPxPhysics()->createArticulationReducedCoordinate();
 	m_pArticulation->setArticulationFlag(physx::PxArticulationFlag::eDISABLE_SELF_COLLISION, true);
 	m_pArticulation->setSolverIterationCounts(30, 10);
-	m_pArticulation->setMaxCOMLinearVelocity(40);
+	m_pArticulation->setMaxCOMLinearVelocity(FLT_MAX);
 
 	float scale = m_xmf4x4Scale._11;
 
@@ -914,7 +920,7 @@ void CGameObject::CreateArticulation(float meshScale)
 	m_pArtiLinkNames.emplace_back(target);
 
 
-	target = "pelvis" ;
+	target = "pelvis";
 	CGameObject* pelvis = FindFrame("pelvis");
 	ParentMt = root->m_xmf4x4Transform;
 	//ParentMt = Matrix4x4::Multiply(ParentMt, XMMatrixRotationRollPitchYaw(90.0f * physx::PxPi / 180.0f, 0.f, 0.f));
@@ -943,15 +949,15 @@ void CGameObject::CreateArticulation(float meshScale)
 	SPHERICALDesc.eS1LImit.high = 10.0f * physx::PxPi / 180.0f;
 	SPHERICALDesc.eS2LImit.low = -10.0f * physx::PxPi / 180.0f;  // x?
 	SPHERICALDesc.eS2LImit.high = 10.0f * physx::PxPi / 180.0f;
-	SPHERICALDesc.eTDrive.driveType = physx::PxArticulationDriveType::eFORCE;
-	SPHERICALDesc.eTDrive.damping = 100.0f;
-	SPHERICALDesc.eTDrive.stiffness = 0.5f;
-	SPHERICALDesc.eS1Drive.driveType = physx::PxArticulationDriveType::eFORCE;
-	SPHERICALDesc.eS1Drive.damping = 100.0f;
-	SPHERICALDesc.eS1Drive.stiffness = 0.5f;
-	SPHERICALDesc.eS2Drive.driveType = physx::PxArticulationDriveType::eFORCE;
-	SPHERICALDesc.eS2Drive.damping = 100.0f;
-	SPHERICALDesc.eS2Drive.stiffness = 0.5f;
+	SPHERICALDesc.eTDrive.driveType = physx::PxArticulationDriveType::eNONE;
+	SPHERICALDesc.eTDrive.damping = 1.0f;
+	SPHERICALDesc.eTDrive.stiffness = 5.0f;
+	SPHERICALDesc.eS1Drive.driveType = physx::PxArticulationDriveType::eNONE;
+	SPHERICALDesc.eS1Drive.damping = 1.0f;
+	SPHERICALDesc.eS1Drive.stiffness = 5.0f;
+	SPHERICALDesc.eS2Drive.driveType = physx::PxArticulationDriveType::eNONE;
+	SPHERICALDesc.eS2Drive.damping = 1.0f;
+	SPHERICALDesc.eS2Drive.stiffness = 5.0f;
 #ifdef _test_ragdoll
 	SetJoint(joint, SPHERICALDesc);
 #else
@@ -1007,15 +1013,6 @@ void CGameObject::CreateArticulation(float meshScale)
 	SPHERICALDesc.eS1LImit.high = 10.0f * physx::PxPi / 180.0f;
 	SPHERICALDesc.eS2LImit.low = -10.0f * physx::PxPi / 180.0f;  // x?
 	SPHERICALDesc.eS2LImit.high = 10.0f * physx::PxPi / 180.0f;
-	SPHERICALDesc.eTDrive.driveType = physx::PxArticulationDriveType::eFORCE;
-	SPHERICALDesc.eTDrive.damping = 100.0f;
-	SPHERICALDesc.eTDrive.stiffness = 0.5f;
-	SPHERICALDesc.eS1Drive.driveType = physx::PxArticulationDriveType::eFORCE;
-	SPHERICALDesc.eS1Drive.damping = 100.0f;
-	SPHERICALDesc.eS1Drive.stiffness = 0.5f;
-	SPHERICALDesc.eS2Drive.driveType = physx::PxArticulationDriveType::eFORCE;
-	SPHERICALDesc.eS2Drive.damping = 100.0f;
-	SPHERICALDesc.eS2Drive.stiffness = 0.5f;
 #ifdef _test_ragdoll
 	SetJoint(joint, SPHERICALDesc);
 #else
@@ -1036,15 +1033,6 @@ void CGameObject::CreateArticulation(float meshScale)
 	SPHERICALDesc.eS1LImit.high = 10.0f * physx::PxPi / 180.0f;
 	SPHERICALDesc.eS2LImit.low = -10.0f * physx::PxPi / 180.0f;  // x?
 	SPHERICALDesc.eS2LImit.high = 40.0f * physx::PxPi / 180.0f;
-	SPHERICALDesc.eTDrive.driveType = physx::PxArticulationDriveType::eFORCE;
-	SPHERICALDesc.eTDrive.damping = 100.0f;
-	SPHERICALDesc.eTDrive.stiffness = 0.5f;
-	SPHERICALDesc.eS1Drive.driveType = physx::PxArticulationDriveType::eFORCE;
-	SPHERICALDesc.eS1Drive.damping = 100.0f;
-	SPHERICALDesc.eS1Drive.stiffness = 0.5f;
-	SPHERICALDesc.eS2Drive.driveType = physx::PxArticulationDriveType::eFORCE;
-	SPHERICALDesc.eS2Drive.damping = 100.0f;
-	SPHERICALDesc.eS2Drive.stiffness = 0.5f;
 #ifdef _test_ragdoll
 	SetJoint(joint, SPHERICALDesc);
 #else
@@ -1121,15 +1109,15 @@ void CGameObject::CreateArticulation(float meshScale)
 	REVOLUTEDesc.eTWIST = false;
 	REVOLUTEDesc.eS2LImit.low = 0.0f * physx::PxPi / 180.0f;
 	REVOLUTEDesc.eS2LImit.high = 140.0f * physx::PxPi / 180.0f;
-	REVOLUTEDesc.eTDrive.driveType = physx::PxArticulationDriveType::eFORCE;
-	REVOLUTEDesc.eTDrive.damping = 100.0f;
-	REVOLUTEDesc.eTDrive.stiffness = 0.7f;
-	REVOLUTEDesc.eS1Drive.driveType = physx::PxArticulationDriveType::eFORCE;
-	REVOLUTEDesc.eS1Drive.damping = 100.0f;
-	REVOLUTEDesc.eS1Drive.stiffness = 0.7f;
-	REVOLUTEDesc.eS2Drive.driveType = physx::PxArticulationDriveType::eFORCE;
-	REVOLUTEDesc.eS2Drive.damping = 100.0f;
-	REVOLUTEDesc.eS2Drive.stiffness = 0.7f;
+	REVOLUTEDesc.eTDrive.driveType = physx::PxArticulationDriveType::eNONE;
+	REVOLUTEDesc.eTDrive.damping = 1.0f;
+	REVOLUTEDesc.eTDrive.stiffness = 5.0f;
+	REVOLUTEDesc.eS1Drive.driveType = physx::PxArticulationDriveType::eNONE;
+	REVOLUTEDesc.eS1Drive.damping = 1.0f;
+	REVOLUTEDesc.eS1Drive.stiffness = 5.0f;
+	REVOLUTEDesc.eS2Drive.driveType = physx::PxArticulationDriveType::eNONE;
+	REVOLUTEDesc.eS2Drive.damping = 1.0f;
+	REVOLUTEDesc.eS2Drive.stiffness = 5.0f;
 #ifdef _test_ragdoll
 	SetJoint(joint, REVOLUTEDesc);
 #else
@@ -1205,15 +1193,6 @@ void CGameObject::CreateArticulation(float meshScale)
 	REVOLUTEDesc.eTWIST = false;
 	REVOLUTEDesc.eS2LImit.low = 0.0f * physx::PxPi / 180.0f;
 	REVOLUTEDesc.eS2LImit.high = 140.0f * physx::PxPi / 180.0f;
-	REVOLUTEDesc.eTDrive.driveType = physx::PxArticulationDriveType::eFORCE;
-	REVOLUTEDesc.eTDrive.damping = 100.0f;
-	REVOLUTEDesc.eTDrive.stiffness = 0.7f;
-	REVOLUTEDesc.eS1Drive.driveType = physx::PxArticulationDriveType::eFORCE;
-	REVOLUTEDesc.eS1Drive.damping = 100.0f;
-	REVOLUTEDesc.eS1Drive.stiffness = 0.7f;
-	REVOLUTEDesc.eS2Drive.driveType = physx::PxArticulationDriveType::eFORCE;
-	REVOLUTEDesc.eS2Drive.damping = 100.0f;
-	REVOLUTEDesc.eS2Drive.stiffness = 0.7f;
 #ifdef _test_ragdoll
 	SetJoint(joint, REVOLUTEDesc);
 #else
@@ -1278,15 +1257,6 @@ void CGameObject::CreateArticulation(float meshScale)
 	REVOLUTEDesc.eTWIST = false;
 	REVOLUTEDesc.eS2LImit.low = 0.0f * physx::PxPi / 180.0f;
 	REVOLUTEDesc.eS2LImit.high = 100.0f * physx::PxPi / 180.0f;
-	REVOLUTEDesc.eTDrive.driveType = physx::PxArticulationDriveType::eFORCE;
-	REVOLUTEDesc.eTDrive.damping = 100.0f;
-	REVOLUTEDesc.eTDrive.stiffness = 0.5f;
-	REVOLUTEDesc.eS1Drive.driveType = physx::PxArticulationDriveType::eFORCE;
-	REVOLUTEDesc.eS1Drive.damping = 100.0f;
-	REVOLUTEDesc.eS1Drive.stiffness = 0.5f;
-	REVOLUTEDesc.eS2Drive.driveType = physx::PxArticulationDriveType::eFORCE;
-	REVOLUTEDesc.eS2Drive.damping = 100.0f;
-	REVOLUTEDesc.eS2Drive.stiffness = 0.5f;
 #ifdef _test_ragdoll
 	SetJoint(joint, REVOLUTEDesc);
 #else
@@ -1361,15 +1331,6 @@ void CGameObject::CreateArticulation(float meshScale)
 	REVOLUTEDesc.eTWIST = false;
 	REVOLUTEDesc.eS2LImit.low = 0.0f * physx::PxPi / 180.0f;
 	REVOLUTEDesc.eS2LImit.high = 100.0f * physx::PxPi / 180.0f;
-	REVOLUTEDesc.eTDrive.driveType = physx::PxArticulationDriveType::eFORCE;
-	REVOLUTEDesc.eTDrive.damping = 100.0f;
-	REVOLUTEDesc.eTDrive.stiffness = 0.5f;
-	REVOLUTEDesc.eS1Drive.driveType = physx::PxArticulationDriveType::eFORCE;
-	REVOLUTEDesc.eS1Drive.damping = 100.0f;
-	REVOLUTEDesc.eS1Drive.stiffness = 0.5f;
-	REVOLUTEDesc.eS2Drive.driveType = physx::PxArticulationDriveType::eFORCE;
-	REVOLUTEDesc.eS2Drive.damping = 100.0f;
-	REVOLUTEDesc.eS2Drive.stiffness = 0.5f;
 #ifdef _test_ragdoll
 	SetJoint(joint, REVOLUTEDesc);
 #else

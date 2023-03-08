@@ -13,6 +13,11 @@ CMonster::CMonster()
 	m_fStunStartTime = 0.0f;
 	m_fShakeDistance = 0.0f;
 	m_fStunTime = 0.0f;
+	m_fMaxDissolveTime = 3.0f;
+	m_fDissolveThrethHold = 0.0f;
+	m_fDissolveTime = 0.0f;
+	TestDissolvetime = 0.0f;
+
 }
 
 CMonster::~CMonster()
@@ -31,6 +36,20 @@ void CMonster::Update(float fTimeElapsed)
 
 	CPhysicsObject::Apply_Gravity(fTimeElapsed);
 
+	Animate(fTimeElapsed);
+
+	if (!m_bDissolved) {
+		TestDissolvetime += fTimeElapsed;
+		if (TestDissolvetime > 10.0f)
+			m_bDissolved = true;
+	}
+	else{
+		m_fDissolveTime += fTimeElapsed;
+		m_fDissolveThrethHold = m_fDissolveTime / m_fMaxDissolveTime;
+		/*if (m_fDissolveThrethHold > 1.0f) {
+			m_fDissolveThrethHold = 1.0f;
+		}*/
+	}
 	if (m_pStateMachine->GetCurrentState() == Damaged_Monster::GetInst() ||
 		m_pStateMachine->GetCurrentState() == Stun_Monster::GetInst())
 	{
@@ -123,6 +142,8 @@ COrcObject::COrcObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3d
 	CLoadedModelInfo* pOrcModel = CModelManager::GetInst()->GetModelInfo("Object/Orc.bin");;
 	if (!pOrcModel) pOrcModel = CModelManager::GetInst()->LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, "Object/Orc.bin");
 
+	CreateShaderVariables(pd3dDevice, pd3dCommandList);
+
 	SetChild(pOrcModel->m_pModelRootObject, true);
 	m_pSkinnedAnimationController = std::make_unique<CAnimationController>(pd3dDevice, pd3dCommandList, nAnimationTracks, pOrcModel);
 
@@ -165,6 +186,8 @@ CGoblinObject::CGoblinObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 
 	CLoadedModelInfo* pGoblinModel = CModelManager::GetInst()->GetModelInfo("Object/Goblin.bin");;
 	if (!pGoblinModel) pGoblinModel = CModelManager::GetInst()->LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, "Object/Goblin.bin");
+
+	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
 	SetChild(pGoblinModel->m_pModelRootObject, true);
 	m_pSkinnedAnimationController = std::make_unique<CAnimationController>(pd3dDevice, pd3dCommandList, nAnimationTracks, pGoblinModel);
@@ -221,6 +244,8 @@ CSkeletonObject::CSkeletonObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 
 	SetChild(pSkeletonModel->m_pModelRootObject, true);
 	m_pSkinnedAnimationController = std::make_unique<CAnimationController>(pd3dDevice, pd3dCommandList, nAnimationTracks, pSkeletonModel);
+
+	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
 	PrepareBoundingBox(pd3dDevice, pd3dCommandList);
 	/*CLoadedModelInfo* pArmorModel = CModelManager::GetInst()->GetModelInfo("Object/SK_Armor.bin");;

@@ -27,7 +27,7 @@ bool CLocator::Init()
 	physx::PxSceneDesc SceneDesc(m_pPhysics->getTolerancesScale());
 	SceneDesc.cpuDispatcher = physx::PxDefaultCpuDispatcherCreate(8); // 이 세가지 파라미터가 반드시 필요함.
 	SceneDesc.filterShader = physx::PxDefaultSimulationFilterShader; // 각각 어떤 역할을 하는 지는 추가적으로 조사해볼 필요가 있음.
-	SceneDesc.gravity = physx::PxVec3(0.0f, -9.81f, 0.0f);
+	SceneDesc.gravity = physx::PxVec3(0.0f, -9.81f * 1.0f, 0.0f);
 	//SceneDesc.gravity = physx::PxVec3(0.0f, 0.0f, 0.0f);
 
 	m_pPxScene = m_pPhysics->createScene(SceneDesc);

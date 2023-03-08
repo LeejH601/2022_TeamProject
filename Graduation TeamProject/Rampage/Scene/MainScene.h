@@ -8,10 +8,16 @@
 #include "..\Object\ParticleObject.h"
 #include "..\Shader\ParticleShader.h"
 
+#define MAX_OBJECT 1000
+struct DissolveParams {
+	float dissolveThreshold[MAX_OBJECT];
+};
+
 class CMainTMPScene : public CScene
 {
 private:
 	std::vector<std::unique_ptr<CGameObject>> m_pObjects;
+	std::vector<UINT> m_IObjectIndexs;
 	std::unique_ptr<CLight> m_pLight;
 	std::unique_ptr<CSplatTerrain> m_pTerrain;
 	std::unique_ptr<CShader> m_pTerrainShader;
@@ -21,6 +27,9 @@ private:
 
 	std::vector<std::unique_ptr<CParticleObject>> m_ppParticleObjects;
 	std::shared_ptr<CParticleShader> m_pParticleShader;
+
+	DissolveParams* m_pcbMappedDisolveParams = nullptr;
+	ComPtr<ID3D12Resource> m_pd3dcbDisolveParams = nullptr;
 
 public:
 	CMainTMPScene() {}
@@ -50,4 +59,6 @@ public:
 	virtual void AnimateObjects(float fTimeElapsed);
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed, float fCurrentTime, CCamera* pCamera = NULL);
 	virtual void OnPostRenderTarget();
+
+	void LoadSceneFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, char* pstrFileName);
 };

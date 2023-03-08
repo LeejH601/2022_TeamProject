@@ -15,12 +15,12 @@ cbuffer cbCameraInfo : register(b1)
 	//float3 gf3CameraDirection : packoffset(c17);
 };
 
-cbuffer cbParallax : register(b5)
-{
-	float gfParallaxScale;
-	float gfParallaxBias;
-	int gfMappingMode;
-}
+//cbuffer cbParallax : register(b5)
+//{
+//	float gfParallaxScale;
+//	float gfParallaxBias;
+//	int gfMappingMode;
+//}
 
 Texture2D gtxMappedTexture[7] : register(t0);
 

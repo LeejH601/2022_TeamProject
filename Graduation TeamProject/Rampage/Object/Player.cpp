@@ -14,16 +14,20 @@ CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 	m_xmf3Velocity = XMFLOAT3{};
 
 	std::shared_ptr<CGameObject> knightObject = std::make_shared<CKnightObject>(pd3dDevice, pd3dCommandList, 1);
-	
+
 	SetChild(knightObject);
 
 	m_pStateMachine = std::make_unique<CStateMachine<CPlayer>>(this);
 	m_pStateMachine->SetCurrentState(Locator.GetPlayerState(typeid(Idle_Player)));
 	m_pStateMachine->ChangeState(Locator.GetPlayerState(typeid(Idle_Player)));
 
-	SetPosition(XMFLOAT3(-15.0f, 150.0f, 0.0f));
-	SetScale(15.0f, 15.0f, 15.0f);
+	SetPosition(XMFLOAT3(100.0f, 150.0f, -100.0f));
+	SetScale(4.0f, 4.0f, 4.0f);
 	Rotate(0.0f, 90.0f, 0.0f);
+
+	m_fSpeedKperH = 10.0f;
+	m_fSpeedMperS = m_fSpeedKperH * 1000.0f / 3600.0f;
+	m_fSpeedUperS = m_fSpeedMperS * 8.0f / 1.0f;
 }
 
 CPlayer::~CPlayer()
@@ -40,10 +44,10 @@ void CPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity, CCa
 
 		XMFLOAT3 xmf3Shift = XMFLOAT3{};
 
-		if (dwDirection & DIR_FORWARD)xmf3Shift = Vector3::Add(xmf3Shift, Vector3::Normalize(XMFLOAT3(pCamera->GetLookVector().x, 0.0f, pCamera->GetLookVector().z)), fDistance);
-		if (dwDirection & DIR_BACKWARD)xmf3Shift = Vector3::Add(xmf3Shift, Vector3::Normalize(XMFLOAT3(pCamera->GetLookVector().x, 0.0f, pCamera->GetLookVector().z)), -fDistance);
-		if (dwDirection & DIR_RIGHT)xmf3Shift = Vector3::Add(xmf3Shift, Vector3::Normalize(XMFLOAT3(pCamera->GetRightVector().x, 0.0f, pCamera->GetRightVector().z)), fDistance);
-		if (dwDirection & DIR_LEFT)xmf3Shift = Vector3::Add(xmf3Shift, Vector3::Normalize(XMFLOAT3(pCamera->GetRightVector().x, 0.0f, pCamera->GetRightVector().z)), -fDistance);
+		if (dwDirection & DIR_FORWARD)xmf3Shift = Vector3::Add(xmf3Shift, Vector3::Normalize(XMFLOAT3(pCamera->GetLookVector().x, 0.0f, pCamera->GetLookVector().z)));
+		if (dwDirection & DIR_BACKWARD)xmf3Shift = Vector3::Add(xmf3Shift, Vector3::Normalize(XMFLOAT3(pCamera->GetLookVector().x, 0.0f, pCamera->GetLookVector().z)), -1.0f);
+		if (dwDirection & DIR_RIGHT)xmf3Shift = Vector3::Add(xmf3Shift, Vector3::Normalize(XMFLOAT3(pCamera->GetRightVector().x, 0.0f, pCamera->GetRightVector().z)));
+		if (dwDirection & DIR_LEFT)xmf3Shift = Vector3::Add(xmf3Shift, Vector3::Normalize(XMFLOAT3(pCamera->GetRightVector().x, 0.0f, pCamera->GetRightVector().z)), -1.0f);
 
 		CPhysicsObject::Move(xmf3Shift, bUpdateVelocity);
 	}
@@ -138,7 +142,7 @@ void CPlayer::ProcessInput(DWORD dwDirection, float cxDelta, float cyDelta, floa
 	{
 		if (dwDirection)
 		{
-			Move(dwDirection, 115.0f * fTimeElapsed, true, pCamera);
+			Move(dwDirection, m_fSpeedUperS * fTimeElapsed, true, pCamera);
 		}
 	}
 }

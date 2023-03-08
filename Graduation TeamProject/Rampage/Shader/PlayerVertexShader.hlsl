@@ -2,7 +2,8 @@ cbuffer cbGameObjectInfo : register(b0)
 {
 	matrix gmtxGameObject : packoffset(c0);
 	matrix gmtxTexture : packoffset(c4);
-	uint gnTexturesMask : packoffset(c8);
+	uint gnTexturesMask : packoffset(c8.x);
+	uint gnInstanceID : packoffset(c8.y);
 }
 
 cbuffer cbCameraInfo : register(b1)
@@ -27,6 +28,7 @@ cbuffer cbBoneTransforms : register(b3)
 {
 	float4x4 gpmtxBoneTransforms[SKINNED_ANIMATION_BONES];
 };
+
 
 struct VS_INPUT
 {

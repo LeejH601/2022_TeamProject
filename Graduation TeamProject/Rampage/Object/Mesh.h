@@ -61,6 +61,8 @@ public:
 	virtual void PreRender(ID3D12GraphicsCommandList* pd3dCommandList, int nPipelineState) {};
 	virtual void PostRender(ID3D12GraphicsCommandList* pd3dCommandList, int nPipelineState) {};
 	virtual void OnPostRender(int nPipelineState) {};
+	std::vector<XMFLOAT3>& GetVertexs() { return m_pxmf3Positions; };
+	std::vector<UINT>& GetIndices() { return m_ppnSubSetIndices[0]; };
 
 	UINT GetType() { return(m_nType); }
 	XMFLOAT3 GetBoundingCenter() { return(m_xmf3AABBCenter); }
@@ -160,7 +162,9 @@ public:
 	~CRawFormatImage(void);
 
 	BYTE GetRawImagePixel(int x, int z) { return(m_pRawImagePixels[x + (z * m_nWidth)]); }
-	void SetRawImagePixel(int x, int z, BYTE nPixel) { m_pRawImagePixels[x + (z * m_nWidth)] = nPixel; }
+	void SetRawImagePixel(int x, int z, BYTE nPixel) { 
+		m_pRawImagePixels[x + (z * m_nWidth)] = nPixel; 
+	}
 
 	BYTE* GetRawImagePixels() { return(m_pRawImagePixels); }
 
@@ -218,7 +222,7 @@ public:
 	int GetWidth() { return(m_nWidth); }
 	int GetLength() { return(m_nLength); }
 
-	virtual float OnGetHeight(int x, int z, void* pContext);
+	virtual float OnGetHeight(int x, int z, void* pContext, bool SampleByImage = false);
 	virtual XMFLOAT4 OnGetColor(int x, int z, void* pContext);
 };
 //-------------------------------------------------------------------
