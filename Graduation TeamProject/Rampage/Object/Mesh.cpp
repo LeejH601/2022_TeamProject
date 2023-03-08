@@ -1370,6 +1370,8 @@ void CParticleMesh::PreRender(ID3D12GraphicsCommandList* pd3dCommandList, int nP
 	{
 		if (m_bStart)
 		{
+			m_nMaxParticles = m_nMaxParticle;
+
 			m_bStart = false;
 
 			m_nVertices = 1;
@@ -1474,4 +1476,73 @@ void CParticleMesh::OnPostRender(int nPipelineState)
 #endif
 		if ((m_nVertices == 0) || (m_nVertices >= MAX_PARTICLES)) m_bStart = true;
 	}
+}
+
+CSkyBoxMesh::CSkyBoxMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fWidth, float fHeight, float fDepth)
+{
+	m_nVertices = 36;
+	m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+	m_nStride = sizeof(XMFLOAT3);
+	float fx = fWidth * 0.5f, fy = fHeight * 0.5f, fz = fDepth * 0.5f;
+	// Front
+	m_pxmf3Positions.push_back(XMFLOAT3(-fx, +fx, +fx));
+	m_pxmf3Positions.push_back(XMFLOAT3(+fx, +fx, +fx));
+	m_pxmf3Positions.push_back(XMFLOAT3(-fx, -fx, +fx));
+	m_pxmf3Positions.push_back(XMFLOAT3(-fx, -fx, +fx));
+	m_pxmf3Positions.push_back(XMFLOAT3(+fx, +fx, +fx));
+	m_pxmf3Positions.push_back(XMFLOAT3(+fx, -fx, +fx));
+
+	// Back
+	m_pxmf3Positions.push_back(XMFLOAT3(+fx, +fx, -fx));
+	m_pxmf3Positions.push_back(XMFLOAT3(-fx, +fx, -fx));
+	m_pxmf3Positions.push_back(XMFLOAT3(+fx, -fx, -fx));
+	m_pxmf3Positions.push_back(XMFLOAT3(+fx, -fx, -fx));
+	m_pxmf3Positions.push_back(XMFLOAT3(-fx, +fx, -fx));
+	m_pxmf3Positions.push_back(XMFLOAT3(-fx, -fx, -fx));
+
+	// Left							
+	m_pxmf3Positions.push_back(XMFLOAT3(-fx, +fx, -fx));
+	m_pxmf3Positions.push_back(XMFLOAT3(-fx, +fx, +fx));
+	m_pxmf3Positions.push_back(XMFLOAT3(-fx, -fx, -fx));
+	m_pxmf3Positions.push_back(XMFLOAT3(-fx, -fx, -fx));
+	m_pxmf3Positions.push_back(XMFLOAT3(-fx, +fx, +fx));
+	m_pxmf3Positions.push_back(XMFLOAT3(-fx, -fx, +fx));
+
+	// Right						
+	m_pxmf3Positions.push_back(XMFLOAT3(+fx, +fx, +fx));
+	m_pxmf3Positions.push_back(XMFLOAT3(+fx, +fx, -fx));
+	m_pxmf3Positions.push_back(XMFLOAT3(+fx, -fx, +fx));
+	m_pxmf3Positions.push_back(XMFLOAT3(+fx, -fx, +fx));
+	m_pxmf3Positions.push_back(XMFLOAT3(+fx, +fx, -fx));
+	m_pxmf3Positions.push_back(XMFLOAT3(+fx, -fx, -fx));
+
+	// Top 									
+	m_pxmf3Positions.push_back(XMFLOAT3(-fx, +fx, -fx));
+	m_pxmf3Positions.push_back(XMFLOAT3(+fx, +fx, -fx));
+	m_pxmf3Positions.push_back(XMFLOAT3(-fx, +fx, +fx));
+	m_pxmf3Positions.push_back(XMFLOAT3(-fx, +fx, +fx));
+	m_pxmf3Positions.push_back(XMFLOAT3(+fx, +fx, -fx));
+	m_pxmf3Positions.push_back(XMFLOAT3(+fx, +fx, +fx));
+
+	// Bottom				
+	m_pxmf3Positions.push_back(XMFLOAT3(-fx, -fx, +fx));
+	m_pxmf3Positions.push_back(XMFLOAT3(+fx, -fx, +fx));
+	m_pxmf3Positions.push_back(XMFLOAT3(-fx, -fx, -fx));
+	m_pxmf3Positions.push_back(XMFLOAT3(-fx, -fx, -fx));
+	m_pxmf3Positions.push_back(XMFLOAT3(+fx, -fx, +fx));
+	m_pxmf3Positions.push_back(XMFLOAT3(+fx, -fx, -fx));
+
+
+	m_pd3dPositionBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, m_pxmf3Positions.data(), sizeof(XMFLOAT3) * m_nVertices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dPositionUploadBuffer);
+
+	m_nVertexBufferViews = 1;
+	m_pd3dVertexBufferViews.resize(m_nVertexBufferViews);
+
+	m_pd3dVertexBufferViews[0].BufferLocation = m_pd3dPositionBuffer->GetGPUVirtualAddress();
+	m_pd3dVertexBufferViews[0].StrideInBytes = sizeof(XMFLOAT3);
+	m_pd3dVertexBufferViews[0].SizeInBytes = sizeof(XMFLOAT3) * m_nVertices;
+}
+
+CSkyBoxMesh::~CSkyBoxMesh()
+{
 }

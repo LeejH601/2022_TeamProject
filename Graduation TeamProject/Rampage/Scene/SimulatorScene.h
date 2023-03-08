@@ -24,6 +24,7 @@ private:
 	std::unique_ptr<CShader> m_pDepthRenderShader;
 	std::shared_ptr<CParticleShader> m_pParticleObjectShader;
 	std::shared_ptr<CParticleObject> m_pParticleObject;
+
 public:
 	DECLARE_SINGLE(CSimulatorScene);
 	CSimulatorScene() {}

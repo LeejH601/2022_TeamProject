@@ -7,6 +7,8 @@
 #include "..\Object\BillBoardObject.h"
 #include "..\Object\ParticleObject.h"
 #include "..\Shader\ParticleShader.h"
+#include "..\Shader\SkyBoxShader.h"
+#include "..\Object\SkyBox.h"
 
 #define MAX_OBJECT 1000
 struct DissolveParams {
@@ -27,6 +29,9 @@ private:
 
 	std::vector<std::unique_ptr<CParticleObject>> m_ppParticleObjects;
 	std::shared_ptr<CParticleShader> m_pParticleShader;
+
+	std::unique_ptr<CSkyBoxShader> m_pSkyBoxShader;
+	std::unique_ptr<CSkyBox> m_pSkyBoxObject;
 
 	DissolveParams* m_pcbMappedDisolveParams = nullptr;
 	ComPtr<ID3D12Resource> m_pd3dcbDisolveParams = nullptr;

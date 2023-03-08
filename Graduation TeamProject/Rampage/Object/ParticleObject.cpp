@@ -17,7 +17,7 @@ CParticleObject::CParticleObject(std::shared_ptr<CTexture> pSpriteTexture, ID3D1
 
 	pShader->CreateGraphicsPipelineState(pd3dDevice, pd3dGraphicsRootSignature, 0);
 	pShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
-	
+
 }
 
 CParticleObject::~CParticleObject()
@@ -34,21 +34,33 @@ void CParticleObject::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12Grap
 	m_pd3dcbFrameworkInfo = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, ncbElementBytes, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER | D3D12_RESOURCE_STATE_GENERIC_READ, NULL);
 
 	m_pd3dcbFrameworkInfo->Map(0, NULL, (void**)&m_pcbMappedFrameworkInfo);
+
+	m_pcbMappedFrameworkInfo->m_bStart = true;
 }
 
 void CParticleObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList, float fCurrentTime, float fElapsedTime)
 {
+	m_fTime -= fElapsedTime;
+
 	m_pcbMappedFrameworkInfo->m_fCurrentTime = fCurrentTime;
 	m_pcbMappedFrameworkInfo->m_fElapsedTime = fElapsedTime;
-	m_pcbMappedFrameworkInfo->m_fSecondsPerFirework = 0.4f;
+
+	m_pcbMappedFrameworkInfo->m_fSpeed = m_fSpeed;
 	m_pcbMappedFrameworkInfo->m_nFlareParticlesToEmit = m_iEmitParticleN;
 	m_pcbMappedFrameworkInfo->m_xmf3Gravity = XMFLOAT3(0.0f, 0.f, 0.0f);
 	m_pcbMappedFrameworkInfo->m_nMaxFlareType2Particles = 15 * 1.5f;
 	m_pcbMappedFrameworkInfo->m_xmf3Color = m_f3Color;
 	m_pcbMappedFrameworkInfo->m_nParticleType = PARTICLE_TYPE_EMITTER;
-	m_pcbMappedFrameworkInfo->m_fLifeTime = m_fLifeTime;
+	m_pcbMappedFrameworkInfo->m_fLifeTime = m_fTime;
 	m_pcbMappedFrameworkInfo->m_fSize = m_fSize;
 
+	if (m_fTime < 0.f) {
+		m_fTime = m_fLifeTime;
+		m_pcbMappedFrameworkInfo->m_bStart = true;
+	}
+
+	if (static_cast<CParticleMesh*>(m_pMesh.get())->GetVertices() > 1)
+		m_pcbMappedFrameworkInfo->m_bStart = false;
 
 	D3D12_GPU_VIRTUAL_ADDRESS d3dGpuVirtualAddress = m_pd3dcbFrameworkInfo->GetGPUVirtualAddress();
 	pd3dCommandList->SetGraphicsRootConstantBufferView(11, d3dGpuVirtualAddress);
@@ -144,5 +156,10 @@ void CParticleObject::SetEmitParticleN(int iParticleN)
 
 void CParticleObject::SetMaxParticleN(int iMaxParticleN)
 {
-	static_cast<CParticleMesh*>(m_pMesh.get())->m_nMaxParticles = iMaxParticleN;
+	static_cast<CParticleMesh*>(m_pMesh.get())->m_nMaxParticle = iMaxParticleN;
+}
+
+void CParticleObject::SetSpeed(float fSpeed)
+{
+	m_fSpeed = fSpeed;
 }
