@@ -63,6 +63,7 @@ public:
 	virtual void OnPostRender(int nPipelineState) {};
 
 	UINT GetType() { return(m_nType); }
+	UINT GetVertices() { return(m_nVertices); }
 	XMFLOAT3 GetBoundingCenter() { return(m_xmf3AABBCenter); }
 	XMFLOAT3 GetBoundingExtent() { return(m_xmf3AABBExtents); }
 };
@@ -351,6 +352,7 @@ public:
 	bool								m_bStart = true;
 
 	UINT								m_nMaxParticles = MAX_PARTICLES;
+	UINT								m_nMaxParticle = MAX_PARTICLES;
 
 	ComPtr<ID3D12Resource>				m_pd3dVertexBuffer = NULL;
 	ID3D12Resource*						m_pd3dStreamOutputBuffer = NULL;
@@ -377,4 +379,12 @@ public:
 	virtual void PostRender(ID3D12GraphicsCommandList* pd3dCommandList, UINT nPipelineState);
 
 	virtual void OnPostRender(int nPipelineState);
+};
+
+
+class CSkyBoxMesh : public CMesh
+{
+public:
+	CSkyBoxMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fWidth = 20.0f, float fHeight = 20.0f, float fDepth = 20.0f);
+	virtual ~CSkyBoxMesh();
 };

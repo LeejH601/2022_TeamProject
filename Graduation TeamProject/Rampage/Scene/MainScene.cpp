@@ -122,7 +122,7 @@ void CMainTMPScene::CreateGraphicsRootSignature(ID3D12Device* pd3dDevice)
 	pd3dRootParameters[12].DescriptorTable.pDescriptorRanges = &pd3dDescriptorRanges[4];
 	pd3dRootParameters[12].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 
-	D3D12_STATIC_SAMPLER_DESC d3dSamplerDesc[4];
+	D3D12_STATIC_SAMPLER_DESC d3dSamplerDesc[5];
 
 	d3dSamplerDesc[0].Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;
 	d3dSamplerDesc[0].AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
@@ -178,6 +178,19 @@ void CMainTMPScene::CreateGraphicsRootSignature(ID3D12Device* pd3dDevice)
 	d3dSamplerDesc[3].ShaderRegister = 3;
 	d3dSamplerDesc[3].RegisterSpace = 0;
 	d3dSamplerDesc[3].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+
+	d3dSamplerDesc[4].Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;
+	d3dSamplerDesc[4].AddressU = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
+	d3dSamplerDesc[4].AddressV = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
+	d3dSamplerDesc[4].AddressW = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
+	d3dSamplerDesc[4].MipLODBias = 0;
+	d3dSamplerDesc[4].MaxAnisotropy = 1;
+	d3dSamplerDesc[4].ComparisonFunc = D3D12_COMPARISON_FUNC_ALWAYS;
+	d3dSamplerDesc[4].MinLOD = 0;
+	d3dSamplerDesc[4].MaxLOD = D3D12_FLOAT32_MAX;
+	d3dSamplerDesc[4].ShaderRegister = 4;
+	d3dSamplerDesc[4].RegisterSpace = 0;
+	d3dSamplerDesc[4].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
 
 	D3D12_ROOT_SIGNATURE_FLAGS d3dRootSignatureFlags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT | D3D12_ROOT_SIGNATURE_FLAG_ALLOW_STREAM_OUTPUT | D3D12_ROOT_SIGNATURE_FLAG_DENY_HULL_SHADER_ROOT_ACCESS | D3D12_ROOT_SIGNATURE_FLAG_DENY_DOMAIN_SHADER_ROOT_ACCESS;
 	D3D12_ROOT_SIGNATURE_DESC d3dRootSignatureDesc;
@@ -310,6 +323,17 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	//std::unique_ptr<CParticleObject> pParticleObject = std::make_unique<CParticleObject>(pd3dDevice, pd3dCommandList, GetGraphicsRootSignature(), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.f, 0.0f), 2.0f, XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT2(2.0f, 2.0f), MAX_PARTICLES, m_pParticleShader.get(), true);
 	//
 	//m_ppParticleObjects.push_back(std::move(pParticleObject));
+
+	std::shared_ptr<CTexture> pSkyBoxTexture = std::make_shared<CTexture>(1, RESOURCE_TEXTURE_CUBE, 0, 1);
+	pSkyBoxTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"SkyBox/Night_MoonBurst.dds", RESOURCE_TEXTURE_CUBE, 0);
+
+	m_pSkyBoxShader = std::make_unique<CSkyBoxShader>();
+	m_pSkyBoxShader->CreateShader(pd3dDevice, GetGraphicsRootSignature(), 1, &pdxgiObjectRtvFormats, 0);
+	m_pSkyBoxShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
+	m_pSkyBoxShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 1);
+	m_pSkyBoxShader->CreateShaderResourceViews(pd3dDevice, pSkyBoxTexture.get(), 0, 10);
+
+	m_pSkyBoxObject = std::make_unique<CSkyBox>(pd3dDevice, pd3dCommandList, GetGraphicsRootSignature(), pSkyBoxTexture);
 }
 void CMainTMPScene::AnimateObjects(float fTimeElapsed)
 {
@@ -317,6 +341,9 @@ void CMainTMPScene::AnimateObjects(float fTimeElapsed)
 void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed, float fCurrentTime, CCamera* pCamera)
 {
 	m_pLight->Render(pd3dCommandList);
+
+	m_pSkyBoxShader->Render(pd3dCommandList, 0);
+	m_pSkyBoxObject->Render(pd3dCommandList, pCamera);
 
 	CModelShader::GetInst()->Render(pd3dCommandList, 0);
 

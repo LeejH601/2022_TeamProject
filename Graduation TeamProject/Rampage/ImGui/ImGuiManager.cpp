@@ -244,10 +244,10 @@ void CImGuiManager::SetUI()
 			ImGui::SetCursorPos(initial_curpos);
 			ImGui::SetNextItemWidth(190.f);
 
-			int iParticleSpriteN = pParticleComponent->GetParticleNumber();
-			ImGui::Combo("Texture##ParticleEffect", (int*)(&pParticleComponent->GetParticleNumber()), items.data(), items.size());
-			if (iParticleSpriteN != pParticleComponent->GetParticleNumber())
-				pParticleComponent->SetTexture(0, ConverCtoWC(items[pParticleComponent->GetParticleNumber()]));
+			int iParticleSpriteN = pParticleComponent->GetParticleIndex();
+			ImGui::Combo("Texture##ParticleEffect", (int*)(&pParticleComponent->GetParticleIndex()), items.data(), items.size());
+			if (iParticleSpriteN != pParticleComponent->GetParticleIndex())
+				pParticleComponent->SetTexture(0, ConverCtoWC(items[pParticleComponent->GetParticleIndex()]));
 
 			initial_curpos.y += 25.f;
 			ImGui::SetCursorPos(initial_curpos);
@@ -264,16 +264,20 @@ void CImGuiManager::SetUI()
 			ImGui::SetNextItemWidth(190.f);
 			ImGui::DragFloat("LifeTime##ParticleEffect", &pParticleComponent->m_fLifeTime, 0.01f, 0.0f, 10.0f, "%.1f", 0);
 
-			//initial_curpos.y += 25.f;
-			//ImGui::SetCursorPos(initial_curpos);
-			//ImGui::SetNextItemWidth(190.f);
-			//ImGui::DragInt("MaxParticle##ParticleEffect", &pParticleComponent->m_nParticleNumber, 0.01f, 0.0f, 10.0f, "%d", 0);
+			initial_curpos.y += 25.f;
+			ImGui::SetCursorPos(initial_curpos);
+			ImGui::SetNextItemWidth(190.f);
+			ImGui::DragInt("ParticleCount##ParticleEffect", &pParticleComponent->m_nParticleNumber, 0.01f, 0.0f, 10.0f, "%d", 0);
+
+			initial_curpos.y += 25.f;
+			ImGui::SetCursorPos(initial_curpos);
+			ImGui::SetNextItemWidth(190.f);
+			ImGui::DragFloat("Speed##ParticleEffect", &pParticleComponent->m_fSpeed, 0.01f, 0.0f, 10.0f, "%.1f", 0);
 
 			initial_curpos.y += 25.f;
 			ImGui::SetCursorPos(initial_curpos);
 			ImGui::SetNextItemWidth(30.f);
 			ImGui::ColorEdit3("ParticleEffect", (float*)&pParticleComponent->m_f3Color); // Edit 3 floats representing a color
-
 			//initial_curpos.x += 35.f;
 			//ImGui::SetCursorPos(initial_curpos);
 			//ImGui::SetNextItemWidth(30.f);
@@ -645,7 +649,7 @@ void CImGuiManager::OnPrepareRender(ID3D12GraphicsCommandList* pd3dCommandList, 
 	m_pCamera->RegenerateViewMatrix();
 	m_pCamera->OnPrepareRender(pd3dCommandList);
 
-	CSimulatorScene::GetInst()->Render(pd3dCommandList, fTimeElapsed, fCurrentTime, NULL);
+	CSimulatorScene::GetInst()->Render(pd3dCommandList, fTimeElapsed, fCurrentTime, pCamera);
 
 	::SynchronizeResourceTransition(pd3dCommandList, m_pRTTexture->GetResource(0), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_COMMON);
 }

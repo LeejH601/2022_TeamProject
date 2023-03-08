@@ -18,7 +18,7 @@ struct CB_FRAMEWORK_INFO
 {
 	float					m_fCurrentTime;
 	float					m_fElapsedTime;
-	float					m_fSecondsPerFirework = 1.0f;
+	float					m_fSpeed = 1.0f;
 	int						m_nFlareParticlesToEmit = 30;
 	XMFLOAT3				m_xmf3Gravity = XMFLOAT3(0.0f, -9.8f, 0.0f);
 	int						m_nMaxFlareType2Particles = 15;
@@ -26,6 +26,7 @@ struct CB_FRAMEWORK_INFO
 	int						m_nParticleType = PARTICLE_TYPE_EMITTER;
 	float					m_fLifeTime = SHELL_PARTICLE_LIFETIME;
 	float					m_fSize = 0.5f;
+	bool					m_bStart = true;
 };
 class CBillBoardObject : public CGameObject
 {

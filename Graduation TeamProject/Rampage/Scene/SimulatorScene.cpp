@@ -286,11 +286,18 @@ void CSimulatorScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 
 
 	m_pParticleObjectShader = std::make_shared<CParticleShader>();
-	m_pParticleObjectShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 10);
+	m_pParticleObjectShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 40);
 	CTextureManager::GetInst()->LoadParticleTexture(pd3dDevice, pd3dCommandList, L"ParticleImage/RoundSoftParticle.dds", m_pParticleObjectShader.get(), 0, 0);
-	CTextureManager::GetInst()->LoadParticleTexture(pd3dDevice, pd3dCommandList, L"Image/Flower01.dds", m_pParticleObjectShader.get(), 0, 0);
+	CTextureManager::GetInst()->LoadParticleTexture(pd3dDevice, pd3dCommandList, L"Image/Effect0.dds", m_pParticleObjectShader.get(), 0, 0);
+	CTextureManager::GetInst()->LoadParticleTexture(pd3dDevice, pd3dCommandList, L"Image/Effect1.dds", m_pParticleObjectShader.get(), 0, 0);
+	CTextureManager::GetInst()->LoadParticleTexture(pd3dDevice, pd3dCommandList, L"Image/Effect2.dds", m_pParticleObjectShader.get(), 0, 0);
+	CTextureManager::GetInst()->LoadParticleTexture(pd3dDevice, pd3dCommandList, L"Image/Effect3.dds", m_pParticleObjectShader.get(), 0, 0);
+	CTextureManager::GetInst()->LoadParticleTexture(pd3dDevice, pd3dCommandList, L"Image/Effect4.dds", m_pParticleObjectShader.get(), 0, 0);
+	CTextureManager::GetInst()->LoadParticleTexture(pd3dDevice, pd3dCommandList, L"Image/Effect5.dds", m_pParticleObjectShader.get(), 0, 0);
 	m_pParticleObject = std::make_shared<CParticleObject>(CTextureManager::GetInst()->LoadParticleTexture(L"ParticleImage/RoundSoftParticle.dds"), pd3dDevice, pd3dCommandList, GetGraphicsRootSignature(), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), 2.0f, XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT2(2.0f, 2.0f), MAX_PARTICLES, m_pParticleObjectShader.get());
 	CParticleComponent::GetInst()->Set_ParticleComponent(m_pParticleObject);
+
+
 }
 void CSimulatorScene::AnimateObjects(float fTimeElapsed)
 {

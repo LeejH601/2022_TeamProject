@@ -7,6 +7,8 @@
 #include "..\Object\BillBoardObject.h"
 #include "..\Object\ParticleObject.h"
 #include "..\Shader\ParticleShader.h"
+#include "..\Shader\SkyBoxShader.h"
+#include "..\Object\SkyBox.h"
 
 class CMainTMPScene : public CScene
 {
@@ -21,6 +23,9 @@ private:
 
 	std::vector<std::unique_ptr<CParticleObject>> m_ppParticleObjects;
 	std::shared_ptr<CParticleShader> m_pParticleShader;
+
+	std::unique_ptr<CSkyBoxShader> m_pSkyBoxShader;
+	std::unique_ptr<CSkyBox> m_pSkyBoxObject;
 
 public:
 	CMainTMPScene() {}
