@@ -72,12 +72,13 @@ cbuffer cbToLightSpace : register(b6)
 };
 
 
-
+#define STEP 0.15f
+#define INTERVEL_STEPS 0.05f
 
 float4 CalculateDissolve(float4 color, float2 uv, float ThreshHold) {
 	float4 NoiseColor = gtxMappedTexture[2].Sample(gSamplerState, uv / 16 + 0.5f);
-	float step = 0.15f;
-	float step2 = step + 0.05f;
+
+	float step2 = STEP + INTERVEL_STEPS;
 	float Alpha = 1.0f;
 
 	if (ThreshHold <= 0.0f)
@@ -87,8 +88,13 @@ float4 CalculateDissolve(float4 color, float2 uv, float ThreshHold) {
 		float4 emissionColor = float4(0.3125, 0.734f, 0.871f, 0.6f);
 		color = emissionColor;
 	}
-	if (NoiseColor.r <= ThreshHold - step) {
-		float4 emissionColor = float4(0.117, 0.562, 1.0f, 0.2f);
+	if (NoiseColor.r <= ThreshHold - STEP) {
+		float emissionAlpha = 0.2f;
+		float AlphaWeight = 0.f;
+		if ((ThreshHold - STEP) >= 1.0f - INTERVEL_STEPS) {
+			emissionAlpha = emissionAlpha - ((ThreshHold - STEP) - (1.0f - INTERVEL_STEPS)) * 4.0f;
+		}
+		float4 emissionColor = float4(0.117, 0.562, 1.0f, emissionAlpha);
 		color = emissionColor;
 	}
 	if (NoiseColor.r <= ThreshHold - step2) {

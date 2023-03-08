@@ -858,7 +858,7 @@ void CGameObject::CreateArticulation(float meshScale)
 	m_pArticulation = Locator.GetPxPhysics()->createArticulationReducedCoordinate();
 	m_pArticulation->setArticulationFlag(physx::PxArticulationFlag::eDISABLE_SELF_COLLISION, true);
 	m_pArticulation->setSolverIterationCounts(30, 10);
-	m_pArticulation->setMaxCOMLinearVelocity(40);
+	m_pArticulation->setMaxCOMLinearVelocity(FLT_MAX);
 
 	float scale = m_xmf4x4Scale._11;
 

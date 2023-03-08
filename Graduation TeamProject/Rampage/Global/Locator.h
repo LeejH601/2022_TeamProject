@@ -57,6 +57,11 @@ public:
 	};
 };
 
+enum class MOUSE_CUROSR_MODE {
+	THIRD_FERSON_MODE,
+	FLOATING_MODE,
+};
+
 class CLocator
 {
 	std::unique_ptr<CCamera> m_pSimulaterCamera = NULL;
@@ -79,6 +84,9 @@ class CLocator
 
 	CoptSetPair dummy;
 	PlayerStatePair statedummy;
+
+	MOUSE_CUROSR_MODE m_eMouseCursorMode = MOUSE_CUROSR_MODE::FLOATING_MODE;
+
 public:
 	CLocator() = default;
 	~CLocator();
@@ -125,6 +133,9 @@ public:
 	physx::PxFoundation* GetPxFoundation() { return m_pFoundation; };
 	physx::PxPhysics* GetPxPhysics() { return m_pPhysics; };
 	physx::PxScene* GetPxScene() { return m_pPxScene; };
+
+	void SetMouseCursorMode(MOUSE_CUROSR_MODE mode) { m_eMouseCursorMode = mode; };
+	MOUSE_CUROSR_MODE GetMouseCursorMode() { return m_eMouseCursorMode; };
 };
 
 extern CLocator Locator;

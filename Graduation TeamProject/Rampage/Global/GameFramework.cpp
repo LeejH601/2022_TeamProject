@@ -8,6 +8,7 @@
 #include "..\Shader\DepthRenderShader.h"
 #include "Locator.h"
 #include "MessageDispatcher.h"
+#include <windowsx.h>
 
 CGameFramework::CGameFramework()
 {
@@ -282,6 +283,12 @@ void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM
 		::ReleaseCapture();
 		break;
 	case WM_MOUSEMOVE:
+		//if (Locator.GetMouseCursorMode() == MOUSE_CUROSR_MODE::THIRD_FERSON_MODE) {
+		//	//::SetCapture(hWnd);
+		//	m_ptOldCursorPos.x = GET_X_LPARAM(lParam);
+		//	m_ptOldCursorPos.y = GET_Y_LPARAM(lParam);
+		//	::GetCursorPos(&m_ptOldCursorPos);
+		//}
 		break;
 	default:
 		break;
@@ -301,9 +308,13 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 			break;
 		case '1':
 			m_pCurrentCamera = m_pFloatingCamera.get();
+			Locator.SetMouseCursorMode(MOUSE_CUROSR_MODE::FLOATING_MODE);
+			PostMessage(hWnd, WM_ACTIVATE, 0, 0);
 			break;
 		case '2':
 			m_pCurrentCamera = Locator.GetMainSceneCamera();
+			Locator.SetMouseCursorMode(MOUSE_CUROSR_MODE::THIRD_FERSON_MODE);
+			PostMessage(hWnd, WM_ACTIVATE, 0, 0);
 			break;
 		case VK_F9:
 			ChangeSwapChainState();
@@ -319,6 +330,7 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 }
 LRESULT CALLBACK CGameFramework::OnProcessingWindowMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
 {
+	static int CursorHideCount = 0;
 	switch (nMessageID)
 	{
 	case WM_ACTIVATE:
@@ -327,6 +339,29 @@ LRESULT CALLBACK CGameFramework::OnProcessingWindowMessage(HWND hWnd, UINT nMess
 			m_GameTimer.Stop();
 		else
 			m_GameTimer.Start();*/
+		RECT screenRect;
+		GetWindowRect(hWnd, &screenRect);
+		MOUSE_CUROSR_MODE eMouseMode = Locator.GetMouseCursorMode();
+		switch (eMouseMode)
+		{
+		case MOUSE_CUROSR_MODE::THIRD_FERSON_MODE:
+			if (CursorHideCount < 1) {
+				CursorHideCount++;
+				ShowCursor(false);
+				ClipCursor(&screenRect);
+			}
+			break;
+		case MOUSE_CUROSR_MODE::FLOATING_MODE:
+			while (CursorHideCount > 0)
+			{
+				CursorHideCount--;
+				ShowCursor(true);
+			}
+			ClipCursor(NULL);
+			break;
+		default:
+			break;
+		}
 		break;
 	}
 	case WM_SIZE:
@@ -361,6 +396,12 @@ void CGameFramework::ProcessInput()
 		cyDelta = (float)(ptCursorPos.y - m_ptOldCursorPos.y) / 3.0f;
 		SetCursorPos(m_ptOldCursorPos.x, m_ptOldCursorPos.y);
 	}
+	/*if (Locator.GetMouseCursorMode() == MOUSE_CUROSR_MODE::THIRD_FERSON_MODE) {
+		cxDelta = (float)(ptCursorPos.x - m_ptOldCursorPos.x) / 3.0f;
+		cyDelta = (float)(ptCursorPos.y - m_ptOldCursorPos.y) / 3.0f;
+		m_ptOldCursorPos.x = ptCursorPos.x;
+		m_ptOldCursorPos.y = ptCursorPos.y;
+	}*/
 
 	m_pCurrentCamera->ProcessInput(dwDirection, cxDelta, cyDelta, m_GameTimer.GetFrameTimeElapsed());
 	((CPlayer*)(m_pPlayer.get()))->ProcessInput(dwDirection, cxDelta, cyDelta, m_GameTimer.GetFrameTimeElapsed(), m_pCurrentCamera);
