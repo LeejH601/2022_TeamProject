@@ -1,3 +1,6 @@
+
+#include "Header.hlsli"
+
 cbuffer cbGameObjectInfo : register(b0)
 {
 	matrix gmtxGameObject : packoffset(c0);
@@ -55,8 +58,10 @@ static int gnMaxSamples = 20;
 static int gnMinSamples = 4;
 static float gfscale = 0.0001f;
 
-float4 PSParallaxTerrain(VS_TERRAIN_OUTPUT input) : SV_TARGET
+PS_MULTIPLE_RENDER_TARGETS_OUTPUT PSParallaxTerrain(VS_TERRAIN_OUTPUT input) : SV_TARGET
 {
+	PS_MULTIPLE_RENDER_TARGETS_OUTPUT output;
+
 	float fParallaxLimit = -length(input.toCamera.xy) / input.toCamera.z;
 	fParallaxLimit *= gfscale;
 
@@ -178,5 +183,8 @@ float4 PSParallaxTerrain(VS_TERRAIN_OUTPUT input) : SV_TARGET
 	//float3 vDiffuse = vFinalColor.rgb * max(0.0f, dot(input.toLight, vFinalNormal.xyz)) * 0.5;
 	//vFinalColor.rgb = vAmbient + vDiffuse;
 
-	return (cIllumination);
+	output.f4Scene = cIllumination;
+	output.f4Color = cIllumination;
+
+	return (output);
 }

@@ -164,8 +164,10 @@ void CParticleShader::CreateGraphicsPipelineState(ID3D12Device* pd3dDevice, ID3D
 	m_nPipelineStates = 2;
 	m_ppd3dPipelineStates.resize(m_nPipelineStates);
 
-	DXGI_FORMAT pdxgiRtvFormats[2] = {DXGI_FORMAT_UNKNOWN,  DXGI_FORMAT_R8G8B8A8_UNORM };
+	DXGI_FORMAT pdxgiRtvFormats[8] = {DXGI_FORMAT_UNKNOWN,  DXGI_FORMAT_R8G8B8A8_UNORM, DXGI_FORMAT_R8G8B8A8_UNORM, DXGI_FORMAT_R8G8B8A8_UNORM, DXGI_FORMAT_R8G8B8A8_UNORM,
+		DXGI_FORMAT_R8G8B8A8_UNORM, DXGI_FORMAT_R32_FLOAT, DXGI_FORMAT_R32_FLOAT };
+
 
 	CParticleShader::CreateShader(pd3dDevice, pd3dGraphicsRootSignature, 0, &pdxgiRtvFormats[0], 0); //Stream Output Pipeline State // DXGI_FORMAT_UNKNOWN
-	CParticleShader::CreateShader(pd3dDevice, pd3dGraphicsRootSignature, 1, &pdxgiRtvFormats[1], 1); //Draw Pipeline State // DXGI_FORMAT_R8G8B8A8_UNORM
+	CParticleShader::CreateShader(pd3dDevice, pd3dGraphicsRootSignature, 7, &pdxgiRtvFormats[1], 1); //Draw Pipeline State // DXGI_FORMAT_R8G8B8A8_UNORM
 }

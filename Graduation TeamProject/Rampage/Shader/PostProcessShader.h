@@ -32,7 +32,9 @@ protected:
 
 public:
 	CTexture* GetTexture() { return(m_pTexture.get()); }
+	std::shared_ptr<CTexture> GetTextureShared() { return m_pTexture; };
 	ID3D12Resource* GetTextureResource(UINT nIndex) { return(m_pTexture->GetResource(nIndex)); }
+	void SetTexture(std::shared_ptr<CTexture> pTexture) { m_pTexture = pTexture; };
 
 	D3D12_CPU_DESCRIPTOR_HANDLE GetRtvCPUDescriptorHandle(UINT nIndex) { return(m_pd3dRtvCPUDescriptorHandles[nIndex]); }
 };

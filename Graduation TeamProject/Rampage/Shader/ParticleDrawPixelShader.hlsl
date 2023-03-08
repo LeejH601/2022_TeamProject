@@ -1,3 +1,5 @@
+#include "Header.hlsli"
+
 Texture2D<float4> gtxtParticleTexture : register(t31);
 
 SamplerState gSamplerState : register(s0);
@@ -32,11 +34,15 @@ struct GS_PARTICLE_DRAW_OUTPUT
 	uint type : PARTICLETYPE;
 };
 
-float4 PSParticleDraw(GS_PARTICLE_DRAW_OUTPUT input) : SV_TARGET
+PS_MULTIPLE_RENDER_TARGETS_OUTPUT PSParticleDraw(GS_PARTICLE_DRAW_OUTPUT input) : SV_TARGET
 {
+	PS_MULTIPLE_RENDER_TARGETS_OUTPUT output;
 	float4 cColor = gtxtParticleTexture.Sample(gSamplerState, input.uv);
 	cColor.a *= gnTexturesMask * 0.01f; // 0~100으로 받아 0.00 ~1.00으로 변경
 	cColor *= float4(gfColor, 1.f);
 
-	return(cColor);
+	output.f4Scene = cColor;
+	output.f4Color = cColor;
+
+	return(output);
 }
