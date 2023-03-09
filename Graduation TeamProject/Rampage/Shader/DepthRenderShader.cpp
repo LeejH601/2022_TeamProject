@@ -123,10 +123,10 @@ D3D12_RASTERIZER_DESC CDepthRenderShader::CreateRasterizerState(int nPipelineSta
 	d3dRasterizerDesc.CullMode = D3D12_CULL_MODE_BACK;
 	d3dRasterizerDesc.FrontCounterClockwise = FALSE;
 #ifdef _WITH_RASTERIZER_DEPTH_BIAS
-	d3dRasterizerDesc.DepthBias = 250000;
+	d3dRasterizerDesc.DepthBias = 8500;
 #endif
-	d3dRasterizerDesc.DepthBiasClamp = 0.0f;
-	d3dRasterizerDesc.SlopeScaledDepthBias = 1.0f;
+	d3dRasterizerDesc.DepthBiasClamp = 100000;
+	d3dRasterizerDesc.SlopeScaledDepthBias = 9.2f;
 	d3dRasterizerDesc.DepthClipEnable = TRUE;
 	d3dRasterizerDesc.MultisampleEnable = FALSE;
 	d3dRasterizerDesc.AntialiasedLineEnable = FALSE;
@@ -246,7 +246,6 @@ void CDepthRenderShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCam
 	CShader::Render(pd3dCommandList, 0);
 	for (int i = 0; i < m_pObjects.size(); ++i)
 	{
-		//(*m_pObjects)[i]->Animate(0.0f);
 		m_pObjects[i]->Animate(fTimeElapsed);
 		m_pObjects[i]->Render(pd3dCommandList, false);
 	}
@@ -274,7 +273,7 @@ void CDepthRenderShader::PrepareShadowMap(ID3D12GraphicsCommandList* pd3dCommand
 
 			if (m_pLights[j].m_nType == DIRECTIONAL_LIGHT)
 			{
-				float fWidth = _PLANE_WIDTH, fHeight = _PLANE_HEIGHT;
+				float fWidth = _PLANE_WIDTH / 4, fHeight = _PLANE_HEIGHT / 4;
 				xmmtxProjection = XMMatrixOrthographicLH(fWidth, fHeight, fNearPlaneDistance, fFarPlaneDistance);
 			}
 			else if (m_pLights[j].m_nType == SPOT_LIGHT)

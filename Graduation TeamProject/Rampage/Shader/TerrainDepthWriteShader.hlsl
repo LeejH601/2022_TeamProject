@@ -6,6 +6,7 @@ struct VS_TERRAIN_OUTPUT
 	float2 uv1 : TEXCOORD1;
 	float3 normal : NORMAL0;
 	float3 normalW : NORMAL1;
+	float3 tangent : TANGENT;
 	float3 toCamera : TEXCOORD2;
 	float3 toLight : TEXCOORD3;
 };

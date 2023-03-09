@@ -1,6 +1,7 @@
 #include "Mesh.h"
 #include "Object.h"
 #include "ModelManager.h"
+#include "..\Global\Locator.h"
 
 CLoadedModelInfo::~CLoadedModelInfo()
 {
@@ -13,6 +14,7 @@ void CLoadedModelInfo::PrepareSkinning()
 
 	for (int i = 0; i < m_nSkinnedMeshes; i++) m_ppSkinnedMeshes[i]->PrepareSkinning(m_pModelRootObject.get());
 }
+
 void CModelManager::LoadModel(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, const char* pstrFileName)
 {
 	LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pstrFileName);
@@ -47,6 +49,34 @@ CLoadedModelInfo* CModelManager::LoadGeometryAndAnimationFromFile(ID3D12Device* 
 			else if (!strcmp(pstrToken, "</Animation>:"))
 			{
 				break;
+			}
+		}
+		else
+		{
+			break;
+		}
+	}
+
+	vModels.push_back(std::move(pLoadedModel));
+	return (vModels.back()).get();
+}
+CLoadedModelInfo* CModelManager::LoadGeometryFromFileOfScene(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, FILE* pInFile)
+{
+	std::unique_ptr<CLoadedModelInfo> pLoadedModel = std::make_unique<CLoadedModelInfo>();
+
+	//pLoadedModel->pFilePath = pstrFileName;
+	pLoadedModel->m_pModelRootObject = std::make_shared<CGameObject>();
+
+	char pstrToken[64] = { '\0' };
+
+	for (; ; )
+	{
+		if (::ReadStringFromFile(pInFile, pstrToken))
+		{
+			if (!strcmp(pstrToken, "<Hierarchy>:"))
+			{
+				pLoadedModel->m_pModelRootObject->LoadFrameHierarchyFromFile(pd3dDevice, pd3dCommandList, NULL, pInFile, &pLoadedModel->m_nSkinnedMeshes);
+				::ReadStringFromFile(pInFile, pstrToken); //"</Hierarchy>"
 			}
 		}
 		else

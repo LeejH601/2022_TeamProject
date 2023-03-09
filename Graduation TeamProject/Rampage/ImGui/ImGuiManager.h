@@ -23,7 +23,7 @@ private:
 
 	CComponentSet* m_pCurrentComponentSet = nullptr;
 
-	std::shared_ptr<CCamera> m_pCamera = NULL;
+	CCamera* m_pCamera = NULL;
 
 	std::unique_ptr<CTexture> m_pRTTexture;
 	D3D12_CPU_DESCRIPTOR_HANDLE m_pd3dRtvCPUDescriptorHandles;

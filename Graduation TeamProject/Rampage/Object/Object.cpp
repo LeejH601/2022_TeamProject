@@ -15,6 +15,8 @@ CGameObject::CGameObject()
 	m_xmf4x4World = Matrix4x4::Identity();
 	m_xmf4x4Transform = Matrix4x4::Identity();
 	m_xmf4x4Texture = Matrix4x4::Identity();
+
+	//m_fDissolveThrethHold = 1.0f;
 }
 CGameObject::CGameObject(int nMaterials)
 {
@@ -94,6 +96,10 @@ void CGameObject::ChangeTexture(std::shared_ptr<CTexture> pTexture)
 		SetTexture(pTexture);
 }
 
+void CGameObject::Update(float fTimeElapsed)
+{
+	Animate(fTimeElapsed);
+}
 void CGameObject::Animate(float fTimeElapsed)
 {
 	if (m_pSkinnedAnimationController) m_pSkinnedAnimationController->AdvanceTime(fTimeElapsed, this);
@@ -173,6 +179,7 @@ void CGameObject::SetScale(float x, float y, float z)
 	m_xmf4x4Transform = Matrix4x4::Multiply(mtxScale, m_xmf4x4Transform);
 
 	UpdateTransform(NULL);
+	XMStoreFloat4x4(&m_xmf4x4Scale, mtxScale);
 }
 void CGameObject::Rotate(float fPitch, float fYaw, float fRoll)
 {
@@ -196,6 +203,16 @@ void CGameObject::SetLookAt(XMFLOAT3& xmf3Target, XMFLOAT3& xmf3Up)
 	m_xmf4x4World._21 = mtxLookAt._12; m_xmf4x4World._22 = mtxLookAt._22; m_xmf4x4World._23 = mtxLookAt._32;
 	m_xmf4x4World._31 = mtxLookAt._13; m_xmf4x4World._32 = mtxLookAt._23; m_xmf4x4World._33 = mtxLookAt._33;
 }
+void CGameObject::updateArticulationMatrix()
+{
+	int index = 0;
+	for (XMFLOAT4X4& world : m_AritculatCacheMatrixs) {
+		physx::PxMat44 mat = m_pArticulationLinks[index++]->getGlobalPose();
+
+		memcpy(&world, &mat, sizeof(XMFLOAT4X4));
+		world = Matrix4x4::Multiply(XMMatrixScaling(m_xmf4x4Scale._11, m_xmf4x4Scale._11, m_xmf4x4Scale._11), world);
+	}
+}
 void CGameObject::UpdateTransform(XMFLOAT4X4* pxmf4x4Parent)
 {
 	m_xmf4x4World = (pxmf4x4Parent) ? Matrix4x4::Multiply(m_xmf4x4Transform, *pxmf4x4Parent) : m_xmf4x4Transform;
@@ -203,6 +220,48 @@ void CGameObject::UpdateTransform(XMFLOAT4X4* pxmf4x4Parent)
 	if (m_pSibling) m_pSibling->UpdateTransform(pxmf4x4Parent);
 	if (m_pChild) m_pChild->UpdateTransform(&m_xmf4x4World);
 }
+
+void CGameObject::UpdateTransformFromArticulation(XMFLOAT4X4* pxmf4x4Parent, std::vector<std::string> pArtiLinkNames, std::vector<physx::PxArticulationLink*> pArticulationLinks, float scale)
+{
+	std::string target = m_pstrFrameName;
+	auto it = std::find(pArtiLinkNames.begin(), pArtiLinkNames.end(), target);
+	int distance = std::distance(pArtiLinkNames.begin(), it);
+	if (distance < pArtiLinkNames.size()) {
+
+		physx::PxTransform transform = pArticulationLinks[distance]->getGlobalPose();
+		//physx::PxTransform transform = m_pArticulationLinks[index]->getInboundJoint()->getChildPose();
+		physx::PxMat44 World = physx::PxMat44(transform);
+
+		memcpy(&m_xmf4x4World, &World, sizeof(XMFLOAT4X4));
+		m_xmf4x4World = Matrix4x4::Multiply(XMMatrixScaling(scale, scale, scale), m_xmf4x4World);
+		/*m_xmf4x4World._41 = World.column3.x;
+		m_xmf4x4World._42 = World.column3.y;
+		m_xmf4x4World._43 = World.column3.z;*/
+	}
+	else {
+		m_xmf4x4World = (pxmf4x4Parent) ? Matrix4x4::Multiply(m_xmf4x4Transform, *pxmf4x4Parent) : m_xmf4x4Transform;
+	}
+
+	if (m_pSibling) m_pSibling->UpdateTransformFromArticulation(pxmf4x4Parent, pArtiLinkNames, pArticulationLinks, scale);
+	if (m_pChild) m_pChild->UpdateTransformFromArticulation(&m_xmf4x4World, pArtiLinkNames, pArticulationLinks, scale);
+}
+
+void CGameObject::UpdateTransformFromArticulation(XMFLOAT4X4* pxmf4x4Parent, std::vector<std::string> pArtiLinkNames, std::vector<XMFLOAT4X4>& AritculatCacheMatrixs, float scale)
+{
+	std::string target = m_pstrFrameName;
+	auto it = std::find(pArtiLinkNames.begin(), pArtiLinkNames.end(), target);
+	int distance = std::distance(pArtiLinkNames.begin(), it);
+	if (distance < pArtiLinkNames.size()) {
+		m_xmf4x4World = AritculatCacheMatrixs[distance];
+	}
+	else {
+		m_xmf4x4World = (pxmf4x4Parent) ? Matrix4x4::Multiply(m_xmf4x4Transform, *pxmf4x4Parent) : m_xmf4x4Transform;
+	}
+
+	if (m_pSibling) m_pSibling->UpdateTransformFromArticulation(pxmf4x4Parent, pArtiLinkNames, AritculatCacheMatrixs, scale);
+	if (m_pChild) m_pChild->UpdateTransformFromArticulation(&m_xmf4x4World, pArtiLinkNames, AritculatCacheMatrixs, scale);
+}
+
 CGameObject* CGameObject::FindFrame(const char* pstrFrameName)
 {
 	CGameObject* pFrameObject = NULL;
@@ -230,7 +289,7 @@ void CGameObject::LoadFrameHierarchyFromFile(ID3D12Device* pd3dDevice, ID3D12Gra
 			nFrame = ::ReadIntegerFromFile(pInFile);
 			nTextures = ::ReadIntegerFromFile(pInFile);
 
-			::ReadStringFromFile(pInFile, m_pstrFrameName);
+			int length = ::ReadStringFromFile(pInFile, m_pstrFrameName);
 		}
 		else if (!strcmp(pstrToken, "<Transform>:"))
 		{
@@ -328,7 +387,8 @@ void CGameObject::LoadMaterialsFromFile(ID3D12Device* pd3dDevice, ID3D12Graphics
 			nReads = (UINT)::fread(&nMaterial, sizeof(int), 1, pInFile);
 
 			pMaterial = std::make_shared<CMaterial>();
-			pTexture = std::make_shared<CTexture>(7, RESOURCE_TEXTURE2D, 0, 1); //0:Albedo, 1:Specular, 2:Metallic, 3:Normal, 4:Emission, 5:DetailAlbedo, 6:DetailNormal
+			pTexture = std::make_shared<CTexture>(8, RESOURCE_TEXTURE2D, 0, 1); //0:Albedo, 1:Specular, 2:Metallic, 3:Normal, 4:Emission, 5:DetailAlbedo, 6:DetailNormal 7:NoiseTexture
+			//pTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Object/Textures/Perlin9.dds", RESOURCE_TEXTURE2D, 7);
 			pTexture->SetRootParameterIndex(0, 2);
 
 			pMaterial->SetTexture(pTexture);
@@ -372,15 +432,17 @@ void CGameObject::LoadMaterialsFromFile(ID3D12Device* pd3dDevice, ID3D12Graphics
 		{
 			if (pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, pParent, pInFile, CModelShader::GetInst(), 0)) pMaterial->SetMaterialType(MATERIAL_ALBEDO_MAP);
 		}
-		else if (!strcmp(pstrToken, "<SpecularMap>:"))
+		/*else if (!strcmp(pstrToken, "<SpecularMap>:"))
 		{
 			if (pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, pParent, pInFile, CModelShader::GetInst(), 1)) pMaterial->SetMaterialType(MATERIAL_SPECULAR_MAP);
-		}
+		}*/
 		else if (!strcmp(pstrToken, "<NormalMap>:"))
 		{
 			if (pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, pParent, pInFile, CModelShader::GetInst(), 2)) pMaterial->SetMaterialType(MATERIAL_NORMAL_MAP);
+			pTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Object/Textures/Grainy10.dds", RESOURCE_TEXTURE2D, 3);
+			CModelShader::GetInst()->CreateShaderResourceView(pd3dDevice, pTexture.get(), 3);
 		}
-		else if (!strcmp(pstrToken, "<MetallicMap>:"))
+		/*else if (!strcmp(pstrToken, "<MetallicMap>:"))
 		{
 			if (pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, pParent, pInFile, CModelShader::GetInst(), 3)) pMaterial->SetMaterialType(MATERIAL_METALLIC_MAP);
 		}
@@ -395,7 +457,7 @@ void CGameObject::LoadMaterialsFromFile(ID3D12Device* pd3dDevice, ID3D12Graphics
 		else if (!strcmp(pstrToken, "<DetailNormalMap>:"))
 		{
 			if (pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, pParent, pInFile, CModelShader::GetInst(), 6)) pMaterial->SetMaterialType(MATERIAL_DETAIL_NORMAL_MAP);
-		}
+		}*/
 		else if (!strcmp(pstrToken, "</Materials>"))
 		{
 			break;
@@ -413,7 +475,7 @@ int CGameObject::FindReplicatedTexture(_TCHAR* pstrTextureName, D3D12_GPU_DESCRI
 			int nTextures = m_ppMaterials[i]->m_pTexture->GetTextures();
 			for (int j = 0; j < nTextures; j++)
 			{
-				if (!_tcsncmp(m_ppMaterials[i]->m_pTexture->GetTextureName(j), pstrTextureName, _tcslen(pstrTextureName)))
+				if (!_tcscmp(m_ppMaterials[i]->m_pTexture->GetTextureName(j), pstrTextureName))
 				{
 					*pd3dSrvGpuDescriptorHandle = m_ppMaterials[i]->m_pTexture->GetGpuDescriptorHandle(j);
 					nParameterIndex = m_ppMaterials[i]->m_pTexture->GetRootParameter(j);
@@ -433,6 +495,86 @@ void CGameObject::FindAndSetSkinnedMesh(CSkinnedMesh** ppSkinnedMeshes, int* pnS
 
 	if (m_pSibling) m_pSibling->FindAndSetSkinnedMesh(ppSkinnedMeshes, pnSkinnedMesh);
 	if (m_pChild) m_pChild->FindAndSetSkinnedMesh(ppSkinnedMeshes, pnSkinnedMesh);
+}
+void CGameObject::CreateArticulation(physx::PxArticulationReducedCoordinate* articulation, physx::PxArticulationLink* Parent, const physx::PxTransform& pos)
+{
+	static int count = 0;
+	TCHAR pstrDebug[256] = { 0 };
+	_stprintf_s(pstrDebug, 256, _T("cnt : %d - %s \n"), ++count, m_pstrFrameName);
+	OutputDebugString(pstrDebug);
+
+	physx::PxMat44 mymatrix;
+	XMFLOAT4X4 myTransform = m_xmf4x4Transform;
+	XMFLOAT3 mypos(GetPosition());
+	myTransform._41 = 0;
+	myTransform._42 = 0;
+	myTransform._43 = 0;
+	memcpy(&mymatrix, &Matrix4x4::Inverse(myTransform), sizeof(physx::PxMat44));
+
+	mymatrix.column3.x = mypos.x;
+	mymatrix.column3.y = mypos.y;
+	mymatrix.column3.z = mypos.z;
+
+	physx::PxTransform transform(mymatrix);
+
+	//if (Parent) {
+	physx::PxArticulationLink* link = articulation->createLink(Parent, transform);
+	physx::PxBoxGeometry linkGeometry = physx::PxBoxGeometry(0.01f, 0.01f, 0.1f);
+	physx::PxMaterial* material = Locator.GetPxPhysics()->createMaterial(0.5, 0.5, 0.5);
+	physx::PxRigidActorExt::createExclusiveShape(*link, linkGeometry, *material);
+	physx::PxRigidBodyExt::updateMassAndInertia(*link, 1.0f);
+
+	physx::PxArticulationJointReducedCoordinate* joint = link->getInboundJoint();
+
+	if (joint) {
+		joint->setJointType(physx::PxArticulationJointType::ePRISMATIC);
+		// revolute joint that rotates about the z axis (eSWING2) of the joint frames
+		joint->setMotion(physx::PxArticulationAxis::eTWIST, physx::PxArticulationMotion::eFREE);
+		//joint->setMotion(physx::PxArticulationAxis::eSWING2, physx::PxArticulationMotion::eLIMITED);
+		//physx::PxArticulationLimit limits;
+		//limits.low = -physx::PxPiDivFour;  // in rad for a rotational motion
+		//limits.high = physx::PxPiDivFour;
+		//joint->setLimitParams(physx::PxArticulationAxis::eSWING2, limits);
+
+		//physx::PxArticulationDrive posDrive;
+		//posDrive.stiffness = driveStiffness;                      // the spring constant driving the joint to a target position
+		//posDrive.damping = driveDamping;                        // the damping coefficient driving the joint to a target velocity
+		//posDrive.maxForce = actuatorLimit;                        // force limit for the drive
+		//posDrive.driveType = PxArticulationDriveType::eFORCE;
+
+		//joint->setDriveParams(physx::PxArticulationAxis::eSWING2, posDrive);
+		//joint->setDriveVelocity(physx::PxArticulationAxis::eSWING2, 0.0f);
+		//joint->setDriveTarget(physx::PxArticulationAxis::eSWING2, targetPosition);
+
+		joint->setParentPose(pos);
+
+		/*physx::PxMat44 matrix;
+		XMFLOAT4X4 childTransform = m_pChild->m_xmf4x4Transform;
+		XMFLOAT3 childpos(m_pChild->GetPosition());
+		childTransform._41 = 0;
+		childTransform._42 = 0;
+		childTransform._43 = 0;
+		memcpy(&matrix, &Matrix4x4::Inverse(childTransform), sizeof(physx::PxMat44));
+
+		matrix.column3.x = childpos.x;
+		matrix.column3.y = childpos.y;
+		matrix.column3.z = childpos.z;
+
+		physx::PxTransform childPx(matrix);*/
+		joint->setChildPose(transform);
+	}
+	if (m_pChild) {
+
+		m_pChild->CreateArticulation(articulation, link, transform);
+	}
+	if (m_pSibling) {
+
+		m_pSibling->CreateArticulation(articulation, Parent, pos);
+	}
+	/*}
+	else {
+
+	}*/
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -502,13 +644,42 @@ CKnightObject::CKnightObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 
 	CGameObject* obj = pKnightModel->m_pModelRootObject->FindFrame("SK_FKnightB_05");
 	//obj->m_ppMaterials[8]->m_pTexture->m_nTextureType = 1;
-	obj->m_ppMaterials[5]->m_nType = 1; // ¸Ó¸® ³ë¸Ö ¸Ê »ç¿ë x
-	obj->m_ppMaterials[7]->m_nType = 1; // °¡½¿ ¹êµå ³ë¸Ö ¸Ê »ç¿ë x
-	obj->m_ppMaterials[8]->m_nType = 1; // ÇÇºÎ ³ë¸Ö ¸Ê »ç¿ë x
+	//obj->m_ppMaterials[5]->m_nType = 1; // ¸Ó¸® ³ë¸Ö ¸Ê »ç¿ë x
+	//obj->m_ppMaterials[7]->m_nType = 1; // °¡½¿ ¹êµå ³ë¸Ö ¸Ê »ç¿ë x
+	//obj->m_ppMaterials[8]->m_nType = 1; // ÇÇºÎ ³ë¸Ö ¸Ê »ç¿ë x
 
 	SetChild(pKnightModel->m_pModelRootObject, true);
 	//m_pSkinnedAnimationController = std::make_unique<CKightRootRollBackAnimationController>(pd3dDevice, pd3dCommandList, nAnimationTracks, pKnightModel);
 	m_pSkinnedAnimationController = std::make_unique<CKightNoMoveRootAnimationController>(pd3dDevice, pd3dCommandList, nAnimationTracks, pKnightModel);
+
+	auto Find_Frame_Index = [](std::string& target, std::vector<std::string>& source) {
+		int cnt = 0;
+		for (std::string& str : source) {
+			if (strcmp(str.c_str(), target.c_str()) == 0)
+				break;
+			cnt++;
+		}
+		return cnt;
+	};
+
+
+
+	//CSkinnedMesh* Mesh = (CSkinnedMesh*)obj->m_pMesh.get();
+
+	//static int test = 0;
+
+
+	//if (test == 0) {
+	//	m_pArticulation = Locator.GetPxPhysics()->createArticulationReducedCoordinate();
+
+	//	physx::PxTransform transform(physx::PxVec3(0.0f, 0.0f, 0.0f));
+	//	m_pChild->m_pChild->CreateArticulation(m_pArticulation, NULL, transform);
+
+	//	Locator.GetPxScene()->addArticulation(*m_pArticulation);
+
+	//	test++;
+	//}
+
 
 	PrepareBoundingBox(pd3dDevice, pd3dCommandList);
 #ifdef KNIGHT_ROOT_MOTION
@@ -521,6 +692,30 @@ CKnightObject::CKnightObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 }
 CKnightObject::~CKnightObject()
 {
+	/*if (Rigid) {
+		Locator.GetPxScene()->removeActor(*Rigid);
+	}*/
+}
+void CKnightObject::SetRigidDynamic()
+{
+	physx::PxPhysics* pPhysics = Locator.GetPxPhysics();
+
+	physx::PxTransform transform(physx::PxVec3(0.0f, 10.0f, 0.0f));
+
+	physx::PxMaterial* material = pPhysics->createMaterial(0.5, 0.5, 0.5);
+	physx::PxShape* shape = pPhysics->createShape(physx::PxBoxGeometry(3.0f, 5.0f, 3.0f), *material);
+
+	physx::PxRigidDynamic* actor = physx::PxCreateDynamic(*pPhysics, transform, physx::PxBoxGeometry(3.0f, 5.0f, 3.0f), *material, 1.0f);
+
+	Rigid = actor;
+
+	//Locator.GetPxScene()->addActor(*Rigid);
+
+
+	//
+	//physx::PxArticulationReducedCoordinate* Articulation = pPhysics->createArticulationReducedCoordinate();
+	//Articulation->setArticulationFlag(physx::PxArticulationFlag::eFIX_BASE, true);
+
 }
 bool CKnightObject::CheckCollision(CGameObject* pTargetObject)
 {
@@ -528,8 +723,11 @@ bool CKnightObject::CheckCollision(CGameObject* pTargetObject)
 	if (pTargetObject)
 	{
 		BoundingBox TargetBoundingBox = pTargetObject->GetBoundingBox();
-		if (m_TransformedWeaponBoudningBox.Intersects(TargetBoundingBox)) {
-			pTargetObject->SetHit(this);
+		if (m_TransformedWeaponBoundingBox.Intersects(TargetBoundingBox)) {
+
+			TCHAR pstrDebug[256] = { 0 };
+			_stprintf_s(pstrDebug, 256, _T("Collide\n"));
+			OutputDebugString(pstrDebug);
 
 			flag = true;
 		}
@@ -539,6 +737,18 @@ bool CKnightObject::CheckCollision(CGameObject* pTargetObject)
 void CKnightObject::Animate(float fTimeElapsed)
 {
 	CGameObject::Animate(fTimeElapsed);
+	if (Rigid) {
+		physx::PxRigidDynamic* actor = (physx::PxRigidDynamic*)Rigid;
+		physx::PxTransform transform = actor->getGlobalPose();
+
+		physx::PxMat44 Matrix(transform);
+		Matrix = Matrix.inverseRT();
+		m_pChild->m_xmf4x4Transform._11 = Matrix.column0.x; m_pChild->m_xmf4x4Transform._12 = Matrix.column0.y; m_pChild->m_xmf4x4Transform._13 = Matrix.column0.z;
+		m_pChild->m_xmf4x4Transform._21 = Matrix.column1.x; m_pChild->m_xmf4x4Transform._22 = Matrix.column1.y; m_pChild->m_xmf4x4Transform._23 = Matrix.column1.z;
+		m_pChild->m_xmf4x4Transform._31 = Matrix.column2.x; m_pChild->m_xmf4x4Transform._32 = Matrix.column2.y; m_pChild->m_xmf4x4Transform._33 = Matrix.column2.z;
+		//m_xmf4x4World._41 = Matrix.column3.x; m_xmf4x4World._42 = Matrix.column3.y; m_xmf4x4World._43 = Matrix.column3.z; m_xmf4x4World._44 = Matrix.column3.w;
+		SetPosition(XMFLOAT3(transform.p.x, transform.p.y, transform.p.z));
+	}
 }
 void CKnightObject::UpdateTransform(XMFLOAT4X4* pxmf4x4Parent)
 {
@@ -548,7 +758,7 @@ void CKnightObject::UpdateTransform(XMFLOAT4X4* pxmf4x4Parent)
 	if (m_pChild) m_pChild->UpdateTransform(&m_xmf4x4World);
 
 	pBodyBoundingBoxMesh->SetWorld(m_xmf4x4Transform);
-	m_BodyBoundingBox.Transform(m_TransformedBodyBoudningBox, XMLoadFloat4x4(&m_xmf4x4Transform));
+	m_BodyBoundingBox.Transform(m_TransformedBodyBoundingBox, XMLoadFloat4x4(&m_xmf4x4Transform));
 
 	if (pWeapon)
 	{
@@ -561,7 +771,7 @@ void CKnightObject::UpdateTransform(XMFLOAT4X4* pxmf4x4Parent)
 		xmf4x4World._43 = xmf3Position.z;
 		pWeaponBoundingBoxMesh->SetWorld(xmf4x4World);
 
-		m_WeaponBoundingBox.Transform(m_TransformedWeaponBoudningBox, XMLoadFloat4x4(&xmf4x4World));
+		m_WeaponBoundingBox.Transform(m_TransformedWeaponBoundingBox, XMLoadFloat4x4(&xmf4x4World));
 	}
 }
 void CKnightObject::PrepareBoundingBox(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)

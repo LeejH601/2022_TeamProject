@@ -175,6 +175,15 @@
     <ClCompile Include="Object\ParticleComponent.cpp">
       <Filter>Object</Filter>
     </ClCompile>
+    <ClCompile Include="Scene\SceneManager.cpp">
+      <Filter>Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="Scene\LobbyScene.cpp">
+      <Filter>Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="Object\PhysicsObject.cpp">
+      <Filter>Object</Filter>
+    </ClCompile>
     <ClCompile Include="Shader\SkyBoxShader.cpp">
       <Filter>Shader</Filter>
     </ClCompile>
@@ -342,6 +351,15 @@
     <ClInclude Include="Object\ParticleComponent.h">
       <Filter>Object</Filter>
     </ClInclude>
+    <ClInclude Include="Scene\SceneManager.h">
+      <Filter>Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene\LobbyScene.h">
+      <Filter>Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Object\PhysicsObject.h">
+      <Filter>Object</Filter>
+    </ClInclude>
     <ClInclude Include="Shader\SkyBoxShader.h">
       <Filter>Shader</Filter>
     </ClInclude>
@@ -355,7 +373,6 @@
     <FxCompile Include="Shader\Light.hlsl" />
     <FxCompile Include="TerrainPixelShader.hlsl" />
     <FxCompile Include="TerrainVertexShader.hlsl" />
-    <FxCompile Include="Shader\TerrainSplatPixelShader.hlsl" />
     <FxCompile Include="Shader\TerrainParallaxVertexShader.hlsl" />
     <FxCompile Include="Shader\TerrainParallaxPixelShader.hlsl" />
     <FxCompile Include="Shader\BoundVertexShader.hlsl" />
@@ -370,6 +387,7 @@
     <FxCompile Include="Shader\ParticleDrawGSShader.hlsl" />
     <FxCompile Include="Shader\ParticleSteamOutputGeometryShader.hlsl" />
     <FxCompile Include="Shader\ParticleStreamOutputVertexShader.hlsl" />
+    <FxCompile Include="TreePixelShader.hlsl" />
     <FxCompile Include="Shader\SkyBoxPixelShader.hlsl" />
     <FxCompile Include="Shader\SkyBoxVertexShader.hlsl" />
   </ItemGroup>

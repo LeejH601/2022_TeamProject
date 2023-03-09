@@ -12,6 +12,8 @@ class CSoundPlayer : public IEntity
     CComponent* m_pDamageComponent = nullptr;
 
 public:
+    CSoundPlayer() { }
+    ~CSoundPlayer() { }
     void Update(float fElapsedTime);
     void LoadComponentFromSet(CComponentSet* componentset);
     virtual bool HandleMessage(const Telegram& msg);

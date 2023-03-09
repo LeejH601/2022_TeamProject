@@ -824,13 +824,17 @@ void CHeightMapGridMesh::ReleaseUploadBuffers()
 	if (m_pd3dTextureCoord1UploadBuffer) m_pd3dTextureCoord1UploadBuffer->Release();
 
 }
-float CHeightMapGridMesh::OnGetHeight(int x, int z, void* pContext)
+float CHeightMapGridMesh::OnGetHeight(int x, int z, void* pContext, bool SampleByImage)
 {
 	CHeightMapImage* pHeightMapImage = (CHeightMapImage*)pContext;
 	BYTE* pHeightMapPixels = pHeightMapImage->GetRawImagePixels();
 	XMFLOAT3 xmf3Scale = pHeightMapImage->GetScale();
 	int nWidth = pHeightMapImage->GetRawImageWidth();
-	float fHeight = pHeightMapPixels[x + (z * nWidth)] * xmf3Scale.y;
+	float fHeight;
+	if (SampleByImage)
+		fHeight = pHeightMapPixels[x + (z * nWidth)] * xmf3Scale.y;
+	else
+		fHeight = m_pxmf3Positions[x + (z * nWidth)].y;
 	return(fHeight);
 }
 XMFLOAT4 CHeightMapGridMesh::OnGetColor(int x, int z, void* pContext)
@@ -872,20 +876,79 @@ CSplatGridMesh::CSplatGridMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 	m_pxmf2TextureCoords0.resize(m_nVertices);
 	m_pxmf2TextureCoords1.resize(m_nVertices);
 
+	auto clamp = [&](float value) {
+		return value < 0 ? 0 : (value > m_nLength - 1 ? m_nLength - 1 : value);
+	};
+
 	float fHeight = 0.0f, fMinHeight = +FLT_MAX, fMaxHeight = -FLT_MAX;
 	for (int i = 0, z = zStart; z < (zStart + nLength); z++)
 	{
 		for (int x = xStart; x < (xStart + nWidth); x++, i++)
 		{
-			fHeight = OnGetHeight(x, z, pContext);
+			//fHeight = OnGetHeight(x, z, pContext);
+			float _h01 = OnGetHeight(x, clamp(z - 2), pContext, true);
+			float _h10 = OnGetHeight(clamp(x - 2), z, pContext, true);
+			float _h11 = OnGetHeight(clamp(x - 2), clamp(z - 2), pContext, true);
+			float _h_01 = OnGetHeight(clamp(x - 2), clamp(z + 2), pContext, true);
+			float _h0_1 = OnGetHeight(clamp(x + 2), clamp(z - 2), pContext, true);
+			float h00 = OnGetHeight(x, z, pContext, true);
+			float h01 = OnGetHeight(x, clamp(z + 2), pContext, true);
+			float h10 = OnGetHeight(clamp(x + 2), z, pContext, true);
+			float h11 = OnGetHeight(clamp(x + 2), clamp(z + 2), pContext, true);
+			float fx = 0.5f, fz = 0.5f;
+			float hRB = (1 - fx) * ((1 - fz) * h00 + fz * h01) + fx * ((1 - fz) * h10 + fz * h11);
+			float hRT = (1 - fx) * ((1 - fz) * _h01 + fz * h00) + fx * ((1 - fz) * _h0_1 + fz * h10);
+			float hLB = (1 - fx) * ((1 - fz) * _h10 + fz * _h_01) + fx * ((1 - fz) * h00 + fz * h01);
+			float hLT = (1 - fx) * ((1 - fz) * _h11 + fz * _h10) + fx * ((1 - fz) * _h01 + fz * h00);
+			fHeight = (1 - fx) * ((1 - fz) * hLT + fz * hLB) + fx * ((1 - fz) * hRT + fz * hRB);
 			m_pxmf3Positions[i] = XMFLOAT3((x * m_xmf3Scale.x), fHeight, (z * m_xmf3Scale.z));
 			m_pxmf4Colors[i] = Vector4::Add(OnGetColor(x, z, pContext), xmf4Color);
-			m_pxmf2TextureCoords0[i] = XMFLOAT2(float(x) / float(m_xmf3Scale.x * 0.5f), float(z) / float(m_xmf3Scale.z * 0.5f));
+			m_pxmf2TextureCoords0[i] = XMFLOAT2(float(x) / float(m_xmf3Scale.x * 100.0f), float(z) / float(m_xmf3Scale.z * 100.0f));
 			m_pxmf2TextureCoords1[i] = XMFLOAT2(float(x) / float(cxHeightMap - 1), float(czHeightMap - 1 - z) / float(czHeightMap - 1));
 			if (fHeight < fMinHeight) fMinHeight = fHeight;
 			if (fHeight > fMaxHeight) fMaxHeight = fHeight;
 		}
 	}
+
+
+	//std::vector<XMFLOAT3> pPositions = m_pxmf3Positions;
+	//for (int i = 0, z = zStart; z < (zStart + nLength); z++)
+	//{
+	//	for (int x = xStart; x < (xStart + nWidth); x++, i++)
+	//	{
+	//		//x + (z * nWidth)
+	//		//fHeight = OnGetHeight(x, z, pContext);
+	//		float _h01 = pPositions[x + clamp(z - 2) * nWidth].y;
+	//		float _h10 = pPositions[clamp(x - 2) + z * nWidth].y;
+	//		float _h11 = pPositions[clamp(x - 2) + clamp(z - 2) * nWidth].y;
+	//		float _h_01 = pPositions[clamp(x - 2) + clamp(z + 2) * nWidth].y;
+	//		float _h0_1 = pPositions[clamp(x + 2) + clamp(z - 2) * nWidth].y;
+	//		float h00 = pPositions[x + z * nWidth].y;
+	//		float h01 = pPositions[x + clamp(z + 2) * nWidth].y;
+	//		float h10 = pPositions[clamp(x + 2) + z * nWidth].y;
+	//		float h11 = pPositions[clamp(x + 2) + clamp(z + 2) * nWidth].y;
+	//		float fx = 0.5f, fz = 0.5f;
+	//		float hRB = (1 - fx) * ((1 - fz) * h00 + fz * h01) + fx * ((1 - fz) * h10 + fz * h11);
+	//		float hRT = (1 - fx) * ((1 - fz) * _h01 + fz * h00) + fx * ((1 - fz) * _h0_1 + fz * h10);
+	//		float hLB = (1 - fx) * ((1 - fz) * _h10 + fz * _h_01) + fx * ((1 - fz) * h00 + fz * h01);
+	//		float hLT = (1 - fx) * ((1 - fz) * _h11 + fz * _h10) + fx * ((1 - fz) * _h01 + fz * h00);
+	//		fHeight = (1 - fx) * ((1 - fz) * hLT + fz * hLB) + fx * ((1 - fz) * hRT + fz * hRB);
+	//		m_pxmf3Positions[i] = XMFLOAT3((x * m_xmf3Scale.x), fHeight, (z * m_xmf3Scale.z));
+	//	}
+	//}
+
+	/*for (int i = 0, z = zStart + 1; z < (zStart + nLength - 2); z++)
+	{
+		for (int x = xStart + 1; x < (xStart + nWidth - 2); x++, i++)
+		{
+			XMFLOAT3 p0 = pPositions[x + (z * cxHeightMap) - 1];
+			XMFLOAT3 p1 = pPositions[x + (z * cxHeightMap)];
+			XMFLOAT3 p2 = pPositions[x + (z * cxHeightMap) + 1];
+			XMFLOAT3 p3 = pPositions[x + (z * cxHeightMap) + 2];
+
+			XMVectorCatmullRom(XMLoadFloat3(&p0), XMLoadFloat3(&p1), XMLoadFloat3(&p2), XMLoadFloat3(&p3), );
+		}
+	}*/
 
 	m_pxmf3Normals.resize(m_nVertices);
 	m_pxmf3Tangents.resize(m_nVertices);
@@ -924,7 +987,7 @@ CSplatGridMesh::CSplatGridMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 
 			XMFLOAT4X4 result = Matrix4x4::Multiply(uvMatrix, edgeMatrix);
 
-			m_pxmf3Tangents[i] = XMFLOAT3(result._11, result._12, result._13);
+			m_pxmf3Tangents[i] = Vector3::Normalize(XMFLOAT3(result._11, result._12, result._13));
 		}
 	}
 
@@ -1027,7 +1090,7 @@ CBoundingBoxMesh::CBoundingBoxMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 	m_pxmf3Positions.push_back(Vector3::Add(xmf3AABBCenter, XMFLOAT3(-fx, -fy, +fz)));
 
 	m_pd3dPositionBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, m_pxmf3Positions.data(), sizeof(XMFLOAT3) * m_nVertices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dPositionUploadBuffer);
-	
+
 	m_nVertexBufferViews = 1;
 	m_pd3dVertexBufferViews.resize(m_nVertexBufferViews);
 

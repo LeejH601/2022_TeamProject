@@ -2,9 +2,11 @@
 #include "stdafx.h"
 #include "Timer.h"
 #include "..\Scene\Scene.h"
+#include "..\Scene\SceneManager.h"
 
 class CCamera;
 class CShader;
+class CGameObject;
 class CCameraMovementManager;
 
 struct CB_Parallax_Info
@@ -62,9 +64,10 @@ private:
 	UINT64 m_nFenceValues[m_nSwapChainBuffers];
 	HANDLE m_hFenceEvent;
 
-	std::unique_ptr<CScene> m_pScene = NULL;
-	std::unique_ptr<CCamera> m_pCamera = NULL;
-
+	std::unique_ptr<CCamera> m_pFloatingCamera = NULL;
+	CCamera* m_pCurrentCamera = NULL;
+	std::unique_ptr<CGameObject> m_pPlayer = NULL;
+	std::unique_ptr<CSceneManager> m_pSceneManager = NULL;
 public:
 	CGameTimer					m_GameTimer;
 

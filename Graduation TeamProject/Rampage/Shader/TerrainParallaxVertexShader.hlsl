@@ -45,6 +45,7 @@ struct VS_TERRAIN_OUTPUT
 	float2 uv1 : TEXCOORD1;
 	float3 normal : NORMAL0;
 	float3 normalW : NORMAL1;
+	float3 tangent : TANGENT;
 	float3 toCamera : TEXCOORD2;
 	float3 toLight : TEXCOORD3;
 	float4 uvs[MAX_LIGHTS] : TEXCOORD4;
@@ -64,9 +65,11 @@ VS_TERRAIN_OUTPUT VSParallaxTerrain(VS_TERRAIN_INPUT input)
 	output.positionW = positionW;
 
 	float3x3 mtxTangentToWorld;
-	mtxTangentToWorld[0] = mul(input.tangent, gmtxGameObject);
-	mtxTangentToWorld[2] = mul(input.normal, gmtxGameObject);
-	mtxTangentToWorld[1] = mul(cross(input.tangent, input.normal), gmtxGameObject);
+	mtxTangentToWorld[0] = normalize(mul(input.tangent, gmtxGameObject));
+	mtxTangentToWorld[2] = normalize(mul(input.normal, gmtxGameObject));
+	mtxTangentToWorld[1] = normalize( mul(cross(input.tangent, input.normal), gmtxGameObject));
+
+	output.tangent = mtxTangentToWorld[0];
 
 	float3 toLight = float3(0.0f, 1.0f, 0.0f);
 	[unroll(MAX_LIGHTS)] for (int i = 0; i < gnLights; i++)

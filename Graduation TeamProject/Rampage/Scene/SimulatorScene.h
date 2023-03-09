@@ -36,13 +36,14 @@ public:
 	virtual void CreateGraphicsRootSignature(ID3D12Device* pd3dDevice);
 
 	virtual bool OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam) { return false; }
-	virtual bool OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam) { return false; }
+	virtual bool OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam, DWORD& dwDirection) { return false; }
 
 	virtual void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	virtual void ReleaseObjects() {}
 
 	virtual bool ProcessInput(UCHAR* pKeysBuffer) { return false; }
 	virtual void AnimateObjects(float fTimeElapsed);
+	virtual void UpdateObjects(float fTimeElapsed);
 	virtual void CheckCollide();
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed, float fCurrentTime, CCamera* pCamera = NULL);
 	virtual void OnPostRenderTarget();

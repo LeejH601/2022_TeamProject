@@ -2,7 +2,8 @@ cbuffer cbGameObjectInfo : register(b0)
 {
 	matrix gmtxGameObject : packoffset(c0);
 	matrix gmtxTexture : packoffset(c4);
-	uint gnTexturesMask : packoffset(c8);
+	uint gnTexturesMask : packoffset(c8.x);
+	uint gnInstanceID : packoffset(c8.y);
 }
 
 cbuffer cbCameraInfo : register(b1)
@@ -27,6 +28,7 @@ cbuffer cbBoneTransforms : register(b3)
 {
 	float4x4 gpmtxBoneTransforms[SKINNED_ANIMATION_BONES];
 };
+
 
 struct VS_INPUT
 {
@@ -87,9 +89,9 @@ VS_OUTPUT VS_Player(VS_INPUT input)
 
 		float4 positionW = mul(float4(input.position, 1.0f), mtxVertexToBoneWorld);
 		output.positionW = positionW.xyz;
-		output.normalW = mul(input.normal, (float3x3)mtxVertexToBoneWorld).xyz;
-		output.tangentW = mul(input.tangent, (float3x3)mtxVertexToBoneWorld).xyz;
-		output.bitangentW = mul(input.bitangent, (float3x3)mtxVertexToBoneWorld).xyz;
+		output.normalW = normalize(mul(input.normal, (float3x3)mtxVertexToBoneWorld)).xyz;
+		output.tangentW = normalize(mul(input.tangent, (float3x3)mtxVertexToBoneWorld)).xyz;
+		output.bitangentW = normalize(mul(input.bitangent, (float3x3)mtxVertexToBoneWorld)).xyz;
 		output.position = mul(mul(float4(output.positionW, 1.0f), gmtxView), gmtxProjection);
 		output.uv = input.uv;
 
@@ -102,9 +104,9 @@ VS_OUTPUT VS_Player(VS_INPUT input)
 	{
 		float4 positionW = mul(float4(input.position, 1.0f), gmtxGameObject);
 		output.positionW = positionW.xyz;
-		output.normalW = mul(input.normal, (float3x3)gmtxGameObject);
-		output.tangentW = mul(input.tangent, (float3x3)gmtxGameObject);
-		output.bitangentW = mul(input.bitangent, (float3x3)gmtxGameObject);
+		output.normalW = normalize(mul(input.normal, (float3x3)gmtxGameObject));
+		output.tangentW = normalize(mul(input.tangent, (float3x3)gmtxGameObject));
+		output.bitangentW = normalize(mul(input.bitangent, (float3x3)gmtxGameObject));
 		output.position = mul(mul(float4(output.positionW, 1.0f), gmtxView), gmtxProjection);
 		output.uv = input.uv;
 		for (int i = 0; i < MAX_LIGHTS; i++)

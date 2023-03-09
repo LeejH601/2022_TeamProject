@@ -27,25 +27,57 @@ class CShader;
 class CTexture;
 class CMaterial;
 
+struct JointAxisDesc {
+	physx::PxArticulationJointType::Enum type;
+
+	bool eSwing1;
+	bool eSwing2;
+	bool eTWIST;
+
+	physx::PxArticulationLimit eS1LImit;
+	physx::PxArticulationLimit eS2LImit;
+	physx::PxArticulationLimit eTLImit;
+
+	physx::PxArticulationDrive eS1Drive;
+	physx::PxArticulationDrive eS2Drive;
+	physx::PxArticulationDrive eTDrive;
+};
+
 class CGameObject
 {
 public:
 	bool bHit = false;
-	
+
 	char m_pstrFrameName[MAX_FRAMENAME];
 
 	XMFLOAT4X4 m_xmf4x4Transform;
 	XMFLOAT4X4 m_xmf4x4World;
 	XMFLOAT4X4 m_xmf4x4Texture;
+	XMFLOAT4X4 m_xmf4x4Scale;
 
 	std::shared_ptr<CMesh> m_pMesh;
-	
+
 	int	m_nMaterials = 0;
 	std::vector<std::shared_ptr<CMaterial>> m_ppMaterials;
 
 	CGameObject* m_pParent = nullptr;
 	std::shared_ptr<CGameObject> m_pChild = nullptr;
 	std::shared_ptr<CGameObject> m_pSibling = nullptr;
+
+	physx::PxActor* Rigid = nullptr;
+	physx::PxArticulationReducedCoordinate* m_pArticulation;
+	physx::PxArticulationCache* m_pArticulationCache;
+	physx::PxU32 m_nArtiCache;
+	std::vector<std::string> m_pArtiLinkNames;
+	std::vector<physx::PxArticulationLink*> m_pArticulationLinks;
+	std::vector<XMFLOAT4X4> m_AritculatCacheMatrixs;
+
+	bool m_bSimulateArticulate = false;
+	bool m_bDissolved = false;
+	float m_fDissolveThrethHold = 0.0f;
+	float m_fDissolveTime;
+	float m_fMaxDissolveTime;
+
 public:
 	std::unique_ptr<CAnimationController> m_pSkinnedAnimationController;
 
@@ -53,7 +85,12 @@ public:
 	CGameObject(int nMaterials);
 	virtual ~CGameObject();
 
-	char* GetFrameName() { return m_pstrFrameName; }
+	virtual void SetRigidDynamic() {};
+	virtual void SetRigidStatic() {};
+
+	char* GetFrameName() { 
+		return m_pstrFrameName; 
+	}
 	XMFLOAT3 GetPosition();
 	XMFLOAT3 GetLook();
 	XMFLOAT3 GetUp();
@@ -72,20 +109,23 @@ public:
 	void ChangeTexture(std::shared_ptr<CTexture> pTexture);
 	void SetMesh(std::shared_ptr<CMesh> pMesh) { m_pMesh = pMesh; }
 
-	void SetScale(float x, float y, float z);
-	void SetPosition(float x, float y, float z);
-	void SetPosition(XMFLOAT3 xmf3Position);
+	virtual void SetScale(float x, float y, float z);
+	virtual void SetPosition(float x, float y, float z);
+	virtual void SetPosition(XMFLOAT3 xmf3Position);
 	void SetTransform(XMFLOAT4X4 xmf4x4Transform) { m_xmf4x4Transform = xmf4x4Transform; }
 	void SetWorld(XMFLOAT4X4 xmf4x4World) { m_xmf4x4World = xmf4x4World; }
 	virtual void SetHit(CGameObject* pHitter) { bHit = true; }
 	virtual void SetNotHit() { bHit = false; }
 	
-	void Rotate(float fPitch = 10.0f, float fYaw = 10.0f, float fRoll = 10.0f);
+	virtual void Rotate(float fPitch = 10.0f, float fYaw = 10.0f, float fRoll = 10.0f);
 	void Rotate(XMFLOAT3* pxmf3Axis, float fAngle);
 
 	void SetLookAt(XMFLOAT3& xmf3Target, XMFLOAT3& xmf3Up = XMFLOAT3(0.0f, 1.0f, 0.0f));
 
+	virtual void updateArticulationMatrix();
 	virtual void UpdateTransform(XMFLOAT4X4* pxmf4x4Parent = NULL);
+	virtual void UpdateTransformFromArticulation(XMFLOAT4X4* pxmf4x4Parent, std::vector<std::string> pArtiLinkNames, std::vector<physx::PxArticulationLink*> pArticulationLinks, float scale = 1.0f);
+	virtual void UpdateTransformFromArticulation(XMFLOAT4X4* pxmf4x4Parent, std::vector<std::string> pArtiLinkNames, std::vector<XMFLOAT4X4>& AritculatCacheMatrixs, float scale = 1.0f);
 	void PrintFrameInfo(CGameObject* pGameObject, CGameObject* pParent);
 	CGameObject* FindFrame(const char* pstrFrameName);
 	virtual void CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList) {}
@@ -95,15 +135,18 @@ public:
 
 	virtual void PrepareAnimate() {}
 	virtual void PrepareBoundingBox(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList) {}
+	virtual void Update(float fTimeElapsed);
 	virtual void Animate(float fTimeElapsed);
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, bool b_UseTexture, CCamera* pCamera = NULL);
 	virtual bool CheckCollision(CGameObject* pTargetObject) { return false; };
 
 	void LoadFrameHierarchyFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CGameObject* pParent, FILE* pInFile, int* pnSkinnedMeshes);
 	void LoadMaterialsFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CGameObject* pParent, FILE* pInFile);
-	
+
 	int FindReplicatedTexture(_TCHAR* pstrTextureName, D3D12_GPU_DESCRIPTOR_HANDLE* pd3dSrvGpuDescriptorHandle);
 	void FindAndSetSkinnedMesh(CSkinnedMesh** ppSkinnedMeshes, int* pnSkinnedMesh);
+
+	void CreateArticulation(physx::PxArticulationReducedCoordinate* articulation, physx::PxArticulationLink* Parent, const physx::PxTransform& pos);
 };
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -165,15 +208,19 @@ private:
 	CGameObject* pWeapon;
 	BoundingBox m_BodyBoundingBox;
 	BoundingBox m_WeaponBoundingBox;
-	BoundingBox m_TransformedBodyBoudningBox;
-	BoundingBox m_TransformedWeaponBoudningBox;
+	BoundingBox m_TransformedBodyBoundingBox;
+	BoundingBox m_TransformedWeaponBoundingBox;
 	CGameObject* pBodyBoundingBoxMesh;
 	CGameObject* pWeaponBoundingBoxMesh;
+
 public:
 	CKnightObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks);
 	virtual ~CKnightObject();
 
-	virtual BoundingBox GetBoundingBox() { return m_TransformedBodyBoudningBox; }
+	virtual void SetRigidDynamic();
+	
+
+	virtual BoundingBox GetBoundingBox() { return m_TransformedBodyBoundingBox; }
 	virtual bool CheckCollision(CGameObject* pTargetObject);
 
 	virtual void Animate(float fTimeElapsed);

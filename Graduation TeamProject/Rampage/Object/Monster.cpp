@@ -13,36 +13,83 @@ CMonster::CMonster()
 	m_fStunStartTime = 0.0f;
 	m_fShakeDistance = 0.0f;
 	m_fStunTime = 0.0f;
+	m_fMaxDissolveTime = 3.0f;
+	m_fDissolveThrethHold = 0.0f;
+	m_fDissolveTime = 0.0f;
+	TestDissolvetime = 0.0f;
+
 }
 
 CMonster::~CMonster()
 {
 }
 
-void CMonster::Render(ID3D12GraphicsCommandList* pd3dCommandList, bool b_UseTexture, CCamera* pCamera)
+void CMonster::SetScale(float x, float y, float z)
 {
-	CGameObject::Render(pd3dCommandList, b_UseTexture, pCamera);
+	CPhysicsObject::SetScale(x, y, z);
+	m_pSkinnedAnimationController->m_xmf3RootObjectScale = m_xmf3Scale;
+}
+
+void CMonster::Animate(float fTimeElapsed)
+{
+	if (m_pStateMachine->GetCurrentState() == Damaged_Monster::GetInst())
+	{
+		if (CStunAnimationComponent::GetInst()->GetEnable() &&
+			m_fStunStartTime < m_pSkinnedAnimationController->m_fTime && !m_bStunned)
+			m_pStateMachine->ChangeState(Stun_Monster::GetInst());
+		CGameObject::Animate(fTimeElapsed);
+	}
+
+	else if (m_pStateMachine->GetCurrentState() == Stun_Monster::GetInst())
+	{
+		CGameObject::Animate(0.0f);
+	}
+
+	else
+		CGameObject::Animate(fTimeElapsed);
 }
 
 void CMonster::Update(float fTimeElapsed)
 {
 	m_pStateMachine->Update(fTimeElapsed);
-}
-void CMonster::UpdateTransform(XMFLOAT4X4* pxmf4x4Parent)
-{
+
+	CPhysicsObject::Apply_Gravity(fTimeElapsed);
+
+	Animate(fTimeElapsed);
+
+	if (!m_bDissolved) {
+		TestDissolvetime += fTimeElapsed;
+		if (TestDissolvetime > 10.0f)
+			m_bDissolved = true;
+	}
+	else{
+		m_fDissolveTime += fTimeElapsed;
+		m_fDissolveThrethHold = m_fDissolveTime / m_fMaxDissolveTime;
+		/*if (m_fDissolveThrethHold > 1.0f) {
+			m_fDissolveThrethHold = 1.0f;
+		}*/
+	}
 	if (m_pStateMachine->GetCurrentState() == Damaged_Monster::GetInst() ||
 		m_pStateMachine->GetCurrentState() == Stun_Monster::GetInst())
 	{
 		XMFLOAT3 xmf3ShakeVec = Vector3::ScalarProduct(GetRight(), m_fShakeDistance, false);
 		XMFLOAT3 xmf3DamageVec = Vector3::ScalarProduct(m_xmf3HitterVec, m_fDamageDistance, false);
-		//XMFLOAT3 xmf3DamageVec = XMFLOAT3{};
 		XMFLOAT3 xmf3Pos = Vector3::Add(Vector3::Add(GetPosition(), xmf3ShakeVec), xmf3DamageVec);
 
-		m_xmf4x4Transform._41 = xmf3Pos.x;
-		m_xmf4x4Transform._42 = xmf3Pos.y;
-		m_xmf4x4Transform._43 = xmf3Pos.z;
+		SetPosition(xmf3Pos);
 	}
 
+	CPhysicsObject::Move(m_xmf3Velocity, false);
+
+	// 플레이어가 터레인보다 아래에 있지 않도록 하는 코드
+	if (m_pUpdatedContext) CPhysicsObject::OnUpdateCallback(fTimeElapsed);
+
+	Animate(fTimeElapsed);
+
+	CPhysicsObject::Apply_Friction(fTimeElapsed);
+}
+void CMonster::UpdateTransform(XMFLOAT4X4* pxmf4x4Parent)
+{
 	m_xmf4x4World = (pxmf4x4Parent) ? Matrix4x4::Multiply(m_xmf4x4Transform, *pxmf4x4Parent) : m_xmf4x4Transform;
 
 	if (m_pSibling) m_pSibling->UpdateTransform(pxmf4x4Parent);
@@ -58,8 +105,29 @@ void CMonster::UpdateTransform(XMFLOAT4X4* pxmf4x4Parent)
 #ifdef RENDER_BOUNDING_BOX
 		pWeaponBoundingBoxMesh->SetWorld(pWeapon->GetWorld());
 #endif 
-		m_WeaponBoundingBox.Transform(m_TransformedWeaponBoudningBox, XMLoadFloat4x4(&pWeapon->GetWorld()));
+		m_WeaponBoundingBox.Transform(m_TransformedWeaponBoundingBox, XMLoadFloat4x4(&pWeapon->GetWorld()));
 	}
+}
+void CMonster::UpdateTransformFromArticulation(XMFLOAT4X4* pxmf4x4Parent, std::vector<std::string> pArtiLinkNames, std::vector<XMFLOAT4X4>& AritculatCacheMatrixs, float scale)
+{
+	std::string target = m_pstrFrameName;
+	auto it = std::find(pArtiLinkNames.begin(), pArtiLinkNames.end(), target);
+	int distance = std::distance(pArtiLinkNames.begin(), it);
+	if (distance < pArtiLinkNames.size()) {
+		m_xmf4x4World = AritculatCacheMatrixs[distance];
+	}
+	else {
+		m_xmf4x4World = (pxmf4x4Parent) ? Matrix4x4::Multiply(m_xmf4x4Transform, *pxmf4x4Parent) : m_xmf4x4Transform;
+	}
+
+	XMFLOAT3 xAxis = XMFLOAT3(1.0f, 0.0f, 0.0f);
+	
+	m_BodyBoundingBox.Transform(m_TransformedBodyBoudningBox, XMLoadFloat4x4(&Matrix4x4::Multiply(XMMatrixRotationAxis(XMLoadFloat3(&xAxis), XMConvertToRadians(90.0f)), AritculatCacheMatrixs[0])));
+#ifdef RENDER_BOUNDING_BOX
+	pBodyBoundingBoxMesh->SetWorld(Matrix4x4::Multiply(XMMatrixRotationAxis(XMLoadFloat3(&xAxis), XMConvertToRadians(90.0f)), AritculatCacheMatrixs[0]));
+#endif // RENDER_BOUNDING_BOX
+	if (m_pSibling) m_pSibling->UpdateTransformFromArticulation(pxmf4x4Parent, pArtiLinkNames, AritculatCacheMatrixs, scale);
+	if (m_pChild) m_pChild->UpdateTransformFromArticulation(&m_xmf4x4World, pArtiLinkNames, AritculatCacheMatrixs, scale);
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -68,6 +136,8 @@ COrcObject::COrcObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3d
 	CLoadedModelInfo* pOrcModel = CModelManager::GetInst()->GetModelInfo("Object/Orc.bin");;
 	if (!pOrcModel) pOrcModel = CModelManager::GetInst()->LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, "Object/Orc.bin");
 
+	CreateShaderVariables(pd3dDevice, pd3dCommandList);
+
 	SetChild(pOrcModel->m_pModelRootObject, true);
 	m_pSkinnedAnimationController = std::make_unique<CAnimationController>(pd3dDevice, pd3dCommandList, nAnimationTracks, pOrcModel);
 
@@ -75,14 +145,6 @@ COrcObject::COrcObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3d
 }
 COrcObject::~COrcObject()
 {
-}
-void COrcObject::Animate(float fTimeElapsed)
-{
-	CGameObject::Animate(fTimeElapsed);
-}
-void COrcObject::UpdateTransform(XMFLOAT4X4* pxmf4x4Parent)
-{
-	CMonster::UpdateTransform(pxmf4x4Parent);
 }
 void COrcObject::PrepareBoundingBox(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
@@ -101,10 +163,12 @@ void COrcObject::PrepareBoundingBox(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 CGoblinObject::CGoblinObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks)
 {
 	m_fStunTime = 0.0f;
-	m_fStunStartTime = 0.4f;
+	m_fStunStartTime = 0.2f;
 
 	CLoadedModelInfo* pGoblinModel = CModelManager::GetInst()->GetModelInfo("Object/Goblin.bin");;
 	if (!pGoblinModel) pGoblinModel = CModelManager::GetInst()->LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, "Object/Goblin.bin");
+
+	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
 	SetChild(pGoblinModel->m_pModelRootObject, true);
 	m_pSkinnedAnimationController = std::make_unique<CAnimationController>(pd3dDevice, pd3dCommandList, nAnimationTracks, pGoblinModel);
@@ -113,26 +177,6 @@ CGoblinObject::CGoblinObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 }
 CGoblinObject::~CGoblinObject()
 {
-}
-void CGoblinObject::Animate(float fTimeElapsed)
-{
-	if (m_pStateMachine->GetCurrentState() == Damaged_Monster::GetInst())
-	{
-		if (m_fStunStartTime < m_pSkinnedAnimationController->m_fTime && !m_bStunned)
-			m_pStateMachine->ChangeState(Stun_Monster::GetInst());
-		CGameObject::Animate(fTimeElapsed);
-	}
-
-	else if (m_pStateMachine->GetCurrentState() == Stun_Monster::GetInst())
-	{
-	}
-
-	else
-		CGameObject::Animate(fTimeElapsed);
-}
-void CGoblinObject::UpdateTransform(XMFLOAT4X4* pxmf4x4Parent)
-{
-	CMonster::UpdateTransform(pxmf4x4Parent);
 }
 void CGoblinObject::PrepareBoundingBox(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
@@ -154,6 +198,8 @@ CSkeletonObject::CSkeletonObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	SetChild(pSkeletonModel->m_pModelRootObject, true);
 	m_pSkinnedAnimationController = std::make_unique<CAnimationController>(pd3dDevice, pd3dCommandList, nAnimationTracks, pSkeletonModel);
 
+	CreateShaderVariables(pd3dDevice, pd3dCommandList);
+
 	PrepareBoundingBox(pd3dDevice, pd3dCommandList);
 	/*CLoadedModelInfo* pArmorModel = CModelManager::GetInst()->GetModelInfo("Object/SK_Armor.bin");;
 	if (!pArmorModel) pArmorModel = CModelManager::GetInst()->LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, "Object/SK_Armor.bin");
@@ -163,14 +209,6 @@ CSkeletonObject::CSkeletonObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 }
 CSkeletonObject::~CSkeletonObject()
 {
-}
-void CSkeletonObject::Animate(float fTimeElapsed)
-{
-	CGameObject::Animate(fTimeElapsed);
-}
-void CSkeletonObject::UpdateTransform(XMFLOAT4X4* pxmf4x4Parent)
-{
-	CMonster::UpdateTransform(pxmf4x4Parent);
 }
 void CSkeletonObject::PrepareBoundingBox(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {

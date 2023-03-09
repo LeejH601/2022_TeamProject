@@ -1,5 +1,6 @@
 #include "GameFramework.h"
 #include "..\Global\Camera.h"
+#include "..\Scene\SceneManager.h"
 #include "..\Scene\MainScene.h"
 #include "..\Scene\SimulatorScene.h"
 #include "..\ImGui\ImGuiManager.h"
@@ -7,6 +8,7 @@
 #include "..\Shader\DepthRenderShader.h"
 #include "Locator.h"
 #include "MessageDispatcher.h"
+#include <windowsx.h>
 
 CGameFramework::CGameFramework()
 {
@@ -44,7 +46,16 @@ bool CGameFramework::OnCreate(HINSTANCE hInstance, HWND hMainWnd)
 
 	//CommandList를 실행하고 GPU 연산이 완료될 때까지 기다립니다.
 	ExecuteCommandLists();
-	
+
+
+
+
+	/*physx::PxPvd* mPvd = physx::PxCreatePvd(*mFoundation);
+	physx::PxPvdTransport* transport = physx::PxDefaultPvdSocketTransportCreate(PVD_HOST, 5425, 10);
+
+	PxPvdTransport* transport = PxDefaultPvdSocketTransportCreate(PVD_HOST, 5425, 10);
+	mPvd->connect(*transport, PxPvdInstrumentationFlag::eALL);*/
+
 	return(true);
 }
 void CGameFramework::OnDestroy()
@@ -236,16 +247,20 @@ void CGameFramework::BuildObjects()
 {
 	m_pd3dCommandList->Reset(m_pd3dCommandAllocator.Get(), NULL);
 
-	// CScene 생성(RootSignature 생성)
-	m_pScene = std::make_unique<CMainTMPScene>();
-	m_pScene->BuildObjects(m_pd3dDevice.Get(), m_pd3dCommandList.Get());
+	m_pSceneManager = std::make_unique<CSceneManager>(m_pd3dDevice.Get(), m_pd3dCommandList.Get());
+
+	m_pFloatingCamera = std::make_unique<CFloatingCamera>();
+	m_pFloatingCamera->Init(m_pd3dDevice.Get(), m_pd3dCommandList.Get());
+	m_pFloatingCamera->SetPosition(XMFLOAT3(0.0f, 400.0f, -100.0f));
+
+	Locator.CreateMainSceneCamera(m_pd3dDevice.Get(), m_pd3dCommandList.Get());
 	
-	CSimulatorScene::GetInst()->BuildObjects(m_pd3dDevice.Get(), m_pd3dCommandList.Get());
+	m_pCurrentCamera = m_pFloatingCamera.get();
 
+	m_pPlayer = std::make_unique<CPlayer>(m_pd3dDevice.Get(), m_pd3dCommandList.Get(), 1);
 
-	m_pCamera = std::make_unique<CFirstPersonCamera>();
-	m_pCamera->Init(m_pd3dDevice.Get(), m_pd3dCommandList.Get());
-
+	m_pSceneManager->SetPlayer((CPlayer*)m_pPlayer.get());
+	((CThirdPersonCamera*)Locator.GetMainSceneCamera())->SetPlayer((CPlayer*)m_pPlayer.get());
 }
 void CGameFramework::ReleaseObjects()
 {
@@ -256,6 +271,9 @@ void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM
 	switch (nMessageID)
 	{
 	case WM_LBUTTONDOWN:
+		::SetCapture(hWnd);
+		::GetCursorPos(&m_ptOldCursorPos);
+		break;
 	case WM_RBUTTONDOWN:
 		::SetCapture(hWnd);
 		::GetCursorPos(&m_ptOldCursorPos);
@@ -265,10 +283,18 @@ void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM
 		::ReleaseCapture();
 		break;
 	case WM_MOUSEMOVE:
+		//if (Locator.GetMouseCursorMode() == MOUSE_CUROSR_MODE::THIRD_FERSON_MODE) {
+		//	//::SetCapture(hWnd);
+		//	m_ptOldCursorPos.x = GET_X_LPARAM(lParam);
+		//	m_ptOldCursorPos.y = GET_Y_LPARAM(lParam);
+		//	::GetCursorPos(&m_ptOldCursorPos);
+		//}
 		break;
 	default:
 		break;
 	}
+
+	m_pSceneManager->OnProcessingMouseMessage(hWnd, nMessageID, wParam, lParam);
 }
 void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
 {
@@ -277,32 +303,18 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 	case WM_KEYDOWN:
 		switch (wParam)
 		{
-		case 'w':
-		case 'W':
-			if (wParam == 'w' || wParam == 'W') dwDirection |= DIR_FORWARD;
-			break;
-		case 's':
-		case 'S':
-			if (wParam == 's' || wParam == 'S') dwDirection |= DIR_BACKWARD;
-			break;
-		case 'a':
-		case 'A':
-			if (wParam == 'a' || wParam == 'A') dwDirection |= DIR_LEFT;
-			break;
-		case 'd':
-		case 'D':
-			if (wParam == 'd' || wParam == 'D') dwDirection |= DIR_RIGHT;
-			break;
-		case 'q':
-		case 'Q':
-			if (wParam == 'q' || wParam == 'Q')dwDirection |= DIR_DOWN;
-			break;
-		case 'e':
-		case 'E':
-			if (wParam == 'e' || wParam == 'E') dwDirection |= DIR_UP;
-			break;
 		case VK_ESCAPE:
 			::PostQuitMessage(0);
+			break;
+		case '1':
+			m_pCurrentCamera = m_pFloatingCamera.get();
+			Locator.SetMouseCursorMode(MOUSE_CUROSR_MODE::FLOATING_MODE);
+			PostMessage(hWnd, WM_ACTIVATE, 0, 0);
+			break;
+		case '2':
+			m_pCurrentCamera = Locator.GetMainSceneCamera();
+			Locator.SetMouseCursorMode(MOUSE_CUROSR_MODE::THIRD_FERSON_MODE);
+			PostMessage(hWnd, WM_ACTIVATE, 0, 0);
 			break;
 		case VK_F9:
 			ChangeSwapChainState();
@@ -310,41 +322,15 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 			break;
 		}
 		break;
-	case WM_KEYUP:
-		switch (wParam)
-		{
-		case 'w':
-		case 'W':
-			if (wParam == 'w' || wParam == 'W') dwDirection &= (~DIR_FORWARD);
-			break;
-		case 's':
-		case 'S':
-			if (wParam == 's' || wParam == 'S') dwDirection &= (~DIR_BACKWARD);
-			break;
-		case 'a':
-		case 'A':
-			if (wParam == 'a' || wParam == 'A') dwDirection &= (~DIR_LEFT);
-			break;
-		case 'd':
-		case 'D':
-			if (wParam == 'd' || wParam == 'D') dwDirection &= (~DIR_RIGHT);
-			break;
-		case 'q':
-		case 'Q':
-			if (wParam == 'q' || wParam == 'Q')dwDirection &= (~DIR_DOWN);
-			break;
-		case 'e':
-		case 'E':
-			if (wParam == 'e' || wParam == 'E') dwDirection &= (~DIR_UP);
-			break;
-		break;
-		}
 	default:
 		break;
 	}
+
+	m_pSceneManager->OnProcessingKeyboardMessage(hWnd, nMessageID, wParam, lParam, dwDirection);
 }
 LRESULT CALLBACK CGameFramework::OnProcessingWindowMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
 {
+	static int CursorHideCount = 0;
 	switch (nMessageID)
 	{
 	case WM_ACTIVATE:
@@ -353,6 +339,29 @@ LRESULT CALLBACK CGameFramework::OnProcessingWindowMessage(HWND hWnd, UINT nMess
 			m_GameTimer.Stop();
 		else
 			m_GameTimer.Start();*/
+		RECT screenRect;
+		GetWindowRect(hWnd, &screenRect);
+		MOUSE_CUROSR_MODE eMouseMode = Locator.GetMouseCursorMode();
+		switch (eMouseMode)
+		{
+		case MOUSE_CUROSR_MODE::THIRD_FERSON_MODE:
+			if (CursorHideCount < 1) {
+				CursorHideCount++;
+				ShowCursor(false);
+				ClipCursor(&screenRect);
+			}
+			break;
+		case MOUSE_CUROSR_MODE::FLOATING_MODE:
+			while (CursorHideCount > 0)
+			{
+				CursorHideCount--;
+				ShowCursor(true);
+			}
+			ClipCursor(NULL);
+			break;
+		default:
+			break;
+		}
 		break;
 	}
 	case WM_SIZE:
@@ -377,10 +386,6 @@ LRESULT CALLBACK CGameFramework::OnProcessingWindowMessage(HWND hWnd, UINT nMess
 }
 void CGameFramework::ProcessInput()
 {
-	static UCHAR pKeysBuffer[256];
-
-	GetKeyboardState(pKeysBuffer);
-
 	float cxDelta = 0.0f, cyDelta = 0.0f;
 	POINT ptCursorPos;
 	if (GetCapture() == m_hWnd)
@@ -391,55 +396,23 @@ void CGameFramework::ProcessInput()
 		cyDelta = (float)(ptCursorPos.y - m_ptOldCursorPos.y) / 3.0f;
 		SetCursorPos(m_ptOldCursorPos.x, m_ptOldCursorPos.y);
 	}
+	/*if (Locator.GetMouseCursorMode() == MOUSE_CUROSR_MODE::THIRD_FERSON_MODE) {
+		cxDelta = (float)(ptCursorPos.x - m_ptOldCursorPos.x) / 3.0f;
+		cyDelta = (float)(ptCursorPos.y - m_ptOldCursorPos.y) / 3.0f;
+		m_ptOldCursorPos.x = ptCursorPos.x;
+		m_ptOldCursorPos.y = ptCursorPos.y;
+	}*/
 
-	if (cxDelta || cyDelta)
-	{
-		/*if (pKeysBuffer[VK_RBUTTON] & 0xF0)
-			m_pCamera->Rotate(cyDelta, 0.0f, -cxDelta);
-		else
-			m_pCamera->Rotate(cyDelta, cxDelta, 0.0f);*/
-
-		if (pKeysBuffer[VK_RBUTTON] & 0xF0)
-			m_pCamera->Rotate(cyDelta, cxDelta, 0.0f);
-	}
-
-	m_pCamera->RegenerateViewMatrix();
-
-	if (pKeysBuffer[VK_RBUTTON] & 0xF0) {
-		if (dwDirection) {
-			if (dwDirection)
-			{
-				XMFLOAT3 xmf3Shift = XMFLOAT3(0, 0, 0);
-				float fDistance = 40.0f * m_GameTimer.GetFrameTimeElapsed();
-				if (pKeysBuffer[VK_SHIFT] & 0xF0)
-					fDistance *= 10.0f;
-				if (dwDirection & DIR_FORWARD) xmf3Shift = Vector3::Add(xmf3Shift, m_pCamera->GetLookVector(), fDistance);
-				if (dwDirection & DIR_BACKWARD) xmf3Shift = Vector3::Add(xmf3Shift, m_pCamera->GetLookVector(), -fDistance);
-				if (dwDirection & DIR_RIGHT) xmf3Shift = Vector3::Add(xmf3Shift, m_pCamera->GetRightVector(), fDistance);
-				if (dwDirection & DIR_LEFT) xmf3Shift = Vector3::Add(xmf3Shift, m_pCamera->GetRightVector(), -fDistance);
-				if (dwDirection & DIR_UP) xmf3Shift = Vector3::Add(xmf3Shift, m_pCamera->GetUpVector(), fDistance);
-				if (dwDirection & DIR_DOWN) xmf3Shift = Vector3::Add(xmf3Shift, m_pCamera->GetUpVector(), -fDistance);
-
-				m_pCamera->Move(xmf3Shift);
-			}
-		}
-	}
-	
-	
-
-
-	/*TCHAR pstrDebug[256] = { 0 };
-	_stprintf_s(pstrDebug, 256, _T("%f, %f, %f \n"), m_pCamera->GetLookVector().x, m_pCamera->GetLookVector().y, m_pCamera->GetLookVector().z);
-	OutputDebugString(pstrDebug);*/
+	m_pCurrentCamera->ProcessInput(dwDirection, cxDelta, cyDelta, m_GameTimer.GetFrameTimeElapsed());
+	((CPlayer*)(m_pPlayer.get()))->ProcessInput(dwDirection, cxDelta, cyDelta, m_GameTimer.GetFrameTimeElapsed(), m_pCurrentCamera);
 }
 void CGameFramework::AnimateObjects()
 {
 	// Object들의 애니메이션을 수행한다.
-	m_pCamera->Animate(m_GameTimer.GetFrameTimeElapsed());
-	m_pScene->AnimateObjects(m_GameTimer.GetFrameTimeElapsed());
-	CSimulatorScene::GetInst()->AnimateObjects(m_GameTimer.GetFrameTimeElapsed());
+	m_pFloatingCamera->Animate(m_GameTimer.GetFrameTimeElapsed());
+	Locator.GetMainSceneCamera()->Animate(m_GameTimer.GetFrameTimeElapsed());
+	m_pSceneManager->Animate(m_GameTimer.GetFrameTimeElapsed());
 }
-
 void CGameFramework::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	UINT ncbElementBytes = ((sizeof(CB_Parallax_Info) + 255) & ~255); //256의 배수
@@ -447,16 +420,15 @@ void CGameFramework::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12Graph
 
 	m_pd3dcbParallax->Map(0, NULL, (void**)&m_pcbMappedParallax);
 }
-
 void CGameFramework::OnPrepareRenderTarget()
 {
 	//ImVec4 clear_color = CImGuiManager::GetInst()->GetColor();
 	const float clear_color_with_alpha[4] = { 0.f, 0.f, 0.f, 0.f };
-	
+
 	/*FLOAT pfDefaultClearColor[4] = {0.0f, 0.0f, 0.0f, 1.0f};
 
 	D3D12_CPU_DESCRIPTOR_HANDLE* pd3dAllRtvCPUHandles = new D3D12_CPU_DESCRIPTOR_HANDLE[2];
-	
+
 	pd3dAllRtvCPUHandles[0] = m_pd3dSwapRTVCPUHandles[m_nSwapChainBufferIndex];
 	m_pd3dCommandList->ClearRenderTargetView(m_pd3dSwapRTVCPUHandles[m_nSwapChainBufferIndex], clear_color_with_alpha, 0, NULL);
 
@@ -465,10 +437,10 @@ void CGameFramework::OnPrepareRenderTarget()
 	D3D12_CPU_DESCRIPTOR_HANDLE d3dRtvCPUDescriptorHandle = CImGuiManager::GetInst()->GetRtvCPUDescriptorHandle();
 	m_pd3dCommandList->ClearRenderTargetView(d3dRtvCPUDescriptorHandle, pfDefaultClearColor, 0, NULL);
 	pd3dAllRtvCPUHandles[1] = d3dRtvCPUDescriptorHandle;
-	
+
 	m_pd3dCommandList->OMSetRenderTargets(2, pd3dAllRtvCPUHandles, FALSE, &m_d3dDsvDescriptorCPUHandle);
 
-	
+
 	if (pd3dAllRtvCPUHandles) delete[] pd3dAllRtvCPUHandles;*/
 	m_pd3dCommandList->ClearRenderTargetView(m_pd3dSwapRTVCPUHandles[m_nSwapChainBufferIndex], clear_color_with_alpha, 0, NULL);
 	m_pd3dCommandList->OMSetRenderTargets(1, &m_pd3dSwapRTVCPUHandles[m_nSwapChainBufferIndex], FALSE, &m_d3dDsvDescriptorCPUHandle);
@@ -477,7 +449,7 @@ void CGameFramework::OnPrepareImGui()
 {
 	HRESULT hResult = m_pd3dCommandList->Reset(m_pd3dCommandAllocator.Get(), NULL);
 
-	CImGuiManager::GetInst()->OnPrepareRender(m_pd3dCommandList.Get(), &m_d3dDsvDescriptorCPUHandle, m_GameTimer.GetFrameTimeElapsed(), m_GameTimer.GetTotalTime(), m_pCamera.get());
+	CImGuiManager::GetInst()->OnPrepareRender(m_pd3dCommandList.Get(), &m_d3dDsvDescriptorCPUHandle, m_GameTimer.GetFrameTimeElapsed(), m_GameTimer.GetTotalTime(), m_pCurrentCamera);
 
 	//명령 리스트를 닫힌 상태로 만든다. 
 	hResult = m_pd3dCommandList->Close();
@@ -491,8 +463,7 @@ void CGameFramework::OnPrepareImGui()
 }
 void CGameFramework::OnPostRenderTarget()
 {
-	m_pScene->OnPostRenderTarget();
-	CImGuiManager::GetInst()->OnPostRenderTarget();
+	m_pSceneManager->OnPostRenderTarget();
 }
 void CGameFramework::MoveToNextFrame()
 {
@@ -517,12 +488,23 @@ void CGameFramework::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dComman
 	D3D12_GPU_VIRTUAL_ADDRESS d3dGpuVirtualAddress = m_pd3dcbParallax->GetGPUVirtualAddress();
 	pd3dCommandList->SetGraphicsRootConstantBufferView(7, d3dGpuVirtualAddress);*/
 }
-void CGameFramework::FrameAdvance() 
+void CGameFramework::FrameAdvance()
 {
 	m_GameTimer.Tick(0.0f);
+	//if (started == 0) {
+	//	Locator.GetPxScene()->simulate(m_GameTimer.GetFrameTimeElapsed());
+	//	started++;
+	//}
+	
 
 	ProcessInput();
 	AnimateObjects();
+
+	XMFLOAT3 xmf3PlayerPos = m_pPlayer->GetPosition();
+	xmf3PlayerPos.y += 12.5f;
+
+	m_pCurrentCamera->Update(xmf3PlayerPos, 0.0f);
+
 	Locator.GetMessageDispather()->DispatchMessages();
 
 	//명령 할당자를 리셋한다.
@@ -533,20 +515,16 @@ void CGameFramework::FrameAdvance()
 	//명령 리스트를 리셋한다.
 	hResult = m_pd3dCommandList->Reset(m_pd3dCommandAllocator.Get(), NULL);
 
-	//CImGuiManager::GetInst()->DemoRendering();
-	CImGuiManager::GetInst()->SetUI();
-
 	::SynchronizeResourceTransition(m_pd3dCommandList.Get(), m_ppd3dRenderTargetBuffers[m_nSwapChainBufferIndex].Get(), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
 
-	m_pScene->OnPrepareRender(m_pd3dCommandList.Get());
-	m_pScene->OnPreRender(m_pd3dCommandList.Get(), m_GameTimer.GetFrameTimeElapsed());
+	m_pSceneManager->PreRender(m_pd3dCommandList.Get(), m_GameTimer.GetFrameTimeElapsed());
+	
 	m_pd3dCommandList->ClearDepthStencilView(m_d3dDsvDescriptorCPUHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
 	OnPrepareRenderTarget();
 	UpdateShaderVariables(m_pd3dCommandList.Get());
-	m_pCamera->OnPrepareRender(m_pd3dCommandList.Get());
-	m_pScene->Render(m_pd3dCommandList.Get(), m_GameTimer.GetFrameTimeElapsed(), m_GameTimer.GetTotalTime(), m_pCamera.get());
-	CImGuiManager::GetInst()->Render(m_pd3dCommandList.Get());
 
+	m_pSceneManager->Render(m_pd3dCommandList.Get(), m_GameTimer.GetFrameTimeElapsed(), m_GameTimer.GetTotalTime(), m_pCurrentCamera);
+	
 	::SynchronizeResourceTransition(m_pd3dCommandList.Get(), m_ppd3dRenderTargetBuffers[m_nSwapChainBufferIndex].Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
 
 	//명령 리스트를 닫힌 상태로 만든다. 

@@ -5,31 +5,29 @@
 #include "..\Global\MessageDispatcher.h"
 #include "..\Global\Timer.h"
 
-CPlayer::CPlayer()
+CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks)
 {
+	m_xmf4x4World = Matrix4x4::Identity();
+	m_xmf4x4Transform = Matrix4x4::Identity();
+	m_xmf4x4Texture = Matrix4x4::Identity();
+
+	m_xmf3Velocity = XMFLOAT3{};
+
+	std::shared_ptr<CGameObject> knightObject = std::make_shared<CKnightObject>(pd3dDevice, pd3dCommandList, 1);
+
+	SetChild(knightObject);
+
 	m_pStateMachine = std::make_unique<CStateMachine<CPlayer>>(this);
 	m_pStateMachine->SetCurrentState(Locator.GetPlayerState(typeid(Idle_Player)));
-	m_pStateMachine->SetPreviousState(Locator.GetPlayerState(typeid(Idle_Player)));
+	m_pStateMachine->ChangeState(Locator.GetPlayerState(typeid(Idle_Player)));
 
-	m_pCamera = nullptr;;
+	SetPosition(XMFLOAT3(100.0f, 150.0f, -100.0f));
+	SetScale(4.0f, 4.0f, 4.0f);
+	Rotate(0.0f, 90.0f, 0.0f);
 
-	m_xmf3Position = XMFLOAT3(0.0f, 0.0f, 0.0f);
-	m_xmf3Right = XMFLOAT3(1.0f, 0.0f, 0.0f);
-	m_xmf3Up = XMFLOAT3(0.0f, 1.0f, 0.0f);
-	m_xmf3Look = XMFLOAT3(0.0f, 0.0f, 1.0f);
-
-	m_xmf3Velocity = XMFLOAT3(0.0f, 0.0f, 0.0f);
-	m_xmf3Gravity = XMFLOAT3(0.0f, 0.0f, 0.0f);
-	m_fMaxVelocityXZ = 0.0f;
-	m_fMaxVelocityY = 0.0f;
-	m_fFriction = 0.0f;
-
-	m_fPitch = 0.0f;
-	m_fRoll = 0.0f;
-	m_fYaw = 0.0f;
-
-	m_pPlayerUpdatedContext = nullptr;
-	m_pCameraUpdatedContext = nullptr;
+	m_fSpeedKperH = 10.0f;
+	m_fSpeedMperS = m_fSpeedKperH * 1000.0f / 3600.0f;
+	m_fSpeedUperS = m_fSpeedMperS * 8.0f / 1.0f;
 }
 
 CPlayer::~CPlayer()
@@ -37,134 +35,32 @@ CPlayer::~CPlayer()
 	ReleaseShaderVariables();
 }
 
-void CPlayer::Move(const XMFLOAT3& xmf3Shift, bool bUpdateVelocity)
+void CPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity, CCamera* pCamera)
 {
-	if (bUpdateVelocity)
+	if (dwDirection)
 	{
-		m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, xmf3Shift);
+		if (m_pStateMachine->GetCurrentState() == Locator.GetPlayerState(typeid(Idle_Player)))
+			m_pStateMachine->ChangeState(Locator.GetPlayerState(typeid(Run_Player)));
+
+		XMFLOAT3 xmf3Shift = XMFLOAT3{};
+
+		if (dwDirection & DIR_FORWARD)xmf3Shift = Vector3::Add(xmf3Shift, Vector3::Normalize(XMFLOAT3(pCamera->GetLookVector().x, 0.0f, pCamera->GetLookVector().z)));
+		if (dwDirection & DIR_BACKWARD)xmf3Shift = Vector3::Add(xmf3Shift, Vector3::Normalize(XMFLOAT3(pCamera->GetLookVector().x, 0.0f, pCamera->GetLookVector().z)), -1.0f);
+		if (dwDirection & DIR_RIGHT)xmf3Shift = Vector3::Add(xmf3Shift, Vector3::Normalize(XMFLOAT3(pCamera->GetRightVector().x, 0.0f, pCamera->GetRightVector().z)));
+		if (dwDirection & DIR_LEFT)xmf3Shift = Vector3::Add(xmf3Shift, Vector3::Normalize(XMFLOAT3(pCamera->GetRightVector().x, 0.0f, pCamera->GetRightVector().z)), -1.0f);
+
+		CPhysicsObject::Move(xmf3Shift, bUpdateVelocity);
 	}
-	else
-	{
-		m_xmf3Position = Vector3::Add(m_xmf3Position, xmf3Shift);
-		if (m_pCamera)
-			m_pCamera->Move(xmf3Shift);
-	}
-}
-
-void CPlayer::Rotate(float x, float y, float z)
-{
-	{
-		if (x != 0.0f)
-		{
-			m_fPitch += x;
-			if (m_fPitch > +89.0f) { x -= (m_fPitch - 89.0f); m_fPitch = +89.0f; }
-			if (m_fPitch < -89.0f) { x -= (m_fPitch + 89.0f); m_fPitch = -89.0f; }
-		}
-		if (y != 0.0f)
-		{
-			m_fYaw += y;
-			if (m_fYaw > 360.0f) m_fYaw -= 360.0f;
-			if (m_fYaw < 0.0f) m_fYaw += 360.0f;
-		}
-		if (z != 0.0f)
-		{
-			m_fRoll += z;
-			if (m_fRoll > +20.0f) { z -= (m_fRoll - 20.0f); m_fRoll = +20.0f; }
-			if (m_fRoll < -20.0f) { z -= (m_fRoll + 20.0f); m_fRoll = -20.0f; }
-		}
-		m_pCamera->Rotate(x, y, z);
-		if (y != 0.0f)
-		{
-			XMMATRIX xmmtxRotate = XMMatrixRotationAxis(XMLoadFloat3(&m_xmf3Up), XMConvertToRadians(y));
-			m_xmf3Look = Vector3::TransformNormal(m_xmf3Look, xmmtxRotate);
-			m_xmf3Right = Vector3::TransformNormal(m_xmf3Right, xmmtxRotate);
-		}
-	}
-
-
-	m_xmf3Look = Vector3::Normalize(m_xmf3Look);
-	m_xmf3Right = Vector3::CrossProduct(m_xmf3Up, m_xmf3Look, true);
-	m_xmf3Up = Vector3::CrossProduct(m_xmf3Look, m_xmf3Right, true);
-}
-
-void CPlayer::Update(float fTimeElapsed)
-{
-	m_pStateMachine->Update(fTimeElapsed);
-
-	m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, m_xmf3Gravity);
-	float fLength = sqrtf(m_xmf3Velocity.x * m_xmf3Velocity.x + m_xmf3Velocity.z * m_xmf3Velocity.z);
-	float fMaxVelocityXZ = m_fMaxVelocityXZ;
-	if (fLength > m_fMaxVelocityXZ)
-	{
-		m_xmf3Velocity.x *= (fMaxVelocityXZ / fLength);
-		m_xmf3Velocity.z *= (fMaxVelocityXZ / fLength);
-	}
-	float fMaxVelocityY = m_fMaxVelocityY;
-	fLength = sqrtf(m_xmf3Velocity.y * m_xmf3Velocity.y);
-	if (fLength > m_fMaxVelocityY) m_xmf3Velocity.y *= (fMaxVelocityY / fLength);
-
-	XMFLOAT3 xmf3Velocity = Vector3::ScalarProduct(m_xmf3Velocity, fTimeElapsed, false);
-	Move(xmf3Velocity, false);
-
-	if (m_pPlayerUpdatedContext) OnPlayerUpdateCallback(fTimeElapsed);
-
-	// thrid Person Camera
-	if (m_pCamera)
-	{
-		m_pCamera->Update(m_xmf3Position, fTimeElapsed);
-		if (m_pCameraUpdatedContext) OnCameraUpdateCallback(fTimeElapsed);
-		m_pCamera->SetLookAt(m_xmf3Position);
-
-		m_pCamera->Animate(fTimeElapsed);
-		m_pCamera->RegenerateViewMatrix();
-	}
-
-
-	fLength = Vector3::Length(m_xmf3Velocity);
-	float fDeceleration = (m_fFriction * fTimeElapsed);
-	if (fDeceleration > fLength) fDeceleration = fLength;
-	m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, Vector3::ScalarProduct(m_xmf3Velocity, -fDeceleration, true));
-}
-
-void CPlayer::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
-{
-	if (m_pCamera) m_pCamera->CreateShaderVariables(pd3dDevice, pd3dCommandList);
-}
-
-void CPlayer::ReleaseShaderVariables()
-{
-	if (m_pCamera) m_pCamera->ReleaseShaderVariables();
-}
-
-void CPlayer::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
-{
-}
-
-CCamera* CPlayer::OnChangeCamera(DWORD nNewCameraMode, DWORD nCurrentCameraMode)
-{
-	return nullptr;
-}
-
-void CPlayer::OnPrepareRender()
-{
-	m_xmf4x4Transform._11 = m_xmf3Right.x; m_xmf4x4Transform._12 = m_xmf3Right.y; m_xmf4x4Transform._13 = m_xmf3Right.z;
-	m_xmf4x4Transform._21 = m_xmf3Up.x; m_xmf4x4Transform._22 = m_xmf3Up.y; m_xmf4x4Transform._23 = m_xmf3Up.z;
-	m_xmf4x4Transform._31 = m_xmf3Look.x; m_xmf4x4Transform._32 = m_xmf3Look.y; m_xmf4x4Transform._33 = m_xmf3Look.z;
-	m_xmf4x4Transform._41 = m_xmf3Position.x; m_xmf4x4Transform._42 = m_xmf3Position.y; m_xmf4x4Transform._43 = m_xmf3Position.z;
-
-	m_xmf4x4Transform = Matrix4x4::Multiply(XMMatrixScaling(m_xmf3Scale.x, m_xmf3Scale.y, m_xmf3Scale.z), m_xmf4x4Transform);
-}
-
-void CPlayer::Render(ID3D12GraphicsCommandList* pd3dCommandList, bool b_UseTexture, CCamera* pCamera)
-{
-	CGameObject::Render(pd3dCommandList, b_UseTexture, pCamera);
 }
 
 bool CPlayer::CheckCollision(CGameObject* pTargetObject)
 {
 	bool flag = false;
 	if (m_pChild.get()) {
-		if (m_pChild->CheckCollision(pTargetObject) && !m_bAttacked) {
+		if (!m_bAttacked && m_pChild->CheckCollision(pTargetObject)) {
+
+			pTargetObject->SetHit(this);
+
 			flag = true;
 			m_iAttack_Limit--;
 
@@ -172,25 +68,28 @@ bool CPlayer::CheckCollision(CGameObject* pTargetObject)
 			msg.Msg = (int)MESSAGE_TYPE::Msg_CameraShakeStart;
 			msg.DispatchTime = Locator.GetTimer()->GetNowTime();
 			msg.Receiver = (IEntity*)Locator.GetSimulaterCamera();
-			Locator.GetMessageDispather()->RegisterMessage(msg);
+			//Locator.GetMessageDispather()->RegisterMessage(msg);
+			Locator.GetMessageDispather()->Discharge(msg.Receiver, msg);
 
 			msg.Msg = (int)MESSAGE_TYPE::Msg_CameraMoveStart;
 			msg.DispatchTime = Locator.GetTimer()->GetNowTime();
 			msg.Receiver = (IEntity*)Locator.GetSimulaterCamera();
 			msg.Sender = this;
-			Locator.GetMessageDispather()->RegisterMessage(msg);
+			//Locator.GetMessageDispather()->RegisterMessage(msg);
+			Locator.GetMessageDispather()->Discharge(msg.Receiver, msg);
 
 			msg.Msg = (int)MESSAGE_TYPE::Msg_CameraZoomStart;
 			msg.DispatchTime = Locator.GetTimer()->GetNowTime();
 			msg.Receiver = (IEntity*)Locator.GetSimulaterCamera();
 			msg.Sender = (IEntity*)pTargetObject;
-			Locator.GetMessageDispather()->RegisterMessage(msg);
+			//Locator.GetMessageDispather()->RegisterMessage(msg);
+			Locator.GetMessageDispather()->Discharge(msg.Receiver, msg);
 
 			msg.Msg = (int)MESSAGE_TYPE::Msg_SoundEffectReady;
 			msg.DispatchTime = Locator.GetTimer()->GetNowTime();
 			msg.Receiver = (IEntity*)Locator.GetSoundPlayer();
-			Locator.GetMessageDispather()->RegisterMessage(msg);
-
+			//Locator.GetMessageDispather()->RegisterMessage(msg);
+			Locator.GetMessageDispather()->Discharge(msg.Receiver, msg);
 
 			if (m_iAttack_Limit < 1)
 				m_bAttacked = true;
@@ -199,7 +98,63 @@ bool CPlayer::CheckCollision(CGameObject* pTargetObject)
 	return flag;
 }
 
-bool CPlayer::HandleMessage(const Telegram& msg)
+void CPlayer::Update(float fTimeElapsed)
 {
-	return false;
+	m_pStateMachine->Update(fTimeElapsed);
+
+	// Idle 상태로 복귀하는 코드
+	if (!Vector3::Length(m_xmf3Velocity) && m_pStateMachine->GetCurrentState() == Locator.GetPlayerState(typeid(Run_Player)))
+		m_pStateMachine->ChangeState(Locator.GetPlayerState(typeid(Idle_Player)));
+
+	// Run 상태일때 플레이어를 이동시키고 방향전환 시켜주는 코드
+	if (m_pStateMachine->GetCurrentState() == Locator.GetPlayerState(typeid(Run_Player)))
+	{
+		CPhysicsObject::Apply_Gravity(fTimeElapsed);
+
+		if (m_xmf3Velocity.x + m_xmf3Velocity.z)
+			SetLookAt(Vector3::Add(GetPosition(), Vector3::Normalize(XMFLOAT3{ m_xmf3Velocity.x, 0.0f, m_xmf3Velocity.z })));
+		
+		CPhysicsObject::Move(m_xmf3Velocity, false);
+	}
+	// Run 상태가 아닐때 플레이어에게 중력만 작용하는 코드
+	else
+	{
+		m_xmf3Velocity = XMFLOAT3{};
+		CPhysicsObject::Apply_Gravity(fTimeElapsed);
+		CPhysicsObject::Move(m_xmf3Velocity, false);
+	}
+
+	// 플레이어가 터레인보다 아래에 있지 않도록 하는 코드
+	if (m_pUpdatedContext) CPhysicsObject::OnUpdateCallback(fTimeElapsed);
+
+	Animate(fTimeElapsed);
+
+	CPhysicsObject::Apply_Friction(fTimeElapsed);
+}
+
+void CPlayer::ProcessInput(DWORD dwDirection, float cxDelta, float cyDelta, float fTimeElapsed, CCamera* pCamera)
+{
+	static UCHAR pKeysBuffer[256];
+
+	GetKeyboardState(pKeysBuffer);
+
+	if ((dwDirection != 0) || (cxDelta != 0.0f) || (cyDelta != 0.0f))
+	{
+		if (dwDirection)
+		{
+			Move(dwDirection, m_fSpeedUperS * fTimeElapsed, true, pCamera);
+		}
+	}
+}
+
+void CPlayer::SetScale(float x, float y, float z)
+{
+	CPhysicsObject::SetScale(x, y, z);
+	
+	m_pChild->m_pSkinnedAnimationController->m_xmf3RootObjectScale = m_xmf3Scale;
+}
+
+void CPlayer::Tmp()
+{
+	m_pChild->m_pSkinnedAnimationController->SetTrackAnimationSet(0, m_nAnimationNum++);
 }
