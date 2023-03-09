@@ -46,6 +46,8 @@ std::shared_ptr<CTexture> CTextureManager::LoadParticleTexture(ID3D12Device* pd3
 	std::shared_ptr<CTexture> pParticleTexture = std::make_shared<CTexture>(3, RESOURCE_TEXTURE1D, 0, 1);
 	pParticleTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, pszFileName, RESOURCE_TEXTURE2D, 0);
 
+	pParticleTexture->SetRowColumn(iRow, Column);
+
 	srand((unsigned)time(NULL));
 
 	XMFLOAT4* pxmf4RandomValues = new XMFLOAT4[1024];

@@ -66,16 +66,10 @@ void CParticleObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dComma
 	pd3dCommandList->SetGraphicsRootConstantBufferView(11, d3dGpuVirtualAddress);
 }
 
-void CParticleObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
-{
-}
-
-
 void CParticleObject::PreRender(ID3D12GraphicsCommandList* pd3dCommandList, CShader* pShader, int nPipelineState)
 {
 	if (!m_bEnable)
 		return;
-	UpdateShaderVariables(pd3dCommandList);
 	pShader->OnPrepareRender(pd3dCommandList, nPipelineState);
 	for (int i = 0; i < m_nMaterials; ++i)
 	{
@@ -106,6 +100,7 @@ void CParticleObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera
 {
 	if (!m_bEnable)
 		return;
+	CGameObject::UpdateShaderVariables(pd3dCommandList);
 	StreamOutRender(pd3dCommandList, pCamera, pShader);
 	DrawRender(pd3dCommandList, pCamera, pShader);
 }
@@ -113,6 +108,47 @@ void CParticleObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera
 void CParticleObject::OnPostRender()
 {
 	if (m_pMesh) m_pMesh->OnPostRender(0); //Read Stream Output Buffer Filled Size
+}
+
+void CParticleObject::Animate(float fTimeElapsed)
+{
+	if (m_bEnable) {
+		m_fAnimateTime -= fTimeElapsed * m_fAnimationSpeed;
+		AnimateRowColumn(m_fAnimateTime);
+
+		if (m_fAnimateTime <= 0.f)
+			m_fAnimateTime = 0.5f;
+	}
+}
+
+void CParticleObject::AnimateRowColumn(float fTimeElapsed)
+{
+	if (!m_ppMaterials.empty() && m_ppMaterials[0]->GetTexture())
+	{
+		int m_nRows = m_ppMaterials[0]->GetTexture()->GetRow();
+		int m_nCols = m_ppMaterials[0]->GetTexture()->GetColumn();
+		m_xmf4x4World._11 = 1.0f / float(m_nRows);
+		m_xmf4x4World._22 = 1.0f / float(m_nCols);
+		m_xmf4x4World._31 = float(m_nRow) / float(m_nRows);
+		m_xmf4x4World._32 = float(m_nCol) / float(m_nCols);
+		if (fTimeElapsed <= 0.0f)
+		{
+			//if ((m_nRow + 1) == m_nRows && (m_nCol + 1) == m_nCols) {
+			//	//m_bEnable = false;
+			//	m_nRow = 0;
+			//	m_nCol = 0;
+			//}
+			//else
+			//{
+				if (++m_nCol == m_nCols) {
+					m_nRow++;
+					m_nCol = 0;
+				}
+				if (m_nRow == m_nRows)
+					m_nRow = 0;
+			//}
+		}
+	}
 }
 
 bool& CParticleObject::GetEnable()
