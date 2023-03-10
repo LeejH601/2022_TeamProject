@@ -5,8 +5,8 @@ class Telegram;
 
 class IEntity
 {
+private:
 	unsigned int ID;
-
 public:
 	IEntity();
 	virtual ~IEntity();

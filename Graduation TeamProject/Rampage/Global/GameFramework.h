@@ -1,21 +1,12 @@
 #pragma once
 #include "stdafx.h"
+#include "Locator.h"
 #include "Timer.h"
 #include "..\Scene\Scene.h"
 #include "..\Scene\SceneManager.h"
 
 class CCamera;
-class CShader;
 class CGameObject;
-class CCameraMovementManager;
-
-struct CB_Parallax_Info
-{
-	float m_fParallaxScale;
-	float m_fParallaxBias;
-	int m_iMappingMode;
-};
-
 class CGameFramework
 {
 private:
@@ -66,22 +57,18 @@ private:
 
 	std::unique_ptr<CCamera> m_pFloatingCamera = NULL;
 	CCamera* m_pCurrentCamera = NULL;
+
+	std::unique_ptr<DataLoader> m_pDataLoader = NULL;
 	std::unique_ptr<CGameObject> m_pPlayer = NULL;
 	std::unique_ptr<CSceneManager> m_pSceneManager = NULL;
-public:
+
 	CGameTimer					m_GameTimer;
 
-private:
 	POINT						m_ptOldCursorPos;
 	_TCHAR						m_pszFrameRate[50];
 
 	DWORD dwDirection;
 	bool m_bIsSprint = false;
-
-	ComPtr<ID3D12Resource> m_pd3dcbParallax = NULL;
-	CB_Parallax_Info* m_pcbMappedParallax = NULL;
-
-
 public:
 	CGameFramework();
 	~CGameFramework();
@@ -96,10 +83,14 @@ public:
 	void CreateDirect3DDevice();
 	void CreateCommandQueueAndList();
 	void CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+	void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList);
 
-	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList);
+	// 얘네는 뭐라 설명하지
+	void InitSound();
+	void InitLocator();
+	void InitImgui();
 
-	// 렌더타겟을 렌더링하기 위한 준비를 하는 함수이다.
+	//렌더타겟을 렌더링하기 위한 준비를 하는 함수이다.
 	void OnPrepareRenderTarget();
 	void OnPrepareImGui();
 	void OnPostRenderTarget();
