@@ -49,9 +49,10 @@ void Atk1_Player::Enter(CPlayer* player)
 
 	CComponentSet* componentset = Locator.GetComponentSet(0);
 	if (componentset) {
+		Locator.GetMainSceneCamera()->LoadComponentFromSet(componentset);
+		Locator.GetSimulaterCamera()->LoadComponentFromSet(componentset);
 		Locator.GetSoundPlayer()->LoadComponentFromSet(componentset);
 	}
-
 #ifdef ATTACK_SOUND
 	Telegram msg;
 	msg.Receiver = Locator.GetSoundPlayer();
@@ -99,6 +100,8 @@ void Atk2_Player::Enter(CPlayer* player)
 
 	CComponentSet* componentset = Locator.GetComponentSet(1);
 	if (componentset) {
+		Locator.GetMainSceneCamera()->LoadComponentFromSet(componentset);
+		Locator.GetSimulaterCamera()->LoadComponentFromSet(componentset);
 		Locator.GetSoundPlayer()->LoadComponentFromSet(componentset);
 	}
 
@@ -146,6 +149,8 @@ void Atk3_Player::Enter(CPlayer* player)
 
 	CComponentSet* componentset = Locator.GetComponentSet(2);
 	if (componentset) {
+		Locator.GetMainSceneCamera()->LoadComponentFromSet(componentset);
+		Locator.GetSimulaterCamera()->LoadComponentFromSet(componentset);
 		Locator.GetSoundPlayer()->LoadComponentFromSet(componentset);
 	}
 

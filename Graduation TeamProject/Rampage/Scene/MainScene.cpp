@@ -6,7 +6,6 @@
 #include "..\Object\ModelManager.h"
 #include "..\Shader\ModelShader.h"
 #include "..\Shader\ModelShader.h"
-//#include "..\Sound\SoundManager.h"
 #include "..\Shader\BoundingBoxShader.h"
 #include "..\Shader\ParticleShader.h"
 #include "..\Shader\DepthRenderShader.h"
@@ -17,7 +16,7 @@
 void CMainTMPScene::SetPlayer(CGameObject* pPlayer)
 {
 	m_pPlayer = pPlayer;
-	((CPlayer*)m_pPlayer)->SetPlayerUpdatedContext(m_pTerrain.get());
+	((CPlayer*)m_pPlayer)->SetUpdatedContext(m_pTerrain.get());
 
 	if (m_pDepthRenderShader.get())
 		((CDepthRenderShader*)m_pDepthRenderShader.get())->RegisterObject(pPlayer);
@@ -29,6 +28,7 @@ void CMainTMPScene::OnPreRender(ID3D12GraphicsCommandList* pd3dCommandList, floa
 	{
 		((CDepthRenderShader*)m_pDepthRenderShader.get())->PrepareShadowMap(pd3dCommandList, 0.0f);
 		((CDepthRenderShader*)m_pDepthRenderShader.get())->UpdateDepthTexture(pd3dCommandList);
+		CheckCollide();
 	}
 }
 void CMainTMPScene::OnPrepareRender(ID3D12GraphicsCommandList* pd3dCommandList)
@@ -147,8 +147,7 @@ void CMainTMPScene::CreateGraphicsRootSignature(ID3D12Device* pd3dDevice)
 	pd3dRootParameters[13].DescriptorTable.pDescriptorRanges = &pd3dDescriptorRanges[5];
 	pd3dRootParameters[13].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 
-
-	D3D12_STATIC_SAMPLER_DESC d3dSamplerDesc[4];
+	D3D12_STATIC_SAMPLER_DESC d3dSamplerDesc[5];
 
 	d3dSamplerDesc[0].Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;
 	d3dSamplerDesc[0].AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
@@ -204,6 +203,19 @@ void CMainTMPScene::CreateGraphicsRootSignature(ID3D12Device* pd3dDevice)
 	d3dSamplerDesc[3].ShaderRegister = 3;
 	d3dSamplerDesc[3].RegisterSpace = 0;
 	d3dSamplerDesc[3].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+
+	d3dSamplerDesc[4].Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;
+	d3dSamplerDesc[4].AddressU = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
+	d3dSamplerDesc[4].AddressV = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
+	d3dSamplerDesc[4].AddressW = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
+	d3dSamplerDesc[4].MipLODBias = 0;
+	d3dSamplerDesc[4].MaxAnisotropy = 1;
+	d3dSamplerDesc[4].ComparisonFunc = D3D12_COMPARISON_FUNC_ALWAYS;
+	d3dSamplerDesc[4].MinLOD = 0;
+	d3dSamplerDesc[4].MaxLOD = D3D12_FLOAT32_MAX;
+	d3dSamplerDesc[4].ShaderRegister = 4;
+	d3dSamplerDesc[4].RegisterSpace = 0;
+	d3dSamplerDesc[4].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
 
 	D3D12_ROOT_SIGNATURE_FLAGS d3dRootSignatureFlags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT | D3D12_ROOT_SIGNATURE_FLAG_ALLOW_STREAM_OUTPUT | D3D12_ROOT_SIGNATURE_FLAG_DENY_HULL_SHADER_ROOT_ACCESS | D3D12_ROOT_SIGNATURE_FLAG_DENY_DOMAIN_SHADER_ROOT_ACCESS;
 	D3D12_ROOT_SIGNATURE_DESC d3dRootSignatureDesc;
@@ -337,10 +349,20 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	CModelShader::GetInst()->CreateShaderVariables(pd3dDevice, pd3dCommandList);
 	CModelShader::GetInst()->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 200);
 
-	//CSoundManager::GetInst()->RegisterSound("Sound/mp3/David Bowie - Starman.mp3", false);
-	//CSoundManager::GetInst()->PlaySound("Sound/mp3/David Bowie - Starman.mp3");
+	std::unique_ptr<CGoblinObject> m_pGoblinObject = std::make_unique<CGoblinObject>(pd3dDevice, pd3dCommandList, 1);
+	m_pGoblinObject->SetPosition(XMFLOAT3(-15.0f, 200.0f, 15.0f));
+	m_pGoblinObject->SetScale(15.0f, 15.0f, 15.0f);
+	m_pGoblinObject->Rotate(0.0f, 180.0f, 0.0f);
+	m_pGoblinObject->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 5);
+	m_pGoblinObject->m_pSkinnedAnimationController->m_xmf3RootObjectScale = XMFLOAT3(10.0f, 10.0f, 10.0f);
+	m_pObjects.push_back(std::move(m_pGoblinObject));
 
-	//std::unique_ptr<CKnightObject> m_pObject = std::make_unique<CKnightObject>(pd3dDevice, pd3dCommandList, 1);
+	m_pGoblinObject = std::make_unique<CGoblinObject>(pd3dDevice, pd3dCommandList, 1);
+	m_pGoblinObject->SetPosition(XMFLOAT3(15.0f, 200.0f, -15.0f));
+	m_pGoblinObject->SetScale(15.0f, 15.0f, 15.0f);
+	m_pGoblinObject->Rotate(0.0f, 180.0f, 0.0f);
+	m_pGoblinObject->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 5);
+	m_pObjects.push_back(std::move(m_pGoblinObject));
 
 	/*std::unique_ptr<CKnightObject> m_pObject = std::make_unique<CKnightObject>(pd3dDevice, pd3dCommandList, 1);
 	m_pObject->SetPosition(XMFLOAT3(-15.0f, 350.0f, 15.0f));
@@ -369,6 +391,7 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 		m_pGoblin->CreateArticulation(1.0f);
 		m_pGoblin->m_bSimulateArticulate = false;
 		m_pGoblin->Animate(0.0f);
+		m_pGoblin->OnPrepareRender();
 		m_pGoblin->m_bSimulateArticulate = true;
 		XMFLOAT4X4 rootWorld = m_pGoblin->FindFrame("root")->m_xmf4x4World;
 		m_pGoblin->m_pArticulation->copyInternalStateToCache(*m_pGoblin->m_pArticulationCache, physx::PxArticulationCacheFlag::eALL);
@@ -392,6 +415,7 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pOrc->CreateArticulation(1.0f);
 	m_pOrc->m_bSimulateArticulate = false;
 	m_pOrc->Animate(0.0f);
+	m_pOrc->OnPrepareRender();
 	m_pOrc->m_bSimulateArticulate = true;
 	physx::PxMat44 mat = m_pOrc->m_pArticulation->getRootGlobalPose();
 	XMFLOAT4X4 rootWorld = m_pOrc->FindFrame("root")->m_xmf4x4World;
@@ -438,6 +462,7 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pGoblin->CreateArticulation(1.0f);
 	m_pGoblin->m_bSimulateArticulate = false;
 	m_pGoblin->Animate(0.0f);
+	m_pGoblin->OnPrepareRender();
 	m_pGoblin->m_bSimulateArticulate = true;
 	rootWorld = m_pGoblin->FindFrame("root")->m_xmf4x4World;
 	m_pGoblin->m_pArticulation->copyInternalStateToCache(*m_pGoblin->m_pArticulationCache, physx::PxArticulationCacheFlag::eALL);
@@ -458,6 +483,7 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pGoblin->CreateArticulation(1.0f);
 	m_pGoblin->m_bSimulateArticulate = false;
 	m_pGoblin->Animate(0.0f);
+	m_pGoblin->OnPrepareRender();
 	m_pGoblin->m_bSimulateArticulate = true;
 	rootWorld = m_pGoblin->FindFrame("root")->m_xmf4x4World;
 	m_pGoblin->m_pArticulation->copyInternalStateToCache(*m_pGoblin->m_pArticulationCache, physx::PxArticulationCacheFlag::eALL);
@@ -481,6 +507,7 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 		m_pGoblin->CreateArticulation(1.0f);
 		m_pGoblin->m_bSimulateArticulate = false;
 		m_pGoblin->Animate(0.0f);
+		m_pGoblin->OnPrepareRender();
 		m_pGoblin->m_bSimulateArticulate = true;
 		rootWorld = m_pGoblin->FindFrame("root")->m_xmf4x4World;
 		m_pGoblin->m_pArticulation->copyInternalStateToCache(*m_pGoblin->m_pArticulationCache, physx::PxArticulationCacheFlag::eALL);
@@ -537,6 +564,10 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_IObjectIndexs.resize(m_pObjects.size());
 	for (int i = 0; i < m_pObjects.size(); ++i) {
 		((CDepthRenderShader*)m_pDepthRenderShader.get())->RegisterObject(m_pObjects[i].get());
+
+		if(dynamic_cast<CPhysicsObject*>(m_pObjects[i].get()))
+			((CPhysicsObject*)m_pObjects[i].get())->SetUpdatedContext(m_pTerrain.get());
+		
 		m_IObjectIndexs[i] = i;
 	}
 	((CDepthRenderShader*)m_pDepthRenderShader.get())->SetLight(m_pLight->GetLights());
@@ -566,18 +597,43 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	//std::unique_ptr<CParticleObject> pParticleObject = std::make_unique<CParticleObject>(pd3dDevice, pd3dCommandList, GetGraphicsRootSignature(), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.f, 0.0f), 2.0f, XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT2(2.0f, 2.0f), MAX_PARTICLES, m_pParticleShader.get(), true);
 	//
 	//m_ppParticleObjects.push_back(std::move(pParticleObject));
+
+	std::shared_ptr<CTexture> pSkyBoxTexture = std::make_shared<CTexture>(1, RESOURCE_TEXTURE_CUBE, 0, 1);
+	pSkyBoxTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"SkyBox/Night_MoonBurst.dds", RESOURCE_TEXTURE_CUBE, 0);
+
+	m_pSkyBoxShader = std::make_unique<CSkyBoxShader>();
+	m_pSkyBoxShader->CreateShader(pd3dDevice, GetGraphicsRootSignature(), 1, &pdxgiObjectRtvFormats, 0);
+	m_pSkyBoxShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
+	m_pSkyBoxShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 1);
+	m_pSkyBoxShader->CreateShaderResourceViews(pd3dDevice, pSkyBoxTexture.get(), 0, 10);
+
+	m_pSkyBoxObject = std::make_unique<CSkyBox>(pd3dDevice, pd3dCommandList, GetGraphicsRootSignature(), pSkyBoxTexture);
 }
 void CMainTMPScene::UpdateObjects(float fTimeElapsed)
 {
 	m_pPlayer->Update(fTimeElapsed);
+	m_pLight->Update((CPlayer*)m_pPlayer);
 
 	for (int i = 0; i < m_pObjects.size(); ++i) {
 		m_pObjects[i]->Update(fTimeElapsed);
 		m_pcbMappedDisolveParams->dissolveThreshold[i] = m_pObjects[i]->m_fDissolveThrethHold;
 	}
 }
+
+void CMainTMPScene::CheckCollide()
+{
+	for (int i = 0; i < m_pObjects.size(); ++i) {
+		if(((CPlayer*)m_pPlayer)->m_pStateMachine->GetCurrentState() != Locator.GetPlayerState(typeid(Run_Player)) &&
+			((CPlayer*)m_pPlayer)->m_pStateMachine->GetCurrentState() != Locator.GetPlayerState(typeid(Idle_Player)))
+			m_pPlayer->CheckCollision(m_pObjects[i].get());
+	}
+}
+
+#define WITH_LAG_DOLL_SIMULATION
+
 void CMainTMPScene::AnimateObjects(float fTimeElapsed)
 {
+#ifdef WITH_LAG_DOLL_SIMULATION
 	static float SimulateElapsedTime = 0.0f;
 
 	SimulateElapsedTime += fTimeElapsed;
@@ -590,7 +646,7 @@ void CMainTMPScene::AnimateObjects(float fTimeElapsed)
 		UpdateObjectArticulation();
 		b_simulation = false;
 	}
-
+#endif // WITH_LAG_DOLL_SIMULATION
 	UpdateObjects(fTimeElapsed);
 }
 void CMainTMPScene::OnPrepareRenderTarget(ID3D12GraphicsCommandList* pd3dCommandList, int nRenderTargets, D3D12_CPU_DESCRIPTOR_HANDLE* pd3dRtvCPUHandles, D3D12_CPU_DESCRIPTOR_HANDLE d3dDepthStencilBufferDSVCPUHandle)
@@ -603,6 +659,9 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 	if (pCamera) pCamera->OnPrepareRender(pd3dCommandList);
 
 	m_pLight->Render(pd3dCommandList);
+
+	m_pSkyBoxShader->Render(pd3dCommandList, 0);
+	m_pSkyBoxObject->Render(pd3dCommandList, pCamera);
 
 	m_pTerrainShader->Render(pd3dCommandList, 0);
 	m_pTerrain->Render(pd3dCommandList, true);

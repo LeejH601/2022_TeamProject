@@ -183,7 +183,9 @@
     <ClCompile Include="Object\MonsterState.cpp" />
     <ClCompile Include="Object\Object.cpp" />
     <ClCompile Include="Object\ParticleComponent.cpp" />
+    <ClCompile Include="Object\PhysicsObject.cpp" />
     <ClCompile Include="Object\Player.cpp" />
+    <ClCompile Include="Object\SkyBox.cpp" />
     <ClCompile Include="Object\State.cpp" />
     <ClCompile Include="Object\ParticleObject.cpp" />
     <ClCompile Include="Object\Terrain.cpp" />
@@ -202,6 +204,7 @@
     <ClCompile Include="Shader\ParticleShader.cpp" />
     <ClCompile Include="Shader\PostProcessShader.cpp" />
     <ClCompile Include="Shader\Shader.cpp" />
+    <ClCompile Include="Shader\SkyBoxShader.cpp" />
     <ClCompile Include="Shader\TerrainShader.cpp" />
     <ClCompile Include="Sound\Sound.cpp" />
     <ClCompile Include="Sound\SoundComponent.cpp" />
@@ -241,7 +244,9 @@
     <ClInclude Include="Object\MonsterState.h" />
     <ClInclude Include="Object\Object.h" />
     <ClInclude Include="Object\ParticleComponent.h" />
+    <ClInclude Include="Object\PhysicsObject.h" />
     <ClInclude Include="Object\Player.h" />
+    <ClInclude Include="Object\SkyBox.h" />
     <ClInclude Include="Object\State.h" />
     <ClInclude Include="Object\StateMachine.h" />
     <ClInclude Include="Object\ParticleObject.h" />
@@ -260,6 +265,7 @@
     <ClInclude Include="Shader\ParticleShader.h" />
     <ClInclude Include="Shader\PostProcessShader.h" />
     <ClInclude Include="Shader\Shader.h" />
+    <ClInclude Include="Shader\SkyBoxShader.h" />
     <ClInclude Include="Shader\TerrainShader.h" />
     <ClInclude Include="Sound\Sound.h" />
     <ClInclude Include="Sound\SoundComponent.h" />
@@ -456,6 +462,30 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.1</ShaderModel>
       <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(Filename).cso</ObjectFileOutput>
+    </FxCompile>
+    <FxCompile Include="Shader\SkyBoxPixelShader.hlsl">
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.1</ShaderModel>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(Filename).cso</ObjectFileOutput>
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">PSSkyBox</EntryPointName>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">PSSkyBox</EntryPointName>
+      <DisableOptimizations Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</DisableOptimizations>
+      <EnableDebuggingInformation Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</EnableDebuggingInformation>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.1</ShaderModel>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(Filename).cso</ObjectFileOutput>
+    </FxCompile>
+    <FxCompile Include="Shader\SkyBoxVertexShader.hlsl">
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.1</ShaderModel>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(Filename).cso</ObjectFileOutput>
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">VSSkyBox</EntryPointName>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">VSSkyBox</EntryPointName>
+      <DisableOptimizations Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</DisableOptimizations>
+      <EnableDebuggingInformation Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</EnableDebuggingInformation>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.1</ShaderModel>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(Filename).cso</ObjectFileOutput>
     </FxCompile>
     <FxCompile Include="Shader\TerrainDepthWriteShader.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>

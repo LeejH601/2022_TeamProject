@@ -1,5 +1,7 @@
 #include "LobbyScene.h"
 #include "SimulatorScene.h"
+#include "..\Global\Global.h"
+#include "..\Global\Locator.h"
 #include "..\ImGui\ImGuiManager.h"
 
 void CLobbyScene::OnPrepareRender(ID3D12GraphicsCommandList* pd3dCommandList)
@@ -25,6 +27,7 @@ bool CLobbyScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM
 		switch (wParam)
 		{
 		case VK_RETURN:
+			Locator.OnChangeScene(SCENE_TYPE::MAIN_SCENE);
 			return 1;
 		default:
 			break;

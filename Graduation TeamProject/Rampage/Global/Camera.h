@@ -67,7 +67,8 @@ public:
 	CCameraMover();
 	virtual ~CCameraMover() {};
 
-	void SetDirection(XMFLOAT3 Dir) { m_xmf3Direction = Dir; };
+	void SetDirection(XMFLOAT3 Dir) { m_xmf3Direction = Dir; }
+	void SetCamera(CCamera* pCamera) { m_pCamera = pCamera; }
 
 	virtual void Update(float fElapsedTime);
 	virtual void Reset();
@@ -89,6 +90,8 @@ public:
 public:
 	CCameraShaker();
 	virtual ~CCameraShaker() {};
+
+	void SetCamera(CCamera* pCamera) { m_pCamera = pCamera; }
 
 	virtual void Update(float fElapsedTime);
 	virtual void Reset();
@@ -118,6 +121,8 @@ public:
 public:
 	CCameraZoomer();
 	virtual ~CCameraZoomer();
+
+	void SetCamera(CCamera* pCamera) { m_pCamera = pCamera; }
 
 	virtual void Update(float fElapsedTime);
 	virtual void Reset();

@@ -184,6 +184,15 @@
     <ClCompile Include="Shader\PostProcessShader.cpp">
       <Filter>Shader</Filter>
     </ClCompile>
+    <ClCompile Include="Object\PhysicsObject.cpp">
+      <Filter>Object</Filter>
+    </ClCompile>
+    <ClCompile Include="Shader\SkyBoxShader.cpp">
+      <Filter>Shader</Filter>
+    </ClCompile>
+    <ClCompile Include="Object\SkyBox.cpp">
+      <Filter>Object</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Global\stdafx.h">
@@ -354,6 +363,15 @@
     <ClInclude Include="Shader\PostProcessShader.h">
       <Filter>Shader</Filter>
     </ClInclude>
+    <ClInclude Include="Object\PhysicsObject.h">
+      <Filter>Object</Filter>
+    </ClInclude>
+    <ClInclude Include="Shader\SkyBoxShader.h">
+      <Filter>Shader</Filter>
+    </ClInclude>
+    <ClInclude Include="Object\SkyBox.h">
+      <Filter>Object</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shader\PlayerPixelShader.hlsl" />
@@ -382,5 +400,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Shader\Header.hlsli" />
+    <FxCompile Include="Shader\SkyBoxPixelShader.hlsl" />
+    <FxCompile Include="Shader\SkyBoxVertexShader.hlsl" />
   </ItemGroup>
 </Project>

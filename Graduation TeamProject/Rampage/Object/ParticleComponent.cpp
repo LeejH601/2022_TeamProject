@@ -22,13 +22,19 @@ void CParticleComponent::Update()
 		m_pParticleObject->SetSize(m_fSize);
 		m_pParticleObject->SetAlpha(m_fAlpha);
 		m_pParticleObject->SetColor(m_f3Color);
+		m_pParticleObject->SetSpeed(m_fSpeed);
 		m_pParticleObject->SetLifeTime(m_fLifeTime);
-		//m_pParticleObject->SetMaxParticleN(m_nParticleNumber);
-		//m_pParticleObject->SetEmitParticleN(m_nParticleNumber);
+		m_pParticleObject->SetMaxParticleN(m_nParticleNumber);
+		m_pParticleObject->SetEmitParticleN(m_nParticleNumber);
 	}
 }
 
 int& CParticleComponent::GetParticleNumber()
 {
 	return m_nParticleNumber;
+}
+
+int& CParticleComponent::GetParticleIndex()
+{
+	return m_nParticleIndex;
 }

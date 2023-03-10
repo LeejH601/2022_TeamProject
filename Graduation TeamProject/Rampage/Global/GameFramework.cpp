@@ -426,7 +426,6 @@ void CGameFramework::AnimateObjects()
 	Locator.GetMainSceneCamera()->Animate(m_GameTimer.GetFrameTimeElapsed());
 	m_pSceneManager->Animate(m_GameTimer.GetFrameTimeElapsed());
 }
-
 void CGameFramework::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	UINT ncbElementBytes = ((sizeof(CB_Parallax_Info) + 255) & ~255); //256ÀÇ ¹è¼ö
@@ -434,7 +433,6 @@ void CGameFramework::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12Graph
 
 	m_pd3dcbParallax->Map(0, NULL, (void**)&m_pcbMappedParallax);
 }
-
 void CGameFramework::OnPrepareRenderTarget()
 {
 	//ImVec4 clear_color = CImGuiManager::GetInst()->GetColor();

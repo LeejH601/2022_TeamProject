@@ -1,5 +1,6 @@
 #pragma once
 #include "stdafx.h"
+#include "Global.h"
 #include "Camera.h"
 #include "EntityManager.h"
 #include "..\Sound\SoundPlayer.h"
@@ -92,6 +93,8 @@ public:
 	~CLocator();
 
 	bool Init();
+
+	void OnChangeScene(SCENE_TYPE scene_type);
 
 	void CreateSimulatorCamera(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	CCamera* GetSimulaterCamera() { return m_pSimulaterCamera.get(); };

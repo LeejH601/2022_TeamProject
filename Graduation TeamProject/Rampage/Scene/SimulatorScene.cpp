@@ -237,7 +237,7 @@ void CSimulatorScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 	// 4->HIT
 	// 5->IDLE
 	std::shared_ptr<CMonster> m_pDummyEnemy = std::make_unique<CGoblinObject>(pd3dDevice, pd3dCommandList, 1);
-	m_pDummyEnemy->SetPosition(XMFLOAT3(8.0f, 0.0f, 0.0f));
+	m_pDummyEnemy->SetPosition(XMFLOAT3(8.0f, 250.0f, 0.0f));
 	m_pDummyEnemy->SetScale(14.0f, 14.0f, 14.0f);
 	m_pDummyEnemy->Rotate(0.0f, -90.0f, 0.0f);
 	m_pDummyEnemy->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 5);
@@ -245,12 +245,7 @@ void CSimulatorScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 
 	// 3->IDLE
 	// 28->Attack
-	
 	m_pMainCharacter = std::make_unique<CPlayer>(pd3dDevice, pd3dCommandList, 1);
-
-	((CDepthRenderShader*)m_pDepthRenderShader.get())->RegisterObject(m_pMainCharacter.get());
-	for (int i = 0; i < m_pEnemys.size(); ++i)
-		((CDepthRenderShader*)m_pDepthRenderShader.get())->RegisterObject(m_pEnemys[i].get());
 
 	((CDepthRenderShader*)m_pDepthRenderShader.get())->SetLight(m_pLight->GetLights());
 	((CDepthRenderShader*)m_pDepthRenderShader.get())->SetTerrain(m_pTerrain.get());
@@ -265,7 +260,15 @@ void CSimulatorScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 	XMFLOAT4 xmf4Color(0.0f, 0.5f, 0.0f, 0.0f);
 	m_pTerrain = std::make_unique<CSplatTerrain>(pd3dDevice, pd3dCommandList, GetGraphicsRootSignature(), _T("Terrain/terrainHeightMap257.raw"), 257, 257, 257, 257, xmf3Scale, xmf4Color, m_pTerrainShader.get());
 	m_pTerrain->SetPosition(XMFLOAT3(-800.f, -310.f, -800.f));
-	m_pMainCharacter->SetPlayerUpdatedContext(m_pTerrain.get());
+
+	((CDepthRenderShader*)m_pDepthRenderShader.get())->RegisterObject(m_pMainCharacter.get());
+	m_pMainCharacter->SetUpdatedContext(m_pTerrain.get());
+
+	for (int i = 0; i < m_pEnemys.size(); ++i)
+	{
+		((CDepthRenderShader*)m_pDepthRenderShader.get())->RegisterObject(m_pEnemys[i].get());
+		m_pEnemys[i]->SetUpdatedContext(m_pTerrain.get());
+	}
 
 	/*std::unique_ptr<CGameObject> pDumpCharater = std::make_unique<CKnightObject>(pd3dDevice, pd3dCommandList, 1);
 
@@ -292,9 +295,14 @@ void CSimulatorScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 
 
 	m_pParticleObjectShader = std::make_shared<CParticleShader>();
-	m_pParticleObjectShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 10);
+	m_pParticleObjectShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 40);
 	CTextureManager::GetInst()->LoadParticleTexture(pd3dDevice, pd3dCommandList, L"ParticleImage/RoundSoftParticle.dds", m_pParticleObjectShader.get(), 0, 0);
-	CTextureManager::GetInst()->LoadParticleTexture(pd3dDevice, pd3dCommandList, L"Image/Flower01.dds", m_pParticleObjectShader.get(), 0, 0);
+	CTextureManager::GetInst()->LoadParticleTexture(pd3dDevice, pd3dCommandList, L"Image/Effect0.dds", m_pParticleObjectShader.get(), 0, 0);
+	CTextureManager::GetInst()->LoadParticleTexture(pd3dDevice, pd3dCommandList, L"Image/Effect1.dds", m_pParticleObjectShader.get(), 0, 0);
+	CTextureManager::GetInst()->LoadParticleTexture(pd3dDevice, pd3dCommandList, L"Image/Effect2.dds", m_pParticleObjectShader.get(), 0, 0);
+	CTextureManager::GetInst()->LoadParticleTexture(pd3dDevice, pd3dCommandList, L"Image/Effect3.dds", m_pParticleObjectShader.get(), 0, 0);
+	CTextureManager::GetInst()->LoadParticleTexture(pd3dDevice, pd3dCommandList, L"Image/Effect4.dds", m_pParticleObjectShader.get(), 0, 0);
+	CTextureManager::GetInst()->LoadParticleTexture(pd3dDevice, pd3dCommandList, L"Image/Effect5.dds", m_pParticleObjectShader.get(), 0, 0);
 	m_pParticleObject = std::make_shared<CParticleObject>(CTextureManager::GetInst()->LoadParticleTexture(L"ParticleImage/RoundSoftParticle.dds"), pd3dDevice, pd3dCommandList, GetGraphicsRootSignature(), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), 2.0f, XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT2(2.0f, 2.0f), MAX_PARTICLES, m_pParticleObjectShader.get());
 	CParticleComponent::GetInst()->Set_ParticleComponent(m_pParticleObject);
 
@@ -351,6 +359,7 @@ void CSimulatorScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float f
 	Locator.GetSoundPlayer()->Update(fTimeElapsed);
 
 	CAttackSpriteComponent::GetInst()->Collision_Check();
+
 	m_pBillBoardObjectShader->Render(pd3dCommandList, 0);
 	m_pBillBoardObject->Animate(fTimeElapsed);
 	m_pBillBoardObject->UpdateShaderVariables(pd3dCommandList);

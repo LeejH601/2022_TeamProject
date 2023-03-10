@@ -23,6 +23,8 @@ struct LIGHTS
 	XMFLOAT4				m_xmf4GlobalAmbient;
 	int						m_nLights;
 };
+
+class CPlayer;
 class CLight
 {
 public:
@@ -33,6 +35,8 @@ public:
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList);
 	virtual void CreateLightVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	virtual void ReleaseLightVariables();
+
+	void Update(CPlayer* pPlayer);
 private:
 	XMFLOAT4 m_xmf4GlobalAmbient = XMFLOAT4(0.4f, 0.4f, 0.4f, 1.5f);
 
