@@ -101,7 +101,7 @@ float4 CalculateDissolve(float4 color, float2 uv, float ThreshHold) {
 }
 
 //[earlydepthstencil]
-PS_MULTIPLE_RENDER_TARGETS_OUTPUT PS_Player(VS_OUTPUT input) : SV_TARGET
+PS_MULTIPLE_RENDER_TARGETS_OUTPUT PS_Player(VS_OUTPUT input)
 {
 	PS_MULTIPLE_RENDER_TARGETS_OUTPUT output;
 	float4 cAlbedoColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
@@ -174,7 +174,8 @@ PS_MULTIPLE_RENDER_TARGETS_OUTPUT PS_Player(VS_OUTPUT input) : SV_TARGET
 		 else
 			 output.f4Color = float4(0.0f, 0.0f, 0.0f, 1.0f);*/
 
-		 output.f4Normal = float4(input.normalW.xyz * 0.5f + 0.5f, 1.0f);
+		 float Depth = cIllumination.w < 0.001f ? 0.0f : input.position.z;
+		 output.f4Normal = float4(input.normalW.xyz * 0.5f + 0.5f, Depth);
 		 output.f4Texture.x = Compute3x3ShadowFactor(input.uvs[0].xy / input.uvs[0].ww, input.uvs[0].z / input.uvs[0].w, 0);
 		 
 

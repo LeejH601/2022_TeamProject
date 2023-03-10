@@ -23,7 +23,11 @@ CSkyBox::~CSkyBox()
 
 void CSkyBox::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 {
+	static bool isSetSkyBoxPos = false;
 	CGameObject::Render(pd3dCommandList, pCamera);
-	XMFLOAT3 xmf3CameraPos = pCamera->GetPosition();
-	SetPosition(xmf3CameraPos.x, xmf3CameraPos.y, xmf3CameraPos.z);
+	//if (!isSetSkyBoxPos) {
+		XMFLOAT3 xmf3CameraPos = pCamera->GetPosition();
+		SetPosition(xmf3CameraPos.x, xmf3CameraPos.y, xmf3CameraPos.z);
+		isSetSkyBoxPos = true;
+	//}
 }

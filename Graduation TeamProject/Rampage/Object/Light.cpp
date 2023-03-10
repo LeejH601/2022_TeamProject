@@ -68,10 +68,10 @@ void CLight::ReleaseLightVariables()
 
 void CLight::Update(CPlayer* pPlayer)
 {
-	if (m_pLights && m_pLights[0].m_bEnable)
+	/*if (m_pLights && m_pLights[0].m_bEnable)
 	{
 		XMFLOAT3 xmf3Position = pPlayer->GetPosition();
 
 		m_pLights[0].m_xmf3Position = XMFLOAT3{ xmf3Position.x, xmf3Position.y + 128.0f, xmf3Position.z };
-	}
+	}*/
 }
