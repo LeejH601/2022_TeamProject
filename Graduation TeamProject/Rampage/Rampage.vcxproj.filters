@@ -378,5 +378,9 @@
     <FxCompile Include="TreePixelShader.hlsl" />
     <FxCompile Include="Shader\PostProcessingPixelShader.hlsl" />
     <FxCompile Include="Shader\PostProcessingVertexShader.hlsl" />
+    <FxCompile Include="LightShaft.hlsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Shader\Header.hlsli" />
   </ItemGroup>
 </Project>
