@@ -61,7 +61,7 @@ void CPostProcessShader::CreateResourcesAndViews(ID3D12Device* pd3dDevice, ID3D1
 {
 	m_pTexture = std::make_shared<CTexture>(nResources, RESOURCE_TEXTURE2D, 0, 1);
 
-	D3D12_CLEAR_VALUE d3dClearValue = { DXGI_FORMAT_R8G8B8A8_UNORM, { 0.0f, 0.0f, 1.0f, 1.0f } };
+	D3D12_CLEAR_VALUE d3dClearValue = { DXGI_FORMAT_R8G8B8A8_UNORM, { 0.0f, 0.0f, 0.0f, 1.0f } };
 	for (UINT i = 0; i < nResources; i++)
 	{
 		d3dClearValue.Format = pdxgiFormats[i];
@@ -111,7 +111,7 @@ void CPostProcessShader::OnPrepareRenderTarget(ID3D12GraphicsCommandList* pd3dCo
 		::SynchronizeResourceTransition(pd3dCommandList, GetTextureResource(i), D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_RENDER_TARGET);
 
 		D3D12_CPU_DESCRIPTOR_HANDLE d3dRtvCPUDescriptorHandle = GetRtvCPUDescriptorHandle(i);
-		FLOAT pfClearColor[4] = { 0.0f, 0.0f, 1.0f, 1.0f };
+		FLOAT pfClearColor[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
 		pd3dCommandList->ClearRenderTargetView(d3dRtvCPUDescriptorHandle, pfClearColor, 0, NULL);
 		pd3dAllRtvCPUHandles[nRenderTargets + i] = d3dRtvCPUDescriptorHandle;
 	}

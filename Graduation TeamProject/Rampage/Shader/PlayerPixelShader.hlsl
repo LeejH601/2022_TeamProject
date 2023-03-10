@@ -168,6 +168,17 @@ PS_MULTIPLE_RENDER_TARGETS_OUTPUT PS_Player(VS_OUTPUT input) : SV_TARGET
 
 		 output.f4Scene = cIllumination;
 		 output.f4Color = cIllumination;
+		 float gray = dot(cIllumination.rgb, float3(0.299, 0.587, 0.114));
+		/* if (gray > 1.0)
+			 output.f4Color = cIllumination;
+		 else
+			 output.f4Color = float4(0.0f, 0.0f, 0.0f, 1.0f);*/
+
+		 output.f4Normal = float4(input.normalW.xyz * 0.5f + 0.5f, 1.0f);
+		 output.f4Texture.x = Compute3x3ShadowFactor(input.uvs[0].xy / input.uvs[0].ww, input.uvs[0].z / input.uvs[0].w, 0);
+		 
+
+		 //output.f4Texture.x = Compute3x3ShadowFactor(input.uvs[0].xy / input.uvs[0].ww, input.uvs[0].z / input.uvs[0].w, 0);
 
 		 //return float4(gfDissolveThreshHold[0], 0.0f, 0.0f, 1.0f);
 		 return (output);
