@@ -68,57 +68,43 @@ float4 PS_PostProcessing(VS_SCREEN_RECT_TEXTURED_OUTPUT input) : SV_Target
 
 	float result = pow((input.uv.x - lightPosInScreenSpace.x), 2) + pow((input.uv.y - lightPosInScreenSpace.y), 2);
 
-
-	//float4 cColor = gtxMultiRenderTargetTextures[0].Sample(gSamplerState, input.uv);
-	//float4 cColor = float4(1.0f, 0.0f, 0.0f, 1.0f);
-
 	float weight = 0.1f;
 	float exposure = 0.8f;
 	float Density = 0.7f;
 	float radiusPow = pow(radius, 2);
 	float4 cColor;
 	float4 Pixelnormal = gtxMultiRenderTargetTextures[1].Sample(gSamplerState, input.uv);
-	//float3 normal = Pixelnormal.xyz;
 	float3 normal = Pixelnormal.xyz * 2.0f - 1.0f;
 	float4 positionW = gtxMultiRenderTargetTextures[2].Sample(gSamplerState, input.uv);
 
 	// 광원이 범위 안쪽에 위치하고, 카메라가 바라보는 방향에 있다면 효과를 적용
-	//if (/*result < radiusPow && */!(lightPosInNDC.z > 1.0f)) {
-	if ((lightPosInNDC.z > 1.0f) || Pixelnormal.z > 0.0f)
+	if ((lightPosInNDC.z > 1.0f) || Pixelnormal.z > 0.0f) {
 		weight = 0.0f;
+	}
 
-	if(result < radiusPow)
+	if (result < radiusPow) {
 		weight *= max(0.0f, (1.0f - ((result) / radiusPow)));
-	else
+	}
+	else {
 		weight = 0.0f;
+	}
 
-		Density *= (1.0f - (result / radiusPow) );
-		//exposure = max(0.4, shadowFactor);
-		float angle = dot(normalize(gLights[0].m_vDirection),  normalize(Pixelnormal.xyz));
-		/*if (angle > 0)
-			exposure = 0.6f;*/
-
-		/*float4  positionW = mul(mul(float4(positionNDC, 1.0f), gmtxInverseProjection), gmtxInverseView);
-		positionW.xyz = positionW.xyz / positionW.w;*/
+	Density *= (1.0f - (result / radiusPow));
+	float angle = dot(normalize(gLights[0].m_vDirection),  normalize(Pixelnormal.xyz));
+	/*if (angle > 0)
+		exposure = 0.6f;*/
 
 
-		float4 uvs[MAX_LIGHTS];
+	float4 uvs[MAX_LIGHTS];
 
-		for (int i = 0; i < MAX_LIGHTS; i++)
-		{
-			if (gcbToLightSpaces[i].f4Position.w != 0.0f) uvs[i] = mul(positionW, gcbToLightSpaces[i].mtxToTexture);
-		}
+	for (int i = 0; i < MAX_LIGHTS; i++)
+	{
+		if (gcbToLightSpaces[i].f4Position.w != 0.0f) uvs[i] = mul(positionW, gcbToLightSpaces[i].mtxToTexture);
+	}
 
-		cColor = LightShaft(input.uv, lightPosInScreenSpace, weight, exposure, Density);
-		cColor = Lighting(positionW.xyz, normalize(normal), cColor, true, uvs);
+	cColor = LightShaft(input.uv, lightPosInScreenSpace, weight, exposure, Density);
+	cColor = Lighting(positionW.xyz, normalize(normal), cColor, true, uvs);
 
-		//cColor = float4(positionW.xyz,1.0f);
-
-
-		//cColor.xyz = normal;
-	//}
-	//else
-	//	cColor = gtxMultiRenderTargetTextures[0].Sample(gSamplerState, input.uv);
 
 	return cColor;
 }
