@@ -149,39 +149,41 @@ PS_MULTIPLE_RENDER_TARGETS_OUTPUT PS_Player(VS_OUTPUT input)
 		 */
 
 		 //float3 normalW = normalize(input.normalW);
-		 float3 normalW = mul(normal, TBN);
+	float3 normalW = mul(normal, TBN);
 
-		 float4 cIllumination;
-		 if (gnTexturesMask & MATERIAL_NORMAL_MAP)
-			 cIllumination = Lighting(input.positionW, normalize(normalW), cColor, true, input.uvs);
-		 else
-			 cIllumination = Lighting(input.positionW, normalize(input.normalW), cColor, true, input.uvs);
-		 //float4 cIllumination = Lighting(input.positionW, normalize(input.normalW), cColor, true, input.uvs);
+	float4 cIllumination;
+	if (gnTexturesMask & MATERIAL_NORMAL_MAP)
+		cIllumination = Lighting(input.positionW, normalize(normalW), cColor, true, input.uvs);
+	else
+		cIllumination = Lighting(input.positionW, normalize(input.normalW), cColor, true, input.uvs);
+	//float4 cIllumination = Lighting(input.positionW, normalize(input.normalW), cColor, true, input.uvs);
 
-		 //cIllumination = gtxMappedTexture[2].Sample(gSamplerState, input.uv);
-		 /*if(gbDissolved)
-			 cIllumination.a = CalculateDissolve(input.uv, gfDissolveThreshHold);
-		 else {
-			 cIllumination.a = 1 - gfDissolveThreshHold;
-		 }*/
-		 cIllumination = CalculateDissolve(cIllumination, input.uv, gfDissolveThreshHold[gnInstanceID / 4][gnInstanceID % 4]);
 
-		 output.f4Scene = cIllumination;
+	cColor = CalculateDissolve(cColor, input.uv, gfDissolveThreshHold[gnInstanceID / 4][gnInstanceID % 4]);
+	//cIllumination = CalculateDissolve(cIllumination, input.uv, gfDissolveThreshHold[gnInstanceID / 4][gnInstanceID % 4]);
+
+	output.f4Scene = cIllumination;
+	if (cColor.a > 0.001f) {
+		output.f4Color = cColor;
+		output.f4PositoinW = float4(input.positionW, 1.0f);
+		float Depth = cIllumination.w < 0.001f ? 0.0f : input.position.z;
+		output.f4Normal = float4(input.normalW.xyz * 0.5f + 0.5f, Depth);
+	}
+	else
+		discard;
+
+	float gray = dot(cIllumination.rgb, float3(0.299, 0.587, 0.114));
+	/* if (gray > 1.0)
 		 output.f4Color = cIllumination;
-		 float gray = dot(cIllumination.rgb, float3(0.299, 0.587, 0.114));
-		/* if (gray > 1.0)
-			 output.f4Color = cIllumination;
-		 else
-			 output.f4Color = float4(0.0f, 0.0f, 0.0f, 1.0f);*/
+	 else
+		 output.f4Color = float4(0.0f, 0.0f, 0.0f, 1.0f);*/
 
-		 float Depth = cIllumination.w < 0.001f ? 0.0f : input.position.z;
-		 output.f4Normal = float4(input.normalW.xyz * 0.5f + 0.5f, Depth);
-		 output.f4Texture.x = Compute3x3ShadowFactor(input.uvs[0].xy / input.uvs[0].ww, input.uvs[0].z / input.uvs[0].w, 0);
-		 
+	//output.f4Texture.x = Compute3x3ShadowFactor(input.uvs[0].xy / input.uvs[0].ww, input.uvs[0].z / input.uvs[0].w, 0);
 
-		 //output.f4Texture.x = Compute3x3ShadowFactor(input.uvs[0].xy / input.uvs[0].ww, input.uvs[0].z / input.uvs[0].w, 0);
 
-		 //return float4(gfDissolveThreshHold[0], 0.0f, 0.0f, 1.0f);
-		 return (output);
+	//output.f4Texture.x = Compute3x3ShadowFactor(input.uvs[0].xy / input.uvs[0].ww, input.uvs[0].z / input.uvs[0].w, 0);
+
+	//return float4(gfDissolveThreshHold[0], 0.0f, 0.0f, 1.0f);
+	return (output);
 }
 

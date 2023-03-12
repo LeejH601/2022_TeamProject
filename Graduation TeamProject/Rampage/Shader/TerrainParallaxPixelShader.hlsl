@@ -184,7 +184,10 @@ PS_MULTIPLE_RENDER_TARGETS_OUTPUT PSParallaxTerrain(VS_TERRAIN_OUTPUT input) : S
 	//vFinalColor.rgb = vAmbient + vDiffuse;
 
 	output.f4Scene = cIllumination;
-	output.f4Color = cIllumination;
+	output.f4Color = vFinalColor;
+	float Depth = cIllumination.w < 0.001f ? 0.0f : input.position.z;
+	output.f4Normal = float4(Normal * 0.5f + 0.5f, 0.0f);
+	output.f4PositoinW = input.positionW;
 
 	return (output);
 }

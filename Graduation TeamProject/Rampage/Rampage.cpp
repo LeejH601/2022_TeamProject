@@ -5,6 +5,37 @@
 #include "Object/State.h"
 #include "Global/EntityManager.h"
 #include "Sound/SoundManager.h"
+#include <filesystem>
+#include <shlobj.h>
+
+static std::wstring GetLatestWinPixGpuCapturerPath_Cpp17()
+{
+	LPWSTR programFilesPath = nullptr;
+	SHGetKnownFolderPath(FOLDERID_ProgramFiles, KF_FLAG_DEFAULT, NULL, &programFilesPath);
+
+	std::filesystem::path pixInstallationPath = programFilesPath;
+	pixInstallationPath /= "Microsoft PIX";
+
+	std::wstring newestVersionFound;
+
+	for (auto const& directory_entry : std::filesystem::directory_iterator(pixInstallationPath))
+	{
+		if (directory_entry.is_directory())
+		{
+			if (newestVersionFound.empty() || newestVersionFound < directory_entry.path().filename().c_str())
+			{
+				newestVersionFound = directory_entry.path().filename().c_str();
+			}
+		}
+	}
+
+	if (newestVersionFound.empty())
+	{
+		// TODO: Error, no PIX installation found
+	}
+
+	return pixInstallationPath / newestVersionFound / L"WinPixGpuCapturer.dll";
+}
 
 #define MAX_LOADSTRING 100
 
@@ -24,6 +55,8 @@ ATOM                MyRegisterClass(HINSTANCE hInstance);
 BOOL                InitInstance(HINSTANCE, int);
 LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
+
+//#define DEBUG_FIX
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	_In_opt_ HINSTANCE hPrevInstance,
@@ -55,6 +88,15 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	//CSoundManager::GetInst()->PlaySound("Sound/Background/Action 1 (Loop).wav");
 	//CSoundManager::GetInst()->PlaySound("Sound/Background/Light Ambient 1 (Loop).wav");
 
+#ifdef DEBUG_FIX
+	if (GetModuleHandle(L"WinPixGpuCapturer.dll") == 0)
+	{
+		LoadLibrary(GetLatestWinPixGpuCapturerPath_Cpp17().c_str());
+	}
+#endif // DEBUG_FIX
+
+	
+
 	MyRegisterClass(hInstance);
 
 	// 애플리케이션 초기화를 수행합니다:
@@ -66,6 +108,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	HACCEL hAccelTable = LoadAccelerators(hInstance, TEXT("Rampage"));
 
 	MSG msg;
+
 
 	// 메세지 루프 입니다.
 	while (1)
