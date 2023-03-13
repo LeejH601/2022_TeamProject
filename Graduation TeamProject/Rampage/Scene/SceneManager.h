@@ -9,6 +9,7 @@ class CSceneManager {
 private:
 	CPlayer* m_pPlayer = NULL;
 	CScene* m_pCurrentScene = NULL;
+	SCENE_TYPE m_CurrentScene;
 	std::unique_ptr<CScene> m_pMainScene = NULL;
 	std::unique_ptr<CScene> m_pLobbyScene = NULL;
 	std::unique_ptr<CScene> m_pSimulatorScene = NULL;
@@ -19,6 +20,7 @@ public:
 
 	void SetPlayer(CPlayer* pPlayer);
 	void SetCurrentScene(SCENE_TYPE scene_type);
+	SCENE_TYPE GetCurrentScene() { return m_CurrentScene; }
 	void PreRender(ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed);
 	void Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed, float fCurrentTime, CCamera* pCamera = NULL);
 	void OnPostRenderTarget();

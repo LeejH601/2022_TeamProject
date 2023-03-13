@@ -316,12 +316,6 @@ void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM
 		::ReleaseCapture();
 		break;
 	case WM_MOUSEMOVE:
-		//if (Locator.GetMouseCursorMode() == MOUSE_CUROSR_MODE::THIRD_FERSON_MODE) {
-		//	//::SetCapture(hWnd);
-		//	m_ptOldCursorPos.x = GET_X_LPARAM(lParam);
-		//	m_ptOldCursorPos.y = GET_Y_LPARAM(lParam);
-		//	::GetCursorPos(&m_ptOldCursorPos);
-		//}
 		break;
 	default:
 		break;
@@ -439,56 +433,47 @@ void CGameFramework::ProcessInput()
 	m_pCurrentCamera->ProcessInput(dwDirection, cxDelta, cyDelta, m_GameTimer.GetFrameTimeElapsed());
 	((CPlayer*)(m_pPlayer.get()))->ProcessInput(dwDirection, cxDelta, cyDelta, m_GameTimer.GetFrameTimeElapsed(), m_pCurrentCamera);
 }
-void CGameFramework::AnimateObjects()
+void CGameFramework::UpdateObjects()
 {
 	// Object들의 애니메이션을 수행한다.
 	m_pFloatingCamera->Animate(m_GameTimer.GetFrameTimeElapsed());
 	Locator.GetMainSceneCamera()->Animate(m_GameTimer.GetFrameTimeElapsed());
 	m_pSceneManager->Animate(m_GameTimer.GetFrameTimeElapsed());
+
+	XMFLOAT3 xmf3PlayerPos = m_pPlayer->GetPosition();
+	xmf3PlayerPos.y += 12.5f;
+
+	m_pCurrentCamera->Update(xmf3PlayerPos, 0.0f);
 }
 void CGameFramework::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 }
-void CGameFramework::OnPrepareRenderTarget()
+void CGameFramework::PrepareRenderTarget()
 {
 	//ImVec4 clear_color = CImGuiManager::GetInst()->GetColor();
 	const float clear_color_with_alpha[4] = { 0.f, 0.f, 0.f, 0.f };
 
-	/*FLOAT pfDefaultClearColor[4] = {0.0f, 0.0f, 0.0f, 1.0f};
-
-	D3D12_CPU_DESCRIPTOR_HANDLE* pd3dAllRtvCPUHandles = new D3D12_CPU_DESCRIPTOR_HANDLE[2];
-
-	pd3dAllRtvCPUHandles[0] = m_pd3dSwapRTVCPUHandles[m_nSwapChainBufferIndex];
-	m_pd3dCommandList->ClearRenderTargetView(m_pd3dSwapRTVCPUHandles[m_nSwapChainBufferIndex], clear_color_with_alpha, 0, NULL);
-
-	::SynchronizeResourceTransition(m_pd3dCommandList.Get(), CImGuiManager::GetInst()->GetRTTextureResource(), D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_RENDER_TARGET);
-
-	D3D12_CPU_DESCRIPTOR_HANDLE d3dRtvCPUDescriptorHandle = CImGuiManager::GetInst()->GetRtvCPUDescriptorHandle();
-	m_pd3dCommandList->ClearRenderTargetView(d3dRtvCPUDescriptorHandle, pfDefaultClearColor, 0, NULL);
-	pd3dAllRtvCPUHandles[1] = d3dRtvCPUDescriptorHandle;
-
-	m_pd3dCommandList->OMSetRenderTargets(2, pd3dAllRtvCPUHandles, FALSE, &m_d3dDsvDescriptorCPUHandle);
-
-
-	if (pd3dAllRtvCPUHandles) delete[] pd3dAllRtvCPUHandles;*/
 	m_pd3dCommandList->ClearRenderTargetView(m_pd3dSwapRTVCPUHandles[m_nSwapChainBufferIndex], clear_color_with_alpha, 0, NULL);
 	m_pd3dCommandList->OMSetRenderTargets(1, &m_pd3dSwapRTVCPUHandles[m_nSwapChainBufferIndex], FALSE, &m_d3dDsvDescriptorCPUHandle);
 }
-void CGameFramework::OnPrepareImGui()
+void CGameFramework::PrepareImGui()
 {
-	HRESULT hResult = m_pd3dCommandList->Reset(m_pd3dCommandAllocator.Get(), NULL);
+	if (m_pSceneManager->GetCurrentScene() == SCENE_TYPE::LOBBY_SCENE)
+	{
+		HRESULT hResult = m_pd3dCommandList->Reset(m_pd3dCommandAllocator.Get(), NULL);
 
-	CImGuiManager::GetInst()->OnPrepareRender(m_pd3dCommandList.Get(), &m_d3dDsvDescriptorCPUHandle, m_GameTimer.GetFrameTimeElapsed(), m_GameTimer.GetTotalTime(), m_pCurrentCamera);
+		CImGuiManager::GetInst()->OnPrepareRender(m_pd3dCommandList.Get(), &m_d3dDsvDescriptorCPUHandle, m_GameTimer.GetFrameTimeElapsed(), m_GameTimer.GetTotalTime(), m_pCurrentCamera);
 
-	//명령 리스트를 닫힌 상태로 만든다. 
-	hResult = m_pd3dCommandList->Close();
+		//명령 리스트를 닫힌 상태로 만든다. 
+		hResult = m_pd3dCommandList->Close();
 
-	//명령 리스트를 명령 큐에 추가하여 실행한다.
-	ID3D12CommandList* CommandLists[] = { m_pd3dCommandList.Get() };
-	m_pd3dCommandQueue->ExecuteCommandLists(1, CommandLists);
+		//명령 리스트를 명령 큐에 추가하여 실행한다.
+		ID3D12CommandList* CommandLists[] = { m_pd3dCommandList.Get() };
+		m_pd3dCommandQueue->ExecuteCommandLists(1, CommandLists);
 
-	//GPU가 모든 명령 리스트를 실행할 때 까지 기다린다.
-	::WaitForGpuComplete(m_pd3dCommandQueue.Get(), m_pd3dFence.Get(), ++m_nFenceValues[m_nSwapChainBufferIndex], m_hFenceEvent);
+		//GPU가 모든 명령 리스트를 실행할 때 까지 기다린다.
+		::WaitForGpuComplete(m_pd3dCommandQueue.Get(), m_pd3dFence.Get(), ++m_nFenceValues[m_nSwapChainBufferIndex], m_hFenceEvent);
+	}
 }
 void CGameFramework::OnPostRenderTarget()
 {
@@ -507,27 +492,12 @@ void CGameFramework::MoveToNextFrame()
 		::WaitForSingleObject(m_hFenceEvent, INFINITE);
 	}
 }
-void CGameFramework::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
+void CGameFramework::RenderObjects()
 {
-}
-void CGameFramework::FrameAdvance()
-{
-	m_GameTimer.Tick(0.0f);
-	
-	ProcessInput();
-	AnimateObjects();
-
-	XMFLOAT3 xmf3PlayerPos = m_pPlayer->GetPosition();
-	xmf3PlayerPos.y += 12.5f;
-
-	m_pCurrentCamera->Update(xmf3PlayerPos, 0.0f);
-
-	Locator.GetMessageDispather()->DispatchMessages();
-
 	//명령 할당자를 리셋한다.
 	HRESULT hResult = m_pd3dCommandAllocator->Reset();
 
-	OnPrepareImGui();
+	PrepareImGui();
 
 	//명령 리스트를 리셋한다.
 	hResult = m_pd3dCommandList->Reset(m_pd3dCommandAllocator.Get(), NULL);
@@ -535,13 +505,13 @@ void CGameFramework::FrameAdvance()
 	::SynchronizeResourceTransition(m_pd3dCommandList.Get(), m_ppd3dRenderTargetBuffers[m_nSwapChainBufferIndex].Get(), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
 
 	m_pSceneManager->PreRender(m_pd3dCommandList.Get(), m_GameTimer.GetFrameTimeElapsed());
-	
+
 	m_pd3dCommandList->ClearDepthStencilView(m_d3dDsvDescriptorCPUHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
-	OnPrepareRenderTarget();
+	PrepareRenderTarget();
 	UpdateShaderVariables(m_pd3dCommandList.Get());
 
 	m_pSceneManager->Render(m_pd3dCommandList.Get(), m_GameTimer.GetFrameTimeElapsed(), m_GameTimer.GetTotalTime(), m_pCurrentCamera);
-	
+
 	::SynchronizeResourceTransition(m_pd3dCommandList.Get(), m_ppd3dRenderTargetBuffers[m_nSwapChainBufferIndex].Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
 
 	//명령 리스트를 닫힌 상태로 만든다. 
@@ -555,6 +525,19 @@ void CGameFramework::FrameAdvance()
 	::WaitForGpuComplete(m_pd3dCommandQueue.Get(), m_pd3dFence.Get(), ++m_nFenceValues[m_nSwapChainBufferIndex], m_hFenceEvent);
 
 	OnPostRenderTarget();
+}
+void CGameFramework::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
+{
+}
+void CGameFramework::FrameAdvance()
+{
+	m_GameTimer.Tick(0.0f);
+	
+	ProcessInput();
+	UpdateObjects();
+	Locator.GetMessageDispather()->DispatchMessages();
+
+	RenderObjects();
 
 	/*스왑체인을 프리젠트한다. 프리젠트를 하면 현재 렌더 타겟(후면버퍼)의 내용이 전면버퍼로 옮겨지고 렌더 타겟 인
 	덱스가 바뀔 것이다.*/

@@ -91,8 +91,8 @@ public:
 	void InitImgui();
 
 	//렌더타겟을 렌더링하기 위한 준비를 하는 함수이다.
-	void OnPrepareRenderTarget();
-	void OnPrepareImGui();
+	void PrepareImGui();
+	void PrepareRenderTarget();
 	void OnPostRenderTarget();
 
 	//렌더 타겟 뷰와 깊이-스텐실 뷰를 생성하는 함수이다. 
@@ -105,9 +105,10 @@ public:
 
 	//프레임워크의 핵심(사용자 입력, 애니메이션, 렌더링)을 구성하는 함수이다. 
 	void ProcessInput();
-	void AnimateObjects();
+	void UpdateObjects();
 	void FrameAdvance();
 	void MoveToNextFrame();
+	void RenderObjects();
 
 	//윈도우의 메시지(키보드, 마우스 입력)를 처리하는 함수이다. 
 	void OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
