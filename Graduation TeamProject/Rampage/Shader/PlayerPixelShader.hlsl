@@ -117,73 +117,36 @@ PS_MULTIPLE_RENDER_TARGETS_OUTPUT PS_Player(VS_OUTPUT input)
 	if (gnTexturesMask & MATERIAL_METALLIC_MAP) cMetallicColor = gtxMappedTexture[3].Sample(gSamplerState, input.uv);
 	if (gnTexturesMask & MATERIAL_EMISSION_MAP) cEmissionColor = gtxMappedTexture[4].Sample(gSamplerState, input.uv);
 
-	/*float3 NormalW = input.normalW;
-	NormalW.x = -NormalW.x;
-	NormalW.y = -NormalW.y;
-	NormalW.z = -NormalW.z;*/
-
-	//float3 NormalW = float3(input.normalW.x, -input.normalW.z, input.normalW.y);
-
-
 	float3 N = normalize(input.normalW);
 	float3 T = normalize(input.tangentW);
-	//float3 T = normalize(input.tangentW - dot(input.tangentW, N) * N);
-	//float3 B = cross(N, T);
 	float3 B = normalize(input.bitangentW);
 
 	float3x3 TBN = float3x3(T, B, N);
 
 	float3 normal = cNormalColor.rgb;
-	//float3 normal = float3(cNormalColor.r, -cNormalColor.b, cNormalColor.g);
 	normal = (2.0f * normal) - 1.0f;
-	/*normal.y = -normal.y;
-	normal.z = -normal.z;*/
 
 	float4 cColor = cAlbedoColor + cSpecularColor + cEmissionColor;
 
-	/*if (gnTexturesMask & MATERIAL_METALLIC_MAP) {
-		float MetailcConstant = cMetallicColor.r * 0.1f;
-		float4 MetalColor = float4(0.95f, 0.95f, 0.95f, 1.0f);
-		cColor = lerp(cColor, MetalColor, MetailcConstant);
-	}
-		 */
-
-		 //float3 normalW = normalize(input.normalW);
 	float3 normalW = mul(normal, TBN);
-
-	float4 cIllumination;
-	if (gnTexturesMask & MATERIAL_NORMAL_MAP)
-		cIllumination = Lighting(input.positionW, normalize(normalW), cColor, true, input.uvs);
-	else
-		cIllumination = Lighting(input.positionW, normalize(input.normalW), cColor, true, input.uvs);
-	//float4 cIllumination = Lighting(input.positionW, normalize(input.normalW), cColor, true, input.uvs);
 
 
 	cColor = CalculateDissolve(cColor, input.uv, gfDissolveThreshHold[gnInstanceID / 4][gnInstanceID % 4]);
-	//cIllumination = CalculateDissolve(cIllumination, input.uv, gfDissolveThreshHold[gnInstanceID / 4][gnInstanceID % 4]);
 
-	output.f4Scene = cIllumination;
 	if (cColor.a > 0.001f) {
+		float3 toCameraVec = normalize(gf3CameraPosition - input.positionW.xyz);
+		float RimLight = smoothstep(1.0f - 0.3f, 1.0f, 1 - max(0, dot(normalize(input.normalW), toCameraVec)));
+
+		cColor.xyz += RimLight;
+
 		output.f4Color = cColor;
 		output.f4PositoinW = float4(input.positionW, 1.0f);
-		float Depth = cIllumination.w < 0.001f ? 0.0f : input.position.z;
+		float Depth = cColor.w < 0.001f ? 0.0f : input.position.z;
 		output.f4Normal = float4(input.normalW.xyz * 0.5f + 0.5f, Depth);
 	}
 	else
 		discard;
 
-	float gray = dot(cIllumination.rgb, float3(0.299, 0.587, 0.114));
-	/* if (gray > 1.0)
-		 output.f4Color = cIllumination;
-	 else
-		 output.f4Color = float4(0.0f, 0.0f, 0.0f, 1.0f);*/
-
-	//output.f4Texture.x = Compute3x3ShadowFactor(input.uvs[0].xy / input.uvs[0].ww, input.uvs[0].z / input.uvs[0].w, 0);
-
-
-	//output.f4Texture.x = Compute3x3ShadowFactor(input.uvs[0].xy / input.uvs[0].ww, input.uvs[0].z / input.uvs[0].w, 0);
-
-	//return float4(gfDissolveThreshHold[0], 0.0f, 0.0f, 1.0f);
 	return (output);
 }
 

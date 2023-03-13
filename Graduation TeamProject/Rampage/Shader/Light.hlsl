@@ -1,8 +1,8 @@
 //--------------------------------------------------------------------------------------
 #define MAX_LIGHTS			4 
 
-#define FRAME_BUFFER_WIDTH		1400
-#define FRAME_BUFFER_HEIGHT		800
+#define FRAME_BUFFER_WIDTH		1920
+#define FRAME_BUFFER_HEIGHT		1080
 
 #define _DEPTH_BUFFER_WIDTH		(FRAME_BUFFER_WIDTH * 4)
 #define _DEPTH_BUFFER_HEIGHT	(FRAME_BUFFER_HEIGHT * 4)

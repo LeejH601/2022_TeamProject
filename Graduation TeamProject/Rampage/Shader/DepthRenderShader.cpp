@@ -120,13 +120,13 @@ D3D12_RASTERIZER_DESC CDepthRenderShader::CreateRasterizerState(int nPipelineSta
 	D3D12_RASTERIZER_DESC d3dRasterizerDesc;
 	::ZeroMemory(&d3dRasterizerDesc, sizeof(D3D12_RASTERIZER_DESC));
 	d3dRasterizerDesc.FillMode = D3D12_FILL_MODE_SOLID;
-	d3dRasterizerDesc.CullMode = D3D12_CULL_MODE_BACK;
+	d3dRasterizerDesc.CullMode = D3D12_CULL_MODE_FRONT;
 	d3dRasterizerDesc.FrontCounterClockwise = FALSE;
 #ifdef _WITH_RASTERIZER_DEPTH_BIAS
-	d3dRasterizerDesc.DepthBias = 8500;
+	d3dRasterizerDesc.DepthBias = 4000;
 #endif
-	d3dRasterizerDesc.DepthBiasClamp = 100000;
-	d3dRasterizerDesc.SlopeScaledDepthBias = 9.2f;
+	d3dRasterizerDesc.DepthBiasClamp = 0;
+	d3dRasterizerDesc.SlopeScaledDepthBias = 3.2f;
 	d3dRasterizerDesc.DepthClipEnable = TRUE;
 	d3dRasterizerDesc.MultisampleEnable = FALSE;
 	d3dRasterizerDesc.AntialiasedLineEnable = FALSE;

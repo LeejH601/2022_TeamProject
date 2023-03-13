@@ -27,7 +27,7 @@ cbuffer cbToLightSpace : register(b6)
 };
 
 #define NUM_SAMPLES 128
-#define Decay 0.9f
+#define Decay 0.82f
 
 float4 LightShaft(float2 uv, float2 ScreenLightPos, float Weight, float Exposure, float Density)
 {
@@ -68,9 +68,9 @@ float4 PS_PostProcessing(VS_SCREEN_RECT_TEXTURED_OUTPUT input) : SV_Target
 
 	float result = pow((input.uv.x - lightPosInScreenSpace.x), 2) + pow((input.uv.y - lightPosInScreenSpace.y), 2);
 
-	float weight = 0.1f;
-	float exposure = 0.8f;
-	float Density = 0.7f;
+	float weight = 0.2f;
+	float exposure = 1.0f;
+	float Density = 0.5f;
 	float radiusPow = pow(radius, 2);
 	float4 cColor;
 	float4 Pixelnormal = gtxMultiRenderTargetTextures[1].Sample(gSamplerState, input.uv);
@@ -94,7 +94,6 @@ float4 PS_PostProcessing(VS_SCREEN_RECT_TEXTURED_OUTPUT input) : SV_Target
 	/*if (angle > 0)
 		exposure = 0.6f;*/
 
-
 	float4 uvs[MAX_LIGHTS];
 
 	for (int i = 0; i < MAX_LIGHTS; i++)
@@ -103,8 +102,13 @@ float4 PS_PostProcessing(VS_SCREEN_RECT_TEXTURED_OUTPUT input) : SV_Target
 	}
 
 	cColor = LightShaft(input.uv, lightPosInScreenSpace, weight, exposure, Density);
-	cColor = Lighting(positionW.xyz, normalize(normal), cColor, true, uvs);
 
+	float3 normalOffsetScale = 20.0f;
+	float3 normalOffset = normalOffsetScale * normal;
+	float3 normalOffsetedPosition = positionW.xyz + normalOffset;
 
+	cColor = Lighting(normalOffsetedPosition, normalize(normal), cColor, true, uvs);
+
+	
 	return cColor;
 }

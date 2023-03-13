@@ -36,6 +36,27 @@ D3D12_DEPTH_STENCIL_DESC CPostProcessShader::CreateDepthStencilState(int nPipeli
 	return(d3dDepthStencilDesc);
 }
 
+D3D12_RASTERIZER_DESC CPostProcessShader::CreateRasterizerState(int nPipelineState)
+{
+	D3D12_RASTERIZER_DESC d3dRasterizerDesc;
+	::ZeroMemory(&d3dRasterizerDesc, sizeof(D3D12_RASTERIZER_DESC));
+	d3dRasterizerDesc.FillMode = D3D12_FILL_MODE_SOLID;
+	d3dRasterizerDesc.CullMode = D3D12_CULL_MODE_BACK;
+	d3dRasterizerDesc.FrontCounterClockwise = FALSE;
+#ifdef _WITH_RASTERIZER_DEPTH_BIAS
+	d3dRasterizerDesc.DepthBias = 8500;
+#endif
+	d3dRasterizerDesc.DepthBiasClamp = 0;
+	d3dRasterizerDesc.SlopeScaledDepthBias = 0.f;
+	d3dRasterizerDesc.DepthClipEnable = FALSE;
+	d3dRasterizerDesc.MultisampleEnable = FALSE;
+	d3dRasterizerDesc.AntialiasedLineEnable = FALSE;
+	d3dRasterizerDesc.ForcedSampleCount = 0;
+	d3dRasterizerDesc.ConservativeRaster = D3D12_CONSERVATIVE_RASTERIZATION_MODE_OFF;
+
+	return(d3dRasterizerDesc);
+}
+
 D3D12_SHADER_BYTECODE CPostProcessShader::CreateVertexShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
 {
 	return(CShader::ReadCompiledShaderFile(L"PostProcessingVertexShader.cso", ppd3dShaderBlob));
