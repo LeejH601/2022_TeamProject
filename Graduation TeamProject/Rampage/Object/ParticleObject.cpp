@@ -50,8 +50,8 @@ void CParticleObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dComma
 	m_pcbMappedFrameworkInfo->m_xmf3Gravity = XMFLOAT3(0.0f, 0.f, 0.0f);
 	m_pcbMappedFrameworkInfo->m_nMaxFlareType2Particles = 15 * 1.5f;
 	m_pcbMappedFrameworkInfo->m_xmf3Color = m_f3Color;
-	m_pcbMappedFrameworkInfo->m_nParticleType = PARTICLE_TYPE_EMITTER;
-	m_pcbMappedFrameworkInfo->m_fLifeTime = m_fTime;
+	m_pcbMappedFrameworkInfo->m_nParticleType = ParticleType::PARTICLE_TYPE_END;
+	m_pcbMappedFrameworkInfo->m_fLifeTime = m_fLifeTime;
 	m_pcbMappedFrameworkInfo->m_fSize = m_fSize;
 
 	if (m_fTime < 0.f) {
@@ -107,7 +107,7 @@ void CParticleObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera
 
 void CParticleObject::OnPostRender()
 {
-	if (m_pMesh) m_pMesh->OnPostRender(0); //Read Stream Output Buffer Filled Size
+	if (m_pMesh) m_pMesh->OnPostRender(0);
 }
 
 void CParticleObject::Animate(float fTimeElapsed)
@@ -133,20 +133,12 @@ void CParticleObject::AnimateRowColumn(float fTimeElapsed)
 		m_xmf4x4World._32 = float(m_nCol) / float(m_nCols);
 		if (fTimeElapsed <= 0.0f)
 		{
-			//if ((m_nRow + 1) == m_nRows && (m_nCol + 1) == m_nCols) {
-			//	//m_bEnable = false;
-			//	m_nRow = 0;
-			//	m_nCol = 0;
-			//}
-			//else
-			//{
-				if (++m_nCol == m_nCols) {
-					m_nRow++;
-					m_nCol = 0;
-				}
-				if (m_nRow == m_nRows)
+			if (++m_nCol == m_nCols) {
+				m_nRow++;
+				m_nCol = 0;
+			}
+			if (m_nRow == m_nRows)
 					m_nRow = 0;
-			//}
 		}
 	}
 }

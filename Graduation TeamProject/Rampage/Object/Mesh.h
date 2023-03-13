@@ -331,19 +331,13 @@ public:
 	XMFLOAT3						m_xmf3Position = XMFLOAT3(0.0f, 0.0f, 0.0f);
 	XMFLOAT3						m_xmf3Velocity = XMFLOAT3(0.0f, 0.0f, 0.0f);
 	float							m_fLifetime = 0.0f;
-	UINT							m_nType = 0;
-	float							m_fSize = 0.1f;
+	float							m_fSpanTime = 0.f;
+	bool							m_bDraw = true;
 
 public:
 	CParticleVertex() { }
 	~CParticleVertex() { }
 };
-
-#define PARTICLE_TYPE_EMITTER		0
-#define PARTICLE_TYPE_SHELL			1
-#define PARTICLE_TYPE_FLARE01		2
-#define PARTICLE_TYPE_FLARE02		3
-#define PARTICLE_TYPE_FLARE03		4
 
 #define MAX_PARTICLES				5000
 

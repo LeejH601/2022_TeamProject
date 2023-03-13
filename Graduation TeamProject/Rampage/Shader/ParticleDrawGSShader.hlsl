@@ -3,15 +3,16 @@ struct VS_PARTICLE_DRAW_OUTPUT
 	float3 position : POSITION;
 	float4 color : COLOR;
 	float size : SCALE;
-	uint type : PARTICLETYPE;
+	float spantime : SPANTIME;
 };
+
 
 struct GS_PARTICLE_DRAW_OUTPUT
 {
 	float4 position : SV_Position;
 	float4 color : COLOR;
 	float2 uv : TEXTURE;
-	uint type : PARTICLETYPE;
+	float spantime : SPANTIME;
 };
 
 cbuffer cbCameraInfo : register(b1)
@@ -39,18 +40,19 @@ void GSParticleDraw(point VS_PARTICLE_DRAW_OUTPUT input[1], inout TriangleStream
 {
 	GS_PARTICLE_DRAW_OUTPUT output = (GS_PARTICLE_DRAW_OUTPUT)0;
 
-	output.type = input[0].type;
+	//output.type = input[0].type;
 	output.color = input[0].color;
+
 	for (int i = 0; i < 4; i++)
 	{
-		
 		float3 positionW = mul(gf3Positions[i] * input[0].size, (float3x3)(gmtxInverseView)) + input[0].position;
 		output.position = mul(mul(float4(positionW, 1.0f), gmtxView), gmtxProjection);
 		output.uv = mul(float3(gf2QuadUVs[i], 1.0f), (float3x3)(gmtxGameObject)).xy;
 		//output.uv = gf2QuadUVs[i];
-
+		output.spantime = input[0].spantime;
 		outputStream.Append(output);
 	}
+
 	outputStream.RestartStrip();
 }
 

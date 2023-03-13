@@ -2,17 +2,23 @@
 #include "../Object/Object.h"
 #include "../Shader/BillBoardObjectShader.h"
 
-#define PARTICLE_TYPE_EMITTER		0
-#define PARTICLE_TYPE_SHELL			1
-#define PARTICLE_TYPE_FLARE01		2
-#define PARTICLE_TYPE_FLARE02		3
-#define PARTICLE_TYPE_FLARE03		4
+//#define PARTICLE_TYPE_EMITTER		0
+//#define PARTICLE_TYPE_SHELL			1
+//#define PARTICLE_TYPE_FLARE01		2
+//#define PARTICLE_TYPE_FLARE02		3
+//#define PARTICLE_TYPE_FLARE03		4
+//
+//#define SHELL_PARTICLE_LIFETIME		3.0f
+//#define FLARE01_PARTICLE_LIFETIME	2.5f
+//#define FLARE02_PARTICLE_LIFETIME	1.5f
+//#define FLARE03_PARTICLE_LIFETIME	2.0f
 
-#define SHELL_PARTICLE_LIFETIME		3.0f
-#define FLARE01_PARTICLE_LIFETIME	2.5f
-#define FLARE02_PARTICLE_LIFETIME	1.5f
-#define FLARE03_PARTICLE_LIFETIME	2.0f
-
+enum class ParticleType
+{
+	PARTICLE_TYPE_SPHERE,
+	PARTICLE_TYPE_CONE,
+	PARTICLE_TYPE_END
+};
 
 struct CB_FRAMEWORK_INFO
 {
@@ -23,8 +29,8 @@ struct CB_FRAMEWORK_INFO
 	XMFLOAT3				m_xmf3Gravity = XMFLOAT3(0.0f, -9.8f, 0.0f);
 	int						m_nMaxFlareType2Particles = 15;
 	XMFLOAT3				m_xmf3Color = XMFLOAT3(0.0f, 0.f, 1.0f);
-	int						m_nParticleType = PARTICLE_TYPE_EMITTER;
-	float					m_fLifeTime = SHELL_PARTICLE_LIFETIME;
+	ParticleType			m_nParticleType = ParticleType::PARTICLE_TYPE_END;
+	float					m_fLifeTime = 0.f;
 	float					m_fSize = 0.5f;
 	bool					m_bStart = true;
 };

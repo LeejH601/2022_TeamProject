@@ -29,7 +29,7 @@ struct GS_PARTICLE_DRAW_OUTPUT
 	float4 position : SV_Position;
 	float4 color : COLOR;
 	float2 uv : TEXTURE;
-	uint type : PARTICLETYPE;
+	float spantime : SPANTIME;
 };
 
 float4 PSParticleDraw(GS_PARTICLE_DRAW_OUTPUT input) : SV_TARGET
@@ -37,6 +37,7 @@ float4 PSParticleDraw(GS_PARTICLE_DRAW_OUTPUT input) : SV_TARGET
 	float4 cColor = gtxtParticleTexture.Sample(gSamplerState, input.uv);
 	cColor.a *= gnTexturesMask * 0.01f; // 0~100으로 받아 0.00 ~1.00으로 변경
 	cColor *= float4(gfColor, 1.f);
-
+	if (input.spantime < 0.f)
+		cColor.a = 0.f;
 	return(cColor);
 }

@@ -26,7 +26,6 @@ cbuffer cbFrameworkInfo : register(b7)
 	float		gfLifeTime : packoffset(c3.x);
 	float		gfSize : packoffset(c3.y);
 	bool		bStart : packoffset(c3.z);
-
 };
 
 struct VS_PARTICLE_INPUT
@@ -34,7 +33,8 @@ struct VS_PARTICLE_INPUT
 	float3 position : POSITION;
 	float3 velocity : VELOCITY;
 	float lifetime : LIFETIME;
-	uint type : PARTICLETYPE;
+	float spantime : SPANTIME;
+	//uint type : PARTICLETYPE;
 };
 
 /////////////////////////////////////////////////////////////////////////////////////////////////
@@ -145,7 +145,7 @@ void GenerateEmberParticles(VS_PARTICLE_INPUT input, inout PointStream<VS_PARTIC
 		// gfLifeTime
 		VS_PARTICLE_INPUT particle = input;
 
-		particle.type = PARTICLE_TYPE_FLARE03;
+		//particle.type = PARTICLE_TYPE_FLARE03;
 		//particle.position = input.position + (input.velocity * gfElapsedTime);
 		particle.lifetime = gfLifeTime;
 		for (int i = 0; i < 64; i++)
@@ -171,7 +171,7 @@ void SphereParticles(VS_PARTICLE_INPUT input, inout PointStream<VS_PARTICLE_INPU
 		VS_PARTICLE_INPUT particle = input;
 		float4 f4Random = float4(0.0f, 0.0f, 0.0f, 0.0f);
 
-		particle.type = PARTICLE_TYPE_FLARE01;
+		//particle.type = PARTICLE_TYPE_FLARE01;
 		particle.position = input.position + (input.velocity * gfElapsedTime * 2.0f);
 
 
@@ -189,37 +189,37 @@ void SphereParticles(VS_PARTICLE_INPUT input, inout PointStream<VS_PARTICLE_INPU
 	}
 }
 
-void ConeParticles(VS_PARTICLE_INPUT input, inout PointStream<VS_PARTICLE_INPUT> output)
+void LineParticles(VS_PARTICLE_INPUT input, inout PointStream<VS_PARTICLE_INPUT> output)
 {
 
-	if ((gfLifeTime <= 0.0f)) // 생성시점
-	{
 		VS_PARTICLE_INPUT particle = input;
 		float4 f4Random = float4(0.0f, 0.0f, 0.0f, 0.0f);
 
-		particle.type = PARTICLE_TYPE_FLARE01;
-		particle.position = input.position + (input.velocity * gfElapsedTime * 2.0f);
+		particle.spantime += 0.08f;
+		if(particle.spantime > 0.f)
+			particle.position.y = (50 * particle.spantime) % 80.f;
 
+		output.Append(particle);
+}
 
-		for (int i = 0; i < gnFlareParticlesToEmit; i++)
-		{
-			f4Random = RandomDirectionOnSphere(i);
-			particle.velocity = input.velocity + (f4Random.xyz * gfSpeed);
+void ConeParticles(VS_PARTICLE_INPUT input, inout PointStream<VS_PARTICLE_INPUT> output)
+{
 
-			output.Append(particle);
-		}
-	}
-	else
-	{
-		OutputParticleToStream(input, output);
-	}
+	VS_PARTICLE_INPUT particle = input;
+	float4 f4Random = float4(0.0f, 0.0f, 0.0f, 0.0f);
+
+	particle.spantime += 0.08f;
+	if (particle.spantime > 0.f)
+		particle.position.y = (50 * particle.spantime) % 80.f;
+
+	output.Append(particle);
 }
 
 [maxvertexcount(128)]
 void GSParticleStreamOutput(point VS_PARTICLE_INPUT input[1], inout PointStream<VS_PARTICLE_INPUT> output)
 {
 	VS_PARTICLE_INPUT particle = input[0];
-	ConeParticles(particle, output);
+	LineParticles(particle, output);
 	//if (particle.type == PARTICLE_TYPE_EMITTER) 
 	//	EmmitParticles(particle, output);
 	//else if (particle.type == PARTICLE_TYPE_SHELL) 

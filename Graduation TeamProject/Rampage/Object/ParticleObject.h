@@ -41,17 +41,17 @@ public:
 	void SetSpeed(float fSpeed);
 
 private:
-	bool		m_bEnable = false;
-	float		m_fSize = 0.8f;
-	float		m_fAlpha = 1.f;
-	float		m_fLifeTime = 3.f;
-	float		m_fTime = 0.f;
-	float		m_fAnimateTime = 0.f;
-	float		m_fAnimationSpeed = 6.0f;
-	XMFLOAT3	m_f3Color = XMFLOAT3(1.f, 1.f, 1.f);
-	int			m_iEmitParticleN = 100;
-	int			m_iMaxParticleN = MAX_PARTICLES;
-	float		m_fSpeed = 10.f;
+	bool							m_bEnable = false;
+	float							m_fSize = 0.8f;
+	float							m_fAlpha = 1.f;
+	float							m_fLifeTime = 3.f;
+	float							m_fTime = 0.f;
+	float							m_fAnimateTime = 0.f;
+	float							m_fAnimationSpeed = 6.0f;
+	XMFLOAT3						m_f3Color = XMFLOAT3(1.f, 1.f, 1.f);
+	int								m_iEmitParticleN = 100;
+	int								m_iMaxParticleN = MAX_PARTICLES;
+	float							m_fSpeed = 10.f;
 
 protected:
 	int 							m_nRow = 0;
