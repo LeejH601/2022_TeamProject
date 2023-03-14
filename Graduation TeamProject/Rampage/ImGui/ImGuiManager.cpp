@@ -668,7 +668,8 @@ void CImGuiManager::OnPrepareRender(ID3D12GraphicsCommandList* pd3dCommandList, 
 		pCamera->OnPrepareRender(pd3dCommandList);*/
 	CSimulatorScene::GetInst()->OnPreRender(pd3dCommandList, fTimeElapsed);
 
-	PrepareRenderTarget(pd3dCommandList, d3dDsvDescriptorCPUHandle);
+	//PrepareRenderTarget(pd3dCommandList, d3dDsvDescriptorCPUHandle);
+	CSimulatorScene::GetInst()->OnPrepareRenderTarget(pd3dCommandList, 1, &m_pd3dRtvCPUDescriptorHandles, *d3dDsvDescriptorCPUHandle);
 	/*if (pCamera)
 		pCamera->OnPrepareRender(pd3dCommandList);*/
 	m_pCamera->Animate(fTimeElapsed);

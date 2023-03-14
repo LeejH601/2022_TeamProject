@@ -176,7 +176,7 @@ void CGameFramework::CreateRtvAndDsvDescriptorHeaps()
 {
 	D3D12_DESCRIPTOR_HEAP_DESC d3dDescriptorHeapDesc;
 	::ZeroMemory(&d3dDescriptorHeapDesc, sizeof(D3D12_DESCRIPTOR_HEAP_DESC));
-	d3dDescriptorHeapDesc.NumDescriptors = m_nSwapChainBuffers + 6 + 1;
+	d3dDescriptorHeapDesc.NumDescriptors = m_nSwapChainBuffers + 6 + 1 + 6;
 	d3dDescriptorHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
 	d3dDescriptorHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
 	d3dDescriptorHeapDesc.NodeMask = 0;
@@ -256,7 +256,36 @@ void CGameFramework::BuildObjects()
 
 		DXGI_FORMAT pdxgiResourceFormats[6] = { DXGI_FORMAT_R8G8B8A8_UNORM, DXGI_FORMAT_R16G16B16A16_UNORM, DXGI_FORMAT_R32G32B32A32_FLOAT, DXGI_FORMAT_R8G8B8A8_UNORM, DXGI_FORMAT_R32_FLOAT, DXGI_FORMAT_R32_FLOAT };
 		m_pSceneManager->GetMainScene()->m_pPostProcessShader->CreateResourcesAndViews(m_pd3dDevice.Get(), m_pd3dCommandList.Get(), 6, pdxgiResourceFormats, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, d3dRtvCPUDescriptorHandle, 6 + 1); //SRV to (Render Targets) + (Depth Buffer)
-		CSimulatorScene::GetInst()->m_pPostProcessShader->SetTexture(m_pSceneManager->GetMainScene()->m_pPostProcessShader->GetTextureShared());
+		d3dRtvCPUDescriptorHandle.ptr += (::gnRtvDescriptorIncrementSize * 6);
+		CSimulatorScene::GetInst()->m_pPostProcessShader->CreateResourcesAndViews(m_pd3dDevice.Get(), m_pd3dCommandList.Get(), 6, pdxgiResourceFormats, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, d3dRtvCPUDescriptorHandle, 6 + 1); //SRV to (Render Targets) + (Depth Buffer)
+		/*CSimulatorScene::GetInst()->m_pPostProcessShader->SetTexture(m_pSceneManager->GetMainScene()->m_pPostProcessShader->GetTextureShared());
+		CSimulatorScene::GetInst()->m_pPostProcessShader->SetRtvCPUDescriptorHandle(m_pSceneManager->GetMainScene()->m_pPostProcessShader->GetRtvCPUDescriptorHandle(), 6);*/
+
+		/*D3D12_CPU_DESCRIPTOR_HANDLE* pd3dRtvCPUDescriptorHandles = CSimulatorScene::GetInst()->m_pPostProcessShader->GetRtvCPUDescriptorHandle();
+		pd3dRtvCPUDescriptorHandles = m_pSceneManager->GetMainScene()->m_pPostProcessShader->GetRtvCPUDescriptorHandle();*/
+
+		/*D3D12_RENDER_TARGET_VIEW_DESC d3dRenderTargetViewDesc;
+		d3dRenderTargetViewDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
+		d3dRenderTargetViewDesc.Texture2D.MipSlice = 0;
+		d3dRenderTargetViewDesc.Texture2D.PlaneSlice = 0;
+
+		D3D12_CPU_DESCRIPTOR_HANDLE* pd3dRtvCPUDescriptorHandles = CSimulatorScene::GetInst()->m_pPostProcessShader->GetRtvCPUDescriptorHandle();
+		pd3dRtvCPUDescriptorHandles = m_pSceneManager->GetMainScene()->m_pPostProcessShader->GetRtvCPUDescriptorHandle();*/
+		
+		/*int nResources = CSimulatorScene::GetInst()->m_pPostProcessShader->GetTexture()->GetTextures();
+		pd3dRtvCPUDescriptorHandles = new D3D12_CPU_DESCRIPTOR_HANDLE[nResources];
+
+		for (UINT i = 0; i < nResources; i++)
+		{
+			d3dRenderTargetViewDesc.Format = pdxgiResourceFormats[i];
+			ID3D12Resource* pd3dTextureResource = CSimulatorScene::GetInst()->m_pPostProcessShader->GetTexture()->GetResource(i);
+			m_pd3dDevice->CreateRenderTargetView(pd3dTextureResource, &d3dRenderTargetViewDesc, d3dRtvCPUDescriptorHandle);
+			pd3dRtvCPUDescriptorHandles[i] = d3dRtvCPUDescriptorHandle;
+			d3dRtvCPUDescriptorHandle.ptr += ::gnRtvDescriptorIncrementSize;
+		}*/
+
+		CImGuiManager::GetInst()->GetRtvDescHandle();
+		
 
 		//DXGI_FORMAT pdxgiDepthSrvFormats[1] = { DXGI_FORMAT_R32_FLOAT };
 		//m_pPostProcessShader->CreateShaderResourceViews(m_pd3dDevice.Get(), 1, &m_pd3dDepthStencilBuffer, pdxgiDepthSrvFormats);
@@ -523,7 +552,8 @@ void CGameFramework::FrameAdvance()
 	//명령 할당자를 리셋한다.
 	HRESULT hResult = m_pd3dCommandAllocator->Reset();
 
-	//OnPrepareImGui();
+	if (typeid(*m_pSceneManager->GetCurrentScene()) != typeid(CMainTMPScene))
+		OnPrepareImGui();
 
 	//명령 리스트를 리셋한다.
 	hResult = m_pd3dCommandList->Reset(m_pd3dCommandAllocator.Get(), NULL);
@@ -532,10 +562,12 @@ void CGameFramework::FrameAdvance()
 
 	m_pSceneManager->PreRender(m_pd3dCommandList.Get(), m_GameTimer.GetFrameTimeElapsed());
 
-	m_pSceneManager->OnPrepareRenderTarget(m_pd3dCommandList.Get(), 1, &m_pd3dSwapRTVCPUHandles[m_nSwapChainBufferIndex], m_d3dDsvDescriptorCPUHandle);
+	if(typeid(*m_pSceneManager->GetCurrentScene()) == typeid(CMainTMPScene))
+		m_pSceneManager->OnPrepareRenderTarget(m_pd3dCommandList.Get(), 1, &m_pd3dSwapRTVCPUHandles[m_nSwapChainBufferIndex], m_d3dDsvDescriptorCPUHandle);
+	else
+		OnPrepareRenderTarget();
 
 	m_pd3dCommandList->ClearDepthStencilView(m_d3dDsvDescriptorCPUHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
-	//OnPrepareRenderTarget();
 	UpdateShaderVariables(m_pd3dCommandList.Get());
 
 	m_pSceneManager->Render(m_pd3dCommandList.Get(), m_GameTimer.GetFrameTimeElapsed(), m_GameTimer.GetTotalTime(), m_pCurrentCamera);

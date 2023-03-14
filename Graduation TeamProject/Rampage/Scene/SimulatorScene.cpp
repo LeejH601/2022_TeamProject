@@ -237,8 +237,8 @@ void CSimulatorScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 	// 4->HIT
 	// 5->IDLE
 	std::shared_ptr<CMonster> m_pDummyEnemy = std::make_unique<CGoblinObject>(pd3dDevice, pd3dCommandList, 1);
-	m_pDummyEnemy->SetPosition(XMFLOAT3(8.0f, 250.0f, 0.0f));
-	m_pDummyEnemy->SetScale(14.0f, 14.0f, 14.0f);
+	m_pDummyEnemy->SetPosition(XMFLOAT3(100, 100, 100));
+	m_pDummyEnemy->SetScale(4.0f, 4.0f, 4.0f);
 	m_pDummyEnemy->Rotate(0.0f, -90.0f, 0.0f);
 	m_pDummyEnemy->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 5);
 	m_pEnemys.push_back(m_pDummyEnemy);
@@ -256,10 +256,10 @@ void CSimulatorScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 	m_pTerrainShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
 	// Terrain »ý¼º
-	XMFLOAT3 xmf3Scale(18.0f, 6.0f, 18.0f);
+	XMFLOAT3 xmf3Scale(1.0f, 1.0f, 1.0f);
 	XMFLOAT4 xmf4Color(0.0f, 0.5f, 0.0f, 0.0f);
-	m_pTerrain = std::make_unique<CSplatTerrain>(pd3dDevice, pd3dCommandList, GetGraphicsRootSignature(), _T("Terrain/terrainHeightMap257.raw"), 257, 257, 257, 257, xmf3Scale, xmf4Color, m_pTerrainShader.get());
-	m_pTerrain->SetPosition(XMFLOAT3(-800.f, -310.f, -800.f));
+	m_pTerrain = std::make_unique<CSplatTerrain>(pd3dDevice, pd3dCommandList, GetGraphicsRootSignature(), _T("Terrain/terrainHeightMap_5.raw"), 513, 513, 513, 513, xmf3Scale, xmf4Color, m_pTerrainShader.get());
+	m_pTerrain->SetPosition(XMFLOAT3(0, 0, 0));
 
 	((CDepthRenderShader*)m_pDepthRenderShader.get())->RegisterObject(m_pMainCharacter.get());
 	m_pMainCharacter->SetUpdatedContext(m_pTerrain.get());

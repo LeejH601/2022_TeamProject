@@ -38,5 +38,10 @@ public:
 	void SetTexture(std::shared_ptr<CTexture> pTexture) { m_pTexture = pTexture; };
 
 	D3D12_CPU_DESCRIPTOR_HANDLE GetRtvCPUDescriptorHandle(UINT nIndex) { return(m_pd3dRtvCPUDescriptorHandles[nIndex]); }
+	D3D12_CPU_DESCRIPTOR_HANDLE* GetRtvCPUDescriptorHandle() { return(m_pd3dRtvCPUDescriptorHandles); }
+	void SetRtvCPUDescriptorHandle(D3D12_CPU_DESCRIPTOR_HANDLE* src, int nResource) {
+		m_pd3dRtvCPUDescriptorHandles = new D3D12_CPU_DESCRIPTOR_HANDLE[nResource];
+		memcpy(m_pd3dRtvCPUDescriptorHandles, src, sizeof(D3D12_CPU_DESCRIPTOR_HANDLE) * nResource);
+	}
 };
 

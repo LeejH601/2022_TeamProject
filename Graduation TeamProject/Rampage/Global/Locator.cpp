@@ -152,8 +152,8 @@ void CLocator::CreateSimulatorCamera(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 {
 	m_pSimulaterCamera = std::make_unique<CSimulatorCamera>();
 	m_pSimulaterCamera->Init(pd3dDevice, pd3dCommandList);
-	m_pSimulaterCamera->SetPosition(XMFLOAT3(-18.5f, 37.5f, -18.5f));
-	m_pSimulaterCamera->SetLookAt(XMFLOAT3(0.0f, 0.0f, 0.0f));
+	m_pSimulaterCamera->SetPosition(XMFLOAT3(50, 100, 50));
+	m_pSimulaterCamera->SetLookAt(XMFLOAT3(100, 0, 100));
 	m_pSimulaterCamera->RegenerateViewMatrix();
 }
 
