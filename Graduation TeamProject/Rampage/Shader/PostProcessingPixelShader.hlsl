@@ -36,9 +36,10 @@ float4 LightShaft(float2 uv, float2 ScreenLightPos, float Weight, float Exposure
 
 	float4 Basecolor = gtxMultiRenderTargetTextures[0].Sample(gSamplerState, uv);
 	float3 color = Basecolor.xyz;
+	//float illuminationDecay = 0.5f;
 	float illuminationDecay = 1.0f;
 
-	float2 TexCoord = uv + (DeltaUV * NUM_SAMPLES);
+	float2 TexCoord = uv - (DeltaUV * NUM_SAMPLES);
 	float4 OcculusionColor = gtxMultiRenderTargetTextures[3].Sample(gSamplerState, uv);
 
 	if (OcculusionColor.r < 0.0001f) {
@@ -91,7 +92,7 @@ float4 PS_PostProcessing(VS_SCREEN_RECT_TEXTURED_OUTPUT input) : SV_Target
 
 	// LightShaft Values
 	float weight = 0.2f;
-	float exposure = 0.6f;
+	float exposure = 0.9f;
 	float Density = 0.5f;
 	float Decay = 0.9f;
 	float radiusPow = pow(radius, 2);
