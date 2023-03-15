@@ -150,10 +150,11 @@ void CLocator::OnChangeScene(SCENE_TYPE scene_type)
 
 void CLocator::CreateSimulatorCamera(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
+	XMFLOAT3 offset{ 86.4804 , 0.0f, -183.7856 };
 	m_pSimulaterCamera = std::make_unique<CSimulatorCamera>();
 	m_pSimulaterCamera->Init(pd3dDevice, pd3dCommandList);
-	m_pSimulaterCamera->SetPosition(XMFLOAT3(50, 100, 50));
-	m_pSimulaterCamera->SetLookAt(XMFLOAT3(100, 0, 100));
+	m_pSimulaterCamera->SetPosition(XMFLOAT3(43 + offset.x, 62, 46 + offset.z));
+	m_pSimulaterCamera->SetLookAt(XMFLOAT3(100 + offset.x, 0, 100 + offset.z));
 	m_pSimulaterCamera->RegenerateViewMatrix();
 }
 
