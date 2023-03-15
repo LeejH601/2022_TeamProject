@@ -285,6 +285,9 @@ bool CMainTMPScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPAR
 		case 'E':
 			if (wParam == 'e' || wParam == 'E') dwDirection |= DIR_UP;
 			break;
+		case ';':
+			m_bTestKey = true;
+			break;
 		default:
 			break;
 		}
@@ -331,7 +334,7 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pd3dcbDisolveParams = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, ncbElementBytes, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
 
 	m_pd3dcbDisolveParams->Map(0, NULL, (void**)&m_pcbMappedDisolveParams);
-	
+
 	DXGI_FORMAT pdxgiObjectRtvFormats[7] = { DXGI_FORMAT_R8G8B8A8_UNORM, DXGI_FORMAT_R8G8B8A8_UNORM, DXGI_FORMAT_R16G16B16A16_UNORM, DXGI_FORMAT_R32G32B32A32_FLOAT,
 		DXGI_FORMAT_R8G8B8A8_UNORM, DXGI_FORMAT_R32_FLOAT, DXGI_FORMAT_R32_FLOAT };
 
@@ -350,16 +353,16 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	CModelShader::GetInst()->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 200);
 
 	std::unique_ptr<CGoblinObject> m_pGoblinObject = std::make_unique<CGoblinObject>(pd3dDevice, pd3dCommandList, 1);
-	m_pGoblinObject->SetPosition(XMFLOAT3(-15.0f, 200.0f, 15.0f));
-	m_pGoblinObject->SetScale(15.0f, 15.0f, 15.0f);
+	m_pGoblinObject->SetPosition(XMFLOAT3(200, 300, -120));
+	m_pGoblinObject->SetScale(4.0f, 4.0f, 4.0f);
 	m_pGoblinObject->Rotate(0.0f, 180.0f, 0.0f);
 	m_pGoblinObject->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 5);
 	m_pGoblinObject->m_pSkinnedAnimationController->m_xmf3RootObjectScale = XMFLOAT3(10.0f, 10.0f, 10.0f);
 	m_pObjects.push_back(std::move(m_pGoblinObject));
 
 	m_pGoblinObject = std::make_unique<CGoblinObject>(pd3dDevice, pd3dCommandList, 1);
-	m_pGoblinObject->SetPosition(XMFLOAT3(15.0f, 200.0f, -15.0f));
-	m_pGoblinObject->SetScale(15.0f, 15.0f, 15.0f);
+	m_pGoblinObject->SetPosition(XMFLOAT3(200, 300, -60));
+	m_pGoblinObject->SetScale(4.0f, 4.0f, 4.0f);
 	m_pGoblinObject->Rotate(0.0f, 180.0f, 0.0f);
 	m_pGoblinObject->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 5);
 	m_pObjects.push_back(std::move(m_pGoblinObject));
@@ -565,9 +568,9 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	for (int i = 0; i < m_pObjects.size(); ++i) {
 		((CDepthRenderShader*)m_pDepthRenderShader.get())->RegisterObject(m_pObjects[i].get());
 
-		if(dynamic_cast<CPhysicsObject*>(m_pObjects[i].get()))
+		if (dynamic_cast<CPhysicsObject*>(m_pObjects[i].get()))
 			((CPhysicsObject*)m_pObjects[i].get())->SetUpdatedContext(m_pTerrain.get());
-		
+
 		m_IObjectIndexs[i] = i;
 	}
 	((CDepthRenderShader*)m_pDepthRenderShader.get())->SetLight(m_pLight->GetLights());
@@ -615,6 +618,10 @@ void CMainTMPScene::UpdateObjects(float fTimeElapsed)
 	m_pLight->Update((CPlayer*)m_pPlayer);
 
 	for (int i = 0; i < m_pObjects.size(); ++i) {
+		/*if (i > 1 && i < 6) {
+			if (!m_bTestKey)
+				continue;
+		}*/
 		m_pObjects[i]->Update(fTimeElapsed);
 		m_pcbMappedDisolveParams->dissolveThreshold[i] = m_pObjects[i]->m_fDissolveThrethHold;
 	}
@@ -623,7 +630,7 @@ void CMainTMPScene::UpdateObjects(float fTimeElapsed)
 void CMainTMPScene::CheckCollide()
 {
 	for (int i = 0; i < m_pObjects.size(); ++i) {
-		if(((CPlayer*)m_pPlayer)->m_pStateMachine->GetCurrentState() != Locator.GetPlayerState(typeid(Run_Player)) &&
+		if (((CPlayer*)m_pPlayer)->m_pStateMachine->GetCurrentState() != Locator.GetPlayerState(typeid(Run_Player)) &&
 			((CPlayer*)m_pPlayer)->m_pStateMachine->GetCurrentState() != Locator.GetPlayerState(typeid(Idle_Player)))
 			m_pPlayer->CheckCollision(m_pObjects[i].get());
 	}
@@ -646,6 +653,7 @@ void CMainTMPScene::AnimateObjects(float fTimeElapsed)
 		UpdateObjectArticulation();
 		b_simulation = false;
 	}
+
 #endif // WITH_LAG_DOLL_SIMULATION
 	UpdateObjects(fTimeElapsed);
 }
@@ -678,7 +686,7 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 
 	D3D12_GPU_VIRTUAL_ADDRESS d3dGpuVirtualAddress = m_pd3dcbDisolveParams->GetGPUVirtualAddress();
 	pd3dCommandList->SetGraphicsRootConstantBufferView(7, d3dGpuVirtualAddress);
-	
+
 	UINT index = 0;
 	for (int i = 0; i < m_pObjects.size(); ++i)
 	{

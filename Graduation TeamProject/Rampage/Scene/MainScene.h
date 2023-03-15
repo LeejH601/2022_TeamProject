@@ -34,6 +34,7 @@ private:
 	std::unique_ptr<CSkyBoxShader> m_pSkyBoxShader;
 	std::unique_ptr<CSkyBox> m_pSkyBoxObject;
 
+	bool m_bTestKey = false;
 
 private:
 	DissolveParams* m_pcbMappedDisolveParams = nullptr;

@@ -189,5 +189,12 @@ PS_MULTIPLE_RENDER_TARGETS_OUTPUT PSParallaxTerrain(VS_TERRAIN_OUTPUT input) : S
 	output.f4Normal = float4(Normal * 0.5f + 0.5f, 0.0f);
 	output.f4PositoinW = input.positionW;
 
+	float fShadowFactor = gtxtDepthTextures[0].SampleCmpLevelZero(gssComparisonPCFShadow, input.uvs[0].xy / input.uvs[0].ww, input.uvs[0].z / input.uvs[0].w).r;
+	output.f4Illumination = float4(0.0f, 0.0f, 0.0f, 1.0f);
+	/*if (fShadowFactor > 0.0f)
+		output.f4Illumination = float4(1.0f, 1.0f, 1.0f, 0.0f);
+	else
+		output.f4Illumination = float4(0.0f, 0.0f, 0.0f, 1.0f);*/
+
 	return (output);
 }

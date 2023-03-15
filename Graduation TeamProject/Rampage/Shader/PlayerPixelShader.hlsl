@@ -55,6 +55,7 @@ struct VS_OUTPUT
 	float3 bitangentW : BITANGENT;
 	float2 uv : TEXCOORD0;
 	float4 uvs[MAX_LIGHTS] : TEXCOORD1;
+	uint instanceID : SV_InstanceID;
 };
 
 struct CB_TOOBJECTSPACE
@@ -143,6 +144,14 @@ PS_MULTIPLE_RENDER_TARGETS_OUTPUT PS_Player(VS_OUTPUT input)
 		output.f4PositoinW = float4(input.positionW, 1.0f);
 		float Depth = cColor.w < 0.001f ? 0.0f : input.position.z;
 		output.f4Normal = float4(input.normalW.xyz * 0.5f + 0.5f, Depth);
+		//output.f4Illumination = float4(1.0f, 1.0f, 1.0f, 1.0f);
+
+		float fShadowFactor = gtxtDepthTextures[0].SampleCmpLevelZero(gssComparisonPCFShadow, input.uvs[0].xy / input.uvs[0].ww, input.uvs[0].z / input.uvs[0].w).r;
+		output.f4Illumination = float4(0.0f, 0.0f, 0.0f, 1.0f);
+		/*if(fShadowFactor > 0.0f )
+			output.f4Illumination = float4(1.0f, 1.0f, 1.0f, input.instanceID);
+		else
+			output.f4Illumination = float4(0.0f, 0.0f, 0.0f, 1.0f);*/
 	}
 	else
 		discard;

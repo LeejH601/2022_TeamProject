@@ -39,6 +39,7 @@ struct VS_INPUT
 	float3 normal : NORMAL;
 	float3 tangent : TANGENT;
 	float3 bitangent : BITANGENT;
+	uint instanceID : SV_InstanceID;
 };
 
 #include "Light.hlsl"
@@ -63,6 +64,7 @@ struct VS_OUTPUT
 	float3 bitangentW : BITANGENT;
 	float2 uv : TEXCOORD0;
 	float4 uvs[MAX_LIGHTS] : TEXCOORD1;
+	uint instanceID : SV_InstanceID;
 };
 
 float WeightSum(float4 fWeight)
@@ -114,6 +116,8 @@ VS_OUTPUT VS_Player(VS_INPUT input)
 			if (gcbToLightSpaces[i].f4Position.w != 0.0f) output.uvs[i] = mul(positionW, gcbToLightSpaces[i].mtxToTexture);
 		}
 	}
+
+	output.instanceID = input.instanceID;
 
 	return(output);
 }
