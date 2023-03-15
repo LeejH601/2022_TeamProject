@@ -25,6 +25,7 @@ private:
 	std::shared_ptr<CParticleShader> m_pParticleObjectShader;
 	std::shared_ptr<CParticleObject> m_pParticleObject;
 
+	std::unique_ptr<CCamera> m_pSimulaterCamera = NULL;
 public:
 	DECLARE_SINGLE(CSimulatorScene);
 	CSimulatorScene() {}
@@ -41,10 +42,7 @@ public:
 	virtual void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	virtual void ReleaseObjects() {}
 
-	virtual bool ProcessInput(UCHAR* pKeysBuffer) { return false; }
-	virtual void AnimateObjects(float fTimeElapsed);
-	virtual void UpdateObjects(float fTimeElapsed);
-	virtual void CheckCollide();
+	virtual void Update(float fTimeElapsed);
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed, float fCurrentTime, CCamera* pCamera = NULL);
 	virtual void OnPostRenderTarget();
 

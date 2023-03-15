@@ -59,7 +59,6 @@ CHeightMapTerrain::CHeightMapTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 
 CHeightMapTerrain::~CHeightMapTerrain(void)
 {
-	if (m_pHeightMapImage) delete m_pHeightMapImage;
 }
 
 CSplatTerrain::CSplatTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, LPCTSTR pFileName, int nWidth, int nLength, int nBlockWidth, int nBlockLength, XMFLOAT3 xmf3Scale, XMFLOAT4 xmf4Color, CShader* pTerrainShader)
@@ -140,9 +139,7 @@ CSplatTerrain::CSplatTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 
 CSplatTerrain::~CSplatTerrain()
 {
-	/*if (Locator.GetPxScene() && Rigid) {
-		Locator.GetPxScene()->removeActor(*Rigid);
-	}*/
+	if (m_pHeightMapImage) delete m_pHeightMapImage;
 }
 
 void CSplatTerrain::SetRigidStatic()

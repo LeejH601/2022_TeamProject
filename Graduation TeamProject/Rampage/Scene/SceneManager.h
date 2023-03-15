@@ -24,8 +24,9 @@ public:
 	void PreRender(ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed);
 	void Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed, float fCurrentTime, CCamera* pCamera = NULL);
 	void OnPostRenderTarget();
-	void Animate(float fTimeElapsed);
+	void Update(float fTimeElapsed);
 
+	bool ProcessInput(DWORD dwDirection, float cxDelta, float cyDelta, float fTimeElapsed);
 	bool OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
 	bool OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam, DWORD& dwDirection);
 };

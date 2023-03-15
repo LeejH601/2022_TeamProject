@@ -8,8 +8,6 @@
 
 CLocator::~CLocator()
 {
-	m_pEntityManager->Clear();
-	m_pEntityManager.reset();
 }
 
 bool CLocator::Init()
@@ -28,25 +26,8 @@ bool CLocator::Init()
 	SceneDesc.cpuDispatcher = physx::PxDefaultCpuDispatcherCreate(8); // 이 세가지 파라미터가 반드시 필요함.
 	SceneDesc.filterShader = physx::PxDefaultSimulationFilterShader; // 각각 어떤 역할을 하는 지는 추가적으로 조사해볼 필요가 있음.
 	SceneDesc.gravity = physx::PxVec3(0.0f, -9.81f * 1.0f, 0.0f);
-	//SceneDesc.gravity = physx::PxVec3(0.0f, 0.0f, 0.0f);
 
 	m_pPxScene = m_pPhysics->createScene(SceneDesc);
-
-	//physx::PxTransform transform(physx::PxVec3(0.0f, 10.0f, 0.0f));
-
-	//physx::PxMaterial* material = m_pPhysics->createMaterial(0.5, 0.5, 0.5);
-	//physx::PxShape* shape = m_pPhysics->createShape(physx::PxBoxGeometry(1.0f, 1.0f, 1.0f), *material);
-
-	//physx::PxRigidDynamic* actor = physx::PxCreateDynamic(*m_pPhysics, transform, physx::PxBoxGeometry(1.0f, 1.0f, 1.0f), *material, 1.0f);
-
-
-	//physx::PxRigidStatic* plane = physx::PxCreateStatic(*m_pPhysics, physx::PxTransform(physx::PxVec3(0.0f), physx::PxQuat(physx::PxHalfPi, physx::PxVec3(0.0f, 0.0f, 1.0f))), physx::PxPlaneGeometry(), *material);
-
-	////physx::PxActor* actor = m_pPhysics->createRigidDynamic(transform);
-
-	////actor->attachShape(*actor);
-	//m_pPxScene->addActor(*plane);
-	//m_pPxScene->addActor(*actor);
 
 	pvdClient = m_pPxScene->getScenePvdClient();
 	if (pvdClient) {
@@ -55,10 +36,6 @@ bool CLocator::Init()
 		pvdClient->setScenePvdFlag(physx::PxPvdSceneFlag::eTRANSMIT_SCENEQUERIES, true);
 	}
 
-
-	m_pMessageDispatcher = std::make_unique<CMessageDispatcher>();
-	m_pEntityManager = std::make_unique<CEntityManager>();
-
 	std::shared_ptr<CComponentSet> componentset = std::make_shared<CComponentSet>();
 	SetComponentSet(componentset);
 	componentset = std::make_shared<CComponentSet>();
@@ -66,18 +43,6 @@ bool CLocator::Init()
 	componentset = std::make_shared<CComponentSet>();
 	SetComponentSet(componentset);
 
-	CSoundManager::GetInst()->RegisterSound("Sound/David Bowie - Starman.mp3", false, SOUND_CATEGORY::SOUND_BACKGROUND);
-	CSoundManager::GetInst()->RegisterSound("Sound/Air Cut by Langerium Id-84616.wav", false, SOUND_CATEGORY::SOUND_SHOOT);
-	CSoundManager::GetInst()->RegisterSound("Sound/Bloody Blade 2 by Kreastricon62 Id-323526.wav", false, SOUND_CATEGORY::SOUND_SHOCK);
-	CSoundManager::GetInst()->RegisterSound("Sound/Swing by XxChr0nosxX Id-268227.wav", false, SOUND_CATEGORY::SOUND_SHOOT);
-	CSoundManager::GetInst()->RegisterSound("Sound/Sword by hello_flowers Id-37596.wav", false, SOUND_CATEGORY::SOUND_SHOOT);
-	CSoundManager::GetInst()->RegisterSound("Sound/Sword4 by Streety Id-30246.wav", false, SOUND_CATEGORY::SOUND_SHOOT);
-	CSoundManager::GetInst()->RegisterSound("Sound/Sword7 by Streety Id-30248.wav", false, SOUND_CATEGORY::SOUND_SHOOT);
-	CSoundManager::GetInst()->RegisterSound("Sound/effect/HammerFlesh1.wav", false, SOUND_CATEGORY::SOUND_SHOCK);
-	CSoundManager::GetInst()->RegisterSound("Sound/effect/HammerFlesh2.wav", false, SOUND_CATEGORY::SOUND_SHOCK);
-	CSoundManager::GetInst()->RegisterSound("Sound/effect/HammerFlesh3.wav", false, SOUND_CATEGORY::SOUND_SHOCK);
-	CSoundManager::GetInst()->RegisterSound("Sound/effect/HammerFlesh4.wav", false, SOUND_CATEGORY::SOUND_SHOCK);
-	CSoundManager::GetInst()->RegisterSound("Sound/effect/HammerFlesh5.wav", false, SOUND_CATEGORY::SOUND_SHOCK);
 
 	for (auto& [num, componentSet] : m_sComponentSets) {
 		std::shared_ptr<CComponent> component;
@@ -120,8 +85,6 @@ bool CLocator::Init()
 	state = std::make_shared<Run_Player>();
 	SetPlayerState(state);
 
-	m_pMessageDispatcher = std::make_unique<CMessageDispatcher>();
-	m_pEntityManager = std::make_unique<CEntityManager>();
 	m_pSoundPlayer = std::make_unique<CSoundPlayer>();
 
 	return true;
@@ -129,7 +92,7 @@ bool CLocator::Init()
 
 void CLocator::OnChangeScene(SCENE_TYPE scene_type)
 {
-	switch (scene_type)
+	/*switch (scene_type)
 	{
 	case SCENE_TYPE::LOBBY_SCENE:
 		break;
@@ -145,22 +108,7 @@ void CLocator::OnChangeScene(SCENE_TYPE scene_type)
 			zoomer->SetCamera(m_pMainSceneCamera.get());
 		}
 		break;
-	}
-}
-
-void CLocator::CreateSimulatorCamera(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
-{
-	m_pSimulaterCamera = std::make_unique<CSimulatorCamera>();
-	m_pSimulaterCamera->Init(pd3dDevice, pd3dCommandList);
-	m_pSimulaterCamera->SetPosition(XMFLOAT3(-18.5f, 37.5f, -18.5f));
-	m_pSimulaterCamera->SetLookAt(XMFLOAT3(0.0f, 0.0f, 0.0f));
-	m_pSimulaterCamera->RegenerateViewMatrix();
-}
-
-void CLocator::CreateMainSceneCamera(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
-{
-	m_pMainSceneCamera = std::make_unique<CThirdPersonCamera>();
-	m_pMainSceneCamera->Init(pd3dDevice, pd3dCommandList);
+	}*/
 }
 
 CState<CPlayer>* CLocator::GetPlayerState(const std::type_info& type)

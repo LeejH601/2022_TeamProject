@@ -1,4 +1,3 @@
-#include "../Global/MessageDispatcher.h"
 #include "../Global/Global.h"
 #include "../Global/Locator.h"
 #include "BillBoardComponent.h"

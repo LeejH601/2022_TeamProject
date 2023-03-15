@@ -1,11 +1,9 @@
 #pragma once
-#include "..\Global\Entity.h"
-
 class CComponent;
 class CComponentSet;
 class Telegram;
 
-class CSoundPlayer : public IEntity
+class CSoundPlayer
 {
     CComponent* m_pEffectComponent = nullptr;
     CComponent* m_pShootComponent = nullptr;
@@ -16,5 +14,4 @@ public:
     ~CSoundPlayer() { }
     void Update(float fElapsedTime);
     void LoadComponentFromSet(CComponentSet* componentset);
-    virtual bool HandleMessage(const Telegram& msg);
 };

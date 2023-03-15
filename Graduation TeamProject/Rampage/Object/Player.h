@@ -3,7 +3,7 @@
 #include "StateMachine.h"
 
 class CCamera;
-class CPlayer : public CPhysicsObject, public IEntity
+class CPlayer : public CPhysicsObject
 {
 public:
 	std::unique_ptr<CStateMachine<CPlayer>> m_pStateMachine;

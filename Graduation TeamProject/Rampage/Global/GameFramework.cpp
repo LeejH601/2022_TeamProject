@@ -6,7 +6,6 @@
 #include "..\ImGui\ImGuiManager.h"
 #include "..\Object\Texture.h"
 #include "..\Shader\DepthRenderShader.h"
-#include "MessageDispatcher.h"
 #include <windowsx.h>
 #include "..\Sound\SoundManager.h"
 
@@ -82,6 +81,19 @@ void CGameFramework::InitSound()
 	CSoundManager::GetInst()->RegisterSound("Sound/Background/Light Ambient 3 (Loop).wav", true, SOUND_CATEGORY::SOUND_BACKGROUND);
 	CSoundManager::GetInst()->RegisterSound("Sound/Background/Light Ambient 4 (Loop).wav", true, SOUND_CATEGORY::SOUND_BACKGROUND);
 	CSoundManager::GetInst()->RegisterSound("Sound/Background/Light Ambient 5 (Loop).wav", true, SOUND_CATEGORY::SOUND_BACKGROUND);
+
+	CSoundManager::GetInst()->RegisterSound("Sound/David Bowie - Starman.mp3", false, SOUND_CATEGORY::SOUND_BACKGROUND);
+	CSoundManager::GetInst()->RegisterSound("Sound/Air Cut by Langerium Id-84616.wav", false, SOUND_CATEGORY::SOUND_SHOOT);
+	CSoundManager::GetInst()->RegisterSound("Sound/Bloody Blade 2 by Kreastricon62 Id-323526.wav", false, SOUND_CATEGORY::SOUND_SHOCK);
+	CSoundManager::GetInst()->RegisterSound("Sound/Swing by XxChr0nosxX Id-268227.wav", false, SOUND_CATEGORY::SOUND_SHOOT);
+	CSoundManager::GetInst()->RegisterSound("Sound/Sword by hello_flowers Id-37596.wav", false, SOUND_CATEGORY::SOUND_SHOOT);
+	CSoundManager::GetInst()->RegisterSound("Sound/Sword4 by Streety Id-30246.wav", false, SOUND_CATEGORY::SOUND_SHOOT);
+	CSoundManager::GetInst()->RegisterSound("Sound/Sword7 by Streety Id-30248.wav", false, SOUND_CATEGORY::SOUND_SHOOT);
+	CSoundManager::GetInst()->RegisterSound("Sound/effect/HammerFlesh1.wav", false, SOUND_CATEGORY::SOUND_SHOCK);
+	CSoundManager::GetInst()->RegisterSound("Sound/effect/HammerFlesh2.wav", false, SOUND_CATEGORY::SOUND_SHOCK);
+	CSoundManager::GetInst()->RegisterSound("Sound/effect/HammerFlesh3.wav", false, SOUND_CATEGORY::SOUND_SHOCK);
+	CSoundManager::GetInst()->RegisterSound("Sound/effect/HammerFlesh4.wav", false, SOUND_CATEGORY::SOUND_SHOCK);
+	CSoundManager::GetInst()->RegisterSound("Sound/effect/HammerFlesh5.wav", false, SOUND_CATEGORY::SOUND_SHOCK);
 }
 void CGameFramework::InitLocator()
 {
@@ -277,18 +289,9 @@ void CGameFramework::BuildObjects()
 
 	m_pSceneManager = std::make_unique<CSceneManager>(m_pd3dDevice.Get(), m_pd3dCommandList.Get());
 
-	m_pFloatingCamera = std::make_unique<CFloatingCamera>();
-	m_pFloatingCamera->Init(m_pd3dDevice.Get(), m_pd3dCommandList.Get());
-	m_pFloatingCamera->SetPosition(XMFLOAT3(0.0f, 400.0f, -100.0f));
-
-	Locator.CreateMainSceneCamera(m_pd3dDevice.Get(), m_pd3dCommandList.Get());
-	
-	m_pCurrentCamera = m_pFloatingCamera.get();
-
 	m_pPlayer = std::make_unique<CPlayer>(m_pd3dDevice.Get(), m_pd3dCommandList.Get(), 1);
 
 	m_pSceneManager->SetPlayer((CPlayer*)m_pPlayer.get());
-	((CThirdPersonCamera*)Locator.GetMainSceneCamera())->SetPlayer((CPlayer*)m_pPlayer.get());
 }
 void CGameFramework::ReleaseObjects()
 {
@@ -332,16 +335,6 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 		{
 		case VK_ESCAPE:
 			::PostQuitMessage(0);
-			break;
-		case '1':
-			m_pCurrentCamera = m_pFloatingCamera.get();
-			Locator.SetMouseCursorMode(MOUSE_CUROSR_MODE::FLOATING_MODE);
-			PostMessage(hWnd, WM_ACTIVATE, 0, 0);
-			break;
-		case '2':
-			m_pCurrentCamera = Locator.GetMainSceneCamera();
-			Locator.SetMouseCursorMode(MOUSE_CUROSR_MODE::THIRD_FERSON_MODE);
-			PostMessage(hWnd, WM_ACTIVATE, 0, 0);
 			break;
 		case VK_F9:
 			ChangeSwapChainState();
@@ -423,27 +416,12 @@ void CGameFramework::ProcessInput()
 		cyDelta = (float)(ptCursorPos.y - m_ptOldCursorPos.y) / 3.0f;
 		SetCursorPos(m_ptOldCursorPos.x, m_ptOldCursorPos.y);
 	}
-	/*if (Locator.GetMouseCursorMode() == MOUSE_CUROSR_MODE::THIRD_FERSON_MODE) {
-		cxDelta = (float)(ptCursorPos.x - m_ptOldCursorPos.x) / 3.0f;
-		cyDelta = (float)(ptCursorPos.y - m_ptOldCursorPos.y) / 3.0f;
-		m_ptOldCursorPos.x = ptCursorPos.x;
-		m_ptOldCursorPos.y = ptCursorPos.y;
-	}*/
 
-	m_pCurrentCamera->ProcessInput(dwDirection, cxDelta, cyDelta, m_GameTimer.GetFrameTimeElapsed());
-	((CPlayer*)(m_pPlayer.get()))->ProcessInput(dwDirection, cxDelta, cyDelta, m_GameTimer.GetFrameTimeElapsed(), m_pCurrentCamera);
+	m_pSceneManager->ProcessInput(dwDirection, cxDelta, cyDelta, m_GameTimer.GetFrameTimeElapsed());
 }
 void CGameFramework::UpdateObjects()
 {
-	// Object들의 애니메이션을 수행한다.
-	m_pFloatingCamera->Animate(m_GameTimer.GetFrameTimeElapsed());
-	Locator.GetMainSceneCamera()->Animate(m_GameTimer.GetFrameTimeElapsed());
-	m_pSceneManager->Animate(m_GameTimer.GetFrameTimeElapsed());
-
-	XMFLOAT3 xmf3PlayerPos = m_pPlayer->GetPosition();
-	xmf3PlayerPos.y += 12.5f;
-
-	m_pCurrentCamera->Update(xmf3PlayerPos, 0.0f);
+	m_pSceneManager->Update(m_GameTimer.GetFrameTimeElapsed());
 }
 void CGameFramework::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
@@ -462,7 +440,7 @@ void CGameFramework::PrepareImGui()
 	{
 		HRESULT hResult = m_pd3dCommandList->Reset(m_pd3dCommandAllocator.Get(), NULL);
 
-		CImGuiManager::GetInst()->OnPrepareRender(m_pd3dCommandList.Get(), &m_d3dDsvDescriptorCPUHandle, m_GameTimer.GetFrameTimeElapsed(), m_GameTimer.GetTotalTime(), m_pCurrentCamera);
+		CImGuiManager::GetInst()->OnPrepareRender(m_pd3dCommandList.Get(), &m_d3dDsvDescriptorCPUHandle, m_GameTimer.GetFrameTimeElapsed(), m_GameTimer.GetTotalTime(), NULL);
 
 		//명령 리스트를 닫힌 상태로 만든다. 
 		hResult = m_pd3dCommandList->Close();
@@ -510,7 +488,7 @@ void CGameFramework::RenderObjects()
 	PrepareRenderTarget();
 	UpdateShaderVariables(m_pd3dCommandList.Get());
 
-	m_pSceneManager->Render(m_pd3dCommandList.Get(), m_GameTimer.GetFrameTimeElapsed(), m_GameTimer.GetTotalTime(), m_pCurrentCamera);
+	m_pSceneManager->Render(m_pd3dCommandList.Get(), m_GameTimer.GetFrameTimeElapsed(), m_GameTimer.GetTotalTime(), NULL);
 
 	::SynchronizeResourceTransition(m_pd3dCommandList.Get(), m_ppd3dRenderTargetBuffers[m_nSwapChainBufferIndex].Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
 
@@ -535,7 +513,6 @@ void CGameFramework::FrameAdvance()
 	
 	ProcessInput();
 	UpdateObjects();
-	Locator.GetMessageDispather()->DispatchMessages();
 
 	RenderObjects();
 

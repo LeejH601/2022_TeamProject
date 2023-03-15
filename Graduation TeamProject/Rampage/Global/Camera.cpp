@@ -1,6 +1,5 @@
 #include "Camera.h"
 #include "..\Object\Object.h"
-#include "MessageDispatcher.h"
 #include "Global.h"
 #include "Locator.h"
 #include "..\Object\Player.h"
@@ -128,7 +127,7 @@ void CCamera::SetLookAt(XMFLOAT3& xmf3LookAt)
 }
 bool CCamera::HandleMessage(const Telegram& msg)
 {
-	MESSAGE_TYPE type = static_cast<MESSAGE_TYPE>(msg.Msg);
+	/*MESSAGE_TYPE type = static_cast<MESSAGE_TYPE>(msg.Msg);
 	if (type == MESSAGE_TYPE::Msg_CameraMoveStart || type == MESSAGE_TYPE::Msg_CameraShakeStart || type == MESSAGE_TYPE::Msg_CameraZoomStart)
 	{
 		CComponent* com = nullptr;
@@ -147,7 +146,7 @@ bool CCamera::HandleMessage(const Telegram& msg)
 			break;
 		}
 		return (com) ? com->HandleMessage(msg) : false;
-	}
+	}*/
 
 	return false;
 }
@@ -181,6 +180,10 @@ CThirdPersonCamera::CThirdPersonCamera() : CCamera()
 {
 	m_pPlayer = nullptr;
 	SetOffset(XMFLOAT3(0.0f, 0.0f,-10.0f));
+}
+
+CThirdPersonCamera::~CThirdPersonCamera()
+{
 }
 
 void CThirdPersonCamera::ProcessInput(DWORD dwDirection, float cxDelta, float cyDelta, float fTimeElapsed)
@@ -369,8 +372,8 @@ CCameraShaker::CCameraShaker()
 
 void CCameraShaker::Update(float fElapsedTime)
 {
-	if (!m_pCamera)
-		m_pCamera = Locator.GetSimulaterCamera();
+	/*if (!m_pCamera)
+		m_pCamera = Locator.GetSimulaterCamera();*/
 	if (!m_bEnable)
 		return;
 	if (m_bShakeEnd || !m_pCamera->m_bCameraShaking)
@@ -412,8 +415,8 @@ void CCameraShaker::Reset()
 
 bool CCameraShaker::HandleMessage(const Telegram& msg)
 {
-	if (!m_pCamera)
-		m_pCamera = Locator.GetSimulaterCamera();
+	/*if (!m_pCamera)
+		m_pCamera = Locator.GetSimulaterCamera();*/
 
 	if (!m_pCamera->m_bCameraShaking && m_bEnable) {
 		m_pCamera->m_bCameraShaking = true;
@@ -440,8 +443,8 @@ CCameraMover::CCameraMover()
 
 void CCameraMover::Update(float fElapsedTime)
 {
-	if (!m_pCamera)
-		m_pCamera = Locator.GetSimulaterCamera();
+	/*if (!m_pCamera)
+		m_pCamera = Locator.GetSimulaterCamera();*/
 
 	if (!m_bEnable)
 		return;
@@ -485,18 +488,13 @@ void CCameraMover::Reset()
 
 bool CCameraMover::HandleMessage(const Telegram& msg)
 {
-	if (!m_pCamera)
-		m_pCamera = Locator.GetSimulaterCamera();
+	/*if (!m_pCamera)
+		m_pCamera = Locator.GetSimulaterCamera();*/
 
 	if (!m_pCamera->m_bCameraMoving && m_bEnable) {
 		m_pCamera->m_bCameraMoving = true;
 
 		Reset();
-
-		CPlayer* player = (CPlayer*)msg.Sender;
-		m_xmf3Direction.x = player->m_xmf3CameraMoveDirection.x * player->m_fCMDConstant;
-		m_xmf3Direction.y = player->m_xmf3CameraMoveDirection.y;
-		m_xmf3Direction.z = player->m_xmf3CameraMoveDirection.z;
 
 		return true;
 	}
@@ -523,8 +521,8 @@ CCameraZoomer::~CCameraZoomer()
 
 void CCameraZoomer::Update(float fElapsedTime)
 {
-	if (!m_pCamera)
-		m_pCamera = Locator.GetSimulaterCamera();
+	/*if (!m_pCamera)
+		m_pCamera = Locator.GetSimulaterCamera();*/
 	if (!m_bEnable)
 		return;
 	if (m_bZoomEnd || !m_pCamera->m_bCameraZooming)
@@ -568,15 +566,13 @@ void CCameraZoomer::Reset()
 
 bool CCameraZoomer::HandleMessage(const Telegram& msg)
 {
-	if (!m_pCamera)
-		m_pCamera = Locator.GetSimulaterCamera();
+	/*if (!m_pCamera)
+		m_pCamera = Locator.GetSimulaterCamera();*/
 
 	if (!m_pCamera->m_bCameraZooming && m_bEnable) {
 		m_pCamera->m_bCameraZooming = true;
 
 		Reset();
-		CGameObject* obj = (CGameObject*)(msg.Sender);
-		m_xmf3Direction = Vector3::Normalize(Vector3::Subtract(obj->GetPosition(), m_pCamera->GetPosition()));
 
 		return true;
 	}

@@ -1,7 +1,7 @@
 #pragma once
 #include "..\Global\stdafx.h"
+#include "..\Global\MessageDispatcher.h"
 #include "Animation.h"
-#include "..\Global\Entity.h"
 
 #define MAX_FRAMENAME 64
 
@@ -78,6 +78,7 @@ public:
 	float m_fDissolveTime;
 	float m_fMaxDissolveTime;
 
+	std::vector<std::unique_ptr<IMessageListener>> m_pListeners;
 public:
 	std::unique_ptr<CAnimationController> m_pSkinnedAnimationController;
 
@@ -202,7 +203,7 @@ public:
 
 	virtual void OnRootMotion(CGameObject* pRootGameObject);
 };
-class CKnightObject : public CGameObject, public IEntity
+class CKnightObject : public CGameObject
 {
 private:
 	CGameObject* pWeapon;

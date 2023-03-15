@@ -106,8 +106,8 @@ void CImGuiManager::Init(HWND hWnd, ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 		m_pd3dSrvDescHeap->GetCPUDescriptorHandleForHeapStart(),
 		m_pd3dSrvDescHeap->GetGPUDescriptorHandleForHeapStart());
 
-	Locator.CreateSimulatorCamera(pd3dDevice, pd3dCommandList);
-	m_pCamera = Locator.GetSimulaterCamera();
+	/*Locator.CreateSimulatorCamera(pd3dDevice, pd3dCommandList);
+	m_pCamera = Locator.GetSimulaterCamera();*/
 
 	D3D12_CLEAR_VALUE d3dClearValue = { DXGI_FORMAT_R8G8B8A8_UNORM, { 0.0f, 0.0f, 0.0f, 1.0f } };
 	m_pRTTexture = std::make_unique<CTexture>(1, RESOURCE_TEXTURE2D, 0, 1);
@@ -172,10 +172,10 @@ void CImGuiManager::SetUI()
 	ImGui_ImplWin32_NewFrame();
 	ImGui::NewFrame();
 
-	if (m_pCurrentComponentSet == nullptr) {
+	/*if (m_pCurrentComponentSet == nullptr) {
 		m_pCurrentComponentSet = Locator.GetComponentSet(0);
 		m_pCamera->LoadComponentFromSet(m_pCurrentComponentSet);
-	}
+	}*/
 
 
 	// Show my window.
@@ -368,7 +368,7 @@ void CImGuiManager::SetUI()
 		initial_curpos.y += 25.f;
 		ImGui::SetCursorPos(initial_curpos);
 
-		CCamera* pCamera = Locator.GetSimulaterCamera();
+		/*CCamera* pCamera = Locator.GetSimulaterCamera();*/
 
 		if (ImGui::CollapsingHeader("Camera Move"))
 		{
@@ -626,8 +626,6 @@ void CImGuiManager::SetUI()
 			CComponentSet* componentset = Locator.GetComponentSet(0);
 			if (componentset) {
 				m_pCurrentComponentSet = componentset;
-				m_pCamera->LoadComponentFromSet(m_pCurrentComponentSet);
-				Locator.GetSoundPlayer()->LoadComponentFromSet(m_pCurrentComponentSet);
 				CSimulatorScene::GetInst()->SetPlayerAnimationSet(0);
 			}
 		}
@@ -637,8 +635,6 @@ void CImGuiManager::SetUI()
 			CComponentSet* componentset = Locator.GetComponentSet(1);
 			if (componentset) {
 				m_pCurrentComponentSet = componentset;
-				m_pCamera->LoadComponentFromSet(m_pCurrentComponentSet);
-				Locator.GetSoundPlayer()->LoadComponentFromSet(m_pCurrentComponentSet);
 				CSimulatorScene::GetInst()->SetPlayerAnimationSet(1);
 			}
 		}
@@ -648,8 +644,6 @@ void CImGuiManager::SetUI()
 			CComponentSet* componentset = Locator.GetComponentSet(2);
 			if (componentset) {
 				m_pCurrentComponentSet = componentset;
-				m_pCamera->LoadComponentFromSet(m_pCurrentComponentSet);
-				Locator.GetSoundPlayer()->LoadComponentFromSet(m_pCurrentComponentSet);
 				CSimulatorScene::GetInst()->SetPlayerAnimationSet(2);
 			}
 		}
@@ -664,16 +658,9 @@ void CImGuiManager::OnPrepareRender(ID3D12GraphicsCommandList* pd3dCommandList, 
 	//PrepareRenderTarget(pd3dCommandList, d3dDsvDescriptorCPUHandle);
 	CSimulatorScene::GetInst()->OnPrepareRender(pd3dCommandList);
 
-	/*if (pCamera)
-		pCamera->OnPrepareRender(pd3dCommandList);*/
 	CSimulatorScene::GetInst()->OnPreRender(pd3dCommandList, fTimeElapsed);
 
 	PrepareRenderTarget(pd3dCommandList, d3dDsvDescriptorCPUHandle);
-	/*if (pCamera)
-		pCamera->OnPrepareRender(pd3dCommandList);*/
-	m_pCamera->Animate(fTimeElapsed);
-	m_pCamera->RegenerateViewMatrix();
-	m_pCamera->OnPrepareRender(pd3dCommandList);
 
 	CSimulatorScene::GetInst()->Render(pd3dCommandList, fTimeElapsed, fCurrentTime, pCamera);
 

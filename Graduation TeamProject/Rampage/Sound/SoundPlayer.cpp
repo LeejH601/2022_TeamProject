@@ -2,7 +2,6 @@
 #include "SoundPlayer.h"
 #include "SoundComponent.h"
 #include "..\Global\Locator.h"
-#include "..\Global\MessageDispatcher.h"
 
 void CSoundPlayer::Update(float fElapsedTime)
 {
@@ -20,25 +19,3 @@ void CSoundPlayer::LoadComponentFromSet(CComponentSet* componentset)
 	m_pEffectComponent = componentset->FindComponent(typeid(CEffectSoundComponent));
 	m_pShootComponent = componentset->FindComponent(typeid(CShootSoundComponent));
 }
-
-bool CSoundPlayer::HandleMessage(const Telegram& msg)
-{
-	switch (static_cast<MESSAGE_TYPE>(msg.Msg))
-	{
-	case MESSAGE_TYPE::Msg_PlaySoundDamage:
-		return m_pDamageComponent->HandleMessage(msg);
-	case MESSAGE_TYPE::Msg_PlaySoundEffect:
-		return m_pEffectComponent->HandleMessage(msg);
-	case MESSAGE_TYPE::Msg_PlaySoundShoot:
-		return m_pShootComponent->HandleMessage(msg);
-	case MESSAGE_TYPE::Msg_SoundDamageReady:
-		return m_pDamageComponent->HandleMessage(msg);
-	case MESSAGE_TYPE::Msg_SoundEffectReady:
-		return m_pEffectComponent->HandleMessage(msg);
-	case MESSAGE_TYPE::Msg_SoundShootReady:
-		return m_pShootComponent->HandleMessage(msg);
-	default:
-		return false;
-	}
-}
-

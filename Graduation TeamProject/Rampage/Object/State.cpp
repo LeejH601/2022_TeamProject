@@ -1,8 +1,8 @@
 #include "State.h"
 #include "Player.h"
 #include "..\Global\Locator.h"
-#include "..\Global\MessageDispatcher.h"
 #include "..\Global\Global.h"
+#include "..\Global\MessageDispatcher.h"
 #include "..\Sound\Sound.h"
 #include "..\Sound\SoundPlayer.h"
 
@@ -29,11 +29,6 @@ void Idle_Player::Exit(CPlayer* player)
 
 }
 
-bool Idle_Player::OnMessage(CPlayer* player, const Telegram& msg)
-{
-	return false;
-}
-
 void Atk1_Player::Enter(CPlayer* player)
 {
 	player->m_pChild->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
@@ -47,18 +42,17 @@ void Atk1_Player::Enter(CPlayer* player)
 	player->m_xmf3CameraMoveDirection = Vector3::Normalize(XMFLOAT3(-1.0f, -1.0f, 0.0f));
 	player->m_fCMDConstant = 1.0f;
 
+	PlayerAttackParams PlayerAttackParam;
+	PlayerAttackParam.pPlayer = player;
+
+	CMessageDispatcher::GetInst()->Dispatch_Message<PlayerAttackParams>(MessageType::PLAYER_ATTACK, &PlayerAttackParam);
+
 	CComponentSet* componentset = Locator.GetComponentSet(0);
 	if (componentset) {
-		Locator.GetMainSceneCamera()->LoadComponentFromSet(componentset);
-		Locator.GetSimulaterCamera()->LoadComponentFromSet(componentset);
+		/*Locator.GetMainSceneCamera()->LoadComponentFromSet(componentset);
+		Locator.GetSimulaterCamera()->LoadComponentFromSet(componentset);*/
 		Locator.GetSoundPlayer()->LoadComponentFromSet(componentset);
 	}
-#ifdef ATTACK_SOUND
-	Telegram msg;
-	msg.Receiver = Locator.GetSoundPlayer();
-	msg.Msg = (int)MESSAGE_TYPE::Msg_SoundShootReady;
-	Locator.GetSoundPlayer()->HandleMessage(msg);
-#endif
 }
 
 void Atk1_Player::Execute(CPlayer* player, float fElapsedTime)
@@ -80,11 +74,6 @@ void Atk1_Player::Exit(CPlayer* player)
 {
 }
 
-bool Atk1_Player::OnMessage(CPlayer* player, const Telegram& msg)
-{
-	return false;
-}
-
 void Atk2_Player::Enter(CPlayer* player)
 {
 	player->m_pChild->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 1);
@@ -100,17 +89,10 @@ void Atk2_Player::Enter(CPlayer* player)
 
 	CComponentSet* componentset = Locator.GetComponentSet(1);
 	if (componentset) {
-		Locator.GetMainSceneCamera()->LoadComponentFromSet(componentset);
-		Locator.GetSimulaterCamera()->LoadComponentFromSet(componentset);
+		/*Locator.GetMainSceneCamera()->LoadComponentFromSet(componentset);
+		Locator.GetSimulaterCamera()->LoadComponentFromSet(componentset);*/
 		Locator.GetSoundPlayer()->LoadComponentFromSet(componentset);
 	}
-
-#ifdef ATTACK_SOUND
-	Telegram msg;
-	msg.Receiver = Locator.GetSoundPlayer();
-	msg.Msg = (int)MESSAGE_TYPE::Msg_SoundShootReady;
-	Locator.GetSoundPlayer()->HandleMessage(msg);
-#endif
 }
 
 void Atk2_Player::Execute(CPlayer* player, float fElapsedTime)
@@ -132,11 +114,6 @@ void Atk2_Player::Exit(CPlayer* player)
 {
 }
 
-bool Atk2_Player::OnMessage(CPlayer* player, const Telegram& msg)
-{
-	return false;
-}
-
 void Atk3_Player::Enter(CPlayer* player)
 {
 	player->m_pChild->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 2);
@@ -149,17 +126,10 @@ void Atk3_Player::Enter(CPlayer* player)
 
 	CComponentSet* componentset = Locator.GetComponentSet(2);
 	if (componentset) {
-		Locator.GetMainSceneCamera()->LoadComponentFromSet(componentset);
-		Locator.GetSimulaterCamera()->LoadComponentFromSet(componentset);
+		/*Locator.GetMainSceneCamera()->LoadComponentFromSet(componentset);
+		Locator.GetSimulaterCamera()->LoadComponentFromSet(componentset);*/
 		Locator.GetSoundPlayer()->LoadComponentFromSet(componentset);
 	}
-
-#ifdef ATTACK_SOUND
-	Telegram msg;
-	msg.Receiver = Locator.GetSoundPlayer();
-	msg.Msg = (int)MESSAGE_TYPE::Msg_SoundShootReady;
-	Locator.GetSoundPlayer()->HandleMessage(msg);
-#endif
 }
 
 void Atk3_Player::Execute(CPlayer* player, float fElapsedTime)
@@ -174,11 +144,6 @@ void Atk3_Player::Execute(CPlayer* player, float fElapsedTime)
 
 void Atk3_Player::Exit(CPlayer* player)
 {
-}
-
-bool Atk3_Player::OnMessage(CPlayer* player, const Telegram& msg)
-{
-	return false;
 }
 
 void Run_Player::Enter(CPlayer* player)
@@ -198,9 +163,4 @@ void Run_Player::Execute(CPlayer* player, float fElapsedTime)
 
 void Run_Player::Exit(CPlayer* player)
 {
-}
-
-bool Run_Player::OnMessage(CPlayer* player, const Telegram& msg)
-{
-	return false;
 }

@@ -1,7 +1,6 @@
 #pragma once
 #include <fmod.h>
 #include <string>
-#include "..\Global\Entity.h"
 
 #define SOUND_MAX 1.0f
 #define SOUND_MIN 0.1f

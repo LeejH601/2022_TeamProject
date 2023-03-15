@@ -2,7 +2,6 @@
 #include "Global\GameFramework.h"
 #include "Global/Camera.h"
 #include "Object/State.h"
-#include "Global/EntityManager.h"
 
 #define MAX_LOADSTRING 100
 

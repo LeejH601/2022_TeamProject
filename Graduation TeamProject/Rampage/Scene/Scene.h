@@ -27,11 +27,9 @@ public:
 	virtual void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList) {}
 	virtual void ReleaseObjects() {}
 
-	virtual bool ProcessInput(UCHAR* pKeysBuffer) { return false; }
-	virtual void AnimateObjects(float fTimeElapsed) {}
-	virtual void UpdateObjects(float fTimeElapsed) {}
+	virtual bool ProcessInput(DWORD dwDirection, float cxDelta, float cyDelta, float fTimeElapsed) { return false; }
+	virtual void Update(float fTimeElapsed) {}
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed, float fCurrentTime, CCamera* pCamera = NULL) {}
 	virtual void OnPostRenderTarget() {};
-	virtual void CheckCollide() {}
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed) {}
 };

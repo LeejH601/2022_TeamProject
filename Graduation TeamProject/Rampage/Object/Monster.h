@@ -3,7 +3,7 @@
 #include "PhysicsObject.h"
 #include "StateMachine.h"
 
-class CMonster : public CPhysicsObject , public IEntity
+class CMonster : public CPhysicsObject
 {
 public:
 	XMFLOAT3 m_xmf3HitterVec;

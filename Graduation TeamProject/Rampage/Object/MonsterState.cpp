@@ -24,11 +24,6 @@ void Idle_Monster::Exit(CMonster* monster)
 
 }
 
-bool Idle_Monster::OnMessage(CMonster* monster, const Telegram& msg)
-{
-	return false;
-}
-
 void Damaged_Monster::Enter(CMonster* monster)
 {
 	if (monster->m_pStateMachine->GetPreviousState() != Stun_Monster::GetInst())
@@ -74,11 +69,6 @@ void Damaged_Monster::Exit(CMonster* monster)
 {
 }
 
-bool Damaged_Monster::OnMessage(CMonster* monster, const Telegram& msg)
-{
-	return false;
-}
-
 void Stun_Monster::Enter(CMonster* monster)
 {
 	monster->m_bStunned = true;
@@ -112,9 +102,4 @@ void Stun_Monster::Execute(CMonster* monster, float fElapsedTime)
 
 void Stun_Monster::Exit(CMonster* monster)
 {
-}
-
-bool Stun_Monster::OnMessage(CMonster* monster, const Telegram& msg)
-{
-	return false;
 }

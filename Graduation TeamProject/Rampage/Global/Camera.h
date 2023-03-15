@@ -1,7 +1,6 @@
 #pragma once
 #include "stdafx.h"
 #include "Component.h"
-#include "Entity.h"
 
 #define ASPECT_RATIO (float(FRAME_BUFFER_WIDTH) / float(FRAME_BUFFER_HEIGHT))
 
@@ -129,7 +128,7 @@ public:
 	virtual bool HandleMessage(const Telegram& msg);
 };
 
-class CCamera : public IEntity
+class CCamera
 {
 public:
 	bool m_bCameraShaking = false;
@@ -231,7 +230,7 @@ protected:
 	CPlayer* m_pPlayer;
 public:
 	CThirdPersonCamera();
-	virtual ~CThirdPersonCamera() { }
+	virtual ~CThirdPersonCamera();
 
 	virtual void ProcessInput(DWORD dwDirection, float cxDelta, float cyDelta, float fTimeElapsed);
 

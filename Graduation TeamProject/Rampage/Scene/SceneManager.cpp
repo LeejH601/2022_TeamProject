@@ -59,9 +59,16 @@ void CSceneManager::OnPostRenderTarget()
 	m_pCurrentScene->OnPostRenderTarget();
 }
 
-void CSceneManager::Animate(float fTimeElapsed)
+void CSceneManager::Update(float fTimeElapsed)
 {
-	m_pCurrentScene->AnimateObjects(fTimeElapsed);
+	m_pCurrentScene->Update(fTimeElapsed);
+}
+
+bool CSceneManager::ProcessInput(DWORD dwDirection, float cxDelta, float cyDelta, float fTimeElapsed)
+{
+	m_pCurrentScene->ProcessInput(dwDirection, cxDelta, cyDelta, fTimeElapsed);
+
+	return false;
 }
 
 bool CSceneManager::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)

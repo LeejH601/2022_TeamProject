@@ -2,10 +2,8 @@
 #include "stdafx.h"
 #include "Global.h"
 #include "Camera.h"
-#include "EntityManager.h"
 #include "..\Sound\SoundPlayer.h"
 #include "..\Object\State.h"
-#include "MessageDispatcher.h"
 
 template <class entity_type> class CState;
 class CCamera;
@@ -65,15 +63,10 @@ enum class MOUSE_CUROSR_MODE {
 
 class CLocator
 {
-	std::unique_ptr<CCamera> m_pSimulaterCamera = NULL;
-	std::unique_ptr<CCamera> m_pMainSceneCamera = NULL;
-
 	std::set<CoptSetPair, Comp_ComponentSet> m_sComponentSets;
 	std::set<PlayerStatePair, Comp_PlayerState> m_sPlayerStateSet;
 
 	std::unique_ptr<CSoundPlayer> m_pSoundPlayer = NULL;
-	std::unique_ptr<CEntityManager> m_pEntityManager = NULL;
-	std::unique_ptr<CMessageDispatcher> m_pMessageDispatcher = NULL;
 
 	physx::PxFoundation* m_pFoundation;
 	physx::PxPhysics* m_pPhysics;
@@ -95,12 +88,6 @@ public:
 	bool Init();
 
 	void OnChangeScene(SCENE_TYPE scene_type);
-
-	void CreateSimulatorCamera(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
-	CCamera* GetSimulaterCamera() { return m_pSimulaterCamera.get(); };
-
-	void CreateMainSceneCamera(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
-	CCamera* GetMainSceneCamera() { return m_pMainSceneCamera.get(); };
 
 	CComponentSet* GetComponentSet(int num)
 	{
@@ -124,9 +111,6 @@ public:
 	void SetPlayerState(std::shared_ptr<CState<CPlayer>>& state);
 
 	CSoundPlayer* GetSoundPlayer() { return m_pSoundPlayer.get(); };
-
-	CEntityManager* GetEntityManager() { return m_pEntityManager.get(); };
-	CMessageDispatcher* GetMessageDispather() { return m_pMessageDispatcher.get(); };
 
 	void SetTimer(CGameTimer* timer) { m_pTimer = timer; };
 	CGameTimer* GetTimer() { return m_pTimer; };

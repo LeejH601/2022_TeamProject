@@ -17,9 +17,11 @@ void CMainTMPScene::SetPlayer(CGameObject* pPlayer)
 {
 	m_pPlayer = pPlayer;
 	((CPlayer*)m_pPlayer)->SetUpdatedContext(m_pTerrain.get());
+	((CThirdPersonCamera*)m_pMainSceneCamera.get())->SetPlayer((CPlayer*)m_pPlayer);
 
 	if (m_pDepthRenderShader.get())
 		((CDepthRenderShader*)m_pDepthRenderShader.get())->RegisterObject(pPlayer);
+
 }
 
 void CMainTMPScene::OnPreRender(ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed)
@@ -28,7 +30,6 @@ void CMainTMPScene::OnPreRender(ID3D12GraphicsCommandList* pd3dCommandList, floa
 	{
 		((CDepthRenderShader*)m_pDepthRenderShader.get())->PrepareShadowMap(pd3dCommandList, 0.0f);
 		((CDepthRenderShader*)m_pDepthRenderShader.get())->UpdateDepthTexture(pd3dCommandList);
-		CheckCollide();
 	}
 }
 void CMainTMPScene::OnPrepareRender(ID3D12GraphicsCommandList* pd3dCommandList)
@@ -257,6 +258,16 @@ bool CMainTMPScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPAR
 	case WM_KEYDOWN:
 		switch (wParam)
 		{
+		case '1':
+			m_pCurrentCamera = m_pFloatingCamera.get();
+			Locator.SetMouseCursorMode(MOUSE_CUROSR_MODE::FLOATING_MODE);
+			PostMessage(hWnd, WM_ACTIVATE, 0, 0);
+			break;
+		case '2':
+			m_pCurrentCamera = m_pMainSceneCamera.get();
+			Locator.SetMouseCursorMode(MOUSE_CUROSR_MODE::THIRD_FERSON_MODE);
+			PostMessage(hWnd, WM_ACTIVATE, 0, 0);
+			break;
 		case 'f':
 		case 'F':
 			((CPlayer*)m_pPlayer)->Tmp();
@@ -329,12 +340,20 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 
 	UINT ncbElementBytes = ((sizeof(DissolveParams) + 255) & ~255); //256ÀÇ ¹è¼ö
 	m_pd3dcbDisolveParams = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, ncbElementBytes, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
-
 	m_pd3dcbDisolveParams->Map(0, NULL, (void**)&m_pcbMappedDisolveParams);
 
 	DXGI_FORMAT pdxgiObjectRtvFormats = { DXGI_FORMAT_R8G8B8A8_UNORM };
+	m_pFloatingCamera = std::make_unique<CFloatingCamera>();
+	m_pFloatingCamera->Init(pd3dDevice, pd3dCommandList);
+	m_pFloatingCamera->SetPosition(XMFLOAT3(0.0f, 400.0f, -100.0f));
 
+	m_pMainSceneCamera = std::make_unique<CThirdPersonCamera>();
+	m_pMainSceneCamera->Init(pd3dDevice, pd3dCommandList);
+
+	m_pCurrentCamera = m_pFloatingCamera.get();
+#ifdef RENDER_BOUNDING_BOX
 	CBoundingBoxShader::GetInst()->CreateShader(pd3dDevice, GetGraphicsRootSignature(), 1, &pdxgiObjectRtvFormats, DXGI_FORMAT_D32_FLOAT, 0);
+#endif
 
 	DXGI_FORMAT pdxgiRtvFormats[1] = { DXGI_FORMAT_R32_FLOAT };
 	m_pDepthRenderShader = std::make_unique<CDepthRenderShader>();
@@ -604,8 +623,18 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 
 	m_pSkyBoxObject = std::make_unique<CSkyBox>(pd3dDevice, pd3dCommandList, GetGraphicsRootSignature(), pSkyBoxTexture);
 }
+bool CMainTMPScene::ProcessInput(DWORD dwDirection, float cxDelta, float cyDelta, float fTimeElapsed)
+{
+	m_pCurrentCamera->ProcessInput(dwDirection, cxDelta, cyDelta, fTimeElapsed);
+	((CPlayer*)m_pPlayer)->ProcessInput(dwDirection, cxDelta, cyDelta, fTimeElapsed, m_pCurrentCamera);
+
+	return true;
+}
 void CMainTMPScene::UpdateObjects(float fTimeElapsed)
 {
+	m_pFloatingCamera->Animate(fTimeElapsed);
+	m_pMainSceneCamera->Animate(fTimeElapsed);
+
 	m_pPlayer->Update(fTimeElapsed);
 	m_pLight->Update((CPlayer*)m_pPlayer);
 
@@ -613,20 +642,16 @@ void CMainTMPScene::UpdateObjects(float fTimeElapsed)
 		m_pObjects[i]->Update(fTimeElapsed);
 		m_pcbMappedDisolveParams->dissolveThreshold[i] = m_pObjects[i]->m_fDissolveThrethHold;
 	}
-}
 
-void CMainTMPScene::CheckCollide()
-{
-	for (int i = 0; i < m_pObjects.size(); ++i) {
-		if(((CPlayer*)m_pPlayer)->m_pStateMachine->GetCurrentState() != Locator.GetPlayerState(typeid(Run_Player)) &&
-			((CPlayer*)m_pPlayer)->m_pStateMachine->GetCurrentState() != Locator.GetPlayerState(typeid(Idle_Player)))
-			m_pPlayer->CheckCollision(m_pObjects[i].get());
-	}
+	XMFLOAT3 xmf3PlayerPos = m_pPlayer->GetPosition();
+	xmf3PlayerPos.y += 12.5f;
+
+	m_pCurrentCamera->Update(xmf3PlayerPos, 0.0f);
 }
 
 #define WITH_LAG_DOLL_SIMULATION
 
-void CMainTMPScene::AnimateObjects(float fTimeElapsed)
+void CMainTMPScene::Update(float fTimeElapsed)
 {
 #ifdef WITH_LAG_DOLL_SIMULATION
 	static float SimulateElapsedTime = 0.0f;
@@ -644,14 +669,15 @@ void CMainTMPScene::AnimateObjects(float fTimeElapsed)
 #endif // WITH_LAG_DOLL_SIMULATION
 	UpdateObjects(fTimeElapsed);
 }
+
 void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed, float fCurrentTime, CCamera* pCamera)
 {
-	if (pCamera) pCamera->OnPrepareRender(pd3dCommandList);
+	m_pCurrentCamera->OnPrepareRender(pd3dCommandList);
 
 	m_pLight->Render(pd3dCommandList);
 
 	m_pSkyBoxShader->Render(pd3dCommandList, 0);
-	m_pSkyBoxObject->Render(pd3dCommandList, pCamera);
+	m_pSkyBoxObject->Render(pd3dCommandList, m_pCurrentCamera);
 
 	m_pTerrainShader->Render(pd3dCommandList, 0);
 	m_pTerrain->Render(pd3dCommandList, true);
@@ -713,8 +739,7 @@ void CMainTMPScene::LoadSceneFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 	::rewind(pInFile);
 
 	CMainTMPScene* pScene = this;
-	//pScene->BuildObjects(pd3dDevice, pd3dCommandList);
-	//pScene->m_pd3dGraphicsRootSignature = pScene->CreateGraphicsRootSignature(pd3dDevice);
+
 	char pstrToken[64] = { '\0' };
 
 	int nGameObjects;

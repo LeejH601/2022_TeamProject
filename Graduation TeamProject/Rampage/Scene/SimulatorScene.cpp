@@ -18,7 +18,6 @@ void CSimulatorScene::OnPreRender(ID3D12GraphicsCommandList* pd3dCommandList, fl
 	{
 		((CDepthRenderShader*)m_pDepthRenderShader.get())->PrepareShadowMap(pd3dCommandList, 0.0f);
 		((CDepthRenderShader*)m_pDepthRenderShader.get())->UpdateDepthTexture(pd3dCommandList);
-		CheckCollide();
 	}
 }
 void CSimulatorScene::OnPrepareRender(ID3D12GraphicsCommandList* pd3dCommandList)
@@ -218,6 +217,12 @@ void CSimulatorScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 
 	DXGI_FORMAT pdxgiObjectRtvFormats = { DXGI_FORMAT_R8G8B8A8_UNORM };
 
+	m_pSimulaterCamera = std::make_unique<CSimulatorCamera>();
+	m_pSimulaterCamera->Init(pd3dDevice, pd3dCommandList);
+	m_pSimulaterCamera->SetPosition(XMFLOAT3(-18.5f, 37.5f, -18.5f));
+	m_pSimulaterCamera->SetLookAt(XMFLOAT3(0.0f, 0.0f, 0.0f));
+	m_pSimulaterCamera->RegenerateViewMatrix();
+
 	CModelShader::GetInst()->CreateShader(pd3dDevice, GetGraphicsRootSignature(), 1, &pdxgiObjectRtvFormats, DXGI_FORMAT_D32_FLOAT, 1);
 
 	DXGI_FORMAT pdxgiRtvFormats[1] = { DXGI_FORMAT_R32_FLOAT };
@@ -306,35 +311,22 @@ void CSimulatorScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 
 
 }
-void CSimulatorScene::AnimateObjects(float fTimeElapsed)
-{
-	UpdateObjects(fTimeElapsed);
-}
-void CSimulatorScene::UpdateObjects(float fTimeElapsed)
+void CSimulatorScene::Update(float fTimeElapsed)
 {
 	m_pMainCharacter->Update(fTimeElapsed);
 
 	for (int i = 0; i < m_pEnemys.size(); ++i)
 		m_pEnemys[i]->Update(fTimeElapsed);
 }
-void CSimulatorScene::CheckCollide()
-{
-	for (int i = 0; i < m_pEnemys.size(); ++i) {
-		m_pMainCharacter->CheckCollision(m_pEnemys[i].get());
-	}
-
-}
 void CSimulatorScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed, float fCurrentTime, CCamera* pCamera)
 {
+	m_pSimulaterCamera->Animate(fTimeElapsed);
+	m_pSimulaterCamera->RegenerateViewMatrix();
+	m_pSimulaterCamera->OnPrepareRender(pd3dCommandList);
+
 	m_pLight->Render(pd3dCommandList);
 
 	CModelShader::GetInst()->Render(pd3dCommandList, 1);
-
-	///*for (int i = 0; i < m_pMainCharacters.size(); ++i)
-	//{
-	//	m_pMainCharacters[i]->Animate(fTimeElapsed);
-	//	m_pMainCharacters[i]->Render(pd3dCommandList, true);
-	//}*/
 
 	m_pMainCharacter->Animate(0.0f);
 	m_pMainCharacter->Render(pd3dCommandList, true);

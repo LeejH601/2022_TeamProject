@@ -5,7 +5,6 @@
 #include "..\Shader\Shader.h"
 #include "..\Shader\ModelShader.h"
 #include "..\Shader\BoundingBoxShader.h"
-#include "..\Global\MessageDispatcher.h"
 #include "..\Global\Locator.h"
 #include "..\Global\Timer.h"
 #include "..\Global\Global.h"

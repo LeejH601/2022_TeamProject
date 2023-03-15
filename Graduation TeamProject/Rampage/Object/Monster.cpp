@@ -18,6 +18,11 @@ CMonster::CMonster()
 	m_fDissolveTime = 0.0f;
 	TestDissolvetime = 0.0f;
 
+	std::unique_ptr<PlayerAttackComponent> pCollisionComponent = std::make_unique<PlayerAttackComponent>();
+	pCollisionComponent->SetObject(this);
+	m_pListeners.push_back(std::move(pCollisionComponent));
+
+	CMessageDispatcher::GetInst()->RegisterListener(MessageType::PLAYER_ATTACK, m_pListeners.back().get());
 }
 
 CMonster::~CMonster()
