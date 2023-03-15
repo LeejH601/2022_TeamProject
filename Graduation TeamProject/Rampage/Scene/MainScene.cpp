@@ -682,6 +682,10 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 	UINT index = 0;
 	for (int i = 0; i < m_pObjects.size(); ++i)
 	{
+		//if(pCamera->m_bFrustumBoundingBox.Intersects( m_pObjects[i].get()->m_)
+		/*if (i < 4) {
+			(CMonster*)m_pObjects[i].get()->
+		}*/
 		pd3dCommandList->SetGraphicsRoot32BitConstants(0, 1, &i, 33);
 		m_pObjects[i]->Animate(0.0f);
 		m_pObjects[i]->Render(pd3dCommandList, true);

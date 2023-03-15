@@ -164,6 +164,8 @@ protected:
 	VS_CB_CAMERA_INFO* m_pcbMappedCamera = NULL;
 public:
 	std::vector<CComponent*> m_vComponentSet;
+	BoundingFrustum m_bFrustumBoundingBox{};
+
 public:
 	CCamera();
 	virtual ~CCamera();
@@ -176,6 +178,8 @@ public:
 	void RegenerateViewMatrix();
 
 	void GenerateProjectionMatrix(float fNearPlaneDistance, float fFarPlaneDistance, float fAspectRatio, float fFOVAngle);
+
+	void UpdateCameraFrustumBox();
 
 	void SetViewport(int xTopLeft, int yTopLeft, int nWidth, int nHeight, float fMinZ = 0.0f, float fMaxZ = 1.0f);
 	void SetScissorRect(LONG xLeft, LONG yTop, LONG xRight, LONG yBottom);

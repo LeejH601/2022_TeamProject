@@ -41,8 +41,12 @@ float4 LightShaft(float2 uv, float2 ScreenLightPos, float Weight, float Exposure
 	for (int i = 0; i < NUM_SAMPLES; i++) {
 		uv -= DeltaUV;
 		float3 sampleColor = gtxMultiRenderTargetTextures[0].Sample(gSamplerState, uv).xyz;
+		//sampleColor = float3(1.0f, 1.0f, 1.0f);
+
 		sampleColor *= illuminationDecay * Weight;
 		color += sampleColor;
+		//color = sampleColor;
+			
 		illuminationDecay *= Decay;
 	}
 
@@ -56,7 +60,7 @@ struct VS_SCREEN_RECT_TEXTURED_OUTPUT
 	float3 viewSpaceDir : TEXCOORD1;
 };
 
-#define radius 1.0f
+#define radius 1.4f
 
 float4 PS_PostProcessing(VS_SCREEN_RECT_TEXTURED_OUTPUT input) : SV_Target
 {
@@ -64,15 +68,19 @@ float4 PS_PostProcessing(VS_SCREEN_RECT_TEXTURED_OUTPUT input) : SV_Target
 	float4 lightPosInViewSpace = mul(float4(gLights[0].m_vPosition, 1.0), gmtxView);
 	float4 lightPosInClipSpace = mul(lightPosInViewSpace, gmtxProjection);
 	float3 lightPosInNDC = lightPosInClipSpace.xyz / lightPosInClipSpace.w;
+
+	lightPosInNDC.x = min(1.0f, max(-1.0f, lightPosInNDC.x));
+	lightPosInNDC.y = min(1.0f, max(-1.0f, lightPosInNDC.y));
+
 	float2 lightPosInScreenSpace = float2(lightPosInNDC.x * 0.5 + 0.5, -lightPosInNDC.y * 0.5 + 0.5);
 
 	float result = pow((input.uv.x - lightPosInScreenSpace.x), 2) + pow((input.uv.y - lightPosInScreenSpace.y), 2);
 
 	// LightShaft Values
 	float weight = 0.2f;
-	float exposure = 1.0f;
-	float Density = 0.5f;
-	float Decay = 0.82f;
+	float exposure = 0.6f;
+	float Density = 0.6f;
+	float Decay = 0.9f;
 	float radiusPow = pow(radius, 2);
 
 	float4 cColor;
@@ -80,21 +88,26 @@ float4 PS_PostProcessing(VS_SCREEN_RECT_TEXTURED_OUTPUT input) : SV_Target
 	float3 normal = Pixelnormal.xyz * 2.0f - 1.0f;
 	float4 positionW = gtxMultiRenderTargetTextures[2].Sample(gSamplerState, input.uv);
 
-	// 광원이 범위 안쪽에 위치하고, 카메라가 바라보는 방향에 있다면 효과를 적용
-	if ((lightPosInNDC.z > 1.0f) || Pixelnormal.z > 0.0f) {
-		weight = 0.0f;
-		//Density = 0.0f;
-	}
 
+
+
+	// 광원이 범위 안쪽에 위치하고, 카메라가 바라보는 방향에 있다면 효과를 적용
+	//if ((lightPosInNDC.z > 1.0f) || Pixelnormal.z > 0.0f) {
+	//	//weight = 0.0f;
+	//	Density = 0.0f;
+	//}
+
+	// 광원을 기준으로 원의 방정식 상에서 점의 위치에 따라 weigth 값을 조절
+	// 범위를 벗어나면 weight를 0으로 고정
 	if (result < radiusPow) {
-		weight *= max(0.0f, (1.0f - ((result) / radiusPow)));
+		//weight *= max(0.0f, (1.0f - ((result) / radiusPow)));
 		//Density *= max(0.0f, (1.0f - ((result) / radiusPow)));
 	}
 	else {
 		weight = 0.0f;
 	}
 
-	Density *= (1.0f - (result / radiusPow));
+	//Density *= (1.0f - (result / radiusPow));
 	float angle = dot(normalize(gLights[0].m_vDirection),  normalize(Pixelnormal.xyz));
 	/*if (angle > 0)
 		exposure = 0.6f;*/
@@ -106,8 +119,13 @@ float4 PS_PostProcessing(VS_SCREEN_RECT_TEXTURED_OUTPUT input) : SV_Target
 		if (gcbToLightSpaces[i].f4Position.w != 0.0f) uvs[i] = mul(positionW, gcbToLightSpaces[i].mtxToTexture);
 	}
 
+	if (lightPosInClipSpace.z > 0.0f) {
+		//Density *= (1.0f - lightPosInClipSpace.z);e
 
-	cColor = LightShaft(input.uv, lightPosInScreenSpace, weight, exposure, Density, Decay);
+		cColor = LightShaft(input.uv, lightPosInScreenSpace, weight, exposure, Density, Decay);
+	}
+	else
+		cColor = LightShaft(input.uv, lightPosInScreenSpace, weight, exposure, 0.0, Decay);
 
 	float3 normalOffsetScale = 20.0f;
 	float3 normalOffset = normalOffsetScale * normal;
@@ -115,6 +133,6 @@ float4 PS_PostProcessing(VS_SCREEN_RECT_TEXTURED_OUTPUT input) : SV_Target
 
 	cColor = Lighting(normalOffsetedPosition, normalize(normal), cColor, true, uvs);
 
-	
+
 	return cColor;
 }

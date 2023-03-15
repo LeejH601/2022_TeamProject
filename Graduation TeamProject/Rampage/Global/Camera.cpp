@@ -4,6 +4,7 @@
 #include "Global.h"
 #include "Locator.h"
 #include "..\Object\Player.h"
+#include <DirectXMath.h>
 
 CCamera::CCamera()
 {
@@ -38,6 +39,7 @@ void CCamera::OnPrepareRender(ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	SetViewportsAndScissorRects(pd3dCommandList);
 	UpdateShaderVariables(pd3dCommandList);
+	UpdateCameraFrustumBox();
 }
 void CCamera::SetViewport(int xTopLeft, int yTopLeft, int nWidth, int nHeight, float fMinZ, float fMaxZ)
 {
@@ -58,6 +60,13 @@ void CCamera::SetScissorRect(LONG xLeft, LONG yTop, LONG xRight, LONG yBottom)
 void CCamera::GenerateProjectionMatrix(float fNearPlaneDistance, float fFarPlaneDistance, float fAspectRatio, float fFOVAngle)
 {
 	m_xmf4x4Projection = Matrix4x4::PerspectiveFovLH(XMConvertToRadians(fFOVAngle), fAspectRatio, fNearPlaneDistance, fFarPlaneDistance);
+	//m_bFrustumBoundingBox = BoundingFrustum(XMLoadFloat4x4(&m_xmf4x4Projection));
+}
+void CCamera::UpdateCameraFrustumBox()
+{
+	XMMATRIX viewProj = XMLoadFloat4x4(&m_xmf4x4View) * XMLoadFloat4x4(&m_xmf4x4Projection);
+
+	m_bFrustumBoundingBox = BoundingFrustum(viewProj);
 }
 void CCamera::GenerateViewMatrix(XMFLOAT3 xmf3Position, XMFLOAT3 xmf3LookAt, XMFLOAT3 xmf3Up)
 {
