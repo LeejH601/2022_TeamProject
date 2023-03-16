@@ -66,16 +66,12 @@ void CParticleObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dComma
 	pd3dCommandList->SetGraphicsRootConstantBufferView(11, d3dGpuVirtualAddress);
 }
 
-void CParticleObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
-{
-}
-
 
 void CParticleObject::PreRender(ID3D12GraphicsCommandList* pd3dCommandList, CShader* pShader, int nPipelineState)
 {
 	if (!m_bEnable)
 		return;
-	UpdateShaderVariables(pd3dCommandList);
+	CGameObject::UpdateShaderVariables(pd3dCommandList);
 	pShader->OnPrepareRender(pd3dCommandList, nPipelineState);
 	for (int i = 0; i < m_nMaterials; ++i)
 	{

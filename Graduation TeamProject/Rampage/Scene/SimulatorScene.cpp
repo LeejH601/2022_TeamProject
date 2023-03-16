@@ -308,8 +308,8 @@ void CSimulatorScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 	CTextureManager::GetInst()->LoadParticleTexture(pd3dDevice, pd3dCommandList, L"Image/Effect5.dds", m_pParticleObjectShader.get(), 0, 0);
 	m_pParticleObject = std::make_shared<CParticleObject>(CTextureManager::GetInst()->LoadParticleTexture(L"ParticleImage/RoundSoftParticle.dds"), pd3dDevice, pd3dCommandList, GetGraphicsRootSignature(), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), 2.0f, XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT2(2.0f, 2.0f), MAX_PARTICLES, m_pParticleObjectShader.get());
 	CParticleComponent::GetInst()->Set_ParticleComponent(m_pParticleObject);
-	//m_pParticleObject->SetPosition(XMFLOAT3(50 + offset.x, 50.0f, 50 + offset.z));
-
+	m_pParticleObject->SetPosition(XMFLOAT3(offset.x + 80.f, 0.f, 100.f));
+	//m_pParticleObject->SetPosition(XMFLOAT3(50 + offset.x, 100, 50 + offset.z));
 	m_pPostProcessShader = std::make_unique<CPostProcessShader>();
 	m_pPostProcessShader->CreateShader(pd3dDevice, GetGraphicsRootSignature(), 1, NULL, DXGI_FORMAT_D32_FLOAT, 0);
 	m_pPostProcessShader->BuildObjects(pd3dDevice, pd3dCommandList);
