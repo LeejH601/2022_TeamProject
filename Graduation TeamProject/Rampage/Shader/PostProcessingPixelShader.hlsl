@@ -67,6 +67,35 @@ float4 LightShaft(float2 uv, float2 ScreenLightPos, float Weight, float Exposure
 	return float4(color * Exposure, Basecolor.w);
 }
 
+
+
+//void executeRaymarching(float3 VLI) {
+//	
+//}
+//
+//
+//#define NUM_SAMPLES_RCP 0.007125
+//
+//float Volumetirc(float4 cColor) {
+//	float rayMarchDistanceLimit = 999999.0f;
+//	
+//	//...
+//
+//	float rayMarchDistance = trunc(clamp(length(cameraPosLight.xyz - posLight.xyz), 0.0, rayMarchDistanceLimit);
+//
+//	float stepSize = rayMarchDistance * NUM_SAMPLES_RCP;
+//	float3 rayPositionLight = posLight.xyz;
+//
+//	float3 VLI 0.0;
+//
+//	[loop] for (float l = rayMarchDistance; l > stepSize; l -= stepSize) {
+//		executeRaymarching(VLI);
+//	}
+//
+//	float4 color = float4(cColor.xyz * VLI, cColor.w);
+//	return color;
+//}
+
 struct VS_SCREEN_RECT_TEXTURED_OUTPUT
 {
 	float4 position : SV_POSITION;
