@@ -193,6 +193,9 @@
     <ClCompile Include="Object\SkyBox.cpp">
       <Filter>Object</Filter>
     </ClCompile>
+    <ClCompile Include="Shader\SunLightShader.cpp">
+      <Filter>Shader</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Global\stdafx.h">
@@ -372,6 +375,9 @@
     <ClInclude Include="Object\SkyBox.h">
       <Filter>Object</Filter>
     </ClInclude>
+    <ClInclude Include="Shader\SunLightShader.h">
+      <Filter>Shader</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shader\PlayerPixelShader.hlsl" />
@@ -397,6 +403,7 @@
     <FxCompile Include="Shader\PostProcessingPixelShader.hlsl" />
     <FxCompile Include="Shader\PostProcessingVertexShader.hlsl" />
     <FxCompile Include="LightShaft.hlsl" />
+    <FxCompile Include="Shader\SunLightPixelShader.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Shader\Header.hlsli" />

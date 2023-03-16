@@ -1,6 +1,18 @@
 
 #include "Header.hlsli"
 
+cbuffer cbCameraInfo : register(b1)
+{
+	matrix gmtxView : packoffset(c0);
+	matrix gmtxProjection : packoffset(c4);
+	matrix gmtxInverseProjection : packoffset(c8);
+	matrix gmtxInverseView : packoffset(c12);
+	float3 gf3CameraPosition : packoffset(c16);
+	//float3 gf3CameraDirection : packoffset(c17);
+};
+
+#include "Light.hlsl"
+
 TextureCube gtxtSkyCubeTexture : register(t30);
 SamplerState gssClamp : register(s4);
 SamplerState gSamplerState : register(s0);

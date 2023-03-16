@@ -576,9 +576,13 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	((CDepthRenderShader*)m_pDepthRenderShader.get())->SetLight(m_pLight->GetLights());
 	((CDepthRenderShader*)m_pDepthRenderShader.get())->SetTerrain(m_pTerrain.get());
 
+	m_pSunLightShader = std::make_unique<CSunLightShader>();
+	m_pSunLightShader->CreateShader(pd3dDevice, GetGraphicsRootSignature(), 7, pdxgiObjectRtvFormats, DXGI_FORMAT_D32_FLOAT, 0);
+
 	m_pBillBoardObjectShader = std::make_unique<CBillBoardObjectShader>();
 	m_pBillBoardObjectShader->CreateShader(pd3dDevice, GetGraphicsRootSignature(), 7, pdxgiObjectRtvFormats, 0);
 	m_pBillBoardObjectShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 10);
+
 
 	m_pPostProcessShader = std::make_unique<CPostProcessShader>();
 	m_pPostProcessShader->CreateShader(pd3dDevice, GetGraphicsRootSignature(), 1, NULL, DXGI_FORMAT_D32_FLOAT, 0);
@@ -668,9 +672,11 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 
 	m_pLight->Render(pd3dCommandList);
 
+	m_pSunLightShader->Render(pd3dCommandList, pCamera);
+
 	m_pSkyBoxShader->Render(pd3dCommandList, 0);
 	m_pSkyBoxObject->Render(pd3dCommandList, pCamera);
-
+	
 	m_pTerrainShader->Render(pd3dCommandList, 0);
 	m_pTerrain->Render(pd3dCommandList, true);
 

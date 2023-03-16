@@ -132,7 +132,7 @@ void CPostProcessShader::OnPrepareRenderTarget(ID3D12GraphicsCommandList* pd3dCo
 		::SynchronizeResourceTransition(pd3dCommandList, GetTextureResource(i), D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_RENDER_TARGET);
 
 		D3D12_CPU_DESCRIPTOR_HANDLE d3dRtvCPUDescriptorHandle = GetRtvCPUDescriptorHandle(i);
-		FLOAT pfClearColor[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
+		FLOAT pfClearColor[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
 		pd3dCommandList->ClearRenderTargetView(d3dRtvCPUDescriptorHandle, pfClearColor, 0, NULL);
 		pd3dAllRtvCPUHandles[nRenderTargets + i] = d3dRtvCPUDescriptorHandle;
 	}

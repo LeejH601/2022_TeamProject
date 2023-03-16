@@ -10,6 +10,7 @@
 #include "..\Shader\SkyBoxShader.h"
 #include "..\Object\SkyBox.h"
 #include "..\Shader\PostProcessShader.h"
+#include "..\Shader\SunLightShader.h"
 
 #define MAX_OBJECT 1000
 struct DissolveParams {
@@ -27,6 +28,7 @@ private:
 	std::unique_ptr<CShader> m_pDepthRenderShader;
 	std::vector<std::unique_ptr<CGameObject>> m_pBillBoardObjects;
 	std::unique_ptr<CBillBoardObjectShader> m_pBillBoardObjectShader;
+	std::unique_ptr<CSunLightShader> m_pSunLightShader;
 
 	std::vector<std::unique_ptr<CParticleObject>> m_ppParticleObjects;
 	std::shared_ptr<CParticleShader> m_pParticleShader;

@@ -136,7 +136,7 @@ PS_MULTIPLE_RENDER_TARGETS_OUTPUT PS_Player(VS_OUTPUT input)
 
 	if (cColor.a > 0.001f) {
 		float3 toCameraVec = normalize(gf3CameraPosition - input.positionW.xyz);
-		float RimLight = smoothstep(1.0f - 0.3f, 1.0f, 1 - max(0, dot(normalize(input.normalW), toCameraVec)));
+		float RimLight = smoothstep(1.0f - 0.1f, 1.0f, 1 - max(0, dot(normalize(input.normalW), toCameraVec)));
 
 		cColor.xyz += RimLight;
 
