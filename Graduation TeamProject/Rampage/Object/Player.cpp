@@ -63,8 +63,11 @@ bool CPlayer::CheckCollision(CGameObject* pTargetObject)
 			CMessageDispatcher::GetInst()->Dispatch_Message<SoundPlayParams>(MessageType::PLAY_SOUND, &SoundPlayParam, m_pStateMachine->GetCurrentState());
 
 			if (m_pCamera)
+			{
 				m_pCamera->m_bCameraShaking = true;
-
+				m_pCamera->m_bCameraZooming = true;
+				m_pCamera->m_bCameraMoving = true;
+			}
 			pTargetObject->SetHit(this);
 
 			flag = true;
@@ -149,10 +152,10 @@ void CPlayer::UpdateCamera(float fTimeElapsed)
 
 		m_pCamera->Update(xmf3PlayerPos, fTimeElapsed);
 
-		CameraShakeParams camera_shake_params;
+		CameraUpdateParams camera_shake_params;
 		camera_shake_params.pCamera = m_pCamera;
 		camera_shake_params.fElapsedTime = fTimeElapsed;
-		CMessageDispatcher::GetInst()->Dispatch_Message<CameraShakeParams>(MessageType::UPDATE_CAMERA, &camera_shake_params, m_pStateMachine->GetCurrentState());
+		CMessageDispatcher::GetInst()->Dispatch_Message<CameraUpdateParams>(MessageType::UPDATE_CAMERA, &camera_shake_params, m_pStateMachine->GetCurrentState());
 	
 		m_pCamera->RegenerateViewMatrix();
 	}

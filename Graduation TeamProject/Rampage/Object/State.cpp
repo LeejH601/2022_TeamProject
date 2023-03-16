@@ -61,8 +61,27 @@ Atk1_Player::Atk1_Player()
 	// CAMERA SHAKE
 	std::unique_ptr<CameraShakeComponent> pShakeComponent = std::make_unique<CameraShakeComponent>();
 	pShakeComponent->SetDuration(1.0f);
-	pShakeComponent->SetMagnitude(5.0f);
+	pShakeComponent->SetMagnitude(1.5f);
 	m_pListeners.push_back(std::move(pShakeComponent));
+	CMessageDispatcher::GetInst()->RegisterListener(MessageType::UPDATE_CAMERA, m_pListeners.back().get(), this);
+
+	// CAMERA ZOOM IN/OUT
+	std::unique_ptr<CameraZoomerComponent> pZoomerComponent = std::make_unique<CameraZoomerComponent>();
+	pZoomerComponent->SetIsIn(false);
+	pZoomerComponent->SetDirection(XMFLOAT3{ 0.0f, 0.0f, 1.0f });
+	pZoomerComponent->SetMaxDistance(10.0f);
+	pZoomerComponent->SetMovingTime(0.02f);
+	pZoomerComponent->SetRollBackTime(0.25f);
+	m_pListeners.push_back(std::move(pZoomerComponent));
+	CMessageDispatcher::GetInst()->RegisterListener(MessageType::UPDATE_CAMERA, m_pListeners.back().get(), this);
+
+	// CAMERA MOVE
+	std::unique_ptr<CameraMoveComponent> pMoveComponent = std::make_unique<CameraMoveComponent>();
+	pMoveComponent->SetDirection(XMFLOAT3{ 1.0f, 0.0f, 1.0f });
+	pMoveComponent->SetMaxDistance(5.0f);
+	pMoveComponent->SetMovingTime(0.02f);
+	pMoveComponent->SetRollBackTime(0.25f);
+	m_pListeners.push_back(std::move(pMoveComponent));
 	CMessageDispatcher::GetInst()->RegisterListener(MessageType::UPDATE_CAMERA, m_pListeners.back().get(), this);
 }
 
@@ -140,8 +159,27 @@ Atk2_Player::Atk2_Player()
 	// CAMERA SHAKE
 	std::unique_ptr<CameraShakeComponent> pShakeComponent = std::make_unique<CameraShakeComponent>();
 	pShakeComponent->SetDuration(1.0f);
-	pShakeComponent->SetMagnitude(5.0f);
+	pShakeComponent->SetMagnitude(1.5f);
 	m_pListeners.push_back(std::move(pShakeComponent));
+	CMessageDispatcher::GetInst()->RegisterListener(MessageType::UPDATE_CAMERA, m_pListeners.back().get(), this);
+
+	// CAMERA ZOOM IN/OUT
+	std::unique_ptr<CameraZoomerComponent> pZoomerComponent = std::make_unique<CameraZoomerComponent>();
+	pZoomerComponent->SetIsIn(false);
+	pZoomerComponent->SetDirection(XMFLOAT3{ 0.0f, 0.0f, 1.0f });
+	pZoomerComponent->SetMaxDistance(10.0f);
+	pZoomerComponent->SetMovingTime(0.02f);
+	pZoomerComponent->SetRollBackTime(0.25f);
+	m_pListeners.push_back(std::move(pZoomerComponent));
+	CMessageDispatcher::GetInst()->RegisterListener(MessageType::UPDATE_CAMERA, m_pListeners.back().get(), this);
+
+	// CAMERA MOVE
+	std::unique_ptr<CameraMoveComponent> pMoveComponent = std::make_unique<CameraMoveComponent>();
+	pMoveComponent->SetDirection(XMFLOAT3{ 1.0f, 0.0f, 1.0f });
+	pMoveComponent->SetMaxDistance(5.0f);
+	pMoveComponent->SetMovingTime(0.02f);
+	pMoveComponent->SetRollBackTime(0.25f);
+	m_pListeners.push_back(std::move(pMoveComponent));
 	CMessageDispatcher::GetInst()->RegisterListener(MessageType::UPDATE_CAMERA, m_pListeners.back().get(), this);
 }
 
@@ -219,8 +257,27 @@ Atk3_Player::Atk3_Player()
 	// CAMERA SHAKE
 	std::unique_ptr<CameraShakeComponent> pShakeComponent = std::make_unique<CameraShakeComponent>();
 	pShakeComponent->SetDuration(1.0f);
-	pShakeComponent->SetMagnitude(5.0f);
+	pShakeComponent->SetMagnitude(1.5f);
 	m_pListeners.push_back(std::move(pShakeComponent));
+	CMessageDispatcher::GetInst()->RegisterListener(MessageType::UPDATE_CAMERA, m_pListeners.back().get(), this);
+
+	// CAMERA ZOOM IN/OUT
+	std::unique_ptr<CameraZoomerComponent> pZoomerComponent = std::make_unique<CameraZoomerComponent>();
+	pZoomerComponent->SetIsIn(false);
+	pZoomerComponent->SetDirection(XMFLOAT3{ 0.0f, 0.0f, 1.0f });
+	pZoomerComponent->SetMaxDistance(10.0f);
+	pZoomerComponent->SetMovingTime(0.02f);
+	pZoomerComponent->SetRollBackTime(0.25f);
+	m_pListeners.push_back(std::move(pZoomerComponent));
+	CMessageDispatcher::GetInst()->RegisterListener(MessageType::UPDATE_CAMERA, m_pListeners.back().get(), this);
+
+	// CAMERA MOVE
+	std::unique_ptr<CameraMoveComponent> pMoveComponent = std::make_unique<CameraMoveComponent>();
+	pMoveComponent->SetDirection(XMFLOAT3{ 1.0f, 0.0f, 1.0f });
+	pMoveComponent->SetMaxDistance(5.0f);
+	pMoveComponent->SetMovingTime(0.02f);
+	pMoveComponent->SetRollBackTime(0.25f);
+	m_pListeners.push_back(std::move(pMoveComponent));
 	CMessageDispatcher::GetInst()->RegisterListener(MessageType::UPDATE_CAMERA, m_pListeners.back().get(), this);
 }
 

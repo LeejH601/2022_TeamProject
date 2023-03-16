@@ -147,21 +147,6 @@ void CCamera::ReleaseShaderVariables()
 	if (m_pd3dcbCamera)
 		m_pd3dcbCamera->Unmap(0, NULL);
 }
-void CCamera::LoadComponentFromSet(CComponentSet* componentset)
-{
-	m_vComponentSet.clear();
-	m_vComponentSet.emplace_back(componentset->FindComponent(typeid(CCameraMover)));
-	m_vComponentSet.emplace_back(componentset->FindComponent(typeid(CCameraShaker)));
-	m_vComponentSet.emplace_back(componentset->FindComponent(typeid(CCameraZoomer)));
-}
-CComponent* CCamera::FindComponent(const std::type_info& typeinfo)
-{
-	for (CComponent* component : m_vComponentSet) {
-		if (strcmp(typeinfo.name(), typeid(*component).name()) == 0)
-			return component;
-	}
-	return nullptr;
-}
 void CCamera::SetViewportsAndScissorRects(ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	pd3dCommandList->RSSetViewports(1, &m_d3dViewport);

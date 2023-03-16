@@ -3,6 +3,12 @@
 #include "..\Object\Object.h"
 #include "..\Sound\SoundManager.h"
 
+void CMessageDispatcher::RegisterListener(MessageType messageType, IMessageListener* listener, void* filterObject)
+{
+	ListenerInfo info = { listener, filterObject };
+	m_listeners[static_cast<int>(messageType)].push_back(info);
+}
+
 void PlayerAttackComponent::HandleMessage(const Message& message, const PlayerAttackParams& params)
 {
     if (message.getType() == MessageType::PLAYER_ATTACK) {
@@ -41,18 +47,85 @@ void CameraShakeComponent::Update(CCamera* pCamera, float fElapsedTime)
 		pCamera->m_bCameraShaking = false;
 	}
 }
-void CameraShakeComponent::HandleMessage(const Message& message, const CameraShakeParams& params)
+void CameraShakeComponent::HandleMessage(const Message& message, const CameraUpdateParams& params)
 {
 	if (m_bEnable)
 		Update(params.pCamera, params.fElapsedTime);
 }
-void CMessageDispatcher::RegisterListener(MessageType messageType, IMessageListener* listener, void* filterObject)
+void CameraZoomerComponent::Update(CCamera* pCamera, float fElapsedTime)
 {
-    ListenerInfo info = { listener, filterObject };
-    m_listeners[static_cast<int>(messageType)].push_back(info);
+	if (!m_bEnable || !pCamera->m_bCameraZooming)
+		return;
+
+	m_fSpeed = m_fMaxDistance / m_fMovingTime;
+	m_fBackSpeed = m_fMaxDistance / m_fRollBackTime;
+
+	float ZoomConstant = (m_bIsIN) ? 1.0f : -1.0f;
+
+	if (m_fCurrDistance < m_fMaxDistance) {
+		float length = m_fSpeed * fElapsedTime;
+		m_fCurrDistance += length;
+
+		offset = Vector3::Add(offset, Vector3::ScalarProduct(m_xmf3Direction, length * ZoomConstant, false));
+
+		pCamera->m_xmf3CalculatedPosition = Vector3::Add(pCamera->m_xmf3CalculatedPosition, offset);
+	}
+	else if (m_fCurrDistance > m_fMaxDistance * 2.0f) {
+		pCamera->m_bCameraZooming = false;
+		m_fCurrDistance = 0.f;
+		offset.x = 0.0f;
+		offset.y = 0.0f;
+		offset.z = 0.0f;
+	}
+	else if (m_fCurrDistance > m_fMaxDistance) {
+		float length = m_fBackSpeed * fElapsedTime;
+		m_fCurrDistance += length;
+
+		offset = Vector3::Add(offset, Vector3::ScalarProduct(m_xmf3Direction, -length * ZoomConstant, false));
+
+		pCamera->m_xmf3CalculatedPosition = Vector3::Add(pCamera->m_xmf3CalculatedPosition, offset);
+	}
 }
-/*
-플레이어 - 발사 사운드
-몬스터 - 데미지 사운드, 충격 사운드
-어떤 몬스터 맞았는지?에 대한 정보
-*/
+void CameraZoomerComponent::HandleMessage(const Message& message, const CameraUpdateParams& params)
+{
+	if (m_bEnable)
+		Update(params.pCamera, params.fElapsedTime);
+}
+void CameraMoveComponent::Update(CCamera* pCamera, float fElapsedTime)
+{
+	if (!m_bEnable || !pCamera->m_bCameraMoving)
+		return;
+
+	m_fSpeed = m_fMaxDistance / m_fMovingTime;
+	m_fBackSpeed = m_fMaxDistance / m_fRollBackTime;
+
+	if (m_fCurrDistance < m_fMaxDistance) {
+		float length = m_fSpeed * 1.0f * fElapsedTime;
+		m_fCurrDistance += length;
+
+		offset = Vector3::Add(offset, Vector3::ScalarProduct(m_xmf3Direction, length, false));
+
+		pCamera->m_xmf3CalculatedPosition = Vector3::Add(pCamera->m_xmf3CalculatedPosition, offset);
+	}
+	else if (m_fCurrDistance > m_fMaxDistance * 2.0f) {
+		pCamera->m_bCameraMoving = false;
+		m_fCurrDistance = 0.f;
+		offset.x = 0.0f;
+		offset.y = 0.0f;
+		offset.z = 0.0f;
+	}
+	else if (m_fCurrDistance > m_fMaxDistance) {
+		float length = m_fBackSpeed * 1.0f * fElapsedTime;
+		m_fCurrDistance += length;
+
+		offset = Vector3::Add(offset, Vector3::ScalarProduct(m_xmf3Direction, -length, false));
+
+		pCamera->m_xmf3CalculatedPosition = Vector3::Add(pCamera->m_xmf3CalculatedPosition, offset);
+	}
+}
+
+void CameraMoveComponent::HandleMessage(const Message& message, const CameraUpdateParams& params)
+{
+	if (m_bEnable)
+		Update(params.pCamera, params.fElapsedTime);
+}

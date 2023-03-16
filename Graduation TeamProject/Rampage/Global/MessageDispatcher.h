@@ -22,16 +22,17 @@ struct SoundPlayParams {
     SOUND_CATEGORY sound_category = SOUND_CATEGORY::SOUND_SHOCK;
 };
 
-struct CameraShakeParams {
+struct CameraUpdateParams {
     CCamera* pCamera = NULL;
     float fElapsedTime;
 };
+
 // Define message listener interface
 class IMessageListener {
 public:
     virtual void HandleMessage(const Message& message, const PlayerAttackParams& params) {}
     virtual void HandleMessage(const Message& message, const SoundPlayParams& params) {}
-    virtual void HandleMessage(const Message& message, const CameraShakeParams& params) {}
+    virtual void HandleMessage(const Message& message, const CameraUpdateParams& params) {}
 };
 
 // Define Player Attack component
@@ -70,9 +71,62 @@ class CameraShakeComponent : public IMessageListener {
 public:
     void SetDuration(float duration) { m_fDuration = duration; }
     void SetMagnitude(float magnitude) { m_fMagnitude = magnitude; }
+
     void Update(CCamera* pCamera, float fElapsedTime);
-    void Reset();
-    virtual void HandleMessage(const Message& message, const CameraShakeParams& params);
+    virtual void HandleMessage(const Message& message, const CameraUpdateParams& params);
+};
+
+// Define CameraMove component
+class CameraMoveComponent : public IMessageListener {
+    bool m_bEnable = true;
+
+    XMFLOAT3 m_xmf3Direction = XMFLOAT3(0.0f, 0.0f, 1.0f);
+
+    float m_fMaxDistance = 2.0f;
+    float m_fCurrDistance = 0.0f;
+    float m_fMovingTime = 0.02f;
+    float m_fSpeed = m_fMaxDistance / m_fMovingTime;;
+
+    float m_fRollBackTime = 0.1f;
+    float m_fBackSpeed = m_fMaxDistance / m_fRollBackTime;
+
+    XMFLOAT3 offset = XMFLOAT3(0.0f, 0.0f, 0.0f);;
+public:
+    void SetDirection(XMFLOAT3 xmf3direction) { m_xmf3Direction = xmf3direction; }
+    void SetMaxDistance(float max_distance) { m_fMaxDistance = max_distance; }
+    void SetMovingTime(float moving_time) { m_fMovingTime = moving_time; }
+    void SetRollBackTime(float rollback_time) { m_fRollBackTime = rollback_time; }
+
+    void Update(CCamera* pCamera, float fElapsedTime);
+    virtual void HandleMessage(const Message& message, const CameraUpdateParams& params);
+};
+
+// Define Zoom In/Out component
+class CameraZoomerComponent : public IMessageListener {
+    bool m_bEnable = true;
+
+    XMFLOAT3 m_xmf3Direction = XMFLOAT3(0.0f, 0.0f, 1.0f);
+
+    bool m_bIsIN = true;
+
+    float m_fMaxDistance = 2.0f;
+    float m_fCurrDistance = 0.0f;
+    float m_fMovingTime = 0.01f;;
+    float m_fSpeed = m_fMaxDistance / m_fMovingTime;
+
+    float m_fRollBackTime = 0.1f;
+    float m_fBackSpeed = m_fMaxDistance / m_fRollBackTime;
+
+    XMFLOAT3 offset = XMFLOAT3(0.0f, 0.0f, 0.0f);
+public:
+    void SetDirection(XMFLOAT3 direction) { m_xmf3Direction = direction; }
+    void SetMaxDistance(float max_distance) { m_fMaxDistance = max_distance; }
+    void SetMovingTime(float moving_time) { m_fMovingTime = moving_time; }
+    void SetRollBackTime(float roolback_time) { m_fRollBackTime = roolback_time; }
+    void SetIsIn(bool is_in) { m_bIsIN = is_in; }
+
+    void Update(CCamera* pCamera, float fElapsedTime);
+    virtual void HandleMessage(const Message& message, const CameraUpdateParams& params);
 };
 
 struct ListenerInfo {
