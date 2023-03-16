@@ -256,10 +256,10 @@ void CImGuiManager::SetUI()
 			ImGui::SetNextItemWidth(190.f);
 			ImGui::DragFloat("LifeTime##ParticleEffect", &pParticleComponent->m_fLifeTime, 0.01f, 0.0f, 10.0f, "%.1f", 0);
 
-			initial_curpos.y += 25.f;
-			ImGui::SetCursorPos(initial_curpos);
-			ImGui::SetNextItemWidth(190.f);
-			ImGui::DragInt("ParticleCount##ParticleEffect", &pParticleComponent->m_nParticleNumber, 0.01f, 0.0f, 10.0f, "%d", 0);
+			//initial_curpos.y += 25.f;
+			//ImGui::SetCursorPos(initial_curpos);
+			//ImGui::SetNextItemWidth(190.f);
+			//ImGui::DragInt("ParticleCount##ParticleEffect", &pParticleComponent->m_nParticleNumber, 0.01f, 0.0f, 10.0f, "%d", 0);
 
 			initial_curpos.y += 25.f;
 			ImGui::SetCursorPos(initial_curpos);
@@ -269,7 +269,7 @@ void CImGuiManager::SetUI()
 			initial_curpos.y += 25.f;
 			ImGui::SetCursorPos(initial_curpos);
 			ImGui::SetNextItemWidth(30.f);
-			ImGui::ColorEdit3("ParticleEffect", (float*)&pParticleComponent->m_f3Color); // Edit 3 floats representing a color
+			ImGui::ColorEdit3("Color##ParticleEffect", (float*)&pParticleComponent->m_f3Color); // Edit 3 floats representing a color
 			//initial_curpos.x += 35.f;
 			//ImGui::SetCursorPos(initial_curpos);
 			//ImGui::SetNextItemWidth(30.f);
@@ -601,19 +601,25 @@ void CImGuiManager::SetUI()
 
 			initial_curpos.x += 200.f;
 			ImGui::SetCursorPos(initial_curpos);
-			if (ImGui::Button("Animation"))
+			if (ImGui::Button("Animation##SpriteEffect"))
 				AttackSprite->SetSpriteEnable(0);
 			initial_curpos.x -= 200.f;
 
 			initial_curpos.y += 25.f;
 			ImGui::SetCursorPos(initial_curpos);
 			ImGui::SetNextItemWidth(190.f);
-			ImGui::DragFloat("Speed", &AttackSprite->GetSpeed(), 0.01f, 0.0f, 10.0f, "%.2f", 0);
+			ImGui::DragFloat("Speed##SpriteEffect", &AttackSprite->GetSpeed(), 0.01f, 0.0f, 10.0f, "%.2f", 0);
 
 			initial_curpos.y += 25.f;
 			ImGui::SetCursorPos(initial_curpos);
 			ImGui::SetNextItemWidth(190.f);
-			ImGui::DragFloat("Alpha", &AttackSprite->GetAlpha(), 0.01f, 0.0f, 10.0f, "%.2f", 0);
+			ImGui::DragFloat("Alpha##SpriteEffect", &AttackSprite->GetAlpha(), 0.01f, 0.0f, 10.0f, "%.2f", 0);
+			AttackSprite->UpdateData();
+
+			initial_curpos.y += 25.f;
+			ImGui::SetCursorPos(initial_curpos);
+			ImGui::SetNextItemWidth(190.f);
+			ImGui::DragFloat("Size##SpriteEffect", &AttackSprite->GetSize(), 0.01f, 0.0f, 10.0f, "%.2f", 0);
 			AttackSprite->UpdateData();
 		}
 

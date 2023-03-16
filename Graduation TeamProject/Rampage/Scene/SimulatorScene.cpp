@@ -366,7 +366,7 @@ void CSimulatorScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float f
 
 	m_pBillBoardObjectShader->Render(pd3dCommandList, 0);
 	m_pBillBoardObject->Animate(fTimeElapsed);
-	m_pBillBoardObject->UpdateShaderVariables(pd3dCommandList);
+	m_pBillBoardObject->UpdateShaderVariables(pd3dCommandList, fCurrentTime, fTimeElapsed);
 	m_pBillBoardObject->Render(pd3dCommandList, true);
 
 	m_pParticleObject->UpdateShaderVariables(pd3dCommandList, fCurrentTime, fTimeElapsed);

@@ -19,11 +19,6 @@ CBillBoardObject::~CBillBoardObject()
 {
 }
 
-void CBillBoardObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
-{
-	CGameObject::UpdateShaderVariables(pd3dCommandList);
-}
-
 void CBillBoardObject::Animate(float fTimeElapsed)
 {
 	if (m_bEnable) {
@@ -68,6 +63,8 @@ void CBillBoardObject::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12Gra
 
 void CBillBoardObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList, float fCurrentTime, float fElapsedTime)
 {
+	CGameObject::UpdateShaderVariables(pd3dCommandList);
+
 	m_pcbMappedFrameworkInfo->m_fCurrentTime = fCurrentTime;
 	m_pcbMappedFrameworkInfo->m_fElapsedTime = fElapsedTime;
 	m_pcbMappedFrameworkInfo->m_fSpeed = 10.f;
@@ -129,6 +126,11 @@ void CMultiSpriteObject::SetEnable(bool bEnable)
 	CBillBoardObject::Set_Enable(bEnable);
 	m_nRow = 0;
 	m_nCol = 0;
+}
+
+void CMultiSpriteObject::SetSize(float fSize)
+{
+	m_fSize = fSize;
 }
 
 void CMultiSpriteObject::SetSpeed(float fSpeed)

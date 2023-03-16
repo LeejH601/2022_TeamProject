@@ -63,6 +63,7 @@ void CAttackSpriteComponent::UpdateData()
 {
 	if (m_vSprite[0].second) {
 		m_vSprite[0].second->SetSpeed(m_fSpeed);
+		m_vSprite[0].second->SetSize(m_fSize);
 	}
 	if (m_bEnable)
 		m_bAnimation = true;
@@ -81,6 +82,11 @@ float& CAttackSpriteComponent::GetSpeed()
 float& CAttackSpriteComponent::GetAlpha()
 {
 	return m_fAlpha;
+}
+
+float& CAttackSpriteComponent::GetSize()
+{
+	return m_fSize;
 }
 
 //bool CAttackSpriteComponent::HandleMessage(const Telegram& msg)

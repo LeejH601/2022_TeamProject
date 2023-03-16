@@ -34,7 +34,6 @@ public:
 	CBillBoardObject(std::shared_ptr<CTexture> pSpriteTexture, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CShader* pShader, float fSize); // 이미지 이름, 
 	virtual ~CBillBoardObject();
 	virtual void CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
-	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList);
 	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList, float fCurrentTime, float fElapsedTime);
 	virtual void Animate(float fTimeElapsed);
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, bool b_UseTexture, CCamera* pCamera = NULL);
@@ -49,7 +48,7 @@ protected:
 	float							m_fSpeed = 5.f;
 	float							m_fTime = 0.0f;
 	float							m_fAlpha = 1.f;
-	float							m_fSize = 0.f;
+	float							m_fSize = 10.f;
 	float							m_fLifeTime = 0.f;
 
 protected:
@@ -67,6 +66,7 @@ public:
 	virtual void AnimateRowColumn(float fTimeElapsed);
 	virtual void SetEnable(bool bEnable);
 
+	void SetSize(float fSize);
 	void SetSpeed(float fSpeed);
 	void SetAlpah(float fAlpha);
 	bool& GetAnimation();

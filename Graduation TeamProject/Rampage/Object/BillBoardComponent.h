@@ -25,11 +25,11 @@ public:
     unsigned int& GetAttackNumber();
     float& GetSpeed();
     float& GetAlpha();
-
+    float& GetSize();
 private:
     unsigned int m_nMonsterAttackNumber = 0;
     float   m_fSpeed = 5.f;
     float   m_fAlpha = 1.f;
-    float   m_fSize = 0.5f;
+    float   m_fSize = 5.f;
     bool    m_bAnimation = false;
 };

@@ -24,8 +24,8 @@ void CParticleComponent::Update()
 		m_pParticleObject->SetColor(m_f3Color);
 		m_pParticleObject->SetSpeed(m_fSpeed);
 		m_pParticleObject->SetLifeTime(m_fLifeTime);
-		m_pParticleObject->SetMaxParticleN(m_nParticleNumber);
-		m_pParticleObject->SetEmitParticleN(m_nParticleNumber);
+		//m_pParticleObject->SetMaxParticleN(m_nParticleNumber);
+		//m_pParticleObject->SetEmitParticleN(m_nParticleNumber);
 	}
 }
 
