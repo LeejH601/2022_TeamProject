@@ -82,7 +82,7 @@ void CPostProcessShader::CreateResourcesAndViews(ID3D12Device* pd3dDevice, ID3D1
 {
 	m_pTexture = std::make_shared<CTexture>(nResources, RESOURCE_TEXTURE2D, 0, 1);
 
-	D3D12_CLEAR_VALUE d3dClearValue = { DXGI_FORMAT_R8G8B8A8_UNORM, { 0.0f, 0.0f, 0.0f, 1.0f } };
+	D3D12_CLEAR_VALUE d3dClearValue = { DXGI_FORMAT_R8G8B8A8_UNORM, { 1.0f, 1.0f, 1.0f, 1.0f } };
 	for (UINT i = 0; i < nResources; i++)
 	{
 		d3dClearValue.Format = pdxgiFormats[i];
