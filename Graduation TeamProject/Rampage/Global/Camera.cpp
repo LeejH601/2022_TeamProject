@@ -35,8 +35,13 @@ void CCamera::Init(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComm
 }
 void CCamera::OnPrepareRender(ID3D12GraphicsCommandList* pd3dCommandList)
 {
+	RegenerateViewMatrix();
 	SetViewportsAndScissorRects(pd3dCommandList);
 	UpdateShaderVariables(pd3dCommandList);
+}
+void CCamera::OnPostRender()
+{
+	m_xmf3CalculatedPosition = m_xmf3Position;
 }
 void CCamera::SetViewport(int xTopLeft, int yTopLeft, int nWidth, int nHeight, float fMinZ, float fMaxZ)
 {
@@ -107,7 +112,6 @@ void CCamera::ProcessInput(DWORD dwDirection, float cxDelta, float cyDelta, floa
 }
 void CCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
 {
-	m_xmf3CalculatedPosition = m_xmf3Position;
 }
 void CCamera::SetLookAt(XMFLOAT3& xmf3LookAt)
 {
@@ -116,31 +120,6 @@ void CCamera::SetLookAt(XMFLOAT3& xmf3LookAt)
 	m_xmf3Right = XMFLOAT3(mtxLookAt._11, mtxLookAt._21, mtxLookAt._31);
 	m_xmf3Up = XMFLOAT3(mtxLookAt._12, mtxLookAt._22, mtxLookAt._32);
 	m_xmf3Look = XMFLOAT3(mtxLookAt._13, mtxLookAt._23, mtxLookAt._33);
-}
-bool CCamera::HandleMessage(const Telegram& msg)
-{
-	/*MESSAGE_TYPE type = static_cast<MESSAGE_TYPE>(msg.Msg);
-	if (type == MESSAGE_TYPE::Msg_CameraMoveStart || type == MESSAGE_TYPE::Msg_CameraShakeStart || type == MESSAGE_TYPE::Msg_CameraZoomStart)
-	{
-		CComponent* com = nullptr;
-		switch (type)
-		{
-		case MESSAGE_TYPE::Msg_CameraMoveStart:
-			com = FindComponent(typeid(CCameraMover));
-			break;
-		case MESSAGE_TYPE::Msg_CameraShakeStart:
-			com = FindComponent(typeid(CCameraShaker));
-			break;
-		case MESSAGE_TYPE::Msg_CameraZoomStart:
-			com = FindComponent(typeid(CCameraZoomer));
-			break;
-		default:
-			break;
-		}
-		return (com) ? com->HandleMessage(msg) : false;
-	}*/
-
-	return false;
 }
 void CCamera::ReleaseShaderVariables()
 {

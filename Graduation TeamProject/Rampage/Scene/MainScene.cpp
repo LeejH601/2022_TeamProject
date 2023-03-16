@@ -1,6 +1,7 @@
 #include "MainScene.h"
 #include "..\Global\Timer.h"
 #include "..\Global\Camera.h"
+#include "..\Global\MessageDispatcher.h"
 #include "..\Object\Texture.h"
 #include "..\Object\Player.h"
 #include "..\Object\ModelManager.h"
@@ -640,6 +641,17 @@ void CMainTMPScene::UpdateObjects(float fTimeElapsed)
 		m_pObjects[i]->Update(fTimeElapsed);
 		m_pcbMappedDisolveParams->dissolveThreshold[i] = m_pObjects[i]->m_fDissolveThrethHold;
 	}
+
+	// Update Camera
+	XMFLOAT3 xmf3PlayerPos = m_pPlayer->GetPosition();
+	xmf3PlayerPos.y += 12.5f;
+
+	m_pMainSceneCamera->Update(xmf3PlayerPos, fTimeElapsed);
+
+	CameraUpdateParams camera_shake_params;
+	camera_shake_params.pCamera = m_pMainSceneCamera.get();
+	camera_shake_params.fElapsedTime = fTimeElapsed;
+	CMessageDispatcher::GetInst()->Dispatch_Message<CameraUpdateParams>(MessageType::UPDATE_CAMERA, &camera_shake_params, ((CPlayer*)m_pPlayer)->m_pStateMachine->GetCurrentState());
 }
 
 #define WITH_LAG_DOLL_SIMULATION
@@ -716,13 +728,10 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 	//}
 }
 
-void CMainTMPScene::OnPostRenderTarget()
+void CMainTMPScene::OnPostRender()
 {
-	//for (int i = 0; i < m_ppParticleObjects.size(); i++)
-	//{
-	//	m_ppParticleObjects[i]->OnPostRender();
-	//}
-
+	m_pMainSceneCamera->OnPostRender();
+	m_pFloatingCamera->OnPostRender();
 }
 
 void CMainTMPScene::LoadSceneFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, char* pstrFileName)

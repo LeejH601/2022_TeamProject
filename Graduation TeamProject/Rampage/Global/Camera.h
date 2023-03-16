@@ -171,6 +171,7 @@ public:
 
 	void Init(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	void OnPrepareRender(ID3D12GraphicsCommandList* pd3dCommandList);
+	void OnPostRender();
 
 	void GenerateViewMatrix();
 	void GenerateViewMatrix(XMFLOAT3 xmf3Position, XMFLOAT3 xmf3LookAt, XMFLOAT3 xmf3Up);
@@ -220,8 +221,6 @@ public:
 	virtual void ProcessInput(DWORD dwDirection, float cxDelta, float cyDelta, float fTimeElapsed);
 	virtual void Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed);
 	virtual void SetLookAt(XMFLOAT3& xmf3LookAt);
-
-	virtual bool HandleMessage(const Telegram& msg);
 };
 
 class CPlayer;

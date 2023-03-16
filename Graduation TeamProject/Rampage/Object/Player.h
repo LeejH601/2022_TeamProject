@@ -25,7 +25,6 @@ public:
 
 	void ProcessInput(DWORD dwDirection, float cxDelta, float cyDelta, float fTimeElapsed, CCamera* pCamera);
 	virtual void Update(float fTimeElapsed);
-	void UpdateCamera(float fTimeElapsed);
 	virtual bool CheckCollision(CGameObject* pTargetObject);
 
 	void SetCamera(CCamera* pCamera) { m_pCamera = pCamera; }

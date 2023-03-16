@@ -353,8 +353,10 @@ void CSimulatorScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float f
 	m_pParticleObject->UpdateShaderVariables(pd3dCommandList, fCurrentTime, fTimeElapsed);
 	m_pParticleObject->Render(pd3dCommandList, pCamera, m_pParticleObjectShader.get());
 }
-void CSimulatorScene::OnPostRenderTarget()
+void CSimulatorScene::OnPostRender()
 {
+	m_pSimulaterCamera->OnPostRender();
+
 	if(m_pParticleObject)
 		m_pParticleObject->OnPostRender();
 }

@@ -60,7 +60,7 @@ void CLobbyScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTime
 	CImGuiManager::GetInst()->Render(pd3dCommandList);
 }
 
-void CLobbyScene::OnPostRenderTarget()
+void CLobbyScene::OnPostRender()
 {
-	CSimulatorScene::GetInst()->OnPostRenderTarget();
+	CSimulatorScene::GetInst()->OnPostRender();
 }

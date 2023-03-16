@@ -23,7 +23,7 @@ public:
 	SCENE_TYPE GetCurrentScene() { return m_CurrentScene; }
 	void PreRender(ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed);
 	void Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed, float fCurrentTime, CCamera* pCamera = NULL);
-	void OnPostRenderTarget();
+	void OnPostRender();
 	void Update(float fTimeElapsed);
 
 	bool ProcessInput(DWORD dwDirection, float cxDelta, float cyDelta, float fTimeElapsed);

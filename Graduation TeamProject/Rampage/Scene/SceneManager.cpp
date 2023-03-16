@@ -54,9 +54,9 @@ void CSceneManager::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 	m_pCurrentScene->Render(pd3dCommandList, fTimeElapsed, fCurrentTime, pCamera);
 }
 
-void CSceneManager::OnPostRenderTarget()
+void CSceneManager::OnPostRender()
 {
-	m_pCurrentScene->OnPostRenderTarget();
+	m_pCurrentScene->OnPostRender();
 }
 
 void CSceneManager::Update(float fTimeElapsed)

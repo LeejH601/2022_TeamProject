@@ -453,9 +453,9 @@ void CGameFramework::PrepareImGui()
 		::WaitForGpuComplete(m_pd3dCommandQueue.Get(), m_pd3dFence.Get(), ++m_nFenceValues[m_nSwapChainBufferIndex], m_hFenceEvent);
 	}
 }
-void CGameFramework::OnPostRenderTarget()
+void CGameFramework::OnPostRender()
 {
-	m_pSceneManager->OnPostRenderTarget();
+	m_pSceneManager->OnPostRender();
 }
 void CGameFramework::MoveToNextFrame()
 {
@@ -502,7 +502,7 @@ void CGameFramework::RenderObjects()
 	//GPU가 모든 명령 리스트를 실행할 때 까지 기다린다.
 	::WaitForGpuComplete(m_pd3dCommandQueue.Get(), m_pd3dFence.Get(), ++m_nFenceValues[m_nSwapChainBufferIndex], m_hFenceEvent);
 
-	OnPostRenderTarget();
+	OnPostRender();
 }
 void CGameFramework::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
 {

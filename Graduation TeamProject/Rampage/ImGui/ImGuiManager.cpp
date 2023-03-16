@@ -1033,9 +1033,9 @@ void CImGuiManager::Render(ID3D12GraphicsCommandList* pd3dCommandList)
 	ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), pd3dCommandList);
 }
 
-void CImGuiManager::OnPostRenderTarget()
+void CImGuiManager::OnPostRender()
 {
-	CSimulatorScene::GetInst()->OnPostRenderTarget();
+	CSimulatorScene::GetInst()->OnPostRender();
 }
 
 void CImGuiManager::OnDestroy()

@@ -44,7 +44,7 @@ public:
 
 	virtual void Update(float fTimeElapsed);
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed, float fCurrentTime, CCamera* pCamera = NULL);
-	virtual void OnPostRenderTarget();
+	virtual void OnPostRender();
 
 	void SetPlayerAnimationSet(int nSet);
 };

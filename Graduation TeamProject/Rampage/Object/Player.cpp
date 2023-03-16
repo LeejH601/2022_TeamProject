@@ -68,37 +68,11 @@ bool CPlayer::CheckCollision(CGameObject* pTargetObject)
 				m_pCamera->m_bCameraZooming = true;
 				m_pCamera->m_bCameraMoving = true;
 			}
+
 			pTargetObject->SetHit(this);
 
 			flag = true;
 			m_iAttack_Limit--;
-
-			//Telegram msg;
-			//msg.Msg = (int)MESSAGE_TYPE::Msg_CameraShakeStart;
-			//msg.DispatchTime = Locator.GetTimer()->GetNowTime();
-			//msg.Receiver = (IEntity*)Locator.GetSimulaterCamera();
-			////Locator.GetMessageDispather()->RegisterMessage(msg);
-			//Locator.GetMessageDispather()->Discharge(msg.Receiver, msg);
-
-			//msg.Msg = (int)MESSAGE_TYPE::Msg_CameraMoveStart;
-			//msg.DispatchTime = Locator.GetTimer()->GetNowTime();
-			//msg.Receiver = (IEntity*)Locator.GetSimulaterCamera();
-			//msg.Sender = this;
-			////Locator.GetMessageDispather()->RegisterMessage(msg);
-			//Locator.GetMessageDispather()->Discharge(msg.Receiver, msg);
-
-			//msg.Msg = (int)MESSAGE_TYPE::Msg_CameraZoomStart;
-			//msg.DispatchTime = Locator.GetTimer()->GetNowTime();
-			//msg.Receiver = (IEntity*)Locator.GetSimulaterCamera();
-			//msg.Sender = (IEntity*)pTargetObject;
-			////Locator.GetMessageDispather()->RegisterMessage(msg);
-			//Locator.GetMessageDispather()->Discharge(msg.Receiver, msg);
-
-			//msg.Msg = (int)MESSAGE_TYPE::Msg_SoundEffectReady;
-			//msg.DispatchTime = Locator.GetTimer()->GetNowTime();
-			//msg.Receiver = (IEntity*)Locator.GetSoundPlayer();
-			////Locator.GetMessageDispather()->RegisterMessage(msg);
-			//Locator.GetMessageDispather()->Discharge(msg.Receiver, msg);
 
 			if (m_iAttack_Limit < 1)
 				m_bAttacked = true;
@@ -133,32 +107,12 @@ void CPlayer::Update(float fTimeElapsed)
 		CPhysicsObject::Move(m_xmf3Velocity, false);
 	}
 
-	UpdateCamera(fTimeElapsed);
-
 	// 플레이어가 터레인보다 아래에 있지 않도록 하는 코드
 	if (m_pUpdatedContext) CPhysicsObject::OnUpdateCallback(fTimeElapsed);
 
 	Animate(fTimeElapsed);
 
 	CPhysicsObject::Apply_Friction(fTimeElapsed);
-}
-
-void CPlayer::UpdateCamera(float fTimeElapsed)
-{
-	if (m_pCamera)
-	{
-		XMFLOAT3 xmf3PlayerPos = GetPosition();
-		xmf3PlayerPos.y += 12.5f;
-
-		m_pCamera->Update(xmf3PlayerPos, fTimeElapsed);
-
-		CameraUpdateParams camera_shake_params;
-		camera_shake_params.pCamera = m_pCamera;
-		camera_shake_params.fElapsedTime = fTimeElapsed;
-		CMessageDispatcher::GetInst()->Dispatch_Message<CameraUpdateParams>(MessageType::UPDATE_CAMERA, &camera_shake_params, m_pStateMachine->GetCurrentState());
-	
-		m_pCamera->RegenerateViewMatrix();
-	}
 }
 
 void CPlayer::ProcessInput(DWORD dwDirection, float cxDelta, float cyDelta, float fTimeElapsed, CCamera* pCamera)
