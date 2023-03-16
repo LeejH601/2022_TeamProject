@@ -5,8 +5,6 @@ CSoundManager::CSoundManager()
 }
 
 void CSoundManager::RegisterSound(std::string path, bool loop, SOUND_CATEGORY category) {
-	//CSound sound = CSound(g_sound_system, path, loop);
-
 	int index = 0;
 	CategoryMap::iterator it = m_mCategoryMap.find(category);
 	if (it == m_mCategoryMap.end()) {
@@ -21,10 +19,6 @@ void CSoundManager::RegisterSound(std::string path, bool loop, SOUND_CATEGORY ca
 
 	std::pair<int, SOUND_CATEGORY> pair(index, category);
 	m_mSoundIndexMap[path] = pair;
-	//m_mSoundIndexMap.emplace(path, (index, category));
-
-	//m_Sounds.push_back(sound);
-	//m_vSoundPaths.emplace_back(sound.GetPath());
 }
 
 std::vector<CSound>::iterator CSoundManager::FindSound(std::string path)
@@ -36,11 +30,6 @@ std::vector<CSound>::iterator CSoundManager::FindSound(std::string path)
 
 		return ct_it->second.begin() + it->second.first;
 	}
-
-	/*const std::vector<CSound>::iterator it = std::find_if(m_Sounds.begin(), m_Sounds.end(), [path](CSound sound) {
-		return sound.GetPath() == path;
-		});
-	return it;*/
 }
 
 std::vector<CSound>::iterator CSoundManager::FindSound(unsigned int num, SOUND_CATEGORY category)
@@ -48,8 +37,6 @@ std::vector<CSound>::iterator CSoundManager::FindSound(unsigned int num, SOUND_C
 	CategoryMap::iterator it = m_mCategoryMap.find(category);
 
 	return it->second.begin() + num;
-
-	//return FindSound(m_vSoundPaths[num]);
 }
 
 CSoundManager::~CSoundManager() {
@@ -88,39 +75,13 @@ std::vector<std::string> CSoundManager::getSoundPathsByCategory(SOUND_CATEGORY c
 	return std::vector<std::string>();
 }
 
-
-void CSoundManager::PlaySound(std::string path) {
-	const std::vector<CSound>::iterator sound = FindSound(path);
-	(*sound).play(g_sound_system);
+void CSoundManager::UpdateSound()
+{
+	m_SoundPlayer.PlaySounds(g_sound_system);
 }
 
-void CSoundManager::PauseSound(std::string path) {
+void CSoundManager::PlaySound(std::string path, float volume, float fDelay) {
 	const std::vector<CSound>::iterator sound = FindSound(path);
-	(*sound).pause();
-}
-
-void CSoundManager::ResumeSound(std::string path) {
-	const std::vector<CSound>::iterator sound = FindSound(path);
-	(*sound).resume();
-}
-
-void CSoundManager::StopSound(std::string path) {
-	const std::vector<CSound>::iterator sound = FindSound(path);
-	(*sound).stop();
-}
-
-void CSoundManager::VolumeUp(std::string path) {
-	const std::vector<CSound>::iterator sound = FindSound(path);
-	(*sound).volumeUp();
-}
-
-void CSoundManager::VolumeDown(std::string path) {
-	const std::vector<CSound>::iterator sound = FindSound(path);
-	(*sound).volumeDown();
-}
-
-
-void CSoundManager::UpdateSound(std::string path) {
-	const std::vector<CSound>::iterator sound = FindSound(path);
-	(*sound).Update(g_sound_system);
+	(*sound).setVolume(volume);
+	m_SoundPlayer.RegisterSound(&(*sound), fDelay);
 }

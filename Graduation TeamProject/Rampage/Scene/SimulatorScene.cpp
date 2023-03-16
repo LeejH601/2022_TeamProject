@@ -340,7 +340,7 @@ void CSimulatorScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float f
 	m_pTerrainShader->Render(pd3dCommandList, 0);
 	m_pTerrain->Render(pd3dCommandList, true);
 
-	Locator.GetSoundPlayer()->Update(fTimeElapsed);
+	//Locator.GetSoundPlayer()->Update(fTimeElapsed);
 
 	CAttackSpriteComponent::GetInst()->Collision_Check();
 

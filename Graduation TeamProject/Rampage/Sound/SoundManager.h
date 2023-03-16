@@ -2,6 +2,7 @@
 #include "..\Global\stdafx.h"
 #include "..\Global\Global.h"
 #include "Sound.h"
+#include "SoundPlayer.h"
 #include <vector>
 #include <algorithm>
 #include <ctime>
@@ -15,6 +16,7 @@ private:
     FMOD_SYSTEM* g_sound_system = nullptr;
    /* std::vector<CSound> m_Sounds;
     std::vector<std::string> m_vSoundPaths;*/
+    CSoundPlayer m_SoundPlayer;
 
     SoundIndexMap m_mSoundIndexMap;
     CategoryMap m_mCategoryMap;
@@ -34,11 +36,7 @@ public:
     void RegisterSound(std::string path, bool loop, SOUND_CATEGORY category);
     std::vector<CSound>::iterator FindSound(std::string path);
     std::vector<CSound>::iterator FindSound(unsigned int num, SOUND_CATEGORY category);
-    void PlaySound(std::string path);
-    void PauseSound(std::string path);
-    void ResumeSound(std::string path);
-    void StopSound(std::string path);
-    void VolumeUp(std::string path);
-    void VolumeDown(std::string path);
-    void UpdateSound(std::string path);
+
+    void UpdateSound();
+    void PlaySound(std::string path, float volume, float fDelay);
 };

@@ -46,6 +46,7 @@
 #include <set>
 #include <typeinfo>
 #include <algorithm>
+#include <thread>
 #include <chrono>
 #include <atlstr.h>
 #include "..\ImGui\imgui.h"

@@ -23,6 +23,16 @@ CMonster::CMonster()
 	m_pListeners.push_back(std::move(pCollisionComponent));
 
 	CMessageDispatcher::GetInst()->RegisterListener(MessageType::PLAYER_ATTACK, m_pListeners.back().get());
+	
+	// DAMAGE SOUND
+	std::unique_ptr<SoundPlayComponent> pSoundComponent = std::make_unique<SoundPlayComponent>();
+	pSoundComponent->SetSoundNumber(0);
+	pSoundComponent->SetDelay(0.0f);
+	pSoundComponent->SetVolume(1.25f);
+	pSoundComponent->SetSC(SOUND_CATEGORY::SOUND_SHOCK);
+	pSoundComponent->SetSPT(SOUND_PLAY_TYPE::SOUND_PT_NONE);
+	m_pListeners.push_back(std::move(pSoundComponent));
+	CMessageDispatcher::GetInst()->RegisterListener(MessageType::PLAY_SOUND, m_pListeners.back().get(), this);
 }
 
 CMonster::~CMonster()

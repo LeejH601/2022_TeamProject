@@ -55,7 +55,6 @@ private:
 	UINT64 m_nFenceValues[m_nSwapChainBuffers];
 	HANDLE m_hFenceEvent;
 
-	std::unique_ptr<DataLoader> m_pDataLoader = NULL;
 	std::unique_ptr<CGameObject> m_pPlayer = NULL;
 	std::unique_ptr<CSceneManager> m_pSceneManager = NULL;
 

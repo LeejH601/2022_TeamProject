@@ -63,7 +63,7 @@ void CGameFramework::OnDestroy()
 
 	m_pdxgiSwapChain->SetFullscreenState(FALSE, NULL);
 
-	m_pDataLoader->SaveComponentSets(Locator.GetComponentSetRoot());
+	CImGuiManager::GetInst()->OnDestroy();
 }
 void CGameFramework::InitSound()
 {
@@ -99,9 +99,6 @@ void CGameFramework::InitLocator()
 {
 	Locator.Init();
 	Locator.SetTimer(&m_GameTimer);
-
-	m_pDataLoader = std::make_unique<DataLoader>();
-	m_pDataLoader->LoadComponentSets(Locator.GetComponentSetRoot());
 }
 void CGameFramework::InitImgui()
 {
@@ -422,6 +419,7 @@ void CGameFramework::ProcessInput()
 void CGameFramework::UpdateObjects()
 {
 	m_pSceneManager->Update(m_GameTimer.GetFrameTimeElapsed());
+	CSoundManager::GetInst()->UpdateSound();
 }
 void CGameFramework::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
@@ -515,7 +513,7 @@ void CGameFramework::FrameAdvance()
 	UpdateObjects();
 
 	RenderObjects();
-
+	
 	/*스왑체인을 프리젠트한다. 프리젠트를 하면 현재 렌더 타겟(후면버퍼)의 내용이 전면버퍼로 옮겨지고 렌더 타겟 인
 	덱스가 바뀔 것이다.*/
 	m_pdxgiSwapChain->Present(0, 0);

@@ -6,7 +6,6 @@
 #include "..\Global\GameFramework.h"
 #include "..\Global\Locator.h"
 #include "..\Sound\SoundComponent.h"
-#include "..\Sound\SoundPlayer.h"
 #include "..\Sound\SoundManager.h"
 #include "..\Object\BillBoardComponent.h"
 #include "..\Object\TextureManager.h"
@@ -14,6 +13,319 @@
 #include "..\Object\AnimationComponent.h"
 
 #define NUM_FRAMES_IN_FLIGHT 3
+//========================================================================
+void DataLoader::SaveComponentSets(std::set<CoptSetPair, Comp_ComponentSet>& ComponentSets)
+{
+	std::string path;
+	FILE* pInFile;
+
+	for (auto [num, componentset] : ComponentSets) {
+		path = file_path + std::to_string(num) + file_ext;
+		::fopen_s(&pInFile, path.c_str(), "wb");
+
+		SaveComponentSet(pInFile, componentset.get());
+
+		fclose(pInFile);
+	}
+}
+
+void DataLoader::LoadComponentSets(std::set<CoptSetPair, Comp_ComponentSet>& ComponentSets)
+{
+	std::string path;
+	FILE* pInFile;
+
+	for (auto [num, componentset] : ComponentSets) {
+		path = file_path + std::to_string(num) + file_ext;
+
+		::fopen_s(&pInFile, path.c_str(), "rb");
+		if (!pInFile)
+			continue;
+
+		LoadComponentSet(pInFile, componentset.get());
+
+		fclose(pInFile);
+	}
+}
+
+void DataLoader::SaveComponentSet(FILE* pInFile, CComponentSet* componentset)
+{
+	std::string str = "<Components>:";
+	WriteStringFromFile(pInFile, str);
+
+	WriteStringFromFile(pInFile, std::string("<CCameraMover>:"));
+	CCameraMover* mover = (CCameraMover*)componentset->FindComponent(typeid(CCameraMover));
+	WriteStringFromFile(pInFile, std::string("<Enable>:"));
+	WriteIntegerFromFile(pInFile, mover->GetEnable());
+	WriteStringFromFile(pInFile, std::string("<MaxDistance>:"));
+	WriteFloatFromFile(pInFile, mover->m_fMaxDistance);
+	WriteStringFromFile(pInFile, std::string("<MovingTime>:"));
+	WriteFloatFromFile(pInFile, mover->m_fMovingTime);
+	WriteStringFromFile(pInFile, std::string("<RollBackTime>:"));
+	WriteFloatFromFile(pInFile, mover->m_fRollBackTime);
+	WriteStringFromFile(pInFile, std::string("</CCameraMover>:"));
+
+	WriteStringFromFile(pInFile, std::string("<CCameraShaker>:"));
+	CCameraShaker* shaker = (CCameraShaker*)componentset->FindComponent(typeid(CCameraShaker));
+	WriteStringFromFile(pInFile, std::string("<Enable>:"));
+	WriteIntegerFromFile(pInFile, shaker->GetEnable());
+	WriteStringFromFile(pInFile, std::string("<Duration>:"));
+	WriteFloatFromFile(pInFile, shaker->m_fDuration);
+	WriteStringFromFile(pInFile, std::string("<Magnitude>:"));
+	WriteFloatFromFile(pInFile, shaker->m_fMagnitude);
+	WriteStringFromFile(pInFile, std::string("</CCameraShaker>:"));
+
+	WriteStringFromFile(pInFile, std::string("<CCameraZoomer>:"));
+	CCameraZoomer* zoomer = (CCameraZoomer*)componentset->FindComponent(typeid(CCameraZoomer));
+	WriteStringFromFile(pInFile, std::string("<Enable>:"));
+	WriteIntegerFromFile(pInFile, zoomer->GetEnable());
+	WriteStringFromFile(pInFile, std::string("<MaxDistance>:"));
+	WriteFloatFromFile(pInFile, zoomer->m_fMaxDistance);
+	WriteStringFromFile(pInFile, std::string("<MovingTime>:"));
+	WriteFloatFromFile(pInFile, zoomer->m_fMovingTime);
+	WriteStringFromFile(pInFile, std::string("<RollBackTime>:"));
+	WriteFloatFromFile(pInFile, zoomer->m_fRollBackTime);
+	WriteStringFromFile(pInFile, std::string("<IsZoomIN>:"));
+	WriteIntegerFromFile(pInFile, zoomer->m_bIsIN);
+	WriteStringFromFile(pInFile, std::string("</CCameraZoomer>:"));
+
+	WriteStringFromFile(pInFile, std::string("<CEffectSoundComponent>:"));
+	CEffectSoundComponent* effectsound = (CEffectSoundComponent*)componentset->FindComponent(typeid(CEffectSoundComponent));
+	WriteStringFromFile(pInFile, std::string("<Enable>:"));
+	WriteIntegerFromFile(pInFile, effectsound->GetEnable());
+	WriteStringFromFile(pInFile, std::string("<Sound>:"));
+	WriteIntegerFromFile(pInFile, effectsound->m_nSoundNumber);
+	WriteStringFromFile(pInFile, std::string("<Delay>:"));
+	WriteFloatFromFile(pInFile, effectsound->m_fDelay);
+	WriteStringFromFile(pInFile, std::string("<Volume>:"));
+	WriteFloatFromFile(pInFile, effectsound->m_fVolume);
+	WriteStringFromFile(pInFile, std::string("</CEffectSoundComponent>:"));
+
+	WriteStringFromFile(pInFile, std::string("<CShootSoundComponent>:"));
+	CShootSoundComponent* shootsound = (CShootSoundComponent*)componentset->FindComponent(typeid(CShootSoundComponent));
+	WriteStringFromFile(pInFile, std::string("<Enable>:"));
+	WriteIntegerFromFile(pInFile, shootsound->GetEnable());
+	WriteStringFromFile(pInFile, std::string("<Sound>:"));
+	WriteIntegerFromFile(pInFile, shootsound->m_nSoundNumber);
+	WriteStringFromFile(pInFile, std::string("<Delay>:"));
+	WriteFloatFromFile(pInFile, shootsound->m_fDelay);
+	WriteStringFromFile(pInFile, std::string("<Volume>:"));
+	WriteFloatFromFile(pInFile, shootsound->m_fVolume);
+	WriteStringFromFile(pInFile, std::string("</CShootSoundComponent>:"));
+
+	WriteStringFromFile(pInFile, std::string("<CDamageSoundComponent>:"));
+	CDamageSoundComponent* Damagesound = (CDamageSoundComponent*)componentset->FindComponent(typeid(CDamageSoundComponent));
+	WriteStringFromFile(pInFile, std::string("<Enable>:"));
+	WriteIntegerFromFile(pInFile, Damagesound->GetEnable());
+	WriteStringFromFile(pInFile, std::string("<Sound>:"));
+	WriteIntegerFromFile(pInFile, Damagesound->m_nSoundNumber);
+	WriteStringFromFile(pInFile, std::string("<Delay>:"));
+	WriteFloatFromFile(pInFile, Damagesound->m_fDelay);
+	WriteStringFromFile(pInFile, std::string("<Volume>:"));
+	WriteFloatFromFile(pInFile, Damagesound->m_fVolume);
+	WriteStringFromFile(pInFile, std::string("</CDamageSoundComponent>:"));
+
+	str = "</Components>:";
+	WriteStringFromFile(pInFile, str);
+}
+
+void DataLoader::LoadComponentSet(FILE* pInFile, CComponentSet* componentset)
+{
+	char buf[256];
+	std::string str;
+	str.resize(256);
+	ReadStringFromFile(pInFile, buf);
+
+	for (; ; )
+	{
+		ReadStringFromFile(pInFile, buf);
+
+		if (!strcmp(buf, "<CCameraMover>:"))
+		{
+			CCameraMover* component = (CCameraMover*)componentset->FindComponent(typeid(CCameraMover));
+
+			for (; ; )
+			{
+				ReadStringFromFile(pInFile, buf);
+
+				if (!strcmp(buf, "<MaxDistance>:"))
+				{
+					component->m_fMaxDistance = ReadFloatFromFile(pInFile);
+				}
+				else if (!strcmp(buf, "<MovingTime>:"))
+				{
+					component->m_fMovingTime = ReadFloatFromFile(pInFile);
+				}
+				else if (!strcmp(buf, "<RollBackTime>:"))
+				{
+					component->m_fRollBackTime = ReadFloatFromFile(pInFile);
+				}
+				else if (!strcmp(buf, "<Enable>:"))
+				{
+					component->SetEnable(ReadIntegerFromFile(pInFile));
+				}
+				else if (!strcmp(buf, "</CCameraMover>:"))
+				{
+					break;
+				}
+			}
+		}
+		else if (!strcmp(buf, "<CCameraShaker>:"))
+		{
+			CCameraShaker* component = (CCameraShaker*)componentset->FindComponent(typeid(CCameraShaker));
+
+			for (; ; )
+			{
+				ReadStringFromFile(pInFile, buf);
+
+				if (!strcmp(buf, "<Duration>:"))
+				{
+					component->m_fDuration = ReadFloatFromFile(pInFile);
+				}
+				else if (!strcmp(buf, "<Magnitude>:"))
+				{
+					component->m_fMagnitude = ReadFloatFromFile(pInFile);
+				}
+				else if (!strcmp(buf, "<Enable>:"))
+				{
+					component->SetEnable(ReadIntegerFromFile(pInFile));
+				}
+				else if (!strcmp(buf, "</CCameraShaker>:"))
+				{
+					break;
+				}
+			}
+		}
+		else if (!strcmp(buf, "<CCameraZoomer>:"))
+		{
+			CCameraZoomer* component = (CCameraZoomer*)componentset->FindComponent(typeid(CCameraZoomer));
+
+			for (; ; )
+			{
+				ReadStringFromFile(pInFile, buf);
+
+				if (!strcmp(buf, "<MaxDistance>:"))
+				{
+					component->m_fMaxDistance = ReadFloatFromFile(pInFile);
+				}
+				else if (!strcmp(buf, "<MovingTime>:"))
+				{
+					component->m_fMovingTime = ReadFloatFromFile(pInFile);
+				}
+				else if (!strcmp(buf, "<RollBackTime>:"))
+				{
+					component->m_fRollBackTime = ReadFloatFromFile(pInFile);
+				}
+				else if (!strcmp(buf, "<IsZoomIN>:"))
+				{
+					component->m_bIsIN = ReadIntegerFromFile(pInFile);
+				}
+				else if (!strcmp(buf, "<Enable>:"))
+				{
+					component->SetEnable(ReadIntegerFromFile(pInFile));
+				}
+				else if (!strcmp(buf, "</CCameraZoomer>:"))
+				{
+					break;
+				}
+			}
+		}
+		else if (!strcmp(buf, "<CEffectSoundComponent>:"))
+		{
+			CEffectSoundComponent* component = (CEffectSoundComponent*)componentset->FindComponent(typeid(CEffectSoundComponent));
+
+			for (; ; )
+			{
+				ReadStringFromFile(pInFile, buf);
+
+				if (!strcmp(buf, "<Enable>:"))
+				{
+					component->SetEnable(ReadIntegerFromFile(pInFile));
+				}
+				else if (!strcmp(buf, "<Sound>:"))
+				{
+					component->m_nSoundNumber = ReadIntegerFromFile(pInFile);
+				}
+				else if (!strcmp(buf, "<Delay>:"))
+				{
+					component->m_fDelay = ReadFloatFromFile(pInFile);
+				}
+				else if (!strcmp(buf, "<Volume>:"))
+				{
+					component->m_fVolume = ReadFloatFromFile(pInFile);
+				}
+				else if (!strcmp(buf, "</CEffectSoundComponent>:"))
+				{
+					break;
+				}
+			}
+		}
+		else if (!strcmp(buf, "<CShootSoundComponent>:"))
+		{
+			CShootSoundComponent* component = (CShootSoundComponent*)componentset->FindComponent(typeid(CShootSoundComponent));
+
+			for (; ; )
+			{
+				ReadStringFromFile(pInFile, buf);
+
+				if (!strcmp(buf, "<Enable>:"))
+				{
+					component->SetEnable(ReadIntegerFromFile(pInFile));
+				}
+				else if (!strcmp(buf, "<Sound>:"))
+				{
+					component->m_nSoundNumber = ReadIntegerFromFile(pInFile);
+				}
+				else if (!strcmp(buf, "<Delay>:"))
+				{
+					component->m_fDelay = ReadFloatFromFile(pInFile);
+				}
+				else if (!strcmp(buf, "<Volume>:"))
+				{
+					component->m_fVolume = ReadFloatFromFile(pInFile);
+				}
+				else if (!strcmp(buf, "</CShootSoundComponent>:"))
+				{
+					break;
+				}
+			}
+		}
+		else if (!strcmp(buf, "<CDamageSoundComponent>:"))
+		{
+			CDamageSoundComponent* component = (CDamageSoundComponent*)componentset->FindComponent(typeid(CDamageSoundComponent));
+
+			for (; ; )
+			{
+				ReadStringFromFile(pInFile, buf);
+
+				if (!strcmp(buf, "<Enable>:"))
+				{
+					component->SetEnable(ReadIntegerFromFile(pInFile));
+				}
+				else if (!strcmp(buf, "<Sound>:"))
+				{
+					component->m_nSoundNumber = ReadIntegerFromFile(pInFile);
+				}
+				else if (!strcmp(buf, "<Delay>:"))
+				{
+					component->m_fDelay = ReadFloatFromFile(pInFile);
+				}
+				else if (!strcmp(buf, "<Volume>:"))
+				{
+					component->m_fVolume = ReadFloatFromFile(pInFile);
+				}
+				else if (!strcmp(buf, "</CDamageSoundComponent>:"))
+				{
+					break;
+				}
+			}
+		}
+		else if (!strcmp(buf, "</Components>:"))
+		{
+			break;
+		}
+	}
+}
+//========================================================================
 
 wchar_t* ConverCtoWC(const char* str)
 
@@ -123,6 +435,46 @@ void CImGuiManager::Init(HWND hWnd, ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 	ID3D12Resource* pd3dTextureResource = m_pRTTexture->GetResource(0);
 	pd3dDevice->CreateRenderTargetView(pd3dTextureResource, &d3dRenderTargetViewDesc, d3dRtvCPUDescriptorHandle);
 	m_pd3dRtvCPUDescriptorHandles = d3dRtvCPUDescriptorHandle;
+
+	std::shared_ptr<CComponentSet> componentset = std::make_shared<CComponentSet>();
+	SetComponentSet(componentset);
+	componentset = std::make_shared<CComponentSet>();
+	SetComponentSet(componentset);
+	componentset = std::make_shared<CComponentSet>();
+	SetComponentSet(componentset);
+
+	for (auto& [num, componentSet] : m_sComponentSets) {
+		std::shared_ptr<CComponent> component;
+
+		component = std::make_shared<CCameraMover>();
+		componentSet->AddComponent(component);
+		component = std::make_shared<CCameraShaker>();
+		componentSet->AddComponent(component);
+		component = std::make_shared<CCameraZoomer>();
+		componentSet->AddComponent(component);
+
+		component = std::make_shared<CDamageSoundComponent>(CSoundManager::GetInst()->GetSoundSystem());
+		componentSet->AddComponent(component);
+		component = std::make_shared<CEffectSoundComponent>(CSoundManager::GetInst()->GetSoundSystem());
+		componentSet->AddComponent(component);
+		component = std::make_shared<CShootSoundComponent>(CSoundManager::GetInst()->GetSoundSystem());
+		componentSet->AddComponent(component);
+
+		component = CDamageAnimationComponent::GetInst();
+		componentSet->AddComponent(component);
+		component = CShakeAnimationComponent::GetInst();
+		componentSet->AddComponent(component);
+		component = CStunAnimationComponent::GetInst();
+		componentSet->AddComponent(component);
+
+		component = std::make_shared<CAttackSpriteComponent>();
+		componentSet->AddComponent(component);
+		component = std::make_shared<CParticleComponent>();
+		componentSet->AddComponent(component);
+	}
+
+	m_pDataLoader = std::make_unique<DataLoader>();
+	m_pDataLoader->LoadComponentSets(GetComponentSetRoot());
 }
 void CImGuiManager::DemoRendering()
 {
@@ -172,11 +524,10 @@ void CImGuiManager::SetUI()
 	ImGui_ImplWin32_NewFrame();
 	ImGui::NewFrame();
 
-	/*if (m_pCurrentComponentSet == nullptr) {
-		m_pCurrentComponentSet = Locator.GetComponentSet(0);
-		m_pCamera->LoadComponentFromSet(m_pCurrentComponentSet);
-	}*/
-
+	if (m_pCurrentComponentSet == nullptr) {
+		m_pCurrentComponentSet = GetComponentSet(0);
+		//m_pCamera->LoadComponentFromSet(m_pCurrentComponentSet);
+	}
 
 	// Show my window.
 	{
@@ -623,7 +974,7 @@ void CImGuiManager::SetUI()
 
 		if (ImGui::Button("Animation1", ImVec2(175.f, 45.f))) // Buttons return true when clicked (most widgets return true when edited/activated)
 		{
-			CComponentSet* componentset = Locator.GetComponentSet(0);
+			CComponentSet* componentset = GetComponentSet(0);
 			if (componentset) {
 				m_pCurrentComponentSet = componentset;
 				CSimulatorScene::GetInst()->SetPlayerAnimationSet(0);
@@ -632,7 +983,7 @@ void CImGuiManager::SetUI()
 		ImGui::SameLine();
 		if (ImGui::Button("Animation2", ImVec2(175.f, 45.f))) // Buttons return true when clicked (most widgets return true when edited/activated)
 		{
-			CComponentSet* componentset = Locator.GetComponentSet(1);
+			CComponentSet* componentset = GetComponentSet(1);
 			if (componentset) {
 				m_pCurrentComponentSet = componentset;
 				CSimulatorScene::GetInst()->SetPlayerAnimationSet(1);
@@ -641,7 +992,7 @@ void CImGuiManager::SetUI()
 		ImGui::SameLine();
 		if (ImGui::Button("Animation3", ImVec2(175.f, 45.f))) // Buttons return true when clicked (most widgets return true when edited/activated)
 		{
-			CComponentSet* componentset = Locator.GetComponentSet(2);
+			CComponentSet* componentset = GetComponentSet(2);
 			if (componentset) {
 				m_pCurrentComponentSet = componentset;
 				CSimulatorScene::GetInst()->SetPlayerAnimationSet(2);
@@ -685,5 +1036,10 @@ void CImGuiManager::Render(ID3D12GraphicsCommandList* pd3dCommandList)
 void CImGuiManager::OnPostRenderTarget()
 {
 	CSimulatorScene::GetInst()->OnPostRenderTarget();
+}
+
+void CImGuiManager::OnDestroy()
+{
+	m_pDataLoader->SaveComponentSets(GetComponentSetRoot());
 }
 

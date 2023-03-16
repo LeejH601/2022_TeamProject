@@ -133,9 +133,6 @@
     <ClCompile Include="Sound\SoundComponent.cpp">
       <Filter>Sound</Filter>
     </ClCompile>
-    <ClCompile Include="Sound\SoundPlayer.cpp">
-      <Filter>Sound</Filter>
-    </ClCompile>
     <ClCompile Include="Object\AnimationComponent.cpp">
       <Filter>Object</Filter>
     </ClCompile>
@@ -183,6 +180,9 @@
     </ClCompile>
     <ClCompile Include="Global\MessageDispatcher.cpp">
       <Filter>Global</Filter>
+    </ClCompile>
+    <ClCompile Include="Sound\SoundPlayer.cpp">
+      <Filter>Sound</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -303,9 +303,6 @@
     <ClInclude Include="Sound\SoundComponent.h">
       <Filter>Sound</Filter>
     </ClInclude>
-    <ClInclude Include="Sound\SoundPlayer.h">
-      <Filter>Sound</Filter>
-    </ClInclude>
     <ClInclude Include="Object\AnimationComponent.h">
       <Filter>Object</Filter>
     </ClInclude>
@@ -353,6 +350,9 @@
     </ClInclude>
     <ClInclude Include="Global\MessageDispatcher.h">
       <Filter>Global</Filter>
+    </ClInclude>
+    <ClInclude Include="Sound\SoundPlayer.h">
+      <Filter>Sound</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

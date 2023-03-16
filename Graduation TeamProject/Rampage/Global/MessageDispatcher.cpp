@@ -9,16 +9,17 @@ void PlayerAttackComponent::HandleMessage(const Message& message, const PlayerAt
     }
 }
 
-void CMessageDispatcher::RegisterListener(MessageType messageType, IMessageListener* listener)
+void CMessageDispatcher::RegisterListener(MessageType messageType, IMessageListener* listener, void* filterObject)
 {
-	m_listeners[(int)messageType].push_back(listener);
+    ListenerInfo info = { listener, filterObject };
+    m_listeners[static_cast<int>(messageType)].push_back(info);
 }
 
 void SoundPlayComponent::HandleMessage(const Message& message, const SoundPlayParams& params)
 {
-    if (message.getType() == MessageType::PLAY_SOUND) {
-        CSoundManager::GetInst()->PlaySound("Sound/Air Cut by Langerium Id-84616.wav");
-        // 어떻게든 딜레이에 맞춰서 출력하라~
+    if (message.getType() == MessageType::PLAY_SOUND && m_spt == params.spt) {
+        auto pSound = CSoundManager::GetInst()->FindSound(m_nSoundNumber, m_sc);
+        CSoundManager::GetInst()->PlaySound(pSound->GetPath(), m_fVolume, m_fDelay);
     }
 }
 /*

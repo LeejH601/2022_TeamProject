@@ -4,7 +4,8 @@
 #include "..\Global\Global.h"
 #include "..\Global\MessageDispatcher.h"
 #include "..\Sound\Sound.h"
-#include "..\Sound\SoundPlayer.h"
+#include "..\Sound\SoundManager.h"
+#include "..\ImGui\ImGuiManager.h"
 
 void Idle_Player::Enter(CPlayer* player)
 {
@@ -44,14 +45,16 @@ void Atk1_Player::Enter(CPlayer* player)
 
 	PlayerAttackParams PlayerAttackParam;
 	PlayerAttackParam.pPlayer = player;
+	CMessageDispatcher::GetInst()->Dispatch_Message<PlayerAttackParams>(MessageType::PLAYER_ATTACK, &PlayerAttackParam, player);
 
-	CMessageDispatcher::GetInst()->Dispatch_Message<PlayerAttackParams>(MessageType::PLAYER_ATTACK, &PlayerAttackParam);
+	SoundPlayParams SoundPlayParam{ SOUND_PLAY_TYPE::SOUND_PT_ATK1 };
+	CMessageDispatcher::GetInst()->Dispatch_Message<SoundPlayParams>(MessageType::PLAY_SOUND, &SoundPlayParam, player);
 
-	CComponentSet* componentset = Locator.GetComponentSet(0);
+	CComponentSet* componentset = CImGuiManager::GetInst()->GetComponentSet(0);
 	if (componentset) {
 		/*Locator.GetMainSceneCamera()->LoadComponentFromSet(componentset);
-		Locator.GetSimulaterCamera()->LoadComponentFromSet(componentset);*/
-		Locator.GetSoundPlayer()->LoadComponentFromSet(componentset);
+		Locator.GetSimulaterCamera()->LoadComponentFromSet(componentset);
+		Locator.GetSoundPlayer()->LoadComponentFromSet(componentset);*/
 	}
 }
 
@@ -87,11 +90,18 @@ void Atk2_Player::Enter(CPlayer* player)
 	player->m_xmf3CameraMoveDirection = Vector3::Normalize(XMFLOAT3(1.0f, -1.0f, 0.0f));
 	player->m_fCMDConstant = 1.0f;
 
-	CComponentSet* componentset = Locator.GetComponentSet(1);
+	PlayerAttackParams PlayerAttackParam;
+	PlayerAttackParam.pPlayer = player;
+	CMessageDispatcher::GetInst()->Dispatch_Message<PlayerAttackParams>(MessageType::PLAYER_ATTACK, &PlayerAttackParam, player);
+
+	SoundPlayParams SoundPlayParam{ SOUND_PLAY_TYPE::SOUND_PT_ATK2 };
+	CMessageDispatcher::GetInst()->Dispatch_Message<SoundPlayParams>(MessageType::PLAY_SOUND, &SoundPlayParam, player);
+
+	CComponentSet* componentset = CImGuiManager::GetInst()->GetComponentSet(1);
 	if (componentset) {
 		/*Locator.GetMainSceneCamera()->LoadComponentFromSet(componentset);
-		Locator.GetSimulaterCamera()->LoadComponentFromSet(componentset);*/
-		Locator.GetSoundPlayer()->LoadComponentFromSet(componentset);
+		Locator.GetSimulaterCamera()->LoadComponentFromSet(componentset);
+		Locator.GetSoundPlayer()->LoadComponentFromSet(componentset);*/
 	}
 }
 
@@ -124,11 +134,18 @@ void Atk3_Player::Enter(CPlayer* player)
 	player->m_bAttack = false; // 사용자가 좌클릭시 true가 되는 변수
 	player->m_iAttack_Limit = 1;
 
-	CComponentSet* componentset = Locator.GetComponentSet(2);
+	PlayerAttackParams PlayerAttackParam;
+	PlayerAttackParam.pPlayer = player;
+	CMessageDispatcher::GetInst()->Dispatch_Message<PlayerAttackParams>(MessageType::PLAYER_ATTACK, &PlayerAttackParam, player);
+
+	SoundPlayParams SoundPlayParam{ SOUND_PLAY_TYPE::SOUND_PT_ATK3 };
+	CMessageDispatcher::GetInst()->Dispatch_Message<SoundPlayParams>(MessageType::PLAY_SOUND, &SoundPlayParam, player);
+
+	CComponentSet* componentset = CImGuiManager::GetInst()->GetComponentSet(2);
 	if (componentset) {
 		/*Locator.GetMainSceneCamera()->LoadComponentFromSet(componentset);
-		Locator.GetSimulaterCamera()->LoadComponentFromSet(componentset);*/
-		Locator.GetSoundPlayer()->LoadComponentFromSet(componentset);
+		Locator.GetSimulaterCamera()->LoadComponentFromSet(componentset);
+		Locator.GetSoundPlayer()->LoadComponentFromSet(componentset);*/
 	}
 }
 

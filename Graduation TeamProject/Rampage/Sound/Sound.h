@@ -35,6 +35,7 @@ public:
     void pause();
     void resume();
     void stop();
+    void setVolume(float volume);
     void volumeUp();
     void volumeDown();
     void Update(FMOD_SYSTEM* g_sound_system);

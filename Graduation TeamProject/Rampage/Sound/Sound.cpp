@@ -70,6 +70,11 @@ void CSound::stop() {
 	FMOD_Channel_Stop(m_channel);
 }
 
+void CSound::setVolume(float volume)
+{
+	m_volume = volume;
+}
+
 void CSound::volumeUp() {
 	if (m_volume < SOUND_MAX) {
 		m_volume += SOUND_WEIGHT;

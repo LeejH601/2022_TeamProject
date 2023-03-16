@@ -28,6 +28,36 @@ CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 	m_fSpeedKperH = 10.0f;
 	m_fSpeedMperS = m_fSpeedKperH * 1000.0f / 3600.0f;
 	m_fSpeedUperS = m_fSpeedMperS * 8.0f / 1.0f;
+
+	// ATK1
+	std::unique_ptr<SoundPlayComponent> pSoundComponent = std::make_unique<SoundPlayComponent>();
+	pSoundComponent->SetSoundNumber(0);
+	pSoundComponent->SetDelay(0.0f);
+	pSoundComponent->SetVolume(1.25f);
+	pSoundComponent->SetSC(SOUND_CATEGORY::SOUND_SHOOT);
+	pSoundComponent->SetSPT(SOUND_PLAY_TYPE::SOUND_PT_ATK1);
+	m_pListeners.push_back(std::move(pSoundComponent));
+	CMessageDispatcher::GetInst()->RegisterListener(MessageType::PLAY_SOUND, m_pListeners.back().get(), this);
+
+	// ATK2
+	pSoundComponent = std::make_unique<SoundPlayComponent>();
+	pSoundComponent->SetSoundNumber(1);
+	pSoundComponent->SetDelay(0.0f);
+	pSoundComponent->SetVolume(1.25f);
+	pSoundComponent->SetSC(SOUND_CATEGORY::SOUND_SHOOT);
+	pSoundComponent->SetSPT(SOUND_PLAY_TYPE::SOUND_PT_ATK2);
+	m_pListeners.push_back(std::move(pSoundComponent));
+	CMessageDispatcher::GetInst()->RegisterListener(MessageType::PLAY_SOUND, m_pListeners.back().get(), this);
+
+	// ATK3
+	pSoundComponent = std::make_unique<SoundPlayComponent>();
+	pSoundComponent->SetSoundNumber(2);
+	pSoundComponent->SetDelay(0.0f);
+	pSoundComponent->SetVolume(1.25f);
+	pSoundComponent->SetSC(SOUND_CATEGORY::SOUND_SHOOT);
+	pSoundComponent->SetSPT(SOUND_PLAY_TYPE::SOUND_PT_ATK3);
+	m_pListeners.push_back(std::move(pSoundComponent));
+	CMessageDispatcher::GetInst()->RegisterListener(MessageType::PLAY_SOUND, m_pListeners.back().get(), this);
 }
 
 CPlayer::~CPlayer()
