@@ -6,6 +6,8 @@ class CCamera;
 class CPlayer : public CPhysicsObject
 {
 public:
+	CCamera* m_pCamera = nullptr;
+
 	std::unique_ptr<CStateMachine<CPlayer>> m_pStateMachine;
 
 	int m_nAnimationNum = 0;
@@ -23,8 +25,10 @@ public:
 
 	void ProcessInput(DWORD dwDirection, float cxDelta, float cyDelta, float fTimeElapsed, CCamera* pCamera);
 	virtual void Update(float fTimeElapsed);
+	void UpdateCamera(float fTimeElapsed);
 	virtual bool CheckCollision(CGameObject* pTargetObject);
 
+	void SetCamera(CCamera* pCamera) { m_pCamera = pCamera; }
 	virtual void SetScale(float x, float y, float z);
 	void Tmp();
 

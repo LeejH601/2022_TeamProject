@@ -36,17 +36,6 @@ bool CLocator::Init()
 		pvdClient->setScenePvdFlag(physx::PxPvdSceneFlag::eTRANSMIT_SCENEQUERIES, true);
 	}
 
-	std::shared_ptr<CState<CPlayer>> state = std::make_shared<Idle_Player>();
-	SetPlayerState(state);
-	state = std::make_shared<Atk1_Player>();
-	SetPlayerState(state);
-	state = std::make_shared<Atk2_Player>();
-	SetPlayerState(state);
-	state = std::make_shared<Atk3_Player>();
-	SetPlayerState(state);
-	state = std::make_shared<Run_Player>();
-	SetPlayerState(state);
-
 	return true;
 }
 
@@ -69,24 +58,4 @@ void CLocator::OnChangeScene(SCENE_TYPE scene_type)
 		}
 		break;
 	}*/
-}
-
-CState<CPlayer>* CLocator::GetPlayerState(const std::type_info& type)
-{
-	/*auto comp = [](size_t hashcode, CState<CPlayer>& state) {
-		return hashcode < typeid(state).hash_code();
-	};*/
-	//auto it = m_sPlayerStateSet.find<size_t, Statecomp, Statecomp::is_transparent>(type.hash_code());
-	statedummy.first = type.hash_code();
-	std::set<PlayerStatePair, Comp_PlayerState>::iterator it = m_sPlayerStateSet.find(statedummy);
-	if (it == m_sPlayerStateSet.end())
-		return nullptr;
-
-	return it->second.get();
-}
-
-void CLocator::SetPlayerState(std::shared_ptr<CState<CPlayer>>& state)
-{
-	PlayerStatePair pair = std::make_pair(typeid(*state.get()).hash_code(), state);
-	m_sPlayerStateSet.insert(pair);
 }

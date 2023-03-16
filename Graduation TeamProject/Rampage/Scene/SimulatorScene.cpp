@@ -249,6 +249,7 @@ void CSimulatorScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 	// 3->IDLE
 	// 28->Attack
 	m_pMainCharacter = std::make_unique<CPlayer>(pd3dDevice, pd3dCommandList, 1);
+	m_pMainCharacter->SetCamera(m_pSimulaterCamera.get());
 
 	((CDepthRenderShader*)m_pDepthRenderShader.get())->SetLight(m_pLight->GetLights());
 	((CDepthRenderShader*)m_pDepthRenderShader.get())->SetTerrain(m_pTerrain.get());
@@ -313,14 +314,14 @@ void CSimulatorScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 }
 void CSimulatorScene::Update(float fTimeElapsed)
 {
+	m_pSimulaterCamera->Update(XMFLOAT3{0.0f, 0.0f, 0.0f}, fTimeElapsed);
 	m_pMainCharacter->Update(fTimeElapsed);
 
 	for (int i = 0; i < m_pEnemys.size(); ++i)
 		m_pEnemys[i]->Update(fTimeElapsed);
 }
 void CSimulatorScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed, float fCurrentTime, CCamera* pCamera)
-{
-	m_pSimulaterCamera->Animate(fTimeElapsed);
+{     
 	m_pSimulaterCamera->RegenerateViewMatrix();
 	m_pSimulaterCamera->OnPrepareRender(pd3dCommandList);
 
@@ -363,13 +364,13 @@ void CSimulatorScene::SetPlayerAnimationSet(int nSet)
 	switch (nSet)
 	{
 	case 0:
-		m_pMainCharacter->m_pStateMachine->ChangeState(Locator.GetPlayerState(typeid(Atk1_Player)));
+		m_pMainCharacter->m_pStateMachine->ChangeState(Atk1_Player::GetInst());
 		break;
 	case 1:
-		m_pMainCharacter->m_pStateMachine->ChangeState(Locator.GetPlayerState(typeid(Atk2_Player)));
+		m_pMainCharacter->m_pStateMachine->ChangeState(Atk2_Player::GetInst());
 		break;
 	case 2:
-		m_pMainCharacter->m_pStateMachine->ChangeState(Locator.GetPlayerState(typeid(Atk3_Player)));
+		m_pMainCharacter->m_pStateMachine->ChangeState(Atk3_Player::GetInst());
 		break;
 	default:
 		break;

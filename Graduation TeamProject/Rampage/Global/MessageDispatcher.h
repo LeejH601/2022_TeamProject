@@ -3,6 +3,8 @@
 #include "Global.h"
 
 class CGameObject;
+class CCamera;
+
 // Define base message class
 class Message {
 private:
@@ -17,14 +19,19 @@ struct PlayerAttackParams {
 };
 
 struct SoundPlayParams {
-    SOUND_PLAY_TYPE spt = SOUND_PLAY_TYPE::SOUND_PT_NONE;
+    SOUND_CATEGORY sound_category = SOUND_CATEGORY::SOUND_SHOCK;
 };
 
+struct CameraShakeParams {
+    CCamera* pCamera = NULL;
+    float fElapsedTime;
+};
 // Define message listener interface
 class IMessageListener {
 public:
     virtual void HandleMessage(const Message& message, const PlayerAttackParams& params) {}
     virtual void HandleMessage(const Message& message, const SoundPlayParams& params) {}
+    virtual void HandleMessage(const Message& message, const CameraShakeParams& params) {}
 };
 
 // Define Player Attack component
@@ -42,15 +49,30 @@ class SoundPlayComponent : public IMessageListener {
     float m_fDelay = 0.0f;
     float m_fVolume = 0.0f;
     SOUND_CATEGORY m_sc = SOUND_CATEGORY::SOUND_SHOCK;
-    SOUND_PLAY_TYPE m_spt = SOUND_PLAY_TYPE::SOUND_PT_NONE;
 public:
     void SetSoundNumber(unsigned int SoundNumber) { m_nSoundNumber = SoundNumber; }
     void SetDelay(float Delay) { m_fDelay = Delay; }
     void SetVolume(float Volume) { m_fVolume = Volume; }
     void SetSC(SOUND_CATEGORY sc) { m_sc = sc; }
-    void SetSPT(SOUND_PLAY_TYPE spt) { m_spt = spt; }
 
     virtual void HandleMessage(const Message& message, const SoundPlayParams& params);
+};
+
+// Define Shake Movement component
+class CameraShakeComponent : public IMessageListener {
+    bool m_bEnable = true;
+
+    std::uniform_real_distribution<float> urd{ -1.0f, 1.0f };
+
+    float m_ft = 0.0f;;
+    float m_fDuration;
+    float m_fMagnitude;
+public:
+    void SetDuration(float duration) { m_fDuration = duration; }
+    void SetMagnitude(float magnitude) { m_fMagnitude = magnitude; }
+    void Update(CCamera* pCamera, float fElapsedTime);
+    void Reset();
+    virtual void HandleMessage(const Message& message, const CameraShakeParams& params);
 };
 
 struct ListenerInfo {
@@ -61,7 +83,7 @@ struct ListenerInfo {
 // Define message dispatcher
 class CMessageDispatcher {
 private:
-    std::vector<ListenerInfo> m_listeners[static_cast<int>(MessageType::PLAY_SOUND) + 1];
+    std::vector<ListenerInfo> m_listeners[static_cast<int>(MessageType::UPDATE_CAMERA) + 1];
 public:
     DECLARE_SINGLE(CMessageDispatcher);
     CMessageDispatcher() { }

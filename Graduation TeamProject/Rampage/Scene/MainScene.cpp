@@ -17,6 +17,7 @@ void CMainTMPScene::SetPlayer(CGameObject* pPlayer)
 {
 	m_pPlayer = pPlayer;
 	((CPlayer*)m_pPlayer)->SetUpdatedContext(m_pTerrain.get());
+	((CPlayer*)m_pPlayer)->SetCamera(m_pMainSceneCamera.get());
 	((CThirdPersonCamera*)m_pMainSceneCamera.get())->SetPlayer((CPlayer*)m_pPlayer);
 
 	if (m_pDepthRenderShader.get())
@@ -632,9 +633,6 @@ bool CMainTMPScene::ProcessInput(DWORD dwDirection, float cxDelta, float cyDelta
 }
 void CMainTMPScene::UpdateObjects(float fTimeElapsed)
 {
-	m_pFloatingCamera->Animate(fTimeElapsed);
-	m_pMainSceneCamera->Animate(fTimeElapsed);
-
 	m_pPlayer->Update(fTimeElapsed);
 	m_pLight->Update((CPlayer*)m_pPlayer);
 
@@ -642,11 +640,6 @@ void CMainTMPScene::UpdateObjects(float fTimeElapsed)
 		m_pObjects[i]->Update(fTimeElapsed);
 		m_pcbMappedDisolveParams->dissolveThreshold[i] = m_pObjects[i]->m_fDissolveThrethHold;
 	}
-
-	XMFLOAT3 xmf3PlayerPos = m_pPlayer->GetPosition();
-	xmf3PlayerPos.y += 12.5f;
-
-	m_pCurrentCamera->Update(xmf3PlayerPos, 0.0f);
 }
 
 #define WITH_LAG_DOLL_SIMULATION

@@ -2,7 +2,8 @@
 
 enum class MessageType {
 	PLAYER_ATTACK,
-	PLAY_SOUND
+	PLAY_SOUND,
+	UPDATE_CAMERA,
 };
 
 enum class MESSAGE_TYPE
@@ -27,14 +28,6 @@ enum class SOUND_CATEGORY
 	SOUND_VOICE,
 	SOUND_SHOOT,
 	SOUND_EFFECT,
-};
-
-enum class SOUND_PLAY_TYPE
-{
-	SOUND_PT_NONE,
-	SOUND_PT_ATK1,
-	SOUND_PT_ATK2,
-	SOUND_PT_ATK3,
 };
 
 enum class SCENE_TYPE

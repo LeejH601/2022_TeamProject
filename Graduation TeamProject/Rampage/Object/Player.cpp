@@ -18,8 +18,8 @@ CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 	SetChild(knightObject);
 
 	m_pStateMachine = std::make_unique<CStateMachine<CPlayer>>(this);
-	m_pStateMachine->SetCurrentState(Locator.GetPlayerState(typeid(Idle_Player)));
-	m_pStateMachine->ChangeState(Locator.GetPlayerState(typeid(Idle_Player)));
+	m_pStateMachine->SetCurrentState(Idle_Player::GetInst());
+	m_pStateMachine->ChangeState(Idle_Player::GetInst());
 
 	SetPosition(XMFLOAT3(100.0f, 150.0f, -100.0f));
 	SetScale(4.0f, 4.0f, 4.0f);
@@ -28,36 +28,6 @@ CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 	m_fSpeedKperH = 10.0f;
 	m_fSpeedMperS = m_fSpeedKperH * 1000.0f / 3600.0f;
 	m_fSpeedUperS = m_fSpeedMperS * 8.0f / 1.0f;
-
-	// ATK1
-	std::unique_ptr<SoundPlayComponent> pSoundComponent = std::make_unique<SoundPlayComponent>();
-	pSoundComponent->SetSoundNumber(0);
-	pSoundComponent->SetDelay(0.0f);
-	pSoundComponent->SetVolume(1.25f);
-	pSoundComponent->SetSC(SOUND_CATEGORY::SOUND_SHOOT);
-	pSoundComponent->SetSPT(SOUND_PLAY_TYPE::SOUND_PT_ATK1);
-	m_pListeners.push_back(std::move(pSoundComponent));
-	CMessageDispatcher::GetInst()->RegisterListener(MessageType::PLAY_SOUND, m_pListeners.back().get(), this);
-
-	// ATK2
-	pSoundComponent = std::make_unique<SoundPlayComponent>();
-	pSoundComponent->SetSoundNumber(1);
-	pSoundComponent->SetDelay(0.0f);
-	pSoundComponent->SetVolume(1.25f);
-	pSoundComponent->SetSC(SOUND_CATEGORY::SOUND_SHOOT);
-	pSoundComponent->SetSPT(SOUND_PLAY_TYPE::SOUND_PT_ATK2);
-	m_pListeners.push_back(std::move(pSoundComponent));
-	CMessageDispatcher::GetInst()->RegisterListener(MessageType::PLAY_SOUND, m_pListeners.back().get(), this);
-
-	// ATK3
-	pSoundComponent = std::make_unique<SoundPlayComponent>();
-	pSoundComponent->SetSoundNumber(2);
-	pSoundComponent->SetDelay(0.0f);
-	pSoundComponent->SetVolume(1.25f);
-	pSoundComponent->SetSC(SOUND_CATEGORY::SOUND_SHOOT);
-	pSoundComponent->SetSPT(SOUND_PLAY_TYPE::SOUND_PT_ATK3);
-	m_pListeners.push_back(std::move(pSoundComponent));
-	CMessageDispatcher::GetInst()->RegisterListener(MessageType::PLAY_SOUND, m_pListeners.back().get(), this);
 }
 
 CPlayer::~CPlayer()
@@ -69,8 +39,8 @@ void CPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity, CCa
 {
 	if (dwDirection)
 	{
-		if (m_pStateMachine->GetCurrentState() == Locator.GetPlayerState(typeid(Idle_Player)))
-			m_pStateMachine->ChangeState(Locator.GetPlayerState(typeid(Run_Player)));
+		if (m_pStateMachine->GetCurrentState() == Idle_Player::GetInst())
+			m_pStateMachine->ChangeState(Run_Player::GetInst());
 
 		XMFLOAT3 xmf3Shift = XMFLOAT3{};
 
@@ -88,6 +58,12 @@ bool CPlayer::CheckCollision(CGameObject* pTargetObject)
 	bool flag = false;
 	if (m_pChild.get()) {
 		if (!m_bAttacked && m_pChild->CheckCollision(pTargetObject)) {
+
+			SoundPlayParams SoundPlayParam{ SOUND_CATEGORY::SOUND_SHOCK };
+			CMessageDispatcher::GetInst()->Dispatch_Message<SoundPlayParams>(MessageType::PLAY_SOUND, &SoundPlayParam, m_pStateMachine->GetCurrentState());
+
+			if (m_pCamera)
+				m_pCamera->m_bCameraShaking = true;
 
 			pTargetObject->SetHit(this);
 
@@ -133,11 +109,11 @@ void CPlayer::Update(float fTimeElapsed)
 	m_pStateMachine->Update(fTimeElapsed);
 
 	// Idle 상태로 복귀하는 코드
-	if (!Vector3::Length(m_xmf3Velocity) && m_pStateMachine->GetCurrentState() == Locator.GetPlayerState(typeid(Run_Player)))
-		m_pStateMachine->ChangeState(Locator.GetPlayerState(typeid(Idle_Player)));
+	if (!Vector3::Length(m_xmf3Velocity) && m_pStateMachine->GetCurrentState() == Run_Player::GetInst())
+		m_pStateMachine->ChangeState(Idle_Player::GetInst());
 
 	// Run 상태일때 플레이어를 이동시키고 방향전환 시켜주는 코드
-	if (m_pStateMachine->GetCurrentState() == Locator.GetPlayerState(typeid(Run_Player)))
+	if (m_pStateMachine->GetCurrentState() == Run_Player::GetInst())
 	{
 		CPhysicsObject::Apply_Gravity(fTimeElapsed);
 
@@ -154,12 +130,32 @@ void CPlayer::Update(float fTimeElapsed)
 		CPhysicsObject::Move(m_xmf3Velocity, false);
 	}
 
+	UpdateCamera(fTimeElapsed);
+
 	// 플레이어가 터레인보다 아래에 있지 않도록 하는 코드
 	if (m_pUpdatedContext) CPhysicsObject::OnUpdateCallback(fTimeElapsed);
 
 	Animate(fTimeElapsed);
 
 	CPhysicsObject::Apply_Friction(fTimeElapsed);
+}
+
+void CPlayer::UpdateCamera(float fTimeElapsed)
+{
+	if (m_pCamera)
+	{
+		XMFLOAT3 xmf3PlayerPos = GetPosition();
+		xmf3PlayerPos.y += 12.5f;
+
+		m_pCamera->Update(xmf3PlayerPos, fTimeElapsed);
+
+		CameraShakeParams camera_shake_params;
+		camera_shake_params.pCamera = m_pCamera;
+		camera_shake_params.fElapsedTime = fTimeElapsed;
+		CMessageDispatcher::GetInst()->Dispatch_Message<CameraShakeParams>(MessageType::UPDATE_CAMERA, &camera_shake_params, m_pStateMachine->GetCurrentState());
+	
+		m_pCamera->RegenerateViewMatrix();
+	}
 }
 
 void CPlayer::ProcessInput(DWORD dwDirection, float cxDelta, float cyDelta, float fTimeElapsed, CCamera* pCamera)

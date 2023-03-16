@@ -7,6 +7,14 @@
 #include "..\Sound\SoundManager.h"
 #include "..\ImGui\ImGuiManager.h"
 
+Idle_Player::Idle_Player()
+{
+}
+
+Idle_Player::~Idle_Player()
+{
+}
+
 void Idle_Player::Enter(CPlayer* player)
 {
 	player->m_pChild->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 4);
@@ -22,12 +30,44 @@ void Idle_Player::Execute(CPlayer* player, float fElapsedTime)
 	
 	// 사용자가 좌클릭을 했으면 Atk1_Player로 상태 변경
 	if(player->m_bAttack)
-		player->m_pStateMachine->ChangeState(Locator.GetPlayerState(typeid(Atk1_Player)));
+		player->m_pStateMachine->ChangeState(Atk1_Player::GetInst());
 }
 
 void Idle_Player::Exit(CPlayer* player)
 {
 
+}
+
+Atk1_Player::Atk1_Player()
+{
+	// ATK1 SOUND
+	std::unique_ptr<SoundPlayComponent> pSoundComponent = std::make_unique<SoundPlayComponent>();
+	pSoundComponent->SetSoundNumber(0);
+	pSoundComponent->SetDelay(0.0f);
+	pSoundComponent->SetVolume(1.25f);
+	pSoundComponent->SetSC(SOUND_CATEGORY::SOUND_SHOOT);
+	m_pListeners.push_back(std::move(pSoundComponent));
+	CMessageDispatcher::GetInst()->RegisterListener(MessageType::PLAY_SOUND, m_pListeners.back().get(), this);
+
+	// DAMAGE SOUND
+	pSoundComponent = std::make_unique<SoundPlayComponent>();
+	pSoundComponent->SetSoundNumber(0);
+	pSoundComponent->SetDelay(0.05f);
+	pSoundComponent->SetVolume(0.75f);
+	pSoundComponent->SetSC(SOUND_CATEGORY::SOUND_SHOCK);
+	m_pListeners.push_back(std::move(pSoundComponent));
+	CMessageDispatcher::GetInst()->RegisterListener(MessageType::PLAY_SOUND, m_pListeners.back().get(), this);
+
+	// CAMERA SHAKE
+	std::unique_ptr<CameraShakeComponent> pShakeComponent = std::make_unique<CameraShakeComponent>();
+	pShakeComponent->SetDuration(1.0f);
+	pShakeComponent->SetMagnitude(5.0f);
+	m_pListeners.push_back(std::move(pShakeComponent));
+	CMessageDispatcher::GetInst()->RegisterListener(MessageType::UPDATE_CAMERA, m_pListeners.back().get(), this);
+}
+
+Atk1_Player::~Atk1_Player()
+{
 }
 
 void Atk1_Player::Enter(CPlayer* player)
@@ -47,8 +87,8 @@ void Atk1_Player::Enter(CPlayer* player)
 	PlayerAttackParam.pPlayer = player;
 	CMessageDispatcher::GetInst()->Dispatch_Message<PlayerAttackParams>(MessageType::PLAYER_ATTACK, &PlayerAttackParam, player);
 
-	SoundPlayParams SoundPlayParam{ SOUND_PLAY_TYPE::SOUND_PT_ATK1 };
-	CMessageDispatcher::GetInst()->Dispatch_Message<SoundPlayParams>(MessageType::PLAY_SOUND, &SoundPlayParam, player);
+	SoundPlayParams SoundPlayParam{ SOUND_CATEGORY::SOUND_SHOOT };
+	CMessageDispatcher::GetInst()->Dispatch_Message<SoundPlayParams>(MessageType::PLAY_SOUND, &SoundPlayParam, this);
 
 	CComponentSet* componentset = CImGuiManager::GetInst()->GetComponentSet(0);
 	if (componentset) {
@@ -65,15 +105,47 @@ void Atk1_Player::Execute(CPlayer* player, float fElapsedTime)
 	
 	// 사용자가 좌클릭을 했으면 애니메이션을 0.7초 진행 후 Atk2_Player로 상태 변경
 	if (player->m_bAttack && 0.7 < player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition )
-		player->m_pStateMachine->ChangeState(Locator.GetPlayerState(typeid(Atk2_Player)));
+		player->m_pStateMachine->ChangeState(Atk2_Player::GetInst());
 
 	if (player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition == pAnimationSet->m_fLength)
 	{
-		player->m_pStateMachine->ChangeState(Locator.GetPlayerState(typeid(Idle_Player)));
+		player->m_pStateMachine->ChangeState(Idle_Player::GetInst());
 	}
 }
 
 void Atk1_Player::Exit(CPlayer* player)
+{
+}
+
+Atk2_Player::Atk2_Player()
+{
+	// ATK2 SOUND
+	std::unique_ptr<SoundPlayComponent> pSoundComponent = std::make_unique<SoundPlayComponent>();
+	pSoundComponent->SetSoundNumber(1);
+	pSoundComponent->SetDelay(0.0f);
+	pSoundComponent->SetVolume(1.25f);
+	pSoundComponent->SetSC(SOUND_CATEGORY::SOUND_SHOOT);
+	m_pListeners.push_back(std::move(pSoundComponent));
+	CMessageDispatcher::GetInst()->RegisterListener(MessageType::PLAY_SOUND, m_pListeners.back().get(), this);
+
+	// DAMAGE SOUND
+	pSoundComponent = std::make_unique<SoundPlayComponent>();
+	pSoundComponent->SetSoundNumber(1);
+	pSoundComponent->SetDelay(0.05f);
+	pSoundComponent->SetVolume(0.75f);
+	pSoundComponent->SetSC(SOUND_CATEGORY::SOUND_SHOCK);
+	m_pListeners.push_back(std::move(pSoundComponent));
+	CMessageDispatcher::GetInst()->RegisterListener(MessageType::PLAY_SOUND, m_pListeners.back().get(), this);
+
+	// CAMERA SHAKE
+	std::unique_ptr<CameraShakeComponent> pShakeComponent = std::make_unique<CameraShakeComponent>();
+	pShakeComponent->SetDuration(1.0f);
+	pShakeComponent->SetMagnitude(5.0f);
+	m_pListeners.push_back(std::move(pShakeComponent));
+	CMessageDispatcher::GetInst()->RegisterListener(MessageType::UPDATE_CAMERA, m_pListeners.back().get(), this);
+}
+
+Atk2_Player::~Atk2_Player()
 {
 }
 
@@ -94,8 +166,8 @@ void Atk2_Player::Enter(CPlayer* player)
 	PlayerAttackParam.pPlayer = player;
 	CMessageDispatcher::GetInst()->Dispatch_Message<PlayerAttackParams>(MessageType::PLAYER_ATTACK, &PlayerAttackParam, player);
 
-	SoundPlayParams SoundPlayParam{ SOUND_PLAY_TYPE::SOUND_PT_ATK2 };
-	CMessageDispatcher::GetInst()->Dispatch_Message<SoundPlayParams>(MessageType::PLAY_SOUND, &SoundPlayParam, player);
+	SoundPlayParams SoundPlayParam{ SOUND_CATEGORY::SOUND_SHOOT };
+	CMessageDispatcher::GetInst()->Dispatch_Message<SoundPlayParams>(MessageType::PLAY_SOUND, &SoundPlayParam, this);
 
 	CComponentSet* componentset = CImGuiManager::GetInst()->GetComponentSet(1);
 	if (componentset) {
@@ -112,15 +184,47 @@ void Atk2_Player::Execute(CPlayer* player, float fElapsedTime)
 	
 	// 사용자가 좌클릭을 했으면 애니메이션을 0.7초 진행 후 Atk2_Player로 상태 변경
 	if (player->m_bAttack && 0.7 < player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition)
-		player->m_pStateMachine->ChangeState(Locator.GetPlayerState(typeid(Atk3_Player)));
+		player->m_pStateMachine->ChangeState(Atk3_Player::GetInst());
 
 	if (player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition == pAnimationSet->m_fLength)
 	{
-		player->m_pStateMachine->ChangeState(Locator.GetPlayerState(typeid(Idle_Player)));
+		player->m_pStateMachine->ChangeState(Idle_Player::GetInst());
 	}
 }
 
 void Atk2_Player::Exit(CPlayer* player)
+{
+}
+
+Atk3_Player::Atk3_Player()
+{
+	// ATK3 SOUND
+	std::unique_ptr<SoundPlayComponent> pSoundComponent = std::make_unique<SoundPlayComponent>();
+	pSoundComponent->SetSoundNumber(2);
+	pSoundComponent->SetDelay(0.0f);
+	pSoundComponent->SetVolume(1.25f);
+	pSoundComponent->SetSC(SOUND_CATEGORY::SOUND_SHOOT);
+	m_pListeners.push_back(std::move(pSoundComponent));
+	CMessageDispatcher::GetInst()->RegisterListener(MessageType::PLAY_SOUND, m_pListeners.back().get(), this);
+
+	// DAMAGE SOUND
+	pSoundComponent = std::make_unique<SoundPlayComponent>();
+	pSoundComponent->SetSoundNumber(2);
+	pSoundComponent->SetDelay(0.05f);
+	pSoundComponent->SetVolume(0.75f);
+	pSoundComponent->SetSC(SOUND_CATEGORY::SOUND_SHOCK);
+	m_pListeners.push_back(std::move(pSoundComponent));
+	CMessageDispatcher::GetInst()->RegisterListener(MessageType::PLAY_SOUND, m_pListeners.back().get(), this);
+
+	// CAMERA SHAKE
+	std::unique_ptr<CameraShakeComponent> pShakeComponent = std::make_unique<CameraShakeComponent>();
+	pShakeComponent->SetDuration(1.0f);
+	pShakeComponent->SetMagnitude(5.0f);
+	m_pListeners.push_back(std::move(pShakeComponent));
+	CMessageDispatcher::GetInst()->RegisterListener(MessageType::UPDATE_CAMERA, m_pListeners.back().get(), this);
+}
+
+Atk3_Player::~Atk3_Player()
 {
 }
 
@@ -138,8 +242,8 @@ void Atk3_Player::Enter(CPlayer* player)
 	PlayerAttackParam.pPlayer = player;
 	CMessageDispatcher::GetInst()->Dispatch_Message<PlayerAttackParams>(MessageType::PLAYER_ATTACK, &PlayerAttackParam, player);
 
-	SoundPlayParams SoundPlayParam{ SOUND_PLAY_TYPE::SOUND_PT_ATK3 };
-	CMessageDispatcher::GetInst()->Dispatch_Message<SoundPlayParams>(MessageType::PLAY_SOUND, &SoundPlayParam, player);
+	SoundPlayParams SoundPlayParam{ SOUND_CATEGORY::SOUND_SHOOT };
+	CMessageDispatcher::GetInst()->Dispatch_Message<SoundPlayParams>(MessageType::PLAY_SOUND, &SoundPlayParam, this);
 
 	CComponentSet* componentset = CImGuiManager::GetInst()->GetComponentSet(2);
 	if (componentset) {
@@ -155,11 +259,19 @@ void Atk3_Player::Execute(CPlayer* player, float fElapsedTime)
 	CAnimationSet* pAnimationSet = player->m_pChild->m_pSkinnedAnimationController->m_pAnimationSets->m_pAnimationSets[player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_nAnimationSet];
 	if (player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition == pAnimationSet->m_fLength)
 	{
-		player->m_pStateMachine->ChangeState(Locator.GetPlayerState(typeid(Idle_Player)));
+		player->m_pStateMachine->ChangeState(Idle_Player::GetInst());
 	}
 }
 
 void Atk3_Player::Exit(CPlayer* player)
+{
+}
+
+Run_Player::Run_Player()
+{
+}
+
+Run_Player::~Run_Player()
 {
 }
 
@@ -175,7 +287,7 @@ void Run_Player::Enter(CPlayer* player)
 void Run_Player::Execute(CPlayer* player, float fElapsedTime)
 {
 	if (player->m_bAttack)
-		player->m_pStateMachine->ChangeState(Locator.GetPlayerState(typeid(Atk1_Player)));
+		player->m_pStateMachine->ChangeState(Atk1_Player::GetInst());
 }
 
 void Run_Player::Exit(CPlayer* player)

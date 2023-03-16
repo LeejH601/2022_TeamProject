@@ -102,20 +102,12 @@ void CCamera::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
 	D3D12_GPU_VIRTUAL_ADDRESS d3dGpuVirtualAddress = m_pd3dcbCamera->GetGPUVirtualAddress();
 	pd3dCommandList->SetGraphicsRootConstantBufferView(ROOTSIGNATUREINDEX_CAMERA, d3dGpuVirtualAddress);
 }
-void CCamera::Animate(float fTimeElapsed)
-{
-	m_xmf3CalculatedPosition = m_xmf3Position;
-
-	for (CComponent* component : m_vComponentSet) {
-		component->Update(fTimeElapsed);
-	}
-}
 void CCamera::ProcessInput(DWORD dwDirection, float cxDelta, float cyDelta, float fTimeElapsed)
 {
 }
 void CCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
 {
-
+	m_xmf3CalculatedPosition = m_xmf3Position;
 }
 void CCamera::SetLookAt(XMFLOAT3& xmf3LookAt)
 {
@@ -256,8 +248,7 @@ void CThirdPersonCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
 		SetLookAt(xmf3LookAt);
 	}
 
-	Animate(fTimeElapsed);
-	RegenerateViewMatrix();
+	CCamera::Update(XMFLOAT3{ 0.0f, 0.0f, 0.0f }, fTimeElapsed);
 }
 
 CFloatingCamera::CFloatingCamera() : CCamera()
@@ -415,9 +406,6 @@ void CCameraShaker::Reset()
 
 bool CCameraShaker::HandleMessage(const Telegram& msg)
 {
-	/*if (!m_pCamera)
-		m_pCamera = Locator.GetSimulaterCamera();*/
-
 	if (!m_pCamera->m_bCameraShaking && m_bEnable) {
 		m_pCamera->m_bCameraShaking = true;
 
