@@ -9,3 +9,4 @@ struct PS_MULTIPLE_RENDER_TARGETS_OUTPUT
 	float2 f2ObjectIDzDepth : SV_TARGET5;
 	float4 f4CameraNormal : SV_TARGET6;
 };
+

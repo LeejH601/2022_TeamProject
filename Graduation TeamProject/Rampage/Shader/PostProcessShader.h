@@ -32,6 +32,9 @@ protected:
 	 D3D12_CPU_DESCRIPTOR_HANDLE* m_pd3dRtvCPUDescriptorHandles = NULL;
 
 public:
+	std::shared_ptr<CTexture> m_pHDRTexture = nullptr;
+
+public:
 	CTexture* GetTexture() { return(m_pTexture.get()); }
 	std::shared_ptr<CTexture> GetTextureShared() { return m_pTexture; };
 	ID3D12Resource* GetTextureResource(UINT nIndex) { return(m_pTexture->GetResource(nIndex)); }

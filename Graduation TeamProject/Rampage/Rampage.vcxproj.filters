@@ -416,6 +416,7 @@
     <FxCompile Include="Shader\PostProcessingVertexShader.hlsl" />
     <FxCompile Include="LightShaft.hlsl" />
     <FxCompile Include="Shader\SunLightPixelShader.hlsl" />
+    <FxCompile Include="Shader\HDRComputeShader.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Shader\Header.hlsli" />

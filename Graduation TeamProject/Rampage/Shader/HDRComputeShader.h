@@ -19,9 +19,16 @@ public:
 
 	virtual void ReleaseUploadBuffers();
 
+	void SetTextureSource(ID3D12Device* pd3dDevice, std::shared_ptr<CTexture> pSourceTexture) {
+		m_pSourceTexture = pSourceTexture; 
+		CreateComputeShaderResourceView(pd3dDevice, m_pSourceTexture.get(), 0, 0, 0, 1);
+		m_pSourceTexture->SetComputeSrvRootParameter(0, 0, 0, 1);
+	};
+
 	virtual void Dispatch(ID3D12GraphicsCommandList* pd3dCommandList);
 
 public:
+	std::shared_ptr<CTexture> m_pSourceTexture;
 	std::unique_ptr<CTexture> m_pTextures;
 };
 

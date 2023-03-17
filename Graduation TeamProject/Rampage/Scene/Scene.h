@@ -8,6 +8,7 @@ class CScene
 {
 protected:
 	ComPtr<ID3D12RootSignature> m_pd3dGraphicsRootSignature = nullptr;
+	ComPtr<ID3D12RootSignature> m_pd3dComputeRootSignature = nullptr;
 
 	CGameObject* m_pPlayer = nullptr;
 public:
@@ -26,6 +27,9 @@ public:
 	virtual void OnPreRender(ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed) {}
 	virtual void OnPrepareRender(ID3D12GraphicsCommandList* pd3dCommandList);
 	virtual void CreateGraphicsRootSignature(ID3D12Device* pd3dDevice);
+
+	virtual void CreateComputeRootSignature(ID3D12Device* pd3dDevice);
+	ID3D12RootSignature* GetComputeRootSignature() { return(m_pd3dComputeRootSignature.Get()); }
 
 	virtual bool OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam) { return false; }
 	virtual bool OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam, DWORD& dwDirection) { return false; }

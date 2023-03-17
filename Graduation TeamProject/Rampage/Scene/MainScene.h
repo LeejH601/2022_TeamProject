@@ -11,6 +11,7 @@
 #include "..\Object\SkyBox.h"
 #include "..\Shader\PostProcessShader.h"
 #include "..\Shader\SunLightShader.h"
+#include "..\Shader\HDRComputeShader.h"
 
 #define MAX_OBJECT 1000
 struct DissolveParams {
@@ -38,6 +39,9 @@ private:
 
 	bool m_bTestKey = false;
 
+public:
+	std::unique_ptr<CHDRComputeShader> m_pHDRComputeShader;
+
 private:
 	DissolveParams* m_pcbMappedDisolveParams = nullptr;
 	ComPtr<ID3D12Resource> m_pd3dcbDisolveParams = nullptr;
@@ -52,6 +56,8 @@ public:
 	virtual void OnPreRender(ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed);
 	virtual void OnPrepareRender(ID3D12GraphicsCommandList* pd3dCommandList);
 	virtual void CreateGraphicsRootSignature(ID3D12Device* pd3dDevice);
+	virtual void CreateComputeRootSignature(ID3D12Device* pd3dDevice);
+
 	virtual void UpdateObjectArticulation() {
 		for (int i = 0; i < m_pObjects.size(); ++i) {
 			m_pObjects[i]->updateArticulationMatrix();

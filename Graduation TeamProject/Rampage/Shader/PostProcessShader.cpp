@@ -2,16 +2,16 @@
 
 CPostProcessShader::~CPostProcessShader()
 {
-    if (m_pd3dRtvCPUDescriptorHandles) delete[] m_pd3dRtvCPUDescriptorHandles;
+	if (m_pd3dRtvCPUDescriptorHandles) delete[] m_pd3dRtvCPUDescriptorHandles;
 }
 
 D3D12_INPUT_LAYOUT_DESC CPostProcessShader::CreateInputLayout(int nPipelineState)
 {
-    D3D12_INPUT_LAYOUT_DESC d3dInputLayoutDesc;
-    d3dInputLayoutDesc.pInputElementDescs = NULL;
-    d3dInputLayoutDesc.NumElements = 0;
+	D3D12_INPUT_LAYOUT_DESC d3dInputLayoutDesc;
+	d3dInputLayoutDesc.pInputElementDescs = NULL;
+	d3dInputLayoutDesc.NumElements = 0;
 
-    return(d3dInputLayoutDesc);
+	return(d3dInputLayoutDesc);
 }
 
 D3D12_DEPTH_STENCIL_DESC CPostProcessShader::CreateDepthStencilState(int nPipelineState)
@@ -80,9 +80,12 @@ void CPostProcessShader::CreateShader(ID3D12Device* pd3dDevice, ID3D12RootSignat
 #define _WITH_SCENE_ROOT_SIGNATURE
 void CPostProcessShader::CreateResourcesAndViews(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, UINT nResources, DXGI_FORMAT* pdxgiFormats, UINT nWidth, UINT nHeight, D3D12_CPU_DESCRIPTOR_HANDLE d3dRtvCPUDescriptorHandle, UINT nShaderResources)
 {
-	m_pTexture = std::make_shared<CTexture>(nResources, RESOURCE_TEXTURE2D, 0, 1);
-
+	m_pHDRTexture = std::make_unique<CTexture>(1, RESOURCE_TEXTURE2D, 0, 1);
 	D3D12_CLEAR_VALUE d3dClearValue = { DXGI_FORMAT_R8G8B8A8_UNORM, { 1.0f, 1.0f, 1.0f, 1.0f } };
+
+	m_pTexture = std::make_shared<CTexture>(nResources, RESOURCE_TEXTURE2D, 0, 1, nResources, 0, 1, 0, 1);
+	m_pHDRTexture->CreateTexture(pd3dDevice, pd3dCommandList, 0, RESOURCE_TEXTURE2D, nWidth, nHeight, 1, 0, DXGI_FORMAT_R8G8B8A8_UNORM, D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET, D3D12_RESOURCE_STATE_COMMON, &d3dClearValue);
+
 	for (UINT i = 0; i < nResources; i++)
 	{
 		d3dClearValue.Format = pdxgiFormats[i];
@@ -91,10 +94,11 @@ void CPostProcessShader::CreateResourcesAndViews(ID3D12Device* pd3dDevice, ID3D1
 
 	}
 
-	CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, nShaderResources);
+	CreateCbvSrvUavDescriptorHeaps(pd3dDevice, 0, nShaderResources);
 	CreateShaderVariables(pd3dDevice, NULL);
 #ifdef _WITH_SCENE_ROOT_SIGNATURE
 	CreateShaderResourceViews(pd3dDevice, m_pTexture.get(), 0, 13);
+	CreateComputeShaderResourceView(pd3dDevice, &m_pTexture.get()[0], 0, 0, 0, 1);
 #else
 	CreateShaderResourceViews(pd3dDevice, m_pTexture, 0, 0);
 #endif

@@ -291,6 +291,9 @@ void CGameFramework::BuildObjects()
 		//m_pPostProcessShader->CreateShaderResourceViews(m_pd3dDevice.Get(), 1, &m_pd3dDepthStencilBuffer, pdxgiDepthSrvFormats);
 	}
 
+	((CMainTMPScene*)m_pSceneManager->GetMainScene())->m_pHDRComputeShader->SetTextureSource(m_pd3dDevice.Get(), m_pSceneManager->GetMainScene()->m_pPostProcessShader->GetTextureShared());
+	//((CMainTMPScene*)m_pSceneManager->GetMainScene())->m_pHDRComputeShader->SetTextureSource(m_pd3dDevice.Get(), m_pSceneManager->GetMainScene()->m_pPostProcessShader->GetTextureShared());
+
 	m_pFloatingCamera = std::make_unique<CFloatingCamera>();
 	m_pFloatingCamera->Init(m_pd3dDevice.Get(), m_pd3dCommandList.Get());
 	m_pFloatingCamera->SetPosition(XMFLOAT3(0.0f, 400.0f, -100.0f));
