@@ -196,6 +196,12 @@
     <ClCompile Include="Shader\SunLightShader.cpp">
       <Filter>Shader</Filter>
     </ClCompile>
+    <ClCompile Include="Shader\ComputeShader.cpp">
+      <Filter>Shader</Filter>
+    </ClCompile>
+    <ClCompile Include="Shader\HDRComputeShader.cpp">
+      <Filter>Shader</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Global\stdafx.h">
@@ -376,6 +382,12 @@
       <Filter>Object</Filter>
     </ClInclude>
     <ClInclude Include="Shader\SunLightShader.h">
+      <Filter>Shader</Filter>
+    </ClInclude>
+    <ClInclude Include="Shader\ComputeShader.h">
+      <Filter>Shader</Filter>
+    </ClInclude>
+    <ClInclude Include="Shader\HDRComputeShader.h">
       <Filter>Shader</Filter>
     </ClInclude>
   </ItemGroup>

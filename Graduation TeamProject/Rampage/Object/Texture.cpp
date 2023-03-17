@@ -9,16 +9,16 @@ CTexture::CTexture(int nTextures, UINT nTextureType, int nSamplers, int nRootPar
 	m_nTextures = nTextures;
 	if (m_nTextures > 0)
 	{
-		m_ppd3dTextureUploadBuffers.resize(m_nTextures);
-		m_ppd3dTextures.resize(m_nTextures);
+		m_ppd3dTextureUploadBuffers.resize(m_nTextures); // 업로드 버퍼 생성
+		m_ppd3dTextures.resize(m_nTextures); // 텍스쳐 리소스 생성
 
-		m_ppstrTextureNames.resize(m_nTextures);
+		m_ppstrTextureNames.resize(m_nTextures); // 각 텍스쳐의 이름을 저장하는 배열 생성
 		for (int i = 0; i < m_nTextures; i++) {
 			m_ppstrTextureNames[i].resize(64);
 			m_ppstrTextureNames[i][0] = '\0';
 		}
 
-		m_pd3dSrvGpuDescriptorHandles.resize(m_nTextures);
+		m_pd3dSrvGpuDescriptorHandles.resize(m_nTextures); // 
 		for (int i = 0; i < m_nTextures; i++) m_pd3dSrvGpuDescriptorHandles[i].ptr = NULL;
 
 		m_pnResourceTypes.resize(m_nTextures);
@@ -28,6 +28,44 @@ CTexture::CTexture(int nTextures, UINT nTextureType, int nSamplers, int nRootPar
 		m_pnBufferStrides.resize(m_nTextures);
 		for (int i = 0; i < m_nTextures; i++) m_pnBufferStrides[i] = 0;
 	}
+	m_nRootParameters = nRootParameters;
+	if (nRootParameters > 0) m_pnRootParameterIndices.resize(nRootParameters);
+	for (int i = 0; i < m_nRootParameters; i++) m_pnRootParameterIndices[i] = -1;
+}
+
+CTexture::CTexture(int nTextures, UINT nTextureType, int nSamplers, int nRootParameters, int nGraphicsSrvGpuHandles, int nComputeUavRootParameters, int nComputeSrvRootParameters, int nComputeUavGpuHandles, int nComputeSrvGpuHandles)
+{
+	m_nTextureType = nTextureType;
+
+	m_nTextures = nTextures;
+	if (m_nTextures > 0)
+	{
+		m_ppd3dTextureUploadBuffers.resize(m_nTextures); // 업로드 버퍼 생성
+		m_ppd3dTextures.resize(m_nTextures); // 텍스쳐 리소스 생성
+
+		m_ppstrTextureNames.resize(m_nTextures); // 각 텍스쳐의 이름을 저장하는 배열 생성
+		for (int i = 0; i < m_nTextures; i++) {
+			m_ppstrTextureNames[i].resize(64);
+			m_ppstrTextureNames[i][0] = '\0';
+		}
+
+		m_pd3dSrvGpuDescriptorHandles.resize(nGraphicsSrvGpuHandles); // 
+		for (int i = 0; i < nGraphicsSrvGpuHandles; i++) m_pd3dSrvGpuDescriptorHandles[i].ptr = NULL;
+
+		m_pd3dComputeUavGpuDescriptorHandles.resize(nComputeUavGpuHandles);
+		for (int i = 0; i < nComputeUavGpuHandles; i++) m_pd3dComputeUavGpuDescriptorHandles[i].ptr = NULL;
+
+		m_pd3dComputeSrvGpuDescriptorHandles.resize(nComputeSrvGpuHandles);
+		for (int i = 0; i < nComputeSrvGpuHandles; i++) m_pd3dComputeSrvGpuDescriptorHandles[i].ptr = NULL;
+
+		m_pnResourceTypes.resize(m_nTextures);
+		m_pdxgiBufferFormats.resize(m_nTextures);
+		m_pnBufferElements.resize(m_nTextures);
+		for (int i = 0; i < m_nTextures; i++) m_pnBufferElements[i] = 0;
+		m_pnBufferStrides.resize(m_nTextures);
+		for (int i = 0; i < m_nTextures; i++) m_pnBufferStrides[i] = 0;
+	}
+
 	m_nRootParameters = nRootParameters;
 	if (nRootParameters > 0) m_pnRootParameterIndices.resize(nRootParameters);
 	for (int i = 0; i < m_nRootParameters; i++) m_pnRootParameterIndices[i] = -1;

@@ -7,6 +7,7 @@ class CTexture
 {
 public:
 	CTexture(int nTextureResources, UINT nResourceType, int nSamplers, int nRootParameters);
+	CTexture(int nTextureResources, UINT nResourceType, int nSamplers, int nRootParameters, int nGraphicsSrvGpuHandles, int nComputeUavRootParameters, int nComputeSrvRootParameters, int nComputeUavGpuHandles, int nComputeSrvGpuHandles);
 	virtual ~CTexture();
 	UINT m_nTextureType;		// Texture 타입
 
@@ -30,6 +31,10 @@ private:
 	std::vector<int> m_pnRootParameterIndices;		// 루트파라미터 인덱스
 public:
 	std::vector<D3D12_GPU_DESCRIPTOR_HANDLE> m_pd3dSrvGpuDescriptorHandles;	// Srv 디스크립터 핸들
+	std::vector<D3D12_GPU_DESCRIPTOR_HANDLE> m_pd3dComputeUavGpuDescriptorHandles; // compute Uav 디스크립터 핸들
+	std::vector<D3D12_GPU_DESCRIPTOR_HANDLE> m_pd3dComputeSrvGpuDescriptorHandles;  // compute Srv 디스크립터 핸들
+
+
 public:
 
 	ID3D12Resource* CreateTexture(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, UINT nIndex, UINT nResourceType, UINT nWidth,

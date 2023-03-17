@@ -28,99 +28,31 @@ cbuffer cbToLightSpace : register(b6)
 
 #define NUM_SAMPLES 128
 
-float4 LightShaft(float2 uv, float2 ScreenLightPos, float Weight, float Exposure, float Density, float Decay)
+float3 LightShaft(float2 uv, float2 ScreenLightPos, float Weight, float Exposure, float Density, float Decay)
 {
 	float2 DeltaUV = (uv - ScreenLightPos.xy);
 	DeltaUV *= 1.0f / (float)NUM_SAMPLES * Density;
 
 
-	float4 Basecolor = gtxMultiRenderTargetTextures[3].Sample(gSamplerState, uv);
+	//float4 Basecolor = gtxMultiRenderTargetTextures[3].Sample(gSamplerState, uv);
 	float3 color = float3(0.0f, 0.0f, 0.0f);
-	//float3 color = Basecolor.xyz;
-	//float illuminationDecay = 0.5f;
 	float illuminationDecay = 1.0f;
 
 	float2 TexCoord = uv - (DeltaUV * NUM_SAMPLES);
 	float4 OcculusionColor = gtxMultiRenderTargetTextures[3].Sample(gSamplerState, uv);
 
-	/*if (OcculusionColor.r < 0.0001f) {
-		float3 grayscale = dot(color, float3(0.3, 0.59, 0.11));
-		if(grayscale.r < 0.6f)
-			Basecolor = lerp(Basecolor, OcculusionColor, 0.5f);
-		return Basecolor;
-	}*/
-
-	//uv += DeltaUV * NUM_SAMPLES;
 	for (int i = 0; i < NUM_SAMPLES; i++) {
 		uv -= DeltaUV;
 		float3 sampleColor = gtxMultiRenderTargetTextures[3].Sample(gSamplerState, uv).xyz;
-		//sampleColor = 1.0f - sampleColor;
-
 		sampleColor *= illuminationDecay * Weight;
 		color += sampleColor;
 
 		illuminationDecay *= Decay;
 	}
 
-	return float4(color * Exposure, Basecolor.w);
+	return color * Exposure;
 }
 
-//float VolumeticFog(float3 worldPos) {
-//	float4 mainPos = mul(float4(worldPos, 1.0f), gcbToLightSpaces[0].mtxToTexture);
-//	float4 startPos = mul(float4(gf3CameraPosition, 1.0f), gcbToLightSpaces[0].mtxToTexture);
-//	float4 LightPos = mul(gcbToLightSpaces[0].f4Position, gcbToLightSpaces[0].mtxToTexture);
-//
-//	float2 uv = (mainPos.xy / mainPos.ww);
-//	float2 LightPosInDepth = float2(LightPos.xy / LightPos.ww);
-//
-//	float4 Basecolor = gtxMultiRenderTargetTextures[0].Sample(gSamplerState, uv);
-//	float3 color = Basecolor.xyz;
-//
-//	float illuminationDecay = 1.0f;
-//
-//	for (int i = 0; i < NUM_SAMPLES; i++) {
-//		uv -= DeltaUV;
-//		float3 sampleColor = gtxMultiRenderTargetTextures[3].Sample(gSamplerState, uv).xyz;
-//		sampleColor = 1.0f - sampleColor;
-//
-//		sampleColor *= illuminationDecay * Weight;
-//		color += sampleColor;
-//		//color = sampleColor;
-//
-//		illuminationDecay *= Decay;
-//	}
-//
-//	//float2 DeltaUV = (uv - ScreenLightPos.xy);
-//}
-
-//void executeRaymarching(float3 VLI, float3 rayPositionLight, float stepSize, float3 invViewDir) {
-//	rayPositionLight += stepSize * invViewDir;
-//
-//	float3 shadowFactor = fShadowFactor = gtxtDepthTextures[0].SampleCmpLevelZero(gssComparisonPCFShadow, uvs[i].xy / uvs[i].ww, uvs[i].z / uvs[i].w).r;
-//}
-//
-//
-//#define NUM_SAMPLES_RCP 0.007125
-//
-//float Volumetirc(float4 cColor) {
-//	float rayMarchDistanceLimit = 999999.0f;
-//	
-//	//...
-//
-//	float rayMarchDistance = trunc(clamp(length(cameraPosLight.xyz - posLight.xyz), 0.0, rayMarchDistanceLimit);
-//
-//	float stepSize = rayMarchDistance * NUM_SAMPLES_RCP;
-//	float3 rayPositionLight = posLight.xyz;
-//
-//	float3 VLI 0.0;
-//
-//	[loop] for (float l = rayMarchDistance; l > stepSize; l -= stepSize) {
-//		executeRaymarching(VLI);
-//	}
-//
-//	float4 color = float4(cColor.xyz * VLI, cColor.w);
-//	return color;
-//}
 
 struct VS_SCREEN_RECT_TEXTURED_OUTPUT
 {
@@ -138,15 +70,15 @@ float4 PS_PostProcessing(VS_SCREEN_RECT_TEXTURED_OUTPUT input) : SV_Target
 	float4 lightPosInClipSpace = mul(lightPosInViewSpace, gmtxProjection);
 	float3 lightPosInNDC = lightPosInClipSpace.xyz / lightPosInClipSpace.w;
 
-	lightPosInNDC.x = min(1.0f, max(-1.0f, lightPosInNDC.x));
-	lightPosInNDC.y = min(1.0f, max(-1.0f, lightPosInNDC.y));
+	/*lightPosInNDC.x = min(1.0f, max(-1.0f, lightPosInNDC.x));
+	lightPosInNDC.y = min(1.0f, max(-1.0f, lightPosInNDC.y));*/
 
 	float2 lightPosInScreenSpace = float2(lightPosInNDC.x * 0.5 + 0.5, -lightPosInNDC.y * 0.5 + 0.5);
 
 	float result = pow((input.uv.x - lightPosInScreenSpace.x), 2) + pow((input.uv.y - lightPosInScreenSpace.y), 2);
 
 	// LightShaft Values
-	float weight = 0.7f;
+	float weight = 0.8f;
 	float exposure = 0.6f;
 	float Density = 2.0f;
 	float Decay = 0.95f;
@@ -190,8 +122,14 @@ float4 PS_PostProcessing(VS_SCREEN_RECT_TEXTURED_OUTPUT input) : SV_Target
 
 	cColor = gtxMultiRenderTargetTextures[0].Sample(gSamplerState, input.uv);
 
-	float4 ShaftColor;
-	ShaftColor = LightShaft(input.uv, lightPosInScreenSpace, weight, exposure, Density, Decay);
+	/*float3 grayscale = dot(cColor.xyz, float3(0.3, 0.59, 0.11));
+	if (grayscale.r < 0.45f)
+		cColor.xyz = lerp(cColor.xyz, float3(0.0f,0.0f,0.0f), 0.5f);
+	else {*/
+		float3 ShaftColor;
+		ShaftColor = LightShaft(input.uv, lightPosInScreenSpace, weight, exposure, Density, Decay);
+		cColor.xyz += ShaftColor.xyz;
+	//}
 
 	//
 	//if (lightPosInClipSpace.z > 0.0f) {
@@ -202,7 +140,6 @@ float4 PS_PostProcessing(VS_SCREEN_RECT_TEXTURED_OUTPUT input) : SV_Target
 	//else
 	//	ShaftColor = LightShaft(input.uv, lightPosInScreenSpace, weight, exposure, 0.0, Decay);
 
-	cColor.xyz += ShaftColor.xyz;
 
 	float3 normalOffsetScale = 20.0f;
 	float3 normalOffset = normalOffsetScale * normal;

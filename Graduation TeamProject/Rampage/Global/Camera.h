@@ -15,6 +15,7 @@ struct VS_CB_CAMERA_INFO
 	XMFLOAT4X4 m_xmf4x4InverseProjection;
 	XMFLOAT4X4 m_xmf4x4InverseView;
 	XMFLOAT3 m_xmf3CameraPosition;
+	XMFLOAT3 m_xmf3CameraDir;
 };
 
 class CPath
