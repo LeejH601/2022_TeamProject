@@ -46,6 +46,13 @@ void Damaged_Monster::Execute(CMonster* monster, float fElapsedTime)
 		monster->SetNotHit();
 		monster->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
 	}
+	else
+	{
+		if (CShakeAnimationComponent::GetInst()->GetEnable())
+			monster->m_fShakeDistance = CShakeAnimationComponent::GetInst()->GetShakeDistance(monster->m_pSkinnedAnimationController->m_fTime);
+		else
+			monster->m_fShakeDistance = 0.0f;
+	}
 }
 
 void Damaged_Monster::Exit(CMonster* monster)
@@ -60,9 +67,19 @@ void Stun_Monster::Enter(CMonster* monster)
 
 void Stun_Monster::Execute(CMonster* monster, float fElapsedTime)
 {
+	if (monster->m_fStunTime < CStunAnimationComponent::GetInst()->GetStunTime())
+	{
+		monster->m_fStunTime += fElapsedTime;
+
+		if (CShakeAnimationComponent::GetInst()->GetEnable())
+			monster->m_fShakeDistance = CShakeAnimationComponent::GetInst()->GetShakeDistance((monster->m_pSkinnedAnimationController->m_fTime + monster->m_fStunTime));
+		else
+			monster->m_fShakeDistance = 0.0f;
+	}
+	else
+		monster->m_pStateMachine->ChangeState(Damaged_Monster::GetInst());
 }
 
 void Stun_Monster::Exit(CMonster* monster)
 {
-	monster->m_fStunTime = 0.0f;
 }

@@ -32,12 +32,12 @@ bool CShakeAnimationComponent::HandleMessage(const Telegram& msg)
 	return false;
 }
 
-CStunComponent::CStunComponent()
+CStunAnimationComponent::CStunAnimationComponent()
 {
 	m_bEnable = true;
 }
 
-bool CStunComponent::HandleMessage(const Telegram& msg)
+bool CStunAnimationComponent::HandleMessage(const Telegram& msg)
 {
 	return false;
 }

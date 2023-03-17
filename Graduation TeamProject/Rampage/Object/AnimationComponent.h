@@ -34,16 +34,16 @@ public:
     bool HandleMessage(const Telegram& msg);
 };
 
-class CStunAnimationComponent : public CComponent
+class CStunComponent : public CComponent
 {
     float m_fStunTime = 0.5f;
 public:
-    static std::shared_ptr<CStunAnimationComponent> GetInst()
+    static std::shared_ptr<CStunComponent> GetInst()
     {
-        static std::shared_ptr<CStunAnimationComponent> m_pInst = std::make_shared<CStunAnimationComponent>();
+        static std::shared_ptr<CStunComponent> m_pInst = std::make_shared<CStunComponent>();
         return m_pInst;
     }
-    CStunAnimationComponent();
+    CStunComponent();
     float& GetStunTime() { return m_fStunTime; }
     bool HandleMessage(const Telegram& msg);
 };

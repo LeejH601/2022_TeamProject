@@ -145,74 +145,19 @@ void DamageAnimationComponent::HandleMessage(const Message& message, const Anima
 
 		CMonster* pMonster = dynamic_cast<CMonster*>(pObject);
 
-		if (pMonster)
+		if (pMonster != nullptr 
+			&& (pMonster->m_pStateMachine->GetCurrentState() == Damaged_Monster::GetInst() 
+				|| pMonster->m_pStateMachine->GetCurrentState() == Stun_Monster::GetInst()))
 		{
 			pMonster->m_fDamageDistance = 0.0f;
 
-			if ((pMonster->m_pStateMachine->GetCurrentState() == Damaged_Monster::GetInst()
-				|| pMonster->m_pStateMachine->GetCurrentState() == Stun_Monster::GetInst()))
+			if (pMonster->m_fTotalDamageDistance < m_fMaxDistance)
 			{
-				if (pMonster->m_fTotalDamageDistance < m_fMaxDistance)
-				{
-					pMonster->m_fDamageDistance = fDamageDistance;
-					pMonster->m_fTotalDamageDistance += fDamageDistance;
+				pMonster->m_fDamageDistance = fDamageDistance;
+				pMonster->m_fTotalDamageDistance += fDamageDistance;
 
-					if (m_fMaxDistance < pMonster->m_fTotalDamageDistance)
-						pMonster->m_fDamageDistance -= (pMonster->m_fTotalDamageDistance - m_fMaxDistance);
-				}
-			}
-		}
-	}
-}
-
-void ShakeAnimationComponent::HandleMessage(const Message& message, const AnimationCompParams& params)
-{
-	if (!m_bEnable)
-		return;
-
-	for (int i = 0; i < params.pObjects->size(); ++i)
-	{
-		CGameObject* pObject = ((*(params.pObjects))[i]).get();
-
-		CMonster* pMonster = dynamic_cast<CMonster*>(pObject);
-
-		if (pMonster)
-		{
-			pMonster->m_fShakeDistance = 0.0f;
-
-			float fShakeDistance = m_fDistance * sin((2 * PI * pMonster->m_pSkinnedAnimationController->m_fTime + pMonster->m_fStunTime) / m_fFrequency);
-			
-			if (pMonster->m_pStateMachine->GetCurrentState() == Damaged_Monster::GetInst() || pMonster->m_pStateMachine->GetCurrentState() == Stun_Monster::GetInst())
-				pMonster->m_fShakeDistance = fShakeDistance;
-		}
-	}
-}
-
-void StunAnimationComponent::HandleMessage(const Message& message, const AnimationCompParams& params)
-{
-	if (!m_bEnable)
-		return;
-
-	for (int i = 0; i < params.pObjects->size(); ++i)
-	{
-		CGameObject* pObject = ((*(params.pObjects))[i]).get();
-
-		CMonster* pMonster = dynamic_cast<CMonster*>(pObject);
-
-		if (pMonster)
-		{
-			if (pMonster->m_pStateMachine->GetCurrentState() == Damaged_Monster::GetInst())
-			{
-				if (pMonster->m_fStunStartTime < pMonster->m_pSkinnedAnimationController->m_fTime && !pMonster->m_bStunned)
-					pMonster->m_pStateMachine->ChangeState(Stun_Monster::GetInst());
-			}
-
-			else if (pMonster->m_pStateMachine->GetCurrentState() == Stun_Monster::GetInst())
-			{
-				if (pMonster->m_fStunTime < m_fStunTime)
-					pMonster->m_fStunTime += params.fElapsedTime;
-				else
-					pMonster->m_pStateMachine->ChangeState(Damaged_Monster::GetInst());
+				if (m_fMaxDistance < pMonster->m_fTotalDamageDistance)
+					pMonster->m_fDamageDistance -= (pMonster->m_fTotalDamageDistance - m_fMaxDistance);
 			}
 		}
 	}
