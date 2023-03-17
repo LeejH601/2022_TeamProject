@@ -464,7 +464,7 @@ void CImGuiManager::Init(HWND hWnd, ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 		componentSet->AddComponent(component);
 		component = CShakeAnimationComponent::GetInst();
 		componentSet->AddComponent(component);
-		component = CStunComponent::GetInst();
+		component = CStunAnimationComponent::GetInst();
 		componentSet->AddComponent(component);
 
 		component = std::make_shared<CAttackSpriteComponent>();
@@ -705,7 +705,7 @@ void CImGuiManager::SetUI()
 			initial_curpos.y += 25.f;
 			ImGui::SetCursorPos(initial_curpos);
 			ImGui::SetNextItemWidth(190.f);
-			CStunComponent* stun = (CStunComponent*)(m_pCurrentComponentSet->FindComponent(typeid(CStunComponent)));
+			CStunAnimationComponent* stun = (CStunAnimationComponent*)(m_pCurrentComponentSet->FindComponent(typeid(CStunAnimationComponent)));
 			ImGui::Checkbox("On/Off##StunAnimation", &stun->GetEnable());
 
 			initial_curpos.y += 25.f;
