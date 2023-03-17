@@ -163,7 +163,7 @@ public:
 
 // Define Stun Animation component
 class StunAnimationComponent : public IMessageListener {
-    bool m_bEnable = false;
+    bool m_bEnable = true;
 
     float m_fStunTime = 0.5f;
 public:
