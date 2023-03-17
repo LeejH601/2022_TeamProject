@@ -67,7 +67,7 @@ public:
 
 // Define Shake Movement component
 class CameraShakeComponent : public IMessageListener {
-    bool m_bEnable = true;
+    bool m_bEnable = false;
 
     std::uniform_real_distribution<float> urd{ -1.0f, 1.0f };
 
@@ -84,7 +84,7 @@ public:
 
 // Define CameraMove component
 class CameraMoveComponent : public IMessageListener {
-    bool m_bEnable = true;
+    bool m_bEnable = false;
 
     XMFLOAT3 m_xmf3Direction = XMFLOAT3(0.0f, 0.0f, 1.0f);
 
@@ -109,7 +109,7 @@ public:
 
 // Define Zoom In/Out component
 class CameraZoomerComponent : public IMessageListener {
-    bool m_bEnable = true;
+    bool m_bEnable = false;
 
     XMFLOAT3 m_xmf3Direction = XMFLOAT3(0.0f, 0.0f, 1.0f);
 
@@ -135,7 +135,7 @@ public:
     virtual void HandleMessage(const Message& message, const CameraUpdateParams& params);
 };
 
-// Define Player Attack component
+// Define Damage Animation component
 class DamageAnimationComponent : public IMessageListener {
     bool m_bEnable = true;
 
@@ -144,6 +144,30 @@ class DamageAnimationComponent : public IMessageListener {
 public:
     void SetMaxDistance(float max_distance) { m_fMaxDistance = max_distance; }
     void SetSpeed(float speed) { m_fSpeed = speed; }
+
+    virtual void HandleMessage(const Message& message, const AnimationCompParams& params);
+};
+
+// Define Shake Animation component
+class ShakeAnimationComponent : public IMessageListener {
+    bool m_bEnable = true;
+
+    float m_fDistance = 0.15f;
+    float m_fFrequency = 0.05f;
+public:
+    void SetDistance(float distance) { m_fDistance = distance; }
+    void SetFrequency(float frequency) { m_fFrequency = frequency; }
+
+    virtual void HandleMessage(const Message& message, const AnimationCompParams& params);
+};
+
+// Define Stun Animation component
+class StunAnimationComponent : public IMessageListener {
+    bool m_bEnable = false;
+
+    float m_fStunTime = 0.5f;
+public:
+    void SetStunTime(float stun_time) { m_fStunTime = stun_time; }
 
     virtual void HandleMessage(const Message& message, const AnimationCompParams& params);
 };

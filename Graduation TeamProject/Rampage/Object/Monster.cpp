@@ -39,9 +39,6 @@ void CMonster::Animate(float fTimeElapsed)
 {
 	if (m_pStateMachine->GetCurrentState() == Damaged_Monster::GetInst())
 	{
-		if (CStunAnimationComponent::GetInst()->GetEnable() &&
-			m_fStunStartTime < m_pSkinnedAnimationController->m_fTime && !m_bStunned)
-			m_pStateMachine->ChangeState(Stun_Monster::GetInst());
 		CGameObject::Animate(fTimeElapsed);
 	}
 

@@ -86,9 +86,22 @@ Atk1_Player::Atk1_Player()
 
 	// DAMAGE ANIMATION
 	std::unique_ptr<DamageAnimationComponent> pDamageAnimationComponent = std::make_unique<DamageAnimationComponent>();
-	pDamageAnimationComponent->SetMaxDistance(10.0f);
+	pDamageAnimationComponent->SetMaxDistance(15.0f);
 	pDamageAnimationComponent->SetSpeed(100.0f);
 	m_pListeners.push_back(std::move(pDamageAnimationComponent));
+	CMessageDispatcher::GetInst()->RegisterListener(MessageType::UPDATE_OBJECT, m_pListeners.back().get(), this);
+
+	// SHAKE ANIMATION
+	std::unique_ptr<ShakeAnimationComponent> pShakeAnimationComponent = std::make_unique<ShakeAnimationComponent>();
+	pShakeAnimationComponent->SetDistance(0.25f);
+	pShakeAnimationComponent->SetFrequency(0.01f);
+	m_pListeners.push_back(std::move(pShakeAnimationComponent));
+	CMessageDispatcher::GetInst()->RegisterListener(MessageType::UPDATE_OBJECT, m_pListeners.back().get(), this);
+
+	// STUN ANIMATION
+	std::unique_ptr<StunAnimationComponent> pStunAnimationComponent = std::make_unique<StunAnimationComponent>();
+	pStunAnimationComponent->SetStunTime(0.5f);
+	m_pListeners.push_back(std::move(pStunAnimationComponent));
 	CMessageDispatcher::GetInst()->RegisterListener(MessageType::UPDATE_OBJECT, m_pListeners.back().get(), this);
 }
 
