@@ -70,9 +70,6 @@ void CMonster::Update(float fTimeElapsed)
 	else{
 		m_fDissolveTime += fTimeElapsed;
 		m_fDissolveThrethHold = m_fDissolveTime / m_fMaxDissolveTime;
-		/*if (m_fDissolveThrethHold > 1.0f) {
-			m_fDissolveThrethHold = 1.0f;
-		}*/
 	}
 	if (m_pStateMachine->GetCurrentState() == Damaged_Monster::GetInst() ||
 		m_pStateMachine->GetCurrentState() == Stun_Monster::GetInst())

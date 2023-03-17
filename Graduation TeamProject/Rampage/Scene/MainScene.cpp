@@ -634,6 +634,11 @@ bool CMainTMPScene::ProcessInput(DWORD dwDirection, float cxDelta, float cyDelta
 }
 void CMainTMPScene::UpdateObjects(float fTimeElapsed)
 {
+	AnimationCompParams animation_comp_params;
+	animation_comp_params.pObjects = &m_pObjects;
+	animation_comp_params.fElapsedTime = fTimeElapsed;
+	CMessageDispatcher::GetInst()->Dispatch_Message<AnimationCompParams>(MessageType::UPDATE_OBJECT, &animation_comp_params, ((CPlayer*)m_pPlayer)->m_pStateMachine->GetCurrentState());
+
 	m_pPlayer->Update(fTimeElapsed);
 	m_pLight->Update((CPlayer*)m_pPlayer);
 

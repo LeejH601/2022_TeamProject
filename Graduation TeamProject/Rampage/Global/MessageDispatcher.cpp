@@ -1,6 +1,8 @@
 #include "MessageDispatcher.h"
 #include "Camera.h"
 #include "..\Object\Object.h"
+#include "..\Object\Monster.h"
+#include "..\Object\MonsterState.h"
 #include "..\Sound\SoundManager.h"
 
 void CMessageDispatcher::RegisterListener(MessageType messageType, IMessageListener* listener, void* filterObject)
@@ -128,4 +130,35 @@ void CameraMoveComponent::HandleMessage(const Message& message, const CameraUpda
 {
 	if (m_bEnable)
 		Update(params.pCamera, params.fElapsedTime);
+}
+
+void DamageAnimationComponent::HandleMessage(const Message& message, const AnimationCompParams& params)
+{
+	if (!m_bEnable)
+		return;
+
+	float fDamageDistance = m_fSpeed * params.fElapsedTime;
+
+	for (int i = 0; i < params.pObjects->size(); ++i)
+	{
+		CGameObject* pObject = ((*(params.pObjects))[i]).get();
+
+		CMonster* pMonster = dynamic_cast<CMonster*>(pObject);
+
+		if (pMonster != nullptr 
+			&& (pMonster->m_pStateMachine->GetCurrentState() == Damaged_Monster::GetInst() 
+				|| pMonster->m_pStateMachine->GetCurrentState() == Stun_Monster::GetInst()))
+		{
+			pMonster->m_fDamageDistance = 0.0f;
+
+			if (pMonster->m_fTotalDamageDistance < m_fMaxDistance)
+			{
+				pMonster->m_fDamageDistance = fDamageDistance;
+				pMonster->m_fTotalDamageDistance += fDamageDistance;
+
+				if (m_fMaxDistance < pMonster->m_fTotalDamageDistance)
+					pMonster->m_fDamageDistance -= (pMonster->m_fTotalDamageDistance - m_fMaxDistance);
+			}
+		}
+	}
 }

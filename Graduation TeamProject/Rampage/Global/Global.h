@@ -4,6 +4,7 @@ enum class MessageType {
 	PLAYER_ATTACK,
 	PLAY_SOUND,
 	UPDATE_CAMERA,
+	UPDATE_OBJECT,
 };
 
 enum class MESSAGE_TYPE

@@ -83,6 +83,13 @@ Atk1_Player::Atk1_Player()
 	pMoveComponent->SetRollBackTime(0.5f);
 	m_pListeners.push_back(std::move(pMoveComponent));
 	CMessageDispatcher::GetInst()->RegisterListener(MessageType::UPDATE_CAMERA, m_pListeners.back().get(), this);
+
+	// DAMAGE ANIMATION
+	std::unique_ptr<DamageAnimationComponent> pDamageAnimationComponent = std::make_unique<DamageAnimationComponent>();
+	pDamageAnimationComponent->SetMaxDistance(10.0f);
+	pDamageAnimationComponent->SetSpeed(100.0f);
+	m_pListeners.push_back(std::move(pDamageAnimationComponent));
+	CMessageDispatcher::GetInst()->RegisterListener(MessageType::UPDATE_OBJECT, m_pListeners.back().get(), this);
 }
 
 Atk1_Player::~Atk1_Player()

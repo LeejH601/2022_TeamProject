@@ -27,12 +27,18 @@ struct CameraUpdateParams {
     float fElapsedTime;
 };
 
+struct AnimationCompParams {
+    std::vector<std::unique_ptr<CGameObject>>* pObjects;
+    float fElapsedTime;
+};
+
 // Define message listener interface
 class IMessageListener {
 public:
     virtual void HandleMessage(const Message& message, const PlayerAttackParams& params) {}
     virtual void HandleMessage(const Message& message, const SoundPlayParams& params) {}
     virtual void HandleMessage(const Message& message, const CameraUpdateParams& params) {}
+    virtual void HandleMessage(const Message& message, const AnimationCompParams& params) {}
 };
 
 // Define Player Attack component
@@ -129,6 +135,19 @@ public:
     virtual void HandleMessage(const Message& message, const CameraUpdateParams& params);
 };
 
+// Define Player Attack component
+class DamageAnimationComponent : public IMessageListener {
+    bool m_bEnable = true;
+
+    float m_fMaxDistance = 5.0f;
+    float m_fSpeed = 100.0f;
+public:
+    void SetMaxDistance(float max_distance) { m_fMaxDistance = max_distance; }
+    void SetSpeed(float speed) { m_fSpeed = speed; }
+
+    virtual void HandleMessage(const Message& message, const AnimationCompParams& params);
+};
+
 struct ListenerInfo {
     IMessageListener* listener;
     void* filterObject;
@@ -137,7 +156,7 @@ struct ListenerInfo {
 // Define message dispatcher
 class CMessageDispatcher {
 private:
-    std::vector<ListenerInfo> m_listeners[static_cast<int>(MessageType::UPDATE_CAMERA) + 1];
+    std::vector<ListenerInfo> m_listeners[static_cast<int>(MessageType::UPDATE_OBJECT) + 1];
 public:
     DECLARE_SINGLE(CMessageDispatcher);
     CMessageDispatcher() { }
