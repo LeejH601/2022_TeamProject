@@ -202,6 +202,9 @@
     <ClCompile Include="Shader\HDRComputeShader.cpp">
       <Filter>Shader</Filter>
     </ClCompile>
+    <ClCompile Include="Shader\BloomShader.cpp">
+      <Filter>Shader</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Global\stdafx.h">
@@ -388,6 +391,9 @@
       <Filter>Shader</Filter>
     </ClInclude>
     <ClInclude Include="Shader\HDRComputeShader.h">
+      <Filter>Shader</Filter>
+    </ClInclude>
+    <ClInclude Include="Shader\BloomShader.h">
       <Filter>Shader</Filter>
     </ClInclude>
   </ItemGroup>

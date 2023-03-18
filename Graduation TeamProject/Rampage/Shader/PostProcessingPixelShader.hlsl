@@ -63,7 +63,7 @@ struct VS_SCREEN_RECT_TEXTURED_OUTPUT
 
 #define radius 1.0f
 
-float4 PS_PostProcessing(VS_SCREEN_RECT_TEXTURED_OUTPUT input) : SV_Target
+float4 PS_PostProcessing(VS_SCREEN_RECT_TEXTURED_OUTPUT input) : SV_Target1
 {
 	// gLights[0]에 들어있는 직선광을 스크린 공간 좌표계로 변환
 	float4 lightPosInViewSpace = mul(float4(gLights[0].m_vPosition, 1.0), gmtxView);

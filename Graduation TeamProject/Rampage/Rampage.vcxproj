@@ -198,6 +198,7 @@
     <ClCompile Include="Scene\SceneManager.cpp" />
     <ClCompile Include="Scene\SimulatorScene.cpp" />
     <ClCompile Include="Shader\BillBoardObjectShader.cpp" />
+    <ClCompile Include="Shader\BloomShader.cpp" />
     <ClCompile Include="Shader\BoundingBoxShader.cpp" />
     <ClCompile Include="Shader\ComputeShader.cpp" />
     <ClCompile Include="Shader\DepthRenderShader.cpp" />
@@ -262,6 +263,7 @@
     <ClInclude Include="Scene\SceneManager.h" />
     <ClInclude Include="Scene\SimulatorScene.h" />
     <ClInclude Include="Shader\BillBoardObjectShader.h" />
+    <ClInclude Include="Shader\BloomShader.h" />
     <ClInclude Include="Shader\BoundingBoxShader.h" />
     <ClInclude Include="Shader\ComputeShader.h" />
     <ClInclude Include="Shader\DepthRenderShader.h" />
