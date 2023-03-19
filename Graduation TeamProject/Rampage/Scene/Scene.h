@@ -1,6 +1,7 @@
 #pragma once
 #include "../Global/stdafx.h"
 #include "..\Shader\PostProcessShader.h"
+#include "..\Shader\HDRComputeShader.h"
 
 class CCamera;
 class CGameObject;
@@ -13,6 +14,7 @@ protected:
 	CGameObject* m_pPlayer = nullptr;
 public:
 	std::unique_ptr<CPostProcessShader> m_pPostProcessShader = NULL;
+	std::unique_ptr<CHDRComputeShader> m_pHDRComputeShader;
 
 public:
 	CScene() {}
@@ -22,6 +24,11 @@ public:
 		return(m_pd3dGraphicsRootSignature.Get()); 
 	}
 	virtual void SetPlayer(CGameObject* pPlayer) { m_pPlayer = pPlayer; }
+
+	void SetHDRRenderSource(ID3D12Resource* RenderTargetResource) { 
+		if(m_pHDRComputeShader)
+			m_pHDRComputeShader->m_pRenderTargetResource = RenderTargetResource; 
+	};
 
 	virtual void OnPreRender(ID3D12GraphicsCommandList* pd3dCommandList) {}
 	virtual void OnPreRender(ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed) {}

@@ -39,8 +39,7 @@ private:
 
 	bool m_bTestKey = false;
 
-public:
-	std::unique_ptr<CHDRComputeShader> m_pHDRComputeShader;
+
 
 private:
 	DissolveParams* m_pcbMappedDisolveParams = nullptr;

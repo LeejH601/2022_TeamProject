@@ -128,6 +128,7 @@ PS_MULTIPLE_RENDER_TARGETS_OUTPUT PS_Player(VS_OUTPUT input)
 	normal = (2.0f * normal) - 1.0f;
 
 	float4 cColor = cAlbedoColor + cSpecularColor + cEmissionColor;
+	//cColor.xyz *= 1.5f;
 
 	float3 normalW = mul(normal, TBN);
 
@@ -138,12 +139,15 @@ PS_MULTIPLE_RENDER_TARGETS_OUTPUT PS_Player(VS_OUTPUT input)
 		float3 toCameraVec = normalize(gf3CameraPosition - input.positionW.xyz);
 		float RimLight = smoothstep(1.0f - 0.1f, 1.0f, 1 - max(0, dot(normalize(input.normalW), toCameraVec)));
 
-		cColor.xyz += RimLight;
+		//cColor.xyz += RimLight;
 
 		output.f4Color = cColor;
 		output.f4PositoinW = float4(input.positionW, 1.0f);
 		float Depth = cColor.w < 0.001f ? 0.0f : input.position.z;
-		output.f4Normal = float4(input.normalW.xyz * 0.5f + 0.5f, Depth);
+		if (gnTexturesMask & MATERIAL_NORMAL_MAP)
+			output.f4Normal = float4(normalW * 0.5f + 0.5f, Depth);
+		else
+			output.f4Normal = float4(input.normalW.xyz * 0.5f + 0.5f, Depth);
 		//output.f4Illumination = float4(1.0f, 1.0f, 1.0f, 1.0f);
 
 		float fShadowFactor = gtxtDepthTextures[0].SampleCmpLevelZero(gssComparisonPCFShadow, input.uvs[0].xy / input.uvs[0].ww, input.uvs[0].z / input.uvs[0].w).r;

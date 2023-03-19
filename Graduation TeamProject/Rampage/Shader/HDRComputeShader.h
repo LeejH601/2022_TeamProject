@@ -30,5 +30,6 @@ public:
 public:
 	std::shared_ptr<CTexture> m_pSourceTexture;
 	std::unique_ptr<CTexture> m_pTextures;
+	ID3D12Resource* m_pRenderTargetResource;
 };
 

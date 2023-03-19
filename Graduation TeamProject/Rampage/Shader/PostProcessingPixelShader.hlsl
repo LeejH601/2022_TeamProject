@@ -115,9 +115,14 @@ float4 PS_PostProcessing(VS_SCREEN_RECT_TEXTURED_OUTPUT input) : SV_Target1
 
 	float4 uvs[MAX_LIGHTS];
 
+	float3 normalOffsetScale = 0.15f;
+	float3 normalOffset = normalOffsetScale * normal;
+	float4 normalOffsetedPosition = positionW;
+	normalOffsetedPosition.xyz += normalOffset;
+
 	for (int i = 0; i < MAX_LIGHTS; i++)
 	{
-		if (gcbToLightSpaces[i].f4Position.w != 0.0f) uvs[i] = mul(positionW, gcbToLightSpaces[i].mtxToTexture);
+		if (gcbToLightSpaces[i].f4Position.w != 0.0f) uvs[i] = mul(normalOffsetedPosition, gcbToLightSpaces[i].mtxToTexture);
 	}
 
 	cColor = gtxMultiRenderTargetTextures[0].Sample(gSamplerState, input.uv);
@@ -141,11 +146,9 @@ float4 PS_PostProcessing(VS_SCREEN_RECT_TEXTURED_OUTPUT input) : SV_Target1
 	//	ShaftColor = LightShaft(input.uv, lightPosInScreenSpace, weight, exposure, 0.0, Decay);
 
 
-	float3 normalOffsetScale = 20.0f;
-	float3 normalOffset = normalOffsetScale * normal;
-	float3 normalOffsetedPosition = positionW.xyz + normalOffset;
+	
 
-	cColor = Lighting(normalOffsetedPosition, normalize(normal), cColor, true, uvs);
+	cColor = Lighting(positionW.xyz, normal, cColor, true, uvs);
 
 
 	return cColor;

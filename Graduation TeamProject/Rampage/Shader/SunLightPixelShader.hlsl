@@ -65,24 +65,29 @@ PS_MULTIPLE_RENDER_TARGETS_OUTPUT SunLight_PS(VS_SCREEN_RECT_TEXTURED_OUTPUT inp
 	float radiusPow = pow(radius, 2);
 	float attenuationRadiusPow = pow(attenuation_radius, 2);
 
-	float4 cColor = float4(1.0f, 1.0f, 1.0f, 1.0f);
+	float4 cColor = float4(2.0f, 2.0f, 2.0f, 1.0f);
+	//float4 cColor = float4(1.0f, 1.0f, 1.0f, 1.0f);
 
 	float3 CameraDir = float3(gmtxView._13, gmtxView._23, gmtxView._33);
 
-	if (result < radiusPow) {
+	if (dot(normalize(float3(gLights[0].m_vDirection.x, 0.0f, gLights[0].m_vDirection.z)), normalize(float3(CameraDir.x, 0.0f, CameraDir.z))) > 0.0) {
+		cColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
 		output.f4Illumination = cColor;
-		//output.f4Color = cColor;
 	}
 	else {
-		//output.f4Illumination = float4(0.1f, 0.1f, 0.1f, 1.0f);
-		cColor = float4(0.05f, 0.05f, 0.05f, 1.0f);
-		if (dot(normalize(float3(gLights[0].m_vDirection.x, 0.0f, gLights[0].m_vDirection.z)), 
-			normalize(float3(CameraDir.x, 0.0f, CameraDir.z))) > 0) {
-			cColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
+		if (result < radiusPow) {
+			output.f4Illumination = cColor;
+			//output.f4Color = cColor;
 		}
-		//cColor.xyz *= max(0.0f, (1.0f - ((result) / radiusPow)));
-		output.f4Illumination = cColor;
+		else {
+			//output.f4Illumination = float4(0.1f, 0.1f, 0.1f, 1.0f);
+			cColor = float4(0.05f, 0.05f, 0.05f, 1.0f);
+
+			//cColor.xyz *= max(0.0f, (1.0f - ((result) / radiusPow)));
+			output.f4Illumination = cColor;
+		}
 	}
+	
 
 	return(output);
 }
