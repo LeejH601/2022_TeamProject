@@ -783,6 +783,8 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 	m_pPostProcessShader->Render(pd3dCommandList, pCamera);
 #endif // PostProcessing
 
+	// BloomLighting
+
 	if (m_pd3dComputeRootSignature) pd3dCommandList->SetComputeRootSignature(m_pd3dComputeRootSignature.Get());
 	m_pHDRComputeShader->Dispatch(pd3dCommandList);
 
