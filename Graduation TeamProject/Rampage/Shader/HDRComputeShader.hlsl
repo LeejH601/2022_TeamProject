@@ -41,7 +41,7 @@ float3 uncharted2_filmic(float3 v)
 }
 
 #define UNCHARTED2_TONE_MAPPING
-//#define GAMMA
+#define GAMMA
 
 [numthreads(32, 32, 1)]
 void HDR_CS(int3 nDispatchID : SV_DispatchThreadID)
@@ -61,7 +61,7 @@ void HDR_CS(int3 nDispatchID : SV_DispatchThreadID)
 #endif
 
 #ifdef GAMMA
-    float gamma = 1.2; // gamma value to use for correction
+    float gamma = 0.7; // gamma value to use for correction
     float4 correctedColor = float4(pow(LDRColor.xyz, 1.0 / gamma), LDRColor.w);
     gtxtRWOutput[nDispatchID.xy] = correctedColor;
 #else
