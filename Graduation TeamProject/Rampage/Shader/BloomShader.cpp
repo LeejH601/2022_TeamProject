@@ -80,7 +80,7 @@ void CBloomShader::CreateBloomUAVResource(ID3D12Device* pd3dDevice, ID3D12Graphi
 	}
 
 	std::vector<XMFLOAT2> downSampleTextureResoultions;
-	XMFLOAT2 baseResoultion{ xResoution, yResoultion };
+	XMFLOAT2 baseResoultion{ float(xResoution),  float(yResoultion) };
 
 	downSampleTextureResoultions.emplace_back(xResoution, yResoultion);
 	for (int i = 0; i < nDownSample; ++i) {
