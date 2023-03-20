@@ -1,6 +1,7 @@
 #pragma once
 #include "PhysicsObject.h"
 #include "StateMachine.h"
+#include "..\Global\Camera.h"	// 왜 필요하지
 
 class CCamera;
 class CPlayer : public CPhysicsObject

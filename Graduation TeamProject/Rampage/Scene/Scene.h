@@ -1,5 +1,6 @@
 #pragma once
 #include "../Global/stdafx.h"
+#include "..\Global\MessageDispatcher.h"
 
 class CCamera;
 class CGameObject;
@@ -9,6 +10,7 @@ protected:
 	ComPtr<ID3D12RootSignature> m_pd3dGraphicsRootSignature = nullptr;
 
 	CGameObject* m_pPlayer = nullptr;
+	std::vector<std::unique_ptr<IMessageListener>> m_pListeners;
 public:
 	CScene() {}
 	virtual ~CScene() {}
@@ -30,6 +32,6 @@ public:
 	virtual bool ProcessInput(DWORD dwDirection, float cxDelta, float cyDelta, float fTimeElapsed) { return false; }
 	virtual void Update(float fTimeElapsed) {}
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed, float fCurrentTime, CCamera* pCamera = NULL) {}
-	virtual void OnPostRender() {};
+	virtual void OnPostRender() {}
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed) {}
 };

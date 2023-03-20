@@ -4,6 +4,7 @@
 #include "..\Object\Light.h"
 #include "..\Object\Terrain.h"
 #include "..\Shader\TerrainShader.h"
+#include "..\Object\TextureManager.h"
 #include "..\Object\BillBoardObject.h"
 #include "..\Object\ParticleObject.h"
 #include "..\Shader\ParticleShader.h"
@@ -27,8 +28,9 @@ private:
 	std::vector<std::unique_ptr<CGameObject>> m_pBillBoardObjects;
 	std::unique_ptr<CBillBoardObjectShader> m_pBillBoardObjectShader;
 
-	std::vector<std::unique_ptr<CParticleObject>> m_ppParticleObjects;
-	std::shared_ptr<CParticleShader> m_pParticleShader;
+	std::unique_ptr<CTextureManager> m_pTextureManager = NULL;
+	std::unique_ptr<CParticleShader> m_pParticleShader;
+	std::vector<std::unique_ptr<CGameObject>> m_pParticleObjects;
 
 	std::unique_ptr<CSkyBoxShader> m_pSkyBoxShader;
 	std::unique_ptr<CSkyBox> m_pSkyBoxObject;

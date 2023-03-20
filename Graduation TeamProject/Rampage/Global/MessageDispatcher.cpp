@@ -1,8 +1,10 @@
 #include "MessageDispatcher.h"
 #include "Camera.h"
+#include "..\Scene\Scene.h"
 #include "..\Object\Object.h"
 #include "..\Object\Monster.h"
 #include "..\Object\MonsterState.h"
+#include "..\Object\ParticleObject.h"
 #include "..\Sound\SoundManager.h"
 
 void CMessageDispatcher::RegisterListener(MessageType messageType, IMessageListener* listener, void* filterObject)
@@ -214,6 +216,31 @@ void StunAnimationComponent::HandleMessage(const Message& message, const Animati
 				else
 					pMonster->m_pStateMachine->ChangeState(Damaged_Monster::GetInst());
 			}
+		}
+	}
+}
+
+void ParticleComponent::HandleMessage(const Message& message, const ParticleCompParams& params)
+{
+	if (!m_bEnable)
+		return;
+
+	for (int i = 0; i < params.pObjects->size(); ++i)
+	{
+		CGameObject* pObject = ((*(params.pObjects))[i]).get();
+
+		CParticleObject* pParticle = dynamic_cast<CParticleObject*>(pObject);
+
+		if (pParticle)
+		{
+			pParticle->SetEnable(m_bEnable);
+			pParticle->SetSize(m_fSize);
+			pParticle->SetAlpha(m_fAlpha);
+			pParticle->SetColor(m_xmf3Color);
+			pParticle->SetSpeed(m_fSpeed);
+			pParticle->SetLifeTime(m_fLifeTime);
+			pParticle->SetMaxParticleN(m_nParticleNumber);
+			pParticle->SetEmitParticleN(m_nParticleNumber);
 		}
 	}
 }

@@ -103,6 +103,11 @@ Atk1_Player::Atk1_Player()
 	pStunAnimationComponent->SetStunTime(0.5f);
 	m_pListeners.push_back(std::move(pStunAnimationComponent));
 	CMessageDispatcher::GetInst()->RegisterListener(MessageType::UPDATE_OBJECT, m_pListeners.back().get(), this);
+
+	// PARTICLE ANIMATION
+	std::unique_ptr<ParticleComponent> pParticlenComponent = std::make_unique<ParticleComponent>();
+	m_pListeners.push_back(std::move(pParticlenComponent));
+	CMessageDispatcher::GetInst()->RegisterListener(MessageType::UPDATE_PARTICLE, m_pListeners.back().get(), this);
 }
 
 Atk1_Player::~Atk1_Player()

@@ -1,6 +1,7 @@
 #include "../Global/Global.h"
 #include "../Global/Locator.h"
 #include "BillBoardComponent.h"
+#include "..\Scene\SimulatorScene.h"
 #include "..\Object\TextureManager.h"
 
 std::vector<std::pair<std::shared_ptr<CMonster>, std::shared_ptr<CMultiSpriteObject>>> CAttackSpriteComponent::m_vSprite = std::vector<std::pair<std::shared_ptr<CMonster>, std::shared_ptr<CMultiSpriteObject>>>();
@@ -37,7 +38,7 @@ void CAttackSpriteComponent::SetTexture(int iIndex, LPCTSTR pszFileName)
 {
 	if (m_vSprite.size() <= iIndex)
 		return;
-	std::shared_ptr pTexture = CTextureManager::GetInst()->LoadBillBoardTexture(pszFileName);
+	std::shared_ptr pTexture = CSimulatorScene::GetInst()->GetTextureManager()->LoadBillBoardTexture(pszFileName);
 	if(pTexture)
 		m_vSprite[iIndex].second->ChangeTexture(pTexture);
 }

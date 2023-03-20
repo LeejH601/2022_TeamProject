@@ -4,6 +4,7 @@
 
 class CGameObject;
 class CCamera;
+class CScene;
 
 // Define base message class
 class Message {
@@ -32,6 +33,14 @@ struct AnimationCompParams {
     float fElapsedTime;
 };
 
+struct ParticleCompParams {
+    std::vector<std::unique_ptr<CGameObject>>* pObjects;
+    float fElapsedTime;
+};
+
+struct CollideParams {
+};
+
 // Define message listener interface
 class IMessageListener {
 public:
@@ -39,6 +48,8 @@ public:
     virtual void HandleMessage(const Message& message, const SoundPlayParams& params) {}
     virtual void HandleMessage(const Message& message, const CameraUpdateParams& params) {}
     virtual void HandleMessage(const Message& message, const AnimationCompParams& params) {}
+    virtual void HandleMessage(const Message& message, const ParticleCompParams& params) {}
+    virtual void HandleMessage(const Message& message, const CollideParams& params) {}
 };
 
 // Define Player Attack component
@@ -172,6 +183,30 @@ public:
     virtual void HandleMessage(const Message& message, const AnimationCompParams& params);
 };
 
+// Define Particle Animation component
+#define MAX_PARTICLES				5000
+class ParticleComponent : public IMessageListener {
+    bool m_bEnable = true;
+
+    int m_nParticleNumber = MAX_PARTICLES;
+    int m_nParticleIndex = 0;
+    float m_fSize = 1.f;
+    float m_fAlpha = 1.f;
+    float m_fLifeTime = 5.f;
+    float m_fSpeed = 20.f;
+    XMFLOAT3 m_xmf3Color = XMFLOAT3(1.f, 1.f, 1.f);
+public:
+    void SetParticleNumber(int nParticleNumber) { m_nParticleNumber = nParticleNumber; }
+    void SetParticleIndex(int nParticleIndex) { m_nParticleIndex = nParticleIndex; }
+    void SetSize(float fSize) { m_fSize = fSize; }
+    void SetAlpha(float fAlpha) { m_fSize = fAlpha; }
+    void SetLifeTime(float fLifeTime) { m_fSize = fLifeTime; }
+    void SetSpeed(float fSpeed) { m_fSize = fSpeed; }
+    void SetColor(XMFLOAT3 xmf3Color) { m_xmf3Color = xmf3Color; }
+
+    virtual void HandleMessage(const Message& message, const ParticleCompParams& params);
+};
+
 struct ListenerInfo {
     IMessageListener* listener;
     void* filterObject;
@@ -180,7 +215,7 @@ struct ListenerInfo {
 // Define message dispatcher
 class CMessageDispatcher {
 private:
-    std::vector<ListenerInfo> m_listeners[static_cast<int>(MessageType::UPDATE_OBJECT) + 1];
+    std::vector<ListenerInfo> m_listeners[static_cast<int>(MessageType::UPDATE_PARTICLE) + 1];
 public:
     DECLARE_SINGLE(CMessageDispatcher);
     CMessageDispatcher() { }

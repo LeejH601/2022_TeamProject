@@ -1,11 +1,12 @@
 #include "ParticleComponent.h"
+#include "..\Scene\SimulatorScene.h"
 #include "..\Object\TextureManager.h"
 
 std::shared_ptr<CParticleObject> CParticleComponent::m_pParticleObject = NULL;
 
 void CParticleComponent::SetTexture(int iIndex, LPCTSTR pszFileName)
 {
-	std::shared_ptr pTexture = CTextureManager::GetInst()->LoadParticleTexture(pszFileName);
+	std::shared_ptr pTexture = CSimulatorScene::GetInst()->GetTextureManager()->LoadParticleTexture(pszFileName);
 	if (pTexture)
 		m_pParticleObject->ChangeTexture(pTexture);
 }

@@ -573,7 +573,7 @@ void CImGuiManager::SetUI()
 
 			ImGui::Checkbox("On/Off##ParticleEffect", &pParticleComponent->GetEnable());
 
-			std::vector<std::shared_ptr<CTexture>> vTexture = CTextureManager::GetInst()->GetParticleTextureList();
+			std::vector<std::shared_ptr<CTexture>> vTexture = CSimulatorScene::GetInst()->GetTextureManager()->GetParticleTextureList();
 			std::vector<const char*> items;
 			std::vector <std::string> str(100);
 			for (int i = 0; i < vTexture.size(); i++)
@@ -931,7 +931,7 @@ void CImGuiManager::SetUI()
 
 			ImGui::Checkbox("On/Off##SpriteEffect", &AttackSprite->m_vSprite[0].second->GetAnimation());
 
-			std::vector<std::shared_ptr<CTexture>> vTexture = CTextureManager::GetInst()->GetBillBoardTextureList();
+			std::vector<std::shared_ptr<CTexture>> vTexture = CSimulatorScene::GetInst()->GetTextureManager()->GetBillBoardTextureList();
 			std::vector<const char*> items;
 			std::vector <std::string> str(100);
 			for (int i = 0; i < vTexture.size(); i++)

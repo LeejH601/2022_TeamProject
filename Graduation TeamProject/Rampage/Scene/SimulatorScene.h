@@ -10,6 +10,8 @@
 #include "..\Object\BillBoardObject.h"
 #include "..\Object\ParticleObject.h"
 #include "..\Shader\ParticleShader.h"
+#include "..\Object\TextureManager.h"
+
 
 class CSimulatorScene : public CScene
 {
@@ -25,6 +27,7 @@ private:
 	std::shared_ptr<CParticleShader> m_pParticleObjectShader;
 	std::shared_ptr<CParticleObject> m_pParticleObject;
 
+	std::unique_ptr<CTextureManager> m_pTextureManager = NULL;
 	std::unique_ptr<CCamera> m_pSimulaterCamera = NULL;
 public:
 	DECLARE_SINGLE(CSimulatorScene);
@@ -47,4 +50,5 @@ public:
 	virtual void OnPostRender();
 
 	void SetPlayerAnimationSet(int nSet);
+	CTextureManager* GetTextureManager() { return m_pTextureManager.get(); }
 };
