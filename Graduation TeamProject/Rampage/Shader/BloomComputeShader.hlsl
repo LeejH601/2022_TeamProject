@@ -60,7 +60,9 @@ void Bloom_CS( uint3 DTid : SV_DispatchThreadID )
 
 
 	for(int level = 1; level < 4 + 1; ++level) {
-		if (!(DTid.x % pow(REDUTION_SIZE, level) || DTid.y % pow(REDUTION_SIZE, level)))
+		int sampleSize = REDUTION_SIZE;
+
+		if (!(DTid.x % pow(REDUTION_SIZE, level) == 0 || DTid.y % pow(REDUTION_SIZE, level) == 0))
 			break;
 
 		int2 Resoultion = int2(ceil((float)RESOULTION_X / pow(REDUTION_SIZE, level)), ceil((float)RESOULTION_Y / pow(REDUTION_SIZE, level)));
@@ -68,22 +70,23 @@ void Bloom_CS( uint3 DTid : SV_DispatchThreadID )
 		int2 hLevelTexCoord = int2(DTid.x / pow(REDUTION_SIZE, level - 1), DTid.y / pow(REDUTION_SIZE, level - 1));
 		int2 TexCoord = int2(DTid.x / pow(REDUTION_SIZE, level), DTid.y / pow(REDUTION_SIZE, level));
 		float4 f4Color = float4(0, 0, 0, 0);
-		for (int i = 0; i < 4; i++)
+		for (int i = 0; i < sampleSize; i++)
 		{
-			for (int j = 0; j < 4; j++)
+			for (int j = 0; j < sampleSize; j++)
 			{
 				f4Color += gtxtRWFillters[level - 1][hLevelTexCoord.xy + int2(i, j)];
 			}
 		}
 
-		gtxtRWFillters[level][TexCoord] = f4Color / 16;
+		gtxtRWFillters[level][TexCoord] = f4Color / (sampleSize * sampleSize);
 	}
 	
 	GroupMemoryBarrierWithGroupSync();
 
-	float BloomFactor = 0.2f;
+	float BloomFactor = 0.08f;
 
 	float4 Color = FragColor;
+	float4 BloomColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
 	for (int level = 1; level < 4 + 1; ++level) {
 		int2 TexCoord = int2(DTid.x / pow(REDUTION_SIZE, level), DTid.y / pow(REDUTION_SIZE, level));
 		float4 f4Color = float4(0, 0, 0, 0);
@@ -95,7 +98,9 @@ void Bloom_CS( uint3 DTid : SV_DispatchThreadID )
 			}
 		}
 		Color += BloomFactor * f4Color;
-		BloomFactor -= 0.045f;
+		//BloomFactor -= 0.01f;
 	}
+	//gtxtRWOutput[DTid.xy] =lerp(Color, BloomColor, 0.5f);
+	//gtxtRWOutput[DTid.xy] = BrightColor.r > 0.0f ? lerp(Color, BloomColor, 0.7f) : Color;
 	gtxtRWOutput[DTid.xy] = Color;
 }
