@@ -40,19 +40,11 @@ static float4 TestColorSet[4] = {
 
 #define RESOULTION_X 1920
 #define RESOULTION_Y 1080
+#define REDUTION_SIZE 2
 
 [numthreads(32, 32, 1)]
 void Bloom_CS( uint3 DTid : SV_DispatchThreadID )
 {
-	/*if (DTid.x < 32 && DTid.y < 32) {
-		gtxtRWFillters[0][DTid.xy] = float4(1.0f, 0.0f, 0.0f, 1.0f);
-		gtxtRWFillters[1][DTid.xy] = float4(0.0f, 1.0f, 0.0f, 1.0f);
-		gtxtRWFillters[2][DTid.xy] = float4(0.0f, 0.0f, 1.0f, 1.0f);
-		gtxtRWFillters[3][DTid.xy] = float4(1.0f, 0.0f, 1.0f, 1.0f);
-	}
-
-	gtxtRWOutput[DTid.xy] = gtxtSource[DTid.xy];*/
-
 	float4 FragColor = gtxtSource[DTid.xy];
 	float Brightness = dot(FragColor.rgb, gf3ToLuminance);
 	float4 BrightColor;
@@ -67,14 +59,14 @@ void Bloom_CS( uint3 DTid : SV_DispatchThreadID )
 	GroupMemoryBarrierWithGroupSync();
 
 
-	for(int level = 1; level < 3 + 1; ++level) {
-		if (!(DTid.x % pow(4, level) || DTid.y % pow(4, level)))
+	for(int level = 1; level < 4 + 1; ++level) {
+		if (!(DTid.x % pow(REDUTION_SIZE, level) || DTid.y % pow(REDUTION_SIZE, level)))
 			break;
 
-		int2 Resoultion = int2(ceil((float)RESOULTION_X / pow(4, level)), ceil((float)RESOULTION_Y / pow(4, level)));
+		int2 Resoultion = int2(ceil((float)RESOULTION_X / pow(REDUTION_SIZE, level)), ceil((float)RESOULTION_Y / pow(REDUTION_SIZE, level)));
 
-		int2 hLevelTexCoord = int2(DTid.x / pow(4, level - 1), DTid.y / pow(4, level - 1));
-		int2 TexCoord = int2(DTid.x / pow(4, level), DTid.y / pow(4, level));
+		int2 hLevelTexCoord = int2(DTid.x / pow(REDUTION_SIZE, level - 1), DTid.y / pow(REDUTION_SIZE, level - 1));
+		int2 TexCoord = int2(DTid.x / pow(REDUTION_SIZE, level), DTid.y / pow(REDUTION_SIZE, level));
 		float4 f4Color = float4(0, 0, 0, 0);
 		for (int i = 0; i < 4; i++)
 		{
@@ -85,41 +77,25 @@ void Bloom_CS( uint3 DTid : SV_DispatchThreadID )
 		}
 
 		gtxtRWFillters[level][TexCoord] = f4Color / 16;
-		//gtxtRWFillters[level][TexCoord] = TestColorSet[level - 1];
-		//GroupMemoryBarrierWithGroupSync();
 	}
 	
 	GroupMemoryBarrierWithGroupSync();
 
-	float BloomFactor = 0.4f;
+	float BloomFactor = 0.2f;
 
 	float4 Color = FragColor;
-	for (int level = 1; level < 2 + 1; ++level) {
-		/*if (!(DTid.x % pow(4, level) || DTid.y % pow(4, level)))
-			break;*/
-
-		//int2 Resoultion = int2(ceil((float)RESOULTION_X / pow(4, level)), ceil((float)RESOULTION_Y / pow(4, level)));
-
-		//int2 hLevelTexCoord = int2(DTid.x / pow(4, level - 1), DTid.y / pow(4, level - 1));
-		int2 TexCoord = int2(DTid.x / pow(4, level), DTid.y / pow(4, level));
+	for (int level = 1; level < 4 + 1; ++level) {
+		int2 TexCoord = int2(DTid.x / pow(REDUTION_SIZE, level), DTid.y / pow(REDUTION_SIZE, level));
 		float4 f4Color = float4(0, 0, 0, 0);
-		for (int i = 0; i < 4; i++)
+		for (int i = -2; i <= 2; i++)
 		{
-			for (int j = 0; j < 4; j++)
+			for (int j = -2; j <= 2; j++)
 			{
-				f4Color += gfGaussianBlurMask2D[i][j] * gtxtRWFillters[level][TexCoord.xy + int2(i, j)];
+				f4Color += gfGaussianBlurMask2D[i+2][j+2] * gtxtRWFillters[level][TexCoord.xy + int2(i, j)];
 			}
 		}
 		Color += BloomFactor * f4Color;
-		BloomFactor -= 0.1f;
+		BloomFactor -= 0.045f;
 	}
 	gtxtRWOutput[DTid.xy] = Color;
-
-	/*float4 Color = FragColor;
-	for (int level = 1; level < 3 + 1; ++level) {
-		int2 TexCoord = int2(DTid.x / pow(4, level), DTid.y / pow(4, level));
-		Color += gtxtRWFillters[level][TexCoord.xy];
-	}
-	gtxtRWOutput[DTid.xy] = Color;*/
-
 }

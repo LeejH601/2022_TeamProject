@@ -97,11 +97,13 @@ void CBloomShader::Dispatch(ID3D12GraphicsCommandList* pd3dCommandList)
 
 void CBloomShader::CreateBloomUAVResource(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, UINT xResoution, UINT yResoultion, int nDownSampling)
 {
+	int redutionSize = 2;
+
 	UINT minResoul = xResoution > yResoultion ? yResoultion : xResoution;
 	int maxDownSample = 4;
 	int nDownSample = maxDownSample;
 	for (int i = 0; i < maxDownSample; ++i) {
-		if (minResoul / (pow(4, maxDownSample - i)) < 16) {
+		if (minResoul / (pow(redutionSize, maxDownSample - i)) < 16) {
 			nDownSample--;
 		}
 		else
@@ -111,11 +113,12 @@ void CBloomShader::CreateBloomUAVResource(ID3D12Device* pd3dDevice, ID3D12Graphi
 	std::vector<XMFLOAT2> downSampleTextureResoultions;
 	XMFLOAT2 baseResoultion{ float(xResoution),  float(yResoultion) };
 
+
 	downSampleTextureResoultions.emplace_back(xResoution, yResoultion);
 	XMFLOAT2 resoultion = baseResoultion;
 	for (int i = 0; i < nDownSample; ++i) {
-		resoultion.x /= 4;
-		resoultion.y /= 4;
+		resoultion.x /= redutionSize;
+		resoultion.y /= redutionSize;
 		resoultion.x = ceil(resoultion.x);
 		resoultion.y = ceil(resoultion.y);
 		downSampleTextureResoultions.emplace_back(resoultion);
