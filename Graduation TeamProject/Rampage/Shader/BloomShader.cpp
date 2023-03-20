@@ -10,7 +10,7 @@ CBloomShader::~CBloomShader()
 
 D3D12_SHADER_BYTECODE CBloomShader::CreateComputeShader(ID3DBlob** ppd3dShaderBlob)
 {
-	return D3D12_SHADER_BYTECODE();
+	return(CShader::ReadCompiledShaderFile(L"BloomComputeShader.cso", ppd3dShaderBlob));
 }
 
 void CBloomShader::CreateShader(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dRootSignature, UINT cxThreadGroups, UINT cyThreadGroups, UINT czThreadGroups)
@@ -42,7 +42,7 @@ void CBloomShader::CreateShader(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandL
 	m_cyThreadGroups = cyThreadGroups;
 	m_czThreadGroups = czThreadGroups;
 
-	CreateCbvSrvUavDescriptorHeaps(pd3dDevice, 0, 1, 1);
+	CreateCbvSrvUavDescriptorHeaps(pd3dDevice, 0, 1, 1 + 5);
 	//CreateUavDescriptorHeaps(pd3dDevice, 1);
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
@@ -50,6 +50,20 @@ void CBloomShader::CreateShader(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandL
 
 void CBloomShader::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
+#ifdef _WITH_SHARED_TEXTURE
+	m_pTexture = new CTexture(3, RESOURCE_TEXTURE2D, 0, 1, 1, 1, 1, 1, 2);
+#else
+	m_pBloomedTexture = std::make_unique<CTexture>(1, RESOURCE_TEXTURE2D, 0, 0, 0, 1, 0, 1, 0);
+#endif
+	m_pBloomedTexture->CreateTexture(pd3dDevice, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, DXGI_FORMAT_R16G16B16A16_FLOAT, D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_UNORDERED_ACCESS, NULL, RESOURCE_TEXTURE2D, 0);
+
+	CreateComputeUnorderedAccessView(pd3dDevice, m_pBloomedTexture.get(), 0, 0, 0, 1);
+
+	//m_pTextures->SetComputeSrvRootParameter(0, 0, 0, 2);
+	m_pBloomedTexture->SetComputeUavRootParameter(0, 1, 0, 1);
+
+	m_cxThreadGroups = ceil(FRAME_BUFFER_WIDTH / 32.0f);
+	m_cyThreadGroups = ceil(FRAME_BUFFER_HEIGHT / 32.0f);
 }
 
 void CBloomShader::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
@@ -74,25 +88,30 @@ void CBloomShader::CreateBloomUAVResource(ID3D12Device* pd3dDevice, ID3D12Graphi
 	int maxDownSample = 4;
 	int nDownSample = maxDownSample;
 	for (int i = 0; i < maxDownSample; ++i) {
-		if (minResoul / (pow(4, maxDownSample - i)) < 4) {
+		if (minResoul / (pow(4, maxDownSample - i)) < 16) {
 			nDownSample--;
 		}
+		else
+			break;
 	}
 
 	std::vector<XMFLOAT2> downSampleTextureResoultions;
 	XMFLOAT2 baseResoultion{ float(xResoution),  float(yResoultion) };
 
 	downSampleTextureResoultions.emplace_back(xResoution, yResoultion);
+	XMFLOAT2 resoultion = baseResoultion;
 	for (int i = 0; i < nDownSample; ++i) {
-		XMFLOAT2 resoultion;
-		resoultion.x = baseResoultion.x / 4;
-		resoultion.y = baseResoultion.y / 4;
+		resoultion.x /= 4;
+		resoultion.y /= 4;
+		resoultion.x = ceil(resoultion.x);
+		resoultion.y = ceil(resoultion.y);
 		downSampleTextureResoultions.emplace_back(resoultion);
 	}
 
-	m_pFillterTextures = std::make_unique<CTexture>(nDownSample, RESOURCE_TEXTURE2D, 0, 0, 0, 1, 0, nDownSample, 0);
-	for (int i = 0; i < nDownSample; ++i) {
+	m_pFillterTextures = std::make_unique<CTexture>(nDownSample + 1, RESOURCE_TEXTURE2D, 0, 0, 0, 1, 0, nDownSample + 1, 0);
+	for (int i = 0; i < nDownSample + 1; ++i) {
 		m_pFillterTextures->CreateTexture(pd3dDevice, downSampleTextureResoultions[i].x, downSampleTextureResoultions[i].y, DXGI_FORMAT_R16G16B16A16_FLOAT, D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_UNORDERED_ACCESS, NULL, RESOURCE_TEXTURE2D, i);
 	}
-
+	CreateComputeUnorderedAccessView(pd3dDevice, m_pFillterTextures.get(), 0, 0, 0, nDownSample + 1);
+	m_pFillterTextures->SetComputeUavRootParameter(0, 2, 1, nDownSample + 1);
 }

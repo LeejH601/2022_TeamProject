@@ -2,6 +2,7 @@
 #include "../Global/stdafx.h"
 #include "..\Shader\PostProcessShader.h"
 #include "..\Shader\HDRComputeShader.h"
+#include "..\Shader\BloomShader.h"
 
 class CCamera;
 class CGameObject;
@@ -15,6 +16,7 @@ protected:
 public:
 	std::unique_ptr<CPostProcessShader> m_pPostProcessShader = NULL;
 	std::unique_ptr<CHDRComputeShader> m_pHDRComputeShader;
+	std::unique_ptr<CBloomShader> m_pBloomComputeShader;
 
 public:
 	CScene() {}

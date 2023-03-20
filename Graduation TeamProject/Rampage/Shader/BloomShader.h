@@ -20,7 +20,7 @@ public:
 
 	virtual void Dispatch(ID3D12GraphicsCommandList* pd3dCommandList);
 
-	void CreateBloomUAVResource(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, UINT xResoution, UINT yResoultion, int nDownSampling);
+	void CreateBloomUAVResource(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, UINT xResoution, UINT yResoultion, int nDownSampling = 0);
 
 public:
 	std::shared_ptr<CTexture> m_pSourceTextures;
