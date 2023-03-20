@@ -68,6 +68,15 @@ void CBloomShader::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12Graphic
 
 void CBloomShader::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
 {
+	if (m_pSourceTextures) {
+		m_pSourceTextures->UpdateComputeSrvShaderVariable(pd3dCommandList, 0);
+	}
+	if (m_pFillterTextures) {
+		m_pFillterTextures->UpdateComputeUavShaderVariable(pd3dCommandList, 0);
+	}
+	if (m_pBloomedTexture) {
+		m_pBloomedTexture->UpdateComputeUavShaderVariable(pd3dCommandList, 0);
+	}
 }
 
 void CBloomShader::ReleaseShaderVariables()
@@ -80,6 +89,10 @@ void CBloomShader::ReleaseUploadBuffers()
 
 void CBloomShader::Dispatch(ID3D12GraphicsCommandList* pd3dCommandList)
 {
+	OnPrepareRender(pd3dCommandList, 0);
+	//UpdateShaderVariables(pd3dCommandList);
+
+	pd3dCommandList->Dispatch(m_cxThreadGroups, m_cyThreadGroups, m_czThreadGroups);
 }
 
 void CBloomShader::CreateBloomUAVResource(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, UINT xResoution, UINT yResoultion, int nDownSampling)
@@ -108,10 +121,16 @@ void CBloomShader::CreateBloomUAVResource(ID3D12Device* pd3dDevice, ID3D12Graphi
 		downSampleTextureResoultions.emplace_back(resoultion);
 	}
 
+	m_nFillters = nDownSample + 1;
 	m_pFillterTextures = std::make_unique<CTexture>(nDownSample + 1, RESOURCE_TEXTURE2D, 0, 0, 0, 1, 0, nDownSample + 1, 0);
 	for (int i = 0; i < nDownSample + 1; ++i) {
 		m_pFillterTextures->CreateTexture(pd3dDevice, downSampleTextureResoultions[i].x, downSampleTextureResoultions[i].y, DXGI_FORMAT_R16G16B16A16_FLOAT, D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_UNORDERED_ACCESS, NULL, RESOURCE_TEXTURE2D, i);
 	}
 	CreateComputeUnorderedAccessView(pd3dDevice, m_pFillterTextures.get(), 0, 0, 0, nDownSample + 1);
-	m_pFillterTextures->SetComputeUavRootParameter(0, 2, 1, nDownSample + 1);
+	m_pFillterTextures->SetComputeUavRootParameter(0, 2, 0, nDownSample + 1);
+}
+
+void CBloomShader::ClearFillters(ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	
 }
