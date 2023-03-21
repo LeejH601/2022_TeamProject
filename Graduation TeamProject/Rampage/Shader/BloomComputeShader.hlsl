@@ -83,7 +83,8 @@ void Bloom_CS( uint3 DTid : SV_DispatchThreadID )
 	
 	GroupMemoryBarrierWithGroupSync();
 
-	float BloomFactor = 0.08f;
+	float BloomFactor = 0.18f;
+	//float BloomFactor = 0.08f;
 
 	float4 Color = FragColor;
 	float4 BloomColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
@@ -97,7 +98,14 @@ void Bloom_CS( uint3 DTid : SV_DispatchThreadID )
 				f4Color += gfGaussianBlurMask2D[i+2][j+2] * gtxtRWFillters[level][TexCoord.xy + int2(i, j)];
 			}
 		}
-		Color += BloomFactor * f4Color;
+		if (level > 2) {
+			Color += 0.06f * f4Color;
+		}
+		else if (level > 3) {
+			Color += 0.03f * f4Color;
+		}
+		else
+			Color += BloomFactor * f4Color;
 		//BloomFactor -= 0.01f;
 	}
 	//gtxtRWOutput[DTid.xy] =lerp(Color, BloomColor, 0.5f);
