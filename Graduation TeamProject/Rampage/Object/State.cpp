@@ -133,13 +133,6 @@ void Atk1_Player::Enter(CPlayer* player)
 
 	SoundPlayParams SoundPlayParam{ SOUND_CATEGORY::SOUND_SHOOT };
 	CMessageDispatcher::GetInst()->Dispatch_Message<SoundPlayParams>(MessageType::PLAY_SOUND, &SoundPlayParam, this);
-
-	CComponentSet* componentset = CImGuiManager::GetInst()->GetComponentSet(0);
-	if (componentset) {
-		/*Locator.GetMainSceneCamera()->LoadComponentFromSet(componentset);
-		Locator.GetSimulaterCamera()->LoadComponentFromSet(componentset);
-		Locator.GetSoundPlayer()->LoadComponentFromSet(componentset);*/
-	}
 }
 
 void Atk1_Player::Execute(CPlayer* player, float fElapsedTime)
@@ -206,6 +199,31 @@ Atk2_Player::Atk2_Player()
 	pMoveComponent->SetRollBackTime(0.5f);
 	m_pListeners.push_back(std::move(pMoveComponent));
 	CMessageDispatcher::GetInst()->RegisterListener(MessageType::UPDATE_CAMERA, m_pListeners.back().get(), this);
+
+	// DAMAGE ANIMATION
+	std::unique_ptr<DamageAnimationComponent> pDamageAnimationComponent = std::make_unique<DamageAnimationComponent>();
+	pDamageAnimationComponent->SetMaxDistance(15.0f);
+	pDamageAnimationComponent->SetSpeed(100.0f);
+	m_pListeners.push_back(std::move(pDamageAnimationComponent));
+	CMessageDispatcher::GetInst()->RegisterListener(MessageType::UPDATE_OBJECT, m_pListeners.back().get(), this);
+
+	// SHAKE ANIMATION
+	std::unique_ptr<ShakeAnimationComponent> pShakeAnimationComponent = std::make_unique<ShakeAnimationComponent>();
+	pShakeAnimationComponent->SetDistance(0.25f);
+	pShakeAnimationComponent->SetFrequency(0.01f);
+	m_pListeners.push_back(std::move(pShakeAnimationComponent));
+	CMessageDispatcher::GetInst()->RegisterListener(MessageType::UPDATE_OBJECT, m_pListeners.back().get(), this);
+
+	// STUN ANIMATION
+	std::unique_ptr<StunAnimationComponent> pStunAnimationComponent = std::make_unique<StunAnimationComponent>();
+	pStunAnimationComponent->SetStunTime(0.5f);
+	m_pListeners.push_back(std::move(pStunAnimationComponent));
+	CMessageDispatcher::GetInst()->RegisterListener(MessageType::UPDATE_OBJECT, m_pListeners.back().get(), this);
+
+	// PARTICLE ANIMATION
+	std::unique_ptr<ParticleComponent> pParticlenComponent = std::make_unique<ParticleComponent>();
+	m_pListeners.push_back(std::move(pParticlenComponent));
+	CMessageDispatcher::GetInst()->RegisterListener(MessageType::UPDATE_PARTICLE, m_pListeners.back().get(), this);
 }
 
 Atk2_Player::~Atk2_Player()
@@ -231,13 +249,6 @@ void Atk2_Player::Enter(CPlayer* player)
 
 	SoundPlayParams SoundPlayParam{ SOUND_CATEGORY::SOUND_SHOOT };
 	CMessageDispatcher::GetInst()->Dispatch_Message<SoundPlayParams>(MessageType::PLAY_SOUND, &SoundPlayParam, this);
-
-	CComponentSet* componentset = CImGuiManager::GetInst()->GetComponentSet(1);
-	if (componentset) {
-		/*Locator.GetMainSceneCamera()->LoadComponentFromSet(componentset);
-		Locator.GetSimulaterCamera()->LoadComponentFromSet(componentset);
-		Locator.GetSoundPlayer()->LoadComponentFromSet(componentset);*/
-	}
 }
 
 void Atk2_Player::Execute(CPlayer* player, float fElapsedTime)
@@ -304,6 +315,31 @@ Atk3_Player::Atk3_Player()
 	pMoveComponent->SetRollBackTime(0.5f);
 	m_pListeners.push_back(std::move(pMoveComponent));
 	CMessageDispatcher::GetInst()->RegisterListener(MessageType::UPDATE_CAMERA, m_pListeners.back().get(), this);
+
+	// DAMAGE ANIMATION
+	std::unique_ptr<DamageAnimationComponent> pDamageAnimationComponent = std::make_unique<DamageAnimationComponent>();
+	pDamageAnimationComponent->SetMaxDistance(15.0f);
+	pDamageAnimationComponent->SetSpeed(100.0f);
+	m_pListeners.push_back(std::move(pDamageAnimationComponent));
+	CMessageDispatcher::GetInst()->RegisterListener(MessageType::UPDATE_OBJECT, m_pListeners.back().get(), this);
+
+	// SHAKE ANIMATION
+	std::unique_ptr<ShakeAnimationComponent> pShakeAnimationComponent = std::make_unique<ShakeAnimationComponent>();
+	pShakeAnimationComponent->SetDistance(0.25f);
+	pShakeAnimationComponent->SetFrequency(0.01f);
+	m_pListeners.push_back(std::move(pShakeAnimationComponent));
+	CMessageDispatcher::GetInst()->RegisterListener(MessageType::UPDATE_OBJECT, m_pListeners.back().get(), this);
+
+	// STUN ANIMATION
+	std::unique_ptr<StunAnimationComponent> pStunAnimationComponent = std::make_unique<StunAnimationComponent>();
+	pStunAnimationComponent->SetStunTime(0.5f);
+	m_pListeners.push_back(std::move(pStunAnimationComponent));
+	CMessageDispatcher::GetInst()->RegisterListener(MessageType::UPDATE_OBJECT, m_pListeners.back().get(), this);
+
+	// PARTICLE ANIMATION
+	std::unique_ptr<ParticleComponent> pParticlenComponent = std::make_unique<ParticleComponent>();
+	m_pListeners.push_back(std::move(pParticlenComponent));
+	CMessageDispatcher::GetInst()->RegisterListener(MessageType::UPDATE_PARTICLE, m_pListeners.back().get(), this);
 }
 
 Atk3_Player::~Atk3_Player()
@@ -326,13 +362,6 @@ void Atk3_Player::Enter(CPlayer* player)
 
 	SoundPlayParams SoundPlayParam{ SOUND_CATEGORY::SOUND_SHOOT };
 	CMessageDispatcher::GetInst()->Dispatch_Message<SoundPlayParams>(MessageType::PLAY_SOUND, &SoundPlayParam, this);
-
-	CComponentSet* componentset = CImGuiManager::GetInst()->GetComponentSet(2);
-	if (componentset) {
-		/*Locator.GetMainSceneCamera()->LoadComponentFromSet(componentset);
-		Locator.GetSimulaterCamera()->LoadComponentFromSet(componentset);
-		Locator.GetSoundPlayer()->LoadComponentFromSet(componentset);*/
-	}
 }
 
 void Atk3_Player::Execute(CPlayer* player, float fElapsedTime)

@@ -47,6 +47,7 @@ protected:
     bool m_bEnable = false;
 public:
     bool& GetEnable() { return m_bEnable; }
+    void SetEnable(bool bEnable) { m_bEnable = bEnable; }
 
     virtual void HandleMessage(const Message& message, const PlayerAttackParams& params) {}
     virtual void HandleMessage(const Message& message, const SoundPlayParams& params) {}
@@ -214,13 +215,13 @@ class ParticleComponent : public IMessageListener {
     float m_fSpeed = 20.f;
     XMFLOAT3 m_xmf3Color = XMFLOAT3(1.f, 1.f, 1.f);
 public:
-    int GetParticleNumber() { return m_nParticleNumber; }
-    int GetParticleIndex() { return m_nParticleIndex; }
-    float GetSize() { return m_fSize; }
-    float GetAlpha() { return m_fSize; }
-    float GetLifeTime() { return m_fSize; }
-    float GetSpeed() { return m_fSize; }
-    XMFLOAT3 GetColor() { return m_xmf3Color; }
+    int& GetParticleNumber() { return m_nParticleNumber; }
+    int& GetParticleIndex() { return m_nParticleIndex; }
+    float& GetSize() { return m_fSize; }
+    float& GetAlpha() { return m_fSize; }
+    float& GetLifeTime() { return m_fSize; }
+    float& GetSpeed() { return m_fSize; }
+    XMFLOAT3& GetColor() { return m_xmf3Color; }
 
     void SetParticleNumber(int nParticleNumber) { m_nParticleNumber = nParticleNumber; }
     void SetParticleIndex(int nParticleIndex) { m_nParticleIndex = nParticleIndex; }
