@@ -43,7 +43,11 @@ struct CollideParams {
 
 // Define message listener interface
 class IMessageListener {
+protected:
+    bool m_bEnable = false;
 public:
+    bool& GetEnable() { return m_bEnable; }
+
     virtual void HandleMessage(const Message& message, const PlayerAttackParams& params) {}
     virtual void HandleMessage(const Message& message, const SoundPlayParams& params) {}
     virtual void HandleMessage(const Message& message, const CameraUpdateParams& params) {}
@@ -63,11 +67,17 @@ public:
 
 // Define Sound Play component
 class SoundPlayComponent : public IMessageListener {
+
     unsigned int m_nSoundNumber = 0;
     float m_fDelay = 0.0f;
     float m_fVolume = 0.0f;
     SOUND_CATEGORY m_sc = SOUND_CATEGORY::SOUND_SHOCK;
 public:
+    float& GetDelay() { return m_fDelay; }
+    float& GetVolume() { return m_fVolume; }
+    unsigned int& GetSoundNumber() { return m_nSoundNumber; }
+    SOUND_CATEGORY GetSoundCategory() { return m_sc; }
+
     void SetSoundNumber(unsigned int SoundNumber) { m_nSoundNumber = SoundNumber; }
     void SetDelay(float Delay) { m_fDelay = Delay; }
     void SetVolume(float Volume) { m_fVolume = Volume; }
@@ -78,14 +88,15 @@ public:
 
 // Define Shake Movement component
 class CameraShakeComponent : public IMessageListener {
-    bool m_bEnable = false;
-
     std::uniform_real_distribution<float> urd{ -1.0f, 1.0f };
 
     float m_ft = 0.0f;;
     float m_fDuration;
     float m_fMagnitude;
 public:
+    float& GetDuration() { return m_fDuration; }
+    float& GetMagnitude() { return m_fMagnitude; }
+
     void SetDuration(float duration) { m_fDuration = duration; }
     void SetMagnitude(float magnitude) { m_fMagnitude = magnitude; }
 
@@ -95,8 +106,6 @@ public:
 
 // Define CameraMove component
 class CameraMoveComponent : public IMessageListener {
-    bool m_bEnable = false;
-
     XMFLOAT3 m_xmf3Direction = XMFLOAT3(0.0f, 0.0f, 1.0f);
 
     float m_fMaxDistance = 2.0f;
@@ -109,6 +118,11 @@ class CameraMoveComponent : public IMessageListener {
 
     XMFLOAT3 offset = XMFLOAT3(0.0f, 0.0f, 0.0f);;
 public:
+    XMFLOAT3& GetDirection() { return m_xmf3Direction; }
+    float& GetMaxDistance() { return m_fMaxDistance; }
+    float& GetMovingTime() { return m_fMovingTime; }
+    float& GetRollBackTime() { return m_fRollBackTime; }
+
     void SetDirection(XMFLOAT3 xmf3direction) { m_xmf3Direction = xmf3direction; }
     void SetMaxDistance(float max_distance) { m_fMaxDistance = max_distance; }
     void SetMovingTime(float moving_time) { m_fMovingTime = moving_time; }
@@ -120,8 +134,6 @@ public:
 
 // Define Zoom In/Out component
 class CameraZoomerComponent : public IMessageListener {
-    bool m_bEnable = false;
-
     XMFLOAT3 m_xmf3Direction = XMFLOAT3(0.0f, 0.0f, 1.0f);
 
     bool m_bIsIN = true;
@@ -136,6 +148,12 @@ class CameraZoomerComponent : public IMessageListener {
 
     XMFLOAT3 offset = XMFLOAT3(0.0f, 0.0f, 0.0f);
 public:
+    XMFLOAT3& GetDirection() { return m_xmf3Direction; }
+    float& GetMaxDistance() { return m_fMaxDistance; }
+    float& GetMovingTime() { return m_fMovingTime; }
+    float& GetRollBackTime() { return m_fRollBackTime; }
+    bool& GetIsIn() { return m_bIsIN; }
+
     void SetDirection(XMFLOAT3 direction) { m_xmf3Direction = direction; }
     void SetMaxDistance(float max_distance) { m_fMaxDistance = max_distance; }
     void SetMovingTime(float moving_time) { m_fMovingTime = moving_time; }
@@ -148,11 +166,12 @@ public:
 
 // Define Damage Animation component
 class DamageAnimationComponent : public IMessageListener {
-    bool m_bEnable = true;
-
     float m_fMaxDistance = 5.0f;
     float m_fSpeed = 100.0f;
 public:
+    float& GetMaxDistance() { return m_fMaxDistance; }
+    float& GetSpeed() { return m_fSpeed; }
+
     void SetMaxDistance(float max_distance) { m_fMaxDistance = max_distance; }
     void SetSpeed(float speed) { m_fSpeed = speed; }
 
@@ -161,11 +180,12 @@ public:
 
 // Define Shake Animation component
 class ShakeAnimationComponent : public IMessageListener {
-    bool m_bEnable = true;
-
     float m_fDistance = 0.15f;
     float m_fFrequency = 0.05f;
 public:
+    float& GetDistance() { return m_fDistance; }
+    float& GetFrequency() { return m_fFrequency; }
+
     void SetDistance(float distance) { m_fDistance = distance; }
     void SetFrequency(float frequency) { m_fFrequency = frequency; }
 
@@ -174,10 +194,10 @@ public:
 
 // Define Stun Animation component
 class StunAnimationComponent : public IMessageListener {
-    bool m_bEnable = true;
-
     float m_fStunTime = 0.5f;
 public:
+    float& GetStunTime() { return m_fStunTime; }
+
     void SetStunTime(float stun_time) { m_fStunTime = stun_time; }
 
     virtual void HandleMessage(const Message& message, const AnimationCompParams& params);
@@ -186,8 +206,6 @@ public:
 // Define Particle Animation component
 #define MAX_PARTICLES				5000
 class ParticleComponent : public IMessageListener {
-    bool m_bEnable = true;
-
     int m_nParticleNumber = MAX_PARTICLES;
     int m_nParticleIndex = 0;
     float m_fSize = 1.f;
@@ -196,6 +214,14 @@ class ParticleComponent : public IMessageListener {
     float m_fSpeed = 20.f;
     XMFLOAT3 m_xmf3Color = XMFLOAT3(1.f, 1.f, 1.f);
 public:
+    int GetParticleNumber() { return m_nParticleNumber; }
+    int GetParticleIndex() { return m_nParticleIndex; }
+    float GetSize() { return m_fSize; }
+    float GetAlpha() { return m_fSize; }
+    float GetLifeTime() { return m_fSize; }
+    float GetSpeed() { return m_fSize; }
+    XMFLOAT3 GetColor() { return m_xmf3Color; }
+
     void SetParticleNumber(int nParticleNumber) { m_nParticleNumber = nParticleNumber; }
     void SetParticleIndex(int nParticleIndex) { m_nParticleIndex = nParticleIndex; }
     void SetSize(float fSize) { m_fSize = fSize; }

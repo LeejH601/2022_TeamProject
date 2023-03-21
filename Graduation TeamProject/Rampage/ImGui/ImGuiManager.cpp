@@ -526,7 +526,22 @@ void CImGuiManager::SetUI()
 
 	if (m_pCurrentComponentSet == nullptr) {
 		m_pCurrentComponentSet = GetComponentSet(0);
-		//m_pCamera->LoadComponentFromSet(m_pCurrentComponentSet);
+	}
+
+	CState<CPlayer>* pCurrentAnimation = Atk1_Player::GetInst();
+
+	switch (Player_Animation_Number) {
+	case 0:
+		pCurrentAnimation = Atk1_Player::GetInst();
+		break;
+	case 1:
+		pCurrentAnimation = Atk2_Player::GetInst();
+		break;
+	case 2:
+		pCurrentAnimation = Atk3_Player::GetInst();
+		break;
+	default:
+		break;
 	}
 
 	// Show my window.
@@ -570,7 +585,6 @@ void CImGuiManager::SetUI()
 			ImGui::SetNextItemWidth(190.f);
 
 			CParticleComponent* pParticleComponent = (CParticleComponent*)(m_pCurrentComponentSet->FindComponent(typeid(CParticleComponent)));
-
 			ImGui::Checkbox("On/Off##ParticleEffect", &pParticleComponent->GetEnable());
 
 			std::vector<std::shared_ptr<CTexture>> vTexture = CSimulatorScene::GetInst()->GetTextureManager()->GetParticleTextureList();
@@ -621,15 +635,6 @@ void CImGuiManager::SetUI()
 			ImGui::SetCursorPos(initial_curpos);
 			ImGui::SetNextItemWidth(30.f);
 			ImGui::ColorEdit3("ParticleEffect", (float*)&pParticleComponent->m_f3Color); // Edit 3 floats representing a color
-			//initial_curpos.x += 35.f;
-			//ImGui::SetCursorPos(initial_curpos);
-			//ImGui::SetNextItemWidth(30.f);
-			//ImGui::DragFloat("Color-G##ParticleEffect", &pParticleComponent->m_f3Color.y, 0.01f, 0.0f, 10.0f, "%.2f", 0);
-
-			//initial_curpos.x += 35.f;
-			//ImGui::SetCursorPos(initial_curpos);
-			//ImGui::SetNextItemWidth(30.f);
-			//ImGui::DragFloat("Color-B##ParticleEffect", &pParticleComponent->m_f3Color.z, 0.01f, 0.0f, 10.0f, "%.2f", 0);
 
 			pParticleComponent->Update();
 		}
@@ -650,25 +655,27 @@ void CImGuiManager::SetUI()
 
 		if (ImGui::CollapsingHeader("Damage Animation"))
 		{
+			CDamageAnimationComponent* damage = (CDamageAnimationComponent*)(m_pCurrentComponentSet->FindComponent(typeid(CDamageAnimationComponent)));
+			DamageAnimationComponent* pDamageAnimationComponent = static_cast<DamageAnimationComponent*>(pCurrentAnimation->GetDamageAnimationComponent());
+
 			initial_curpos.y += 25.f;
 			ImGui::SetCursorPos(initial_curpos);
 			ImGui::SetNextItemWidth(190.f);
-			CDamageAnimationComponent* damage = (CDamageAnimationComponent*)(m_pCurrentComponentSet->FindComponent(typeid(CDamageAnimationComponent)));
-			ImGui::Checkbox("On/Off##DamageAnimation", &damage->GetEnable());
+			ImGui::Checkbox("On/Off##DamageAnimation", &pDamageAnimationComponent->GetEnable());
 
 			initial_curpos.y += 25.f;
 			ImGui::SetCursorPos(initial_curpos);
 			ImGui::SetNextItemWidth(190.f);
 
 			if (ImGui::DragFloat("MaxDistance##DamageAnimation", &damage->GetMaxDistance(), 0.01f, 0.0f, 10.0f, "%.2f", 0))
-				damage->GetMaxDistance() = std::clamp(damage->GetMaxDistance(), 0.0f, 10.0f);
+				pDamageAnimationComponent->GetMaxDistance() = std::clamp(pDamageAnimationComponent->GetMaxDistance(), 0.0f, 10.0f);
 
 			initial_curpos.y += 25.f;
 			ImGui::SetCursorPos(initial_curpos);
 			ImGui::SetNextItemWidth(190.f);
 
-			if (ImGui::DragFloat("Speed##DamageAnimation", &damage->GetSpeed(), 0.01f, 0.0f, 200.0f, "%.2f", 0))
-				damage->GetSpeed() = std::clamp(damage->GetSpeed(), 0.0f, 200.0f);
+			if (ImGui::DragFloat("Speed##DamageAnimation", &pDamageAnimationComponent->GetSpeed(), 0.01f, 0.0f, 200.0f, "%.2f", 0))
+				pDamageAnimationComponent->GetSpeed() = std::clamp(pDamageAnimationComponent->GetSpeed(), 0.0f, 200.0f);
 		}
 
 		initial_curpos.y += 25.f;
@@ -676,25 +683,27 @@ void CImGuiManager::SetUI()
 
 		if (ImGui::CollapsingHeader("Shake Animation"))
 		{
-			initial_curpos.y += 25.f;
-			ImGui::SetCursorPos(initial_curpos);
-			ImGui::SetNextItemWidth(190.f);
 			CShakeAnimationComponent* shake = (CShakeAnimationComponent*)(m_pCurrentComponentSet->FindComponent(typeid(CShakeAnimationComponent)));
-			ImGui::Checkbox("On/Off##ShakeAnimation", &shake->GetEnable());
+			ShakeAnimationComponent* pShakeAnimationComponent = static_cast<ShakeAnimationComponent*>(pCurrentAnimation->GetShakeAnimationComponent());
+
+			initial_curpos.y += 25.f;
+			ImGui::SetCursorPos(initial_curpos);
+			ImGui::SetNextItemWidth(190.f);
+			ImGui::Checkbox("On/Off##ShakeAnimation", &pShakeAnimationComponent->GetEnable());
 
 			initial_curpos.y += 25.f;
 			ImGui::SetCursorPos(initial_curpos);
 			ImGui::SetNextItemWidth(190.f);
 
-			if (ImGui::DragFloat("Distance##ShakeAnimation", &shake->GetDistance(), 0.01f, 0.0f, 1.0f, "%.2f", 0))
-				shake->GetDistance() = std::clamp(shake->GetDistance(), 0.0f, 1.0f);
+			if (ImGui::DragFloat("Distance##ShakeAnimation", &pShakeAnimationComponent->GetDistance(), 0.01f, 0.0f, 1.0f, "%.2f", 0))
+				pShakeAnimationComponent->GetDistance() = std::clamp(pShakeAnimationComponent->GetDistance(), 0.0f, 1.0f);
 
 			initial_curpos.y += 25.f;
 			ImGui::SetCursorPos(initial_curpos);
 			ImGui::SetNextItemWidth(190.f);
 
-			if (ImGui::DragFloat("Frequency##ShakeAnimation", &shake->GetFrequency(), 0.01f, 0.0f, 1.0f, "%.2f", 0))
-				shake->GetFrequency() = std::clamp(shake->GetFrequency(), 0.0f, 1.0f);
+			if (ImGui::DragFloat("Frequency##ShakeAnimation", &pShakeAnimationComponent->GetFrequency(), 0.01f, 0.0f, 1.0f, "%.2f", 0))
+				pShakeAnimationComponent->GetFrequency() = std::clamp(pShakeAnimationComponent->GetFrequency(), 0.0f, 1.0f);
 		}
 
 		initial_curpos.y += 25.f;
@@ -702,18 +711,20 @@ void CImGuiManager::SetUI()
 
 		if (ImGui::CollapsingHeader("Stun Animation"))
 		{
-			initial_curpos.y += 25.f;
-			ImGui::SetCursorPos(initial_curpos);
-			ImGui::SetNextItemWidth(190.f);
 			CStunComponent* stun = (CStunComponent*)(m_pCurrentComponentSet->FindComponent(typeid(CStunComponent)));
-			ImGui::Checkbox("On/Off##StunAnimation", &stun->GetEnable());
+			StunAnimationComponent* pShakeAnimationComponent = static_cast<StunAnimationComponent*>(pCurrentAnimation->GetStunAnimationComponent());
+
+			initial_curpos.y += 25.f;
+			ImGui::SetCursorPos(initial_curpos);
+			ImGui::SetNextItemWidth(190.f);
+			ImGui::Checkbox("On/Off##StunAnimation", &pShakeAnimationComponent->GetEnable());
 
 			initial_curpos.y += 25.f;
 			ImGui::SetCursorPos(initial_curpos);
 			ImGui::SetNextItemWidth(190.f);
 
-			if (ImGui::DragFloat("StunTime##StunAnimation", &stun->GetStunTime(), 0.01f, 0.0f, 1.0f, "%.2f", 0))
-				stun->GetStunTime() = std::clamp(stun->GetStunTime(), 0.0f, 1.0f);
+			if (ImGui::DragFloat("StunTime##StunAnimation", &pShakeAnimationComponent->GetStunTime(), 0.01f, 0.0f, 1.0f, "%.2f", 0))
+				pShakeAnimationComponent->GetStunTime() = std::clamp(pShakeAnimationComponent->GetStunTime(), 0.0f, 1.0f);
 		}
 
 		initial_curpos.y += 25.f;
@@ -723,27 +734,29 @@ void CImGuiManager::SetUI()
 
 		if (ImGui::CollapsingHeader("Camera Move"))
 		{
-			initial_curpos.y += 25.f;
-			ImGui::SetCursorPos(initial_curpos);
-			ImGui::SetNextItemWidth(190.f);
 			CCameraMover* mover = (CCameraMover*)(m_pCurrentComponentSet->FindComponent(typeid(CCameraMover)));
-			ImGui::Checkbox("On/Off##Move", &mover->GetEnable());
+			CameraMoveComponent* pCameraMoveComponent = static_cast<CameraMoveComponent*>(pCurrentAnimation->GetCameraMoveComponent());
+
+			initial_curpos.y += 25.f;
+			ImGui::SetCursorPos(initial_curpos);
+			ImGui::SetNextItemWidth(190.f);
+			ImGui::Checkbox("On/Off##Move", &pCameraMoveComponent->GetEnable());
 
 			initial_curpos.y += 25.f;
 			ImGui::SetCursorPos(initial_curpos);
 			ImGui::SetNextItemWidth(190.f);
 
-			ImGui::DragFloat("Distance##Move", &mover->m_fMaxDistance, 0.01f, 0.0f, 10.0f, "%.2f", 0);
+			ImGui::DragFloat("Distance##Move", &pCameraMoveComponent->GetMaxDistance(), 0.01f, 0.0f, 10.0f, "%.2f", 0);
 
 			initial_curpos.y += 25.f;
 			ImGui::SetCursorPos(initial_curpos);
 			ImGui::SetNextItemWidth(190.f);
-			ImGui::DragFloat("Time##Move", &mover->m_fMovingTime, 0.01f, 0.0f, 10.0f, "%.2f", 0);
+			ImGui::DragFloat("Time##Move", &pCameraMoveComponent->GetMovingTime(), 0.01f, 0.0f, 10.0f, "%.2f", 0);
 
 			initial_curpos.y += 25.f;
 			ImGui::SetCursorPos(initial_curpos);
 			ImGui::SetNextItemWidth(190.f);
-			ImGui::DragFloat("RollBackTime##Move", &mover->m_fRollBackTime, 0.01f, 0.0f, 10.0f, "%.2f", 0);
+			ImGui::DragFloat("RollBackTime##Move", &pCameraMoveComponent->GetRollBackTime(), 0.01f, 0.0f, 10.0f, "%.2f", 0);
 		}
 
 		initial_curpos.y += 25.f;
@@ -751,22 +764,24 @@ void CImGuiManager::SetUI()
 
 		if (ImGui::CollapsingHeader("Camera Shake"))
 		{
-			initial_curpos.y += 25.f;
-			ImGui::SetCursorPos(initial_curpos);
-			ImGui::SetNextItemWidth(190.f);
 			CCameraShaker* shaker = (CCameraShaker*)(m_pCurrentComponentSet->FindComponent(typeid(CCameraShaker)));
-			ImGui::Checkbox("On/Off##Shake", &shaker->GetEnable());
+			CameraShakeComponent* pCameraShakeComponent = static_cast<CameraShakeComponent*>(pCurrentAnimation->GetCameraShakeComponent());
+
+			initial_curpos.y += 25.f;
+			ImGui::SetCursorPos(initial_curpos);
+			ImGui::SetNextItemWidth(190.f);
+			ImGui::Checkbox("On/Off##Shake", &pCameraShakeComponent->GetEnable());
 
 			initial_curpos.y += 25.f;
 			ImGui::SetCursorPos(initial_curpos);
 			ImGui::SetNextItemWidth(190.f);
 
-			ImGui::DragFloat("Magnitude##Shake", &shaker->m_fMagnitude, 0.01f, 0.0f, 10.0f, "%.2f", 0);
+			ImGui::DragFloat("Magnitude##Shake", &pCameraShakeComponent->GetMagnitude(), 0.01f, 0.0f, 10.0f, "%.2f", 0);
 
 			initial_curpos.y += 25.f;
 			ImGui::SetCursorPos(initial_curpos);
 			ImGui::SetNextItemWidth(190.f);
-			ImGui::DragFloat("Duration##Shake", &shaker->m_fDuration, 0.01f, 0.0f, 10.0f, "%.2f", 0);
+			ImGui::DragFloat("Duration##Shake", &pCameraShakeComponent->GetDuration(), 0.01f, 0.0f, 10.0f, "%.2f", 0);
 
 			//ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
 		}
@@ -776,32 +791,34 @@ void CImGuiManager::SetUI()
 
 		if (ImGui::CollapsingHeader("Camera ZoomIn/ZoomOut"))
 		{
-			initial_curpos.y += 25.f;
-			ImGui::SetCursorPos(initial_curpos);
-			ImGui::SetNextItemWidth(190.f);
 			CCameraZoomer* Zoomer = (CCameraZoomer*)(m_pCurrentComponentSet->FindComponent(typeid(CCameraZoomer)));
-			ImGui::Checkbox("On/Off##Zoom", &Zoomer->GetEnable());
+			CameraZoomerComponent* pCameraZoomerComponent = static_cast<CameraZoomerComponent*>(pCurrentAnimation->GetCameraZoomerComponent());
+
+			initial_curpos.y += 25.f;
+			ImGui::SetCursorPos(initial_curpos);
+			ImGui::SetNextItemWidth(190.f);
+			ImGui::Checkbox("On/Off##Zoom", &pCameraZoomerComponent->GetEnable());
 
 			initial_curpos.y += 25.f;
 			ImGui::SetCursorPos(initial_curpos);
 			ImGui::SetNextItemWidth(190.f);
 
-			ImGui::DragFloat("Distance##Zoom", &Zoomer->m_fMaxDistance, 0.01f, 0.0f, 10.0f, "%.2f", 0);
+			ImGui::DragFloat("Distance##Zoom", &pCameraZoomerComponent->GetMaxDistance(), 0.01f, 0.0f, 10.0f, "%.2f", 0);
 
 			initial_curpos.y += 25.f;
 			ImGui::SetCursorPos(initial_curpos);
 			ImGui::SetNextItemWidth(190.f);
-			ImGui::DragFloat("Time##Zoom", &Zoomer->m_fMovingTime, 0.01f, 0.0f, 10.0f, "%.2f", 0);
+			ImGui::DragFloat("Time##Zoom", &pCameraZoomerComponent->GetMovingTime(), 0.01f, 0.0f, 10.0f, "%.2f", 0);
 
 			initial_curpos.y += 25.f;
 			ImGui::SetCursorPos(initial_curpos);
 			ImGui::SetNextItemWidth(190.f);
-			ImGui::DragFloat("RollBackTime##Zoom", &Zoomer->m_fRollBackTime, 0.01f, 0.0f, 10.0f, "%.2f", 0);
+			ImGui::DragFloat("RollBackTime##Zoom", &pCameraZoomerComponent->GetRollBackTime(), 0.01f, 0.0f, 10.0f, "%.2f", 0);
 
 			initial_curpos.y += 25.f;
 			ImGui::SetCursorPos(initial_curpos);
 			ImGui::SetNextItemWidth(190.f);
-			ImGui::Checkbox("IN / OUT##Zoom", &Zoomer->m_bIsIN);
+			ImGui::Checkbox("IN / OUT##Zoom", &pCameraZoomerComponent->GetIsIn());
 		}
 
 		initial_curpos.y += 25.f;
@@ -810,6 +827,10 @@ void CImGuiManager::SetUI()
 		if (ImGui::CollapsingHeader("Shock Sound Effect"))
 		{
 			std::vector<std::string> paths = CSoundManager::GetInst()->getSoundPathsByCategory(SOUND_CATEGORY::SOUND_SHOCK);
+			
+			SoundPlayComponent* pShockSoundComponent = static_cast<SoundPlayComponent*>(pCurrentAnimation->GetShockSoundComponent());
+			CEffectSoundComponent* effect = (CEffectSoundComponent*)(m_pCurrentComponentSet->FindComponent(typeid(CEffectSoundComponent)));
+
 			std::vector<const char*> items;
 			for (auto& path : paths) {
 				items.push_back(path.c_str());
@@ -818,23 +839,22 @@ void CImGuiManager::SetUI()
 			initial_curpos.y += 25.f;
 			ImGui::SetCursorPos(initial_curpos);
 			ImGui::SetNextItemWidth(190.f);
-			CEffectSoundComponent* effect = (CEffectSoundComponent*)(m_pCurrentComponentSet->FindComponent(typeid(CEffectSoundComponent)));
-			ImGui::Checkbox("On/Off##effectsound", &effect->GetEnable());
+			ImGui::Checkbox("On/Off##effectsound", &pShockSoundComponent->GetEnable());
 
 			initial_curpos.y += 25.f;
 			ImGui::SetCursorPos(initial_curpos);
 			ImGui::SetNextItemWidth(190.f);
-			ImGui::Combo("Sound##effectsound", (int*)&effect->m_nSoundNumber, items.data(), items.size());
+			ImGui::Combo("Sound##effectsound", (int*)&pShockSoundComponent->GetSoundNumber(), items.data(), items.size());
 
 			initial_curpos.y += 25.f;
 			ImGui::SetCursorPos(initial_curpos);
 			ImGui::SetNextItemWidth(190.f);
-			ImGui::DragFloat("Delay##effectsound", &effect->m_fDelay, 0.01f, 0.0f, 10.0f, "%.2f", 0);
+			ImGui::DragFloat("Delay##effectsound", &pShockSoundComponent->GetDelay(), 0.01f, 0.0f, 10.0f, "%.2f", 0);
 
 			initial_curpos.y += 25.f;
 			ImGui::SetCursorPos(initial_curpos);
 			ImGui::SetNextItemWidth(190.f);
-			ImGui::DragFloat("Volume##effectsound", &effect->m_fVolume, 0.01f, 0.0f, 10.0f, "%.2f", 0);
+			ImGui::DragFloat("Volume##effectsound", &pShockSoundComponent->GetVolume(), 0.01f, 0.0f, 10.0f, "%.2f", 0);
 		}
 
 		initial_curpos.y += 25.f;
@@ -843,6 +863,10 @@ void CImGuiManager::SetUI()
 		if (ImGui::CollapsingHeader("Shooting Sound Effect"))
 		{
 			std::vector<std::string> paths = CSoundManager::GetInst()->getSoundPathsByCategory(SOUND_CATEGORY::SOUND_SHOOT);
+
+			CShootSoundComponent* shoot = (CShootSoundComponent*)(m_pCurrentComponentSet->FindComponent(typeid(CShootSoundComponent)));
+			SoundPlayComponent* pShootSoundComponent = static_cast<SoundPlayComponent*>(pCurrentAnimation->GetShootSoundComponent());
+
 			std::vector<const char*> items;
 			for (auto& path : paths) {
 				items.push_back(path.c_str());
@@ -851,23 +875,22 @@ void CImGuiManager::SetUI()
 			initial_curpos.y += 25.f;
 			ImGui::SetCursorPos(initial_curpos);
 			ImGui::SetNextItemWidth(190.f);
-			CShootSoundComponent* shoot = (CShootSoundComponent*)(m_pCurrentComponentSet->FindComponent(typeid(CShootSoundComponent)));
-			ImGui::Checkbox("On/Off##shootsound", &shoot->GetEnable());
+			ImGui::Checkbox("On/Off##shootsound", &pShootSoundComponent->GetEnable());
 
 			initial_curpos.y += 25.f;
 			ImGui::SetCursorPos(initial_curpos);
 			ImGui::SetNextItemWidth(190.f);
-			ImGui::Combo("Sound##shootsound", (int*)&shoot->m_nSoundNumber, items.data(), items.size());
+			ImGui::Combo("Sound##shootsound", (int*)&pShootSoundComponent->GetSoundNumber(), items.data(), items.size());
 
 			initial_curpos.y += 25.f;
 			ImGui::SetCursorPos(initial_curpos);
 			ImGui::SetNextItemWidth(190.f);
-			ImGui::DragFloat("Delay##shootsound", &shoot->m_fDelay, 0.01f, 0.0f, 10.0f, "%.2f", 0);
+			ImGui::DragFloat("Delay##shootsound", &pShootSoundComponent->GetDelay(), 0.01f, 0.0f, 10.0f, "%.2f", 0);
 
 			initial_curpos.y += 25.f;
 			ImGui::SetCursorPos(initial_curpos);
 			ImGui::SetNextItemWidth(190.f);
-			ImGui::DragFloat("Volume##shootsound", &shoot->m_fVolume, 0.01f, 0.0f, 10.0f, "%.2f", 0);
+			ImGui::DragFloat("Volume##shootsound", &pShootSoundComponent->GetVolume(), 0.01f, 0.0f, 10.0f, "%.2f", 0);
 
 		}
 
@@ -877,6 +900,8 @@ void CImGuiManager::SetUI()
 		if (ImGui::CollapsingHeader("Damage Moan Sound Effect"))
 		{
 			std::vector<std::string> paths = CSoundManager::GetInst()->getSoundPathsByCategory(SOUND_CATEGORY::SOUND_VOICE);
+			CDamageSoundComponent* damage = (CDamageSoundComponent*)(m_pCurrentComponentSet->FindComponent(typeid(CDamageSoundComponent)));
+
 			std::vector<const char*> items;
 			for (auto& path : paths) {
 				items.push_back(path.c_str());
@@ -885,7 +910,6 @@ void CImGuiManager::SetUI()
 			initial_curpos.y += 25.f;
 			ImGui::SetCursorPos(initial_curpos);
 			ImGui::SetNextItemWidth(190.f);
-			CDamageSoundComponent* damage = (CDamageSoundComponent*)(m_pCurrentComponentSet->FindComponent(typeid(CDamageSoundComponent)));
 			ImGui::Checkbox("On/Off##damagesound", &damage->GetEnable());
 
 			initial_curpos.y += 25.f;
@@ -904,21 +928,6 @@ void CImGuiManager::SetUI()
 			ImGui::DragFloat("Volume##damagesound", &damage->m_fVolume, 0.01f, 0.0f, 10.0f, "%.2f", 0);
 		}
 
-		/* initial_curpos.y += 25.f;
-		 ImGui::SetCursorPos(initial_curpos);
-		 ImGui::SetNextItemWidth(170.f);
-		 ImGui::DragFloat("Parallax Scale", (float*)&ParallaxScale, 0.01f, 0.0f, 1.0f, "%.6f", 0);
-
-		 initial_curpos.y += 25.f;
-		 ImGui::SetCursorPos(initial_curpos);
-		 ImGui::SetNextItemWidth(170.f);
-		 ImGui::DragFloat("Parallax Bias", (float*)&ParallaxBias, 0.01f, 0.0f, 1.0f, "%.6f", 0);
-
-		 initial_curpos.y += 25.f;
-		 ImGui::SetCursorPos(initial_curpos);
-		 ImGui::SetNextItemWidth(120.f);
-		 ImGui::InputInt("Terrain Mapping Mode", (int*)&Terrain_Mapping_mode, 1, 1, 0);*/
-
 		initial_curpos.y += 25.f;
 		ImGui::SetCursorPos(initial_curpos);
 		if (ImGui::CollapsingHeader("Attack Sprite Effect"))
@@ -928,7 +937,7 @@ void CImGuiManager::SetUI()
 			ImGui::SetNextItemWidth(190.f);
 
 			CAttackSpriteComponent* AttackSprite = (CAttackSpriteComponent*)(m_pCurrentComponentSet->FindComponent(typeid(CAttackSpriteComponent)));
-
+			
 			ImGui::Checkbox("On/Off##SpriteEffect", &AttackSprite->m_vSprite[0].second->GetAnimation());
 
 			std::vector<std::shared_ptr<CTexture>> vTexture = CSimulatorScene::GetInst()->GetTextureManager()->GetBillBoardTextureList();

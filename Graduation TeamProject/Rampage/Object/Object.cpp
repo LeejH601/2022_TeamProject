@@ -529,37 +529,7 @@ void CGameObject::CreateArticulation(physx::PxArticulationReducedCoordinate* art
 		joint->setJointType(physx::PxArticulationJointType::ePRISMATIC);
 		// revolute joint that rotates about the z axis (eSWING2) of the joint frames
 		joint->setMotion(physx::PxArticulationAxis::eTWIST, physx::PxArticulationMotion::eFREE);
-		//joint->setMotion(physx::PxArticulationAxis::eSWING2, physx::PxArticulationMotion::eLIMITED);
-		//physx::PxArticulationLimit limits;
-		//limits.low = -physx::PxPiDivFour;  // in rad for a rotational motion
-		//limits.high = physx::PxPiDivFour;
-		//joint->setLimitParams(physx::PxArticulationAxis::eSWING2, limits);
-
-		//physx::PxArticulationDrive posDrive;
-		//posDrive.stiffness = driveStiffness;                      // the spring constant driving the joint to a target position
-		//posDrive.damping = driveDamping;                        // the damping coefficient driving the joint to a target velocity
-		//posDrive.maxForce = actuatorLimit;                        // force limit for the drive
-		//posDrive.driveType = PxArticulationDriveType::eFORCE;
-
-		//joint->setDriveParams(physx::PxArticulationAxis::eSWING2, posDrive);
-		//joint->setDriveVelocity(physx::PxArticulationAxis::eSWING2, 0.0f);
-		//joint->setDriveTarget(physx::PxArticulationAxis::eSWING2, targetPosition);
-
 		joint->setParentPose(pos);
-
-		/*physx::PxMat44 matrix;
-		XMFLOAT4X4 childTransform = m_pChild->m_xmf4x4Transform;
-		XMFLOAT3 childpos(m_pChild->GetPosition());
-		childTransform._41 = 0;
-		childTransform._42 = 0;
-		childTransform._43 = 0;
-		memcpy(&matrix, &Matrix4x4::Inverse(childTransform), sizeof(physx::PxMat44));
-
-		matrix.column3.x = childpos.x;
-		matrix.column3.y = childpos.y;
-		matrix.column3.z = childpos.z;
-
-		physx::PxTransform childPx(matrix);*/
 		joint->setChildPose(transform);
 	}
 	if (m_pChild) {

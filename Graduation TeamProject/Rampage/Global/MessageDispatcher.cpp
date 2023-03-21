@@ -12,7 +12,6 @@ void CMessageDispatcher::RegisterListener(MessageType messageType, IMessageListe
 	ListenerInfo info = { listener, filterObject };
 	m_listeners[static_cast<int>(messageType)].push_back(info);
 }
-
 void PlayerAttackComponent::HandleMessage(const Message& message, const PlayerAttackParams& params)
 {
     if (message.getType() == MessageType::PLAYER_ATTACK) {
@@ -21,6 +20,9 @@ void PlayerAttackComponent::HandleMessage(const Message& message, const PlayerAt
 }
 void SoundPlayComponent::HandleMessage(const Message& message, const SoundPlayParams& params)
 {
+	if (!m_bEnable)
+		return;
+
     if (message.getType() == MessageType::PLAY_SOUND && m_sc == params.sound_category) {
         auto pSound = CSoundManager::GetInst()->FindSound(m_nSoundNumber, m_sc);
         CSoundManager::GetInst()->PlaySound(pSound->GetPath(), m_fVolume, m_fDelay);
@@ -127,13 +129,11 @@ void CameraMoveComponent::Update(CCamera* pCamera, float fElapsedTime)
 		pCamera->m_xmf3CalculatedPosition = Vector3::Add(pCamera->m_xmf3CalculatedPosition, offset);
 	}
 }
-
 void CameraMoveComponent::HandleMessage(const Message& message, const CameraUpdateParams& params)
 {
 	if (m_bEnable)
 		Update(params.pCamera, params.fElapsedTime);
 }
-
 void DamageAnimationComponent::HandleMessage(const Message& message, const AnimationCompParams& params)
 {
 	if (!m_bEnable)
@@ -166,7 +166,6 @@ void DamageAnimationComponent::HandleMessage(const Message& message, const Anima
 		}
 	}
 }
-
 void ShakeAnimationComponent::HandleMessage(const Message& message, const AnimationCompParams& params)
 {
 	if (!m_bEnable)
@@ -189,7 +188,6 @@ void ShakeAnimationComponent::HandleMessage(const Message& message, const Animat
 		}
 	}
 }
-
 void StunAnimationComponent::HandleMessage(const Message& message, const AnimationCompParams& params)
 {
 	if (!m_bEnable)
@@ -219,7 +217,6 @@ void StunAnimationComponent::HandleMessage(const Message& message, const Animati
 		}
 	}
 }
-
 void ParticleComponent::HandleMessage(const Message& message, const ParticleCompParams& params)
 {
 	if (!m_bEnable)

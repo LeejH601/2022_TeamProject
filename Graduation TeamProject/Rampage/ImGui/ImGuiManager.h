@@ -45,7 +45,7 @@ private:
 	float ParallaxBias = 0.0f;
 	int Terrain_Mapping_mode = 0;
 
-	int Player_Animation_Number;
+	int Player_Animation_Number = 0;
 
 	bool show_demo_window = false;
 	bool show_another_window = false;

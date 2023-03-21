@@ -11,6 +11,16 @@ protected:
     std::vector<std::unique_ptr<IMessageListener>> m_pListeners;
 public:
 	virtual ~CState() {}
+    virtual IMessageListener* GetShockSoundComponent();
+    virtual IMessageListener* GetShootSoundComponent();
+    virtual IMessageListener* GetEffectSoundComponent();
+    virtual IMessageListener* GetCameraShakeComponent();
+    virtual IMessageListener* GetCameraMoveComponent();
+    virtual IMessageListener* GetCameraZoomerComponent();
+    virtual IMessageListener* GetDamageAnimationComponent();
+    virtual IMessageListener* GetShakeAnimationComponent();
+    virtual IMessageListener* GetStunAnimationComponent();
+    virtual IMessageListener* GetParticleComponent();
 
 	virtual void Enter(entity_type*) = 0;
 	virtual void Execute(entity_type*, float) = 0;
@@ -76,3 +86,173 @@ public:
     virtual void Execute(CPlayer* player, float fElapsedTime);
     virtual void Exit(CPlayer* player);
 };
+
+template<class entity_type>
+inline IMessageListener* CState<entity_type>::GetShockSoundComponent()
+{
+    std::vector<std::unique_ptr<IMessageListener>>::iterator p = std::find_if(m_pListeners.begin(), m_pListeners.end(), [](const std::unique_ptr<IMessageListener>& listener) {
+        SoundPlayComponent* pSoundPlayComponent = dynamic_cast<SoundPlayComponent*>(listener.get());
+        if (pSoundPlayComponent && pSoundPlayComponent->GetSoundCategory() == SOUND_CATEGORY::SOUND_SHOCK){
+                return true;
+        }
+        return false;
+    });
+    
+    if (p != m_pListeners.end())
+        return (*p).get();
+
+    return nullptr;
+}
+
+template<class entity_type>
+inline IMessageListener* CState<entity_type>::GetShootSoundComponent()
+{
+    std::vector<std::unique_ptr<IMessageListener>>::iterator p = std::find_if(m_pListeners.begin(), m_pListeners.end(), [](const std::unique_ptr<IMessageListener>& listener) {
+        SoundPlayComponent* pSoundPlayComponent = dynamic_cast<SoundPlayComponent*>(listener.get());
+        if (pSoundPlayComponent && pSoundPlayComponent->GetSoundCategory() == SOUND_CATEGORY::SOUND_SHOOT) {
+            return true;
+        }
+        return false;
+    });
+
+    if (p != m_pListeners.end())
+        return (*p).get();
+
+    return nullptr;
+}
+
+template<class entity_type>
+inline IMessageListener* CState<entity_type>::GetEffectSoundComponent()
+{
+    std::vector<std::unique_ptr<IMessageListener>>::iterator p = std::find_if(m_pListeners.begin(), m_pListeners.end(), [](const std::unique_ptr<IMessageListener>& listener) {
+        SoundPlayComponent* pSoundPlayComponent = dynamic_cast<SoundPlayComponent*>(listener.get());
+        if (pSoundPlayComponent && pSoundPlayComponent->GetSoundCategory() == SOUND_CATEGORY::SOUND_EFFECT) {
+            return true;
+        }
+        return false;
+    });
+
+    if (p != m_pListeners.end())
+        return (*p).get();
+
+    return nullptr;
+}
+
+template<class entity_type>
+inline IMessageListener* CState<entity_type>::GetCameraShakeComponent()
+{
+    std::vector<std::unique_ptr<IMessageListener>>::iterator p = std::find_if(m_pListeners.begin(), m_pListeners.end(), [](const std::unique_ptr<IMessageListener>& listener) {
+        CameraShakeComponent* pCameraShakeComponent = dynamic_cast<CameraShakeComponent*>(listener.get());
+        if (pCameraShakeComponent) {
+            return true;
+        }
+        return false;
+    });
+
+    if (p != m_pListeners.end())
+        return (*p).get();
+
+    return nullptr;
+}
+
+template<class entity_type>
+inline IMessageListener* CState<entity_type>::GetCameraMoveComponent()
+{
+    std::vector<std::unique_ptr<IMessageListener>>::iterator p = std::find_if(m_pListeners.begin(), m_pListeners.end(), [](const std::unique_ptr<IMessageListener>& listener) {
+        CameraMoveComponent* pCameraMoveComponent = dynamic_cast<CameraMoveComponent*>(listener.get());
+        if (pCameraMoveComponent) {
+            return true;
+        }
+        return false;
+    });
+
+    if (p != m_pListeners.end())
+        return (*p).get();
+
+    return nullptr;
+}
+
+template<class entity_type>
+inline IMessageListener* CState<entity_type>::GetCameraZoomerComponent()
+{
+    std::vector<std::unique_ptr<IMessageListener>>::iterator p = std::find_if(m_pListeners.begin(), m_pListeners.end(), [](const std::unique_ptr<IMessageListener>& listener) {
+        CameraZoomerComponent* pCameraZoomerComponent = dynamic_cast<CameraZoomerComponent*>(listener.get());
+        if (pCameraZoomerComponent) {
+            return true;
+        }
+        return false;
+    });
+
+    if (p != m_pListeners.end())
+        return (*p).get();
+
+    return nullptr;
+}
+
+template<class entity_type>
+inline IMessageListener* CState<entity_type>::GetDamageAnimationComponent()
+{
+    std::vector<std::unique_ptr<IMessageListener>>::iterator p = std::find_if(m_pListeners.begin(), m_pListeners.end(), [](const std::unique_ptr<IMessageListener>& listener) {
+        DamageAnimationComponent* pDamageAnimationComponent = dynamic_cast<DamageAnimationComponent*>(listener.get());
+        if (pDamageAnimationComponent) {
+            return true;
+        }
+        return false;
+    });
+
+    if (p != m_pListeners.end())
+        return (*p).get();
+
+    return nullptr;
+}
+
+template<class entity_type>
+inline IMessageListener* CState<entity_type>::GetShakeAnimationComponent()
+{
+    std::vector<std::unique_ptr<IMessageListener>>::iterator p = std::find_if(m_pListeners.begin(), m_pListeners.end(), [](const std::unique_ptr<IMessageListener>& listener) {
+        ShakeAnimationComponent* pShakeAnimationComponent = dynamic_cast<ShakeAnimationComponent*>(listener.get());
+        if (pShakeAnimationComponent) {
+            return true;
+        }
+        return false;
+    });
+
+    if (p != m_pListeners.end())
+        return (*p).get();
+
+    return nullptr;
+}
+
+template<class entity_type>
+inline IMessageListener* CState<entity_type>::GetStunAnimationComponent()
+{
+    std::vector<std::unique_ptr<IMessageListener>>::iterator p = std::find_if(m_pListeners.begin(), m_pListeners.end(), [](const std::unique_ptr<IMessageListener>& listener) {
+        StunAnimationComponent* pStunAnimationComponent = dynamic_cast<StunAnimationComponent*>(listener.get());
+        if (pStunAnimationComponent) {
+            return true;
+        }
+        return false;
+    });
+
+    if (p != m_pListeners.end())
+        return (*p).get();
+
+    return nullptr;
+}
+
+template<class entity_type>
+inline IMessageListener* CState<entity_type>::GetParticleComponent()
+{
+    std::vector<std::unique_ptr<IMessageListener>>::iterator p = std::find_if(m_pListeners.begin(), m_pListeners.end(), [](const std::unique_ptr<IMessageListener>& listener) {
+        ParticleComponent* pParticleComponent = dynamic_cast<ParticleComponent*>(listener.get());
+        if (pParticleComponent) {
+            return true;
+        }
+        return false;
+    });
+
+    if (p != m_pListeners.end())
+        return (*p).get();
+
+    return nullptr;
+}
