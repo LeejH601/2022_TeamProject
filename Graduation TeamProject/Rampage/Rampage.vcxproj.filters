@@ -424,6 +424,7 @@
     <FxCompile Include="Shader\SunLightPixelShader.hlsl" />
     <FxCompile Include="Shader\HDRComputeShader.hlsl" />
     <FxCompile Include="Shader\BloomComputeShader.hlsl" />
+    <FxCompile Include="Shader\BloomApplyComputeShader.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Shader\Header.hlsli" />
