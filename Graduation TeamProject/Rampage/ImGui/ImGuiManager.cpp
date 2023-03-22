@@ -1076,6 +1076,7 @@ void CImGuiManager::SetUI()
 			CSimulatorScene::GetInst()->SetPlayerAnimationSet(2);
 			Player_Animation_Number = 2;
 		}
+
 		ImGui::End();
 	}
 }

@@ -57,12 +57,9 @@ using namespace DirectX;
 using namespace DirectX::PackedVector;
 using Microsoft::WRL::ComPtr;
 
-#define MULTI_RENDER_TARGETS				6
-
 // 루트 시그니쳐 번호를 표현하는 상수들입니다.
-#define ROOTSIGNATUREINDEX_CAMERA			1
-#define ROOTSIGNATUREINDEX_LIGHT			5
-#define ROOTSIGNATUREINDEX_RENDERTARGET		14
+#define ROOTSIGNATUREINDEX_CAMERA		1
+#define ROOTSIGNATUREINDEX_LIGHT		5
 
 extern int gnCurrentParticles;
 

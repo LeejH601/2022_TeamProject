@@ -1,5 +1,3 @@
-#include <windowsx.h>
-
 #include "GameFramework.h"
 #include "..\Global\Camera.h"
 #include "..\Scene\SceneManager.h"
@@ -8,6 +6,7 @@
 #include "..\ImGui\ImGuiManager.h"
 #include "..\Object\Texture.h"
 #include "..\Shader\DepthRenderShader.h"
+#include <windowsx.h>
 #include "..\Sound\SoundManager.h"
 
 CLocator Locator;
@@ -106,92 +105,9 @@ void CGameFramework::InitLocator()
 void CGameFramework::InitImgui()
 {
 	D3D12_CPU_DESCRIPTOR_HANDLE d3dRtvCPUDescriptorHandle = m_pd3dRtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
-	d3dRtvCPUDescriptorHandle.ptr += (::gnRtvDescriptorIncrementSize * (m_nSwapChainBuffers + MULTI_RENDER_TARGETS));
+	d3dRtvCPUDescriptorHandle.ptr += (::gnRtvDescriptorIncrementSize * m_nSwapChainBuffers);
 
 	CImGuiManager::GetInst()->Init(m_hWnd, m_pd3dDevice.Get(), m_pd3dCommandList.Get(), d3dRtvCPUDescriptorHandle);
-}
-void CGameFramework::InitMultiRenderTargets()
-{
-	DXGI_FORMAT pdxgiResourceFormats[6] = { DXGI_FORMAT_R8G8B8A8_UNORM, DXGI_FORMAT_R8G8B8A8_UNORM, DXGI_FORMAT_R8G8B8A8_UNORM, DXGI_FORMAT_R8G8B8A8_UNORM, DXGI_FORMAT_R8G8B8A8_UNORM, DXGI_FORMAT_R8G8B8A8_UNORM };
-
-	m_pRenderTargetTexture = std::make_unique<CTexture>(MULTI_RENDER_TARGETS, RESOURCE_TEXTURE2D, 0, 1);
-
-	D3D12_CLEAR_VALUE d3dClearValue = { DXGI_FORMAT_R8G8B8A8_UNORM, { 0.0f, 0.0f, 1.0f, 1.0f } };
-	for (UINT i = 0; i < MULTI_RENDER_TARGETS; i++)
-	{
-		d3dClearValue.Format = pdxgiResourceFormats[i];
-		m_pRenderTargetTexture->CreateTexture(m_pd3dDevice.Get(), FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, pdxgiResourceFormats[i], D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET, D3D12_RESOURCE_STATE_COMMON, &d3dClearValue, RESOURCE_TEXTURE2D, i);
-	}
-
-	D3D12_DESCRIPTOR_HEAP_DESC d3dDescriptorHeapDesc;
-	d3dDescriptorHeapDesc.NumDescriptors = MULTI_RENDER_TARGETS + 1; //SRVs 
-	d3dDescriptorHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
-	d3dDescriptorHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
-	d3dDescriptorHeapDesc.NodeMask = 0;
-	HRESULT hResult = m_pd3dDevice->CreateDescriptorHeap(&d3dDescriptorHeapDesc, __uuidof(ID3D12DescriptorHeap), (void**)&m_pd3dMultiRtvDescriptorHeap);
-
-	m_d3dMultiRtvCPUDescriptorStartHandle = m_pd3dMultiRtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
-	m_d3dMultiRtvGPUDescriptorStartHandle = m_pd3dMultiRtvDescriptorHeap->GetGPUDescriptorHandleForHeapStart();
-
-	int nTextures = m_pRenderTargetTexture->GetTextures();
-	UINT nTextureType = m_pRenderTargetTexture->GetTextureType();
-	for (int i = 0; i < nTextures; i++)
-	{
-		ID3D12Resource* pShaderResource = m_pRenderTargetTexture->GetResource(i);
-		if (pShaderResource)
-		{
-			D3D12_SHADER_RESOURCE_VIEW_DESC d3dShaderResourceViewDesc = m_pRenderTargetTexture->GetShaderResourceViewDesc(i);
-
-			D3D12_CPU_DESCRIPTOR_HANDLE d3dRtvCPUDescriptorHandle;
-			D3D12_GPU_DESCRIPTOR_HANDLE d3dRtvGPUDescriptorHandle;
-
-			d3dRtvCPUDescriptorHandle.ptr = m_d3dMultiRtvCPUDescriptorStartHandle.ptr + (i * ::gnCbvSrvDescriptorIncrementSize);
-			d3dRtvGPUDescriptorHandle.ptr = m_d3dMultiRtvGPUDescriptorStartHandle.ptr + (i * ::gnCbvSrvDescriptorIncrementSize);
-
-			m_pd3dDevice->CreateShaderResourceView(pShaderResource, &d3dShaderResourceViewDesc, d3dRtvCPUDescriptorHandle);
-			m_pRenderTargetTexture->SetGpuDescriptorHandle(i, d3dRtvGPUDescriptorHandle);
-		}
-	}
-
-	m_pRenderTargetTexture->SetRootParameterIndex(0, ROOTSIGNATUREINDEX_RENDERTARGET);
-
-	D3D12_RENDER_TARGET_VIEW_DESC d3dRenderTargetViewDesc;
-	d3dRenderTargetViewDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
-	d3dRenderTargetViewDesc.Texture2D.MipSlice = 0;
-	d3dRenderTargetViewDesc.Texture2D.PlaneSlice = 0;
-
-	D3D12_CPU_DESCRIPTOR_HANDLE d3dRtvCPUDescriptorHandle = m_pd3dRtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
-	d3dRtvCPUDescriptorHandle.ptr += (::gnRtvDescriptorIncrementSize * (m_nSwapChainBuffers));
-
-	for (UINT i = 0; i < MULTI_RENDER_TARGETS; i++)
-	{
-		d3dRenderTargetViewDesc.Format = pdxgiResourceFormats[i];
-		ID3D12Resource* pd3dTextureResource = m_pRenderTargetTexture->GetResource(i);
-		m_pd3dDevice->CreateRenderTargetView(pd3dTextureResource, &d3dRenderTargetViewDesc, d3dRtvCPUDescriptorHandle);
-		m_pd3dMultiRtvCPUDescriptorHandles.push_back(d3dRtvCPUDescriptorHandle);
-		d3dRtvCPUDescriptorHandle.ptr += ::gnRtvDescriptorIncrementSize;
-	}
-
-	DXGI_FORMAT pdxgiDepthSrvFormats[1] = { DXGI_FORMAT_R32_FLOAT };
-
-	if (m_pd3dDepthStencilBuffer.Get())
-	{
-		D3D12_CPU_DESCRIPTOR_HANDLE d3dRtvCPUDescriptorHandle;
-		d3dRtvCPUDescriptorHandle.ptr = m_d3dMultiRtvCPUDescriptorStartHandle.ptr + (MULTI_RENDER_TARGETS * ::gnCbvSrvDescriptorIncrementSize);
-
-		D3D12_SHADER_RESOURCE_VIEW_DESC d3dShaderResourceViewDesc;
-		d3dShaderResourceViewDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-		d3dShaderResourceViewDesc.Format = pdxgiDepthSrvFormats[0];
-		d3dShaderResourceViewDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-		d3dShaderResourceViewDesc.Texture2D.MipLevels = 1;
-		d3dShaderResourceViewDesc.Texture2D.MostDetailedMip = 0;
-		d3dShaderResourceViewDesc.Texture2D.PlaneSlice = 0;
-		d3dShaderResourceViewDesc.Texture2D.ResourceMinLODClamp = 0.0f;
-		m_pd3dDevice->CreateShaderResourceView(m_pd3dDepthStencilBuffer.Get(), &d3dShaderResourceViewDesc, d3dRtvCPUDescriptorHandle);
-	}
-}
-void CGameFramework::PrepareMultiRenderTargets()
-{
 }
 void CGameFramework::CreateDirect3DDevice()
 {
@@ -274,7 +190,7 @@ void CGameFramework::CreateRtvAndDsvDescriptorHeaps()
 {
 	D3D12_DESCRIPTOR_HEAP_DESC d3dDescriptorHeapDesc;
 	::ZeroMemory(&d3dDescriptorHeapDesc, sizeof(D3D12_DESCRIPTOR_HEAP_DESC));
-	d3dDescriptorHeapDesc.NumDescriptors = m_nSwapChainBuffers + MULTI_RENDER_TARGETS + 1;
+	d3dDescriptorHeapDesc.NumDescriptors = m_nSwapChainBuffers + 1;
 	d3dDescriptorHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
 	d3dDescriptorHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
 	d3dDescriptorHeapDesc.NodeMask = 0;
@@ -369,8 +285,6 @@ void CGameFramework::CreateDepthStencilView()
 void CGameFramework::BuildObjects()
 {
 	m_pd3dCommandList->Reset(m_pd3dCommandAllocator.Get(), NULL);
-
-	InitMultiRenderTargets();
 
 	m_pSceneManager = std::make_unique<CSceneManager>(m_pd3dDevice.Get(), m_pd3dCommandList.Get());
 

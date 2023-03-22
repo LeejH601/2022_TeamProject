@@ -6,7 +6,6 @@
 #include "..\Scene\SceneManager.h"
 
 class CCamera;
-class CTexture;
 class CGameObject;
 class CGameFramework
 {
@@ -59,12 +58,6 @@ private:
 	std::unique_ptr<CGameObject> m_pPlayer = NULL;
 	std::unique_ptr<CSceneManager> m_pSceneManager = NULL;
 
-	ComPtr<ID3D12DescriptorHeap> m_pd3dMultiRtvDescriptorHeap;
-	D3D12_CPU_DESCRIPTOR_HANDLE	m_d3dMultiRtvCPUDescriptorStartHandle;
-	D3D12_GPU_DESCRIPTOR_HANDLE	m_d3dMultiRtvGPUDescriptorStartHandle;
-	std::vector<D3D12_CPU_DESCRIPTOR_HANDLE> m_pd3dMultiRtvCPUDescriptorHandles;
-	std::unique_ptr<CTexture> m_pRenderTargetTexture = NULL;
-
 	CGameTimer					m_GameTimer;
 
 	POINT						m_ptOldCursorPos;
@@ -92,10 +85,6 @@ public:
 	void InitSound();
 	void InitLocator();
 	void InitImgui();
-
-	//멀티렌더타겟을 사용하기 위해 준비하는 함수이다.
-	void InitMultiRenderTargets();
-	void PrepareMultiRenderTargets();
 
 	//렌더타겟을 렌더링하기 위한 준비를 하는 함수이다.
 	void PrepareImGui();
