@@ -70,7 +70,7 @@ void DataLoader::LoadComponentSets()
 		default:
 			break;
 		}
-		path = file_path + std::to_string(0) + file_ext;
+		path = file_path + std::to_string(i) + file_ext;
 		::fopen_s(&pInFile, path.c_str(), "rb");
 		if (!pInFile)
 			continue;
