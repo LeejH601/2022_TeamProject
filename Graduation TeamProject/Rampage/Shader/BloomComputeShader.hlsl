@@ -86,7 +86,7 @@ void Bloom_CS( uint3 DTid : SV_DispatchThreadID )
 		float4 f4Color = float4(0, 0, 0, 0);
 		for (int i = -1; i < sampleSize - 1; i++)
 		{
-			for (int j = -1; j < sampleSize - 1; j++)
+			for (int j = -1; j < sampleSize -1; j++)
 			{
 				f4Color += gtxtRWFillters[level - 1][hLevelTexCoord.xy + int2(i, j)];
 			}

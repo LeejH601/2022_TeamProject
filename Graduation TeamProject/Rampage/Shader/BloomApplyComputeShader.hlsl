@@ -24,6 +24,8 @@ static float gfGaussianBlurMask2D[5][5] = {
 	{ 1.0f / 273.0f, 4.0f / 273.0f, 7.0f / 273.0f, 4.0f / 273.0f, 1.0f / 273.0f }
 };
 
+#define BICUBIC
+
 [numthreads(1, 1, 1)]
 void BloomApply_CS(uint3 DTid : SV_DispatchThreadID)
 {
@@ -39,11 +41,11 @@ void BloomApply_CS(uint3 DTid : SV_DispatchThreadID)
 		{
 			for (int j = -2; j <= 2; j++)
 			{
-				f4Color += gfGaussianBlurMask2D[i + 2][j + 2] * gtxtRWFillters[3][TexCoord + int2(i, j)];
+				f4Color += gfGaussianBlurMask2D[i + 2][j + 2] * gtxtRWFillters[gnLevel][TexCoord + int2(i, j)];
 
 			}
 		}
-		gtxtRWBlurs[3][TexCoord] = f4Color;
+		gtxtRWBlurs[gnLevel][TexCoord] = f4Color;
 	}
 	else if (gnLevel > 0) {
 
@@ -53,19 +55,102 @@ void BloomApply_CS(uint3 DTid : SV_DispatchThreadID)
 
 		float plusColor;
 		//gtxtRWBlurs[level][TexCoord] = gtxtRWFillters[level][TexCoord];
-		float4 plusColor1 = gtxtRWBlurs[gnLevel + 1][TexCoord_plus];
-		float4 plusColor2 = gtxtRWBlurs[gnLevel + 1][TexCoord_plus + int2(1, 0)];
-		float4 plusColor3 = gtxtRWBlurs[gnLevel + 1][TexCoord_plus + int2(0, 1)];
-		float4 plusColor4 = gtxtRWBlurs[gnLevel + 1][TexCoord_plus + int2(1, 1)];
-		float4 pluslerp1 = lerp(plusColor1, plusColor2, Weigth_plus.x);
-		float4 pluslerp2 = lerp(plusColor3, plusColor4, Weigth_plus.x);
-		plusColor = lerp(pluslerp1, pluslerp2, Weigth_plus.y);
+		
+#ifdef BICUBIC
+		{
+			float4 plusColor1 = gtxtRWBlurs[gnLevel + 1][TexCoord_plus + int2(-1, -1)];
+			float4 plusColor2 = gtxtRWBlurs[gnLevel + 1][TexCoord_plus + int2(0, -1)];
+			float4 plusColor5 = gtxtRWBlurs[gnLevel + 1][TexCoord_plus + int2(-1, 0)];
+			float4 plusColor6 = gtxtRWBlurs[gnLevel + 1][TexCoord_plus + int2(0, 0)];
+
+			float4 plusColor3 = gtxtRWBlurs[gnLevel + 1][TexCoord_plus + int2(1, -1)];
+			float4 plusColor4 = gtxtRWBlurs[gnLevel + 1][TexCoord_plus + int2(2, 1)];
+			float4 plusColor7 = gtxtRWBlurs[gnLevel + 1][TexCoord_plus + int2(1, 0)];
+			float4 plusColor8 = gtxtRWBlurs[gnLevel + 1][TexCoord_plus + int2(2, 1)];
+
+			float4 plusColor9 = gtxtRWBlurs[gnLevel + 1][TexCoord_plus + int2(-1, 1)];
+			float4 plusColor10 = gtxtRWBlurs[gnLevel + 1][TexCoord_plus + int2(0, 1)];
+			float4 plusColor13 = gtxtRWBlurs[gnLevel + 1][TexCoord_plus + int2(-1, 2)];
+			float4 plusColor14 = gtxtRWBlurs[gnLevel + 1][TexCoord_plus + int2(0, 2)];
+
+			float4 plusColor11 = gtxtRWBlurs[gnLevel + 1][TexCoord_plus + int2(1, 1)];
+			float4 plusColor12 = gtxtRWBlurs[gnLevel + 1][TexCoord_plus + int2(2, 1)];
+			float4 plusColor15 = gtxtRWBlurs[gnLevel + 1][TexCoord_plus + int2(1, 2)];
+			float4 plusColor16 = gtxtRWBlurs[gnLevel + 1][TexCoord_plus + int2(2, 2)];
+
+			//
+			float4 pluslerp12 = lerp(plusColor1, plusColor2, Weigth_plus.x);
+			float4 pluslerp56 = lerp(plusColor5, plusColor6, Weigth_plus.x);
+
+			float4 pluslerp23 = lerp(plusColor2, plusColor3, Weigth_plus.x);
+			float4 pluslerp67 = lerp(plusColor6, plusColor7, Weigth_plus.x);
+
+			float4 pluslerp34 = lerp(plusColor3, plusColor4, Weigth_plus.x);
+			float4 pluslerp78 = lerp(plusColor7, plusColor8, Weigth_plus.x);
+
+			float4 pluslerp910 = lerp(plusColor9, plusColor10, Weigth_plus.x);
+			float4 pluslerp1314 = lerp(plusColor13, plusColor14, Weigth_plus.x);
+
+			float4 pluslerp1011 = lerp(plusColor10, plusColor11, Weigth_plus.x);
+			float4 pluslerp1415 = lerp(plusColor14, plusColor15, Weigth_plus.x);
+
+			float4 pluslerp1112 = lerp(plusColor11, plusColor12, Weigth_plus.x);
+			float4 pluslerp1516 = lerp(plusColor15, plusColor16, Weigth_plus.x);
+
+			//
+			float4 LT = lerp(pluslerp12, pluslerp56, Weigth_plus.y);
+			float4 TC = lerp(pluslerp23, pluslerp67, Weigth_plus.y);
+			float4 RT = lerp(pluslerp34, pluslerp78, Weigth_plus.y);
+
+			float4 L = lerp(pluslerp56, pluslerp910, Weigth_plus.y);
+			float4 C = lerp(pluslerp67, pluslerp1011, Weigth_plus.y);
+			float4 R = lerp(pluslerp78, pluslerp1112, Weigth_plus.y);
+
+			float4 LB = lerp(pluslerp910, pluslerp1314, Weigth_plus.y);
+			float4 BC = lerp(pluslerp1011, pluslerp1415, Weigth_plus.y);
+			float4 RB = lerp(pluslerp1112, pluslerp1516, Weigth_plus.y);
+
+			//
+			float LTTC = lerp(LT, TC, Weigth_plus.x);
+			float TCRT = lerp(TC, RT, Weigth_plus.x);
+
+			float LC = lerp(L, C, Weigth_plus.x);
+			float CR = lerp(C, R, Weigth_plus.x);
+
+			float LBBC = lerp(LB, BC, Weigth_plus.x);
+			float RCRB = lerp(BC, RB, Weigth_plus.x);
+
+			//
+			float4 S1 = lerp(LTTC, LC, Weigth_plus.y);
+			float4 S2 = lerp(TCRT, CR, Weigth_plus.y);
+			float4 S3 = lerp(LC, LBBC, Weigth_plus.y);
+			float4 S4 = lerp(CR, RCRB, Weigth_plus.y);
+
+			//
+			float4 S1S2 = lerp(S1, S2, Weigth_plus.x);
+			float4 S3S4 = lerp(S3, S4, Weigth_plus.x);
+
+			//
+			plusColor = lerp(S1S2, S3S4, Weigth_plus.y);
+		}
+#else
+		{
+			float4 plusColor1 = gtxtRWBlurs[gnLevel + 1][TexCoord_plus];
+			float4 plusColor2 = gtxtRWBlurs[gnLevel + 1][TexCoord_plus + int2(1, 0)];
+			float4 plusColor3 = gtxtRWBlurs[gnLevel + 1][TexCoord_plus + int2(0, 1)];
+			float4 plusColor4 = gtxtRWBlurs[gnLevel + 1][TexCoord_plus + int2(1, 1)];
+			float4 pluslerp1 = lerp(plusColor1, plusColor2, Weigth_plus.x);
+			float4 pluslerp2 = lerp(plusColor3, plusColor4, Weigth_plus.x);
+			plusColor = lerp(pluslerp1, pluslerp2, Weigth_plus.y);
+		}
+#endif
+		
 
 		//plusColor =  gtxtRWBlurs[gnLevel + 1][TexCoord_plus];
 
-		//gtxtRWFillters[gnLevel][TexCoord] += lerp(gtxtRWFillters[gnLevel][TexCoord], plusColor, 0.5f);
-		gtxtRWFillters[gnLevel][TexCoord] += gtxtRWBlurs[gnLevel + 1][TexCoord_plus];
-		//gtxtRWFillters[gnLevel][TexCoord] += 0.2f *  gtxtRWBlurs[gnLevel + 1][TexCoord_plus];
+		gtxtRWFillters[gnLevel][TexCoord] += lerp(gtxtRWFillters[gnLevel][TexCoord], plusColor, 0.5f);
+		//gtxtRWFillters[gnLevel][TexCoord] += gtxtRWBlurs[gnLevel + 1][TexCoord_plus];
+		//gtxtRWFillters[gnLevel][TexCoord] += 0.4f *  gtxtRWBlurs[gnLevel + 1][TexCoord_plus];
 
 		GroupMemoryBarrierWithGroupSync();
 
@@ -80,52 +165,4 @@ void BloomApply_CS(uint3 DTid : SV_DispatchThreadID)
 		}
 		gtxtRWBlurs[gnLevel][TexCoord] = f4Color;
 	}
-
-
-	if (gnLevel == 0) {
-		float BloomFactor = 0.5f;
-		float4 Color = gtxtSource[DTid.xy];
-		int2 uv = int2(DTid.x / REDUTION_SIZE, DTid.y / REDUTION_SIZE);
-		float2 uvWeight = frac(DTid / REDUTION_SIZE);
-
-		/*float4 Color1 = gtxtRWBlurs[1][uv];
-		float4 Color2 = gtxtRWBlurs[1][uv + int2(1, 0)];
-		float4 Color3 = gtxtRWBlurs[1][uv + int2(0, 1)];
-		float4 Color4 = gtxtRWBlurs[1][uv + int2(1, 1)];
-		float4 lerp1 = lerp(Color1, Color2, uvWeight.x);
-		float4 lerp2 = lerp(Color3, Color4, uvWeight.x);
-		float4 BloomColor = lerp(lerp1, lerp2, uvWeight.y);
-		gtxtRWBlurs[0][DTid.xy] = BloomColor;
-
-
-		gtxtRWOutput[DTid.xy] = float4((Color.xyz + (BloomColor.xyz * BloomFactor)), Color.w);*/
-
-		float4 BloomColor = gtxtRWBlurs[1][uv];
-		gtxtRWBlurs[0][DTid.xy] = BloomColor;
-
-
-		gtxtRWOutput[DTid.xy] = float4((Color.xyz + (BloomColor.xyz * BloomFactor)), Color.w);
-	}
-
-	//FinalBloomColor = gtxtRWBlurs[0][DTid.xy];
-	//FinalBloomColor = gtxtRWBlurs[0][DTid.xy + int2(1,0)];
-	//FinalBloomColor = gtxtRWBlurs[0][DTid.xy + int2(0, 1)];
-	//FinalBloomColor = gtxtRWBlurs[0][DTid.xy + int2(1, 1)];
-	//FinalBloomColor /= 4;
-
-	/*int2 uv = int2(DTid.x / REDUTION_SIZE, DTid.y / REDUTION_SIZE);
-	float2 uvWeight = frac(DTid / REDUTION_SIZE);
-
-	float4 Color1 = gtxtRWBlurs[1][uv];
-	float4 Color2 = gtxtRWBlurs[1][uv + int2(1, 0)];
-	float4 Color3 = gtxtRWBlurs[1][uv + int2(0, 1)];
-	float4 Color4 = gtxtRWBlurs[1][uv + int2(1, 1)];
-	float4 lerp1 = lerp(Color1, Color2, uvWeight.x);
-	float4 lerp2 = lerp(Color3, Color4, uvWeight.x);
-	BloomColor = lerp(lerp1, lerp2, uvWeight.y);
-	gtxtRWBlurs[0][DTid.xy] = BloomColor;*/
-
-	//gtxtRWOutput[DTid.xy] = float4((Color.xyz + (BloomColor.xyz * BloomFactor)), Color.w);
-	//gtxtRWOutput[DTid.xy] = float4(lerp(Color.xyz, BloomColor.xyz, 0.5f), Color.w);
-
 }

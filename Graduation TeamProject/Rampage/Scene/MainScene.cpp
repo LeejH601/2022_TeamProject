@@ -844,13 +844,18 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 	// BloomLighting
 
 	if (m_pd3dComputeRootSignature) pd3dCommandList->SetComputeRootSignature(m_pd3dComputeRootSignature.Get());
-	m_pBloomComputeShader->Dispatch(pd3dCommandList);
+	ID3D12Resource* pd3dSource;
+	ID3D12Resource* pd3dDestination;
+	{
+		m_pBloomComputeShader->Dispatch(pd3dCommandList);
 
-	ID3D12Resource* pd3dSource = m_pBloomComputeShader->m_pBloomedTexture->GetResource(0);
-	::SynchronizeResourceTransition(pd3dCommandList, pd3dSource, D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE);
-	ID3D12Resource* pd3dDestination = m_pHDRComputeShader->m_pSourceTexture->GetResource(0);
-	pd3dCommandList->CopyResource(pd3dDestination, pd3dSource);
-	::SynchronizeResourceTransition(pd3dCommandList, pd3dSource, D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+		pd3dSource = m_pBloomComputeShader->m_pBloomedTexture->GetResource(0);
+		::SynchronizeResourceTransition(pd3dCommandList, pd3dSource, D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE);
+		pd3dDestination = m_pHDRComputeShader->m_pSourceTexture->GetResource(0);
+		pd3dCommandList->CopyResource(pd3dDestination, pd3dSource);
+		::SynchronizeResourceTransition(pd3dCommandList, pd3dSource, D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+	}
+	
 
 	m_pHDRComputeShader->Dispatch(pd3dCommandList);
 

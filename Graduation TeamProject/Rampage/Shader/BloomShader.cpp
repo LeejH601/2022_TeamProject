@@ -164,6 +164,8 @@ void CBloomShader::ReleaseUploadBuffers()
 
 void CBloomShader::Dispatch(ID3D12GraphicsCommandList* pd3dCommandList)
 {
+	int redutionSize = 4;
+
 	if (m_ppd3dPipelineStates.data() && m_ppd3dPipelineStates[0]) pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[0].Get());
 	if (m_pd3dCbvSrvUavDescriptorHeap) pd3dCommandList->SetDescriptorHeaps(1, m_pd3dCbvSrvUavDescriptorHeap.GetAddressOf());
 	UpdateShaderVariables(pd3dCommandList, 0);
@@ -186,7 +188,7 @@ void CBloomShader::Dispatch(ID3D12GraphicsCommandList* pd3dCommandList)
 		pd3dCommandList->SetComputeRoot32BitConstants(5, 4, &level, 0);
 
 		//UpdateShaderVariables(pd3dCommandList, 1);
-		pd3dCommandList->Dispatch(1920 / pow(4, i), 1080 / pow(4,i), 1);
+		pd3dCommandList->Dispatch(1920 / pow(redutionSize, i), 1080 / pow(redutionSize,i), 1);
 	}
 
 	if (m_ppd3dPipelineStates.data() && m_ppd3dPipelineStates[2])
