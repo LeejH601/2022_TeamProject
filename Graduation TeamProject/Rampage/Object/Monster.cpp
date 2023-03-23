@@ -18,6 +18,11 @@ CMonster::CMonster()
 	m_fDissolveTime = 0.0f;
 	TestDissolvetime = 0.0f;
 
+	std::unique_ptr<PlayerAttackComponent> pCollisionComponent = std::make_unique<PlayerAttackComponent>();
+	pCollisionComponent->SetObject(this);
+	m_pListeners.push_back(std::move(pCollisionComponent));
+
+	CMessageDispatcher::GetInst()->RegisterListener(MessageType::PLAYER_ATTACK, m_pListeners.back().get());
 }
 
 CMonster::~CMonster()
@@ -34,9 +39,6 @@ void CMonster::Animate(float fTimeElapsed)
 {
 	if (m_pStateMachine->GetCurrentState() == Damaged_Monster::GetInst())
 	{
-		if (CStunAnimationComponent::GetInst()->GetEnable() &&
-			m_fStunStartTime < m_pSkinnedAnimationController->m_fTime && !m_bStunned)
-			m_pStateMachine->ChangeState(Stun_Monster::GetInst());
 		CGameObject::Animate(fTimeElapsed);
 	}
 
@@ -65,9 +67,6 @@ void CMonster::Update(float fTimeElapsed)
 	else{
 		m_fDissolveTime += fTimeElapsed;
 		m_fDissolveThrethHold = m_fDissolveTime / m_fMaxDissolveTime;
-		/*if (m_fDissolveThrethHold > 1.0f) {
-			m_fDissolveThrethHold = 1.0f;
-		}*/
 	}
 	if (m_pStateMachine->GetCurrentState() == Damaged_Monster::GetInst() ||
 		m_pStateMachine->GetCurrentState() == Stun_Monster::GetInst())

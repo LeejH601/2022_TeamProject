@@ -4,6 +4,7 @@
 #include "..\Object\Light.h"
 #include "..\Object\Terrain.h"
 #include "..\Shader\TerrainShader.h"
+#include "..\Object\TextureManager.h"
 #include "..\Object\BillBoardObject.h"
 #include "..\Object\ParticleObject.h"
 #include "..\Shader\ParticleShader.h"
@@ -27,15 +28,19 @@ private:
 	std::vector<std::unique_ptr<CGameObject>> m_pBillBoardObjects;
 	std::unique_ptr<CBillBoardObjectShader> m_pBillBoardObjectShader;
 
-	std::vector<std::unique_ptr<CParticleObject>> m_ppParticleObjects;
-	std::shared_ptr<CParticleShader> m_pParticleShader;
+	std::unique_ptr<CTextureManager> m_pTextureManager = NULL;
+	std::unique_ptr<CParticleShader> m_pParticleShader;
+	std::vector<std::unique_ptr<CGameObject>> m_pParticleObjects;
 
 	std::unique_ptr<CSkyBoxShader> m_pSkyBoxShader;
 	std::unique_ptr<CSkyBox> m_pSkyBoxObject;
 
+	std::unique_ptr<CCamera> m_pFloatingCamera = NULL;
+	std::unique_ptr<CCamera> m_pMainSceneCamera = NULL;
+	CCamera* m_pCurrentCamera = NULL;
+
 	DissolveParams* m_pcbMappedDisolveParams = nullptr;
 	ComPtr<ID3D12Resource> m_pd3dcbDisolveParams = nullptr;
-
 public:
 	CMainTMPScene() {}
 	virtual ~CMainTMPScene() {}
@@ -58,12 +63,11 @@ public:
 	virtual void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	virtual void ReleaseObjects() {}
 
-	virtual bool ProcessInput(UCHAR* pKeysBuffer) { return false; }
+	virtual bool ProcessInput(DWORD dwDirection, float cxDelta, float cyDelta, float fTimeElapsed);
 	virtual void UpdateObjects(float fTimeElapsed);
-	virtual void CheckCollide();
-	virtual void AnimateObjects(float fTimeElapsed);
+	virtual void Update(float fTimeElapsed);
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed, float fCurrentTime, CCamera* pCamera = NULL);
-	virtual void OnPostRenderTarget();
+	virtual void OnPostRender();
 
 	void LoadSceneFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, char* pstrFileName);
 };

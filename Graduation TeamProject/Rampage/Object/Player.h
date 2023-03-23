@@ -1,11 +1,14 @@
 #pragma once
 #include "PhysicsObject.h"
 #include "StateMachine.h"
+#include "..\Global\Camera.h"	// 왜 필요하지
 
 class CCamera;
-class CPlayer : public CPhysicsObject, public IEntity
+class CPlayer : public CPhysicsObject
 {
 public:
+	CCamera* m_pCamera = nullptr;
+
 	std::unique_ptr<CStateMachine<CPlayer>> m_pStateMachine;
 
 	int m_nAnimationNum = 0;
@@ -25,6 +28,7 @@ public:
 	virtual void Update(float fTimeElapsed);
 	virtual bool CheckCollision(CGameObject* pTargetObject);
 
+	void SetCamera(CCamera* pCamera) { m_pCamera = pCamera; }
 	virtual void SetScale(float x, float y, float z);
 	void Tmp();
 

@@ -33,21 +33,6 @@ public:
 		if (m_pCurrentState) m_pCurrentState->Execute(m_pOwner, fElapsedTime);
 	}
 
-	bool  HandleMessage(const Telegram& msg)const
-	{
-		if (m_pCurrentState && m_pCurrentState->OnMessage(m_pOwner, msg))
-		{
-			return true;
-		}
-
-		if (m_pGlobalState && m_pGlobalState->OnMessage(m_pOwner, msg))
-		{
-			return true;
-		}
-
-		return false;
-	}
-
 	//change to a new state
 	void  ChangeState(CState<entity_type>* pNewState)
 	{

@@ -1,7 +1,6 @@
 #pragma once
 #include <fmod.h>
 #include <string>
-#include "..\Global\Entity.h"
 
 #define SOUND_MAX 1.0f
 #define SOUND_MIN 0.1f
@@ -36,6 +35,7 @@ public:
     void pause();
     void resume();
     void stop();
+    void setVolume(float volume);
     void volumeUp();
     void volumeDown();
     void Update(FMOD_SYSTEM* g_sound_system);

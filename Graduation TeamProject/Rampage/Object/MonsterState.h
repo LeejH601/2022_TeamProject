@@ -9,7 +9,6 @@ public:
     virtual void Enter(CMonster* monster);
     virtual void Execute(CMonster* monster, float fElapsedTime);
     virtual void Exit(CMonster* monster);
-    virtual bool OnMessage(CMonster* monster, const Telegram& msg);
 };
 
 class Damaged_Monster : public CState<CMonster>
@@ -19,7 +18,6 @@ public:
     virtual void Enter(CMonster* monster);
     virtual void Execute(CMonster* monster, float fElapsedTime);
     virtual void Exit(CMonster* monster);
-    virtual bool OnMessage(CMonster* monster, const Telegram& msg);
 };
 
 class Stun_Monster : public CState<CMonster>
@@ -29,5 +27,4 @@ public:
     virtual void Enter(CMonster* monster);
     virtual void Execute(CMonster* monster, float fElapsedTime);
     virtual void Exit(CMonster* monster);
-    virtual bool OnMessage(CMonster* monster, const Telegram& msg);
 };

@@ -1,12 +1,29 @@
 #pragma once
 #include "..\Global\stdafx.h"
 #include "..\Global\Component.h"
+#include "..\Global\MessageDispatcher.h"
+#include "..\Object\State.h"
+
+class DataLoader
+{
+	std::string file_path = "Data\\Component";
+	std::string file_ext = ".bin";
+public:
+	void SaveComponentSets();
+	void LoadComponentSets();
+
+	void SaveComponentSet(FILE* pInFile, CState<CPlayer>* pState);
+	void LoadComponentSet(FILE* pInFile, CState<CPlayer>* pState);
+};
 
 class CTexture;
 class CCamera;
 class CImGuiManager
 {
 private:
+	// Component Sets
+	std::unique_ptr<DataLoader> m_pDataLoader = NULL;
+
 	// Our state
 	ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);;
 	float clear_color_with_alpha[4] = { clear_color.x * clear_color.w, clear_color.y * clear_color.w, clear_color.z * clear_color.w, clear_color.w };
@@ -15,13 +32,11 @@ private:
 	float ParallaxBias = 0.0f;
 	int Terrain_Mapping_mode = 0;
 
-	int Player_Animation_Number;
+	int Player_Animation_Number = 0;
 
 	bool show_demo_window = false;
 	bool show_another_window = false;
 	bool show_my_window = true;
-
-	CComponentSet* m_pCurrentComponentSet = nullptr;
 
 	CCamera* m_pCamera = NULL;
 
@@ -55,7 +70,8 @@ public:
 	void OnPrepareRender(ID3D12GraphicsCommandList* pd3dCommandList, D3D12_CPU_DESCRIPTOR_HANDLE* d3dDsvDescriptorCPUHandle, float fTimeElapsed, float fCurrentTime, CCamera* pCamera = NULL);
 	void PrepareRenderTarget(ID3D12GraphicsCommandList* pd3dCommandList, D3D12_CPU_DESCRIPTOR_HANDLE* d3dDsvDescriptorCPUHandle);
 	void Render(ID3D12GraphicsCommandList* pd3dCommandList);
-	void OnPostRenderTarget();
+	void OnPostRender();
+	void OnDestroy();
 
 	ImVec4 GetColor() { return clear_color; };
 	int GetAnimationNum() { return Player_Animation_Number; };

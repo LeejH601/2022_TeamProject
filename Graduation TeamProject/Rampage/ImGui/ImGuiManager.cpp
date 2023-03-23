@@ -6,7 +6,6 @@
 #include "..\Global\GameFramework.h"
 #include "..\Global\Locator.h"
 #include "..\Sound\SoundComponent.h"
-#include "..\Sound\SoundPlayer.h"
 #include "..\Sound\SoundManager.h"
 #include "..\Object\BillBoardComponent.h"
 #include "..\Object\TextureManager.h"
@@ -14,6 +13,450 @@
 #include "..\Object\AnimationComponent.h"
 
 #define NUM_FRAMES_IN_FLIGHT 3
+//========================================================================
+void DataLoader::SaveComponentSets()
+{
+	std::string path;
+	FILE* pInFile;
+
+	for (int i = 0; i < 3; ++i)
+	{
+		CState<CPlayer>* pCurrentAnimation = Atk1_Player::GetInst();
+
+		// State 선택 로직 생각 필요
+		switch (i) {
+		case 0:
+			pCurrentAnimation = Atk1_Player::GetInst();
+			break;
+		case 1:
+			pCurrentAnimation = Atk2_Player::GetInst();
+			break;
+		case 2:
+			pCurrentAnimation = Atk3_Player::GetInst();
+			break;
+		default:
+			break;
+		}
+
+		path = file_path + std::to_string(i) + file_ext;
+		::fopen_s(&pInFile, path.c_str(), "wb");
+
+		SaveComponentSet(pInFile, pCurrentAnimation);
+
+		fclose(pInFile);
+	}
+}
+
+void DataLoader::LoadComponentSets()
+{
+	std::string path;
+	FILE* pInFile;
+
+	for (int i = 0; i < 3; ++i)
+	{
+		CState<CPlayer>* pCurrentAnimation = Atk1_Player::GetInst();
+
+		// State 선택 로직 생각 필요
+		switch (i) {
+		case 0:
+			pCurrentAnimation = Atk1_Player::GetInst();
+			break;
+		case 1:
+			pCurrentAnimation = Atk2_Player::GetInst();
+			break;
+		case 2:
+			pCurrentAnimation = Atk3_Player::GetInst();
+			break;
+		default:
+			break;
+		}
+		path = file_path + std::to_string(i) + file_ext;
+		::fopen_s(&pInFile, path.c_str(), "rb");
+		if (!pInFile)
+			continue;
+		LoadComponentSet(pInFile, pCurrentAnimation);
+		fclose(pInFile);
+	}
+}
+
+void DataLoader::SaveComponentSet(FILE* pInFile, CState<CPlayer>* pState)
+{
+	CameraMoveComponent* pCameraMoveComponent = dynamic_cast<CameraMoveComponent*>(pState->GetCameraMoveComponent());
+	CameraShakeComponent* pCameraShakerComponent = dynamic_cast<CameraShakeComponent*>(pState->GetCameraShakeComponent());
+	CameraZoomerComponent* pCameraZoomerComponent = dynamic_cast<CameraZoomerComponent*>(pState->GetCameraZoomerComponent());
+
+	DamageAnimationComponent* pDamageAnimationComponent = dynamic_cast<DamageAnimationComponent*>(pState->GetDamageAnimationComponent());
+	ShakeAnimationComponent* pShakeAnimationComponent = dynamic_cast<ShakeAnimationComponent*>(pState->GetShakeAnimationComponent());
+	StunAnimationComponent* pStunAnimationComponent = dynamic_cast<StunAnimationComponent*>(pState->GetStunAnimationComponent());
+
+	SoundPlayComponent* pShockSoundComponent = dynamic_cast<SoundPlayComponent*>(pState->GetShockSoundComponent());
+	SoundPlayComponent* pShootSoundComponent = dynamic_cast<SoundPlayComponent*>(pState->GetShootSoundComponent());
+
+	std::string str = "<Components>:";
+	WriteStringFromFile(pInFile, str);
+
+	WriteStringFromFile(pInFile, std::string("<CCameraMover>:"));
+	WriteStringFromFile(pInFile, std::string("<Enable>:"));
+	WriteIntegerFromFile(pInFile, pCameraMoveComponent->GetEnable());
+	WriteStringFromFile(pInFile, std::string("<MaxDistance>:"));
+	WriteFloatFromFile(pInFile, pCameraMoveComponent->GetMaxDistance());
+	WriteStringFromFile(pInFile, std::string("<MovingTime>:"));
+	WriteFloatFromFile(pInFile, pCameraMoveComponent->GetMovingTime());
+	WriteStringFromFile(pInFile, std::string("<RollBackTime>:"));
+	WriteFloatFromFile(pInFile, pCameraMoveComponent->GetRollBackTime());
+	WriteStringFromFile(pInFile, std::string("</CCameraMover>:"));
+
+	WriteStringFromFile(pInFile, std::string("<CCameraShaker>:"));
+	WriteStringFromFile(pInFile, std::string("<Enable>:"));
+	WriteIntegerFromFile(pInFile, pCameraShakerComponent->GetEnable());
+	WriteStringFromFile(pInFile, std::string("<Duration>:"));
+	WriteFloatFromFile(pInFile, pCameraShakerComponent->GetDuration());
+	WriteStringFromFile(pInFile, std::string("<Magnitude>:"));
+	WriteFloatFromFile(pInFile, pCameraShakerComponent->GetMagnitude());
+	WriteStringFromFile(pInFile, std::string("</CCameraShaker>:"));
+
+	WriteStringFromFile(pInFile, std::string("<CCameraZoomer>:"));
+	WriteStringFromFile(pInFile, std::string("<Enable>:"));
+	WriteIntegerFromFile(pInFile, pCameraZoomerComponent->GetEnable());
+	WriteStringFromFile(pInFile, std::string("<MaxDistance>:"));
+	WriteFloatFromFile(pInFile, pCameraZoomerComponent->GetMaxDistance());
+	WriteStringFromFile(pInFile, std::string("<MovingTime>:"));
+	WriteFloatFromFile(pInFile, pCameraZoomerComponent->GetMovingTime());
+	WriteStringFromFile(pInFile, std::string("<RollBackTime>:"));
+	WriteFloatFromFile(pInFile, pCameraZoomerComponent->GetRollBackTime());
+	WriteStringFromFile(pInFile, std::string("<IsZoomIN>:"));
+	WriteIntegerFromFile(pInFile, pCameraZoomerComponent->GetIsIn());
+	WriteStringFromFile(pInFile, std::string("</CCameraZoomer>:"));
+
+	WriteStringFromFile(pInFile, std::string("<DamageAnimationComponent>:"));
+	WriteStringFromFile(pInFile, std::string("<Enable>:"));
+	WriteIntegerFromFile(pInFile, pDamageAnimationComponent->GetEnable());
+	WriteStringFromFile(pInFile, std::string("<MaxDistance>:"));
+	WriteFloatFromFile(pInFile, pDamageAnimationComponent->GetMaxDistance());
+	WriteStringFromFile(pInFile, std::string("<Speed>:"));
+	WriteFloatFromFile(pInFile, pDamageAnimationComponent->GetSpeed());
+	WriteStringFromFile(pInFile, std::string("</DamageAnimationComponent>:"));
+
+	WriteStringFromFile(pInFile, std::string("<ShakeAnimationComponent>:"));
+	WriteStringFromFile(pInFile, std::string("<Enable>:"));
+	WriteIntegerFromFile(pInFile, pShakeAnimationComponent->GetEnable());
+	WriteStringFromFile(pInFile, std::string("<Distance>:"));
+	WriteFloatFromFile(pInFile, pShakeAnimationComponent->GetDistance());
+	WriteStringFromFile(pInFile, std::string("<Frequency>:"));
+	WriteFloatFromFile(pInFile, pShakeAnimationComponent->GetFrequency());
+	WriteStringFromFile(pInFile, std::string("</ShakeAnimationComponent>:"));
+
+	WriteStringFromFile(pInFile, std::string("<StunAnimationComponent>:"));
+	WriteStringFromFile(pInFile, std::string("<Enable>:"));
+	WriteIntegerFromFile(pInFile, pStunAnimationComponent->GetEnable());
+	WriteStringFromFile(pInFile, std::string("<StunTime>:"));
+	WriteFloatFromFile(pInFile, pStunAnimationComponent->GetStunTime());
+	WriteStringFromFile(pInFile, std::string("</StunAnimationComponent>:"));
+
+	WriteStringFromFile(pInFile, std::string("<CEffectSoundComponent>:"));
+	WriteStringFromFile(pInFile, std::string("<Enable>:"));
+	WriteIntegerFromFile(pInFile, pShockSoundComponent->GetEnable());
+	WriteStringFromFile(pInFile, std::string("<Sound>:"));
+	WriteIntegerFromFile(pInFile, pShockSoundComponent->GetSoundNumber());
+	WriteStringFromFile(pInFile, std::string("<Delay>:"));
+	WriteFloatFromFile(pInFile, pShockSoundComponent->GetDelay());
+	WriteStringFromFile(pInFile, std::string("<Volume>:"));
+	WriteFloatFromFile(pInFile, pShockSoundComponent->GetVolume());
+	WriteStringFromFile(pInFile, std::string("</CEffectSoundComponent>:"));
+
+	WriteStringFromFile(pInFile, std::string("<CShootSoundComponent>:"));
+	WriteStringFromFile(pInFile, std::string("<Enable>:"));
+	WriteIntegerFromFile(pInFile, pShootSoundComponent->GetEnable());
+	WriteStringFromFile(pInFile, std::string("<Sound>:"));
+	WriteIntegerFromFile(pInFile, pShootSoundComponent->GetSoundNumber());
+	WriteStringFromFile(pInFile, std::string("<Delay>:"));
+	WriteFloatFromFile(pInFile, pShootSoundComponent->GetDelay());
+	WriteStringFromFile(pInFile, std::string("<Volume>:"));
+	WriteFloatFromFile(pInFile, pShootSoundComponent->GetVolume());
+	WriteStringFromFile(pInFile, std::string("</CShootSoundComponent>:"));
+
+	// 데미지 사운드 없는거 아닌가?
+	/*WriteStringFromFile(pInFile, std::string("<CDamageSoundComponent>:"));
+	WriteStringFromFile(pInFile, std::string("<Enable>:"));
+	WriteIntegerFromFile(pInFile, pDamageSoundComponent->GetEnable());
+	WriteStringFromFile(pInFile, std::string("<Sound>:"));
+	WriteIntegerFromFile(pInFile, pDamageAnimationComponent->GetSoundNumber());
+	WriteStringFromFile(pInFile, std::string("<Delay>:"));
+	WriteFloatFromFile(pInFile, pDamageAnimationComponent->GetDelay());
+	WriteStringFromFile(pInFile, std::string("<Volume>:"));
+	WriteFloatFromFile(pInFile, pDamageAnimationComponent->GetVolume());
+	WriteStringFromFile(pInFile, std::string("</CDamageSoundComponent>:"));*/
+
+	str = "</Components>:";
+	WriteStringFromFile(pInFile, str);
+}
+
+void DataLoader::LoadComponentSet(FILE* pInFile, CState<CPlayer>* pState)
+{
+	CameraMoveComponent* pCameraMoveComponent = dynamic_cast<CameraMoveComponent*>(pState->GetCameraMoveComponent());
+	CameraShakeComponent* pCameraShakerComponent = dynamic_cast<CameraShakeComponent*>(pState->GetCameraShakeComponent());
+	CameraZoomerComponent* pCameraZoomerComponent = dynamic_cast<CameraZoomerComponent*>(pState->GetCameraZoomerComponent());
+
+	DamageAnimationComponent* pDamageAnimationComponent = dynamic_cast<DamageAnimationComponent*>(pState->GetDamageAnimationComponent());
+	ShakeAnimationComponent* pShakeAnimationComponent = dynamic_cast<ShakeAnimationComponent*>(pState->GetShakeAnimationComponent());
+	StunAnimationComponent* pStunAnimationComponent = dynamic_cast<StunAnimationComponent*>(pState->GetStunAnimationComponent());
+
+	SoundPlayComponent* pShockSoundComponent = dynamic_cast<SoundPlayComponent*>(pState->GetShockSoundComponent());
+	SoundPlayComponent* pShootSoundComponent = dynamic_cast<SoundPlayComponent*>(pState->GetShootSoundComponent());
+
+	char buf[256];
+	std::string str;
+	str.resize(256);
+	ReadStringFromFile(pInFile, buf);
+
+	for (; ; )
+	{
+		ReadStringFromFile(pInFile, buf);
+
+		if (!strcmp(buf, "<CCameraMover>:"))
+		{
+			for (; ; )
+			{
+				ReadStringFromFile(pInFile, buf);
+
+				if (!strcmp(buf, "<MaxDistance>:"))
+				{
+					pCameraMoveComponent->SetMaxDistance(ReadFloatFromFile(pInFile));
+				}
+				else if (!strcmp(buf, "<MovingTime>:"))
+				{
+					pCameraMoveComponent->SetMovingTime(ReadFloatFromFile(pInFile));
+				}
+				else if (!strcmp(buf, "<RollBackTime>:"))
+				{
+					pCameraMoveComponent->SetRollBackTime(ReadFloatFromFile(pInFile));
+				}
+				else if (!strcmp(buf, "<Enable>:"))
+				{
+					pCameraMoveComponent->SetEnable(ReadIntegerFromFile(pInFile));
+				}
+				else if (!strcmp(buf, "</CCameraMover>:"))
+				{
+					break;
+				}
+			}
+		}
+		else if (!strcmp(buf, "<CCameraShaker>:"))
+		{
+			for (; ; )
+			{
+				ReadStringFromFile(pInFile, buf);
+
+				if (!strcmp(buf, "<Duration>:"))
+				{
+					pCameraShakerComponent->SetDuration(ReadFloatFromFile(pInFile));
+				}
+				else if (!strcmp(buf, "<Magnitude>:"))
+				{
+					pCameraShakerComponent->SetMagnitude(ReadFloatFromFile(pInFile));
+				}
+				else if (!strcmp(buf, "<Enable>:"))
+				{
+					pCameraShakerComponent->SetEnable(ReadIntegerFromFile(pInFile));
+				}
+				else if (!strcmp(buf, "</CCameraShaker>:"))
+				{
+					break;
+				}
+			}
+		}
+		else if (!strcmp(buf, "<CCameraZoomer>:"))
+		{
+			for (; ; )
+			{
+				ReadStringFromFile(pInFile, buf);
+
+				if (!strcmp(buf, "<MaxDistance>:"))
+				{
+					pCameraZoomerComponent->SetMaxDistance(ReadFloatFromFile(pInFile));
+				}
+				else if (!strcmp(buf, "<MovingTime>:"))
+				{
+					pCameraZoomerComponent->SetMovingTime(ReadFloatFromFile(pInFile));
+				}
+				else if (!strcmp(buf, "<RollBackTime>:"))
+				{
+					pCameraZoomerComponent->SetRollBackTime(ReadFloatFromFile(pInFile));
+				}
+				else if (!strcmp(buf, "<IsZoomIN>:"))
+				{
+					pCameraZoomerComponent->SetIsIn(ReadIntegerFromFile(pInFile));
+				}
+				else if (!strcmp(buf, "<Enable>:"))
+				{
+					pCameraZoomerComponent->SetEnable(ReadIntegerFromFile(pInFile));
+				}
+				else if (!strcmp(buf, "</CCameraZoomer>:"))
+				{
+					break;
+				}
+			}
+		}
+		else if (!strcmp(buf, "<DamageAnimationComponent>:"))
+		{
+			for (; ; )
+			{
+				ReadStringFromFile(pInFile, buf);
+
+				if (!strcmp(buf, "<Enable>:"))
+				{
+					pDamageAnimationComponent->SetEnable(ReadIntegerFromFile(pInFile));
+				}
+				else if (!strcmp(buf, "<MaxDistance>:"))
+				{
+					pDamageAnimationComponent->SetMaxDistance(ReadFloatFromFile(pInFile));
+				}
+				else if (!strcmp(buf, "<Speed>:"))
+				{
+					pDamageAnimationComponent->SetSpeed(ReadFloatFromFile(pInFile));
+				}
+				else if (!strcmp(buf, "</DamageAnimationComponent>:"))
+				{
+					break;
+				}
+			}
+		}
+		else if (!strcmp(buf, "<ShakeAnimationComponent>:"))
+		{
+			for (; ; )
+			{
+				ReadStringFromFile(pInFile, buf);
+
+				if (!strcmp(buf, "<Enable>:"))
+				{
+					pShakeAnimationComponent->SetEnable(ReadIntegerFromFile(pInFile));
+				}
+				else if (!strcmp(buf, "<Distance>:"))
+				{
+					pShakeAnimationComponent->SetDistance(ReadFloatFromFile(pInFile));
+				}
+				else if (!strcmp(buf, "<Frequency>:"))
+				{
+					pShakeAnimationComponent->SetFrequency(ReadFloatFromFile(pInFile));
+				}
+				else if (!strcmp(buf, "</ShakeAnimationComponent>:"))
+				{
+					break;
+				}
+			}
+		}
+		else if (!strcmp(buf, "<StunAnimationComponent>:"))
+		{
+			for (; ; )
+			{
+				ReadStringFromFile(pInFile, buf);
+
+				if (!strcmp(buf, "<Enable>:"))
+				{
+					pStunAnimationComponent->SetEnable(ReadIntegerFromFile(pInFile));
+				}
+				else if (!strcmp(buf, "<StunTime>:"))
+				{
+					pStunAnimationComponent->SetStunTime(ReadFloatFromFile(pInFile));
+				}
+				else if (!strcmp(buf, "</StunAnimationComponent>:"))
+				{
+					break;
+				}
+			}
+		}
+		else if (!strcmp(buf, "<CEffectSoundComponent>:"))
+		{
+			for (; ; )
+			{
+				ReadStringFromFile(pInFile, buf);
+
+				if (!strcmp(buf, "<Enable>:"))
+				{
+					pShockSoundComponent->SetEnable(ReadIntegerFromFile(pInFile));
+				}
+				else if (!strcmp(buf, "<Sound>:"))
+				{
+					pShockSoundComponent->SetSoundNumber(ReadIntegerFromFile(pInFile));
+				}
+				else if (!strcmp(buf, "<Delay>:"))
+				{
+					pShockSoundComponent->SetDelay(ReadFloatFromFile(pInFile));
+				}
+				else if (!strcmp(buf, "<Volume>:"))
+				{
+					pShockSoundComponent->SetVolume(ReadFloatFromFile(pInFile));
+				}
+				else if (!strcmp(buf, "</CEffectSoundComponent>:"))
+				{
+					break;
+				}
+			}
+		}
+		else if (!strcmp(buf, "<CShootSoundComponent>:"))
+		{
+			for (; ; )
+			{
+				ReadStringFromFile(pInFile, buf);
+
+				if (!strcmp(buf, "<Enable>:"))
+				{
+					pShootSoundComponent->SetEnable(ReadIntegerFromFile(pInFile));
+				}
+				else if (!strcmp(buf, "<Sound>:"))
+				{
+					pShootSoundComponent->SetSoundNumber(ReadIntegerFromFile(pInFile));
+				}
+				else if (!strcmp(buf, "<Delay>:"))
+				{
+					pShootSoundComponent->SetDelay(ReadFloatFromFile(pInFile));
+				}
+				else if (!strcmp(buf, "<Volume>:"))
+				{
+					pShootSoundComponent->SetVolume(ReadFloatFromFile(pInFile));
+				}
+				else if (!strcmp(buf, "</CShootSoundComponent>:"))
+				{
+					break;
+				}
+			}
+		}
+		// 없으니까 일단 주석처리
+		/*else if (!strcmp(buf, "<CDamageSoundComponent>:"))
+		{
+			for (; ; )
+			{
+				ReadStringFromFile(pInFile, buf);
+
+				if (!strcmp(buf, "<Enable>:"))
+				{
+					component->SetEnable(ReadIntegerFromFile(pInFile));
+				}
+				else if (!strcmp(buf, "<Sound>:"))
+				{
+					component->m_nSoundNumber = ReadIntegerFromFile(pInFile);
+				}
+				else if (!strcmp(buf, "<Delay>:"))
+				{
+					component->m_fDelay = ReadFloatFromFile(pInFile);
+				}
+				else if (!strcmp(buf, "<Volume>:"))
+				{
+					component->m_fVolume = ReadFloatFromFile(pInFile);
+				}
+				else if (!strcmp(buf, "</CDamageSoundComponent>:"))
+				{
+					break;
+				}
+			}
+		}*/
+		else if (!strcmp(buf, "</Components>:"))
+		{
+			break;
+		}
+	}
+}
+//========================================================================
 
 wchar_t* ConverCtoWC(const char* str)
 
@@ -106,8 +549,8 @@ void CImGuiManager::Init(HWND hWnd, ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 		m_pd3dSrvDescHeap->GetCPUDescriptorHandleForHeapStart(),
 		m_pd3dSrvDescHeap->GetGPUDescriptorHandleForHeapStart());
 
-	Locator.CreateSimulatorCamera(pd3dDevice, pd3dCommandList);
-	m_pCamera = Locator.GetSimulaterCamera();
+	/*Locator.CreateSimulatorCamera(pd3dDevice, pd3dCommandList);
+	m_pCamera = Locator.GetSimulaterCamera();*/
 
 	D3D12_CLEAR_VALUE d3dClearValue = { DXGI_FORMAT_R8G8B8A8_UNORM, { 0.0f, 0.0f, 0.0f, 1.0f } };
 	m_pRTTexture = std::make_unique<CTexture>(1, RESOURCE_TEXTURE2D, 0, 1);
@@ -123,6 +566,9 @@ void CImGuiManager::Init(HWND hWnd, ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 	ID3D12Resource* pd3dTextureResource = m_pRTTexture->GetResource(0);
 	pd3dDevice->CreateRenderTargetView(pd3dTextureResource, &d3dRenderTargetViewDesc, d3dRtvCPUDescriptorHandle);
 	m_pd3dRtvCPUDescriptorHandles = d3dRtvCPUDescriptorHandle;
+
+	m_pDataLoader = std::make_unique<DataLoader>();
+	m_pDataLoader->LoadComponentSets();
 }
 void CImGuiManager::DemoRendering()
 {
@@ -172,11 +618,22 @@ void CImGuiManager::SetUI()
 	ImGui_ImplWin32_NewFrame();
 	ImGui::NewFrame();
 
-	if (m_pCurrentComponentSet == nullptr) {
-		m_pCurrentComponentSet = Locator.GetComponentSet(0);
-		m_pCamera->LoadComponentFromSet(m_pCurrentComponentSet);
+	CState<CPlayer>* pCurrentAnimation = Atk1_Player::GetInst();
+	
+	// State 선택 로직 생각 필요
+	switch (Player_Animation_Number) {
+	case 0:
+		pCurrentAnimation = Atk1_Player::GetInst();
+		break;
+	case 1:
+		pCurrentAnimation = Atk2_Player::GetInst();
+		break;
+	case 2:
+		pCurrentAnimation = Atk3_Player::GetInst();
+		break;
+	default:
+		break;
 	}
-
 
 	// Show my window.
 	{
@@ -214,73 +671,62 @@ void CImGuiManager::SetUI()
 
 		if (ImGui::CollapsingHeader("Particle Effect"))
 		{
-			initial_curpos.y += 25.f;
-			ImGui::SetCursorPos(initial_curpos);
-			ImGui::SetNextItemWidth(190.f);
+			//일단 보류
+			//ParticleComponent* pParticleComponent = static_cast<ParticleComponent*>(pCurrentAnimation->GetParticleComponent());
 
-			CParticleComponent* pParticleComponent = (CParticleComponent*)(m_pCurrentComponentSet->FindComponent(typeid(CParticleComponent)));
+			//initial_curpos.y += 25.f;
+			//ImGui::SetCursorPos(initial_curpos);
+			//ImGui::SetNextItemWidth(190.f);
+			//ImGui::Checkbox("On/Off##ParticleEffect", &pParticleComponent->GetEnable());
 
-			ImGui::Checkbox("On/Off##ParticleEffect", &pParticleComponent->GetEnable());
+			//std::vector<std::shared_ptr<CTexture>> vTexture = CSimulatorScene::GetInst()->GetTextureManager()->GetParticleTextureList();
+			//std::vector<const char*> items;
+			//std::vector <std::string> str(100);
+			//for (int i = 0; i < vTexture.size(); i++)
+			//{
+			//	std::wstring wstr = vTexture[i]->GetTextureName(0);
+			//	str[i].assign(wstr.begin(), wstr.end());
+			//	items.emplace_back(str[i].c_str());
+			//}
 
-			std::vector<std::shared_ptr<CTexture>> vTexture = CTextureManager::GetInst()->GetParticleTextureList();
-			std::vector<const char*> items;
-			std::vector <std::string> str(100);
-			for (int i = 0; i < vTexture.size(); i++)
-			{
-				std::wstring wstr = vTexture[i]->GetTextureName(0);
-				str[i].assign(wstr.begin(), wstr.end());
-				items.emplace_back(str[i].c_str());
-			}
+			//initial_curpos.y += 25.f;
+			//ImGui::SetCursorPos(initial_curpos);
+			//ImGui::SetNextItemWidth(190.f);
 
-			initial_curpos.y += 25.f;
-			ImGui::SetCursorPos(initial_curpos);
-			ImGui::SetNextItemWidth(190.f);
+			//int iParticleSpriteN = pParticleComponent->GetParticleIndex();
+			//ImGui::Combo("Texture##ParticleEffect", (int*)(&pParticleComponent->GetParticleIndex()), items.data(), items.size());
+			//if (iParticleSpriteN != pParticleComponent->GetParticleIndex())
+			//	pParticleComponent->SetTexture(0, ConverCtoWC(items[pParticleComponent->GetParticleIndex()]));
 
-			int iParticleSpriteN = pParticleComponent->GetParticleIndex();
-			ImGui::Combo("Texture##ParticleEffect", (int*)(&pParticleComponent->GetParticleIndex()), items.data(), items.size());
-			if (iParticleSpriteN != pParticleComponent->GetParticleIndex())
-				pParticleComponent->SetTexture(0, ConverCtoWC(items[pParticleComponent->GetParticleIndex()]));
+			//initial_curpos.y += 25.f;
+			//ImGui::SetCursorPos(initial_curpos);
+			//ImGui::SetNextItemWidth(190.f);
+			//ImGui::DragFloat("Size##ParticleEffect", &pParticleComponent->GetSize(), 0.01f, 0.0f, 10.0f, "%.2f", 0);
 
-			initial_curpos.y += 25.f;
-			ImGui::SetCursorPos(initial_curpos);
-			ImGui::SetNextItemWidth(190.f);
-			ImGui::DragFloat("Size##ParticleEffect", &pParticleComponent->m_fSize, 0.01f, 0.0f, 10.0f, "%.2f", 0);
+			//initial_curpos.y += 25.f;
+			//ImGui::SetCursorPos(initial_curpos);
+			//ImGui::SetNextItemWidth(190.f);
+			//ImGui::DragFloat("Alpha##ParticleEffect", &pParticleComponent->GetAlpha(), 0.01f, 0.0f, 10.0f, "%.2f", 0);
 
-			initial_curpos.y += 25.f;
-			ImGui::SetCursorPos(initial_curpos);
-			ImGui::SetNextItemWidth(190.f);
-			ImGui::DragFloat("Alpha##ParticleEffect", &pParticleComponent->m_fAlpha, 0.01f, 0.0f, 10.0f, "%.2f", 0);
+			//initial_curpos.y += 25.f;
+			//ImGui::SetCursorPos(initial_curpos);
+			//ImGui::SetNextItemWidth(190.f);
+			//ImGui::DragFloat("LifeTime##ParticleEffect", &pParticleComponent->GetLifeTime(), 0.01f, 0.0f, 10.0f, "%.1f", 0);
 
-			initial_curpos.y += 25.f;
-			ImGui::SetCursorPos(initial_curpos);
-			ImGui::SetNextItemWidth(190.f);
-			ImGui::DragFloat("LifeTime##ParticleEffect", &pParticleComponent->m_fLifeTime, 0.01f, 0.0f, 10.0f, "%.1f", 0);
+			//initial_curpos.y += 25.f;
+			//ImGui::SetCursorPos(initial_curpos);
+			//ImGui::SetNextItemWidth(190.f);
+			//ImGui::DragInt("ParticleCount##ParticleEffect", &pParticleComponent->GetParticleNumber(), 0.01f, 0.0f, 10.0f, "%d", 0);
 
-			initial_curpos.y += 25.f;
-			ImGui::SetCursorPos(initial_curpos);
-			ImGui::SetNextItemWidth(190.f);
-			ImGui::DragInt("ParticleCount##ParticleEffect", &pParticleComponent->m_nParticleNumber, 0.01f, 0.0f, 10.0f, "%d", 0);
+			//initial_curpos.y += 25.f;
+			//ImGui::SetCursorPos(initial_curpos);
+			//ImGui::SetNextItemWidth(190.f);
+			//ImGui::DragFloat("Speed##ParticleEffect", &pParticleComponent->GetSpeed(), 0.01f, 0.0f, 10.0f, "%.1f", 0);
 
-			initial_curpos.y += 25.f;
-			ImGui::SetCursorPos(initial_curpos);
-			ImGui::SetNextItemWidth(190.f);
-			ImGui::DragFloat("Speed##ParticleEffect", &pParticleComponent->m_fSpeed, 0.01f, 0.0f, 10.0f, "%.1f", 0);
-
-			initial_curpos.y += 25.f;
-			ImGui::SetCursorPos(initial_curpos);
-			ImGui::SetNextItemWidth(30.f);
-			ImGui::ColorEdit3("ParticleEffect", (float*)&pParticleComponent->m_f3Color); // Edit 3 floats representing a color
-			//initial_curpos.x += 35.f;
+			//initial_curpos.y += 25.f;
 			//ImGui::SetCursorPos(initial_curpos);
 			//ImGui::SetNextItemWidth(30.f);
-			//ImGui::DragFloat("Color-G##ParticleEffect", &pParticleComponent->m_f3Color.y, 0.01f, 0.0f, 10.0f, "%.2f", 0);
-
-			//initial_curpos.x += 35.f;
-			//ImGui::SetCursorPos(initial_curpos);
-			//ImGui::SetNextItemWidth(30.f);
-			//ImGui::DragFloat("Color-B##ParticleEffect", &pParticleComponent->m_f3Color.z, 0.01f, 0.0f, 10.0f, "%.2f", 0);
-
-			pParticleComponent->Update();
+			//ImGui::ColorEdit3("ParticleEffect", (float*)&pParticleComponent->GetColor()); // Edit 3 floats representing a color
 		}
 
 		initial_curpos.y += 25.f;
@@ -299,25 +745,26 @@ void CImGuiManager::SetUI()
 
 		if (ImGui::CollapsingHeader("Damage Animation"))
 		{
-			initial_curpos.y += 25.f;
-			ImGui::SetCursorPos(initial_curpos);
-			ImGui::SetNextItemWidth(190.f);
-			CDamageAnimationComponent* damage = (CDamageAnimationComponent*)(m_pCurrentComponentSet->FindComponent(typeid(CDamageAnimationComponent)));
-			ImGui::Checkbox("On/Off##DamageAnimation", &damage->GetEnable());
+			DamageAnimationComponent* pDamageAnimationComponent = dynamic_cast<DamageAnimationComponent*>(pCurrentAnimation->GetDamageAnimationComponent());
 
 			initial_curpos.y += 25.f;
 			ImGui::SetCursorPos(initial_curpos);
 			ImGui::SetNextItemWidth(190.f);
-
-			if (ImGui::DragFloat("MaxDistance##DamageAnimation", &damage->GetMaxDistance(), 0.01f, 0.0f, 10.0f, "%.2f", 0))
-				damage->GetMaxDistance() = std::clamp(damage->GetMaxDistance(), 0.0f, 10.0f);
+			ImGui::Checkbox("On/Off##DamageAnimation", &pDamageAnimationComponent->GetEnable());
 
 			initial_curpos.y += 25.f;
 			ImGui::SetCursorPos(initial_curpos);
 			ImGui::SetNextItemWidth(190.f);
 
-			if (ImGui::DragFloat("Speed##DamageAnimation", &damage->GetSpeed(), 0.01f, 0.0f, 200.0f, "%.2f", 0))
-				damage->GetSpeed() = std::clamp(damage->GetSpeed(), 0.0f, 200.0f);
+			if (ImGui::DragFloat("MaxDistance##DamageAnimation", &pDamageAnimationComponent->GetMaxDistance(), 0.01f, 0.0f, 10.0f, "%.2f", 0))
+				pDamageAnimationComponent->GetMaxDistance() = std::clamp(pDamageAnimationComponent->GetMaxDistance(), 0.0f, 10.0f);
+
+			initial_curpos.y += 25.f;
+			ImGui::SetCursorPos(initial_curpos);
+			ImGui::SetNextItemWidth(190.f);
+
+			if (ImGui::DragFloat("Speed##DamageAnimation", &pDamageAnimationComponent->GetSpeed(), 0.01f, 0.0f, 200.0f, "%.2f", 0))
+				pDamageAnimationComponent->GetSpeed() = std::clamp(pDamageAnimationComponent->GetSpeed(), 0.0f, 200.0f);
 		}
 
 		initial_curpos.y += 25.f;
@@ -325,25 +772,26 @@ void CImGuiManager::SetUI()
 
 		if (ImGui::CollapsingHeader("Shake Animation"))
 		{
-			initial_curpos.y += 25.f;
-			ImGui::SetCursorPos(initial_curpos);
-			ImGui::SetNextItemWidth(190.f);
-			CShakeAnimationComponent* shake = (CShakeAnimationComponent*)(m_pCurrentComponentSet->FindComponent(typeid(CShakeAnimationComponent)));
-			ImGui::Checkbox("On/Off##ShakeAnimation", &shake->GetEnable());
+			ShakeAnimationComponent* pShakeAnimationComponent = dynamic_cast<ShakeAnimationComponent*>(pCurrentAnimation->GetShakeAnimationComponent());
 
 			initial_curpos.y += 25.f;
 			ImGui::SetCursorPos(initial_curpos);
 			ImGui::SetNextItemWidth(190.f);
-
-			if (ImGui::DragFloat("Distance##ShakeAnimation", &shake->GetDistance(), 0.01f, 0.0f, 1.0f, "%.2f", 0))
-				shake->GetDistance() = std::clamp(shake->GetDistance(), 0.0f, 1.0f);
+			ImGui::Checkbox("On/Off##ShakeAnimation", &pShakeAnimationComponent->GetEnable());
 
 			initial_curpos.y += 25.f;
 			ImGui::SetCursorPos(initial_curpos);
 			ImGui::SetNextItemWidth(190.f);
 
-			if (ImGui::DragFloat("Frequency##ShakeAnimation", &shake->GetFrequency(), 0.01f, 0.0f, 1.0f, "%.2f", 0))
-				shake->GetFrequency() = std::clamp(shake->GetFrequency(), 0.0f, 1.0f);
+			if (ImGui::DragFloat("Distance##ShakeAnimation", &pShakeAnimationComponent->GetDistance(), 0.01f, 0.0f, 1.0f, "%.2f", 0))
+				pShakeAnimationComponent->GetDistance() = std::clamp(pShakeAnimationComponent->GetDistance(), 0.0f, 1.0f);
+
+			initial_curpos.y += 25.f;
+			ImGui::SetCursorPos(initial_curpos);
+			ImGui::SetNextItemWidth(190.f);
+
+			if (ImGui::DragFloat("Frequency##ShakeAnimation", &pShakeAnimationComponent->GetFrequency(), 0.01f, 0.0f, 1.0f, "%.2f", 0))
+				pShakeAnimationComponent->GetFrequency() = std::clamp(pShakeAnimationComponent->GetFrequency(), 0.0f, 1.0f);
 		}
 
 		initial_curpos.y += 25.f;
@@ -351,48 +799,48 @@ void CImGuiManager::SetUI()
 
 		if (ImGui::CollapsingHeader("Stun Animation"))
 		{
+			StunAnimationComponent* pStunAnimationComponent = dynamic_cast<StunAnimationComponent*>(pCurrentAnimation->GetStunAnimationComponent());
+
 			initial_curpos.y += 25.f;
 			ImGui::SetCursorPos(initial_curpos);
 			ImGui::SetNextItemWidth(190.f);
-			CStunAnimationComponent* stun = (CStunAnimationComponent*)(m_pCurrentComponentSet->FindComponent(typeid(CStunAnimationComponent)));
-			ImGui::Checkbox("On/Off##StunAnimation", &stun->GetEnable());
+			ImGui::Checkbox("On/Off##StunAnimation", &pStunAnimationComponent->GetEnable());
 
 			initial_curpos.y += 25.f;
 			ImGui::SetCursorPos(initial_curpos);
 			ImGui::SetNextItemWidth(190.f);
 
-			if (ImGui::DragFloat("StunTime##StunAnimation", &stun->GetStunTime(), 0.01f, 0.0f, 1.0f, "%.2f", 0))
-				stun->GetStunTime() = std::clamp(stun->GetStunTime(), 0.0f, 1.0f);
+			if (ImGui::DragFloat("StunTime##StunAnimation", &pStunAnimationComponent->GetStunTime(), 0.01f, 0.0f, 1.0f, "%.2f", 0))
+				pStunAnimationComponent->GetStunTime() = std::clamp(pStunAnimationComponent->GetStunTime(), 0.0f, 1.0f);
 		}
 
 		initial_curpos.y += 25.f;
 		ImGui::SetCursorPos(initial_curpos);
 
-		CCamera* pCamera = Locator.GetSimulaterCamera();
-
 		if (ImGui::CollapsingHeader("Camera Move"))
 		{
+			CameraMoveComponent* pCameraMoveComponent = dynamic_cast<CameraMoveComponent*>(pCurrentAnimation->GetCameraMoveComponent());
+
 			initial_curpos.y += 25.f;
 			ImGui::SetCursorPos(initial_curpos);
 			ImGui::SetNextItemWidth(190.f);
-			CCameraMover* mover = (CCameraMover*)(m_pCurrentComponentSet->FindComponent(typeid(CCameraMover)));
-			ImGui::Checkbox("On/Off##Move", &mover->GetEnable());
+			ImGui::Checkbox("On/Off##Move", &pCameraMoveComponent->GetEnable());
 
 			initial_curpos.y += 25.f;
 			ImGui::SetCursorPos(initial_curpos);
 			ImGui::SetNextItemWidth(190.f);
 
-			ImGui::DragFloat("Distance##Move", &mover->m_fMaxDistance, 0.01f, 0.0f, 10.0f, "%.2f", 0);
+			ImGui::DragFloat("Distance##Move", &pCameraMoveComponent->GetMaxDistance(), 0.01f, 0.0f, 10.0f, "%.2f", 0);
 
 			initial_curpos.y += 25.f;
 			ImGui::SetCursorPos(initial_curpos);
 			ImGui::SetNextItemWidth(190.f);
-			ImGui::DragFloat("Time##Move", &mover->m_fMovingTime, 0.01f, 0.0f, 10.0f, "%.2f", 0);
+			ImGui::DragFloat("Time##Move", &pCameraMoveComponent->GetMovingTime(), 0.01f, 0.0f, 10.0f, "%.2f", 0);
 
 			initial_curpos.y += 25.f;
 			ImGui::SetCursorPos(initial_curpos);
 			ImGui::SetNextItemWidth(190.f);
-			ImGui::DragFloat("RollBackTime##Move", &mover->m_fRollBackTime, 0.01f, 0.0f, 10.0f, "%.2f", 0);
+			ImGui::DragFloat("RollBackTime##Move", &pCameraMoveComponent->GetRollBackTime(), 0.01f, 0.0f, 10.0f, "%.2f", 0);
 		}
 
 		initial_curpos.y += 25.f;
@@ -400,24 +848,23 @@ void CImGuiManager::SetUI()
 
 		if (ImGui::CollapsingHeader("Camera Shake"))
 		{
-			initial_curpos.y += 25.f;
-			ImGui::SetCursorPos(initial_curpos);
-			ImGui::SetNextItemWidth(190.f);
-			CCameraShaker* shaker = (CCameraShaker*)(m_pCurrentComponentSet->FindComponent(typeid(CCameraShaker)));
-			ImGui::Checkbox("On/Off##Shake", &shaker->GetEnable());
+			CameraShakeComponent* pCameraShakerComponent = dynamic_cast<CameraShakeComponent*>(pCurrentAnimation->GetCameraShakeComponent());
 
 			initial_curpos.y += 25.f;
 			ImGui::SetCursorPos(initial_curpos);
 			ImGui::SetNextItemWidth(190.f);
-
-			ImGui::DragFloat("Magnitude##Shake", &shaker->m_fMagnitude, 0.01f, 0.0f, 10.0f, "%.2f", 0);
+			ImGui::Checkbox("On/Off##Shake", &pCameraShakerComponent->GetEnable());
 
 			initial_curpos.y += 25.f;
 			ImGui::SetCursorPos(initial_curpos);
 			ImGui::SetNextItemWidth(190.f);
-			ImGui::DragFloat("Duration##Shake", &shaker->m_fDuration, 0.01f, 0.0f, 10.0f, "%.2f", 0);
 
-			//ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
+			ImGui::DragFloat("Magnitude##Shake", &pCameraShakerComponent->GetMagnitude(), 0.01f, 0.0f, 10.0f, "%.2f", 0);
+
+			initial_curpos.y += 25.f;
+			ImGui::SetCursorPos(initial_curpos);
+			ImGui::SetNextItemWidth(190.f);
+			ImGui::DragFloat("Duration##Shake", &pCameraShakerComponent->GetDuration(), 0.01f, 0.0f, 10.0f, "%.2f", 0);
 		}
 
 		initial_curpos.y += 25.f;
@@ -425,32 +872,33 @@ void CImGuiManager::SetUI()
 
 		if (ImGui::CollapsingHeader("Camera ZoomIn/ZoomOut"))
 		{
+			CameraZoomerComponent* pCameraZoomerComponent = dynamic_cast<CameraZoomerComponent*>(pCurrentAnimation->GetCameraZoomerComponent());
+
 			initial_curpos.y += 25.f;
 			ImGui::SetCursorPos(initial_curpos);
 			ImGui::SetNextItemWidth(190.f);
-			CCameraZoomer* Zoomer = (CCameraZoomer*)(m_pCurrentComponentSet->FindComponent(typeid(CCameraZoomer)));
-			ImGui::Checkbox("On/Off##Zoom", &Zoomer->GetEnable());
+			ImGui::Checkbox("On/Off##Zoom", &pCameraZoomerComponent->GetEnable());
 
 			initial_curpos.y += 25.f;
 			ImGui::SetCursorPos(initial_curpos);
 			ImGui::SetNextItemWidth(190.f);
 
-			ImGui::DragFloat("Distance##Zoom", &Zoomer->m_fMaxDistance, 0.01f, 0.0f, 10.0f, "%.2f", 0);
+			ImGui::DragFloat("Distance##Zoom", &pCameraZoomerComponent->GetMaxDistance(), 0.01f, 0.0f, 10.0f, "%.2f", 0);
 
 			initial_curpos.y += 25.f;
 			ImGui::SetCursorPos(initial_curpos);
 			ImGui::SetNextItemWidth(190.f);
-			ImGui::DragFloat("Time##Zoom", &Zoomer->m_fMovingTime, 0.01f, 0.0f, 10.0f, "%.2f", 0);
+			ImGui::DragFloat("Time##Zoom", &pCameraZoomerComponent->GetMovingTime(), 0.01f, 0.0f, 10.0f, "%.2f", 0);
 
 			initial_curpos.y += 25.f;
 			ImGui::SetCursorPos(initial_curpos);
 			ImGui::SetNextItemWidth(190.f);
-			ImGui::DragFloat("RollBackTime##Zoom", &Zoomer->m_fRollBackTime, 0.01f, 0.0f, 10.0f, "%.2f", 0);
+			ImGui::DragFloat("RollBackTime##Zoom", &pCameraZoomerComponent->GetRollBackTime(), 0.01f, 0.0f, 10.0f, "%.2f", 0);
 
 			initial_curpos.y += 25.f;
 			ImGui::SetCursorPos(initial_curpos);
 			ImGui::SetNextItemWidth(190.f);
-			ImGui::Checkbox("IN / OUT##Zoom", &Zoomer->m_bIsIN);
+			ImGui::Checkbox("IN / OUT##Zoom", &pCameraZoomerComponent->GetIsIn());
 		}
 
 		initial_curpos.y += 25.f;
@@ -459,6 +907,9 @@ void CImGuiManager::SetUI()
 		if (ImGui::CollapsingHeader("Shock Sound Effect"))
 		{
 			std::vector<std::string> paths = CSoundManager::GetInst()->getSoundPathsByCategory(SOUND_CATEGORY::SOUND_SHOCK);
+			
+			SoundPlayComponent* pShockSoundComponent = dynamic_cast<SoundPlayComponent*>(pCurrentAnimation->GetShockSoundComponent());
+			
 			std::vector<const char*> items;
 			for (auto& path : paths) {
 				items.push_back(path.c_str());
@@ -467,23 +918,22 @@ void CImGuiManager::SetUI()
 			initial_curpos.y += 25.f;
 			ImGui::SetCursorPos(initial_curpos);
 			ImGui::SetNextItemWidth(190.f);
-			CEffectSoundComponent* effect = (CEffectSoundComponent*)(m_pCurrentComponentSet->FindComponent(typeid(CEffectSoundComponent)));
-			ImGui::Checkbox("On/Off##effectsound", &effect->GetEnable());
+			ImGui::Checkbox("On/Off##effectsound", &pShockSoundComponent->GetEnable());
 
 			initial_curpos.y += 25.f;
 			ImGui::SetCursorPos(initial_curpos);
 			ImGui::SetNextItemWidth(190.f);
-			ImGui::Combo("Sound##effectsound", (int*)&effect->m_nSoundNumber, items.data(), items.size());
+			ImGui::Combo("Sound##effectsound", (int*)&pShockSoundComponent->GetSoundNumber(), items.data(), items.size());
 
 			initial_curpos.y += 25.f;
 			ImGui::SetCursorPos(initial_curpos);
 			ImGui::SetNextItemWidth(190.f);
-			ImGui::DragFloat("Delay##effectsound", &effect->m_fDelay, 0.01f, 0.0f, 10.0f, "%.2f", 0);
+			ImGui::DragFloat("Delay##effectsound", &pShockSoundComponent->GetDelay(), 0.01f, 0.0f, 10.0f, "%.2f", 0);
 
 			initial_curpos.y += 25.f;
 			ImGui::SetCursorPos(initial_curpos);
 			ImGui::SetNextItemWidth(190.f);
-			ImGui::DragFloat("Volume##effectsound", &effect->m_fVolume, 0.01f, 0.0f, 10.0f, "%.2f", 0);
+			ImGui::DragFloat("Volume##effectsound", &pShockSoundComponent->GetVolume(), 0.01f, 0.0f, 10.0f, "%.2f", 0);
 		}
 
 		initial_curpos.y += 25.f;
@@ -492,6 +942,9 @@ void CImGuiManager::SetUI()
 		if (ImGui::CollapsingHeader("Shooting Sound Effect"))
 		{
 			std::vector<std::string> paths = CSoundManager::GetInst()->getSoundPathsByCategory(SOUND_CATEGORY::SOUND_SHOOT);
+
+			SoundPlayComponent* pShootSoundComponent = dynamic_cast<SoundPlayComponent*>(pCurrentAnimation->GetShootSoundComponent());
+
 			std::vector<const char*> items;
 			for (auto& path : paths) {
 				items.push_back(path.c_str());
@@ -500,23 +953,22 @@ void CImGuiManager::SetUI()
 			initial_curpos.y += 25.f;
 			ImGui::SetCursorPos(initial_curpos);
 			ImGui::SetNextItemWidth(190.f);
-			CShootSoundComponent* shoot = (CShootSoundComponent*)(m_pCurrentComponentSet->FindComponent(typeid(CShootSoundComponent)));
-			ImGui::Checkbox("On/Off##shootsound", &shoot->GetEnable());
+			ImGui::Checkbox("On/Off##shootsound", &pShootSoundComponent->GetEnable());
 
 			initial_curpos.y += 25.f;
 			ImGui::SetCursorPos(initial_curpos);
 			ImGui::SetNextItemWidth(190.f);
-			ImGui::Combo("Sound##shootsound", (int*)&shoot->m_nSoundNumber, items.data(), items.size());
+			ImGui::Combo("Sound##shootsound", (int*)&pShootSoundComponent->GetSoundNumber(), items.data(), items.size());
 
 			initial_curpos.y += 25.f;
 			ImGui::SetCursorPos(initial_curpos);
 			ImGui::SetNextItemWidth(190.f);
-			ImGui::DragFloat("Delay##shootsound", &shoot->m_fDelay, 0.01f, 0.0f, 10.0f, "%.2f", 0);
+			ImGui::DragFloat("Delay##shootsound", &pShootSoundComponent->GetDelay(), 0.01f, 0.0f, 10.0f, "%.2f", 0);
 
 			initial_curpos.y += 25.f;
 			ImGui::SetCursorPos(initial_curpos);
 			ImGui::SetNextItemWidth(190.f);
-			ImGui::DragFloat("Volume##shootsound", &shoot->m_fVolume, 0.01f, 0.0f, 10.0f, "%.2f", 0);
+			ImGui::DragFloat("Volume##shootsound", &pShootSoundComponent->GetVolume(), 0.01f, 0.0f, 10.0f, "%.2f", 0);
 
 		}
 
@@ -526,15 +978,15 @@ void CImGuiManager::SetUI()
 		if (ImGui::CollapsingHeader("Damage Moan Sound Effect"))
 		{
 			std::vector<std::string> paths = CSoundManager::GetInst()->getSoundPathsByCategory(SOUND_CATEGORY::SOUND_VOICE);
+			
 			std::vector<const char*> items;
 			for (auto& path : paths) {
 				items.push_back(path.c_str());
 			}
 
-			initial_curpos.y += 25.f;
+			/*initial_curpos.y += 25.f;
 			ImGui::SetCursorPos(initial_curpos);
 			ImGui::SetNextItemWidth(190.f);
-			CDamageSoundComponent* damage = (CDamageSoundComponent*)(m_pCurrentComponentSet->FindComponent(typeid(CDamageSoundComponent)));
 			ImGui::Checkbox("On/Off##damagesound", &damage->GetEnable());
 
 			initial_curpos.y += 25.f;
@@ -550,37 +1002,22 @@ void CImGuiManager::SetUI()
 			initial_curpos.y += 25.f;
 			ImGui::SetCursorPos(initial_curpos);
 			ImGui::SetNextItemWidth(190.f);
-			ImGui::DragFloat("Volume##damagesound", &damage->m_fVolume, 0.01f, 0.0f, 10.0f, "%.2f", 0);
+			ImGui::DragFloat("Volume##damagesound", &damage->m_fVolume, 0.01f, 0.0f, 10.0f, "%.2f", 0);*/
 		}
-
-		/* initial_curpos.y += 25.f;
-		 ImGui::SetCursorPos(initial_curpos);
-		 ImGui::SetNextItemWidth(170.f);
-		 ImGui::DragFloat("Parallax Scale", (float*)&ParallaxScale, 0.01f, 0.0f, 1.0f, "%.6f", 0);
-
-		 initial_curpos.y += 25.f;
-		 ImGui::SetCursorPos(initial_curpos);
-		 ImGui::SetNextItemWidth(170.f);
-		 ImGui::DragFloat("Parallax Bias", (float*)&ParallaxBias, 0.01f, 0.0f, 1.0f, "%.6f", 0);
-
-		 initial_curpos.y += 25.f;
-		 ImGui::SetCursorPos(initial_curpos);
-		 ImGui::SetNextItemWidth(120.f);
-		 ImGui::InputInt("Terrain Mapping Mode", (int*)&Terrain_Mapping_mode, 1, 1, 0);*/
 
 		initial_curpos.y += 25.f;
 		ImGui::SetCursorPos(initial_curpos);
 		if (ImGui::CollapsingHeader("Attack Sprite Effect"))
 		{
+			//일단 보류
+			/*CAttackSpriteComponent* AttackSprite = (CAttackSpriteComponent*)(m_pCurrentComponentSet->FindComponent(typeid(CAttackSpriteComponent)));
+
 			initial_curpos.y += 25.f;
 			ImGui::SetCursorPos(initial_curpos);
 			ImGui::SetNextItemWidth(190.f);
-
-			CAttackSpriteComponent* AttackSprite = (CAttackSpriteComponent*)(m_pCurrentComponentSet->FindComponent(typeid(CAttackSpriteComponent)));
-
 			ImGui::Checkbox("On/Off##SpriteEffect", &AttackSprite->m_vSprite[0].second->GetAnimation());
 
-			std::vector<std::shared_ptr<CTexture>> vTexture = CTextureManager::GetInst()->GetBillBoardTextureList();
+			std::vector<std::shared_ptr<CTexture>> vTexture = CSimulatorScene::GetInst()->GetTextureManager()->GetBillBoardTextureList();
 			std::vector<const char*> items;
 			std::vector <std::string> str(100);
 			for (int i = 0; i < vTexture.size(); i++)
@@ -614,7 +1051,7 @@ void CImGuiManager::SetUI()
 			ImGui::SetCursorPos(initial_curpos);
 			ImGui::SetNextItemWidth(190.f);
 			ImGui::DragFloat("Alpha", &AttackSprite->GetAlpha(), 0.01f, 0.0f, 10.0f, "%.2f", 0);
-			AttackSprite->UpdateData();
+			AttackSprite->UpdateData();*/
 		}
 
 		
@@ -623,35 +1060,21 @@ void CImGuiManager::SetUI()
 
 		if (ImGui::Button("Animation1", ImVec2(175.f, 45.f))) // Buttons return true when clicked (most widgets return true when edited/activated)
 		{
-			CComponentSet* componentset = Locator.GetComponentSet(0);
-			if (componentset) {
-				m_pCurrentComponentSet = componentset;
-				m_pCamera->LoadComponentFromSet(m_pCurrentComponentSet);
-				Locator.GetSoundPlayer()->LoadComponentFromSet(m_pCurrentComponentSet);
-				CSimulatorScene::GetInst()->SetPlayerAnimationSet(0);
-			}
+			CSimulatorScene::GetInst()->SetPlayerAnimationSet(0);
+			Player_Animation_Number = 0;
 		}
 		ImGui::SameLine();
 		if (ImGui::Button("Animation2", ImVec2(175.f, 45.f))) // Buttons return true when clicked (most widgets return true when edited/activated)
 		{
-			CComponentSet* componentset = Locator.GetComponentSet(1);
-			if (componentset) {
-				m_pCurrentComponentSet = componentset;
-				m_pCamera->LoadComponentFromSet(m_pCurrentComponentSet);
-				Locator.GetSoundPlayer()->LoadComponentFromSet(m_pCurrentComponentSet);
-				CSimulatorScene::GetInst()->SetPlayerAnimationSet(1);
-			}
+			CSimulatorScene::GetInst()->SetPlayerAnimationSet(1);
+			Player_Animation_Number = 1;
+
 		}
 		ImGui::SameLine();
 		if (ImGui::Button("Animation3", ImVec2(175.f, 45.f))) // Buttons return true when clicked (most widgets return true when edited/activated)
 		{
-			CComponentSet* componentset = Locator.GetComponentSet(2);
-			if (componentset) {
-				m_pCurrentComponentSet = componentset;
-				m_pCamera->LoadComponentFromSet(m_pCurrentComponentSet);
-				Locator.GetSoundPlayer()->LoadComponentFromSet(m_pCurrentComponentSet);
-				CSimulatorScene::GetInst()->SetPlayerAnimationSet(2);
-			}
+			CSimulatorScene::GetInst()->SetPlayerAnimationSet(2);
+			Player_Animation_Number = 2;
 		}
 
 		ImGui::End();
@@ -664,16 +1087,9 @@ void CImGuiManager::OnPrepareRender(ID3D12GraphicsCommandList* pd3dCommandList, 
 	//PrepareRenderTarget(pd3dCommandList, d3dDsvDescriptorCPUHandle);
 	CSimulatorScene::GetInst()->OnPrepareRender(pd3dCommandList);
 
-	/*if (pCamera)
-		pCamera->OnPrepareRender(pd3dCommandList);*/
 	CSimulatorScene::GetInst()->OnPreRender(pd3dCommandList, fTimeElapsed);
 
 	PrepareRenderTarget(pd3dCommandList, d3dDsvDescriptorCPUHandle);
-	/*if (pCamera)
-		pCamera->OnPrepareRender(pd3dCommandList);*/
-	m_pCamera->Animate(fTimeElapsed);
-	m_pCamera->RegenerateViewMatrix();
-	m_pCamera->OnPrepareRender(pd3dCommandList);
 
 	CSimulatorScene::GetInst()->Render(pd3dCommandList, fTimeElapsed, fCurrentTime, pCamera);
 
@@ -695,8 +1111,13 @@ void CImGuiManager::Render(ID3D12GraphicsCommandList* pd3dCommandList)
 	ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), pd3dCommandList);
 }
 
-void CImGuiManager::OnPostRenderTarget()
+void CImGuiManager::OnPostRender()
 {
-	CSimulatorScene::GetInst()->OnPostRenderTarget();
+	CSimulatorScene::GetInst()->OnPostRender();
+}
+
+void CImGuiManager::OnDestroy()
+{
+	m_pDataLoader->SaveComponentSets();
 }
 

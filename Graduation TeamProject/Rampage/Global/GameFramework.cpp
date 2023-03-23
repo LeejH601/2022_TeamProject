@@ -6,9 +6,10 @@
 #include "..\ImGui\ImGuiManager.h"
 #include "..\Object\Texture.h"
 #include "..\Shader\DepthRenderShader.h"
-#include "Locator.h"
-#include "MessageDispatcher.h"
 #include <windowsx.h>
+#include "..\Sound\SoundManager.h"
+
+CLocator Locator;
 
 CGameFramework::CGameFramework()
 {
@@ -28,6 +29,9 @@ bool CGameFramework::OnCreate(HINSTANCE hInstance, HWND hMainWnd)
 	m_hInstance = hInstance;
 	m_hWnd = hMainWnd;
 
+	InitSound();
+	InitLocator();
+
 	//Direct3D 디바이스, 명령 큐와 명령 리스트, 스왑 체인 등을 생성하는 함수를 호출한다. 
 	CreateDirect3DDevice();
 	CreateCommandQueueAndList();
@@ -40,21 +44,10 @@ bool CGameFramework::OnCreate(HINSTANCE hInstance, HWND hMainWnd)
 	BuildObjects();
 
 	//ImGui 렌더링을 위한 세팅을 합니다.
-	D3D12_CPU_DESCRIPTOR_HANDLE d3dRtvCPUDescriptorHandle = m_pd3dRtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
-	d3dRtvCPUDescriptorHandle.ptr += (::gnRtvDescriptorIncrementSize * m_nSwapChainBuffers);
-	CImGuiManager::GetInst()->Init(m_hWnd, m_pd3dDevice.Get(), m_pd3dCommandList.Get(), d3dRtvCPUDescriptorHandle);
+	InitImgui();
 
 	//CommandList를 실행하고 GPU 연산이 완료될 때까지 기다립니다.
 	ExecuteCommandLists();
-
-
-
-
-	/*physx::PxPvd* mPvd = physx::PxCreatePvd(*mFoundation);
-	physx::PxPvdTransport* transport = physx::PxDefaultPvdSocketTransportCreate(PVD_HOST, 5425, 10);
-
-	PxPvdTransport* transport = PxDefaultPvdSocketTransportCreate(PVD_HOST, 5425, 10);
-	mPvd->connect(*transport, PxPvdInstrumentationFlag::eALL);*/
 
 	return(true);
 }
@@ -69,30 +62,52 @@ void CGameFramework::OnDestroy()
 	::CloseHandle(m_hFenceEvent);
 
 	m_pdxgiSwapChain->SetFullscreenState(FALSE, NULL);
+
+	CImGuiManager::GetInst()->OnDestroy();
 }
-void CGameFramework::CreateSwapChain()
+void CGameFramework::InitSound()
 {
-	DXGI_SWAP_CHAIN_DESC dxgiSwapChainDesc;
-	::ZeroMemory(&dxgiSwapChainDesc, sizeof(dxgiSwapChainDesc));
-	dxgiSwapChainDesc.BufferCount = m_nSwapChainBuffers;
-	dxgiSwapChainDesc.BufferDesc.Width = m_nWndClientWidth;
-	dxgiSwapChainDesc.BufferDesc.Height = m_nWndClientHeight;
-	dxgiSwapChainDesc.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-	dxgiSwapChainDesc.BufferDesc.RefreshRate.Numerator = 60;
-	dxgiSwapChainDesc.BufferDesc.RefreshRate.Denominator = 1;
-	dxgiSwapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-	dxgiSwapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
-	dxgiSwapChainDesc.OutputWindow = m_hWnd;
-	dxgiSwapChainDesc.SampleDesc.Count = (m_bMsaa4xEnable) ? 4 : 1;
-	dxgiSwapChainDesc.SampleDesc.Quality = (m_bMsaa4xEnable) ? (m_nMsaa4xQualityLevels - 1) : 0;
-	dxgiSwapChainDesc.Windowed = TRUE;
+	//Init FMOD
+	CSoundManager::GetInst()->Init();
 
-	dxgiSwapChainDesc.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
+	//Register Sound
+	CSoundManager::GetInst()->RegisterSound("Sound/Background/Action 1 (Loop).wav", true, SOUND_CATEGORY::SOUND_BACKGROUND);
+	CSoundManager::GetInst()->RegisterSound("Sound/Background/Action 2 (Loop).wav", true, SOUND_CATEGORY::SOUND_BACKGROUND);
+	CSoundManager::GetInst()->RegisterSound("Sound/Background/Action 3 (Loop).wav", true, SOUND_CATEGORY::SOUND_BACKGROUND);
+	CSoundManager::GetInst()->RegisterSound("Sound/Background/Action 4 (Loop).wav", true, SOUND_CATEGORY::SOUND_BACKGROUND);
+	CSoundManager::GetInst()->RegisterSound("Sound/Background/Action 5 (Loop).wav", true, SOUND_CATEGORY::SOUND_BACKGROUND);
+	CSoundManager::GetInst()->RegisterSound("Sound/Background/Light Ambient 1 (Loop).wav", true, SOUND_CATEGORY::SOUND_BACKGROUND);
+	CSoundManager::GetInst()->RegisterSound("Sound/Background/Light Ambient 2 (Loop).wav", true, SOUND_CATEGORY::SOUND_BACKGROUND);
+	CSoundManager::GetInst()->RegisterSound("Sound/Background/Light Ambient 3 (Loop).wav", true, SOUND_CATEGORY::SOUND_BACKGROUND);
+	CSoundManager::GetInst()->RegisterSound("Sound/Background/Light Ambient 4 (Loop).wav", true, SOUND_CATEGORY::SOUND_BACKGROUND);
+	CSoundManager::GetInst()->RegisterSound("Sound/Background/Light Ambient 5 (Loop).wav", true, SOUND_CATEGORY::SOUND_BACKGROUND);
 
-	HRESULT hResult = m_pdxgiFactory->CreateSwapChain(m_pd3dCommandQueue.Get(), &dxgiSwapChainDesc, (IDXGISwapChain**)m_pdxgiSwapChain.GetAddressOf());
+	CSoundManager::GetInst()->RegisterSound("Sound/David Bowie - Starman.mp3", false, SOUND_CATEGORY::SOUND_BACKGROUND);
+	CSoundManager::GetInst()->RegisterSound("Sound/Air Cut by Langerium Id-84616.wav", false, SOUND_CATEGORY::SOUND_SHOOT);
+	CSoundManager::GetInst()->RegisterSound("Sound/Bloody Blade 2 by Kreastricon62 Id-323526.wav", false, SOUND_CATEGORY::SOUND_SHOCK);
+	CSoundManager::GetInst()->RegisterSound("Sound/Swing by XxChr0nosxX Id-268227.wav", false, SOUND_CATEGORY::SOUND_SHOOT);
+	CSoundManager::GetInst()->RegisterSound("Sound/Sword by hello_flowers Id-37596.wav", false, SOUND_CATEGORY::SOUND_SHOOT);
+	CSoundManager::GetInst()->RegisterSound("Sound/Sword4 by Streety Id-30246.wav", false, SOUND_CATEGORY::SOUND_SHOOT);
+	CSoundManager::GetInst()->RegisterSound("Sound/Sword7 by Streety Id-30248.wav", false, SOUND_CATEGORY::SOUND_SHOOT);
+	CSoundManager::GetInst()->RegisterSound("Sound/effect/HammerFlesh1.wav", false, SOUND_CATEGORY::SOUND_SHOCK);
+	CSoundManager::GetInst()->RegisterSound("Sound/effect/HammerFlesh2.wav", false, SOUND_CATEGORY::SOUND_SHOCK);
+	CSoundManager::GetInst()->RegisterSound("Sound/effect/HammerFlesh3.wav", false, SOUND_CATEGORY::SOUND_SHOCK);
+	CSoundManager::GetInst()->RegisterSound("Sound/effect/HammerFlesh4.wav", false, SOUND_CATEGORY::SOUND_SHOCK);
+	CSoundManager::GetInst()->RegisterSound("Sound/effect/HammerFlesh5.wav", false, SOUND_CATEGORY::SOUND_SHOCK);
 
-	hResult = m_pdxgiFactory->MakeWindowAssociation(m_hWnd, DXGI_MWA_NO_ALT_ENTER);
-	m_nSwapChainBufferIndex = m_pdxgiSwapChain->GetCurrentBackBufferIndex();
+	CSoundManager::GetInst()->PlaySound("Sound/Background/Action 2 (Loop).wav", 0.25f, 0.0f);
+}
+void CGameFramework::InitLocator()
+{
+	Locator.Init();
+	Locator.SetTimer(&m_GameTimer);
+}
+void CGameFramework::InitImgui()
+{
+	D3D12_CPU_DESCRIPTOR_HANDLE d3dRtvCPUDescriptorHandle = m_pd3dRtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
+	d3dRtvCPUDescriptorHandle.ptr += (::gnRtvDescriptorIncrementSize * m_nSwapChainBuffers);
+
+	CImGuiManager::GetInst()->Init(m_hWnd, m_pd3dDevice.Get(), m_pd3dCommandList.Get(), d3dRtvCPUDescriptorHandle);
 }
 void CGameFramework::CreateDirect3DDevice()
 {
@@ -188,6 +203,30 @@ void CGameFramework::CreateRtvAndDsvDescriptorHeaps()
 	d3dDescriptorHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_DSV;
 	hResult = m_pd3dDevice->CreateDescriptorHeap(&d3dDescriptorHeapDesc, __uuidof(ID3D12DescriptorHeap), (void**)m_pd3dDsvDescriptorHeap.GetAddressOf());
 }
+void CGameFramework::CreateSwapChain()
+{
+	DXGI_SWAP_CHAIN_DESC dxgiSwapChainDesc;
+	::ZeroMemory(&dxgiSwapChainDesc, sizeof(dxgiSwapChainDesc));
+	dxgiSwapChainDesc.BufferCount = m_nSwapChainBuffers;
+	dxgiSwapChainDesc.BufferDesc.Width = m_nWndClientWidth;
+	dxgiSwapChainDesc.BufferDesc.Height = m_nWndClientHeight;
+	dxgiSwapChainDesc.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+	dxgiSwapChainDesc.BufferDesc.RefreshRate.Numerator = 60;
+	dxgiSwapChainDesc.BufferDesc.RefreshRate.Denominator = 1;
+	dxgiSwapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+	dxgiSwapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
+	dxgiSwapChainDesc.OutputWindow = m_hWnd;
+	dxgiSwapChainDesc.SampleDesc.Count = (m_bMsaa4xEnable) ? 4 : 1;
+	dxgiSwapChainDesc.SampleDesc.Quality = (m_bMsaa4xEnable) ? (m_nMsaa4xQualityLevels - 1) : 0;
+	dxgiSwapChainDesc.Windowed = TRUE;
+
+	dxgiSwapChainDesc.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
+
+	HRESULT hResult = m_pdxgiFactory->CreateSwapChain(m_pd3dCommandQueue.Get(), &dxgiSwapChainDesc, (IDXGISwapChain**)m_pdxgiSwapChain.GetAddressOf());
+
+	hResult = m_pdxgiFactory->MakeWindowAssociation(m_hWnd, DXGI_MWA_NO_ALT_ENTER);
+	m_nSwapChainBufferIndex = m_pdxgiSwapChain->GetCurrentBackBufferIndex();
+}
 void CGameFramework::CreateRenderTargetViews()
 {
 	D3D12_RENDER_TARGET_VIEW_DESC d3dRenderTargetViewDesc;
@@ -249,22 +288,18 @@ void CGameFramework::BuildObjects()
 
 	m_pSceneManager = std::make_unique<CSceneManager>(m_pd3dDevice.Get(), m_pd3dCommandList.Get());
 
-	m_pFloatingCamera = std::make_unique<CFloatingCamera>();
-	m_pFloatingCamera->Init(m_pd3dDevice.Get(), m_pd3dCommandList.Get());
-	m_pFloatingCamera->SetPosition(XMFLOAT3(0.0f, 400.0f, -100.0f));
-
-	Locator.CreateMainSceneCamera(m_pd3dDevice.Get(), m_pd3dCommandList.Get());
-	
-	m_pCurrentCamera = m_pFloatingCamera.get();
-
 	m_pPlayer = std::make_unique<CPlayer>(m_pd3dDevice.Get(), m_pd3dCommandList.Get(), 1);
 
 	m_pSceneManager->SetPlayer((CPlayer*)m_pPlayer.get());
-	((CThirdPersonCamera*)Locator.GetMainSceneCamera())->SetPlayer((CPlayer*)m_pPlayer.get());
 }
 void CGameFramework::ReleaseObjects()
 {
 	// 메모리 해제가 필요한 객체들의 메모리를 해제해준다.
+
+	// Release Fmod Llibrary
+	CSoundManager::GetInst()->Release();
+
+	Locator.GetPxScene()->release();
 }
 void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
 {
@@ -283,12 +318,6 @@ void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM
 		::ReleaseCapture();
 		break;
 	case WM_MOUSEMOVE:
-		//if (Locator.GetMouseCursorMode() == MOUSE_CUROSR_MODE::THIRD_FERSON_MODE) {
-		//	//::SetCapture(hWnd);
-		//	m_ptOldCursorPos.x = GET_X_LPARAM(lParam);
-		//	m_ptOldCursorPos.y = GET_Y_LPARAM(lParam);
-		//	::GetCursorPos(&m_ptOldCursorPos);
-		//}
 		break;
 	default:
 		break;
@@ -305,16 +334,6 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 		{
 		case VK_ESCAPE:
 			::PostQuitMessage(0);
-			break;
-		case '1':
-			m_pCurrentCamera = m_pFloatingCamera.get();
-			Locator.SetMouseCursorMode(MOUSE_CUROSR_MODE::FLOATING_MODE);
-			PostMessage(hWnd, WM_ACTIVATE, 0, 0);
-			break;
-		case '2':
-			m_pCurrentCamera = Locator.GetMainSceneCamera();
-			Locator.SetMouseCursorMode(MOUSE_CUROSR_MODE::THIRD_FERSON_MODE);
-			PostMessage(hWnd, WM_ACTIVATE, 0, 0);
 			break;
 		case VK_F9:
 			ChangeSwapChainState();
@@ -396,74 +415,47 @@ void CGameFramework::ProcessInput()
 		cyDelta = (float)(ptCursorPos.y - m_ptOldCursorPos.y) / 3.0f;
 		SetCursorPos(m_ptOldCursorPos.x, m_ptOldCursorPos.y);
 	}
-	/*if (Locator.GetMouseCursorMode() == MOUSE_CUROSR_MODE::THIRD_FERSON_MODE) {
-		cxDelta = (float)(ptCursorPos.x - m_ptOldCursorPos.x) / 3.0f;
-		cyDelta = (float)(ptCursorPos.y - m_ptOldCursorPos.y) / 3.0f;
-		m_ptOldCursorPos.x = ptCursorPos.x;
-		m_ptOldCursorPos.y = ptCursorPos.y;
-	}*/
 
-	m_pCurrentCamera->ProcessInput(dwDirection, cxDelta, cyDelta, m_GameTimer.GetFrameTimeElapsed());
-	((CPlayer*)(m_pPlayer.get()))->ProcessInput(dwDirection, cxDelta, cyDelta, m_GameTimer.GetFrameTimeElapsed(), m_pCurrentCamera);
+	m_pSceneManager->ProcessInput(dwDirection, cxDelta, cyDelta, m_GameTimer.GetFrameTimeElapsed());
 }
-void CGameFramework::AnimateObjects()
+void CGameFramework::UpdateObjects()
 {
-	// Object들의 애니메이션을 수행한다.
-	m_pFloatingCamera->Animate(m_GameTimer.GetFrameTimeElapsed());
-	Locator.GetMainSceneCamera()->Animate(m_GameTimer.GetFrameTimeElapsed());
-	m_pSceneManager->Animate(m_GameTimer.GetFrameTimeElapsed());
+	m_pSceneManager->Update(m_GameTimer.GetFrameTimeElapsed());
+	CSoundManager::GetInst()->UpdateSound();
 }
 void CGameFramework::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
-	UINT ncbElementBytes = ((sizeof(CB_Parallax_Info) + 255) & ~255); //256의 배수
-	m_pd3dcbParallax = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, ncbElementBytes, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
-
-	m_pd3dcbParallax->Map(0, NULL, (void**)&m_pcbMappedParallax);
 }
-void CGameFramework::OnPrepareRenderTarget()
+void CGameFramework::PrepareRenderTarget()
 {
 	//ImVec4 clear_color = CImGuiManager::GetInst()->GetColor();
 	const float clear_color_with_alpha[4] = { 0.f, 0.f, 0.f, 0.f };
 
-	/*FLOAT pfDefaultClearColor[4] = {0.0f, 0.0f, 0.0f, 1.0f};
-
-	D3D12_CPU_DESCRIPTOR_HANDLE* pd3dAllRtvCPUHandles = new D3D12_CPU_DESCRIPTOR_HANDLE[2];
-
-	pd3dAllRtvCPUHandles[0] = m_pd3dSwapRTVCPUHandles[m_nSwapChainBufferIndex];
-	m_pd3dCommandList->ClearRenderTargetView(m_pd3dSwapRTVCPUHandles[m_nSwapChainBufferIndex], clear_color_with_alpha, 0, NULL);
-
-	::SynchronizeResourceTransition(m_pd3dCommandList.Get(), CImGuiManager::GetInst()->GetRTTextureResource(), D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_RENDER_TARGET);
-
-	D3D12_CPU_DESCRIPTOR_HANDLE d3dRtvCPUDescriptorHandle = CImGuiManager::GetInst()->GetRtvCPUDescriptorHandle();
-	m_pd3dCommandList->ClearRenderTargetView(d3dRtvCPUDescriptorHandle, pfDefaultClearColor, 0, NULL);
-	pd3dAllRtvCPUHandles[1] = d3dRtvCPUDescriptorHandle;
-
-	m_pd3dCommandList->OMSetRenderTargets(2, pd3dAllRtvCPUHandles, FALSE, &m_d3dDsvDescriptorCPUHandle);
-
-
-	if (pd3dAllRtvCPUHandles) delete[] pd3dAllRtvCPUHandles;*/
 	m_pd3dCommandList->ClearRenderTargetView(m_pd3dSwapRTVCPUHandles[m_nSwapChainBufferIndex], clear_color_with_alpha, 0, NULL);
 	m_pd3dCommandList->OMSetRenderTargets(1, &m_pd3dSwapRTVCPUHandles[m_nSwapChainBufferIndex], FALSE, &m_d3dDsvDescriptorCPUHandle);
 }
-void CGameFramework::OnPrepareImGui()
+void CGameFramework::PrepareImGui()
 {
-	HRESULT hResult = m_pd3dCommandList->Reset(m_pd3dCommandAllocator.Get(), NULL);
+	if (m_pSceneManager->GetCurrentScene() == SCENE_TYPE::LOBBY_SCENE)
+	{
+		HRESULT hResult = m_pd3dCommandList->Reset(m_pd3dCommandAllocator.Get(), NULL);
 
-	CImGuiManager::GetInst()->OnPrepareRender(m_pd3dCommandList.Get(), &m_d3dDsvDescriptorCPUHandle, m_GameTimer.GetFrameTimeElapsed(), m_GameTimer.GetTotalTime(), m_pCurrentCamera);
+		CImGuiManager::GetInst()->OnPrepareRender(m_pd3dCommandList.Get(), &m_d3dDsvDescriptorCPUHandle, m_GameTimer.GetFrameTimeElapsed(), m_GameTimer.GetTotalTime(), NULL);
 
-	//명령 리스트를 닫힌 상태로 만든다. 
-	hResult = m_pd3dCommandList->Close();
+		//명령 리스트를 닫힌 상태로 만든다. 
+		hResult = m_pd3dCommandList->Close();
 
-	//명령 리스트를 명령 큐에 추가하여 실행한다.
-	ID3D12CommandList* CommandLists[] = { m_pd3dCommandList.Get() };
-	m_pd3dCommandQueue->ExecuteCommandLists(1, CommandLists);
+		//명령 리스트를 명령 큐에 추가하여 실행한다.
+		ID3D12CommandList* CommandLists[] = { m_pd3dCommandList.Get() };
+		m_pd3dCommandQueue->ExecuteCommandLists(1, CommandLists);
 
-	//GPU가 모든 명령 리스트를 실행할 때 까지 기다린다.
-	::WaitForGpuComplete(m_pd3dCommandQueue.Get(), m_pd3dFence.Get(), ++m_nFenceValues[m_nSwapChainBufferIndex], m_hFenceEvent);
+		//GPU가 모든 명령 리스트를 실행할 때 까지 기다린다.
+		::WaitForGpuComplete(m_pd3dCommandQueue.Get(), m_pd3dFence.Get(), ++m_nFenceValues[m_nSwapChainBufferIndex], m_hFenceEvent);
+	}
 }
-void CGameFramework::OnPostRenderTarget()
+void CGameFramework::OnPostRender()
 {
-	m_pSceneManager->OnPostRenderTarget();
+	m_pSceneManager->OnPostRender();
 }
 void CGameFramework::MoveToNextFrame()
 {
@@ -478,39 +470,12 @@ void CGameFramework::MoveToNextFrame()
 		::WaitForSingleObject(m_hFenceEvent, INFINITE);
 	}
 }
-void CGameFramework::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
+void CGameFramework::RenderObjects()
 {
-	/*m_pcbMappedParallax->m_fParallaxScale = CImGuiManager::GetInst()->GetParallaxScale();
-	m_pcbMappedParallax->m_fParallaxBias = CImGuiManager::GetInst()->GetParallaxBias();
-	m_pcbMappedParallax->m_iMappingMode = CImGuiManager::GetInst()->GetTerrainMappingMode() % 3;
-	if (m_pcbMappedParallax->m_iMappingMode < 0) m_pcbMappedParallax->m_iMappingMode = 0;
-
-	D3D12_GPU_VIRTUAL_ADDRESS d3dGpuVirtualAddress = m_pd3dcbParallax->GetGPUVirtualAddress();
-	pd3dCommandList->SetGraphicsRootConstantBufferView(7, d3dGpuVirtualAddress);*/
-}
-void CGameFramework::FrameAdvance()
-{
-	m_GameTimer.Tick(0.0f);
-	//if (started == 0) {
-	//	Locator.GetPxScene()->simulate(m_GameTimer.GetFrameTimeElapsed());
-	//	started++;
-	//}
-	
-
-	ProcessInput();
-	AnimateObjects();
-
-	XMFLOAT3 xmf3PlayerPos = m_pPlayer->GetPosition();
-	xmf3PlayerPos.y += 12.5f;
-
-	m_pCurrentCamera->Update(xmf3PlayerPos, 0.0f);
-
-	Locator.GetMessageDispather()->DispatchMessages();
-
 	//명령 할당자를 리셋한다.
 	HRESULT hResult = m_pd3dCommandAllocator->Reset();
 
-	OnPrepareImGui();
+	PrepareImGui();
 
 	//명령 리스트를 리셋한다.
 	hResult = m_pd3dCommandList->Reset(m_pd3dCommandAllocator.Get(), NULL);
@@ -518,13 +483,13 @@ void CGameFramework::FrameAdvance()
 	::SynchronizeResourceTransition(m_pd3dCommandList.Get(), m_ppd3dRenderTargetBuffers[m_nSwapChainBufferIndex].Get(), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
 
 	m_pSceneManager->PreRender(m_pd3dCommandList.Get(), m_GameTimer.GetFrameTimeElapsed());
-	
+
 	m_pd3dCommandList->ClearDepthStencilView(m_d3dDsvDescriptorCPUHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
-	OnPrepareRenderTarget();
+	PrepareRenderTarget();
 	UpdateShaderVariables(m_pd3dCommandList.Get());
 
-	m_pSceneManager->Render(m_pd3dCommandList.Get(), m_GameTimer.GetFrameTimeElapsed(), m_GameTimer.GetTotalTime(), m_pCurrentCamera);
-	
+	m_pSceneManager->Render(m_pd3dCommandList.Get(), m_GameTimer.GetFrameTimeElapsed(), m_GameTimer.GetTotalTime(), NULL);
+
 	::SynchronizeResourceTransition(m_pd3dCommandList.Get(), m_ppd3dRenderTargetBuffers[m_nSwapChainBufferIndex].Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
 
 	//명령 리스트를 닫힌 상태로 만든다. 
@@ -537,8 +502,20 @@ void CGameFramework::FrameAdvance()
 	//GPU가 모든 명령 리스트를 실행할 때 까지 기다린다.
 	::WaitForGpuComplete(m_pd3dCommandQueue.Get(), m_pd3dFence.Get(), ++m_nFenceValues[m_nSwapChainBufferIndex], m_hFenceEvent);
 
-	OnPostRenderTarget();
+	OnPostRender();
+}
+void CGameFramework::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
+{
+}
+void CGameFramework::FrameAdvance()
+{
+	m_GameTimer.Tick(0.0f);
+	
+	ProcessInput();
+	UpdateObjects();
 
+	RenderObjects();
+	
 	/*스왑체인을 프리젠트한다. 프리젠트를 하면 현재 렌더 타겟(후면버퍼)의 내용이 전면버퍼로 옮겨지고 렌더 타겟 인
 	덱스가 바뀔 것이다.*/
 	m_pdxgiSwapChain->Present(0, 0);

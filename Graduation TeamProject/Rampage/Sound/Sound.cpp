@@ -1,5 +1,4 @@
 #include "Sound.h"
-#include "..\Global\MessageDispatcher.h"
 #include "..\Global\Global.h"
 #include "..\Global\Locator.h"
 #include "..\Global\Timer.h"
@@ -69,6 +68,11 @@ void CSound::resume()
 
 void CSound::stop() {
 	FMOD_Channel_Stop(m_channel);
+}
+
+void CSound::setVolume(float volume)
+{
+	m_volume = volume;
 }
 
 void CSound::volumeUp() {

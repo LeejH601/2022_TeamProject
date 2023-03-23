@@ -1,44 +1,36 @@
-#include "..\Global\Global.h"
 #include "SoundPlayer.h"
-#include "SoundComponent.h"
-#include "..\Global\Locator.h"
-#include "..\Global\MessageDispatcher.h"
 
-void CSoundPlayer::Update(float fElapsedTime)
+void CSoundPlayer::PlaySound(FMOD_SYSTEM* g_sound_system, SoundPlayInfo sound_play_info)
 {
-	if (m_pEffectComponent)
-		m_pEffectComponent->Update(fElapsedTime);
-	if (m_pDamageComponent)
-		m_pDamageComponent->Update(fElapsedTime);
-	if (m_pShootComponent)
-		m_pShootComponent->Update(fElapsedTime);
+    std::this_thread::sleep_for(std::chrono::milliseconds(static_cast<int>(sound_play_info.fDelay * 1000)));
+    sound_play_info.pSound->play(g_sound_system);
+
+    // Play the sound and store the playing sound in the vector
+    FMOD_CHANNEL* pChannel = nullptr;
+    m_vPlayingSounds.push_back(sound_play_info.pSound->GetChannel());
 }
 
-void CSoundPlayer::LoadComponentFromSet(CComponentSet* componentset)
+void CSoundPlayer::RegisterSound(CSound* pSound, float fDelay)
 {
-	m_pDamageComponent = componentset->FindComponent(typeid(CDamageSoundComponent));
-	m_pEffectComponent = componentset->FindComponent(typeid(CEffectSoundComponent));
-	m_pShootComponent = componentset->FindComponent(typeid(CShootSoundComponent));
+	SoundPlayInfo sound_play_info{ pSound, fDelay };
+	m_vSounds.push_back(sound_play_info);
 }
 
-bool CSoundPlayer::HandleMessage(const Telegram& msg)
+void CSoundPlayer::PlaySounds(FMOD_SYSTEM* g_sound_system)
 {
-	switch (static_cast<MESSAGE_TYPE>(msg.Msg))
-	{
-	case MESSAGE_TYPE::Msg_PlaySoundDamage:
-		return m_pDamageComponent->HandleMessage(msg);
-	case MESSAGE_TYPE::Msg_PlaySoundEffect:
-		return m_pEffectComponent->HandleMessage(msg);
-	case MESSAGE_TYPE::Msg_PlaySoundShoot:
-		return m_pShootComponent->HandleMessage(msg);
-	case MESSAGE_TYPE::Msg_SoundDamageReady:
-		return m_pDamageComponent->HandleMessage(msg);
-	case MESSAGE_TYPE::Msg_SoundEffectReady:
-		return m_pEffectComponent->HandleMessage(msg);
-	case MESSAGE_TYPE::Msg_SoundShootReady:
-		return m_pShootComponent->HandleMessage(msg);
-	default:
-		return false;
-	}
+    for (auto it = m_vSounds.begin(); it != m_vSounds.end(); ) {
+        std::thread sound_thread(&CSoundPlayer::PlaySound, this, g_sound_system, *it);
+        sound_thread.detach();
+        it = m_vSounds.erase(it);
+    }
 }
 
+void CSoundPlayer::StopSounds()
+{
+    // Stop all currently playing sounds
+    for (auto it = m_vPlayingSounds.begin(); it != m_vPlayingSounds.end(); ) {
+        FMOD_CHANNEL* pChannel = *it;
+        FMOD_Channel_Stop(pChannel);
+        it = m_vPlayingSounds.erase(it);
+    }
+}

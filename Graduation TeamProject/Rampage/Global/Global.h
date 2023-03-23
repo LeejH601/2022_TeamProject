@@ -1,5 +1,14 @@
 #pragma once
 
+enum class MessageType {
+	PLAYER_ATTACK,
+	PLAY_SOUND,
+	COLLISION,
+	UPDATE_CAMERA,
+	UPDATE_OBJECT,
+	UPDATE_PARTICLE
+};
+
 enum class MESSAGE_TYPE
 {
 	Msg_CameraMoveStart,

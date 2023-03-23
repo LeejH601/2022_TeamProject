@@ -50,9 +50,9 @@ void CLobbyScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 	CSimulatorScene::GetInst()->BuildObjects(pd3dDevice, pd3dCommandList);
 }
 
-void CLobbyScene::AnimateObjects(float fTimeElapsed)
+void CLobbyScene::Update(float fTimeElapsed)
 {
-	CSimulatorScene::GetInst()->AnimateObjects(fTimeElapsed);
+	CSimulatorScene::GetInst()->Update(fTimeElapsed);
 }
 
 void CLobbyScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed, float fCurrentTime, CCamera* pCamera)
@@ -60,7 +60,7 @@ void CLobbyScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTime
 	CImGuiManager::GetInst()->Render(pd3dCommandList);
 }
 
-void CLobbyScene::OnPostRenderTarget()
+void CLobbyScene::OnPostRender()
 {
-	CSimulatorScene::GetInst()->OnPostRenderTarget();
+	CSimulatorScene::GetInst()->OnPostRender();
 }

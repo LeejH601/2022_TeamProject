@@ -2,8 +2,8 @@
 #include "..\Global\Camera.h"
 #include "..\Global\Locator.h"
 #include "..\Global\Global.h"
-#include "..\Global\MessageDispatcher.h"
 #include "..\Global\Timer.h"
+#include "..\Global\MessageDispatcher.h"
 
 CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks)
 {
@@ -18,8 +18,8 @@ CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 	SetChild(knightObject);
 
 	m_pStateMachine = std::make_unique<CStateMachine<CPlayer>>(this);
-	m_pStateMachine->SetCurrentState(Locator.GetPlayerState(typeid(Idle_Player)));
-	m_pStateMachine->ChangeState(Locator.GetPlayerState(typeid(Idle_Player)));
+	m_pStateMachine->SetCurrentState(Idle_Player::GetInst());
+	m_pStateMachine->ChangeState(Idle_Player::GetInst());
 
 	SetPosition(XMFLOAT3(100.0f, 150.0f, -100.0f));
 	SetScale(4.0f, 4.0f, 4.0f);
@@ -39,8 +39,8 @@ void CPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity, CCa
 {
 	if (dwDirection)
 	{
-		if (m_pStateMachine->GetCurrentState() == Locator.GetPlayerState(typeid(Idle_Player)))
-			m_pStateMachine->ChangeState(Locator.GetPlayerState(typeid(Run_Player)));
+		if (m_pStateMachine->GetCurrentState() == Idle_Player::GetInst())
+			m_pStateMachine->ChangeState(Run_Player::GetInst());
 
 		XMFLOAT3 xmf3Shift = XMFLOAT3{};
 
@@ -59,37 +59,20 @@ bool CPlayer::CheckCollision(CGameObject* pTargetObject)
 	if (m_pChild.get()) {
 		if (!m_bAttacked && m_pChild->CheckCollision(pTargetObject)) {
 
+			SoundPlayParams SoundPlayParam{ SOUND_CATEGORY::SOUND_SHOCK };
+			CMessageDispatcher::GetInst()->Dispatch_Message<SoundPlayParams>(MessageType::PLAY_SOUND, &SoundPlayParam, m_pStateMachine->GetCurrentState());
+
+			if (m_pCamera)
+			{
+				m_pCamera->m_bCameraShaking = true;
+				m_pCamera->m_bCameraZooming = true;
+				m_pCamera->m_bCameraMoving = true;
+			}
+
 			pTargetObject->SetHit(this);
 
 			flag = true;
 			m_iAttack_Limit--;
-
-			Telegram msg;
-			msg.Msg = (int)MESSAGE_TYPE::Msg_CameraShakeStart;
-			msg.DispatchTime = Locator.GetTimer()->GetNowTime();
-			msg.Receiver = (IEntity*)Locator.GetSimulaterCamera();
-			//Locator.GetMessageDispather()->RegisterMessage(msg);
-			Locator.GetMessageDispather()->Discharge(msg.Receiver, msg);
-
-			msg.Msg = (int)MESSAGE_TYPE::Msg_CameraMoveStart;
-			msg.DispatchTime = Locator.GetTimer()->GetNowTime();
-			msg.Receiver = (IEntity*)Locator.GetSimulaterCamera();
-			msg.Sender = this;
-			//Locator.GetMessageDispather()->RegisterMessage(msg);
-			Locator.GetMessageDispather()->Discharge(msg.Receiver, msg);
-
-			msg.Msg = (int)MESSAGE_TYPE::Msg_CameraZoomStart;
-			msg.DispatchTime = Locator.GetTimer()->GetNowTime();
-			msg.Receiver = (IEntity*)Locator.GetSimulaterCamera();
-			msg.Sender = (IEntity*)pTargetObject;
-			//Locator.GetMessageDispather()->RegisterMessage(msg);
-			Locator.GetMessageDispather()->Discharge(msg.Receiver, msg);
-
-			msg.Msg = (int)MESSAGE_TYPE::Msg_SoundEffectReady;
-			msg.DispatchTime = Locator.GetTimer()->GetNowTime();
-			msg.Receiver = (IEntity*)Locator.GetSoundPlayer();
-			//Locator.GetMessageDispather()->RegisterMessage(msg);
-			Locator.GetMessageDispather()->Discharge(msg.Receiver, msg);
 
 			if (m_iAttack_Limit < 1)
 				m_bAttacked = true;
@@ -103,11 +86,11 @@ void CPlayer::Update(float fTimeElapsed)
 	m_pStateMachine->Update(fTimeElapsed);
 
 	// Idle 상태로 복귀하는 코드
-	if (!Vector3::Length(m_xmf3Velocity) && m_pStateMachine->GetCurrentState() == Locator.GetPlayerState(typeid(Run_Player)))
-		m_pStateMachine->ChangeState(Locator.GetPlayerState(typeid(Idle_Player)));
+	if (!Vector3::Length(m_xmf3Velocity) && m_pStateMachine->GetCurrentState() == Run_Player::GetInst())
+		m_pStateMachine->ChangeState(Idle_Player::GetInst());
 
 	// Run 상태일때 플레이어를 이동시키고 방향전환 시켜주는 코드
-	if (m_pStateMachine->GetCurrentState() == Locator.GetPlayerState(typeid(Run_Player)))
+	if (m_pStateMachine->GetCurrentState() == Run_Player::GetInst())
 	{
 		CPhysicsObject::Apply_Gravity(fTimeElapsed);
 

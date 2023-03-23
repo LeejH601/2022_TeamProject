@@ -3,7 +3,7 @@
 #include "PhysicsObject.h"
 #include "StateMachine.h"
 
-class CMonster : public CPhysicsObject , public IEntity
+class CMonster : public CPhysicsObject
 {
 public:
 	XMFLOAT3 m_xmf3HitterVec;
@@ -40,6 +40,9 @@ public:
 		m_xmf3HitterVec.y = 0.0f;
 
 		SetLookAt(Vector3::Add(GetPosition(), XMFLOAT3(-m_xmf3HitterVec.x, 0.0f, -m_xmf3HitterVec.z)));
+
+		SoundPlayParams SoundPlayParam{ };
+		CMessageDispatcher::GetInst()->Dispatch_Message<SoundPlayParams>(MessageType::PLAY_SOUND, &SoundPlayParam, this);
 	}
 	virtual bool CheckCollision(CGameObject* pTargetObject) {
 		if (pTargetObject)

@@ -1,7 +1,7 @@
 #pragma once
 #include "stdafx.h"
 #include "Component.h"
-#include "Entity.h"
+#include "MessageDispatcher.h"
 
 #define ASPECT_RATIO (float(FRAME_BUFFER_WIDTH) / float(FRAME_BUFFER_HEIGHT))
 
@@ -129,7 +129,7 @@ public:
 	virtual bool HandleMessage(const Telegram& msg);
 };
 
-class CCamera : public IEntity
+class CCamera
 {
 public:
 	bool m_bCameraShaking = false;
@@ -137,7 +137,6 @@ public:
 	bool m_bCameraZooming = false;
 
 	XMFLOAT3 m_xmf3CalculatedPosition;
-
 protected:
 	XMFLOAT3 m_xmf3Position;
 	XMFLOAT3 m_xmf3Right;
@@ -162,6 +161,8 @@ protected:
 
 	ComPtr<ID3D12Resource> m_pd3dcbCamera = NULL;
 	VS_CB_CAMERA_INFO* m_pcbMappedCamera = NULL;
+
+	std::vector<std::unique_ptr<IMessageListener>> m_pListeners;
 public:
 	std::vector<CComponent*> m_vComponentSet;
 public:
@@ -170,6 +171,7 @@ public:
 
 	void Init(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	void OnPrepareRender(ID3D12GraphicsCommandList* pd3dCommandList);
+	void OnPostRender();
 
 	void GenerateViewMatrix();
 	void GenerateViewMatrix(XMFLOAT3 xmf3Position, XMFLOAT3 xmf3LookAt, XMFLOAT3 xmf3Up);
@@ -216,12 +218,9 @@ public:
 
 	virtual void Move(const XMFLOAT3& xmf3Shift) { m_xmf3Position.x += xmf3Shift.x; m_xmf3Position.y += xmf3Shift.y; m_xmf3Position.z += xmf3Shift.z; }
 	virtual void Rotate(float fPitch = 0.0f, float fYaw = 0.0f, float fRoll = 0.0f) { }
-	virtual void Animate(float fTimeElapsed);
 	virtual void ProcessInput(DWORD dwDirection, float cxDelta, float cyDelta, float fTimeElapsed);
 	virtual void Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed);
 	virtual void SetLookAt(XMFLOAT3& xmf3LookAt);
-
-	virtual bool HandleMessage(const Telegram& msg);
 };
 
 class CPlayer;
@@ -231,7 +230,7 @@ protected:
 	CPlayer* m_pPlayer;
 public:
 	CThirdPersonCamera();
-	virtual ~CThirdPersonCamera() { }
+	virtual ~CThirdPersonCamera();
 
 	virtual void ProcessInput(DWORD dwDirection, float cxDelta, float cyDelta, float fTimeElapsed);
 

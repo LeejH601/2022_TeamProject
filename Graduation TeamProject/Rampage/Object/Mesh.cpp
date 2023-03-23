@@ -1320,14 +1320,14 @@ void CParticleMesh::CreateVertexBuffer(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 	m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_POINTLIST;
 
 	CParticleVertex pVertices[50];
-
-	for (int i = 0; i < 50; i++)
+	for (int i = 0; i < 50; ++i)
 	{
 		pVertices[i].m_xmf3Position = xmf3Position;
 		pVertices[i].m_xmf3Velocity = xmf3Velocity;
 		pVertices[i].m_fLifetime = fLifetime;
-		pVertices[i].m_fSpanTime = -0.5f * i;
+		pVertices[i].m_fSpanTime = 0.1f * i;
 	}
+
 	//pVertices[0].m_xmf3Position = xmf3Position;
 	//pVertices[0].m_xmf3Velocity = xmf3Velocity;
 	//pVertices[0].m_fLifetime = fLifetime;

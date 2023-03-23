@@ -118,12 +118,6 @@
     <ClCompile Include="Global\Component.cpp">
       <Filter>Global</Filter>
     </ClCompile>
-    <ClCompile Include="Global\MessageDispatcher.cpp">
-      <Filter>Global</Filter>
-    </ClCompile>
-    <ClCompile Include="Global\Entity.cpp">
-      <Filter>Global</Filter>
-    </ClCompile>
     <ClCompile Include="Object\Player.cpp">
       <Filter>Object</Filter>
     </ClCompile>
@@ -136,13 +130,7 @@
     <ClCompile Include="Shader\DepthRenderShader.cpp">
       <Filter>Shader</Filter>
     </ClCompile>
-    <ClCompile Include="Global\EntityManager.cpp">
-      <Filter>Global</Filter>
-    </ClCompile>
     <ClCompile Include="Sound\SoundComponent.cpp">
-      <Filter>Sound</Filter>
-    </ClCompile>
-    <ClCompile Include="Sound\SoundPlayer.cpp">
       <Filter>Sound</Filter>
     </ClCompile>
     <ClCompile Include="Object\AnimationComponent.cpp">
@@ -189,6 +177,12 @@
     </ClCompile>
     <ClCompile Include="Object\SkyBox.cpp">
       <Filter>Object</Filter>
+    </ClCompile>
+    <ClCompile Include="Global\MessageDispatcher.cpp">
+      <Filter>Global</Filter>
+    </ClCompile>
+    <ClCompile Include="Sound\SoundPlayer.cpp">
+      <Filter>Sound</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -285,12 +279,6 @@
     <ClInclude Include="Shader\BoundingBoxShader.h">
       <Filter>Shader</Filter>
     </ClInclude>
-    <ClInclude Include="Global\MessageDispatcher.h">
-      <Filter>Global</Filter>
-    </ClInclude>
-    <ClInclude Include="Global\Entity.h">
-      <Filter>Global</Filter>
-    </ClInclude>
     <ClInclude Include="Global\Component.h">
       <Filter>Global</Filter>
     </ClInclude>
@@ -315,9 +303,6 @@
     <ClInclude Include="Sound\SoundComponent.h">
       <Filter>Sound</Filter>
     </ClInclude>
-    <ClInclude Include="Sound\SoundPlayer.h">
-      <Filter>Sound</Filter>
-    </ClInclude>
     <ClInclude Include="Object\AnimationComponent.h">
       <Filter>Object</Filter>
     </ClInclude>
@@ -335,9 +320,6 @@
     </ClInclude>
     <ClInclude Include="Shader\ParticleShader.h">
       <Filter>Shader</Filter>
-    </ClInclude>
-    <ClInclude Include="Global\EntityManager.h">
-      <Filter>Global</Filter>
     </ClInclude>
     <ClInclude Include="Object\ParticleObject.h">
       <Filter>Object</Filter>
@@ -365,6 +347,12 @@
     </ClInclude>
     <ClInclude Include="Object\SkyBox.h">
       <Filter>Object</Filter>
+    </ClInclude>
+    <ClInclude Include="Global\MessageDispatcher.h">
+      <Filter>Global</Filter>
+    </ClInclude>
+    <ClInclude Include="Sound\SoundPlayer.h">
+      <Filter>Sound</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

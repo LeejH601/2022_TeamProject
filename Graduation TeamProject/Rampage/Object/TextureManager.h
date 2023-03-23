@@ -5,7 +5,6 @@
 class CTextureManager
 {
 public:
-	DECLARE_SINGLE(CTextureManager);
 	CTextureManager() {}
 	~CTextureManager() {}
 

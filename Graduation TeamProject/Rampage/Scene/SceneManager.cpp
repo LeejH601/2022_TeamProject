@@ -54,14 +54,21 @@ void CSceneManager::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 	m_pCurrentScene->Render(pd3dCommandList, fTimeElapsed, fCurrentTime, pCamera);
 }
 
-void CSceneManager::OnPostRenderTarget()
+void CSceneManager::OnPostRender()
 {
-	m_pCurrentScene->OnPostRenderTarget();
+	m_pCurrentScene->OnPostRender();
 }
 
-void CSceneManager::Animate(float fTimeElapsed)
+void CSceneManager::Update(float fTimeElapsed)
 {
-	m_pCurrentScene->AnimateObjects(fTimeElapsed);
+	m_pCurrentScene->Update(fTimeElapsed);
+}
+
+bool CSceneManager::ProcessInput(DWORD dwDirection, float cxDelta, float cyDelta, float fTimeElapsed)
+{
+	m_pCurrentScene->ProcessInput(dwDirection, cxDelta, cyDelta, fTimeElapsed);
+
+	return false;
 }
 
 bool CSceneManager::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
