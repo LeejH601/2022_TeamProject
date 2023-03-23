@@ -24,8 +24,9 @@ private:
 	std::shared_ptr<CMultiSpriteObject> m_pBillBoardObject;
 	std::unique_ptr<CBillBoardObjectShader> m_pBillBoardObjectShader;
 	std::unique_ptr<CShader> m_pDepthRenderShader;
-	std::shared_ptr<CParticleShader> m_pParticleObjectShader;
-	std::shared_ptr<CParticleObject> m_pParticleObject;
+
+	std::unique_ptr<CParticleShader> m_pParticleShader;
+	std::vector<std::unique_ptr<CGameObject>> m_pParticleObjects;
 
 	std::unique_ptr<CTextureManager> m_pTextureManager = NULL;
 	std::unique_ptr<CCamera> m_pSimulaterCamera = NULL;

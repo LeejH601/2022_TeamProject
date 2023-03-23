@@ -15,7 +15,12 @@ void CMessageDispatcher::RegisterListener(MessageType messageType, IMessageListe
 void PlayerAttackComponent::HandleMessage(const Message& message, const PlayerAttackParams& params)
 {
     if (message.getType() == MessageType::PLAYER_ATTACK) {
-        params.pPlayer->CheckCollision(m_pObject);
+		if (params.pPlayer->CheckCollision(m_pObject))
+		{
+			CollideParams collide_params;
+			collide_params.xmf3CollidePosition = m_pObject->GetPosition();
+			CMessageDispatcher::GetInst()->Dispatch_Message<CollideParams>(MessageType::COLLISION, &collide_params, nullptr);
+		}
     }
 }
 void SoundPlayComponent::HandleMessage(const Message& message, const SoundPlayParams& params)
@@ -222,22 +227,22 @@ void ParticleComponent::HandleMessage(const Message& message, const ParticleComp
 	/*if (!m_bEnable)
 		return;*/
 
-	for (int i = 0; i < params.pObjects->size(); ++i)
+	CParticleObject* pParticle = dynamic_cast<CParticleObject*>(params.pObject);
+
+	if (pParticle)
 	{
-		CGameObject* pObject = ((*(params.pObjects))[i]).get();
-
-		CParticleObject* pParticle = dynamic_cast<CParticleObject*>(pObject);
-
-		if (pParticle)
-		{
-			pParticle->SetEnable(true);
-			pParticle->SetSize(m_fSize);
-			pParticle->SetAlpha(m_fAlpha);
-			pParticle->SetColor(m_xmf3Color);
-			pParticle->SetSpeed(m_fSpeed);
-			pParticle->SetLifeTime(m_fLifeTime);
-			pParticle->SetMaxParticleN(m_nParticleNumber);
-			pParticle->SetEmitParticleN(m_nParticleNumber);
-		}
+		pParticle->SetEnable(true);
+		pParticle->SetSize(m_fSize);
+		pParticle->SetAlpha(m_fAlpha);
+		pParticle->SetColor(m_xmf3Color);
+		pParticle->SetSpeed(m_fSpeed);
+		pParticle->SetLifeTime(m_fLifeTime);
+		pParticle->SetMaxParticleN(m_nParticleNumber);
+		pParticle->SetEmitParticleN(m_nParticleNumber);
+		pParticle->SetPosition(params.xmf3Position);
 	}
+}
+void SceneCollideListener::HandleMessage(const Message& message, const CollideParams& params)
+{
+	m_pScene->HandleCollision(params);
 }

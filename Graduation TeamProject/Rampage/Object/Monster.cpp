@@ -60,13 +60,13 @@ void CMonster::Update(float fTimeElapsed)
 	Animate(fTimeElapsed);
 
 	if (!m_bDissolved) {
-		TestDissolvetime += fTimeElapsed;
+		/*TestDissolvetime += fTimeElapsed;
 		if (TestDissolvetime > 10.0f)
-			m_bDissolved = true;
+			m_bDissolved = true;*/
 	}
 	else{
-		m_fDissolveTime += fTimeElapsed;
-		m_fDissolveThrethHold = m_fDissolveTime / m_fMaxDissolveTime;
+		/*m_fDissolveTime += fTimeElapsed;
+		m_fDissolveThrethHold = m_fDissolveTime / m_fMaxDissolveTime;*/
 	}
 	if (m_pStateMachine->GetCurrentState() == Damaged_Monster::GetInst() ||
 		m_pStateMachine->GetCurrentState() == Stun_Monster::GetInst())

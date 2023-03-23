@@ -70,4 +70,5 @@ public:
 	virtual void OnPostRender();
 
 	void LoadSceneFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, char* pstrFileName);
+	virtual void HandleCollision(const CollideParams& params);
 };

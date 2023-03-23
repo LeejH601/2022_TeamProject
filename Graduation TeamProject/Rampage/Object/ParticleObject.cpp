@@ -14,10 +14,6 @@ CParticleObject::CParticleObject(std::shared_ptr<CTexture> pSpriteTexture, ID3D1
 
 	SetTexture(pSpriteTexture);
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
-
-	pShader->CreateGraphicsPipelineState(pd3dDevice, pd3dGraphicsRootSignature, 0);
-	pShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
-
 }
 
 CParticleObject::~CParticleObject()

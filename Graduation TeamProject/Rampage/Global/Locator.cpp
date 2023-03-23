@@ -4,7 +4,6 @@
 #include "..\Sound\SoundComponent.h"
 #include "..\Sound\SoundManager.h"
 #include "..\Object\BillBoardComponent.h"
-#include "..\Object\ParticleComponent.h"
 
 CLocator::~CLocator()
 {

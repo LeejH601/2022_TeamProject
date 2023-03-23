@@ -14,6 +14,8 @@
 #include "..\Object\TextureManager.h"
 #include "..\Global\Locator.h"
 
+#define MAX_PARTICLE_OBJECT 50
+
 void CMainTMPScene::SetPlayer(CGameObject* pPlayer)
 {
 	m_pPlayer = pPlayer;
@@ -561,6 +563,8 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pTextureManager = std::make_unique<CTextureManager>();
 	m_pParticleShader = std::make_unique<CParticleShader>();
 	m_pParticleShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 40);
+	m_pParticleShader->CreateGraphicsPipelineState(pd3dDevice, GetGraphicsRootSignature(), 0);
+
 	m_pTextureManager->LoadParticleTexture(pd3dDevice, pd3dCommandList, L"ParticleImage/RoundSoftParticle.dds", m_pParticleShader.get(), 0, 0);
 	m_pTextureManager->LoadParticleTexture(pd3dDevice, pd3dCommandList, L"Image/Effect0.dds", m_pParticleShader.get(), 0, 0);
 	m_pTextureManager->LoadParticleTexture(pd3dDevice, pd3dCommandList, L"Image/Effect1.dds", m_pParticleShader.get(), 0, 0);
@@ -569,9 +573,17 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pTextureManager->LoadParticleTexture(pd3dDevice, pd3dCommandList, L"Image/Effect4.dds", m_pParticleShader.get(), 0, 0);
 	m_pTextureManager->LoadParticleTexture(pd3dDevice, pd3dCommandList, L"Image/Effect5.dds", m_pParticleShader.get(), 0, 0);
 
-	std::unique_ptr<CGameObject> m_pParticleObject = std::make_unique<CParticleObject>(m_pTextureManager->LoadParticleTexture(L"ParticleImage/RoundSoftParticle.dds"), pd3dDevice, pd3dCommandList, GetGraphicsRootSignature(), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), 2.0f, XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT2(2.0f, 2.0f), MAX_PARTICLES, m_pParticleShader.get());
-	m_pParticleObject->SetPosition(XMFLOAT3(0.0f, 100.0f, 0.0f));
-	m_pParticleObjects.push_back(std::move(m_pParticleObject));
+	for (int i = 0; i < MAX_PARTICLE_OBJECT; ++i)
+	{
+		std::unique_ptr<CGameObject> m_pParticleObject = std::make_unique<CParticleObject>(m_pTextureManager->LoadParticleTexture(L"ParticleImage/RoundSoftParticle.dds"), pd3dDevice, pd3dCommandList, GetGraphicsRootSignature(), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), 2.0f, XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT2(2.0f, 2.0f), MAX_PARTICLES, m_pParticleShader.get());
+		m_pParticleObjects.push_back(std::move(m_pParticleObject));
+	}
+
+	// COLLIDE LISTENER
+	std::unique_ptr<SceneCollideListener> pCollideListener = std::make_unique<SceneCollideListener>();
+	pCollideListener->SetScene(this);
+	m_pListeners.push_back(std::move(pCollideListener));
+	CMessageDispatcher::GetInst()->RegisterListener(MessageType::COLLISION, m_pListeners.back().get(), nullptr);
 }
 bool CMainTMPScene::ProcessInput(DWORD dwDirection, float cxDelta, float cyDelta, float fTimeElapsed)
 {
@@ -587,13 +599,14 @@ void CMainTMPScene::UpdateObjects(float fTimeElapsed)
 	animation_comp_params.fElapsedTime = fTimeElapsed;
 	CMessageDispatcher::GetInst()->Dispatch_Message<AnimationCompParams>(MessageType::UPDATE_OBJECT, &animation_comp_params, ((CPlayer*)m_pPlayer)->m_pStateMachine->GetCurrentState());
 
-	m_pPlayer->Update(fTimeElapsed);
 	m_pLight->Update((CPlayer*)m_pPlayer);
 
 	for (int i = 0; i < m_pObjects.size(); ++i) {
 		m_pObjects[i]->Update(fTimeElapsed);
 		m_pcbMappedDisolveParams->dissolveThreshold[i] = m_pObjects[i]->m_fDissolveThrethHold;
 	}
+
+	m_pPlayer->Update(fTimeElapsed);
 
 	// Update Camera
 	XMFLOAT3 xmf3PlayerPos = m_pPlayer->GetPosition();
@@ -605,11 +618,6 @@ void CMainTMPScene::UpdateObjects(float fTimeElapsed)
 	camera_shake_params.pCamera = m_pMainSceneCamera.get();
 	camera_shake_params.fElapsedTime = fTimeElapsed;
 	CMessageDispatcher::GetInst()->Dispatch_Message<CameraUpdateParams>(MessageType::UPDATE_CAMERA, &camera_shake_params, ((CPlayer*)m_pPlayer)->m_pStateMachine->GetCurrentState());
-
-	ParticleCompParams particle_comp_params;
-	particle_comp_params.pObjects = &m_pParticleObjects;
-	particle_comp_params.fElapsedTime = fTimeElapsed;
-	CMessageDispatcher::GetInst()->Dispatch_Message<ParticleCompParams>(MessageType::UPDATE_PARTICLE, &particle_comp_params, ((CPlayer*)m_pPlayer)->m_pStateMachine->GetCurrentState());
 }
 
 #define WITH_LAG_DOLL_SIMULATION
@@ -669,7 +677,7 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 	for (int i = 0; i < m_pParticleObjects.size(); ++i)
 	{
 		((CParticleObject*)m_pParticleObjects[i].get())->UpdateShaderVariables(pd3dCommandList, fCurrentTime, fTimeElapsed);
-		((CParticleObject*)m_pParticleObjects[i].get())->Render(pd3dCommandList, pCamera, m_pParticleShader.get());
+		((CParticleObject*)m_pParticleObjects[i].get())->Render(pd3dCommandList, nullptr, m_pParticleShader.get());
 	}
 #ifdef RENDER_BOUNDING_BOX
 	CBoundingBoxShader::GetInst()->Render(pd3dCommandList, 0);
@@ -793,6 +801,23 @@ void CMainTMPScene::LoadSceneFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 
 			fclose(objFile);
 		}
+	}
+}
+
+void CMainTMPScene::HandleCollision(const CollideParams& params)
+{
+	std::vector<std::unique_ptr<CGameObject>>::iterator it = std::find_if(m_pParticleObjects.begin(), m_pParticleObjects.end(), [](const std::unique_ptr<CGameObject>& pParticleObject) {
+		if (!((CParticleObject*)pParticleObject.get())->GetEnable())
+			return true;
+		return false;
+	});
+
+	if (it != m_pParticleObjects.end())
+	{
+		ParticleCompParams particle_comp_params;
+		particle_comp_params.pObject = (*it).get();
+		particle_comp_params.xmf3Position = params.xmf3CollidePosition;
+		CMessageDispatcher::GetInst()->Dispatch_Message<ParticleCompParams>(MessageType::UPDATE_PARTICLE, &particle_comp_params, ((CPlayer*)m_pPlayer)->m_pStateMachine->GetCurrentState());
 	}
 }
 

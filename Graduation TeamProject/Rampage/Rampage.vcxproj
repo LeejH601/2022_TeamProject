@@ -179,7 +179,6 @@
     <ClCompile Include="Object\Monster.cpp" />
     <ClCompile Include="Object\MonsterState.cpp" />
     <ClCompile Include="Object\Object.cpp" />
-    <ClCompile Include="Object\ParticleComponent.cpp" />
     <ClCompile Include="Object\PhysicsObject.cpp" />
     <ClCompile Include="Object\Player.cpp" />
     <ClCompile Include="Object\SkyBox.cpp" />
@@ -236,7 +235,6 @@
     <ClInclude Include="Object\Monster.h" />
     <ClInclude Include="Object\MonsterState.h" />
     <ClInclude Include="Object\Object.h" />
-    <ClInclude Include="Object\ParticleComponent.h" />
     <ClInclude Include="Object\PhysicsObject.h" />
     <ClInclude Include="Object\Player.h" />
     <ClInclude Include="Object\SkyBox.h" />
