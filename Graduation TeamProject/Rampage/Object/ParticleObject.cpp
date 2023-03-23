@@ -68,6 +68,7 @@ void CParticleObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dComma
 
 void CParticleObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
 {
+	CGameObject::UpdateShaderVariables(pd3dCommandList);
 }
 
 

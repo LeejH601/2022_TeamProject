@@ -570,6 +570,7 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pTextureManager->LoadParticleTexture(pd3dDevice, pd3dCommandList, L"Image/Effect5.dds", m_pParticleShader.get(), 0, 0);
 
 	std::unique_ptr<CGameObject> m_pParticleObject = std::make_unique<CParticleObject>(m_pTextureManager->LoadParticleTexture(L"ParticleImage/RoundSoftParticle.dds"), pd3dDevice, pd3dCommandList, GetGraphicsRootSignature(), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), 2.0f, XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT2(2.0f, 2.0f), MAX_PARTICLES, m_pParticleShader.get());
+	m_pParticleObject->SetPosition(XMFLOAT3(0.0f, 100.0f, 0.0f));
 	m_pParticleObjects.push_back(std::move(m_pParticleObject));
 }
 bool CMainTMPScene::ProcessInput(DWORD dwDirection, float cxDelta, float cyDelta, float fTimeElapsed)
@@ -705,7 +706,6 @@ void CMainTMPScene::LoadSceneFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 	if (!strcmp(pstrToken, "<GameObjects>:"))
 	{
 		int nObjects = ReadIntegerFromFile(pInFile);
-		//pScene->m_ppGameObjects = new CGameObject * [pScene->m_nGameObjects];
 		for (int i = 0; i < nObjects; ++i) {
 			ReadStringFromFile(pInFile, pstrToken);
 			nRead = ReadStringFromFile(pInFile, pstrToken);
@@ -713,24 +713,11 @@ void CMainTMPScene::LoadSceneFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 			float buffer[16];
 			std::string objPath{ "Object/Scene/" };
 			objPath += static_cast<std::string>(pstrToken) + ".bin";
-			/*memcpy(pScene->m_ppGameObjects[i]->m_pstrFrameName, pstrToken, (nRead + 1));*/
 			FILE* objFile = NULL;
 			::fopen_s(&objFile, objPath.data(), "rb");
 			::rewind(objFile);
 
 			std::unique_ptr<CGameObject> pObject = std::make_unique<CGameObject>();
-
-			//ReadStringFromFile(pInFile, pstrToken);
-			////MATERIALSLOADINFO* pMaterialsInfo = new MATERIALSLOADINFO;
-			//{
-			//	pMaterialsInfo->m_nMaterials = ::ReadIntegerFromFile(pInFile);
-			//	pMaterialsInfo->m_pMaterials = new MATERIALLOADINFO[pMaterialsInfo->m_nMaterials];
-
-			//	for (int j = 0; j < pMaterialsInfo->m_nMaterials; ++j) {
-			//		nRead = (UINT)::fread(&pMaterialsInfo->m_pMaterials[j].m_xmf4AlbedoColor, sizeof(float), 4, pInFile);
-			//		nRead = (UINT)::fread(&pMaterialsInfo->m_pMaterials[j].m_xmf4EmissiveColor, sizeof(float), 4, pInFile);
-			//	}
-			//}
 
 			nRead = (UINT)::fread(&buffer, sizeof(float), 16, pInFile);
 
@@ -743,12 +730,6 @@ void CMainTMPScene::LoadSceneFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 			};
 
 			CLoadedModelInfo* rootObj = CModelManager::GetInst()->LoadGeometryFromFileOfScene(pd3dDevice, pd3dCommandList, objFile);
-			/*XMFLOAT4 pos = {
-				rootObj->m_pModelRootObject->m_xmf4x4Transform._41,
-				rootObj->m_pModelRootObject->m_xmf4x4Transform._42,
-				rootObj->m_pModelRootObject->m_xmf4x4Transform._43,
-				rootObj->m_pModelRootObject->m_xmf4x4Transform._44,
-			};*/
 			rootObj->m_pModelRootObject->m_xmf4x4Transform = xmfWorld;
 
 			std::string name{ pstrToken };
@@ -756,12 +737,8 @@ void CMainTMPScene::LoadSceneFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 			{
 				physx::PxTolerancesScale scale = Locator.GetPxPhysics()->getTolerancesScale();
 				physx::PxCookingParams params(scale);
-				// disable mesh cleaning - perform mesh validation on development configurations
+				
 				params.meshPreprocessParams |= physx::PxMeshPreprocessingFlag::eDISABLE_CLEAN_MESH;
-				// disable edge precompute, edges are set for each triangle, slows contact generation
-				//params.meshPreprocessParams |= physx::PxMeshPreprocessingFlag::eDISABLE_ACTIVE_EDGES_PRECOMPUTE;
-				// lower hierarchy for internal mesh
-				//params.meshCookingHint = physx::PxMeshCookingHint::eCOOKING_PERFORMANCE;
 
 				physx::PxTriangleMeshDesc meshDesc;
 				std::vector<XMFLOAT3> vertexs = rootObj->m_pModelRootObject->m_pMesh->GetVertexs();
@@ -803,12 +780,6 @@ void CMainTMPScene::LoadSceneFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 
 			}
 
-
-			/*rootObj->m_pModelRootObject->m_xmf4x4Transform = Matrix4x4::Scale(pObject->m_xmf4x4Transform, 6.0f);
-			rootObj->m_pModelRootObject->m_xmf4x4Transform._41 = pos.x;
-			rootObj->m_pModelRootObject->m_xmf4x4Transform._42 = pos.y;
-			rootObj->m_pModelRootObject->m_xmf4x4Transform._43 = pos.z;
-			rootObj->m_pModelRootObject->m_xmf4x4Transform._44 = pos.w;*/
 			pObject->SetChild(rootObj->m_pModelRootObject, true);
 			XMFLOAT4X4 matrix_scale = {
 					10, 0, 0, 0,
@@ -816,66 +787,10 @@ void CMainTMPScene::LoadSceneFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 					0, 0, 10, 0,
 					0, 0, 0, 1,
 			};
-			/*pObject->m_xmf4x4World = Matrix4x4::Scale(pObject->m_xmf4x4World, 3.0f);
-			pObject->m_xmf4x4World._42 += 50.0f;
-			pObject->m_xmf4x4World._41 += 150.0f;
-			pObject->m_xmf4x4World._43 += 150.0f;*/
-			//pObject->m_xmf4x4Transform = pObject->m_xmf4x4World;
 			pObject->UpdateTransform(NULL);
 
 			m_pObjects.push_back(std::move(pObject));
 
-
-			//CMeshLoadInfo* pMeshInfo = CGameObject::LoadMeshInfoFromFile_2(objFile);
-			//if (pMeshInfo) {
-			//	//pMeshInfo->m_pxmf4Colors = new XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f);
-			//	CMesh* pMesh = NULL;
-			//	if (pMeshInfo->m_nType & VERTEXT_NORMAL) {
-			//		pMesh = new CMeshIlluminatedFromFile(pd3dDevice, pd3dCommandList, pMeshInfo);
-			//	}
-			//	if (pMesh) {
-			//		pScene->m_ppGameObjects[i]->SetMesh(pMesh);
-			//		pScene->m_ppGameObjects[i]->m_pMesh->m_xmOOBB.Center = pMeshInfo->m_xmf3AABBCenter;
-			//		pScene->m_ppGameObjects[i]->m_pMesh->m_xmOOBB.Extents = pMeshInfo->m_xmf3AABBExtents;
-			//	}
-			//	delete pMeshInfo;
-			//}
-
-			/*pScene->m_ppGameObjects[i]->m_nMaterials = pMaterialsInfo->m_nMaterials;
-			pScene->m_ppGameObjects[i]->m_ppMaterials = new CMaterial * [pMaterialsInfo->m_nMaterials];
-
-			for (int k = 0; k < pMaterialsInfo->m_nMaterials; k++)
-			{
-				pScene->m_ppGameObjects[i]->m_ppMaterials[k] = NULL;
-
-				CMaterial* pMaterial = new CMaterial();
-
-				CMaterialColors* pMaterialColors = new CMaterialColors(&pMaterialsInfo->m_pMaterials[k]);
-				pMaterial->SetMaterialColors(pMaterialColors);
-
-				if (pScene->m_ppGameObjects[i]->GetMeshType() & VERTEXT_NORMAL) pMaterial->SetIlluminatedShader();
-
-				pScene->m_ppGameObjects[i]->SetMaterial(k, pMaterial);
-			}*/
-
-
-
-
-			//XMFLOAT4X4 matrix_scale = {
-			//	10, 0, 0, 0,
-			//	0, 10, 0, 0,
-			//	0, 0, 10, 0,
-			//	0, 0, 0, 1,
-			//};
-			//pScene->m_ppGameObjects[i]->m_xmf4x4Transform = Matrix4x4::Multiply(pScene->m_ppGameObjects[i]->m_xmf4x4Transform, matrix_scale);
-			//pScene->m_ppGameObjects[i]->m_xmf4x4World = pScene->m_ppGameObjects[i]->m_xmf4x4Transform;
-			//pScene->m_ppGameObjects[i]->UpdateBoundingBox();
-			//pScene->m_ppGameObjects[i]->m_xmOOBB.Extents = Vector3::ScalarProduct(pScene->m_ppGameObjects[i]->m_xmOOBB.Extents, 10.0f, false);
-			////std::string temp_str = { pScene->m_ppGameObjects[i]->m_pstrFrameName };
-			//if (objPath.contains("lamp")) {
-			//	pScene->m_xmfLampsPositions.push_back(pScene->m_ppGameObjects[i]->GetPosition());
-			//	pScene->m_xmfLampsPositions.back().y += 20.0f;
-			//}
 			fclose(objFile);
 		}
 	}

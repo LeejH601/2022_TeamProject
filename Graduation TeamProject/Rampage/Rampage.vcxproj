@@ -155,7 +155,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Global\Camera.cpp" />
-    <ClCompile Include="Global\Component.cpp" />
     <ClCompile Include="Global\DDSTextureLoader12.cpp" />
     <ClCompile Include="Global\GameFramework.cpp" />
     <ClCompile Include="Global\Locator.cpp" />
@@ -210,7 +209,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Global\Camera.h" />
-    <ClInclude Include="Global\Component.h" />
     <ClInclude Include="Global\d3dx12.h" />
     <ClInclude Include="Global\DDSTextureLoader12.h" />
     <ClInclude Include="Global\GameFramework.h" />

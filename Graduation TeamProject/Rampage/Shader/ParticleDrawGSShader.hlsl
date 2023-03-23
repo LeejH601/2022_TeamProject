@@ -14,6 +14,13 @@ struct GS_PARTICLE_DRAW_OUTPUT
 	uint type : PARTICLETYPE;
 };
 
+cbuffer cbGameObjectInfo : register(b0)
+{
+	matrix gmtxGameObject : packoffset(c0);
+	matrix gmtxTexture : packoffset(c4);
+	uint gnTexturesMask : packoffset(c8);
+};
+
 cbuffer cbCameraInfo : register(b1)
 {
 	matrix gmtxView : packoffset(c0);
@@ -36,8 +43,8 @@ void GSParticleDraw(point VS_PARTICLE_DRAW_OUTPUT input[1], inout TriangleStream
 	output.color = input[0].color;
 	for (int i = 0; i < 4; i++)
 	{
-		
-		float3 positionW = mul(gf3Positions[i] * input[0].size, (float3x3)(gmtxInverseView)) + input[0].position;
+		float3 centerW = gmtxGameObject._41_42_43;
+		float3 positionW = mul((gf3Positions[i] + centerW) * input[0].size, (float3x3)(gmtxInverseView)) + input[0].position;
 		output.position = mul(mul(float4(positionW, 1.0f), gmtxView), gmtxProjection);
 		output.uv = gf2QuadUVs[i];
 

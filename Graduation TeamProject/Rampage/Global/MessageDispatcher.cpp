@@ -219,8 +219,8 @@ void StunAnimationComponent::HandleMessage(const Message& message, const Animati
 }
 void ParticleComponent::HandleMessage(const Message& message, const ParticleCompParams& params)
 {
-	if (!m_bEnable)
-		return;
+	/*if (!m_bEnable)
+		return;*/
 
 	for (int i = 0; i < params.pObjects->size(); ++i)
 	{
@@ -230,7 +230,7 @@ void ParticleComponent::HandleMessage(const Message& message, const ParticleComp
 
 		if (pParticle)
 		{
-			pParticle->SetEnable(m_bEnable);
+			pParticle->SetEnable(true);
 			pParticle->SetSize(m_fSize);
 			pParticle->SetAlpha(m_fAlpha);
 			pParticle->SetColor(m_xmf3Color);
