@@ -1,6 +1,5 @@
 #pragma once
 #include "stdafx.h"
-#include "Component.h"
 #include "MessageDispatcher.h"
 
 #define ASPECT_RATIO (float(FRAME_BUFFER_WIDTH) / float(FRAME_BUFFER_HEIGHT))
@@ -46,89 +45,6 @@ public:
 	XMFLOAT3 m_xmf3Offset = XMFLOAT3(0.f, 0.f, 0.f);
 };
 
-class CCameraMover : public CComponent
-{
-	CCamera* m_pCamera = NULL;
-	XMFLOAT3 m_xmf3Direction;
-public:
-	bool m_bMoveEnd = true;
-
-	float m_fMaxDistance;
-	float m_fCurrDistance;
-	float m_fSpeed;
-	float m_fMovingTime;
-	
-	float m_fBackSpeed;
-	float m_fRollBackTime;
-
-	XMFLOAT3 offset;
-
-public:
-	CCameraMover();
-	virtual ~CCameraMover() {};
-
-	void SetDirection(XMFLOAT3 Dir) { m_xmf3Direction = Dir; }
-	void SetCamera(CCamera* pCamera) { m_pCamera = pCamera; }
-
-	virtual void Update(float fElapsedTime);
-	virtual void Reset();
-	virtual bool HandleMessage(const Telegram& msg);
-};
-
-class CCameraShaker : public CComponent
-{
-private:
-	CCamera* m_pCamera = NULL;
-	std::uniform_real_distribution<float> urd{ -1.0f, 1.0f };
-
-public:
-	float m_fDuration;
-	float m_ft;
-	bool m_bShakeEnd = true;
-	float m_fMagnitude;
-
-public:
-	CCameraShaker();
-	virtual ~CCameraShaker() {};
-
-	void SetCamera(CCamera* pCamera) { m_pCamera = pCamera; }
-
-	virtual void Update(float fElapsedTime);
-	virtual void Reset();
-	virtual bool HandleMessage(const Telegram& msg);
-};
-
-class CCameraZoomer : public CComponent
-{
-	CCamera* m_pCamera = NULL;
-
-	XMFLOAT3 m_xmf3Direction;
-public:
-	bool m_bZoomEnd = true;
-	bool m_bIsIN;
-
-	float m_fMaxDistance;
-	float m_fCurrDistance;
-	float m_fSpeed;
-	float m_fMovingTime;
-
-	float m_fBackSpeed;
-	float m_fRollBackTime;
-
-	XMFLOAT3 offset;
-
-
-public:
-	CCameraZoomer();
-	virtual ~CCameraZoomer();
-
-	void SetCamera(CCamera* pCamera) { m_pCamera = pCamera; }
-
-	virtual void Update(float fElapsedTime);
-	virtual void Reset();
-	virtual bool HandleMessage(const Telegram& msg);
-};
-
 class CCamera
 {
 public:
@@ -163,8 +79,6 @@ protected:
 	VS_CB_CAMERA_INFO* m_pcbMappedCamera = NULL;
 
 	std::vector<std::unique_ptr<IMessageListener>> m_pListeners;
-public:
-	std::vector<CComponent*> m_vComponentSet;
 public:
 	CCamera();
 	virtual ~CCamera();
@@ -206,9 +120,6 @@ public:
 	XMFLOAT4X4& GetProjectionMatrix() { return(m_xmf4x4Projection); }
 	D3D12_VIEWPORT& GetViewport() { return(m_d3dViewport); }
 	D3D12_RECT& GetScissorRect() { return(m_d3dScissorRect); }
-
-	void LoadComponentFromSet(CComponentSet* componentset);
-	CComponent* FindComponent(const std::type_info& typeinfo);
 
 	virtual void SetViewportsAndScissorRects(ID3D12GraphicsCommandList* pd3dCommandList);
 

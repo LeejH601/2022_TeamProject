@@ -34,4 +34,5 @@ public:
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed, float fCurrentTime, CCamera* pCamera = NULL) {}
 	virtual void OnPostRender() {}
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed) {}
+	virtual void HandleCollision(const CollideParams& params) {}
 };

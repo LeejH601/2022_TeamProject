@@ -9,7 +9,6 @@
 #include "..\Global\Locator.h"
 #include "..\Shader\DepthRenderShader.h"
 #include "..\Object\BillBoardComponent.h"
-#include "..\Object\ParticleComponent.h"
 
 void CSimulatorScene::OnPreRender(ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed)
 {
@@ -298,18 +297,22 @@ void CSimulatorScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 	m_pBillBoardObject = std::make_shared<CMultiSpriteObject>(m_pTextureManager->LoadBillBoardTexture(L"Image/Fire_Effect.dds"), pd3dDevice, pd3dCommandList, m_pBillBoardObjectShader.get(), 5, 6, 8.f, 5.f);
 	CAttackSpriteComponent::GetInst()->Add_AttackComponent(std::make_pair(m_pEnemys[0], m_pBillBoardObject));
 
+	m_pParticleShader = std::make_unique<CParticleShader>();
+	m_pParticleShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 40);
+	m_pParticleShader->CreateGraphicsPipelineState(pd3dDevice, GetGraphicsRootSignature(), 0);
 
-	m_pParticleObjectShader = std::make_shared<CParticleShader>();
-	m_pParticleObjectShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 40);
-	m_pTextureManager->LoadParticleTexture(pd3dDevice, pd3dCommandList, L"ParticleImage/RoundSoftParticle.dds", m_pParticleObjectShader.get(), 0, 0);
-	m_pTextureManager->LoadParticleTexture(pd3dDevice, pd3dCommandList, L"Image/Effect0.dds", m_pParticleObjectShader.get(), 0, 0);
-	m_pTextureManager->LoadParticleTexture(pd3dDevice, pd3dCommandList, L"Image/Effect1.dds", m_pParticleObjectShader.get(), 0, 0);
-	m_pTextureManager->LoadParticleTexture(pd3dDevice, pd3dCommandList, L"Image/Effect2.dds", m_pParticleObjectShader.get(), 0, 0);
-	m_pTextureManager->LoadParticleTexture(pd3dDevice, pd3dCommandList, L"Image/Effect3.dds", m_pParticleObjectShader.get(), 0, 0);
-	m_pTextureManager->LoadParticleTexture(pd3dDevice, pd3dCommandList, L"Image/Effect4.dds", m_pParticleObjectShader.get(), 0, 0);
-	m_pTextureManager->LoadParticleTexture(pd3dDevice, pd3dCommandList, L"Image/Effect5.dds", m_pParticleObjectShader.get(), 0, 0);
-	m_pParticleObject = std::make_shared<CParticleObject>(m_pTextureManager->LoadParticleTexture(L"ParticleImage/RoundSoftParticle.dds"), pd3dDevice, pd3dCommandList, GetGraphicsRootSignature(), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), 2.0f, XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT2(2.0f, 2.0f), MAX_PARTICLES, m_pParticleObjectShader.get());
-	CParticleComponent::GetInst()->Set_ParticleComponent(m_pParticleObject);
+	m_pTextureManager->LoadParticleTexture(pd3dDevice, pd3dCommandList, L"ParticleImage/RoundSoftParticle.dds", m_pParticleShader.get(), 0, 0);
+	m_pTextureManager->LoadParticleTexture(pd3dDevice, pd3dCommandList, L"Image/Effect0.dds", m_pParticleShader.get(), 0, 0);
+	m_pTextureManager->LoadParticleTexture(pd3dDevice, pd3dCommandList, L"Image/Effect1.dds", m_pParticleShader.get(), 0, 0);
+	m_pTextureManager->LoadParticleTexture(pd3dDevice, pd3dCommandList, L"Image/Effect2.dds", m_pParticleShader.get(), 0, 0);
+	m_pTextureManager->LoadParticleTexture(pd3dDevice, pd3dCommandList, L"Image/Effect3.dds", m_pParticleShader.get(), 0, 0);
+	m_pTextureManager->LoadParticleTexture(pd3dDevice, pd3dCommandList, L"Image/Effect4.dds", m_pParticleShader.get(), 0, 0);
+	m_pTextureManager->LoadParticleTexture(pd3dDevice, pd3dCommandList, L"Image/Effect5.dds", m_pParticleShader.get(), 0, 0);
+	
+	XMFLOAT3 offset{ 86.4804 , 0.0f, -183.7856 };
+	std::unique_ptr<CGameObject> m_pParticleObject = std::make_unique<CParticleObject>(m_pTextureManager->LoadParticleTexture(L"ParticleImage/RoundSoftParticle.dds"), pd3dDevice, pd3dCommandList, GetGraphicsRootSignature(), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), 2.0f, XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT2(2.0f, 2.0f), MAX_PARTICLES, m_pParticleShader.get());
+	m_pParticleObject->SetPosition(XMFLOAT3(offset.x + 80.f, 0.f, 100.f));
+	m_pParticleObjects.push_back(std::move(m_pParticleObject));
 }
 void CSimulatorScene::Update(float fTimeElapsed)
 {
@@ -349,15 +352,20 @@ void CSimulatorScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float f
 	m_pBillBoardObject->UpdateShaderVariables(pd3dCommandList);
 	m_pBillBoardObject->Render(pd3dCommandList, true);
 
-	m_pParticleObject->UpdateShaderVariables(pd3dCommandList, fCurrentTime, fTimeElapsed);
-	m_pParticleObject->Render(pd3dCommandList, pCamera, m_pParticleObjectShader.get());
+	for (int i = 0; i < m_pParticleObjects.size(); ++i)
+	{
+		((CParticleObject*)m_pParticleObjects[i].get())->UpdateShaderVariables(pd3dCommandList, fCurrentTime, fTimeElapsed);
+		((CParticleObject*)m_pParticleObjects[i].get())->Render(pd3dCommandList, pCamera, m_pParticleShader.get());
+	}
 }
 void CSimulatorScene::OnPostRender()
 {
 	m_pSimulaterCamera->OnPostRender();
 
-	if(m_pParticleObject)
-		m_pParticleObject->OnPostRender();
+	for (int i = 0; i < m_pParticleObjects.size(); ++i)
+	{
+		((CParticleObject*)m_pParticleObjects[i].get())->OnPostRender();
+	}
 }
 
 void CSimulatorScene::SetPlayerAnimationSet(int nSet)

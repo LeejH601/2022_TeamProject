@@ -115,9 +115,6 @@
     <ClCompile Include="Shader\BoundingBoxShader.cpp">
       <Filter>Shader</Filter>
     </ClCompile>
-    <ClCompile Include="Global\Component.cpp">
-      <Filter>Global</Filter>
-    </ClCompile>
     <ClCompile Include="Object\Player.cpp">
       <Filter>Object</Filter>
     </ClCompile>
@@ -278,9 +275,6 @@
     </ClInclude>
     <ClInclude Include="Shader\BoundingBoxShader.h">
       <Filter>Shader</Filter>
-    </ClInclude>
-    <ClInclude Include="Global\Component.h">
-      <Filter>Global</Filter>
     </ClInclude>
     <ClInclude Include="Global\Global.h">
       <Filter>Global</Filter>

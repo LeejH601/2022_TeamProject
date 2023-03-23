@@ -9,7 +9,6 @@
 #include "..\Sound\SoundManager.h"
 #include "..\Object\BillBoardComponent.h"
 #include "..\Object\TextureManager.h"
-#include "..\Object\ParticleComponent.h"
 #include "..\Object\AnimationComponent.h"
 
 #define NUM_FRAMES_IN_FLIGHT 3
