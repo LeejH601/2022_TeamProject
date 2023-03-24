@@ -426,6 +426,7 @@
     <FxCompile Include="Shader\BloomComputeShader.hlsl" />
     <FxCompile Include="Shader\BloomApplyComputeShader.hlsl" />
     <FxCompile Include="Shader\BloomAdditiveComputeShader.hlsl" />
+    <FxCompile Include="Shader\BloomUpSampleComputeShader.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Shader\Header.hlsli" />

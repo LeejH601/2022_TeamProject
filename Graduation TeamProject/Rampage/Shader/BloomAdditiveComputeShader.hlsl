@@ -4,7 +4,38 @@
 
 Texture2D gtxtSource : register(t50);
 RWTexture2D<float4> gtxtRWOutput : register(u0);
+RWTexture2D<float4> gtxtRWFillters[5] : register(u5);
 RWTexture2D<float4> gtxtRWBlurs[5] : register(u10);
+
+static float gfGaussianBlurMask2D[5][5] = {
+	{ 1.0f / 273.0f, 4.0f / 273.0f, 7.0f / 273.0f, 4.0f / 273.0f, 1.0f / 273.0f },
+	{ 4.0f / 273.0f, 16.0f / 273.0f, 26.0f / 273.0f, 16.0f / 273.0f, 4.0f / 273.0f },
+	{ 7.0f / 273.0f, 26.0f / 273.0f, 41.0f / 273.0f, 26.0f / 273.0f, 7.0f / 273.0f },
+	{ 4.0f / 273.0f, 16.0f / 273.0f, 26.0f / 273.0f, 16.0f / 273.0f, 4.0f / 273.0f },
+	{ 1.0f / 273.0f, 4.0f / 273.0f, 7.0f / 273.0f, 4.0f / 273.0f, 1.0f / 273.0f }
+};
+
+static float gfGaussianBlurMask2D77[7][7] = {
+	{0.05854983, 0.07729707, 0.09131569, 0.09653235, 0.09131569, 0.07729707, 0.05854983},
+	{0.07729707, 0.10204703, 0.12055432, 0.12744132, 0.12055432, 0.10204703, 0.07729707},
+	{0.09131569, 0.12055432, 0.1424181 , 0.15055413, 0.1424181 , 0.12055432, 0.09131569},
+	{0.09653235, 0.12744132, 0.15055413, 0.15915494, 0.15055413, 0.12744132, 0.09653235},
+	{0.09131569, 0.12055432, 0.1424181 , 0.15055413, 0.1424181 , 0.12055432, 0.09131569},
+	{0.07729707, 0.10204703, 0.12055432, 0.12744132, 0.12055432, 0.10204703, 0.07729707},
+	{0.05854983, 0.07729707, 0.09131569, 0.09653235, 0.09131569, 0.07729707, 0.05854983},
+};
+
+static float gfGaussianBlurMask2D99[9][9] = {
+	{0.05854983, 0.07286644, 0.0851895 , 0.09356236, 0.09653235, 0.09356236, 0.0851895 , 0.07286644, 0.05854983},
+	{0.07286644, 0.09068375, 0.10602005, 0.11644024, 0.12013645, 0.11644024, 0.10602005, 0.09068375, 0.07286644},
+	{0.0851895 , 0.10602005, 0.12394999, 0.13613244, 0.14045374, 0.13613244, 0.12394999, 0.10602005, 0.0851895},
+	{0.09356236, 0.11644024, 0.13613244, 0.14951223, 0.15425826, 0.14951223, 0.13613244, 0.11644024, 0.09356236},
+	{0.09653235, 0.12013645, 0.14045374, 0.15425826, 0.15915494, 0.15425826, 0.14045374, 0.12013645, 0.09653235},
+	{0.09356236, 0.11644024, 0.13613244, 0.14951223, 0.15425826, 0.14951223, 0.13613244, 0.11644024, 0.09356236},
+	{0.0851895 , 0.10602005, 0.12394999, 0.13613244, 0.14045374, 0.13613244, 0.12394999, 0.10602005, 0.0851895},
+	{0.07286644, 0.09068375, 0.10602005, 0.11644024, 0.12013645, 0.11644024, 0.10602005, 0.09068375, 0.07286644},
+	{0.05854983, 0.07286644, 0.0851895 , 0.09356236, 0.09653235, 0.09356236, 0.0851895 , 0.07286644, 0.05854983},
+};
 
 
 //#define BICUBIC
@@ -117,15 +148,43 @@ void BloomAdditive_CS(uint3 DTid : SV_DispatchThreadID)
 	}
 #endif
 
-	BloomColor = gtxtRWBlurs[1][uv];
-	float BloomFactor = 1.0f;
+
+	float f4Color = float4(0, 0, 0, 0);
+
+	//{
+	//	for (int i = -2; i <= 2; i++)
+	//	{
+	//		for (int j = -2; j <= 2; j++)
+	//		{
+	//			//f4Color += gfGaussianBlurMask2D[i+2][j+2] * gtxtRWFillters[level][ int2(float2(TexCoord.xy) + DeltaUV)];
+	//			//f4Color += gfGaussianBlurMask2D[i + 2][j + 2] * gtxtRWFillters[gnLevel][TexCoord + int2(i, j)];
+	//			f4Color += float4(gfGaussianBlurMask2D[i + 2][j + 2] * gtxtRWFillters[0][DTid.xy + int2(i*3, j*3)].xyz, 0.0f);
+	//		}
+	//	}
+	//}
+	
+
+	//for (int i = -3; i <= 3; i++)
+	//{
+	//	for (int j = -3; j <= 3; j++)
+	//	{
+	//		//f4Color += gfGaussianBlurMask2D[i+2][j+2] * gtxtRWFillters[level][ int2(float2(TexCoord.xy) + DeltaUV)];
+	//		//f4Color += gfGaussianBlurMask2D[i + 2][j + 2] * gtxtRWFillters[gnLevel][TexCoord + int2(i, j)];
+	//		f4Color += float4(gfGaussianBlurMask2D77[i + 3][j + 3] * gtxtRWFillters[0][DTid.xy + int2(i, j)].xyz, 0.0f);
+	//	}
+	//}
+
+	//BloomColor = gtxtRWBlurs[1][uv];
+	//BloomColor = f4Color;
+
+	float BloomFactor = 0.2f;
 
 	BloomColor *= BloomFactor;
 
-	gtxtRWBlurs[0][DTid.xy] = BloomColor;
+	gtxtRWBlurs[0][DTid.xy] = float4(BloomColor.xyz, 0.0f);
 
 
 
-	gtxtRWOutput[DTid.xy] =  float4(max(gtxtRWOutput[DTid.xy].xyz, (BloomColor.xyz)), Color.w);
-	//gtxtRWOutput[DTid.xy] = float4((Color.xyz + BloomColor.xyz), Color.w);
+	//gtxtRWOutput[DTid.xy] =  float4(max(gtxtRWOutput[DTid.xy].xyz, (BloomColor.xyz)), Color.w);
+	gtxtRWOutput[DTid.xy] = float4((Color.xyz + BloomColor.xyz), Color.w);
 }

@@ -20,14 +20,16 @@ D3D12_SHADER_BYTECODE CBloomShader::CreateComputeShader(ID3DBlob** ppd3dShaderBl
 	else if(nPipelineState == 1)
 		return(CShader::ReadCompiledShaderFile(L"BloomApplyComputeShader.cso", ppd3dShaderBlob));
 	else if(nPipelineState == 2)
+		return(CShader::ReadCompiledShaderFile(L"BloomUpSampleComputeShader.cso", ppd3dShaderBlob));
+	else if (nPipelineState == 3)
 		return(CShader::ReadCompiledShaderFile(L"BloomAdditiveComputeShader.cso", ppd3dShaderBlob));
 }
 
 void CBloomShader::CreateShader(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dRootSignature, UINT cxThreadGroups, UINT cyThreadGroups, UINT czThreadGroups)
 {
-	if (m_ppd3dPipelineStates.size() != 3)
+	if (m_ppd3dPipelineStates.size() != 4)
 	{
-		m_nPipelineStates = 3;
+		m_nPipelineStates = 4;
 		m_ppd3dPipelineStates.resize(m_nPipelineStates);
 	}
 
@@ -63,6 +65,11 @@ void CBloomShader::CreateShader(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandL
 
 	d3dPipelineStateDesc2.CS = CreateComputeShader(&pd3dComputeShaderBlob2, 2);
 	hResult = pd3dDevice->CreateComputePipelineState(&d3dPipelineStateDesc2, __uuidof(ID3D12PipelineState), (void**)m_ppd3dPipelineStates[2].GetAddressOf());
+
+	if (pd3dComputeShaderBlob2) pd3dComputeShaderBlob2->Release();
+
+	d3dPipelineStateDesc2.CS = CreateComputeShader(&pd3dComputeShaderBlob2, 3);
+	hResult = pd3dDevice->CreateComputePipelineState(&d3dPipelineStateDesc2, __uuidof(ID3D12PipelineState), (void**)m_ppd3dPipelineStates[3].GetAddressOf());
 
 	if (pd3dComputeShaderBlob2) pd3dComputeShaderBlob2->Release();
 
@@ -142,6 +149,14 @@ void CBloomShader::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandL
 		}
 	}
 	else if (nPipelineState == 2) {
+		if (m_pFillterTextures) {
+			m_pFillterTextures->UpdateComputeUavShaderVariable(pd3dCommandList, 0);
+		}
+		if (m_pBluredTextures) {
+			m_pBluredTextures->UpdateComputeUavShaderVariable(pd3dCommandList, 0);
+		}
+	}
+	else if (nPipelineState == 3) {
 		if (m_pSourceTextures) {
 			m_pSourceTextures->UpdateComputeSrvShaderVariable(pd3dCommandList, 0);
 		}
@@ -173,33 +188,50 @@ void CBloomShader::Dispatch(ID3D12GraphicsCommandList* pd3dCommandList)
 	pd3dCommandList->Dispatch(m_cxThreadGroups, m_cyThreadGroups, m_czThreadGroups);
 
 
-	if (m_ppd3dPipelineStates.data() && m_ppd3dPipelineStates[1]) 
-		pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[1].Get());
-	if (m_pd3dCbvSrvUavDescriptorHeap) 
-		pd3dCommandList->SetDescriptorHeaps(1, m_pd3dCbvSrvUavDescriptorHeap.GetAddressOf());
-	UpdateShaderVariables(pd3dCommandList, 1);
+	//if (m_ppd3dPipelineStates.data() && m_ppd3dPipelineStates[1]) 
+	//	pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[1].Get());
+	///*if (m_pd3dCbvSrvUavDescriptorHeap) 
+	//	pd3dCommandList->SetDescriptorHeaps(1, m_pd3dCbvSrvUavDescriptorHeap.GetAddressOf());*/
+	//UpdateShaderVariables(pd3dCommandList, 1);
 
 	//return;
 
-	for (int i = 1; i >= 1; --i) {
+	for (int i = 3; i >= 1; --i) {
 		XMFLOAT4 level = { (float)i,0,0,0 };
 
+		if (m_ppd3dPipelineStates.data() && m_ppd3dPipelineStates[1])
+			pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[1].Get());
 		/*if (m_pd3dCbvSrvUavDescriptorHeap)
 			pd3dCommandList->SetDescriptorHeaps(1, m_pd3dCbvSrvUavDescriptorHeap.GetAddressOf());*/
+		//UpdateShaderVariables(pd3dCommandList, 1);
+
 		pd3dCommandList->SetComputeRoot32BitConstants(5, 4, &level, 0);
 
 		//UpdateShaderVariables(pd3dCommandList, 1);
-		pd3dCommandList->Dispatch(1920 / pow(redutionSize, i), 1080 / pow(redutionSize, i), 1);
-		//pd3dCommandList->Dispatch(m_nDispatchSizes[i-1].x, m_nDispatchSizes[i - 1].y, 1);
+		//pd3dCommandList->Dispatch(1920 / pow(redutionSize, i), 1080 / pow(redutionSize, i), 1);
+		pd3dCommandList->Dispatch(m_nDispatchSizes[i-1].x, m_nDispatchSizes[i - 1].y, 1);
+
+
+		if (i > 1) {
+			if (m_ppd3dPipelineStates.data() && m_ppd3dPipelineStates[2])
+				pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[2].Get());
+			/*if (m_pd3dCbvSrvUavDescriptorHeap)
+				pd3dCommandList->SetDescriptorHeaps(1, m_pd3dCbvSrvUavDescriptorHeap.GetAddressOf());*/
+			//UpdateShaderVariables(pd3dCommandList, 2);
+			//pd3dCommandList->SetComputeRoot32BitConstants(5, 4, &level, 0);
+
+			//pd3dCommandList->Dispatch(1920 / pow(redutionSize, i - 1), 1080 / pow(redutionSize, i - 1), 1);
+			pd3dCommandList->Dispatch(m_nDispatchSizes[i - 2].x, m_nDispatchSizes[i - 2].y, 1);
+		}
 	}
 
 	//return;
 
-	if (m_ppd3dPipelineStates.data() && m_ppd3dPipelineStates[2])
-		pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[2].Get());
-	if (m_pd3dCbvSrvUavDescriptorHeap)
+	if (m_ppd3dPipelineStates.data() && m_ppd3dPipelineStates[3])
+		pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[3].Get());
+	/*if (m_pd3dCbvSrvUavDescriptorHeap)
 		pd3dCommandList->SetDescriptorHeaps(1, m_pd3dCbvSrvUavDescriptorHeap.GetAddressOf());
-	UpdateShaderVariables(pd3dCommandList, 2);
+	UpdateShaderVariables(pd3dCommandList, 3);*/
 
 	pd3dCommandList->Dispatch(m_cxThreadGroups, m_cyThreadGroups, m_czThreadGroups);
 }
@@ -231,7 +263,7 @@ void CBloomShader::CreateBloomUAVResource(ID3D12Device* pd3dDevice, ID3D12Graphi
 		resoultion.x = ceil(resoultion.x);
 		resoultion.y = ceil(resoultion.y);
 		downSampleTextureResoultions.emplace_back(resoultion);
-		m_nDispatchSizes.emplace_back(XMFLOAT3(ceil(resoultion.x / 32.0f), ceil(resoultion.y / 32.0f), 1.0f));
+		m_nDispatchSizes.emplace_back(XMFLOAT3(ceil(resoultion.x / 30.0f), ceil(resoultion.y / 16.0f), 1.0f));
 	}
 
 	m_nFillters = nDownSample + 1;

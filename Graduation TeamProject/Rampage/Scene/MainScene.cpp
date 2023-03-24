@@ -855,7 +855,7 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 		pd3dCommandList->CopyResource(pd3dDestination, pd3dSource);
 		::SynchronizeResourceTransition(pd3dCommandList, pd3dSource, D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 	}
-	
+
 
 	m_pHDRComputeShader->Dispatch(pd3dCommandList);
 

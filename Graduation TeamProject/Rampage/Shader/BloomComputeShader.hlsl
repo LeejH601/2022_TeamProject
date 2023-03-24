@@ -92,7 +92,7 @@ void Bloom_CS( uint3 DTid : SV_DispatchThreadID )
 			}
 		}
 
-		gtxtRWFillters[level][TexCoord] = float4((f4Color / ((sampleSize * sampleSize)+1)).rgb, 0.0f);
+		gtxtRWFillters[level][TexCoord] = float4((f4Color / ((sampleSize+1) * (sampleSize+1))).rgb, 0.0f);
 		//gtxtRWFillters[level][TexCoord] = gtxtRWFillters[level-1][hLevelTexCoord.xy];
 		//gtxtRWFillters[level][TexCoord] = (f4Color / (sampleSize * sampleSize)) * (1.0f / level);
 	}
