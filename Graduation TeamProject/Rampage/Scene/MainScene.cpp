@@ -548,7 +548,7 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pBillBoardObjectShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 10);;
 
 	std::shared_ptr<CTexture> pSkyBoxTexture = std::make_shared<CTexture>(1, RESOURCE_TEXTURE_CUBE, 0, 1);
-	pSkyBoxTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"SkyBox/Cold_Sunset.dds", RESOURCE_TEXTURE_CUBE, 0);
+	pSkyBoxTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"SkyBox/Night_MoonBurst.dds", RESOURCE_TEXTURE_CUBE, 0);
 
 	m_pSkyBoxShader = std::make_unique<CSkyBoxShader>();
 	m_pSkyBoxShader->CreateShader(pd3dDevice, GetGraphicsRootSignature(), 1, &pdxgiObjectRtvFormats, 0);
@@ -585,6 +585,10 @@ void CMainTMPScene::UpdateObjects(float fTimeElapsed)
 	animation_comp_params.pObjects = &m_pObjects;
 	animation_comp_params.fElapsedTime = fTimeElapsed;
 	CMessageDispatcher::GetInst()->Dispatch_Message<AnimationCompParams>(MessageType::UPDATE_OBJECT, &animation_comp_params, ((CPlayer*)m_pPlayer)->m_pStateMachine->GetCurrentState());
+
+	//Particle 추가한 코드
+	ParticleCompParams ParticleStartParm{ &m_pObjects, fTimeElapsed };
+	CMessageDispatcher::GetInst()->Dispatch_Message<ParticleCompParams>(MessageType::UPDATE_PARTICLE, &ParticleStartParm, ((CPlayer*)m_pPlayer)->m_pStateMachine->GetCurrentState());
 
 	m_pPlayer->Update(fTimeElapsed);
 	m_pLight->Update((CPlayer*)m_pPlayer);
@@ -651,6 +655,7 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 	{
 		m_pPlayer->Animate(0.0f);
 		m_pPlayer->Render(pd3dCommandList, true);
+		m_pParticleObjects[0]->SetPosition(m_pPlayer->GetPosition());
 	}
 
 

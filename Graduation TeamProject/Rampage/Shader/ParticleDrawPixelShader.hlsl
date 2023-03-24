@@ -21,6 +21,7 @@ cbuffer cbFrameworkInfo : register(b7)
 	int			gnParticleType : packoffset(c2.w);
 	float		gfLifeTime : packoffset(c3.x);
 	float		gfSize : packoffset(c3.y);
+	bool		bStart : packoffset(c3.z);
 };
 
 
@@ -35,9 +36,8 @@ struct GS_PARTICLE_DRAW_OUTPUT
 float4 PSParticleDraw(GS_PARTICLE_DRAW_OUTPUT input) : SV_TARGET
 {
 	float4 cColor = gtxtParticleTexture.Sample(gSamplerState, input.uv);
-	cColor.a *= gnTexturesMask * 0.01f; // 0~100으로 받아 0.00 ~1.00으로 변경
+	//cColor.a *= gnTexturesMask * 0.01f; // 0~100으로 받아 0.00 ~1.00으로 변경
 	cColor *= float4(gfColor, 1.f);
-	if (input.spantime < 0.f)
-		cColor.a = 0.f;
+
 	return(cColor);
 }

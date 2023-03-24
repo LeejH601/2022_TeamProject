@@ -331,15 +331,14 @@ public:
 	XMFLOAT3						m_xmf3Position = XMFLOAT3(0.0f, 0.0f, 0.0f);
 	XMFLOAT3						m_xmf3Velocity = XMFLOAT3(0.0f, 0.0f, 0.0f);
 	float							m_fLifetime = 0.0f;
-	float							m_fSpanTime = 0.f;
-	bool							m_bDraw = true;
+	float							m_fSpanTime = 0.f;	
 
 public:
 	CParticleVertex() { }
 	~CParticleVertex() { }
 };
 
-#define MAX_PARTICLES				5000
+#define MAX_PARTICLES				250
 
 //#define _WITH_QUERY_DATA_SO_STATISTICS
 

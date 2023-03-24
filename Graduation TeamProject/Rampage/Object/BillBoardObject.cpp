@@ -75,7 +75,7 @@ void CBillBoardObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dComm
 	m_pcbMappedFrameworkInfo->m_xmf3Gravity = XMFLOAT3(0.0f, -9.8f, 0.0f);
 	m_pcbMappedFrameworkInfo->m_nMaxFlareType2Particles = 15 * 1.5f;
 	m_pcbMappedFrameworkInfo->m_xmf3Color = XMFLOAT3(1.f, 0.f, 0.f);
-	m_pcbMappedFrameworkInfo->m_nParticleType = ParticleType::PARTICLE_TYPE_END;
+	m_pcbMappedFrameworkInfo->m_nParticleType = PARTICLE_TYPE_EMITTER;
 	m_pcbMappedFrameworkInfo->m_fLifeTime = m_fLifeTime;
 	m_pcbMappedFrameworkInfo->m_fSize = m_fSize;
 

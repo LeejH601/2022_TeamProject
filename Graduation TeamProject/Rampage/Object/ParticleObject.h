@@ -19,15 +19,14 @@ public:
 	virtual void CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList, float fCurrentTime, float fElapsedTime);
 
+	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList);
+
 	virtual void PreRender(ID3D12GraphicsCommandList* pd3dCommandList, CShader* pShader, int nPipelineState);
 	virtual void StreamOutRender(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, CShader* pShader);
 	virtual void DrawRender(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, CShader* pShader);
 
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, CShader* pShader);
 	virtual void OnPostRender();
-
-	virtual void Animate(float fTimeElapsed);
-	virtual void AnimateRowColumn(float fTimeElapsed);
 
 	bool& GetEnable();
 	void SetEnable(bool bEnable);
@@ -39,23 +38,17 @@ public:
 	void SetEmitParticleN(int iParticleN);
 	void SetMaxParticleN(int iMaxParticleN);
 	void SetSpeed(float fSpeed);
-
 private:
-	bool							m_bEnable = false;
-	float							m_fSize = 0.8f;
-	float							m_fAlpha = 1.f;
-	float							m_fLifeTime = 3.f;
-	float							m_fTime = 0.f;
-	float							m_fAnimateTime = 0.f;
-	float							m_fAnimationSpeed = 6.0f;
-	XMFLOAT3						m_f3Color = XMFLOAT3(1.f, 1.f, 1.f);
-	int								m_iEmitParticleN = 100;
-	int								m_iMaxParticleN = MAX_PARTICLES;
-	float							m_fSpeed = 10.f;
-
-protected:
-	int 							m_nRow = 0;
-	int 							m_nCol = 0;
+	bool		m_bEnable = false;
+	float		m_fSize = 0.8f;
+	float		m_fAlpha = 1.f;
+	float		m_fLifeTime = 3.f;
+	float		m_fTime = 0.f;
+	XMFLOAT3	m_f3Color = XMFLOAT3(1.f, 1.f, 1.f);
+	int			m_iEmitParticleN = 100;
+	int			m_iMaxParticleN = m_iEmitParticleN;
+	float		m_fSpeed = 10.f;
+	bool		m_bStart = true;
 
 protected:
 	ComPtr<ID3D12Resource>	m_pd3dcbFrameworkInfo = NULL;

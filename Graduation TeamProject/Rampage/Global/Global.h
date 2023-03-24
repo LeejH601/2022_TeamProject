@@ -38,3 +38,8 @@ enum class SCENE_TYPE
 	LOBBY_SCENE,
 	MAIN_SCENE,
 };
+
+enum class PARTICLE_CATEGORY
+{
+	PARTICLE_SPHERE
+};

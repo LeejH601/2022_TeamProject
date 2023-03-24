@@ -205,7 +205,7 @@ public:
 };
 
 // Define Particle Animation component
-#define MAX_PARTICLES				5000
+#define MAX_PARTICLES				250
 class ParticleComponent : public IMessageListener {
     int m_nParticleNumber = MAX_PARTICLES;
     int m_nParticleIndex = 0;

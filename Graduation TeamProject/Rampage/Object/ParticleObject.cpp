@@ -35,12 +35,12 @@ void CParticleObject::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12Grap
 
 	m_pd3dcbFrameworkInfo->Map(0, NULL, (void**)&m_pcbMappedFrameworkInfo);
 
-	m_pcbMappedFrameworkInfo->m_bStart = true;
 }
 
 void CParticleObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList, float fCurrentTime, float fElapsedTime)
 {
-	m_fTime -= fElapsedTime;
+	CGameObject::UpdateShaderVariables(pd3dCommandList);
+	//m_fTime -= fElapsedTime;
 
 	m_pcbMappedFrameworkInfo->m_fCurrentTime = fCurrentTime;
 	m_pcbMappedFrameworkInfo->m_fElapsedTime = fElapsedTime;
@@ -50,26 +50,29 @@ void CParticleObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dComma
 	m_pcbMappedFrameworkInfo->m_xmf3Gravity = XMFLOAT3(0.0f, 0.f, 0.0f);
 	m_pcbMappedFrameworkInfo->m_nMaxFlareType2Particles = 15 * 1.5f;
 	m_pcbMappedFrameworkInfo->m_xmf3Color = m_f3Color;
-	m_pcbMappedFrameworkInfo->m_nParticleType = ParticleType::PARTICLE_TYPE_END;
+	m_pcbMappedFrameworkInfo->m_nParticleType = PARTICLE_TYPE_EMITTER;
 	m_pcbMappedFrameworkInfo->m_fLifeTime = m_fLifeTime;
 	m_pcbMappedFrameworkInfo->m_fSize = m_fSize;
+	m_pcbMappedFrameworkInfo->m_bStart = m_bStart;
 
-	if (m_fTime < 0.f) {
-		m_fTime = m_fLifeTime;
-		m_pcbMappedFrameworkInfo->m_bStart = true;
-	}
+	if (m_bStart) // 1번만 파티클을 생성하도록(emit particle)
+		m_bStart = !m_bStart;
 
-	if (static_cast<CParticleMesh*>(m_pMesh.get())->GetVertices() > 1)
-		m_pcbMappedFrameworkInfo->m_bStart = false;
 
 	D3D12_GPU_VIRTUAL_ADDRESS d3dGpuVirtualAddress = m_pd3dcbFrameworkInfo->GetGPUVirtualAddress();
 	pd3dCommandList->SetGraphicsRootConstantBufferView(11, d3dGpuVirtualAddress);
 }
 
+void CParticleObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
+{
+}
+
+
 void CParticleObject::PreRender(ID3D12GraphicsCommandList* pd3dCommandList, CShader* pShader, int nPipelineState)
 {
-	if (!m_bEnable)
-		return;
+	//if (!m_bEnable)
+	//	return;
+	UpdateShaderVariables(pd3dCommandList);
 	pShader->OnPrepareRender(pd3dCommandList, nPipelineState);
 	for (int i = 0; i < m_nMaterials; ++i)
 	{
@@ -98,49 +101,15 @@ void CParticleObject::DrawRender(ID3D12GraphicsCommandList* pd3dCommandList, CCa
 
 void CParticleObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, CShader* pShader)
 {
-	if (!m_bEnable)
-		return;
-	CGameObject::UpdateShaderVariables(pd3dCommandList);
+	//if (!m_bEnable)
+	//	return;
 	StreamOutRender(pd3dCommandList, pCamera, pShader);
 	DrawRender(pd3dCommandList, pCamera, pShader);
 }
 
 void CParticleObject::OnPostRender()
 {
-	if (m_pMesh) m_pMesh->OnPostRender(0);
-}
-
-void CParticleObject::Animate(float fTimeElapsed)
-{
-	if (m_bEnable) {
-		m_fAnimateTime -= fTimeElapsed * m_fAnimationSpeed;
-		AnimateRowColumn(m_fAnimateTime);
-
-		if (m_fAnimateTime <= 0.f)
-			m_fAnimateTime = 0.5f;
-	}
-}
-
-void CParticleObject::AnimateRowColumn(float fTimeElapsed)
-{
-	if (!m_ppMaterials.empty() && m_ppMaterials[0]->GetTexture())
-	{
-		int m_nRows = m_ppMaterials[0]->GetTexture()->GetRow();
-		int m_nCols = m_ppMaterials[0]->GetTexture()->GetColumn();
-		m_xmf4x4World._11 = 1.0f / float(m_nRows);
-		m_xmf4x4World._22 = 1.0f / float(m_nCols);
-		m_xmf4x4World._31 = float(m_nRow) / float(m_nRows);
-		m_xmf4x4World._32 = float(m_nCol) / float(m_nCols);
-		if (fTimeElapsed <= 0.0f)
-		{
-			if (++m_nCol == m_nCols) {
-				m_nRow++;
-				m_nCol = 0;
-			}
-			if (m_nRow == m_nRows)
-					m_nRow = 0;
-		}
-	}
+	if (m_pMesh) m_pMesh->OnPostRender(0); //Read Stream Output Buffer Filled Size
 }
 
 bool& CParticleObject::GetEnable()
@@ -151,6 +120,8 @@ bool& CParticleObject::GetEnable()
 void CParticleObject::SetEnable(bool bEnable)
 {
 	m_bEnable = bEnable;
+	if (m_bEnable)
+		m_bStart = true;
 }
 
 void CParticleObject::SetSize(float fSize)

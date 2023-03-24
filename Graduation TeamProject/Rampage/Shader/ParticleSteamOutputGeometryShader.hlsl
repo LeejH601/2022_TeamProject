@@ -1,14 +1,3 @@
-#define PARTICLE_TYPE_EMITTER		0
-#define PARTICLE_TYPE_SHELL			1
-#define PARTICLE_TYPE_FLARE01		2
-#define PARTICLE_TYPE_FLARE02		3
-#define PARTICLE_TYPE_FLARE03		4
-
-#define SHELL_PARTICLE_LIFETIME		3.0f
-#define FLARE01_PARTICLE_LIFETIME	2.5f
-#define FLARE02_PARTICLE_LIFETIME	1.5f
-#define FLARE03_PARTICLE_LIFETIME	2.0f
-
 Buffer<float4> gRandomConeBuffer : register(t32);
 Buffer<float4> gRandomSphereBuffer : register(t33);
 
@@ -34,8 +23,15 @@ struct VS_PARTICLE_INPUT
 	float3 velocity : VELOCITY;
 	float lifetime : LIFETIME;
 	float spantime : SPANTIME;
-	//uint type : PARTICLETYPE;
 };
+
+cbuffer cbGameObjectInfo : register(b0)
+{
+	matrix gmtxGameObject : packoffset(c0);
+	matrix gmtxTexture : packoffset(c4);
+	uint gnTexturesMask : packoffset(c8);
+}
+
 
 /////////////////////////////////////////////////////////////////////////////////////////////////
 //float4 RandomDirection(float fOffset)
@@ -145,7 +141,7 @@ void GenerateEmberParticles(VS_PARTICLE_INPUT input, inout PointStream<VS_PARTIC
 		// gfLifeTime
 		VS_PARTICLE_INPUT particle = input;
 
-		//particle.type = PARTICLE_TYPE_FLARE03;
+		//particle.spantime = PARTICLE_TYPE_FLARE03;
 		//particle.position = input.position + (input.velocity * gfElapsedTime);
 		particle.lifetime = gfLifeTime;
 		for (int i = 0; i < 64; i++)
@@ -166,12 +162,11 @@ void GenerateEmberParticles(VS_PARTICLE_INPUT input, inout PointStream<VS_PARTIC
 void SphereParticles(VS_PARTICLE_INPUT input, inout PointStream<VS_PARTICLE_INPUT> output)
 {
 
-	if ((gfLifeTime <= 0.0f)) // 积己矫痢
+	if ((/*gfLifeTime <= 0.0f*/ bStart)) // 积己矫痢
 	{
 		VS_PARTICLE_INPUT particle = input;
 		float4 f4Random = float4(0.0f, 0.0f, 0.0f, 0.0f);
 
-		//particle.type = PARTICLE_TYPE_FLARE01;
 		particle.position = input.position + (input.velocity * gfElapsedTime * 2.0f);
 
 
@@ -189,37 +184,33 @@ void SphereParticles(VS_PARTICLE_INPUT input, inout PointStream<VS_PARTICLE_INPU
 	}
 }
 
-void LineParticles(VS_PARTICLE_INPUT input, inout PointStream<VS_PARTICLE_INPUT> output)
-{
-
-		VS_PARTICLE_INPUT particle = input;
-		float4 f4Random = float4(0.0f, 0.0f, 0.0f, 0.0f);
-
-		particle.spantime += 0.08f;
-		if(particle.spantime > 0.f)
-			particle.position.y = (50 * particle.spantime) % 80.f;
-
-		output.Append(particle);
-}
-
 void ConeParticles(VS_PARTICLE_INPUT input, inout PointStream<VS_PARTICLE_INPUT> output)
 {
+	if (bStart) // 积己矫痢
+	{
+		VS_PARTICLE_INPUT particle = input;
+		float4 f4Random = float4(0.0f, 0.0f, 0.0f, 0.0f);
+		particle.lifetime = gfLifeTime;
+		particle.position = gmtxGameObject._41_42_43;
+		for (int i = 0; i < gnFlareParticlesToEmit; i++)
+		{
+			f4Random = RandomDirectionOnSphere(i);
+			particle.velocity = (f4Random.xyz * gfSpeed);
 
-	VS_PARTICLE_INPUT particle = input;
-	float4 f4Random = float4(0.0f, 0.0f, 0.0f, 0.0f);
-
-	particle.spantime += 0.08f;
-	if (particle.spantime > 0.f)
-		particle.position.y = (50 * particle.spantime) % 80.f;
-
-	output.Append(particle);
+			output.Append(particle);
+		}
+	}
+	else if(input.lifetime >= 0.0f)
+	{
+		OutputParticleToStream(input, output);
+	}
 }
 
 [maxvertexcount(128)]
 void GSParticleStreamOutput(point VS_PARTICLE_INPUT input[1], inout PointStream<VS_PARTICLE_INPUT> output)
 {
 	VS_PARTICLE_INPUT particle = input[0];
-	LineParticles(particle, output);
+	ConeParticles(particle, output);
 	//if (particle.type == PARTICLE_TYPE_EMITTER) 
 	//	EmmitParticles(particle, output);
 	//else if (particle.type == PARTICLE_TYPE_SHELL) 

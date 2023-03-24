@@ -4,7 +4,6 @@ struct VS_PARTICLE_INPUT
 	float3 velocity : VELOCITY;
 	float lifetime : LIFETIME;
 	float spantime : SPANTIME;
-	//uint type : PARTICLETYPE;
 };
 
 struct VS_PARTICLE_DRAW_OUTPUT
@@ -27,15 +26,17 @@ cbuffer cbFrameworkInfo : register(b7)
 	int			gnParticleType : packoffset(c2.w);
 	float		gfLifeTime : packoffset(c3.x);
 	float		gfSize : packoffset(c3.y);
-};
+	bool		bStart : packoffset(c3.z);
 
+};
 
 VS_PARTICLE_DRAW_OUTPUT VSParticleDraw(VS_PARTICLE_INPUT input)
 {
 	VS_PARTICLE_DRAW_OUTPUT output = (VS_PARTICLE_DRAW_OUTPUT)0;
 
 	output.position = input.position;
-	output.size = gfSize;
+	output.size = 2.f;
+	output.spantime = input.spantime;
 
 	return(output);
 }

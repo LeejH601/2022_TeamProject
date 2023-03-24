@@ -1320,18 +1320,15 @@ void CParticleMesh::CreateVertexBuffer(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 	m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_POINTLIST;
 
 	CParticleVertex pVertices[50];
+
 	for (int i = 0; i < 50; ++i)
 	{
 		pVertices[i].m_xmf3Position = xmf3Position;
 		pVertices[i].m_xmf3Velocity = xmf3Velocity;
 		pVertices[i].m_fLifetime = fLifetime;
-		pVertices[i].m_fSpanTime = 0.1f * i;
+		pVertices[i].m_fSpanTime = 0.f;
 	}
 
-	//pVertices[0].m_xmf3Position = xmf3Position;
-	//pVertices[0].m_xmf3Velocity = xmf3Velocity;
-	//pVertices[0].m_fLifetime = fLifetime;
-	//pVertices[0].m_fSpanTime = 0.f;
 	m_pd3dPositionBuffer = CreateBufferResource(pd3dDevice, pd3dCommandList, pVertices, m_nStride * m_nVertices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dPositionUploadBuffer);
 
 	D3D12_VERTEX_BUFFER_VIEW m_pd3dPositionBufferView;
@@ -1341,28 +1338,6 @@ void CParticleMesh::CreateVertexBuffer(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 	m_pd3dVertexBufferViews.resize(1);
 	m_pd3dVertexBufferViews[0] = m_pd3dPositionBufferView;
 }
-
-//void CParticleMesh::CreateVertexBuffer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, XMFLOAT3 xmf3Position, XMFLOAT3 xmf3Velocity, float fLifetime, XMFLOAT3 xmf3Acceleration, XMFLOAT3 xmf3Color, XMFLOAT2 xmf2Size)
-//{
-//	m_nVertices = 1;
-//	m_nStride = sizeof(CParticleVertex);
-//	m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_POINTLIST;
-//
-//	CParticleVertex pVertices[1];
-//
-//	pVertices[0].m_xmf3Position = xmf3Position;
-//	pVertices[0].m_xmf3Velocity = xmf3Velocity;
-//	pVertices[0].m_fLifetime = fLifetime;
-//	pVertices[0].m_fSpanTime = 0.f;
-//	m_pd3dPositionBuffer = CreateBufferResource(pd3dDevice, pd3dCommandList, pVertices, m_nStride * m_nVertices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dPositionUploadBuffer);
-//
-//	D3D12_VERTEX_BUFFER_VIEW m_pd3dPositionBufferView;
-//	m_pd3dPositionBufferView.BufferLocation = m_pd3dPositionBuffer->GetGPUVirtualAddress();
-//	m_pd3dPositionBufferView.StrideInBytes = m_nStride;
-//	m_pd3dPositionBufferView.SizeInBytes = m_nStride * m_nVertices;
-//	m_pd3dVertexBufferViews.resize(1);
-//	m_pd3dVertexBufferViews[0] = m_pd3dPositionBufferView;
-//}
 
 void CParticleMesh::CreateStreamOutputBuffer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, UINT nMaxParticles)
 {
@@ -1402,7 +1377,7 @@ void CParticleMesh::PreRender(ID3D12GraphicsCommandList* pd3dCommandList, int nP
 
 			m_bStart = false;
 
-			m_nVertices = 50;
+			m_nVertices = 1;
 
 			m_pd3dPositionBufferView.BufferLocation = m_pd3dPositionBuffer->GetGPUVirtualAddress();
 			m_pd3dPositionBufferView.StrideInBytes = m_nStride;
@@ -1502,7 +1477,8 @@ void CParticleMesh::OnPostRender(int nPipelineState)
 		_stprintf_s(pstrDebug, 256, _T("Stream Output Vertices = %d\n"), m_nVertices);
 		OutputDebugString(pstrDebug);
 #endif
-		if ((m_nVertices == 0) || (m_nVertices >= MAX_PARTICLES)) m_bStart = true;
+		if ((m_nVertices == 0) || (m_nVertices >= MAX_PARTICLES)) 
+			m_bStart = true;
 	}
 }
 
