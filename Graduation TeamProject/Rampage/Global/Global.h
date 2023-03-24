@@ -6,7 +6,7 @@ enum class MessageType {
 	COLLISION,
 	UPDATE_CAMERA,
 	UPDATE_OBJECT,
-	UPDATE_PARTICLE
+	UPDATE_PARTICLE,
 };
 
 enum class MESSAGE_TYPE

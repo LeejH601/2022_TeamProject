@@ -34,11 +34,12 @@ struct AnimationCompParams {
 };
 
 struct ParticleCompParams {
-    std::vector<std::unique_ptr<CGameObject>>* pObjects;
-    float fElapsedTime;
+    CGameObject* pObject;
+    XMFLOAT3 xmf3Position;
 };
 
 struct CollideParams {
+    XMFLOAT3 xmf3CollidePosition;
 };
 
 // Define message listener interface
@@ -49,12 +50,12 @@ public:
     bool& GetEnable() { return m_bEnable; }
     void SetEnable(bool bEnable) { m_bEnable = bEnable; }
 
+    virtual void HandleMessage(const Message& message, const CollideParams& params) {}
     virtual void HandleMessage(const Message& message, const PlayerAttackParams& params) {}
     virtual void HandleMessage(const Message& message, const SoundPlayParams& params) {}
     virtual void HandleMessage(const Message& message, const CameraUpdateParams& params) {}
     virtual void HandleMessage(const Message& message, const AnimationCompParams& params) {}
     virtual void HandleMessage(const Message& message, const ParticleCompParams& params) {}
-    virtual void HandleMessage(const Message& message, const CollideParams& params) {}
 };
 
 // Define Player Attack component
@@ -64,6 +65,14 @@ private:
 public:
     void SetObject(CGameObject* pObject) { m_pObject = pObject; }
     virtual void HandleMessage(const Message& message, const PlayerAttackParams& params);
+};
+
+// Define CollideListener
+class SceneCollideListener : public IMessageListener {
+    CScene* m_pScene;
+public:
+    void SetScene(CScene* pScene) { m_pScene = pScene; }
+    virtual void HandleMessage(const Message& message, const CollideParams& params);
 };
 
 // Define Sound Play component

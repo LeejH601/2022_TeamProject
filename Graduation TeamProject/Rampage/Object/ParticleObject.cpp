@@ -14,10 +14,6 @@ CParticleObject::CParticleObject(std::shared_ptr<CTexture> pSpriteTexture, ID3D1
 
 	SetTexture(pSpriteTexture);
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
-
-	pShader->CreateGraphicsPipelineState(pd3dDevice, pd3dGraphicsRootSignature, 0);
-	pShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
-
 }
 
 CParticleObject::~CParticleObject()
@@ -65,6 +61,7 @@ void CParticleObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dComma
 
 void CParticleObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
 {
+	CGameObject::UpdateShaderVariables(pd3dCommandList);
 }
 
 
