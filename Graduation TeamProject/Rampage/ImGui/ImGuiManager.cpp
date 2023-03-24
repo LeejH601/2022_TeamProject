@@ -91,6 +91,8 @@ void DataLoader::SaveComponentSet(FILE* pInFile, CState<CPlayer>* pState)
 	SoundPlayComponent* pShockSoundComponent = dynamic_cast<SoundPlayComponent*>(pState->GetShockSoundComponent());
 	SoundPlayComponent* pShootSoundComponent = dynamic_cast<SoundPlayComponent*>(pState->GetShootSoundComponent());
 
+	ParticleComponent* pParticleComponent = dynamic_cast<ParticleComponent*>(pState->GetParticleComponent());
+
 	std::string str = "<Components>:";
 	WriteStringFromFile(pInFile, str);
 
@@ -186,6 +188,29 @@ void DataLoader::SaveComponentSet(FILE* pInFile, CState<CPlayer>* pState)
 	WriteFloatFromFile(pInFile, pDamageAnimationComponent->GetVolume());
 	WriteStringFromFile(pInFile, std::string("</CDamageSoundComponent>:"));*/
 
+	WriteStringFromFile(pInFile, std::string("<ParticleComponent>:"));
+	WriteStringFromFile(pInFile, std::string("<Enable>:"));
+	WriteIntegerFromFile(pInFile, pParticleComponent->GetEnable());
+	WriteStringFromFile(pInFile, std::string("<ParticleNumber>:"));
+	WriteIntegerFromFile(pInFile, pParticleComponent->GetParticleNumber());
+	WriteStringFromFile(pInFile, std::string("<ParticleIndex>:"));
+	WriteIntegerFromFile(pInFile, pParticleComponent->GetParticleIndex());
+	WriteStringFromFile(pInFile, std::string("<Alpha>:"));
+	WriteFloatFromFile(pInFile, pParticleComponent->GetAlpha());
+	WriteStringFromFile(pInFile, std::string("<LifeTime>:"));
+	WriteFloatFromFile(pInFile, pParticleComponent->GetLifeTime());
+	WriteStringFromFile(pInFile, std::string("<Speed>:"));
+	WriteFloatFromFile(pInFile, pParticleComponent->GetSpeed());
+	WriteStringFromFile(pInFile, std::string("<Size>:"));
+	WriteFloatFromFile(pInFile, pParticleComponent->GetSize());
+	WriteStringFromFile(pInFile, std::string("<Color_R>:"));
+	WriteFloatFromFile(pInFile, pParticleComponent->GetColor().x);
+	WriteStringFromFile(pInFile, std::string("<Color_G>:"));
+	WriteFloatFromFile(pInFile, pParticleComponent->GetColor().y);
+	WriteStringFromFile(pInFile, std::string("<Color_B>:"));
+	WriteFloatFromFile(pInFile, pParticleComponent->GetColor().z);
+	WriteStringFromFile(pInFile, std::string("</ParticleComponent>:"));
+
 	str = "</Components>:";
 	WriteStringFromFile(pInFile, str);
 }
@@ -202,6 +227,8 @@ void DataLoader::LoadComponentSet(FILE* pInFile, CState<CPlayer>* pState)
 
 	SoundPlayComponent* pShockSoundComponent = dynamic_cast<SoundPlayComponent*>(pState->GetShockSoundComponent());
 	SoundPlayComponent* pShootSoundComponent = dynamic_cast<SoundPlayComponent*>(pState->GetShootSoundComponent());
+
+	ParticleComponent* pParticleComponent = dynamic_cast<ParticleComponent*>(pState->GetParticleComponent());
 
 	char buf[256];
 	std::string str;
@@ -449,6 +476,63 @@ void DataLoader::LoadComponentSet(FILE* pInFile, CState<CPlayer>* pState)
 				}
 			}
 		}*/
+		else if (!strcmp(buf, "<ParticleComponent>:"))
+		{
+			for (; ; )
+			{
+				ReadStringFromFile(pInFile, buf);
+
+				if (!strcmp(buf, "<Enable>:"))
+				{
+					pParticleComponent->SetEnable(ReadIntegerFromFile(pInFile));
+				}
+				else if (!strcmp(buf, "<ParticleNumber>:"))
+				{
+					pParticleComponent->SetParticleNumber(ReadIntegerFromFile(pInFile));
+				}
+				else if (!strcmp(buf, "<ParticleIndex>:"))
+				{
+					pParticleComponent->SetParticleIndex(ReadIntegerFromFile(pInFile));
+
+					std::vector<std::shared_ptr<CTexture>> vTexture = CSimulatorScene::GetInst()->GetTextureManager()->GetParticleTextureList();
+
+					std::shared_ptr pTexture = vTexture[pParticleComponent->GetParticleIndex()];
+					pParticleComponent->SetParticleTexture(pTexture);
+				}
+				else if (!strcmp(buf, "<Alpha>:"))
+				{
+					pParticleComponent->SetAlpha(ReadFloatFromFile(pInFile));
+				}
+				else if (!strcmp(buf, "<LifeTime>:"))
+				{
+					pParticleComponent->SetLifeTime(ReadFloatFromFile(pInFile));
+				}
+				else if (!strcmp(buf, "<Speed>:"))
+				{
+					pParticleComponent->SetSpeed(ReadFloatFromFile(pInFile));
+				}
+				else if (!strcmp(buf, "<Size>:"))
+				{
+					pParticleComponent->SetSize(ReadFloatFromFile(pInFile));
+				}
+				else if (!strcmp(buf, "<Color_R>:"))
+				{
+					pParticleComponent->SetColorR(ReadFloatFromFile(pInFile));
+				}
+				else if (!strcmp(buf, "<Color_G>:"))
+				{
+					pParticleComponent->SetColorG(ReadFloatFromFile(pInFile));
+				}
+				else if (!strcmp(buf, "<Color_B>:"))
+				{
+					pParticleComponent->SetColorB(ReadFloatFromFile(pInFile));
+				}
+				else if (!strcmp(buf, "</ParticleComponent>:"))
+				{
+					break;
+				}
+			}
+			}
 		else if (!strcmp(buf, "</Components>:"))
 		{
 			break;
@@ -670,62 +754,66 @@ void CImGuiManager::SetUI()
 
 		if (ImGui::CollapsingHeader("Particle Effect"))
 		{
-			//일단 보류
-			//ParticleComponent* pParticleComponent = static_cast<ParticleComponent*>(pCurrentAnimation->GetParticleComponent());
+			ParticleComponent* pParticleComponent = dynamic_cast<ParticleComponent*>(pCurrentAnimation->GetParticleComponent());
 
-			//initial_curpos.y += 25.f;
-			//ImGui::SetCursorPos(initial_curpos);
-			//ImGui::SetNextItemWidth(190.f);
-			//ImGui::Checkbox("On/Off##ParticleEffect", &pParticleComponent->GetEnable());
+			initial_curpos.y += 25.f;
+			ImGui::SetCursorPos(initial_curpos);
+			ImGui::SetNextItemWidth(190.f);
+			ImGui::Checkbox("On/Off##ParticleEffect", &pParticleComponent->GetEnable());
 
-			//std::vector<std::shared_ptr<CTexture>> vTexture = CSimulatorScene::GetInst()->GetTextureManager()->GetParticleTextureList();
-			//std::vector<const char*> items;
-			//std::vector <std::string> str(100);
-			//for (int i = 0; i < vTexture.size(); i++)
-			//{
-			//	std::wstring wstr = vTexture[i]->GetTextureName(0);
-			//	str[i].assign(wstr.begin(), wstr.end());
-			//	items.emplace_back(str[i].c_str());
-			//}
+			std::vector<std::shared_ptr<CTexture>> vTexture = CSimulatorScene::GetInst()->GetTextureManager()->GetParticleTextureList();
+			std::vector<const char*> items;
+			std::vector <std::string> str(100);
+			for (int i = 0; i < vTexture.size(); i++)
+			{
+				std::wstring wstr = vTexture[i]->GetTextureName(0);
+				str[i].assign(wstr.begin(), wstr.end());
+				items.emplace_back(str[i].c_str());
+			}
 
-			//initial_curpos.y += 25.f;
-			//ImGui::SetCursorPos(initial_curpos);
-			//ImGui::SetNextItemWidth(190.f);
+			initial_curpos.y += 25.f;
+			ImGui::SetCursorPos(initial_curpos);
+			ImGui::SetNextItemWidth(190.f);
 
-			//int iParticleSpriteN = pParticleComponent->GetParticleIndex();
-			//ImGui::Combo("Texture##ParticleEffect", (int*)(&pParticleComponent->GetParticleIndex()), items.data(), items.size());
-			//if (iParticleSpriteN != pParticleComponent->GetParticleIndex())
-			//	pParticleComponent->SetTexture(0, ConverCtoWC(items[pParticleComponent->GetParticleIndex()]));
+			/*pParticleComponent->SetParticleIndex(0);
+			std::shared_ptr pTexture = vTexture[pParticleComponent->GetParticleIndex()];
+			pParticleComponent->SetParticleTexture(pTexture);*/
 
-			//initial_curpos.y += 25.f;
-			//ImGui::SetCursorPos(initial_curpos);
-			//ImGui::SetNextItemWidth(190.f);
-			//ImGui::DragFloat("Size##ParticleEffect", &pParticleComponent->GetSize(), 0.01f, 0.0f, 10.0f, "%.2f", 0);
+			if (ImGui::Combo("Texture##ParticleEffect", (int*)(&pParticleComponent->GetParticleIndex()), items.data(), items.size()))
+			{
+				std::shared_ptr pTexture = vTexture[pParticleComponent->GetParticleIndex()];
+				pParticleComponent->SetParticleTexture(pTexture);
+			}
 
-			//initial_curpos.y += 25.f;
-			//ImGui::SetCursorPos(initial_curpos);
-			//ImGui::SetNextItemWidth(190.f);
-			//ImGui::DragFloat("Alpha##ParticleEffect", &pParticleComponent->GetAlpha(), 0.01f, 0.0f, 10.0f, "%.2f", 0);
+			initial_curpos.y += 25.f;
+			ImGui::SetCursorPos(initial_curpos);
+			ImGui::SetNextItemWidth(190.f);
+			ImGui::DragFloat("Size##ParticleEffect", &pParticleComponent->GetSize(), 0.01f, 0.0f, 10.0f, "%.2f", 0);
 
-			//initial_curpos.y += 25.f;
-			//ImGui::SetCursorPos(initial_curpos);
-			//ImGui::SetNextItemWidth(190.f);
-			//ImGui::DragFloat("LifeTime##ParticleEffect", &pParticleComponent->GetLifeTime(), 0.01f, 0.0f, 10.0f, "%.1f", 0);
+			initial_curpos.y += 25.f;
+			ImGui::SetCursorPos(initial_curpos);
+			ImGui::SetNextItemWidth(190.f);
+			ImGui::DragFloat("Alpha##ParticleEffect", &pParticleComponent->GetAlpha(), 0.01f, 0.0f, 10.0f, "%.2f", 0);
 
-			//initial_curpos.y += 25.f;
-			//ImGui::SetCursorPos(initial_curpos);
-			//ImGui::SetNextItemWidth(190.f);
-			//ImGui::DragInt("ParticleCount##ParticleEffect", &pParticleComponent->GetParticleNumber(), 0.01f, 0.0f, 10.0f, "%d", 0);
+			initial_curpos.y += 25.f;
+			ImGui::SetCursorPos(initial_curpos);
+			ImGui::SetNextItemWidth(190.f);
+			ImGui::DragFloat("LifeTime##ParticleEffect", &pParticleComponent->GetLifeTime(), 0.01f, 0.0f, 10.0f, "%.1f", 0);
 
-			//initial_curpos.y += 25.f;
-			//ImGui::SetCursorPos(initial_curpos);
-			//ImGui::SetNextItemWidth(190.f);
-			//ImGui::DragFloat("Speed##ParticleEffect", &pParticleComponent->GetSpeed(), 0.01f, 0.0f, 10.0f, "%.1f", 0);
+			initial_curpos.y += 25.f;
+			ImGui::SetCursorPos(initial_curpos);
+			ImGui::SetNextItemWidth(190.f);
+			ImGui::DragInt("ParticleCount##ParticleEffect", &pParticleComponent->GetParticleNumber(), 0.01f, 0.0f, 10.0f, "%d", 0);
 
-			//initial_curpos.y += 25.f;
-			//ImGui::SetCursorPos(initial_curpos);
-			//ImGui::SetNextItemWidth(30.f);
-			//ImGui::ColorEdit3("ParticleEffect", (float*)&pParticleComponent->GetColor()); // Edit 3 floats representing a color
+			initial_curpos.y += 25.f;
+			ImGui::SetCursorPos(initial_curpos);
+			ImGui::SetNextItemWidth(190.f);
+			ImGui::DragFloat("Speed##ParticleEffect", &pParticleComponent->GetSpeed(), 0.01f, 0.0f, 10.0f, "%.1f", 0);
+
+			initial_curpos.y += 25.f;
+			ImGui::SetCursorPos(initial_curpos);
+			ImGui::SetNextItemWidth(30.f);
+			ImGui::ColorEdit3("ParticleEffect", (float*)&pParticleComponent->GetColor()); // Edit 3 floats representing a color
 		}
 
 		initial_curpos.y += 25.f;

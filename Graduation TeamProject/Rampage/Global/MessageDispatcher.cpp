@@ -240,6 +240,7 @@ void ParticleComponent::HandleMessage(const Message& message, const ParticleComp
 		pParticle->SetMaxParticleN(m_nParticleNumber);
 		pParticle->SetEmitParticleN(m_nParticleNumber);
 		pParticle->SetPosition(params.xmf3Position);
+		pParticle->ChangeTexture(m_pTexture);
 	}
 }
 void SceneCollideListener::HandleMessage(const Message& message, const CollideParams& params)

@@ -5,6 +5,7 @@
 class CGameObject;
 class CCamera;
 class CScene;
+class CTexture;
 
 // Define base message class
 class Message {
@@ -223,14 +224,16 @@ class ParticleComponent : public IMessageListener {
     float m_fLifeTime = 5.f;
     float m_fSpeed = 20.f;
     XMFLOAT3 m_xmf3Color = XMFLOAT3(1.f, 1.f, 1.f);
+    std::shared_ptr<CTexture> m_pTexture;
 public:
     int& GetParticleNumber() { return m_nParticleNumber; }
     int& GetParticleIndex() { return m_nParticleIndex; }
     float& GetSize() { return m_fSize; }
-    float& GetAlpha() { return m_fSize; }
-    float& GetLifeTime() { return m_fSize; }
-    float& GetSpeed() { return m_fSize; }
+    float& GetAlpha() { return m_fAlpha; }
+    float& GetLifeTime() { return m_fLifeTime; }
+    float& GetSpeed() { return m_fSpeed; }
     XMFLOAT3& GetColor() { return m_xmf3Color; }
+    std::shared_ptr<CTexture>& GetTexture() { return m_pTexture; }
 
     void SetParticleNumber(int nParticleNumber) { m_nParticleNumber = nParticleNumber; }
     void SetParticleIndex(int nParticleIndex) { m_nParticleIndex = nParticleIndex; }
@@ -239,6 +242,10 @@ public:
     void SetLifeTime(float fLifeTime) { m_fSize = fLifeTime; }
     void SetSpeed(float fSpeed) { m_fSize = fSpeed; }
     void SetColor(XMFLOAT3 xmf3Color) { m_xmf3Color = xmf3Color; }
+    void SetColorR(float r) { m_xmf3Color.x = r; }
+    void SetColorG(float g) { m_xmf3Color.y = g; }
+    void SetColorB(float b) { m_xmf3Color.z = b; }
+    void SetParticleTexture(std::shared_ptr<CTexture> pTexture) { m_pTexture = pTexture; }
 
     virtual void HandleMessage(const Message& message, const ParticleCompParams& params);
 };
