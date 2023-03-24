@@ -10,11 +10,15 @@ RWTexture2D<float4> gtxtRWBlurs[5] : register(u10);
 //#define BICUBIC
 
 [numthreads(32, 32, 1)]
-void BloomAdditive_CS( uint3 DTid : SV_DispatchThreadID )
+void BloomAdditive_CS(uint3 DTid : SV_DispatchThreadID)
 {
-	float BloomFactor = 0.15f;
 	float4 Color = gtxtSource[DTid.xy];
 	int2 uv = int2(DTid.x / REDUTION_SIZE, DTid.y / REDUTION_SIZE);
+
+	int2 uv1 = int2(DTid.x / REDUTION_SIZE, DTid.y / REDUTION_SIZE);
+	int2 uv2 = int2((DTid.x + 1) / REDUTION_SIZE, DTid.y / REDUTION_SIZE);
+	int2 uv3 = int2(DTid.x / REDUTION_SIZE, (DTid.y + 1) / REDUTION_SIZE);
+	int2 uv4 = int2((DTid.x + 1) / REDUTION_SIZE,( DTid.y + 1) / REDUTION_SIZE);
 	float2 uvWeight = frac(DTid / REDUTION_SIZE);
 	float4 BloomColor;
 
@@ -104,12 +108,24 @@ void BloomAdditive_CS( uint3 DTid : SV_DispatchThreadID )
 		float4 lerp1 = lerp(Color1, Color2, uvWeight.x);
 		float4 lerp2 = lerp(Color3, Color4, uvWeight.x);
 		BloomColor = lerp(lerp1, lerp2, uvWeight.y);
+
+		/*float4 Color = gtxtRWBlurs[1][uv1];
+		Color += gtxtRWBlurs[1][uv2];
+		Color += gtxtRWBlurs[1][uv3];
+		Color += gtxtRWBlurs[1][uv4];
+		BloomColor = Color / 4;*/
 	}
 #endif
-	gtxtRWBlurs[0][DTid.xy] = BloomColor;
+
+	BloomColor = gtxtRWBlurs[1][uv];
+	float BloomFactor = 1.0f;
 
 	BloomColor *= BloomFactor;
 
+	gtxtRWBlurs[0][DTid.xy] = BloomColor;
 
-	gtxtRWOutput[DTid.xy] = float4((Color.xyz + BloomColor.xyz), Color.w);
+
+
+	gtxtRWOutput[DTid.xy] =  float4(max(gtxtRWOutput[DTid.xy].xyz, (BloomColor.xyz)), Color.w);
+	//gtxtRWOutput[DTid.xy] = float4((Color.xyz + BloomColor.xyz), Color.w);
 }

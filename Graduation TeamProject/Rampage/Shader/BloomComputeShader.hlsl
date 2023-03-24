@@ -74,7 +74,7 @@ void Bloom_CS( uint3 DTid : SV_DispatchThreadID )
 
 
 	for(int level = 1; level < 4 + 1; ++level) {
-		int sampleSize = REDUTION_SIZE;
+		int sampleSize = REDUTION_SIZE*2;
 
 		if (!(DTid.x % pow(REDUTION_SIZE, level) == 0 || DTid.y % pow(REDUTION_SIZE, level) == 0))
 			break;
@@ -84,15 +84,16 @@ void Bloom_CS( uint3 DTid : SV_DispatchThreadID )
 		int2 hLevelTexCoord = int2(DTid.x / pow(REDUTION_SIZE, level - 1), DTid.y / pow(REDUTION_SIZE, level - 1));
 		int2 TexCoord = int2(DTid.x / pow(REDUTION_SIZE, level), DTid.y / pow(REDUTION_SIZE, level));
 		float4 f4Color = float4(0, 0, 0, 0);
-		for (int i = -1; i < sampleSize - 1; i++)
+		for (int i = -sampleSize/2; i < sampleSize/2; i++)
 		{
-			for (int j = -1; j < sampleSize -1; j++)
+			for (int j = -sampleSize/2; j < sampleSize/2; j++)
 			{
 				f4Color += gtxtRWFillters[level - 1][hLevelTexCoord.xy + int2(i, j)];
 			}
 		}
 
-		gtxtRWFillters[level][TexCoord] = (f4Color / (sampleSize * sampleSize));
+		gtxtRWFillters[level][TexCoord] = float4((f4Color / ((sampleSize * sampleSize)+1)).rgb, 0.0f);
+		//gtxtRWFillters[level][TexCoord] = gtxtRWFillters[level-1][hLevelTexCoord.xy];
 		//gtxtRWFillters[level][TexCoord] = (f4Color / (sampleSize * sampleSize)) * (1.0f / level);
 	}
 	

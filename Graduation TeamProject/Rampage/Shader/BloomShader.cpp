@@ -27,7 +27,7 @@ void CBloomShader::CreateShader(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandL
 {
 	if (m_ppd3dPipelineStates.size() != 3)
 	{
-		m_nPipelineStates = 2;
+		m_nPipelineStates = 3;
 		m_ppd3dPipelineStates.resize(m_nPipelineStates);
 	}
 
@@ -173,14 +173,15 @@ void CBloomShader::Dispatch(ID3D12GraphicsCommandList* pd3dCommandList)
 	pd3dCommandList->Dispatch(m_cxThreadGroups, m_cyThreadGroups, m_czThreadGroups);
 
 
-
 	if (m_ppd3dPipelineStates.data() && m_ppd3dPipelineStates[1]) 
 		pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[1].Get());
 	if (m_pd3dCbvSrvUavDescriptorHeap) 
 		pd3dCommandList->SetDescriptorHeaps(1, m_pd3dCbvSrvUavDescriptorHeap.GetAddressOf());
 	UpdateShaderVariables(pd3dCommandList, 1);
 
-	for (int i = 3; i >= 1; --i) {
+	//return;
+
+	for (int i = 1; i >= 1; --i) {
 		XMFLOAT4 level = { (float)i,0,0,0 };
 
 		/*if (m_pd3dCbvSrvUavDescriptorHeap)
@@ -188,8 +189,11 @@ void CBloomShader::Dispatch(ID3D12GraphicsCommandList* pd3dCommandList)
 		pd3dCommandList->SetComputeRoot32BitConstants(5, 4, &level, 0);
 
 		//UpdateShaderVariables(pd3dCommandList, 1);
-		pd3dCommandList->Dispatch(1920 / pow(redutionSize, i), 1080 / pow(redutionSize,i), 1);
+		pd3dCommandList->Dispatch(1920 / pow(redutionSize, i), 1080 / pow(redutionSize, i), 1);
+		//pd3dCommandList->Dispatch(m_nDispatchSizes[i-1].x, m_nDispatchSizes[i - 1].y, 1);
 	}
+
+	//return;
 
 	if (m_ppd3dPipelineStates.data() && m_ppd3dPipelineStates[2])
 		pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[2].Get());
@@ -227,6 +231,7 @@ void CBloomShader::CreateBloomUAVResource(ID3D12Device* pd3dDevice, ID3D12Graphi
 		resoultion.x = ceil(resoultion.x);
 		resoultion.y = ceil(resoultion.y);
 		downSampleTextureResoultions.emplace_back(resoultion);
+		m_nDispatchSizes.emplace_back(XMFLOAT3(ceil(resoultion.x / 32.0f), ceil(resoultion.y / 32.0f), 1.0f));
 	}
 
 	m_nFillters = nDownSample + 1;

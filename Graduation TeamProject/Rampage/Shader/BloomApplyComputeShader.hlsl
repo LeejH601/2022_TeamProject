@@ -16,6 +16,26 @@ SamplerState gSamplerState : register(s0);
 #define RESOULTION_Y 1080
 #define REDUTION_SIZE 4
 
+static float gfGaussianBlurMask2Ds[3][5][5] = {
+	{{ 2.0f / 273.0f, 8.0f / 273.0f, 14.0f / 273.0f, 8.0f / 273.0f, 2.0f / 273.0f },
+	{ 8.0f / 273.0f, 30.0f / 273.0f, 41.0f / 273.0f, 30.0f / 273.0f, 8.0f / 273.0f },
+	{ 14.0f / 273.0f, 41.0f / 273.0f, 62.0f / 273.0f, 41.0f / 273.0f, 14.0f / 273.0f },
+	{ 8.0f / 273.0f, 30.0f / 273.0f, 41.0f / 273.0f, 30.0f / 273.0f, 8.0f / 273.0f },
+	{ 2.0f / 273.0f, 8.0f / 273.0f, 14.0f / 273.0f, 8.0f / 273.0f, 2.0f / 273.0f }},
+
+	{{ 1.0f / 273.0f, 4.0f / 273.0f, 7.0f / 273.0f, 4.0f / 273.0f, 1.0f / 273.0f },
+	{ 4.0f / 273.0f, 16.0f / 273.0f, 26.0f / 273.0f, 16.0f / 273.0f, 4.0f / 273.0f },
+	{ 7.0f / 273.0f, 26.0f / 273.0f, 41.0f / 273.0f, 26.0f / 273.0f, 7.0f / 273.0f },
+	{ 4.0f / 273.0f, 16.0f / 273.0f, 26.0f / 273.0f, 16.0f / 273.0f, 4.0f / 273.0f },
+	{ 1.0f / 273.0f, 4.0f / 273.0f, 7.0f / 273.0f, 4.0f / 273.0f, 1.0f / 273.0f }},
+
+	{{ 1.0f / 273.0f, 3.0f / 273.0f, 3.0f / 273.0f, 3.0f / 273.0f, 1.0f / 273.0f },
+	{ 3.0f / 273.0f, 8.0f / 273.0f, 12.0f / 273.0f, 8.0f / 273.0f, 3.0f / 273.0f },
+	{ 3.0f / 273.0f, 12.0f / 273.0f, 26.0f / 273.0f, 12.0f / 273.0f, 3.0f / 273.0f },
+	{ 3.0f / 273.0f, 8.0f / 273.0f, 12.0f / 273.0f, 8.0f / 273.0f, 3.0f / 273.0f },
+	{ 1.0f / 273.0f, 3.0f / 273.0f, 3.0f / 273.0f, 3.0f / 273.0f, 1.0f / 273.0f }},
+};
+
 static float gfGaussianBlurMask2D[5][5] = {
 	{ 1.0f / 273.0f, 4.0f / 273.0f, 7.0f / 273.0f, 4.0f / 273.0f, 1.0f / 273.0f },
 	{ 4.0f / 273.0f, 16.0f / 273.0f, 26.0f / 273.0f, 16.0f / 273.0f, 4.0f / 273.0f },
@@ -24,8 +44,21 @@ static float gfGaussianBlurMask2D[5][5] = {
 	{ 1.0f / 273.0f, 4.0f / 273.0f, 7.0f / 273.0f, 4.0f / 273.0f, 1.0f / 273.0f }
 };
 
+static float gfGaussianBlurMask2D_77[7][7] = {
+	{ 1.0f / 273.0f, 4.0f / 273.0f, 7.0f / 273.0f, 10.0f / 273.0f, 7.0f / 273.0f, 4.0f / 273.0f, 1.0f / 273.0f  },
+	{ 4.0f / 273.0f, 10.0f / 273.0f,16.0f / 273.0f,	26.0f / 273.0f,	16.0f / 273.0f,	10.0f / 273.0f,  4.0f / 273.0f  },
+	{ 7.0f / 273.0f, 16.0f / 273.0f,26.0f / 273.0f,	41.0f / 273.0f,	26.0f / 273.0f,	16.0f / 273.0f,  7.0f / 273.0f  },
+	{ 10.0f / 273.0f,26.0f / 273.0f,41.0f / 273.0f, 52.0f / 273.0f, 41.0f / 273.0f, 26.0f / 273.0f, 10.0f / 273.0f },
+	{ 7.0f / 273.0f, 16.0f / 273.0f,26.0f / 273.0f,	41.0f / 273.0f,	26.0f / 273.0f,	16.0f / 273.0f,  7.0f / 273.0f  },
+	{ 4.0f / 273.0f, 10.0f / 273.0f,16.0f / 273.0f,	26.0f / 273.0f,	16.0f / 273.0f,	10.0f / 273.0f,  4.0f / 273.0f  },
+	{  1.0f / 273.0f, 4.0f / 273.0f, 7.0f / 273.0f, 10.0f / 273.0f, 7.0f / 273.0f, 4.0f / 273.0f, 1.0f / 273.0f  }
+};
+
+
+
 #define BICUBIC
 
+//[numthreads(32, 32, 1)]
 [numthreads(1, 1, 1)]
 void BloomApply_CS(uint3 DTid : SV_DispatchThreadID)
 {
@@ -41,12 +74,23 @@ void BloomApply_CS(uint3 DTid : SV_DispatchThreadID)
 		{
 			for (int j = -2; j <= 2; j++)
 			{
-				f4Color += gfGaussianBlurMask2D[i + 2][j + 2] * gtxtRWFillters[gnLevel][TexCoord + int2(i, j)];
+				//f4Color += gfGaussianBlurMask2D[i + 2][j + 2] * gtxtRWFillters[gnLevel][TexCoord + int2(i, j)];
+				f4Color += gfGaussianBlurMask2Ds[1][i + 2][j + 2] * gtxtRWFillters[gnLevel][TexCoord + int2(i, j)];
 
 			}
 		}
-		gtxtRWBlurs[gnLevel][TexCoord] = f4Color;
+		/*for (int i = -3; i <= 3; i++)
+		{
+			for (int j = -3; j <= 3; j++)
+			{
+				f4Color += gfGaussianBlurMask2D_77[i + 3][j + 3] * gtxtRWFillters[gnLevel][TexCoord + int2(i, j)];
+
+			}
+		}*/
+
+		gtxtRWBlurs[gnLevel][TexCoord] = float4(f4Color.rgb, 0.0f);
 	}
+
 	else if (gnLevel > 0) {
 
 		float2 Weigth_plus = float2(TexCoord / REDUTION_SIZE);
@@ -148,21 +192,39 @@ void BloomApply_CS(uint3 DTid : SV_DispatchThreadID)
 
 		//plusColor =  gtxtRWBlurs[gnLevel + 1][TexCoord_plus];
 
-		gtxtRWFillters[gnLevel][TexCoord] += lerp(gtxtRWFillters[gnLevel][TexCoord], plusColor, 0.5f);
-		//gtxtRWFillters[gnLevel][TexCoord] += gtxtRWBlurs[gnLevel + 1][TexCoord_plus];
+		//gtxtRWFillters[gnLevel][TexCoord] += float4(lerp(gtxtRWFillters[gnLevel][TexCoord], plusColor, 0.5f).rgb, 0.0f);
+		//gtxtRWFillters[gnLevel][TexCoord] += plusColor;
+		//gtxtRWFillters[gnLevel][TexCoord] = plusColor;
 		//gtxtRWFillters[gnLevel][TexCoord] += 0.4f *  gtxtRWBlurs[gnLevel + 1][TexCoord_plus];
+		//gtxtRWFillters[gnLevel][TexCoord] += gtxtRWBlurs[gnLevel + 1][TexCoord_plus];
+		//gtxtRWFillters[gnLevel][TexCoord] += max(gtxtRWFillters[gnLevel][TexCoord],  gtxtRWBlurs[gnLevel + 1][TexCoord_plus]);
+		gtxtRWFillters[gnLevel][TexCoord] += max(gtxtRWFillters[gnLevel][TexCoord], plusColor);
 
 		GroupMemoryBarrierWithGroupSync();
+
+		f4Color = float4(0, 0, 0, 0);
 
 		for (int i = -2; i <= 2; i++)
 		{
 			for (int j = -2; j <= 2; j++)
 			{
 				//f4Color += gfGaussianBlurMask2D[i+2][j+2] * gtxtRWFillters[level][ int2(float2(TexCoord.xy) + DeltaUV)];
-				f4Color += gfGaussianBlurMask2D[i + 2][j + 2] * gtxtRWFillters[gnLevel][TexCoord + int2(i, j)];
-
+				//f4Color += gfGaussianBlurMask2D[i + 2][j + 2] * gtxtRWFillters[gnLevel][TexCoord + int2(i, j)];
+				f4Color += gfGaussianBlurMask2Ds[1][i + 2][j + 2] * gtxtRWFillters[gnLevel][TexCoord + int2(i, j)];
 			}
 		}
-		gtxtRWBlurs[gnLevel][TexCoord] = f4Color;
+		/*for (int i = -3; i <= 3; i++)
+		{
+			for (int j = -3; j <= 3; j++)
+			{
+				f4Color += gfGaussianBlurMask2D_77[i + 3][j + 3] * gtxtRWFillters[gnLevel][TexCoord + int2(i, j)];
+
+			}
+		}*/
+		gtxtRWBlurs[gnLevel][TexCoord] = float4(f4Color.rgb,0.0f);
+		//gtxtRWBlurs[gnLevel][TexCoord] += gtxtRWBlurs[gnLevel + 1][TexCoord_plus];
+		//gtxtRWBlurs[gnLevel][TexCoord] += plusColor;
+
+
 	}
 }
