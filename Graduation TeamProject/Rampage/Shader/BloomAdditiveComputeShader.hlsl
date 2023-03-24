@@ -151,33 +151,10 @@ void BloomAdditive_CS(uint3 DTid : SV_DispatchThreadID)
 
 	float f4Color = float4(0, 0, 0, 0);
 
-	//{
-	//	for (int i = -2; i <= 2; i++)
-	//	{
-	//		for (int j = -2; j <= 2; j++)
-	//		{
-	//			//f4Color += gfGaussianBlurMask2D[i+2][j+2] * gtxtRWFillters[level][ int2(float2(TexCoord.xy) + DeltaUV)];
-	//			//f4Color += gfGaussianBlurMask2D[i + 2][j + 2] * gtxtRWFillters[gnLevel][TexCoord + int2(i, j)];
-	//			f4Color += float4(gfGaussianBlurMask2D[i + 2][j + 2] * gtxtRWFillters[0][DTid.xy + int2(i*3, j*3)].xyz, 0.0f);
-	//		}
-	//	}
-	//}
-	
-
-	//for (int i = -3; i <= 3; i++)
-	//{
-	//	for (int j = -3; j <= 3; j++)
-	//	{
-	//		//f4Color += gfGaussianBlurMask2D[i+2][j+2] * gtxtRWFillters[level][ int2(float2(TexCoord.xy) + DeltaUV)];
-	//		//f4Color += gfGaussianBlurMask2D[i + 2][j + 2] * gtxtRWFillters[gnLevel][TexCoord + int2(i, j)];
-	//		f4Color += float4(gfGaussianBlurMask2D77[i + 3][j + 3] * gtxtRWFillters[0][DTid.xy + int2(i, j)].xyz, 0.0f);
-	//	}
-	//}
-
 	//BloomColor = gtxtRWBlurs[1][uv];
 	//BloomColor = f4Color;
 
-	float BloomFactor = 0.2f;
+	float BloomFactor = 0.3f;
 
 	BloomColor *= BloomFactor;
 
