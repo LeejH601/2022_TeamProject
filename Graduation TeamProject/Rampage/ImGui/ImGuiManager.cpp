@@ -618,7 +618,6 @@ wchar_t* ConverCtoWC(const char* str)
 }
 
 
-
 CImGuiManager::CImGuiManager()
 {
 }
@@ -795,49 +794,42 @@ void CImGuiManager::SetUI()
 
 		if (ImGui::CollapsingHeader("Impact Effect"))
 		{
-			//ImpactEffectComponent* pImpactEffectComponent = dynamic_cast<ImpactEffectComponent*>(pCurrentAnimation->GetImpactComponent());
+			ImpactEffectComponent* pImpactEffectComponent = dynamic_cast<ImpactEffectComponent*>(pCurrentAnimation->GetImpactComponent());
 
-			//initial_curpos.y += 25.f;
-			//ImGui::SetCursorPos(initial_curpos);
-			//ImGui::SetNextItemWidth(190.f);
-			//ImGui::Checkbox("On/Off##SpriteEffect", &pImpactEffectComponent->GetEnable());
+			initial_curpos.y += 25.f;
+			ImGui::SetCursorPos(initial_curpos);
+			ImGui::SetNextItemWidth(190.f);
+			ImGui::Checkbox("On/Off##SpriteEffect", &pImpactEffectComponent->GetEnable());
 
-			//std::vector<std::shared_ptr<CTexture>> vTexture = CSimulatorScene::GetInst()->GetTextureManager()->GetBillBoardTextureList();
-			//std::vector<const char*> items;
-			//std::vector <std::string> str(100);
-			//for (int i = 0; i < vTexture.size(); i++)
-			//{
-			//	std::wstring wstr = vTexture[i]->GetTextureName(0);
-			//	str[i].assign(wstr.begin(), wstr.end());
-			//	items.emplace_back(str[i].c_str());
-			//}
+			std::vector<std::shared_ptr<CTexture>> vTexture = CSimulatorScene::GetInst()->GetTextureManager()->GetBillBoardTextureList();
+			std::vector<const char*> items;
+			std::vector <std::string> str(100);
+			for (int i = 0; i < vTexture.size(); i++)
+			{
+				std::wstring wstr = vTexture[i]->GetTextureName(0);
+				str[i].assign(wstr.begin(), wstr.end());
+				items.emplace_back(str[i].c_str());
+			}
 
-			//initial_curpos.y += 25.f;
-			//ImGui::SetCursorPos(initial_curpos);
-			//ImGui::SetNextItemWidth(190.f);
+			initial_curpos.y += 25.f;
+			ImGui::SetCursorPos(initial_curpos);
+			ImGui::SetNextItemWidth(190.f);
 
-			//if(ImGui::Combo("##Attack", (int*)(&pImpactEffectComponent->GetTextureIndex()), items.data(), items.size()));
-			//{
-			//	std::shared_ptr<CTexture> pTexture = vTexture[pImpactEffectComponent->GetTextureIndex()];
-			//	pImpactEffectComponent->SetImpactTexture(pTexture);
-			//}
+			if(ImGui::Combo("##Attack", (int*)(&pImpactEffectComponent->GetTextureIndex()), items.data(), items.size()));
+			{
+				std::shared_ptr<CTexture> pTexture = vTexture[pImpactEffectComponent->GetTextureIndex()];
+				pImpactEffectComponent->SetImpactTexture(pTexture);
+			}
 
-			///*initial_curpos.x += 200.f;
-			//ImGui::SetCursorPos(initial_curpos);
-			//if (ImGui::Button("Animation"))
-			//	pImpactEffectComponent->SetSpriteEnable(0);
-			//initial_curpos.x -= 200.f;*/
+			initial_curpos.y += 25.f;
+			ImGui::SetCursorPos(initial_curpos);
+			ImGui::SetNextItemWidth(190.f);
+			ImGui::DragFloat("Speed", &pImpactEffectComponent->GetSpeed(), 0.01f, 0.0f, 10.0f, "%.2f", 0);
 
-			//initial_curpos.y += 25.f;
-			//ImGui::SetCursorPos(initial_curpos);
-			//ImGui::SetNextItemWidth(190.f);
-			//ImGui::DragFloat("Speed", &pImpactEffectComponent->GetSpeed(), 0.01f, 0.0f, 10.0f, "%.2f", 0);
-
-			//initial_curpos.y += 25.f;
-			//ImGui::SetCursorPos(initial_curpos);
-			//ImGui::SetNextItemWidth(190.f);
-			//ImGui::DragFloat("Alpha", &pImpactEffectComponent->GetAlpha(), 0.01f, 0.0f, 10.0f, "%.2f", 0);
-			////AttackSprite->UpdateData();
+			initial_curpos.y += 25.f;
+			ImGui::SetCursorPos(initial_curpos);
+			ImGui::SetNextItemWidth(190.f);
+			ImGui::DragFloat("Alpha", &pImpactEffectComponent->GetAlpha(), 0.01f, 0.0f, 10.0f, "%.2f", 0);
 		}
 
 		initial_curpos.y += 25.f;
@@ -1262,7 +1254,6 @@ void CImGuiManager::OnPrepareRender(ID3D12GraphicsCommandList* pd3dCommandList, 
 {
 	::SynchronizeResourceTransition(pd3dCommandList, m_pRTTexture->GetResource(0), D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_RENDER_TARGET);
 
-	//PrepareRenderTarget(pd3dCommandList, d3dDsvDescriptorCPUHandle);
 	CSimulatorScene::GetInst()->OnPrepareRender(pd3dCommandList);
 
 	CSimulatorScene::GetInst()->OnPreRender(pd3dCommandList, fTimeElapsed);
@@ -1288,12 +1279,10 @@ void CImGuiManager::Render(ID3D12GraphicsCommandList* pd3dCommandList)
 	pd3dCommandList->SetDescriptorHeaps(1, m_pd3dSrvDescHeap.GetAddressOf());
 	ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), pd3dCommandList);
 }
-
 void CImGuiManager::OnPostRender()
 {
 	CSimulatorScene::GetInst()->OnPostRender();
 }
-
 void CImGuiManager::OnDestroy()
 {
 	m_pDataLoader->SaveComponentSets();

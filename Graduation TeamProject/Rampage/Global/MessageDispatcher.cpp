@@ -225,8 +225,8 @@ void StunAnimationComponent::HandleMessage(const Message& message, const Animati
 }
 void ParticleComponent::HandleMessage(const Message& message, const ParticleCompParams& params)
 {
-	/*if (!m_bEnable)
-		return;*/
+	if (!m_bEnable)
+		return;
 
 	CParticleObject* pParticle = dynamic_cast<CParticleObject*>(params.pObject);
 
@@ -246,8 +246,8 @@ void ParticleComponent::HandleMessage(const Message& message, const ParticleComp
 }
 void ImpactEffectComponent::HandleMessage(const Message& message, const ImpactCompParams& params)
 {
-	/*if (!m_bEnable)
-		return;*/
+	if (!m_bEnable)
+		return;
 
 	CMultiSpriteObject* pMultiSprite = dynamic_cast<CMultiSpriteObject*>(params.pObject);
 

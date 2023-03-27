@@ -244,9 +244,9 @@ public:
     void SetParticleNumber(int nParticleNumber) { m_nParticleNumber = nParticleNumber; }
     void SetParticleIndex(int nParticleIndex) { m_nParticleIndex = nParticleIndex; }
     void SetSize(float fSize) { m_fSize = fSize; }
-    void SetAlpha(float fAlpha) { m_fSize = fAlpha; }
-    void SetLifeTime(float fLifeTime) { m_fSize = fLifeTime; }
-    void SetSpeed(float fSpeed) { m_fSize = fSpeed; }
+    void SetAlpha(float fAlpha) { m_fAlpha = fAlpha; }
+    void SetLifeTime(float fLifeTime) { m_fLifeTime = fLifeTime; }
+    void SetSpeed(float fSpeed) { m_fSpeed = fSpeed; }
     void SetColor(XMFLOAT3 xmf3Color) { m_xmf3Color = xmf3Color; }
     void SetColorR(float r) { m_xmf3Color.x = r; }
     void SetColorG(float g) { m_xmf3Color.y = g; }
@@ -272,8 +272,8 @@ public:
 
     void SetTextureIndex(int nTextureIndex) { m_nTextureIndex = nTextureIndex; }
     void SetSize(float fSize) { m_fSize = fSize; }
-    void SetAlpha(float fAlpha) { m_fSize = fAlpha; }
-    void SetSpeed(float fSpeed) { m_fSize = fSpeed; }
+    void SetAlpha(float fAlpha) { m_fAlpha = fAlpha; }
+    void SetSpeed(float fSpeed) { m_fSpeed = fSpeed; }
     void SetImpactTexture(std::shared_ptr<CTexture> pTexture) { m_pTexture = pTexture; }
 
     virtual void HandleMessage(const Message& message, const ImpactCompParams& params);
