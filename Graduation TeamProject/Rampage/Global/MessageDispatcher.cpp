@@ -5,6 +5,7 @@
 #include "..\Object\Monster.h"
 #include "..\Object\MonsterState.h"
 #include "..\Object\ParticleObject.h"
+#include "..\Object\BillBoardObject.h"
 #include "..\Sound\SoundManager.h"
 
 void CMessageDispatcher::RegisterListener(MessageType messageType, IMessageListener* listener, void* filterObject)
@@ -241,6 +242,24 @@ void ParticleComponent::HandleMessage(const Message& message, const ParticleComp
 		pParticle->SetEmitParticleN(m_nParticleNumber);
 		pParticle->SetPosition(params.xmf3Position);
 		pParticle->ChangeTexture(m_pTexture);
+	}
+}
+void ImpactEffectComponent::HandleMessage(const Message& message, const ImpactCompParams& params)
+{
+	/*if (!m_bEnable)
+		return;*/
+
+	CMultiSpriteObject* pMultiSprite = dynamic_cast<CMultiSpriteObject*>(params.pObject);
+
+	if (pMultiSprite)
+	{
+		pMultiSprite->SetEnable(true);
+		// SetSize() 함수 원래 없나?
+		// pMultiSprite->SetSize(m_fSize);
+		pMultiSprite->SetSpeed(m_fSpeed);
+		pMultiSprite->SetAlpha(m_fAlpha);
+		pMultiSprite->SetPosition(params.xmf3Position);
+		pMultiSprite->ChangeTexture(m_pTexture);
 	}
 }
 void SceneCollideListener::HandleMessage(const Message& message, const CollideParams& params)

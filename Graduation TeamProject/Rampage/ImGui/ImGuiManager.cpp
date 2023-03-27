@@ -92,6 +92,7 @@ void DataLoader::SaveComponentSet(FILE* pInFile, CState<CPlayer>* pState)
 	SoundPlayComponent* pShootSoundComponent = dynamic_cast<SoundPlayComponent*>(pState->GetShootSoundComponent());
 
 	ParticleComponent* pParticleComponent = dynamic_cast<ParticleComponent*>(pState->GetParticleComponent());
+	ImpactEffectComponent* pImpactComponent = dynamic_cast<ImpactEffectComponent*>(pState->GetImpactComponent());
 
 	std::string str = "<Components>:";
 	WriteStringFromFile(pInFile, str);
@@ -211,6 +212,19 @@ void DataLoader::SaveComponentSet(FILE* pInFile, CState<CPlayer>* pState)
 	WriteFloatFromFile(pInFile, pParticleComponent->GetColor().z);
 	WriteStringFromFile(pInFile, std::string("</ParticleComponent>:"));
 
+	WriteStringFromFile(pInFile, std::string("<ImpactComponent>:"));
+	WriteStringFromFile(pInFile, std::string("<Enable>:"));
+	WriteIntegerFromFile(pInFile, pImpactComponent->GetEnable());
+	WriteStringFromFile(pInFile, std::string("<TextureIndex>:"));
+	WriteIntegerFromFile(pInFile, pImpactComponent->GetTextureIndex());
+	WriteStringFromFile(pInFile, std::string("<Size>:"));
+	WriteFloatFromFile(pInFile, pImpactComponent->GetSize());
+	WriteStringFromFile(pInFile, std::string("<Speed>:"));
+	WriteFloatFromFile(pInFile, pImpactComponent->GetSpeed());
+	WriteStringFromFile(pInFile, std::string("<Alpha>:"));
+	WriteFloatFromFile(pInFile, pImpactComponent->GetAlpha());
+	WriteStringFromFile(pInFile, std::string("</ImpactComponent>:"));
+
 	str = "</Components>:";
 	WriteStringFromFile(pInFile, str);
 }
@@ -229,6 +243,7 @@ void DataLoader::LoadComponentSet(FILE* pInFile, CState<CPlayer>* pState)
 	SoundPlayComponent* pShootSoundComponent = dynamic_cast<SoundPlayComponent*>(pState->GetShootSoundComponent());
 
 	ParticleComponent* pParticleComponent = dynamic_cast<ParticleComponent*>(pState->GetParticleComponent());
+	ImpactEffectComponent* pImpactComponent = dynamic_cast<ImpactEffectComponent*>(pState->GetImpactComponent());
 
 	char buf[256];
 	std::string str;
@@ -532,7 +547,44 @@ void DataLoader::LoadComponentSet(FILE* pInFile, CState<CPlayer>* pState)
 					break;
 				}
 			}
+		}
+		else if (!strcmp(buf, "<ImpactComponent>:"))
+		{
+			for (; ; )
+			{
+				ReadStringFromFile(pInFile, buf);
+
+				if (!strcmp(buf, "<Enable>:"))
+				{
+					pImpactComponent->SetEnable(ReadIntegerFromFile(pInFile));
+				}
+				else if (!strcmp(buf, "<TextureIndex>:"))
+				{
+					pImpactComponent->SetTextureIndex(ReadIntegerFromFile(pInFile));
+
+					std::vector<std::shared_ptr<CTexture>> vTexture = CSimulatorScene::GetInst()->GetTextureManager()->GetBillBoardTextureList();
+
+					std::shared_ptr<CTexture> pTexture = vTexture[pImpactComponent->GetTextureIndex()];
+					pImpactComponent->SetImpactTexture(pTexture);
+				}
+				else if (!strcmp(buf, "<Size>:"))
+				{
+					pImpactComponent->SetSize(ReadFloatFromFile(pInFile));
+				}
+				else if (!strcmp(buf, "<Speed>:"))
+				{
+					pImpactComponent->SetSpeed(ReadFloatFromFile(pInFile));
+				}
+				else if (!strcmp(buf, "<Alpha>:"))
+				{
+					pImpactComponent->SetAlpha(ReadFloatFromFile(pInFile));
+				}
+				else if (!strcmp(buf, "</ImpactComponent>:"))
+				{
+					break;
+				}
 			}
+		}
 		else if (!strcmp(buf, "</Components>:"))
 		{
 			break;
@@ -743,10 +795,49 @@ void CImGuiManager::SetUI()
 
 		if (ImGui::CollapsingHeader("Impact Effect"))
 		{
-			initial_curpos.y += 25.f;
-			ImGui::SetCursorPos(initial_curpos);
-			ImGui::SetNextItemWidth(190.f);
-			ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
+			//ImpactEffectComponent* pImpactEffectComponent = dynamic_cast<ImpactEffectComponent*>(pCurrentAnimation->GetImpactComponent());
+
+			//initial_curpos.y += 25.f;
+			//ImGui::SetCursorPos(initial_curpos);
+			//ImGui::SetNextItemWidth(190.f);
+			//ImGui::Checkbox("On/Off##SpriteEffect", &pImpactEffectComponent->GetEnable());
+
+			//std::vector<std::shared_ptr<CTexture>> vTexture = CSimulatorScene::GetInst()->GetTextureManager()->GetBillBoardTextureList();
+			//std::vector<const char*> items;
+			//std::vector <std::string> str(100);
+			//for (int i = 0; i < vTexture.size(); i++)
+			//{
+			//	std::wstring wstr = vTexture[i]->GetTextureName(0);
+			//	str[i].assign(wstr.begin(), wstr.end());
+			//	items.emplace_back(str[i].c_str());
+			//}
+
+			//initial_curpos.y += 25.f;
+			//ImGui::SetCursorPos(initial_curpos);
+			//ImGui::SetNextItemWidth(190.f);
+
+			//if(ImGui::Combo("##Attack", (int*)(&pImpactEffectComponent->GetTextureIndex()), items.data(), items.size()));
+			//{
+			//	std::shared_ptr<CTexture> pTexture = vTexture[pImpactEffectComponent->GetTextureIndex()];
+			//	pImpactEffectComponent->SetImpactTexture(pTexture);
+			//}
+
+			///*initial_curpos.x += 200.f;
+			//ImGui::SetCursorPos(initial_curpos);
+			//if (ImGui::Button("Animation"))
+			//	pImpactEffectComponent->SetSpriteEnable(0);
+			//initial_curpos.x -= 200.f;*/
+
+			//initial_curpos.y += 25.f;
+			//ImGui::SetCursorPos(initial_curpos);
+			//ImGui::SetNextItemWidth(190.f);
+			//ImGui::DragFloat("Speed", &pImpactEffectComponent->GetSpeed(), 0.01f, 0.0f, 10.0f, "%.2f", 0);
+
+			//initial_curpos.y += 25.f;
+			//ImGui::SetCursorPos(initial_curpos);
+			//ImGui::SetNextItemWidth(190.f);
+			//ImGui::DragFloat("Alpha", &pImpactEffectComponent->GetAlpha(), 0.01f, 0.0f, 10.0f, "%.2f", 0);
+			////AttackSprite->UpdateData();
 		}
 
 		initial_curpos.y += 25.f;

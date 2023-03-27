@@ -39,6 +39,11 @@ struct ParticleCompParams {
     XMFLOAT3 xmf3Position;
 };
 
+struct ImpactCompParams {
+    CGameObject* pObject;
+    XMFLOAT3 xmf3Position;
+};
+
 struct CollideParams {
     XMFLOAT3 xmf3CollidePosition;
 };
@@ -57,6 +62,7 @@ public:
     virtual void HandleMessage(const Message& message, const CameraUpdateParams& params) {}
     virtual void HandleMessage(const Message& message, const AnimationCompParams& params) {}
     virtual void HandleMessage(const Message& message, const ParticleCompParams& params) {}
+    virtual void HandleMessage(const Message& message, const ImpactCompParams& params) {}
 };
 
 // Define Player Attack component
@@ -214,7 +220,7 @@ public:
     virtual void HandleMessage(const Message& message, const AnimationCompParams& params);
 };
 
-// Define Particle Animation component
+// Define Particle component
 #define MAX_PARTICLES				5000
 class ParticleComponent : public IMessageListener {
     int m_nParticleNumber = MAX_PARTICLES;
@@ -248,6 +254,29 @@ public:
     void SetParticleTexture(std::shared_ptr<CTexture> pTexture) { m_pTexture = pTexture; }
 
     virtual void HandleMessage(const Message& message, const ParticleCompParams& params);
+};
+
+// Define Impact Effect component
+class ImpactEffectComponent : public IMessageListener {
+    int m_nTextureIndex = 0;
+    float m_fSpeed = 5.f;
+    float m_fAlpha = 1.f;
+    float m_fSize = 0.5f;
+    std::shared_ptr<CTexture> m_pTexture;
+public:
+    int& GetTextureIndex() { return m_nTextureIndex; }
+    float& GetSpeed() { return m_fSpeed; }
+    float& GetAlpha() { return m_fAlpha; }
+    float& GetSize() { return m_fSize; }
+    std::shared_ptr<CTexture>& GetTexture() { return m_pTexture; }
+
+    void SetTextureIndex(int nTextureIndex) { m_nTextureIndex = nTextureIndex; }
+    void SetSize(float fSize) { m_fSize = fSize; }
+    void SetAlpha(float fAlpha) { m_fSize = fAlpha; }
+    void SetSpeed(float fSpeed) { m_fSize = fSpeed; }
+    void SetImpactTexture(std::shared_ptr<CTexture> pTexture) { m_pTexture = pTexture; }
+
+    virtual void HandleMessage(const Message& message, const ImpactCompParams& params);
 };
 
 struct ListenerInfo {

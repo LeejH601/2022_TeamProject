@@ -21,6 +21,7 @@ public:
     virtual IMessageListener* GetShakeAnimationComponent();
     virtual IMessageListener* GetStunAnimationComponent();
     virtual IMessageListener* GetParticleComponent();
+    virtual IMessageListener* GetImpactComponent();
 
 	virtual void Enter(entity_type*) = 0;
 	virtual void Execute(entity_type*, float) = 0;
@@ -250,6 +251,23 @@ inline IMessageListener* CState<entity_type>::GetParticleComponent()
         }
         return false;
     });
+
+    if (p != m_pListeners.end())
+        return (*p).get();
+
+    return nullptr;
+}
+
+template<class entity_type>
+inline IMessageListener* CState<entity_type>::GetImpactComponent()
+{
+    std::vector<std::unique_ptr<IMessageListener>>::iterator p = std::find_if(m_pListeners.begin(), m_pListeners.end(), [](const std::unique_ptr<IMessageListener>& listener) {
+        ImpactEffectComponent* pImpactComponent = dynamic_cast<ImpactEffectComponent*>(listener.get());
+        if (pImpactComponent) {
+            return true;
+        }
+        return false;
+        });
 
     if (p != m_pListeners.end())
         return (*p).get();

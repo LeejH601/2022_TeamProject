@@ -56,7 +56,7 @@ void CAttackSpriteComponent::SetAlpha(float fAlpha)
 	m_fAlpha = fAlpha;
 
 	if (m_vSprite[0].second)
-		m_vSprite[0].second->SetAlpah(m_fAlpha);
+		m_vSprite[0].second->SetAlpha(m_fAlpha);
 }
 
 void CAttackSpriteComponent::UpdateData()

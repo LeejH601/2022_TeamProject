@@ -68,7 +68,7 @@ public:
 	virtual void SetEnable(bool bEnable);
 
 	void SetSpeed(float fSpeed);
-	void SetAlpah(float fAlpha);
+	void SetAlpha(float fAlpha);
 	bool& GetAnimation();
 	bool							m_bAnimation = true;
 protected:

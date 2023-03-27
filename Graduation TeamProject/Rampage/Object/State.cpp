@@ -104,10 +104,15 @@ Atk1_Player::Atk1_Player()
 	m_pListeners.push_back(std::move(pStunAnimationComponent));
 	CMessageDispatcher::GetInst()->RegisterListener(MessageType::UPDATE_OBJECT, m_pListeners.back().get(), this);
 
-	// PARTICLE ANIMATION
+	// PARTICLE
 	std::unique_ptr<ParticleComponent> pParticlenComponent = std::make_unique<ParticleComponent>();
 	m_pListeners.push_back(std::move(pParticlenComponent));
 	CMessageDispatcher::GetInst()->RegisterListener(MessageType::UPDATE_PARTICLE, m_pListeners.back().get(), this);
+
+	// IMPACT
+	std::unique_ptr<ImpactEffectComponent> pImpactComponent = std::make_unique<ImpactEffectComponent>();
+	m_pListeners.push_back(std::move(pImpactComponent));
+	CMessageDispatcher::GetInst()->RegisterListener(MessageType::UPDATE_BILLBOARD, m_pListeners.back().get(), this);
 }
 
 Atk1_Player::~Atk1_Player()
@@ -224,6 +229,11 @@ Atk2_Player::Atk2_Player()
 	std::unique_ptr<ParticleComponent> pParticlenComponent = std::make_unique<ParticleComponent>();
 	m_pListeners.push_back(std::move(pParticlenComponent));
 	CMessageDispatcher::GetInst()->RegisterListener(MessageType::UPDATE_PARTICLE, m_pListeners.back().get(), this);
+
+	// IMPACT
+	std::unique_ptr<ImpactEffectComponent> pImpactComponent = std::make_unique<ImpactEffectComponent>();
+	m_pListeners.push_back(std::move(pImpactComponent));
+	CMessageDispatcher::GetInst()->RegisterListener(MessageType::UPDATE_BILLBOARD, m_pListeners.back().get(), this);
 }
 
 Atk2_Player::~Atk2_Player()
@@ -340,6 +350,11 @@ Atk3_Player::Atk3_Player()
 	std::unique_ptr<ParticleComponent> pParticlenComponent = std::make_unique<ParticleComponent>();
 	m_pListeners.push_back(std::move(pParticlenComponent));
 	CMessageDispatcher::GetInst()->RegisterListener(MessageType::UPDATE_PARTICLE, m_pListeners.back().get(), this);
+
+	// IMPACT
+	std::unique_ptr<ImpactEffectComponent> pImpactComponent = std::make_unique<ImpactEffectComponent>();
+	m_pListeners.push_back(std::move(pImpactComponent));
+	CMessageDispatcher::GetInst()->RegisterListener(MessageType::UPDATE_BILLBOARD, m_pListeners.back().get(), this);
 }
 
 Atk3_Player::~Atk3_Player()
