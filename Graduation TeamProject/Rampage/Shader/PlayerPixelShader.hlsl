@@ -84,6 +84,7 @@ float4 CalculateDissolve(float4 color, float2 uv, float ThreshHold) {
 
 	if (NoiseColor.r <= ThreshHold) {
 		float4 emissionColor = float4(0.3125, 0.734f, 0.871f, 0.6f);
+		emissionColor.xyz *= 2.0f;
 		color = emissionColor;
 	}
 	if (NoiseColor.r <= ThreshHold - STEP) {
@@ -93,6 +94,7 @@ float4 CalculateDissolve(float4 color, float2 uv, float ThreshHold) {
 			emissionAlpha = emissionAlpha - ((ThreshHold - STEP) - (1.0f - INTERVEL_STEPS)) * 4.0f;
 		}
 		float4 emissionColor = float4(0.117, 0.562, 1.0f, emissionAlpha);
+		emissionColor.xyz *= 2.0f;
 		color = emissionColor;
 	}
 	if (NoiseColor.r <= ThreshHold - step2) {
