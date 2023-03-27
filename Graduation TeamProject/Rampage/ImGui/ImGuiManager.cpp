@@ -676,6 +676,8 @@ void CImGuiManager::OnPrepareRender(ID3D12GraphicsCommandList* pd3dCommandList, 
 
 	//PrepareRenderTarget(pd3dCommandList, d3dDsvDescriptorCPUHandle);
 	CSimulatorScene::GetInst()->OnPrepareRenderTarget(pd3dCommandList, 1, &m_pd3dRtvCPUDescriptorHandles, *d3dDsvDescriptorCPUHandle);
+	CSimulatorScene::GetInst()->SetHDRRenderSource(m_pRTTexture->GetResource(0));
+
 	/*if (pCamera)
 		pCamera->OnPrepareRender(pd3dCommandList);*/
 	m_pCamera->Animate(fTimeElapsed);
@@ -683,6 +685,13 @@ void CImGuiManager::OnPrepareRender(ID3D12GraphicsCommandList* pd3dCommandList, 
 	m_pCamera->OnPrepareRender(pd3dCommandList);
 
 	CSimulatorScene::GetInst()->Render(pd3dCommandList, fTimeElapsed, fCurrentTime, pCamera);
+
+	//ID3D12Resource* pd3dSource = m_pRTTexture->GetResource(0);
+	//::SynchronizeResourceTransition(pd3dCommandList, pd3dSource, D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE);
+	//ID3D12Resource* pd3dDestination = CSimulatorScene::GetInst()->m_pHDRComputeShader->m_pRenderTargetResource;
+	//pd3dCommandList->CopyResource(pd3dDestination, pd3dSource);
+
+	//::SynchronizeResourceTransition(pd3dCommandList, pd3dSource, D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 
 	::SynchronizeResourceTransition(pd3dCommandList, m_pRTTexture->GetResource(0), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_COMMON);
 }

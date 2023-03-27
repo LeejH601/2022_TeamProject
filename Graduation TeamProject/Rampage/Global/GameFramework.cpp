@@ -294,6 +294,11 @@ void CGameFramework::BuildObjects()
 	((CMainTMPScene*)m_pSceneManager->GetMainScene())->m_pBloomComputeShader->SetTextureSource(m_pd3dDevice.Get(), m_pSceneManager->GetMainScene()->m_pPostProcessShader->GetTextureShared());
 
 	((CMainTMPScene*)m_pSceneManager->GetMainScene())->m_pHDRComputeShader->SetTextureSource(m_pd3dDevice.Get(), m_pSceneManager->GetMainScene()->m_pPostProcessShader->GetTextureShared());
+
+	CSimulatorScene::GetInst()->m_pBloomComputeShader->SetTextureSource(m_pd3dDevice.Get(), CSimulatorScene::GetInst()->m_pPostProcessShader->GetTextureShared());
+
+	CSimulatorScene::GetInst()->m_pHDRComputeShader->SetTextureSource(m_pd3dDevice.Get(), CSimulatorScene::GetInst()->m_pPostProcessShader->GetTextureShared());
+
 	//((CMainTMPScene*)m_pSceneManager->GetMainScene())->m_pHDRComputeShader->SetTextureSource(m_pd3dDevice.Get(), m_pSceneManager->GetMainScene()->m_pPostProcessShader->GetTextureShared());
 
 	m_pFloatingCamera = std::make_unique<CFloatingCamera>();
@@ -557,8 +562,11 @@ void CGameFramework::FrameAdvance()
 	//명령 할당자를 리셋한다.
 	HRESULT hResult = m_pd3dCommandAllocator->Reset();
 
-	if (typeid(*m_pSceneManager->GetCurrentScene()) != typeid(CMainTMPScene))
+	if (typeid(*m_pSceneManager->GetCurrentScene()) != typeid(CMainTMPScene)) {
+		CSimulatorScene::GetInst()->SetHDRRenderSource(m_ppd3dRenderTargetBuffers[m_nSwapChainBufferIndex].Get());
 		OnPrepareImGui();
+		//CSimulatorScene::GetInst()->OnPrepareRender(m_pd3dCommandList.Get());
+	}
 
 	//명령 리스트를 리셋한다.
 	hResult = m_pd3dCommandList->Reset(m_pd3dCommandAllocator.Get(), NULL);
