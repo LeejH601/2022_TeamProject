@@ -1,7 +1,9 @@
 
 cbuffer LevelInfo : register(b0)
 {
-	float4 gnLevels : packoffset(c0);
+	float gnLevels : packoffset(c0.x);
+	float gnRedution : packoffset(c0.y);
+	float2 gnResoultion : packoffset(c0.z);
 }
 
 Texture2D gtxtSource : register(t50);
@@ -62,21 +64,24 @@ static float gfGaussianBlurMask2D77[7][7] = {
 [numthreads(32, 32, 1)]
 void BloomApply_CS(uint3 DTid : SV_DispatchThreadID)
 {
+	/*if (DTid.x >= (int)gnResoultion.x || DTid.y >= (int)gnResoultion.y)
+		return;*/
+
 	int gnLevel = (int)gnLevels.x;
-	int REDUTION_SIZE = (int)gnLevels.y;
+	int REDUTION_SIZE = (int)gnRedution;
 	//float4 BloomColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
 	
 	int2 TexCoord = DTid.xy;
 	float4 f4Color = float4(0, 0, 0, 0);
 
 	if (gnLevel > 2) {
-		for (int i = -2; i <= 2; i++)
+		for (int i = -3; i <= 3; i++)
 		{
-			for (int j = -2; j <= 2; j++)
+			for (int j = -3; j <= 3; j++)
 			{
 				//f4Color += gfGaussianBlurMask2D[i + 2][j + 2] * gtxtRWFillters[gnLevel][TexCoord + int2(i, j)];
-				f4Color += gfGaussianBlurMask2Ds[1][i + 2][j + 2] * gtxtRWFillters[gnLevel][TexCoord + int2(i, j)];
-
+				//f4Color += gfGaussianBlurMask2Ds[1][i + 2][j + 2] * gtxtRWFillters[gnLevel][TexCoord + int2(i, j)];
+				f4Color += gfGaussianBlurMask2D77[i + 3][j + 3] * gtxtRWFillters[gnLevel][TexCoord + int2(i, j)];
 			}
 		}
 
@@ -195,13 +200,13 @@ void BloomApply_CS(uint3 DTid : SV_DispatchThreadID)
 
 		f4Color = float4(0, 0, 0, 0);
 
-		for (int i = -2; i <= 2; i++)
+		for (int i = -3; i <= 3; i++)
 		{
-			for (int j = -2; j <= 2; j++)
+			for (int j = -3; j <= 3; j++)
 			{
 				//f4Color += gfGaussianBlurMask2D[i+2][j+2] * gtxtRWFillters[level][ int2(float2(TexCoord.xy) + DeltaUV)];
-				f4Color += gfGaussianBlurMask2D[i + 2][j + 2] * gtxtRWFillters[gnLevel][TexCoord + int2(i, j)];
-				//f4Color += gfGaussianBlurMask2D77[i + 3][j + 3] * gtxtRWFillters[gnLevel][TexCoord + int2(i, j)];
+				//f4Color += gfGaussianBlurMask2D[i + 2][j + 2] * gtxtRWFillters[gnLevel][TexCoord + int2(i, j)];
+				f4Color += gfGaussianBlurMask2D77[i + 3][j + 3] * gtxtRWFillters[gnLevel][TexCoord + int2(i, j)];
 			}
 		}
 		gtxtRWBlurs[gnLevel][TexCoord] = float4(f4Color.rgb,0.0f);

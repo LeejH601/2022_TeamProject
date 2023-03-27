@@ -2,6 +2,7 @@ cbuffer LevelInfo : register(b0)
 {
 	float gnLevels : packoffset(c0.x);
 	float gnRedution : packoffset(c0.y);
+	float2 gnResoultion : packoffset(c0.z);
 }
 
 Texture2D gtxtSource : register(t50);
@@ -64,6 +65,8 @@ static float4 TestColorSet[4] = {
 [numthreads(32, 32, 1)]
 void Bloom_CS(uint3 DTid : SV_DispatchThreadID)
 {
+	/*if (DTid.x >= (int)gnResoultion.x || DTid.y >= (int)gnResoultion.y)
+		return;*/
 	int gnLevel = (int)gnLevels.x;
 	int REDUTION_SIZE = (int)gnRedution;
 	int redutionSize = (int)gnRedution;

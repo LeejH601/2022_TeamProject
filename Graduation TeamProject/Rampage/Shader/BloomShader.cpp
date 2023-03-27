@@ -2,6 +2,7 @@
 
 CBloomShader::CBloomShader()
 {
+	//m_nReduceSize = 4;
 }
 
 CBloomShader::~CBloomShader()
@@ -183,7 +184,7 @@ void CBloomShader::Dispatch(ID3D12GraphicsCommandList* pd3dCommandList)
 	if (m_pd3dCbvSrvUavDescriptorHeap) pd3dCommandList->SetDescriptorHeaps(1, m_pd3dCbvSrvUavDescriptorHeap.GetAddressOf());
 	UpdateShaderVariables(pd3dCommandList, 0);
 	for (int i = 0; i < 4; ++i) {
-		XMFLOAT4 level = { (float)i,(float)m_nReduceSize,0,0 };
+		XMFLOAT4 level = { (float)i,(float)m_nReduceSize, SampleTextureResoultions[i].x,SampleTextureResoultions[i].y};
 
 		pd3dCommandList->SetComputeRoot32BitConstants(5, 4, &level, 0);
 
@@ -191,40 +192,23 @@ void CBloomShader::Dispatch(ID3D12GraphicsCommandList* pd3dCommandList)
 		pd3dCommandList->Dispatch(m_nDispatchSizes[i].x, m_nDispatchSizes[i].y, 1);
 	}
 
-
-	//if (m_ppd3dPipelineStates.data() && m_ppd3dPipelineStates[1]) 
-	//	pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[1].Get());
-	///*if (m_pd3dCbvSrvUavDescriptorHeap) 
-	//	pd3dCommandList->SetDescriptorHeaps(1, m_pd3dCbvSrvUavDescriptorHeap.GetAddressOf());*/
-	//UpdateShaderVariables(pd3dCommandList, 1);
-
 	//return;
 
 	for (int i = 3; i >= 1; --i) {
-		XMFLOAT4 level = { (float)i,(float)m_nReduceSize,0,0};
+		XMFLOAT4 level = { (float)i,(float)m_nReduceSize, SampleTextureResoultions[i].x,SampleTextureResoultions[i].y };
 
 		if (m_ppd3dPipelineStates.data() && m_ppd3dPipelineStates[1])
 			pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[1].Get());
-		/*if (m_pd3dCbvSrvUavDescriptorHeap)
-			pd3dCommandList->SetDescriptorHeaps(1, m_pd3dCbvSrvUavDescriptorHeap.GetAddressOf());*/
-		//UpdateShaderVariables(pd3dCommandList, 1);
-
+	
 		pd3dCommandList->SetComputeRoot32BitConstants(5, 4, &level, 0);
 
-		//UpdateShaderVariables(pd3dCommandList, 1);
-		//pd3dCommandList->Dispatch(1920 / pow(redutionSize, i), 1080 / pow(redutionSize, i), 1);
 		pd3dCommandList->Dispatch(m_nDispatchSizes[i].x, m_nDispatchSizes[i].y, 1);
 
 
 		if (i > 1) {
 			if (m_ppd3dPipelineStates.data() && m_ppd3dPipelineStates[2])
 				pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[2].Get());
-			/*if (m_pd3dCbvSrvUavDescriptorHeap)
-				pd3dCommandList->SetDescriptorHeaps(1, m_pd3dCbvSrvUavDescriptorHeap.GetAddressOf());*/
-			//UpdateShaderVariables(pd3dCommandList, 2);
-			//pd3dCommandList->SetComputeRoot32BitConstants(5, 4, &level, 0);
-
-			//pd3dCommandList->Dispatch(1920 / pow(redutionSize, i - 1), 1080 / pow(redutionSize, i - 1), 1);
+		
 			pd3dCommandList->Dispatch(m_nDispatchSizes[i - 1].x, m_nDispatchSizes[i - 1].y, 1);
 		}
 	}
@@ -233,9 +217,6 @@ void CBloomShader::Dispatch(ID3D12GraphicsCommandList* pd3dCommandList)
 
 	if (m_ppd3dPipelineStates.data() && m_ppd3dPipelineStates[3])
 		pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[3].Get());
-	/*if (m_pd3dCbvSrvUavDescriptorHeap)
-		pd3dCommandList->SetDescriptorHeaps(1, m_pd3dCbvSrvUavDescriptorHeap.GetAddressOf());
-	UpdateShaderVariables(pd3dCommandList, 3);*/
 
 	pd3dCommandList->Dispatch(m_cxThreadGroups, m_cyThreadGroups, m_czThreadGroups);
 }
@@ -253,19 +234,18 @@ void CBloomShader::CreateBloomUAVResource(ID3D12Device* pd3dDevice, ID3D12Graphi
 			break;
 	}
 
-	std::vector<XMFLOAT2> downSampleTextureResoultions;
 	XMFLOAT2 baseResoultion{ float(xResoution),  float(yResoultion) };
 
 
-	downSampleTextureResoultions.emplace_back(xResoution, yResoultion);
+	SampleTextureResoultions.emplace_back(xResoution, yResoultion);
 	m_nDispatchSizes.emplace_back(XMFLOAT3(ceil(baseResoultion.x / 32.0f), ceil(baseResoultion.y / 32.0f), 1.0f));
 	XMFLOAT2 resoultion = baseResoultion;
 	for (int i = 0; i < nDownSample; ++i) {
 		resoultion.x /= m_nReduceSize;
 		resoultion.y /= m_nReduceSize;
+		SampleTextureResoultions.emplace_back(resoultion);
 		resoultion.x = ceil(resoultion.x);
 		resoultion.y = ceil(resoultion.y);
-		downSampleTextureResoultions.emplace_back(resoultion);
 		m_nDispatchSizes.emplace_back(XMFLOAT3(ceil(resoultion.x / 32.0f), ceil(resoultion.y / 32.0f), 1.0f));
 	}
 
@@ -273,8 +253,8 @@ void CBloomShader::CreateBloomUAVResource(ID3D12Device* pd3dDevice, ID3D12Graphi
 	m_pFillterTextures = std::make_unique<CTexture>(nDownSample + 1, RESOURCE_TEXTURE2D, 0, 0, 0, 1, 0, nDownSample + 1, 0);
 	m_pBluredTextures = std::make_unique<CTexture>(nDownSample + 1, RESOURCE_TEXTURE2D, 0, 0, 0, 1, 1, nDownSample + 1, nDownSample + 1);
 	for (int i = 0; i < nDownSample + 1; ++i) {
-		m_pFillterTextures->CreateTexture(pd3dDevice, downSampleTextureResoultions[i].x, downSampleTextureResoultions[i].y, DXGI_FORMAT_R16G16B16A16_FLOAT, D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_UNORDERED_ACCESS, NULL, RESOURCE_TEXTURE2D, i);
-		m_pBluredTextures->CreateTexture(pd3dDevice, downSampleTextureResoultions[i].x, downSampleTextureResoultions[i].y, DXGI_FORMAT_R16G16B16A16_FLOAT, D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_UNORDERED_ACCESS, NULL, RESOURCE_TEXTURE2D, i);
+		m_pFillterTextures->CreateTexture(pd3dDevice, SampleTextureResoultions[i].x, SampleTextureResoultions[i].y, DXGI_FORMAT_R16G16B16A16_FLOAT, D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_UNORDERED_ACCESS, NULL, RESOURCE_TEXTURE2D, i);
+		m_pBluredTextures->CreateTexture(pd3dDevice, SampleTextureResoultions[i].x, SampleTextureResoultions[i].y, DXGI_FORMAT_R16G16B16A16_FLOAT, D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_UNORDERED_ACCESS, NULL, RESOURCE_TEXTURE2D, i);
 	}
 	CreateComputeUnorderedAccessView(pd3dDevice, m_pFillterTextures.get(), 0, 0, 0, nDownSample + 1);
 	m_pFillterTextures->SetComputeUavRootParameter(0, 2, 0, nDownSample + 1);

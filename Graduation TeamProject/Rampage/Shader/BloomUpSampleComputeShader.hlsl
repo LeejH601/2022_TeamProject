@@ -1,6 +1,8 @@
 cbuffer LevelInfo : register(b0)
 {
-	float4 gnLevels : packoffset(c0);
+	float gnLevels : packoffset(c0.x);
+	float gnRedution : packoffset(c0.y);
+	float2 gnResoultion : packoffset(c0.z);
 }
 
 Texture2D gtxtSource : register(t50);
@@ -18,11 +20,13 @@ SamplerState gSamplerState : register(s0);
 
 #define binary
 
-[numthreads(30, 16, 1)]
+[numthreads(32, 32, 1)]
 void BloomUpsample_CS(uint3 DTid : SV_DispatchThreadID)
 {
+	/*if (DTid.x >= (int)gnResoultion.x || DTid.y >= (int)gnResoultion.y)
+		return;*/
 	int gnLevel = (int)gnLevels.x;
-	int REDUTION_SIZE = (int)gnLevels.y;
+	int REDUTION_SIZE = (int)gnRedution;
 	gnLevel -= 1;
 	int2 TexCoord = DTid.xy;
 	float2 Weigth_plus = float2(TexCoord / REDUTION_SIZE);

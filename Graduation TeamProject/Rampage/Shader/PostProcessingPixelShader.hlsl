@@ -100,13 +100,13 @@ float4 PS_PostProcessing(VS_SCREEN_RECT_TEXTURED_OUTPUT input) : SV_Target1
 
 	// 광원을 기준으로 원의 방정식 상에서 점의 위치에 따라 weigth 값을 조절
 	// 범위를 벗어나면 weight를 0으로 고정
-	/*if (result < radiusPow) {
+	if (result < radiusPow) {
 		weight *= max(0.0f, (1.0f - ((result) / radiusPow)));
-		Density *= max(0.0f, (1.0f - ((result) / radiusPow)));
+		//Density *= max(0.0f, (1.0f - ((result) / radiusPow)));
 	}
 	else {
 		weight = 0.0f;
-	}*/
+	}
 
 	//Density *= (1.0f - (result / radiusPow));
 	float angle = dot(normalize(gLights[0].m_vDirection),  normalize(Pixelnormal.xyz));

@@ -31,7 +31,7 @@ void CCamera::Init(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComm
 {
 	SetViewport(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f, 1.0f);
 	SetScissorRect(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
-	GenerateProjectionMatrix(1.0f, 500.0f, float(FRAME_BUFFER_WIDTH) / float(FRAME_BUFFER_HEIGHT), 110.f);
+	GenerateProjectionMatrix(1.0f, 500.0f, float(FRAME_BUFFER_WIDTH) / float(FRAME_BUFFER_HEIGHT), 90.f);
 	GenerateViewMatrix(XMFLOAT3(0.0f, 22.5f, -37.5f), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 1.0f, 0.0f));
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
@@ -190,7 +190,7 @@ void CCamera::SetViewportsAndScissorRects(ID3D12GraphicsCommandList* pd3dCommand
 CThirdPersonCamera::CThirdPersonCamera() : CCamera()
 {
 	m_pPlayer = nullptr;
-	SetOffset(XMFLOAT3(0.0f, 0.0f,-10.0f));
+	SetOffset(XMFLOAT3(0.0f, 0.0f,-15.0f));
 }
 
 void CThirdPersonCamera::ProcessInput(DWORD dwDirection, float cxDelta, float cyDelta, float fTimeElapsed)

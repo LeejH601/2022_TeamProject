@@ -1,6 +1,8 @@
 cbuffer LevelInfo : register(b0)
 {
-	float4 gnLevels : packoffset(c0);
+	float gnLevels : packoffset(c0.x);
+	float gnRedution : packoffset(c0.y);
+	float2 gnResoultion : packoffset(c0.z);
 }
 
 #define RESOULTION_X 1920
@@ -48,7 +50,12 @@ static float gfGaussianBlurMask2D99[9][9] = {
 [numthreads(32, 32, 1)]
 void BloomAdditive_CS(uint3 DTid : SV_DispatchThreadID)
 {
-	int REDUTION_SIZE = (int)gnLevels.y;
+	/*if (DTid.x >= (int)gnResoultion.x || DTid.y >= (int)gnResoultion.y)
+		return;*/
+
+	int REDUTION_SIZE = (int)gnRedution;
+
+	//int REDUTION_SIZE = (int)gnLevels.y;
 	float4 Color = gtxtSource[DTid.xy];
 	int2 uv = int2(DTid.x / REDUTION_SIZE, DTid.y / REDUTION_SIZE);
 
@@ -160,7 +167,7 @@ void BloomAdditive_CS(uint3 DTid : SV_DispatchThreadID)
 	//BloomColor = gtxtRWBlurs[1][uv];
 	//BloomColor = f4Color;
 
-	float BloomFactor = 0.3f;
+	float BloomFactor = 0.07f;
 
 	BloomColor *= BloomFactor;
 
