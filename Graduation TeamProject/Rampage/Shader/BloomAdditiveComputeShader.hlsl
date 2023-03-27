@@ -1,6 +1,11 @@
+cbuffer LevelInfo : register(b0)
+{
+	float4 gnLevels : packoffset(c0);
+}
+
 #define RESOULTION_X 1920
 #define RESOULTION_Y 1080
-#define REDUTION_SIZE 4
+//#define REDUTION_SIZE 4
 
 Texture2D gtxtSource : register(t50);
 RWTexture2D<float4> gtxtRWOutput : register(u0);
@@ -43,6 +48,7 @@ static float gfGaussianBlurMask2D99[9][9] = {
 [numthreads(32, 32, 1)]
 void BloomAdditive_CS(uint3 DTid : SV_DispatchThreadID)
 {
+	int REDUTION_SIZE = (int)gnLevels.y;
 	float4 Color = gtxtSource[DTid.xy];
 	int2 uv = int2(DTid.x / REDUTION_SIZE, DTid.y / REDUTION_SIZE);
 

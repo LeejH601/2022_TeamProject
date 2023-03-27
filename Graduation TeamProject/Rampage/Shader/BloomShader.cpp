@@ -179,13 +179,17 @@ void CBloomShader::ReleaseUploadBuffers()
 
 void CBloomShader::Dispatch(ID3D12GraphicsCommandList* pd3dCommandList)
 {
-	int redutionSize = 4;
-
 	if (m_ppd3dPipelineStates.data() && m_ppd3dPipelineStates[0]) pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[0].Get());
 	if (m_pd3dCbvSrvUavDescriptorHeap) pd3dCommandList->SetDescriptorHeaps(1, m_pd3dCbvSrvUavDescriptorHeap.GetAddressOf());
 	UpdateShaderVariables(pd3dCommandList, 0);
+	for (int i = 0; i < 4; ++i) {
+		XMFLOAT4 level = { (float)i,(float)m_nReduceSize,0,0 };
 
-	pd3dCommandList->Dispatch(m_cxThreadGroups, m_cyThreadGroups, m_czThreadGroups);
+		pd3dCommandList->SetComputeRoot32BitConstants(5, 4, &level, 0);
+
+
+		pd3dCommandList->Dispatch(m_nDispatchSizes[i].x, m_nDispatchSizes[i].y, 1);
+	}
 
 
 	//if (m_ppd3dPipelineStates.data() && m_ppd3dPipelineStates[1]) 
@@ -197,7 +201,7 @@ void CBloomShader::Dispatch(ID3D12GraphicsCommandList* pd3dCommandList)
 	//return;
 
 	for (int i = 3; i >= 1; --i) {
-		XMFLOAT4 level = { (float)i,0,0,0 };
+		XMFLOAT4 level = { (float)i,(float)m_nReduceSize,0,0};
 
 		if (m_ppd3dPipelineStates.data() && m_ppd3dPipelineStates[1])
 			pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[1].Get());
@@ -209,7 +213,7 @@ void CBloomShader::Dispatch(ID3D12GraphicsCommandList* pd3dCommandList)
 
 		//UpdateShaderVariables(pd3dCommandList, 1);
 		//pd3dCommandList->Dispatch(1920 / pow(redutionSize, i), 1080 / pow(redutionSize, i), 1);
-		pd3dCommandList->Dispatch(m_nDispatchSizes[i-1].x, m_nDispatchSizes[i - 1].y, 1);
+		pd3dCommandList->Dispatch(m_nDispatchSizes[i].x, m_nDispatchSizes[i].y, 1);
 
 
 		if (i > 1) {
@@ -221,7 +225,7 @@ void CBloomShader::Dispatch(ID3D12GraphicsCommandList* pd3dCommandList)
 			//pd3dCommandList->SetComputeRoot32BitConstants(5, 4, &level, 0);
 
 			//pd3dCommandList->Dispatch(1920 / pow(redutionSize, i - 1), 1080 / pow(redutionSize, i - 1), 1);
-			pd3dCommandList->Dispatch(m_nDispatchSizes[i - 2].x, m_nDispatchSizes[i - 2].y, 1);
+			pd3dCommandList->Dispatch(m_nDispatchSizes[i - 1].x, m_nDispatchSizes[i - 1].y, 1);
 		}
 	}
 
@@ -238,13 +242,11 @@ void CBloomShader::Dispatch(ID3D12GraphicsCommandList* pd3dCommandList)
 
 void CBloomShader::CreateBloomUAVResource(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, UINT xResoution, UINT yResoultion, int nDownSampling)
 {
-	int redutionSize = 4;
-
 	UINT minResoul = xResoution > yResoultion ? yResoultion : xResoution;
 	int maxDownSample = 4;
 	int nDownSample = maxDownSample;
 	for (int i = 0; i < maxDownSample; ++i) {
-		if (minResoul / (pow(redutionSize, maxDownSample - i)) < 16) {
+		if (minResoul / (pow(m_nReduceSize, maxDownSample - i)) < 16) {
 			nDownSample--;
 		}
 		else
@@ -256,14 +258,15 @@ void CBloomShader::CreateBloomUAVResource(ID3D12Device* pd3dDevice, ID3D12Graphi
 
 
 	downSampleTextureResoultions.emplace_back(xResoution, yResoultion);
+	m_nDispatchSizes.emplace_back(XMFLOAT3(ceil(baseResoultion.x / 32.0f), ceil(baseResoultion.y / 32.0f), 1.0f));
 	XMFLOAT2 resoultion = baseResoultion;
 	for (int i = 0; i < nDownSample; ++i) {
-		resoultion.x /= redutionSize;
-		resoultion.y /= redutionSize;
+		resoultion.x /= m_nReduceSize;
+		resoultion.y /= m_nReduceSize;
 		resoultion.x = ceil(resoultion.x);
 		resoultion.y = ceil(resoultion.y);
 		downSampleTextureResoultions.emplace_back(resoultion);
-		m_nDispatchSizes.emplace_back(XMFLOAT3(ceil(resoultion.x / 30.0f), ceil(resoultion.y / 16.0f), 1.0f));
+		m_nDispatchSizes.emplace_back(XMFLOAT3(ceil(resoultion.x / 32.0f), ceil(resoultion.y / 32.0f), 1.0f));
 	}
 
 	m_nFillters = nDownSample + 1;

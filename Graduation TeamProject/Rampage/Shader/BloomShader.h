@@ -34,6 +34,7 @@ public:
 private:
 	int m_nFillters = 0;
 	std::vector<XMFLOAT3> m_nDispatchSizes;
+	int m_nReduceSize = 4;
 
 public:
 	std::shared_ptr<CTexture> m_pSourceTextures;

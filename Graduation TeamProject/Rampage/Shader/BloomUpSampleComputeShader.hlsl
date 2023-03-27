@@ -13,7 +13,7 @@ SamplerState gSamplerState : register(s0);
 
 #define RESOULTION_X 1920
 #define RESOULTION_Y 1080
-#define REDUTION_SIZE 4
+//#define REDUTION_SIZE 4
 
 
 #define binary
@@ -22,6 +22,7 @@ SamplerState gSamplerState : register(s0);
 void BloomUpsample_CS(uint3 DTid : SV_DispatchThreadID)
 {
 	int gnLevel = (int)gnLevels.x;
+	int REDUTION_SIZE = (int)gnLevels.y;
 	gnLevel -= 1;
 	int2 TexCoord = DTid.xy;
 	float2 Weigth_plus = float2(TexCoord / REDUTION_SIZE);

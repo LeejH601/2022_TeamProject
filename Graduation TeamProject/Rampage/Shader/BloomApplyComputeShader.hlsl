@@ -14,7 +14,7 @@ SamplerState gSamplerState : register(s0);
 
 #define RESOULTION_X 1920
 #define RESOULTION_Y 1080
-#define REDUTION_SIZE 4
+//#define REDUTION_SIZE 4
 
 static float gfGaussianBlurMask2Ds[3][5][5] = {
 	{{ 2.0f / 273.0f, 8.0f / 273.0f, 14.0f / 273.0f, 8.0f / 273.0f, 2.0f / 273.0f },
@@ -59,11 +59,11 @@ static float gfGaussianBlurMask2D77[7][7] = {
 //#define BICUBIC
 
 //[numthreads(32, 32, 1)]
-[numthreads(30, 16, 1)]
+[numthreads(32, 32, 1)]
 void BloomApply_CS(uint3 DTid : SV_DispatchThreadID)
 {
 	int gnLevel = (int)gnLevels.x;
-	
+	int REDUTION_SIZE = (int)gnLevels.y;
 	//float4 BloomColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
 	
 	int2 TexCoord = DTid.xy;
