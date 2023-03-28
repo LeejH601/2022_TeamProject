@@ -561,6 +561,20 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pSkyBoxObject = std::make_unique<CSkyBox>(pd3dDevice, pd3dCommandList, GetGraphicsRootSignature(), pSkyBoxTexture);
 
 	m_pTextureManager = std::make_unique<CTextureManager>();
+
+	m_pBillBoardObjectShader = std::make_unique<CBillBoardObjectShader>();
+	m_pBillBoardObjectShader->CreateShader(pd3dDevice, GetGraphicsRootSignature(), 1, &pdxgiObjectRtvFormats, 0);
+	m_pBillBoardObjectShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 10);
+
+	m_pTextureManager->LoadBillBoardTexture(pd3dDevice, pd3dCommandList, L"Image/Explode_8x8.dds", m_pBillBoardObjectShader.get(), 8, 8);
+	m_pTextureManager->LoadBillBoardTexture(pd3dDevice, pd3dCommandList, L"Image/Fire_Effect.dds", m_pBillBoardObjectShader.get(), 5, 6);
+
+	for (int i = 0; i < 50; ++i)
+	{
+		std::unique_ptr<CGameObject> m_pBillBoardObject = std::make_unique<CMultiSpriteObject>(m_pTextureManager->LoadBillBoardTexture(L"Image/Fire_Effect.dds"), pd3dDevice, pd3dCommandList, m_pBillBoardObjectShader.get(), 5, 6, 8.f, 5.f);
+		m_pBillBoardObjects.push_back(std::move(m_pBillBoardObject));
+	}
+	
 	m_pParticleShader = std::make_unique<CParticleShader>();
 	m_pParticleShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 40);
 	m_pParticleShader->CreateGraphicsPipelineState(pd3dDevice, GetGraphicsRootSignature(), 0);
@@ -672,6 +686,14 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 		pd3dCommandList->SetGraphicsRoot32BitConstants(0, 1, &i, 33);
 		m_pObjects[i]->Animate(0.0f);
 		m_pObjects[i]->Render(pd3dCommandList, true);
+	}
+
+	m_pBillBoardObjectShader->Render(pd3dCommandList, 0);
+	for (int i = 0; i < m_pBillBoardObjects.size(); ++i)
+	{
+		m_pBillBoardObjects[i]->Animate(fTimeElapsed);
+		m_pBillBoardObjects[i]->UpdateShaderVariables(pd3dCommandList);
+		m_pBillBoardObjects[i]->Render(pd3dCommandList, true);
 	}
 
 	for (int i = 0; i < m_pParticleObjects.size(); ++i)
@@ -818,6 +840,20 @@ void CMainTMPScene::HandleCollision(const CollideParams& params)
 		particle_comp_params.pObject = (*it).get();
 		particle_comp_params.xmf3Position = params.xmf3CollidePosition;
 		CMessageDispatcher::GetInst()->Dispatch_Message<ParticleCompParams>(MessageType::UPDATE_PARTICLE, &particle_comp_params, ((CPlayer*)m_pPlayer)->m_pStateMachine->GetCurrentState());
+	}
+
+	it = std::find_if(m_pBillBoardObjects.begin(), m_pBillBoardObjects.end(), [](const std::unique_ptr<CGameObject>& pBillBoardObject) {
+		if (!((CParticleObject*)pBillBoardObject.get())->GetEnable())
+			return true;
+		return false;
+		});
+
+	if (it != m_pBillBoardObjects.end())
+	{
+		ImpactCompParams impact_comp_params;
+		impact_comp_params.pObject = (*it).get();
+		impact_comp_params.xmf3Position = params.xmf3CollidePosition;
+		CMessageDispatcher::GetInst()->Dispatch_Message<ImpactCompParams>(MessageType::UPDATE_BILLBOARD, &impact_comp_params, ((CPlayer*)m_pPlayer)->m_pStateMachine->GetCurrentState());
 	}
 }
 

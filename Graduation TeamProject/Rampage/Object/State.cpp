@@ -104,10 +104,15 @@ Atk1_Player::Atk1_Player()
 	m_pListeners.push_back(std::move(pStunAnimationComponent));
 	CMessageDispatcher::GetInst()->RegisterListener(MessageType::UPDATE_OBJECT, m_pListeners.back().get(), this);
 
-	// PARTICLE ANIMATION
+	// PARTICLE
 	std::unique_ptr<ParticleComponent> pParticlenComponent = std::make_unique<ParticleComponent>();
 	m_pListeners.push_back(std::move(pParticlenComponent));
 	CMessageDispatcher::GetInst()->RegisterListener(MessageType::UPDATE_PARTICLE, m_pListeners.back().get(), this);
+
+	// IMPACT
+	std::unique_ptr<ImpactEffectComponent> pImpactComponent = std::make_unique<ImpactEffectComponent>();
+	m_pListeners.push_back(std::move(pImpactComponent));
+	CMessageDispatcher::GetInst()->RegisterListener(MessageType::UPDATE_BILLBOARD, m_pListeners.back().get(), this);
 }
 
 Atk1_Player::~Atk1_Player()
@@ -127,19 +132,24 @@ void Atk1_Player::Enter(CPlayer* player)
 	player->m_xmf3CameraMoveDirection = Vector3::Normalize(XMFLOAT3(-1.0f, -1.0f, 0.0f));
 	player->m_fCMDConstant = 1.0f;
 
-	PlayerAttackParams PlayerAttackParam;
-	PlayerAttackParam.pPlayer = player;
-	CMessageDispatcher::GetInst()->Dispatch_Message<PlayerAttackParams>(MessageType::PLAYER_ATTACK, &PlayerAttackParam, player);
-
 	SoundPlayParams SoundPlayParam{ SOUND_CATEGORY::SOUND_SHOOT };
 	CMessageDispatcher::GetInst()->Dispatch_Message<SoundPlayParams>(MessageType::PLAY_SOUND, &SoundPlayParam, this);
 }
 
 void Atk1_Player::Execute(CPlayer* player, float fElapsedTime)
 {
-	//player->Animate(fElapsedTime);
+	// player->Animate(fElapsedTime);
 	CAnimationSet* pAnimationSet = player->m_pChild->m_pSkinnedAnimationController->m_pAnimationSets->m_pAnimationSets[player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_nAnimationSet];
 	
+	// 충돌 판정 메세지 전달
+	if (0.3 < player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition && 
+		0.7 > player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition)
+	{
+		PlayerAttackParams PlayerAttackParam;
+		PlayerAttackParam.pPlayer = player;
+		CMessageDispatcher::GetInst()->Dispatch_Message<PlayerAttackParams>(MessageType::PLAYER_ATTACK, &PlayerAttackParam, player);
+	}
+
 	// 사용자가 좌클릭을 했으면 애니메이션을 0.7초 진행 후 Atk2_Player로 상태 변경
 	if (player->m_bAttack && 0.7 < player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition )
 		player->m_pStateMachine->ChangeState(Atk2_Player::GetInst());
@@ -224,6 +234,11 @@ Atk2_Player::Atk2_Player()
 	std::unique_ptr<ParticleComponent> pParticlenComponent = std::make_unique<ParticleComponent>();
 	m_pListeners.push_back(std::move(pParticlenComponent));
 	CMessageDispatcher::GetInst()->RegisterListener(MessageType::UPDATE_PARTICLE, m_pListeners.back().get(), this);
+
+	// IMPACT
+	std::unique_ptr<ImpactEffectComponent> pImpactComponent = std::make_unique<ImpactEffectComponent>();
+	m_pListeners.push_back(std::move(pImpactComponent));
+	CMessageDispatcher::GetInst()->RegisterListener(MessageType::UPDATE_BILLBOARD, m_pListeners.back().get(), this);
 }
 
 Atk2_Player::~Atk2_Player()
@@ -243,10 +258,6 @@ void Atk2_Player::Enter(CPlayer* player)
 	player->m_xmf3CameraMoveDirection = Vector3::Normalize(XMFLOAT3(1.0f, -1.0f, 0.0f));
 	player->m_fCMDConstant = 1.0f;
 
-	PlayerAttackParams PlayerAttackParam;
-	PlayerAttackParam.pPlayer = player;
-	CMessageDispatcher::GetInst()->Dispatch_Message<PlayerAttackParams>(MessageType::PLAYER_ATTACK, &PlayerAttackParam, player);
-
 	SoundPlayParams SoundPlayParam{ SOUND_CATEGORY::SOUND_SHOOT };
 	CMessageDispatcher::GetInst()->Dispatch_Message<SoundPlayParams>(MessageType::PLAY_SOUND, &SoundPlayParam, this);
 }
@@ -256,6 +267,15 @@ void Atk2_Player::Execute(CPlayer* player, float fElapsedTime)
 	//player->Animate(fElapsedTime);
 	CAnimationSet* pAnimationSet = player->m_pChild->m_pSkinnedAnimationController->m_pAnimationSets->m_pAnimationSets[player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_nAnimationSet];
 	
+	// 충돌 판정 메세지 전달
+	if (0.3 < player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition &&
+		0.7 > player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition)
+	{
+		PlayerAttackParams PlayerAttackParam;
+		PlayerAttackParam.pPlayer = player;
+		CMessageDispatcher::GetInst()->Dispatch_Message<PlayerAttackParams>(MessageType::PLAYER_ATTACK, &PlayerAttackParam, player);
+	}
+
 	// 사용자가 좌클릭을 했으면 애니메이션을 0.7초 진행 후 Atk2_Player로 상태 변경
 	if (player->m_bAttack && 0.7 < player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition)
 		player->m_pStateMachine->ChangeState(Atk3_Player::GetInst());
@@ -340,6 +360,11 @@ Atk3_Player::Atk3_Player()
 	std::unique_ptr<ParticleComponent> pParticlenComponent = std::make_unique<ParticleComponent>();
 	m_pListeners.push_back(std::move(pParticlenComponent));
 	CMessageDispatcher::GetInst()->RegisterListener(MessageType::UPDATE_PARTICLE, m_pListeners.back().get(), this);
+
+	// IMPACT
+	std::unique_ptr<ImpactEffectComponent> pImpactComponent = std::make_unique<ImpactEffectComponent>();
+	m_pListeners.push_back(std::move(pImpactComponent));
+	CMessageDispatcher::GetInst()->RegisterListener(MessageType::UPDATE_BILLBOARD, m_pListeners.back().get(), this);
 }
 
 Atk3_Player::~Atk3_Player()
@@ -348,6 +373,9 @@ Atk3_Player::~Atk3_Player()
 
 void Atk3_Player::Enter(CPlayer* player)
 {
+	player->m_xmf3CameraMoveDirection = Vector3::Normalize(XMFLOAT3(1.0f, -1.0f, 0.0f));
+	player->m_fCMDConstant = 1.0f;
+
 	player->m_pChild->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 2);
 	player->m_pChild->m_pSkinnedAnimationController->m_fTime = 0.0f;
 	player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition = 0.0f;
@@ -356,21 +384,32 @@ void Atk3_Player::Enter(CPlayer* player)
 	player->m_bAttack = false; // 사용자가 좌클릭시 true가 되는 변수
 	player->m_iAttack_Limit = 1;
 
-	PlayerAttackParams PlayerAttackParam;
-	PlayerAttackParam.pPlayer = player;
-	CMessageDispatcher::GetInst()->Dispatch_Message<PlayerAttackParams>(MessageType::PLAYER_ATTACK, &PlayerAttackParam, player);
-
 	SoundPlayParams SoundPlayParam{ SOUND_CATEGORY::SOUND_SHOOT };
 	CMessageDispatcher::GetInst()->Dispatch_Message<SoundPlayParams>(MessageType::PLAY_SOUND, &SoundPlayParam, this);
 }
 
 void Atk3_Player::Execute(CPlayer* player, float fElapsedTime)
 {
+
+	// 충돌 판정 메세지 전달
+	if (0.3 < player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition &&
+		0.7 > player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition)
+	{
+		PlayerAttackParams PlayerAttackParam;
+		PlayerAttackParam.pPlayer = player;
+		CMessageDispatcher::GetInst()->Dispatch_Message<PlayerAttackParams>(MessageType::PLAYER_ATTACK, &PlayerAttackParam, player);
+	}
+
 	//player->Animate(fElapsedTime);
 	CAnimationSet* pAnimationSet = player->m_pChild->m_pSkinnedAnimationController->m_pAnimationSets->m_pAnimationSets[player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_nAnimationSet];
 	if (player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition == pAnimationSet->m_fLength)
 	{
 		player->m_pStateMachine->ChangeState(Idle_Player::GetInst());
+	}
+
+	else if (player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition == pAnimationSet->m_fLength)
+	{
+
 	}
 }
 

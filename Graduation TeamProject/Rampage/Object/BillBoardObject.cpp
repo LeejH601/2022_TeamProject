@@ -136,7 +136,7 @@ void CMultiSpriteObject::SetSpeed(float fSpeed)
 	m_fSpeed = fSpeed;
 }
 
-void CMultiSpriteObject::SetAlpah(float fAlpha)
+void CMultiSpriteObject::SetAlpha(float fAlpha)
 {
 	m_fAlpha = fAlpha;
 	if (m_ppMaterials.data())

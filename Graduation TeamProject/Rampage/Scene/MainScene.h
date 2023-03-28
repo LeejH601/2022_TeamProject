@@ -25,12 +25,14 @@ private:
 	std::unique_ptr<CSplatTerrain> m_pTerrain;
 	std::unique_ptr<CShader> m_pTerrainShader;
 	std::unique_ptr<CShader> m_pDepthRenderShader;
-	std::vector<std::unique_ptr<CGameObject>> m_pBillBoardObjects;
-	std::unique_ptr<CBillBoardObjectShader> m_pBillBoardObjectShader;
 
 	std::unique_ptr<CTextureManager> m_pTextureManager = NULL;
+
 	std::unique_ptr<CParticleShader> m_pParticleShader;
 	std::vector<std::unique_ptr<CGameObject>> m_pParticleObjects;
+
+	std::unique_ptr<CBillBoardObjectShader> m_pBillBoardObjectShader;
+	std::vector<std::unique_ptr<CGameObject>> m_pBillBoardObjects;
 
 	std::unique_ptr<CSkyBoxShader> m_pSkyBoxShader;
 	std::unique_ptr<CSkyBox> m_pSkyBoxObject;
