@@ -286,18 +286,19 @@ public:
 	virtual ~CTexturedRectMesh();
 };
 
-class CBillBoardVertex
+class CSpriteVertex
 {
 public:
-	XMFLOAT3						m_xmf3Position;
 	XMFLOAT2						m_xmf2Size;
-
+	bool							m_bBillBoard;
 public:
-	CBillBoardVertex() { m_xmf3Position = XMFLOAT3(0.0f, 0.0f, 0.0f), m_xmf2Size = XMFLOAT2(0.f, 0.f); }
-	CBillBoardVertex(XMFLOAT3 xmf3Position, XMFLOAT2 xmf2Size) 
-	{ m_xmf3Position = xmf3Position; 
-	m_xmf2Size = xmf2Size; }
-	~CBillBoardVertex() { }
+	CSpriteVertex() { m_xmf2Size = XMFLOAT2(0.f, 0.f), m_bBillBoard = true; }
+	CSpriteVertex(XMFLOAT2 xmf2Size, bool bBillBoard)
+	{
+		m_xmf2Size = xmf2Size;
+		m_bBillBoard = bBillBoard;
+	}
+	~CSpriteVertex() { }
 };
 
 class CSpriteAnimateVertex
@@ -317,12 +318,12 @@ public:
 	~CSpriteAnimateVertex() { }
 };
 
-class CBillBoardMesh : public CMesh
+class CSpriteMesh : public CMesh
 {
 
 public:
-	CBillBoardMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float m_fSize);
-	virtual ~CBillBoardMesh();
+	CSpriteMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float m_fSize, bool m_bBillBoard);
+	virtual ~CSpriteMesh();
 };
 
 class CParticleVertex
@@ -331,21 +332,14 @@ public:
 	XMFLOAT3						m_xmf3Position = XMFLOAT3(0.0f, 0.0f, 0.0f);
 	XMFLOAT3						m_xmf3Velocity = XMFLOAT3(0.0f, 0.0f, 0.0f);
 	float							m_fLifetime = 0.0f;
-	UINT							m_nType = 0;
-	float							m_fSize = 0.1f;
+	float							m_fSpanTime = 0.f;	
 
 public:
 	CParticleVertex() { }
 	~CParticleVertex() { }
 };
 
-#define PARTICLE_TYPE_EMITTER		0
-#define PARTICLE_TYPE_SHELL			1
-#define PARTICLE_TYPE_FLARE01		2
-#define PARTICLE_TYPE_FLARE02		3
-#define PARTICLE_TYPE_FLARE03		4
-
-#define MAX_PARTICLES				5000
+#define MAX_PARTICLES				250
 
 //#define _WITH_QUERY_DATA_SO_STATISTICS
 

@@ -7,7 +7,6 @@
 #include "..\Global\Locator.h"
 #include "..\Sound\SoundComponent.h"
 #include "..\Sound\SoundManager.h"
-#include "..\Object\BillBoardComponent.h"
 #include "..\Object\TextureManager.h"
 #include "..\Object\AnimationComponent.h"
 

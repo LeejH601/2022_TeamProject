@@ -234,13 +234,14 @@ void ParticleComponent::HandleMessage(const Message& message, const ParticleComp
 	{
 		pParticle->SetEnable(true);
 		pParticle->SetSize(m_fSize);
-		pParticle->SetAlpha(m_fAlpha);
+		pParticle->SetStartAlpha(m_fAlpha);
 		pParticle->SetColor(m_xmf3Color);
 		pParticle->SetSpeed(m_fSpeed);
 		pParticle->SetLifeTime(m_fLifeTime);
 		pParticle->SetMaxParticleN(m_nParticleNumber);
 		pParticle->SetEmitParticleN(m_nParticleNumber);
 		pParticle->SetPosition(params.xmf3Position);
+		pParticle->SetParticleType(m_iParticleType);
 		pParticle->ChangeTexture(m_pTexture);
 	}
 }
@@ -262,7 +263,75 @@ void ImpactEffectComponent::HandleMessage(const Message& message, const ImpactCo
 		pMultiSprite->ChangeTexture(m_pTexture);
 	}
 }
+
 void SceneCollideListener::HandleMessage(const Message& message, const CollideParams& params)
 {
 	m_pScene->HandleCollision(params);
+}
+
+void TerrainSpriteComponent::SetTexture(LPCTSTR pszFileName)
+{
+}
+
+//void TerrainSpriteComponent::SetSpeed(float fSpeed)
+//{
+//}
+//
+//void TerrainSpriteComponent::SetAlpha(float fAlpha)
+//{
+//}
+
+void TerrainSpriteComponent::UpdateData()
+{
+}
+//
+//float& TerrainSpriteComponent::GetSpeed()
+//{
+//	// // O: 여기에 return 문을 삽입합니다.
+//}
+//
+//float& TerrainSpriteComponent::GetAlpha()
+//{
+//	// // O: 여기에 return 문을 삽입합니다.
+//}
+
+void TerrainSpriteComponent::HandleMessage(const Message& message, const TerrainSpriteCompParams& params)
+{
+	CTerrainSpriteObject* pSpriteObject = dynamic_cast<CTerrainSpriteObject*>(params.pObject);
+
+	if (pSpriteObject)
+	{
+		pSpriteObject->SetEnable(true);
+		pSpriteObject->SetPosition(params.xmf3Position);
+		//pSpriteObject->SetSpeed()
+		//pParticle->SetSize(m_fSize);
+		//pParticle->SetAlpha(m_fAlpha);
+		//pParticle->SetColor(m_xmf3Color);
+		//pParticle->SetSpeed(m_fSpeed);
+		//pParticle->SetLifeTime(m_fLifeTime);
+		//pParticle->SetMaxParticleN(m_nParticleNumber);
+		//pParticle->SetEmitParticleN(m_nParticleNumber);
+		//pParticle->SetPosition(params.xmf3Position);
+	}
+}
+
+void SmokeParticleComponent::HandleMessage(const Message& message, const ParticleSmokeParams& params)
+{
+	CParticleObject* pParticleObject = dynamic_cast<CParticleObject*>(params.pObject);
+
+	if (pParticleObject)
+	{
+		pParticleObject->SetEnable(true);
+		pParticleObject->SetPosition(params.xmf3Position);
+		pParticleObject->SetParticleType(m_iParticleType);
+		//pSpriteObject->SetSpeed()
+		pParticleObject->SetSize(m_fSize);
+		pParticleObject->SetStartAlpha(m_fAlpha);
+		pParticleObject->SetColor(m_xmf3Color);
+		//pParticle->SetSpeed(m_fSpeed);
+		pParticleObject->SetLifeTime(m_fLifeTime);
+		//pParticle->SetMaxParticleN(m_nParticleNumber);
+		//pParticle->SetEmitParticleN(m_nParticleNumber);
+		//pParticle->SetPosition(params.xmf3Position);
+	}
 }

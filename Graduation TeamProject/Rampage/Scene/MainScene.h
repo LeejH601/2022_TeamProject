@@ -30,6 +30,10 @@ private:
 
 	std::unique_ptr<CParticleShader> m_pParticleShader;
 	std::vector<std::unique_ptr<CGameObject>> m_pParticleObjects;
+	std::vector<std::unique_ptr<CGameObject>> m_pSpriteAttackObjects;
+	std::vector<std::unique_ptr<CGameObject>> m_pTerrainSpriteObject;
+	
+	std::unique_ptr<CGameObject> m_pSmokeObject;
 
 	std::unique_ptr<CBillBoardObjectShader> m_pBillBoardObjectShader;
 	std::vector<std::unique_ptr<CGameObject>> m_pBillBoardObjects;

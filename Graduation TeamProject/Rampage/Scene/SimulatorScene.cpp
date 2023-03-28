@@ -8,7 +8,6 @@
 #include "..\Global\Camera.h"
 #include "..\Global\Locator.h"
 #include "..\Shader\DepthRenderShader.h"
-#include "..\Object\BillBoardComponent.h"
 
 void CSimulatorScene::OnPreRender(ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed)
 {
@@ -295,7 +294,7 @@ void CSimulatorScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 	m_pTextureManager->LoadBillBoardTexture(pd3dDevice, pd3dCommandList, L"Image/Fire_Effect.dds", m_pBillBoardObjectShader.get(), 5, 6);
 
 	m_pBillBoardObject = std::make_shared<CMultiSpriteObject>(m_pTextureManager->LoadBillBoardTexture(L"Image/Fire_Effect.dds"), pd3dDevice, pd3dCommandList, m_pBillBoardObjectShader.get(), 5, 6, 8.f, 5.f);
-	CAttackSpriteComponent::GetInst()->Add_AttackComponent(std::make_pair(m_pEnemys[0], m_pBillBoardObject));
+	//CAttackSpriteComponent::GetInst()->Add_AttackComponent(std::make_pair(m_pEnemys[0], m_pBillBoardObject));
 
 	m_pParticleShader = std::make_unique<CParticleShader>();
 	m_pParticleShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 40);
@@ -345,7 +344,7 @@ void CSimulatorScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float f
 
 	//Locator.GetSoundPlayer()->Update(fTimeElapsed);
 
-	CAttackSpriteComponent::GetInst()->Collision_Check();
+	//CAttackSpriteComponent::GetInst()->Collision_Check();
 
 	m_pBillBoardObjectShader->Render(pd3dCommandList, 0);
 	m_pBillBoardObject->Animate(fTimeElapsed);

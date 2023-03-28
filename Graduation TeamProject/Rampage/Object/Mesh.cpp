@@ -1231,18 +1231,18 @@ CTexturedRectMesh::~CTexturedRectMesh()
 {
 }
 
-CBillBoardMesh::CBillBoardMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float m_fSize)
+CSpriteMesh::CSpriteMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float m_fSize, bool m_bBillBoard)
 {
 	m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_POINTLIST;
 	int nBillBoard = 1;
-	m_nStride = sizeof(CBillBoardVertex);
+	m_nStride = sizeof(CSpriteVertex);
 	m_nVertices = nBillBoard;
-	std::vector< CBillBoardVertex> m_BillBordVertices;
+	std::vector<CSpriteVertex> m_BillBordVertices;
 	m_BillBordVertices.reserve(nBillBoard);
 
 	for (int i = 0; i < nBillBoard; i++)
 	{
-		m_BillBordVertices.push_back(CBillBoardVertex(XMFLOAT3(0.f, 0.f, 0.f), XMFLOAT2(m_fSize, m_fSize)));
+		m_BillBordVertices.push_back(CSpriteVertex(XMFLOAT2(m_fSize, m_fSize), m_bBillBoard));
 	}
 
 	m_pd3dPositionBuffer = CreateBufferResource(pd3dDevice, pd3dCommandList, m_BillBordVertices.data(), m_nStride * m_nVertices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dPositionUploadBuffer);
@@ -1254,7 +1254,7 @@ CBillBoardMesh::CBillBoardMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 	m_pd3dVertexBufferViews.emplace_back(m_pd3dPositionBufferView);
 }
 
-CBillBoardMesh::~CBillBoardMesh()
+CSpriteMesh::~CSpriteMesh()
 {
 }
 
@@ -1326,7 +1326,7 @@ void CParticleMesh::CreateVertexBuffer(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 		pVertices[i].m_xmf3Position = xmf3Position;
 		pVertices[i].m_xmf3Velocity = xmf3Velocity;
 		pVertices[i].m_fLifetime = fLifetime;
-		pVertices[i].m_nType = PARTICLE_TYPE_EMITTER;
+		pVertices[i].m_fSpanTime = 0.f;
 	}
 
 	m_pd3dPositionBuffer = CreateBufferResource(pd3dDevice, pd3dCommandList, pVertices, m_nStride * m_nVertices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dPositionUploadBuffer);
@@ -1477,7 +1477,8 @@ void CParticleMesh::OnPostRender(int nPipelineState)
 		_stprintf_s(pstrDebug, 256, _T("Stream Output Vertices = %d\n"), m_nVertices);
 		OutputDebugString(pstrDebug);
 #endif
-		if ((m_nVertices == 0) || (m_nVertices >= MAX_PARTICLES)) m_bStart = true;
+		if ((m_nVertices == 0) || (m_nVertices >= MAX_PARTICLES)) 
+			m_bStart = true;
 	}
 }
 

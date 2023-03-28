@@ -8,6 +8,7 @@ enum class MessageType {
 	UPDATE_OBJECT,
 	UPDATE_BILLBOARD,
 	UPDATE_PARTICLE,
+	UPDATE_SPRITE
 };
 
 enum class MESSAGE_TYPE
@@ -38,4 +39,9 @@ enum class SCENE_TYPE
 {
 	LOBBY_SCENE,
 	MAIN_SCENE,
+};
+
+enum class PARTICLE_CATEGORY
+{
+	PARTICLE_SPHERE
 };

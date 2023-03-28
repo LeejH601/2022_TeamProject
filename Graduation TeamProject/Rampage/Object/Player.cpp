@@ -4,6 +4,7 @@
 #include "..\Global\Global.h"
 #include "..\Global\Timer.h"
 #include "..\Global\MessageDispatcher.h"
+#include "..\Object\ParticleObject.h"
 
 CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks)
 {
@@ -115,7 +116,7 @@ void CPlayer::Update(float fTimeElapsed)
 	CPhysicsObject::Apply_Friction(fTimeElapsed);
 }
 
-void CPlayer::ProcessInput(DWORD dwDirection, float cxDelta, float cyDelta, float fTimeElapsed, CCamera* pCamera)
+void CPlayer::ProcessInput(DWORD dwDirection, float cxDelta, float cyDelta, float fTimeElapsed, CCamera* pCamera, CParticleObject* pObject)
 {
 	static UCHAR pKeysBuffer[256];
 
@@ -126,6 +127,14 @@ void CPlayer::ProcessInput(DWORD dwDirection, float cxDelta, float cyDelta, floa
 		if (dwDirection)
 		{
 			Move(dwDirection, m_fSpeedUperS * fTimeElapsed, true, pCamera);
+
+			XMFLOAT3 xmf3Shift = XMFLOAT3{};
+
+			if (dwDirection & DIR_FORWARD)xmf3Shift = Vector3::Add(xmf3Shift, Vector3::Normalize(XMFLOAT3(pCamera->GetLookVector().x, 0.0f, pCamera->GetLookVector().z)));
+			if (dwDirection & DIR_BACKWARD)xmf3Shift = Vector3::Add(xmf3Shift, Vector3::Normalize(XMFLOAT3(pCamera->GetLookVector().x, 0.0f, pCamera->GetLookVector().z)), -1.0f);
+			if (dwDirection & DIR_RIGHT)xmf3Shift = Vector3::Add(xmf3Shift, Vector3::Normalize(XMFLOAT3(pCamera->GetRightVector().x, 0.0f, pCamera->GetRightVector().z)));
+			if (dwDirection & DIR_LEFT)xmf3Shift = Vector3::Add(xmf3Shift, Vector3::Normalize(XMFLOAT3(pCamera->GetRightVector().x, 0.0f, pCamera->GetRightVector().z)), -1.0f);
+			pObject->SetDirection(xmf3Shift);
 		}
 	}
 }
