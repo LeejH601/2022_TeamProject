@@ -456,22 +456,19 @@ void CGameFramework::PrepareRenderTarget()
 }
 void CGameFramework::PrepareImGui()
 {
-	if (m_pSceneManager->GetCurrentScene() == SCENE_TYPE::LOBBY_SCENE)
-	{
-		HRESULT hResult = m_pd3dCommandList->Reset(m_pd3dCommandAllocator.Get(), NULL);
+	HRESULT hResult = m_pd3dCommandList->Reset(m_pd3dCommandAllocator.Get(), NULL);
 
-		CImGuiManager::GetInst()->OnPrepareRender(m_pd3dCommandList.Get(), &m_d3dDsvDescriptorCPUHandle, m_GameTimer.GetFrameTimeElapsed(), m_GameTimer.GetTotalTime(), NULL);
+	CImGuiManager::GetInst()->OnPrepareRender(m_pd3dCommandList.Get(), &m_d3dDsvDescriptorCPUHandle, m_GameTimer.GetFrameTimeElapsed(), m_GameTimer.GetTotalTime(), NULL);
 
-		//명령 리스트를 닫힌 상태로 만든다. 
-		hResult = m_pd3dCommandList->Close();
+	//명령 리스트를 닫힌 상태로 만든다. 
+	hResult = m_pd3dCommandList->Close();
 
-		//명령 리스트를 명령 큐에 추가하여 실행한다.
-		ID3D12CommandList* CommandLists[] = { m_pd3dCommandList.Get() };
-		m_pd3dCommandQueue->ExecuteCommandLists(1, CommandLists);
+	//명령 리스트를 명령 큐에 추가하여 실행한다.
+	ID3D12CommandList* CommandLists[] = { m_pd3dCommandList.Get() };
+	m_pd3dCommandQueue->ExecuteCommandLists(1, CommandLists);
 
-		//GPU가 모든 명령 리스트를 실행할 때 까지 기다린다.
-		::WaitForGpuComplete(m_pd3dCommandQueue.Get(), m_pd3dFence.Get(), ++m_nFenceValues[m_nSwapChainBufferIndex], m_hFenceEvent);
-	}
+	//GPU가 모든 명령 리스트를 실행할 때 까지 기다린다.
+	::WaitForGpuComplete(m_pd3dCommandQueue.Get(), m_pd3dFence.Get(), ++m_nFenceValues[m_nSwapChainBufferIndex], m_hFenceEvent);
 }
 void CGameFramework::OnPostRender()
 {
@@ -496,9 +493,7 @@ void CGameFramework::RenderObjects()
 	HRESULT hResult = m_pd3dCommandAllocator->Reset();
 
 	if (typeid(*m_pSceneManager->GetCurrentScene()) != typeid(CMainTMPScene)) {
-		CSimulatorScene::GetInst()->SetHDRRenderSource(m_ppd3dRenderTargetBuffers[m_nSwapChainBufferIndex].Get());
-		OnPrepareImGui();
-		//CSimulatorScene::GetInst()->OnPrepareRender(m_pd3dCommandList.Get());
+		PrepareImGui();
 	}
 
 	//명령 리스트를 리셋한다.
@@ -513,7 +508,7 @@ void CGameFramework::RenderObjects()
 		m_pSceneManager->OnPrepareRenderTarget(m_pd3dCommandList.Get(), 1, &m_pd3dSwapRTVCPUHandles[m_nSwapChainBufferIndex], m_d3dDsvDescriptorCPUHandle);
 	}
 	else
-		OnPrepareRenderTarget();
+		PrepareRenderTarget();
 
 	m_pd3dCommandList->ClearDepthStencilView(m_d3dDsvDescriptorCPUHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
 	UpdateShaderVariables(m_pd3dCommandList.Get());

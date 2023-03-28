@@ -29,21 +29,6 @@ void CSceneManager::SetPlayer(CPlayer* pPlayer)
 		m_pMainScene->SetPlayer(pPlayer);
 }
 
-void CSceneManager::SetCurrentScene(SCENE_TYPE scene_type)
-{
-	switch (scene_type)
-	{
-	case SCENE_TYPE::LOBBY_SCENE:
-		m_pCurrentScene = m_pLobbyScene.get();
-		break;
-	case SCENE_TYPE::MAIN_SCENE:
-		m_pCurrentScene = m_pMainScene.get();
-		break;
-	default:
-		break;
-	}
-}
-
 void CSceneManager::PreRender(ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed)
 {
 	m_pCurrentScene->OnPrepareRender(pd3dCommandList);

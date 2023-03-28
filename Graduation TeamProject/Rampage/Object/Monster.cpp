@@ -67,8 +67,8 @@ void CMonster::Update(float fTimeElapsed)
 		}
 	}
 	else{
-		/*m_fDissolveTime += fTimeElapsed;
-		m_fDissolveThrethHold = m_fDissolveTime / m_fMaxDissolveTime;*/
+		m_fDissolveTime += fTimeElapsed;
+		m_fDissolveThrethHold = m_fDissolveTime / m_fMaxDissolveTime;
 	}
 
 	if (m_pStateMachine->GetCurrentState() == Damaged_Monster::GetInst() ||

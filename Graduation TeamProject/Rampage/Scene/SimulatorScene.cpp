@@ -11,6 +11,10 @@
 #include "..\Object\TextureManager.h"
 #include "..\Shader\PostProcessShader.h"
 
+#define MAX_PARTICLE_OBJECT 50
+#define MAX_ATTACKSPRITE_OBJECT 50
+#define MAX_TERRAINSPRITE_OBJECT 50
+
 void CSimulatorScene::OnPreRender(ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed)
 {
 	if (m_pDepthRenderShader)
@@ -319,10 +323,12 @@ void CSimulatorScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 	DXGI_FORMAT pdxgiObjectRtvFormats[7] = { DXGI_FORMAT_R8G8B8A8_UNORM, DXGI_FORMAT_R16G16B16A16_FLOAT, DXGI_FORMAT_R16G16B16A16_UNORM, DXGI_FORMAT_R32G32B32A32_FLOAT,
 		DXGI_FORMAT_R8G8B8A8_UNORM, DXGI_FORMAT_R32_FLOAT, DXGI_FORMAT_R32_FLOAT };
 
+	XMFLOAT3 offset{ 86.4804 , 0.0f, -183.7856 };
+
 	m_pSimulaterCamera = std::make_unique<CSimulatorCamera>();
 	m_pSimulaterCamera->Init(pd3dDevice, pd3dCommandList);
-	m_pSimulaterCamera->SetPosition(XMFLOAT3(-18.5f, 37.5f, -18.5f));
-	m_pSimulaterCamera->SetLookAt(XMFLOAT3(0.0f, 0.0f, 0.0f));
+	m_pSimulaterCamera->SetPosition(XMFLOAT3(43 + offset.x, 62, 46 + offset.z));
+	m_pSimulaterCamera->SetLookAt(XMFLOAT3(100 + offset.x, 0, 100 + offset.z));
 	m_pSimulaterCamera->RegenerateViewMatrix();
 
 	CModelShader::GetInst()->CreateShader(pd3dDevice, GetGraphicsRootSignature(), 7, pdxgiObjectRtvFormats, DXGI_FORMAT_D32_FLOAT, 1);
@@ -339,16 +345,14 @@ void CSimulatorScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 	m_pLight = std::make_unique<CLight>();
 	m_pLight->CreateLightVariables(pd3dDevice, pd3dCommandList);
 
-	XMFLOAT3 offset{ 86.4804 , 0.0f, -183.7856 };
-
 	// 4->HIT
 	// 5->IDLE
-	std::shared_ptr<CMonster> m_pDummyEnemy = std::make_unique<CGoblinObject>(pd3dDevice, pd3dCommandList, 1);
+	std::unique_ptr<CMonster> m_pDummyEnemy = std::make_unique<CGoblinObject>(pd3dDevice, pd3dCommandList, 1);
 	m_pDummyEnemy->SetPosition(XMFLOAT3(50 + offset.x, 100, 50 + offset.z));
 	m_pDummyEnemy->SetScale(4.0f, 4.0f, 4.0f);
 	m_pDummyEnemy->Rotate(0.0f, -90.0f, 0.0f);
 	m_pDummyEnemy->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 5);
-	m_pEnemys.push_back(m_pDummyEnemy);
+	m_pEnemys.push_back(std::move(m_pDummyEnemy));
 
 	// 3->IDLE
 	// 28->Attack
@@ -376,21 +380,8 @@ void CSimulatorScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 	for (int i = 0; i < m_pEnemys.size(); ++i)
 	{
 		((CDepthRenderShader*)m_pDepthRenderShader.get())->RegisterObject(m_pEnemys[i].get());
-		m_pEnemys[i]->SetUpdatedContext(m_pTerrain.get());
+		((CMonster*)m_pEnemys[i].get())->SetUpdatedContext(m_pTerrain.get());
 	}
-
-	/*std::unique_ptr<CGameObject> pDumpCharater = std::make_unique<CKnightObject>(pd3dDevice, pd3dCommandList, 1);
-
-	for (int i = 0; i < pDumpCharater->m_pSkinnedAnimationController->m_pAnimationSets->m_nAnimationSets; ++i)
-	{
-		std::unique_ptr<CGameObject> pCharater = std::make_unique<CKnightObject>(pd3dDevice, pd3dCommandList, 1);
-		pCharater = std::make_unique<CKnightObject>(pd3dDevice, pd3dCommandList, 1);
-		pCharater->SetPosition(XMFLOAT3(5.0f * i, 0.0f, 0.0f));
-		pCharater->SetScale(5.0f, 5.0f, 5.0f);
-		pCharater->Rotate(0.0f, -90.0f, 0.0f);
-		pCharater->m_pSkinnedAnimationController->SetTrackAnimationSet(0, i);
-		m_pMainCharacters.push_back(std::move(pCharater));
-	}*/
 
 	m_pTextureManager = std::make_unique<CTextureManager>();
 
@@ -401,30 +392,57 @@ void CSimulatorScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 	m_pTextureManager->LoadBillBoardTexture(pd3dDevice, pd3dCommandList, L"Image/Explode_8x8.dds", m_pBillBoardObjectShader.get(), 8, 8);
 	m_pTextureManager->LoadBillBoardTexture(pd3dDevice, pd3dCommandList, L"Image/Fire_Effect.dds", m_pBillBoardObjectShader.get(), 5, 6);
 
-	m_pBillBoardObject = std::make_shared<CMultiSpriteObject>(m_pTextureManager->LoadBillBoardTexture(L"Image/Fire_Effect.dds"), pd3dDevice, pd3dCommandList, m_pBillBoardObjectShader.get(), 5, 6, 8.f, 5.f);
-	//CAttackSpriteComponent::GetInst()->Add_AttackComponent(std::make_pair(m_pEnemys[0], m_pBillBoardObject));
+	for (int i = 0; i < 50; ++i)
+	{
+		std::unique_ptr<CGameObject> m_pBillBoardObject = std::make_unique<CMultiSpriteObject>(m_pTextureManager->LoadBillBoardTexture(L"Image/Fire_Effect.dds"), pd3dDevice, pd3dCommandList, m_pBillBoardObjectShader.get(), 5, 6, 8.f, 5.f);
+		m_pBillBoardObjects.push_back(std::move(m_pBillBoardObject));
+	}
 
 	m_pParticleShader = std::make_unique<CParticleShader>();
-	m_pParticleShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 40);
+	m_pParticleShader->CreateCbvSrvUavDescriptorHeaps(pd3dDevice, 0, 40);
 	m_pParticleShader->CreateGraphicsPipelineState(pd3dDevice, GetGraphicsRootSignature(), 0);
 
 	m_pTextureManager->LoadParticleTexture(pd3dDevice, pd3dCommandList, L"ParticleImage/RoundSoftParticle.dds", m_pParticleShader.get(), 0, 0);
+	m_pTextureManager->LoadParticleTexture(pd3dDevice, pd3dCommandList, L"ParticleImage/Smoke.dds", m_pParticleShader.get(), 0, 0);
+	m_pTextureManager->LoadParticleTexture(pd3dDevice, pd3dCommandList, L"ParticleImage/Smoke2.dds", m_pParticleShader.get(), 0, 0);
 	m_pTextureManager->LoadParticleTexture(pd3dDevice, pd3dCommandList, L"Image/Effect0.dds", m_pParticleShader.get(), 0, 0);
 	m_pTextureManager->LoadParticleTexture(pd3dDevice, pd3dCommandList, L"Image/Effect1.dds", m_pParticleShader.get(), 0, 0);
 	m_pTextureManager->LoadParticleTexture(pd3dDevice, pd3dCommandList, L"Image/Effect2.dds", m_pParticleShader.get(), 0, 0);
 	m_pTextureManager->LoadParticleTexture(pd3dDevice, pd3dCommandList, L"Image/Effect3.dds", m_pParticleShader.get(), 0, 0);
 	m_pTextureManager->LoadParticleTexture(pd3dDevice, pd3dCommandList, L"Image/Effect4.dds", m_pParticleShader.get(), 0, 0);
 	m_pTextureManager->LoadParticleTexture(pd3dDevice, pd3dCommandList, L"Image/Effect5.dds", m_pParticleShader.get(), 0, 0);
+
+	m_pTextureManager->LoadBillBoardTexture(pd3dDevice, pd3dCommandList, L"Image/Explode_8x8.dds", m_pBillBoardObjectShader.get(), 8, 8);
+	m_pTextureManager->LoadBillBoardTexture(pd3dDevice, pd3dCommandList, L"Image/Fire_Effect.dds", m_pBillBoardObjectShader.get(), 5, 6);
+	m_pTextureManager->LoadBillBoardTexture(pd3dDevice, pd3dCommandList, L"Image/Circle0.dds", m_pBillBoardObjectShader.get(), 0, 0);
 	
-	XMFLOAT3 offset{ 86.4804 , 0.0f, -183.7856 };
-	std::unique_ptr<CGameObject> m_pParticleObject = std::make_unique<CParticleObject>(m_pTextureManager->LoadParticleTexture(L"ParticleImage/RoundSoftParticle.dds"), pd3dDevice, pd3dCommandList, GetGraphicsRootSignature(), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), 2.0f, XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT2(2.0f, 2.0f), MAX_PARTICLES, m_pParticleShader.get());
-	m_pParticleObject->SetPosition(XMFLOAT3(offset.x + 80.f, 0.f, 100.f));
-	m_pParticleObjects.push_back(std::move(m_pParticleObject));
+	for (int i = 0; i < MAX_PARTICLE_OBJECT; ++i)
+	{
+		std::unique_ptr<CGameObject> m_pParticleObject = std::make_unique<CParticleObject>(m_pTextureManager->LoadParticleTexture(L"ParticleImage/RoundSoftParticle.dds"), pd3dDevice, pd3dCommandList, GetGraphicsRootSignature(), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), 2.0f, XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT2(2.0f, 2.0f), MAX_PARTICLES, m_pParticleShader.get());
+		m_pParticleObjects.push_back(std::move(m_pParticleObject));
+	}
 	
+	for (int i = 0; i < MAX_ATTACKSPRITE_OBJECT; ++i)
+	{
+		std::unique_ptr<CGameObject> m_pSpriteObject = std::make_unique<CMultiSpriteObject>(m_pTextureManager->LoadBillBoardTexture(L"Image/Fire_Effect.dds"), pd3dDevice, pd3dCommandList, m_pBillBoardObjectShader.get(), 5, 6, 8.f, true, 5.f);
+		m_pSpriteAttackObjects.push_back(std::move(m_pSpriteObject));
+	}
+
+	for (int i = 0; i < MAX_TERRAINSPRITE_OBJECT; ++i)
+	{
+		std::unique_ptr<CGameObject> m_pSpriteObject = std::make_unique<CTerrainSpriteObject>(m_pTextureManager->LoadBillBoardTexture(L"Image/Circle0.dds"), pd3dDevice, pd3dCommandList, m_pBillBoardObjectShader.get(), 0, 0, 15.f, 5.f);
+		m_pTerrainSpriteObject.push_back(std::move(m_pSpriteObject));
+	}
+
 	m_pPostProcessShader = std::make_unique<CPostProcessShader>();
 	m_pPostProcessShader->CreateShader(pd3dDevice, GetGraphicsRootSignature(), 1, NULL, DXGI_FORMAT_D32_FLOAT, 0);
 	m_pPostProcessShader->BuildObjects(pd3dDevice, pd3dCommandList);
 
+	// COLLIDE LISTENER
+	std::unique_ptr<SceneCollideListener> pCollideListener = std::make_unique<SceneCollideListener>();
+	pCollideListener->SetScene(this);
+	m_pListeners.push_back(std::move(pCollideListener));
+	CMessageDispatcher::GetInst()->RegisterListener(MessageType::COLLISION, m_pListeners.back().get(), nullptr);
 
 	m_pHDRComputeShader = std::make_unique<CHDRComputeShader>();
 	//m_pHDRComputeShader->SetTextureSource(m_pPostProcessShader->GetTextureShared());
@@ -436,11 +454,33 @@ void CSimulatorScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 }
 void CSimulatorScene::Update(float fTimeElapsed)
 {
-	m_pSimulaterCamera->Update(XMFLOAT3{0.0f, 0.0f, 0.0f}, fTimeElapsed);
-	m_pMainCharacter->Update(fTimeElapsed);
+	UpdateObjects(fTimeElapsed);
+}
 
+void CSimulatorScene::UpdateObjects(float fTimeElapsed)
+{
+	AnimationCompParams animation_comp_params;
+	animation_comp_params.pObjects = &m_pEnemys;
+	animation_comp_params.fElapsedTime = fTimeElapsed;
+	CMessageDispatcher::GetInst()->Dispatch_Message<AnimationCompParams>(MessageType::UPDATE_OBJECT, &animation_comp_params, m_pMainCharacter->m_pStateMachine->GetCurrentState());
+	
 	for (int i = 0; i < m_pEnemys.size(); ++i)
 		m_pEnemys[i]->Update(fTimeElapsed);
+
+	for (int i = 0; i < m_pBillBoardObjects.size(); ++i)
+	{
+		m_pBillBoardObjects[i]->Animate(fTimeElapsed);
+	}
+
+	m_pMainCharacter->Update(fTimeElapsed);
+
+	m_pSimulaterCamera->Update(XMFLOAT3{ 0.0f, 0.0f, 0.0f }, fTimeElapsed);
+
+	CameraUpdateParams camera_shake_params;
+	camera_shake_params.pCamera = m_pSimulaterCamera.get();
+	camera_shake_params.fElapsedTime = fTimeElapsed;
+	CMessageDispatcher::GetInst()->Dispatch_Message<CameraUpdateParams>(MessageType::UPDATE_CAMERA, &camera_shake_params, m_pMainCharacter->m_pStateMachine->GetCurrentState());
+
 }
 
 void CSimulatorScene::OnPrepareRenderTarget(ID3D12GraphicsCommandList* pd3dCommandList, int nRenderTargets, D3D12_CPU_DESCRIPTOR_HANDLE* pd3dRtvCPUHandles, D3D12_CPU_DESCRIPTOR_HANDLE d3dDepthStencilBufferDSVCPUHandle)
@@ -466,13 +506,8 @@ void CSimulatorScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float f
 		m_pEnemys[i]->Render(pd3dCommandList, true);
 	}
 
-	m_pTerrainShader->Render(pd3dCommandList, 0);
-	m_pTerrain->Render(pd3dCommandList, true);
-
-	//Locator.GetSoundPlayer()->Update(fTimeElapsed);
-
-	//CAttackSpriteComponent::GetInst()->Collision_Check();
-
+	/*m_pTerrainShader->Render(pd3dCommandList, 0);
+	m_pTerrain->Render(pd3dCommandList, true);*/
 
 #define PostProcessing
 #ifdef PostProcessing
@@ -480,18 +515,24 @@ void CSimulatorScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float f
 
 	m_pPostProcessShader->Render(pd3dCommandList, pCamera);
 #endif // PostProcessing
-
+	
 	m_pBillBoardObjectShader->Render(pd3dCommandList, 0);
-	m_pBillBoardObject->Animate(fTimeElapsed);
-	m_pBillBoardObject->UpdateShaderVariables(pd3dCommandList, fCurrentTime, fTimeElapsed);
-	m_pBillBoardObject->Render(pd3dCommandList, true);
+
+	for (int i = 0; i < m_pTerrainSpriteObject.size(); ++i)
+	{
+		(static_cast<CTerrainSpriteObject*>(m_pTerrainSpriteObject[i].get()))->UpdateShaderVariables(pd3dCommandList, fCurrentTime, fTimeElapsed);
+		m_pTerrainSpriteObject[i]->Render(pd3dCommandList, true);
+	}
+
+	for (int i = 0; i < m_pBillBoardObjects.size(); ++i)
+		m_pBillBoardObjects[i]->Render(pd3dCommandList, true);
 
 	for (int i = 0; i < m_pParticleObjects.size(); ++i)
 	{
 		((CParticleObject*)m_pParticleObjects[i].get())->UpdateShaderVariables(pd3dCommandList, fCurrentTime, fTimeElapsed);
-		((CParticleObject*)m_pParticleObjects[i].get())->Render(pd3dCommandList, pCamera, m_pParticleShader.get());
+		((CParticleObject*)m_pParticleObjects[i].get())->Render(pd3dCommandList, nullptr, m_pParticleShader.get());
 	}
-	
+
 	if (m_pd3dComputeRootSignature) pd3dCommandList->SetComputeRootSignature(m_pd3dComputeRootSignature.Get());
 	ID3D12Resource* pd3dSource;
 	ID3D12Resource* pd3dDestination;
@@ -553,5 +594,50 @@ void CSimulatorScene::SetPlayerAnimationSet(int nSet)
 	m_pMainCharacter->Animate(0.0f);
 }
 
+void CSimulatorScene::HandleCollision(const CollideParams& params)
+{
+	std::vector<std::unique_ptr<CGameObject>>::iterator it = std::find_if(m_pParticleObjects.begin(), m_pParticleObjects.end(), [](const std::unique_ptr<CGameObject>& pParticleObject) {
+		if (!((CParticleObject*)pParticleObject.get())->GetEnable())
+			return true;
+		return false;
+		});
+
+	if (it != m_pParticleObjects.end())
+	{
+		ParticleCompParams particle_comp_params;
+		particle_comp_params.pObject = (*it).get();
+		particle_comp_params.xmf3Position = params.xmf3CollidePosition;
+		CMessageDispatcher::GetInst()->Dispatch_Message<ParticleCompParams>(MessageType::UPDATE_PARTICLE, &particle_comp_params, m_pMainCharacter->m_pStateMachine->GetCurrentState());
+
+	}
+
+	it = std::find_if(m_pBillBoardObjects.begin(), m_pBillBoardObjects.end(), [](const std::unique_ptr<CGameObject>& pBillBoardObject) {
+		if (!((CParticleObject*)pBillBoardObject.get())->GetEnable())
+			return true;
+		return false;
+		});
+
+	if (it != m_pBillBoardObjects.end())
+	{
+		ImpactCompParams impact_comp_params;
+		impact_comp_params.pObject = (*it).get();
+		impact_comp_params.xmf3Position = params.xmf3CollidePosition;
+		CMessageDispatcher::GetInst()->Dispatch_Message<ImpactCompParams>(MessageType::UPDATE_BILLBOARD, &impact_comp_params, m_pMainCharacter->m_pStateMachine->GetCurrentState());
+	}
+
+	std::vector<std::unique_ptr<CGameObject>>::iterator TerrainSpriteit = std::find_if(m_pTerrainSpriteObject.begin(), m_pTerrainSpriteObject.end(), [](const std::unique_ptr<CGameObject>& pSpriteAttackObject) {
+		if (!((CMultiSpriteObject*)pSpriteAttackObject.get())->GetEnable())
+			return true;
+		return false;
+		});
+
+	if (TerrainSpriteit != m_pTerrainSpriteObject.end())
+	{
+		TerrainSpriteCompParams AttackSprite_comp_params;
+		AttackSprite_comp_params.pObject = (*TerrainSpriteit).get();
+		AttackSprite_comp_params.xmf3Position = params.xmf3CollidePosition;
+		CMessageDispatcher::GetInst()->Dispatch_Message<TerrainSpriteCompParams>(MessageType::UPDATE_SPRITE, &AttackSprite_comp_params, m_pMainCharacter->m_pStateMachine->GetCurrentState());
+	}
+}
 
 

@@ -16,17 +16,23 @@
 class CSimulatorScene : public CScene
 {
 private:
-	std::vector<std::shared_ptr<CMonster>> m_pEnemys;
+	std::vector<std::unique_ptr<CGameObject>> m_pEnemys;
 	std::unique_ptr<CPlayer> m_pMainCharacter;
 	std::unique_ptr<CLight> m_pLight;
-	std::unique_ptr<CSplatTerrain> m_pTerrain;
+
 	std::unique_ptr<CShader> m_pTerrainShader;
-	std::shared_ptr<CMultiSpriteObject> m_pBillBoardObject;
-	std::unique_ptr<CBillBoardObjectShader> m_pBillBoardObjectShader;
+	std::unique_ptr<CSplatTerrain> m_pTerrain;
+
 	std::unique_ptr<CShader> m_pDepthRenderShader;
 
 	std::unique_ptr<CParticleShader> m_pParticleShader;
 	std::vector<std::unique_ptr<CGameObject>> m_pParticleObjects;
+
+	std::vector<std::unique_ptr<CGameObject>> m_pSpriteAttackObjects;
+	std::vector<std::unique_ptr<CGameObject>> m_pTerrainSpriteObject;
+
+	std::unique_ptr<CBillBoardObjectShader> m_pBillBoardObjectShader;
+	std::vector<std::unique_ptr<CGameObject>> m_pBillBoardObjects;
 
 	std::unique_ptr<CTextureManager> m_pTextureManager = NULL;
 	std::unique_ptr<CCamera> m_pSimulaterCamera = NULL;
@@ -48,9 +54,12 @@ public:
 	virtual void ReleaseObjects() {}
 
 	virtual void Update(float fTimeElapsed);
+	virtual void UpdateObjects(float fTimeElapsed);
 	virtual void OnPrepareRenderTarget(ID3D12GraphicsCommandList* pd3dCommandList, int nRenderTargets, D3D12_CPU_DESCRIPTOR_HANDLE* pd3dRtvCPUHandles, D3D12_CPU_DESCRIPTOR_HANDLE d3dDepthStencilBufferDSVCPUHandle);
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed, float fCurrentTime, CCamera* pCamera = NULL);
 	virtual void OnPostRender();
+
+	virtual void HandleCollision(const CollideParams& params);
 
 	void SetPlayerAnimationSet(int nSet);
 	CTextureManager* GetTextureManager() { return m_pTextureManager.get(); }

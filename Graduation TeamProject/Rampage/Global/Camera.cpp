@@ -39,7 +39,6 @@ void CCamera::OnPrepareRender(ID3D12GraphicsCommandList* pd3dCommandList)
 	RegenerateViewMatrix();
 	SetViewportsAndScissorRects(pd3dCommandList);
 	UpdateShaderVariables(pd3dCommandList);
-	UpdateCameraFrustumBox();
 }
 void CCamera::OnPostRender()
 {
@@ -65,12 +64,6 @@ void CCamera::GenerateProjectionMatrix(float fNearPlaneDistance, float fFarPlane
 {
 	m_xmf4x4Projection = Matrix4x4::PerspectiveFovLH(XMConvertToRadians(fFOVAngle), fAspectRatio, fNearPlaneDistance, fFarPlaneDistance);
 	//m_bFrustumBoundingBox = BoundingFrustum(XMLoadFloat4x4(&m_xmf4x4Projection));
-}
-void CCamera::UpdateCameraFrustumBox()
-{
-	XMMATRIX viewProj = XMLoadFloat4x4(&m_xmf4x4View) * XMLoadFloat4x4(&m_xmf4x4Projection);
-
-	m_bFrustumBoundingBox = BoundingFrustum(viewProj);
 }
 void CCamera::GenerateViewMatrix(XMFLOAT3 xmf3Position, XMFLOAT3 xmf3LookAt, XMFLOAT3 xmf3Up)
 {

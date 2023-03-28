@@ -403,9 +403,6 @@ bool CMainTMPScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPAR
 		case 'E':
 			if (wParam == 'e' || wParam == 'E') dwDirection |= DIR_UP;
 			break;
-		case ';':
-			m_bTestKey = true;
-			break;
 		default:
 			break;
 		}
@@ -675,8 +672,8 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pTextureManager = std::make_unique<CTextureManager>();
 
 	m_pBillBoardObjectShader = std::make_unique<CBillBoardObjectShader>();
-	m_pBillBoardObjectShader->CreateShader(pd3dDevice, GetGraphicsRootSignature(), 1, &pdxgiObjectRtvFormats, 0);
-	m_pBillBoardObjectShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 10);
+	m_pBillBoardObjectShader->CreateShader(pd3dDevice, GetGraphicsRootSignature(), 7, pdxgiObjectRtvFormats, 0);
+	m_pBillBoardObjectShader->CreateCbvSrvUavDescriptorHeaps(pd3dDevice, 0, 10);
 
 	m_pTextureManager->LoadBillBoardTexture(pd3dDevice, pd3dCommandList, L"Image/Explode_8x8.dds", m_pBillBoardObjectShader.get(), 8, 8);
 	m_pTextureManager->LoadBillBoardTexture(pd3dDevice, pd3dCommandList, L"Image/Fire_Effect.dds", m_pBillBoardObjectShader.get(), 5, 6);
@@ -688,7 +685,7 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	}
 	
 	m_pParticleShader = std::make_unique<CParticleShader>();
-	m_pParticleShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 40);
+	m_pParticleShader->CreateCbvSrvUavDescriptorHeaps(pd3dDevice, 0, 40);
 	m_pParticleShader->CreateGraphicsPipelineState(pd3dDevice, GetGraphicsRootSignature(), 0);
 
 	m_pTextureManager->LoadParticleTexture(pd3dDevice, pd3dCommandList, L"ParticleImage/RoundSoftParticle.dds", m_pParticleShader.get(), 0, 0);
@@ -759,10 +756,6 @@ void CMainTMPScene::UpdateObjects(float fTimeElapsed)
 	m_pLight->Update((CPlayer*)m_pPlayer);
 
 	for (int i = 0; i < m_pObjects.size(); ++i) {
-		/*if (i > 1 && i < 6) {
-			if (!m_bTestKey)
-				continue;
-		}*/
 		m_pObjects[i]->Update(fTimeElapsed);
 		m_pcbMappedDisolveParams->dissolveThreshold[i] = m_pObjects[i]->m_fDissolveThrethHold;
 	}
@@ -817,7 +810,7 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 
 	m_pLight->Render(pd3dCommandList);
 
-	m_pSunLightShader->Render(pd3dCommandList, pCamera);
+	m_pSunLightShader->Render(pd3dCommandList, m_pCurrentCamera);
 
 	m_pSkyBoxShader->Render(pd3dCommandList, 0);
 	m_pSkyBoxObject->Render(pd3dCommandList, m_pCurrentCamera);
@@ -826,7 +819,6 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 	m_pTerrain->Render(pd3dCommandList, true);
 
 	CModelShader::GetInst()->Render(pd3dCommandList, 0);
-
 
 	if (m_pPlayer)
 	{
@@ -840,19 +832,23 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 	UINT index = 0;
 	for (int i = 0; i < m_pObjects.size(); ++i)
 	{
-		//if(pCamera->m_bFrustumBoundingBox.Intersects( m_pObjects[i].get()->m_)
-		/*if (i < 4) {
-			(CMonster*)m_pObjects[i].get()->
-		}*/
 		pd3dCommandList->SetGraphicsRoot32BitConstants(0, 1, &i, 33);
 		m_pObjects[i]->Animate(0.0f);
 		m_pObjects[i]->Render(pd3dCommandList, true);
 	}
+#ifdef RENDER_BOUNDING_BOX
+	CBoundingBoxShader::GetInst()->Render(pd3dCommandList, 0);
+#endif
+
+#define PostProcessing
+
+#ifdef PostProcessing
+	m_pPostProcessShader->OnPostRenderTarget(pd3dCommandList);
+
+	m_pPostProcessShader->Render(pd3dCommandList, pCamera);
+#endif // PostProcessing
 
 	m_pBillBoardObjectShader->Render(pd3dCommandList, 0);
-	for (int i = 0; i < m_pBillBoardObjects.size(); ++i)
-		m_pBillBoardObjects[i]->Render(pd3dCommandList, true);
-
 
 	for (int i = 0; i < m_pTerrainSpriteObject.size(); ++i)
 	{
@@ -860,24 +856,14 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 		m_pTerrainSpriteObject[i]->Render(pd3dCommandList, true);
 	}
 
+	for (int i = 0; i < m_pBillBoardObjects.size(); ++i)
+		m_pBillBoardObjects[i]->Render(pd3dCommandList, true);
+
 	for (int i = 0; i < m_pParticleObjects.size(); ++i)
 	{
 		((CParticleObject*)m_pParticleObjects[i].get())->UpdateShaderVariables(pd3dCommandList, fCurrentTime, fTimeElapsed);
 		((CParticleObject*)m_pParticleObjects[i].get())->Render(pd3dCommandList, nullptr, m_pParticleShader.get());
 	}
-
-#ifdef RENDER_BOUNDING_BOX
-	CBoundingBoxShader::GetInst()->Render(pd3dCommandList, 0);
-#endif
-
-#define PostProcessing
-#ifdef PostProcessing
-	m_pPostProcessShader->OnPostRenderTarget(pd3dCommandList);
-
-	m_pPostProcessShader->Render(pd3dCommandList, pCamera);
-#endif // PostProcessing
-
-	// BloomLighting
 
 	if (m_pd3dComputeRootSignature) pd3dCommandList->SetComputeRootSignature(m_pd3dComputeRootSignature.Get());
 	ID3D12Resource* pd3dSource;
@@ -901,6 +887,10 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 	pd3dCommandList->CopyResource(pd3dDestination, pd3dSource);
 	::SynchronizeResourceTransition(pd3dCommandList, pd3dSource, D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 }
+
+void CMainTMPScene::OnPostRender()
+{
+	m_pCurrentCamera->OnPostRender();
 
 	for (int i = 0; i < m_pParticleObjects.size(); ++i)
 	{
