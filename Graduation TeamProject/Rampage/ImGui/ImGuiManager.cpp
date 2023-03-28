@@ -1174,62 +1174,6 @@ void CImGuiManager::SetUI()
 			ImGui::DragFloat("Volume##damagesound", &damage->m_fVolume, 0.01f, 0.0f, 10.0f, "%.2f", 0);*/
 		}
 
-		initial_curpos.y += 25.f;
-		ImGui::SetCursorPos(initial_curpos);
-		if (ImGui::CollapsingHeader("Attack Sprite Effect"))
-		{
-			//일단 보류
-			/*CAttackSpriteComponent* AttackSprite = (CAttackSpriteComponent*)(m_pCurrentComponentSet->FindComponent(typeid(CAttackSpriteComponent)));
-
-			initial_curpos.y += 25.f;
-			ImGui::SetCursorPos(initial_curpos);
-			ImGui::SetNextItemWidth(190.f);
-			ImGui::Checkbox("On/Off##SpriteEffect", &AttackSprite->m_vSprite[0].second->GetAnimation());
-
-			std::vector<std::shared_ptr<CTexture>> vTexture = CSimulatorScene::GetInst()->GetTextureManager()->GetBillBoardTextureList();
-			std::vector<const char*> items;
-			std::vector <std::string> str(100);
-			for (int i = 0; i < vTexture.size(); i++)
-			{
-				std::wstring wstr = vTexture[i]->GetTextureName(0);
-				str[i].assign(wstr.begin(), wstr.end());
-				items.emplace_back(str[i].c_str());
-			}
-
-			initial_curpos.y += 25.f;
-			ImGui::SetCursorPos(initial_curpos);
-			ImGui::SetNextItemWidth(190.f);
-
-			int iAttackSpriteN = AttackSprite->GetAttackNumber();
-			ImGui::Combo("##Attack", (int*)(&AttackSprite->GetAttackNumber()), items.data(), items.size());
-			if(iAttackSpriteN != AttackSprite->GetAttackNumber())
-				AttackSprite->SetTexture(0, ConverCtoWC(items[AttackSprite->GetAttackNumber()]));
-
-			initial_curpos.x += 200.f;
-			ImGui::SetCursorPos(initial_curpos);
-			if (ImGui::Button("Animation##SpriteEffect"))
-				AttackSprite->SetSpriteEnable(0);
-			initial_curpos.x -= 200.f;
-
-			initial_curpos.y += 25.f;
-			ImGui::SetCursorPos(initial_curpos);
-			ImGui::SetNextItemWidth(190.f);
-			ImGui::DragFloat("Speed##SpriteEffect", &AttackSprite->GetSpeed(), 0.01f, 0.0f, 10.0f, "%.2f", 0);
-
-			initial_curpos.y += 25.f;
-			ImGui::SetCursorPos(initial_curpos);
-			ImGui::SetNextItemWidth(190.f);
-			ImGui::DragFloat("Alpha##SpriteEffect", &AttackSprite->GetAlpha(), 0.01f, 0.0f, 10.0f, "%.2f", 0);
-			AttackSprite->UpdateData();
-
-			initial_curpos.y += 25.f;
-			ImGui::SetCursorPos(initial_curpos);
-			ImGui::SetNextItemWidth(190.f);
-			ImGui::DragFloat("Alpha", &AttackSprite->GetAlpha(), 0.01f, 0.0f, 10.0f, "%.2f", 0);
-			AttackSprite->UpdateData();*/
-		}
-
-		
 		button_pos.y += 5.f;
 		ImGui::SetCursorPos(button_pos);
 

@@ -49,12 +49,6 @@ public:
 		ChangeState(m_pPreviousState);
 	}
 
-	bool  isInState(const CState<entity_type>& st) const {
-		if (typeid(*m_pCurrentState) == typeid(st))
-			return true;
-		return false;
-	}
-
 	CState<entity_type>* GetCurrentState()  const { return m_pCurrentState; }
 	CState<entity_type>* GetGlobalState()   const { return m_pGlobalState; }
 	CState<entity_type>* GetPreviousState() const { return m_pPreviousState; }

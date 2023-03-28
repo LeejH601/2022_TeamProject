@@ -2,6 +2,7 @@
 #include "..\Global\Camera.h"
 #include "..\Scene\SceneManager.h"
 #include "..\Scene\MainScene.h"
+#include "..\Scene\LobbyScene.h"
 #include "..\Scene\SimulatorScene.h"
 #include "..\ImGui\ImGuiManager.h"
 #include "..\Object\Texture.h"
@@ -492,7 +493,7 @@ void CGameFramework::RenderObjects()
 	//명령 할당자를 리셋한다.
 	HRESULT hResult = m_pd3dCommandAllocator->Reset();
 
-	if (typeid(*m_pSceneManager->GetCurrentScene()) != typeid(CMainTMPScene)) {
+	if (dynamic_cast<CLobbyScene*>(m_pSceneManager->GetCurrentScene())) {
 		PrepareImGui();
 	}
 
@@ -503,7 +504,7 @@ void CGameFramework::RenderObjects()
 
 	m_pSceneManager->PreRender(m_pd3dCommandList.Get(), m_GameTimer.GetFrameTimeElapsed());
 
-	if (typeid(*m_pSceneManager->GetCurrentScene()) == typeid(CMainTMPScene)) {
+	if (dynamic_cast<CMainTMPScene*>(m_pSceneManager->GetCurrentScene())) {
 		m_pSceneManager->GetCurrentScene()->SetHDRRenderSource(m_ppd3dRenderTargetBuffers[m_nSwapChainBufferIndex].Get());
 		m_pSceneManager->OnPrepareRenderTarget(m_pd3dCommandList.Get(), 1, &m_pd3dSwapRTVCPUHandles[m_nSwapChainBufferIndex], m_d3dDsvDescriptorCPUHandle);
 	}

@@ -818,6 +818,23 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 	m_pTerrainShader->Render(pd3dCommandList, 0);
 	m_pTerrain->Render(pd3dCommandList, true);
 
+	m_pBillBoardObjectShader->Render(pd3dCommandList, 0);
+
+	for (int i = 0; i < m_pTerrainSpriteObject.size(); ++i)
+	{
+		(static_cast<CTerrainSpriteObject*>(m_pTerrainSpriteObject[i].get()))->UpdateShaderVariables(pd3dCommandList, fCurrentTime, fTimeElapsed);
+		m_pTerrainSpriteObject[i]->Render(pd3dCommandList, true);
+	}
+
+	for (int i = 0; i < m_pBillBoardObjects.size(); ++i)
+		m_pBillBoardObjects[i]->Render(pd3dCommandList, true);
+
+	for (int i = 0; i < m_pParticleObjects.size(); ++i)
+	{
+		((CParticleObject*)m_pParticleObjects[i].get())->UpdateShaderVariables(pd3dCommandList, fCurrentTime, fTimeElapsed);
+		((CParticleObject*)m_pParticleObjects[i].get())->Render(pd3dCommandList, nullptr, m_pParticleShader.get());
+	}
+
 	CModelShader::GetInst()->Render(pd3dCommandList, 0);
 
 	if (m_pPlayer)
@@ -836,6 +853,7 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 		m_pObjects[i]->Animate(0.0f);
 		m_pObjects[i]->Render(pd3dCommandList, true);
 	}
+
 #ifdef RENDER_BOUNDING_BOX
 	CBoundingBoxShader::GetInst()->Render(pd3dCommandList, 0);
 #endif
@@ -843,48 +861,36 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 #define PostProcessing
 
 #ifdef PostProcessing
-	m_pPostProcessShader->OnPostRenderTarget(pd3dCommandList);
-
 	m_pPostProcessShader->Render(pd3dCommandList, pCamera);
 #endif // PostProcessing
-
-	m_pBillBoardObjectShader->Render(pd3dCommandList, 0);
-
-	for (int i = 0; i < m_pTerrainSpriteObject.size(); ++i)
-	{
-		(static_cast<CTerrainSpriteObject*>(m_pTerrainSpriteObject[i].get()))->UpdateShaderVariables(pd3dCommandList, fCurrentTime, fTimeElapsed);
-		m_pTerrainSpriteObject[i]->Render(pd3dCommandList, true);
-	}
-
-	for (int i = 0; i < m_pBillBoardObjects.size(); ++i)
-		m_pBillBoardObjects[i]->Render(pd3dCommandList, true);
-
-	for (int i = 0; i < m_pParticleObjects.size(); ++i)
-	{
-		((CParticleObject*)m_pParticleObjects[i].get())->UpdateShaderVariables(pd3dCommandList, fCurrentTime, fTimeElapsed);
-		((CParticleObject*)m_pParticleObjects[i].get())->Render(pd3dCommandList, nullptr, m_pParticleShader.get());
-	}
 
 	if (m_pd3dComputeRootSignature) pd3dCommandList->SetComputeRootSignature(m_pd3dComputeRootSignature.Get());
 	ID3D12Resource* pd3dSource;
 	ID3D12Resource* pd3dDestination;
+
 	{
 		m_pBloomComputeShader->Dispatch(pd3dCommandList);
 
 		pd3dSource = m_pBloomComputeShader->m_pBloomedTexture->GetResource(0);
-		::SynchronizeResourceTransition(pd3dCommandList, pd3dSource, D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE);
 		pd3dDestination = m_pHDRComputeShader->m_pSourceTexture->GetResource(0);
+
+		::SynchronizeResourceTransition(pd3dCommandList, pd3dSource, D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE);
+		::SynchronizeResourceTransition(pd3dCommandList, pd3dDestination, D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_COPY_DEST);
 		pd3dCommandList->CopyResource(pd3dDestination, pd3dSource);
 		::SynchronizeResourceTransition(pd3dCommandList, pd3dSource, D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+		::SynchronizeResourceTransition(pd3dCommandList, pd3dDestination, D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_COMMON);
 	}
 
 
 	m_pHDRComputeShader->Dispatch(pd3dCommandList);
 
 	pd3dSource = m_pHDRComputeShader->m_pTextures->GetResource(0);
-	::SynchronizeResourceTransition(pd3dCommandList, pd3dSource, D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE);
 	pd3dDestination = m_pHDRComputeShader->m_pRenderTargetResource;
+
+	::SynchronizeResourceTransition(pd3dCommandList, pd3dSource, D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE);
+	::SynchronizeResourceTransition(pd3dCommandList, pd3dDestination, D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_COPY_DEST);
 	pd3dCommandList->CopyResource(pd3dDestination, pd3dSource);
+	::SynchronizeResourceTransition(pd3dCommandList, pd3dDestination, D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_RENDER_TARGET);
 	::SynchronizeResourceTransition(pd3dCommandList, pd3dSource, D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 }
 

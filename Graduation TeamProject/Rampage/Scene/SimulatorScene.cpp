@@ -495,27 +495,9 @@ void CSimulatorScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float f
 
 	m_pLight->Render(pd3dCommandList);
 
-	CModelShader::GetInst()->Render(pd3dCommandList, 1);
+	m_pTerrainShader->Render(pd3dCommandList, 0);
+	m_pTerrain->Render(pd3dCommandList, true);
 
-	m_pMainCharacter->Animate(0.0f);
-	m_pMainCharacter->Render(pd3dCommandList, true);
-
-	for (int i = 0; i < m_pEnemys.size(); ++i)
-	{
-		m_pEnemys[i]->Animate(0.0f);
-		m_pEnemys[i]->Render(pd3dCommandList, true);
-	}
-
-	/*m_pTerrainShader->Render(pd3dCommandList, 0);
-	m_pTerrain->Render(pd3dCommandList, true);*/
-
-#define PostProcessing
-#ifdef PostProcessing
-	m_pPostProcessShader->OnPostRenderTarget(pd3dCommandList);
-
-	m_pPostProcessShader->Render(pd3dCommandList, pCamera);
-#endif // PostProcessing
-	
 	m_pBillBoardObjectShader->Render(pd3dCommandList, 0);
 
 	for (int i = 0; i < m_pTerrainSpriteObject.size(); ++i)
@@ -533,15 +515,34 @@ void CSimulatorScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float f
 		((CParticleObject*)m_pParticleObjects[i].get())->Render(pd3dCommandList, nullptr, m_pParticleShader.get());
 	}
 
+	CModelShader::GetInst()->Render(pd3dCommandList, 1);
+
+	m_pMainCharacter->Animate(0.0f);
+	m_pMainCharacter->Render(pd3dCommandList, true);
+
+	for (int i = 0; i < m_pEnemys.size(); ++i)
+	{
+		m_pEnemys[i]->Animate(0.0f);
+		m_pEnemys[i]->Render(pd3dCommandList, true);
+	}
+
+#define PostProcessing
+#ifdef PostProcessing
+	m_pPostProcessShader->Render(pd3dCommandList, pCamera);
+#endif // PostProcessing
+
 	if (m_pd3dComputeRootSignature) pd3dCommandList->SetComputeRootSignature(m_pd3dComputeRootSignature.Get());
+
 	ID3D12Resource* pd3dSource;
 	ID3D12Resource* pd3dDestination;
+
 	{
 		m_pBloomComputeShader->Dispatch(pd3dCommandList);
 
 		pd3dSource = m_pBloomComputeShader->m_pBloomedTexture->GetResource(0);
-		::SynchronizeResourceTransition(pd3dCommandList, pd3dSource, D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE);
 		pd3dDestination = m_pHDRComputeShader->m_pSourceTexture->GetResource(0);
+
+		::SynchronizeResourceTransition(pd3dCommandList, pd3dSource, D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE);
 		::SynchronizeResourceTransition(pd3dCommandList, pd3dDestination, D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_COPY_DEST);
 		pd3dCommandList->CopyResource(pd3dDestination, pd3dSource);
 		::SynchronizeResourceTransition(pd3dCommandList, pd3dSource, D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
@@ -552,11 +553,11 @@ void CSimulatorScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float f
 	m_pHDRComputeShader->Dispatch(pd3dCommandList);
 
 	pd3dSource = m_pHDRComputeShader->m_pTextures->GetResource(0);
-	::SynchronizeResourceTransition(pd3dCommandList, pd3dSource, D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE);
 	pd3dDestination = m_pHDRComputeShader->m_pRenderTargetResource;
+
+	::SynchronizeResourceTransition(pd3dCommandList, pd3dSource, D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE);
 	::SynchronizeResourceTransition(pd3dCommandList, pd3dDestination, D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_COPY_DEST);
 	pd3dCommandList->CopyResource(pd3dDestination, pd3dSource);
-
 	::SynchronizeResourceTransition(pd3dCommandList, pd3dDestination, D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_RENDER_TARGET);
 	::SynchronizeResourceTransition(pd3dCommandList, pd3dSource, D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 }

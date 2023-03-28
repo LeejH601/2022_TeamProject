@@ -31,9 +31,6 @@ public:
 	~CLocator();
 
 	bool Init();
-
-	void OnChangeScene(SCENE_TYPE scene_type);
-
 	void SetTimer(CGameTimer* timer) { m_pTimer = timer; };
 	CGameTimer* GetTimer() { return m_pTimer; };
 

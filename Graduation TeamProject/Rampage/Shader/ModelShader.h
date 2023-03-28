@@ -5,6 +5,7 @@ class CModelShader : public CShader
 {
 public:
 	DECLARE_SINGLE(CModelShader);
+	
 	virtual void CreateShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature, UINT nRenderTargets, DXGI_FORMAT* pdxgiRtvFormats, DXGI_FORMAT dxgiDsvFormat, int nPipelineState);
 
 	virtual D3D12_BLEND_DESC CreateBlendState(int nPipelineState);

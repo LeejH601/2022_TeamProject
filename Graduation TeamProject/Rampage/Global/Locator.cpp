@@ -36,24 +36,3 @@ bool CLocator::Init()
 
 	return true;
 }
-
-void CLocator::OnChangeScene(SCENE_TYPE scene_type)
-{
-	/*switch (scene_type)
-	{
-	case SCENE_TYPE::LOBBY_SCENE:
-		break;
-	case SCENE_TYPE::MAIN_SCENE:
-		for (auto& [num, componentSet] : m_sComponentSets) {
-			CCameraMover* mover = (CCameraMover*)componentSet->FindComponent(typeid(CCameraMover));
-			mover->SetCamera(m_pMainSceneCamera.get());
-
-			CCameraMover* shaker = (CCameraMover*)componentSet->FindComponent(typeid(CCameraShaker));
-			shaker->SetCamera(m_pMainSceneCamera.get());
-
-			CCameraMover* zoomer = (CCameraMover*)componentSet->FindComponent(typeid(CCameraZoomer));
-			zoomer->SetCamera(m_pMainSceneCamera.get());
-		}
-		break;
-	}*/
-}

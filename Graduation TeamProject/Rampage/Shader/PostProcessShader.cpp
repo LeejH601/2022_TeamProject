@@ -145,17 +145,14 @@ void CPostProcessShader::OnPrepareRenderTarget(ID3D12GraphicsCommandList* pd3dCo
 	if (pd3dAllRtvCPUHandles) delete[] pd3dAllRtvCPUHandles;
 }
 
-void CPostProcessShader::OnPostRenderTarget(ID3D12GraphicsCommandList* pd3dCommandList)
+void CPostProcessShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState)
 {
 	int nResources = m_pTexture->GetTextures();
 	for (int i = 0; i < nResources; i++)
 	{
 		::SynchronizeResourceTransition(pd3dCommandList, GetTextureResource(i), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_COMMON);
 	}
-}
 
-void CPostProcessShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState)
-{
 	CShader::Render(pd3dCommandList, pCamera, nPipelineState);
 
 	if (m_pTexture) m_pTexture->UpdateShaderVariables(pd3dCommandList);
