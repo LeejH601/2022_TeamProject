@@ -476,13 +476,6 @@ void CSimulatorScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float f
 
 	CAttackSpriteComponent::GetInst()->Collision_Check();
 
-	m_pBillBoardObjectShader->Render(pd3dCommandList, 0);
-	m_pBillBoardObject->Animate(fTimeElapsed);
-	m_pBillBoardObject->UpdateShaderVariables(pd3dCommandList, fCurrentTime, fTimeElapsed);
-	m_pBillBoardObject->Render(pd3dCommandList, true);
-
-	m_pParticleObject->UpdateShaderVariables(pd3dCommandList, fCurrentTime, fTimeElapsed);
-	m_pParticleObject->Render(pd3dCommandList, pCamera, m_pParticleObjectShader.get());
 
 #define PostProcessing
 #ifdef PostProcessing
@@ -490,6 +483,14 @@ void CSimulatorScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float f
 
 	m_pPostProcessShader->Render(pd3dCommandList, pCamera);
 #endif // PostProcessing
+
+	m_pBillBoardObjectShader->Render(pd3dCommandList, 0);
+	m_pBillBoardObject->Animate(fTimeElapsed);
+	m_pBillBoardObject->UpdateShaderVariables(pd3dCommandList, fCurrentTime, fTimeElapsed);
+	m_pBillBoardObject->Render(pd3dCommandList, true);
+
+	m_pParticleObject->UpdateShaderVariables(pd3dCommandList, fCurrentTime, fTimeElapsed);
+	m_pParticleObject->Render(pd3dCommandList, pCamera, m_pParticleObjectShader.get());
 
 	if (m_pd3dComputeRootSignature) pd3dCommandList->SetComputeRootSignature(m_pd3dComputeRootSignature.Get());
 	ID3D12Resource* pd3dSource;
@@ -500,8 +501,10 @@ void CSimulatorScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float f
 		pd3dSource = m_pBloomComputeShader->m_pBloomedTexture->GetResource(0);
 		::SynchronizeResourceTransition(pd3dCommandList, pd3dSource, D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE);
 		pd3dDestination = m_pHDRComputeShader->m_pSourceTexture->GetResource(0);
+		::SynchronizeResourceTransition(pd3dCommandList, pd3dDestination, D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_COPY_DEST);
 		pd3dCommandList->CopyResource(pd3dDestination, pd3dSource);
 		::SynchronizeResourceTransition(pd3dCommandList, pd3dSource, D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+		::SynchronizeResourceTransition(pd3dCommandList, pd3dDestination, D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_COMMON);
 	}
 
 
