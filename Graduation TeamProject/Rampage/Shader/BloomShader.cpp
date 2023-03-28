@@ -253,8 +253,8 @@ void CBloomShader::CreateBloomUAVResource(ID3D12Device* pd3dDevice, ID3D12Graphi
 	m_pFillterTextures = std::make_unique<CTexture>(nDownSample + 1, RESOURCE_TEXTURE2D, 0, 0, 0, 1, 0, nDownSample + 1, 0);
 	m_pBluredTextures = std::make_unique<CTexture>(nDownSample + 1, RESOURCE_TEXTURE2D, 0, 0, 0, 1, 1, nDownSample + 1, nDownSample + 1);
 	for (int i = 0; i < nDownSample + 1; ++i) {
-		m_pFillterTextures->CreateTexture(pd3dDevice, SampleTextureResoultions[i].x, SampleTextureResoultions[i].y, DXGI_FORMAT_R16G16B16A16_FLOAT, D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_UNORDERED_ACCESS, NULL, RESOURCE_TEXTURE2D, i);
-		m_pBluredTextures->CreateTexture(pd3dDevice, SampleTextureResoultions[i].x, SampleTextureResoultions[i].y, DXGI_FORMAT_R16G16B16A16_FLOAT, D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_UNORDERED_ACCESS, NULL, RESOURCE_TEXTURE2D, i);
+		m_pFillterTextures->CreateTexture(pd3dDevice, SampleTextureResoultions[i].x, SampleTextureResoultions[i].y, DXGI_FORMAT_R16G16B16A16_FLOAT, D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_UNORDERED_ACCESS, NULL, RESOURCE_TEXTURE2D, i, 0);
+		m_pBluredTextures->CreateTexture(pd3dDevice, SampleTextureResoultions[i].x, SampleTextureResoultions[i].y, DXGI_FORMAT_R16G16B16A16_FLOAT, D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_UNORDERED_ACCESS, NULL, RESOURCE_TEXTURE2D, i, 0);
 	}
 	CreateComputeUnorderedAccessView(pd3dDevice, m_pFillterTextures.get(), 0, 0, 0, nDownSample + 1);
 	m_pFillterTextures->SetComputeUavRootParameter(0, 2, 0, nDownSample + 1);
