@@ -311,27 +311,6 @@ public:
     virtual void HandleMessage(const Message& message, const ParticleSmokeParams& params);
 };
 
-class CAttackSpriteComponent : public IMessageListener
-{
-private:
-    float   m_fSpeed = 5.f;
-    float   m_fAlpha = 1.f;
-    float   m_fSize = 0.8f;
-    bool    m_bAnimation = false;
-
-public:
-    void SetTexture(LPCTSTR pszFileName);
-    void SetSpeed(float fSpeed);
-    void SetAlpha(float fAlpha);
-    void UpdateData();
-
-public:
-    float& GetSpeed();
-    float& GetAlpha();
-
-    virtual void HandleMessage(const Message& message, const AttackSpriteCompParams& params);
-};
-
 class TerrainSpriteComponent : public IMessageListener
 {
 private:

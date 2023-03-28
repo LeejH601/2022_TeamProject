@@ -616,6 +616,7 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 
 	m_pSmokeObject = std::make_unique<CParticleObject>(m_pTextureManager->LoadParticleTexture(L"ParticleImage/Smoke2.dds"), pd3dDevice, pd3dCommandList, GetGraphicsRootSignature(), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), 2.0f, XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT2(2.0f, 2.0f), MAX_PARTICLES, m_pParticleShader.get());
 	((CParticleObject*)m_pSmokeObject.get())->SetEnable(true);
+
 	// COLLIDE LISTENER
 	std::unique_ptr<SceneCollideListener> pCollideListener = std::make_unique<SceneCollideListener>();
 	pCollideListener->SetScene(this);
@@ -641,6 +642,11 @@ void CMainTMPScene::UpdateObjects(float fTimeElapsed)
 	for (int i = 0; i < m_pObjects.size(); ++i) {
 		m_pObjects[i]->Update(fTimeElapsed);
 		m_pcbMappedDisolveParams->dissolveThreshold[i] = m_pObjects[i]->m_fDissolveThrethHold;
+	}
+
+	for (int i = 0; i < m_pBillBoardObjects.size(); ++i)
+	{
+		m_pBillBoardObjects[i]->Animate(fTimeElapsed);
 	}
 
 	m_pPlayer->Update(fTimeElapsed);
@@ -699,7 +705,6 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 		m_pPlayer->Render(pd3dCommandList, true);
 	}
 
-
 	D3D12_GPU_VIRTUAL_ADDRESS d3dGpuVirtualAddress = m_pd3dcbDisolveParams->GetGPUVirtualAddress();
 	pd3dCommandList->SetGraphicsRootConstantBufferView(7, d3dGpuVirtualAddress);
 	
@@ -713,18 +718,12 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 
 	m_pBillBoardObjectShader->Render(pd3dCommandList, 0);
 	for (int i = 0; i < m_pBillBoardObjects.size(); ++i)
-	{
-		m_pBillBoardObjects[i]->Animate(fTimeElapsed);
-		m_pBillBoardObjects[i]->UpdateShaderVariables(pd3dCommandList);
 		m_pBillBoardObjects[i]->Render(pd3dCommandList, true);
-	}
 
 
 	for (int i = 0; i < m_pTerrainSpriteObject.size(); ++i)
 	{
-		m_pTerrainSpriteObject[i]->UpdateShaderVariables(pd3dCommandList);
 		(static_cast<CTerrainSpriteObject*>(m_pTerrainSpriteObject[i].get()))->UpdateShaderVariables(pd3dCommandList, fCurrentTime, fTimeElapsed);
-		m_pTerrainSpriteObject[i]->UpdateShaderVariables(pd3dCommandList);
 		m_pTerrainSpriteObject[i]->Render(pd3dCommandList, true);
 	}
 
@@ -898,16 +897,13 @@ void CMainTMPScene::HandleCollision(const CollideParams& params)
 		return false;
 		});
 
-	//if (TerrainSpriteit != m_pTerrainSpriteObject.end())
-	//{
-	//	TerrainSpriteCompParams AttackSprite_comp_params;
-	//	AttackSprite_comp_params.pObject = (*TerrainSpriteit).get();
-	//	AttackSprite_comp_params.xmf3Position = params.xmf3CollidePosition;
-	//	CMessageDispatcher::GetInst()->Dispatch_Message<TerrainSpriteCompParams>(MessageType::UPDATE_SPRITE, &AttackSprite_comp_params, ((CPlayer*)m_pPlayer)->m_pStateMachine->GetCurrentState());
-	//}
-
-
-
+	if (TerrainSpriteit != m_pTerrainSpriteObject.end())
+	{
+		TerrainSpriteCompParams AttackSprite_comp_params;
+		AttackSprite_comp_params.pObject = (*TerrainSpriteit).get();
+		AttackSprite_comp_params.xmf3Position = params.xmf3CollidePosition;
+		CMessageDispatcher::GetInst()->Dispatch_Message<TerrainSpriteCompParams>(MessageType::UPDATE_SPRITE, &AttackSprite_comp_params, ((CPlayer*)m_pPlayer)->m_pStateMachine->GetCurrentState());
+	}
 }
 
 
