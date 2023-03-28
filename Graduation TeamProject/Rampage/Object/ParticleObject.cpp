@@ -67,7 +67,6 @@ void CParticleObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dComma
 	CGameObject::UpdateShaderVariables(pd3dCommandList);
 }
 
-
 void CParticleObject::PreRender(ID3D12GraphicsCommandList* pd3dCommandList, CShader* pShader, int nPipelineState)
 {
 	UpdateShaderVariables(pd3dCommandList);

@@ -21,6 +21,13 @@ cbuffer cbGameObjectInfo : register(b0)
 	uint gnTexturesMask : packoffset(c8);
 };
 
+cbuffer cbGameObjectInfo : register(b0)
+{
+	matrix gmtxGameObject : packoffset(c0);
+	matrix gmtxTexture : packoffset(c4);
+	uint gnTexturesMask : packoffset(c8); // 빌보드 알파값 사용(Billboard_PS)
+};
+
 cbuffer cbCameraInfo : register(b1)
 {
 	matrix gmtxView : packoffset(c0);
@@ -51,4 +58,6 @@ void GSParticleDraw(point VS_PARTICLE_DRAW_OUTPUT input[1], inout TriangleStream
 		outputStream.Append(output);
 	}
 	outputStream.RestartStrip();
+
+	//output.position = mul(mul(mul(float4(input.position, 1.0f), gmtxGameObject), gmtxView), gmtxProjection);
 }

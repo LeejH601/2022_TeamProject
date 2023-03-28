@@ -10,6 +10,9 @@
 #include "..\Shader\ParticleShader.h"
 #include "..\Shader\SkyBoxShader.h"
 #include "..\Object\SkyBox.h"
+#include "..\Shader\PostProcessShader.h"
+#include "..\Shader\SunLightShader.h"
+#include "..\Shader\HDRComputeShader.h"
 
 #define MAX_OBJECT 1000
 struct DissolveParams {
@@ -38,6 +41,8 @@ private:
 	std::unique_ptr<CBillBoardObjectShader> m_pBillBoardObjectShader;
 	std::vector<std::unique_ptr<CGameObject>> m_pBillBoardObjects;
 
+	std::unique_ptr<CSunLightShader> m_pSunLightShader;
+
 	std::unique_ptr<CSkyBoxShader> m_pSkyBoxShader;
 	std::unique_ptr<CSkyBox> m_pSkyBoxObject;
 
@@ -57,6 +62,8 @@ public:
 	virtual void OnPreRender(ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed);
 	virtual void OnPrepareRender(ID3D12GraphicsCommandList* pd3dCommandList);
 	virtual void CreateGraphicsRootSignature(ID3D12Device* pd3dDevice);
+	virtual void CreateComputeRootSignature(ID3D12Device* pd3dDevice);
+
 	virtual void UpdateObjectArticulation() {
 		for (int i = 0; i < m_pObjects.size(); ++i) {
 			m_pObjects[i]->updateArticulationMatrix();
@@ -71,6 +78,7 @@ public:
 
 	virtual bool ProcessInput(DWORD dwDirection, float cxDelta, float cyDelta, float fTimeElapsed);
 	virtual void UpdateObjects(float fTimeElapsed);
+	virtual void OnPrepareRenderTarget(ID3D12GraphicsCommandList* pd3dCommandList, int nRenderTargets, D3D12_CPU_DESCRIPTOR_HANDLE* pd3dRtvCPUHandles, D3D12_CPU_DESCRIPTOR_HANDLE d3dDepthStencilBufferDSVCPUHandle);
 	virtual void Update(float fTimeElapsed);
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed, float fCurrentTime, CCamera* pCamera = NULL);
 	virtual void OnPostRender();

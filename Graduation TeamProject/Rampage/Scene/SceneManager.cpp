@@ -18,6 +18,7 @@ CSceneManager::CSceneManager(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 	m_pLobbyScene->BuildObjects(pd3dDevice, pd3dCommandList);
 
 	m_pCurrentScene = m_pLobbyScene.get();
+	//m_pCurrentScene = m_pMainScene.get();
 }
 
 void CSceneManager::SetPlayer(CPlayer* pPlayer)
@@ -47,6 +48,11 @@ void CSceneManager::PreRender(ID3D12GraphicsCommandList* pd3dCommandList, float 
 {
 	m_pCurrentScene->OnPrepareRender(pd3dCommandList);
 	m_pCurrentScene->OnPreRender(pd3dCommandList, fTimeElapsed);
+}
+
+void CSceneManager::OnPrepareRenderTarget(ID3D12GraphicsCommandList* pd3dCommandList, int nRenderTargets, D3D12_CPU_DESCRIPTOR_HANDLE* pd3dRtvCPUHandles, D3D12_CPU_DESCRIPTOR_HANDLE d3dDepthStencilBufferDSVCPUHandle)
+{
+	m_pCurrentScene->OnPrepareRenderTarget(pd3dCommandList, nRenderTargets, pd3dRtvCPUHandles, d3dDepthStencilBufferDSVCPUHandle);
 }
 
 void CSceneManager::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed, float fCurrentTime, CCamera* pCamera)

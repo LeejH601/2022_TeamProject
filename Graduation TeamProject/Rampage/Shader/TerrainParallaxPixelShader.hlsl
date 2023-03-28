@@ -1,3 +1,6 @@
+
+#include "Header.hlsli"
+
 cbuffer cbGameObjectInfo : register(b0)
 {
 	matrix gmtxGameObject : packoffset(c0);
@@ -55,8 +58,10 @@ static int gnMaxSamples = 20;
 static int gnMinSamples = 4;
 static float gfscale = 0.0001f;
 
-float4 PSParallaxTerrain(VS_TERRAIN_OUTPUT input) : SV_TARGET
+PS_MULTIPLE_RENDER_TARGETS_OUTPUT PSParallaxTerrain(VS_TERRAIN_OUTPUT input) : SV_TARGET
 {
+	PS_MULTIPLE_RENDER_TARGETS_OUTPUT output;
+
 	float fParallaxLimit = -length(input.toCamera.xy) / input.toCamera.z;
 	fParallaxLimit *= gfscale;
 
@@ -178,5 +183,18 @@ float4 PSParallaxTerrain(VS_TERRAIN_OUTPUT input) : SV_TARGET
 	//float3 vDiffuse = vFinalColor.rgb * max(0.0f, dot(input.toLight, vFinalNormal.xyz)) * 0.5;
 	//vFinalColor.rgb = vAmbient + vDiffuse;
 
-	return (cIllumination);
+	output.f4Scene = cIllumination;
+	output.f4Color = vFinalColor;
+	float Depth = cIllumination.w < 0.001f ? 0.0f : input.position.z;
+	output.f4Normal = float4(Normal * 0.5f + 0.5f, 0.0f);
+	output.f4PositoinW = input.positionW;
+
+	float fShadowFactor = gtxtDepthTextures[0].SampleCmpLevelZero(gssComparisonPCFShadow, input.uvs[0].xy / input.uvs[0].ww, input.uvs[0].z / input.uvs[0].w).r;
+	output.f4Illumination = float4(0.0f, 0.0f, 0.0f, 1.0f);
+	/*if (fShadowFactor > 0.0f)
+		output.f4Illumination = float4(1.0f, 1.0f, 1.0f, 0.0f);
+	else
+		output.f4Illumination = float4(0.0f, 0.0f, 0.0f, 1.0f);*/
+
+	return (output);
 }

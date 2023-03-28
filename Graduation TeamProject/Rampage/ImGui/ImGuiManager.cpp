@@ -685,9 +685,9 @@ void CImGuiManager::Init(HWND hWnd, ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 	/*Locator.CreateSimulatorCamera(pd3dDevice, pd3dCommandList);
 	m_pCamera = Locator.GetSimulaterCamera();*/
 
-	D3D12_CLEAR_VALUE d3dClearValue = { DXGI_FORMAT_R8G8B8A8_UNORM, { 0.0f, 0.0f, 0.0f, 1.0f } };
+	D3D12_CLEAR_VALUE d3dClearValue = { DXGI_FORMAT_R8G8B8A8_UNORM, { 1.0f, 1.0f, 1.0f, 1.0f } };
 	m_pRTTexture = std::make_unique<CTexture>(1, RESOURCE_TEXTURE2D, 0, 1);
-	m_pRTTexture->CreateTexture(pd3dDevice, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, DXGI_FORMAT_R8G8B8A8_UNORM, D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET, D3D12_RESOURCE_STATE_COMMON, &d3dClearValue, RESOURCE_TEXTURE2D, 0);
+	m_pRTTexture->CreateTexture(pd3dDevice, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, DXGI_FORMAT_R8G8B8A8_UNORM, D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET, D3D12_RESOURCE_STATE_COMMON, &d3dClearValue, RESOURCE_TEXTURE2D, 0, 1);
 	CreateShaderResourceViews(pd3dDevice, m_pRTTexture.get(), 1);
 
 	D3D12_RENDER_TARGET_VIEW_DESC d3dRenderTargetViewDesc;
@@ -1207,14 +1207,20 @@ void CImGuiManager::SetUI()
 
 			initial_curpos.x += 200.f;
 			ImGui::SetCursorPos(initial_curpos);
-			if (ImGui::Button("Animation"))
+			if (ImGui::Button("Animation##SpriteEffect"))
 				AttackSprite->SetSpriteEnable(0);
 			initial_curpos.x -= 200.f;
 
 			initial_curpos.y += 25.f;
 			ImGui::SetCursorPos(initial_curpos);
 			ImGui::SetNextItemWidth(190.f);
-			ImGui::DragFloat("Speed", &AttackSprite->GetSpeed(), 0.01f, 0.0f, 10.0f, "%.2f", 0);
+			ImGui::DragFloat("Speed##SpriteEffect", &AttackSprite->GetSpeed(), 0.01f, 0.0f, 10.0f, "%.2f", 0);
+
+			initial_curpos.y += 25.f;
+			ImGui::SetCursorPos(initial_curpos);
+			ImGui::SetNextItemWidth(190.f);
+			ImGui::DragFloat("Alpha##SpriteEffect", &AttackSprite->GetAlpha(), 0.01f, 0.0f, 10.0f, "%.2f", 0);
+			AttackSprite->UpdateData();
 
 			initial_curpos.y += 25.f;
 			ImGui::SetCursorPos(initial_curpos);
@@ -1257,7 +1263,9 @@ void CImGuiManager::OnPrepareRender(ID3D12GraphicsCommandList* pd3dCommandList, 
 
 	CSimulatorScene::GetInst()->OnPreRender(pd3dCommandList, fTimeElapsed);
 
-	PrepareRenderTarget(pd3dCommandList, d3dDsvDescriptorCPUHandle);
+	//PrepareRenderTarget(pd3dCommandList, d3dDsvDescriptorCPUHandle);
+	CSimulatorScene::GetInst()->OnPrepareRenderTarget(pd3dCommandList, 1, &m_pd3dRtvCPUDescriptorHandles, *d3dDsvDescriptorCPUHandle);
+	CSimulatorScene::GetInst()->SetHDRRenderSource(m_pRTTexture->GetResource(0));
 
 	CSimulatorScene::GetInst()->Render(pd3dCommandList, fTimeElapsed, fCurrentTime, pCamera);
 

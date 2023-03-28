@@ -98,7 +98,8 @@ void CPlayer::Update(float fTimeElapsed)
 		if (m_xmf3Velocity.x + m_xmf3Velocity.z)
 			SetLookAt(Vector3::Add(GetPosition(), Vector3::Normalize(XMFLOAT3{ m_xmf3Velocity.x, 0.0f, m_xmf3Velocity.z })));
 		
-		CPhysicsObject::Move(m_xmf3Velocity, false);
+		// 임시로 속도 조절함
+		CPhysicsObject::Move(Vector3::ScalarProduct( m_xmf3Velocity, 0.3f, false), false);
 	}
 	// Run 상태가 아닐때 플레이어에게 중력만 작용하는 코드
 	else

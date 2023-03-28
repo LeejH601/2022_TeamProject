@@ -7,3 +7,6 @@ void CScene::OnPrepareRender(ID3D12GraphicsCommandList* pd3dCommandList)
 void CScene::CreateGraphicsRootSignature(ID3D12Device* pd3dDevice)
 {
 }
+void CScene::CreateComputeRootSignature(ID3D12Device* pd3dDevice)
+{
+}

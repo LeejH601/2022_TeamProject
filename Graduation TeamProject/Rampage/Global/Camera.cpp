@@ -3,6 +3,7 @@
 #include "Global.h"
 #include "Locator.h"
 #include "..\Object\Player.h"
+#include <DirectXMath.h>
 
 CCamera::CCamera()
 {
@@ -29,7 +30,7 @@ void CCamera::Init(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComm
 {
 	SetViewport(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f, 1.0f);
 	SetScissorRect(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
-	GenerateProjectionMatrix(1.0f, 5000.0f, float(FRAME_BUFFER_WIDTH) / float(FRAME_BUFFER_HEIGHT), 110.f);
+	GenerateProjectionMatrix(1.0f, 500.0f, float(FRAME_BUFFER_WIDTH) / float(FRAME_BUFFER_HEIGHT), 90.f);
 	GenerateViewMatrix(XMFLOAT3(0.0f, 22.5f, -37.5f), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 1.0f, 0.0f));
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
@@ -38,6 +39,7 @@ void CCamera::OnPrepareRender(ID3D12GraphicsCommandList* pd3dCommandList)
 	RegenerateViewMatrix();
 	SetViewportsAndScissorRects(pd3dCommandList);
 	UpdateShaderVariables(pd3dCommandList);
+	UpdateCameraFrustumBox();
 }
 void CCamera::OnPostRender()
 {
@@ -62,6 +64,13 @@ void CCamera::SetScissorRect(LONG xLeft, LONG yTop, LONG xRight, LONG yBottom)
 void CCamera::GenerateProjectionMatrix(float fNearPlaneDistance, float fFarPlaneDistance, float fAspectRatio, float fFOVAngle)
 {
 	m_xmf4x4Projection = Matrix4x4::PerspectiveFovLH(XMConvertToRadians(fFOVAngle), fAspectRatio, fNearPlaneDistance, fFarPlaneDistance);
+	//m_bFrustumBoundingBox = BoundingFrustum(XMLoadFloat4x4(&m_xmf4x4Projection));
+}
+void CCamera::UpdateCameraFrustumBox()
+{
+	XMMATRIX viewProj = XMLoadFloat4x4(&m_xmf4x4View) * XMLoadFloat4x4(&m_xmf4x4Projection);
+
+	m_bFrustumBoundingBox = BoundingFrustum(viewProj);
 }
 void CCamera::GenerateViewMatrix(XMFLOAT3 xmf3Position, XMFLOAT3 xmf3LookAt, XMFLOAT3 xmf3Up)
 {
@@ -103,6 +112,7 @@ void CCamera::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
 	XMStoreFloat4x4(&m_pcbMappedCamera->m_xmf4x4InverseProjection, XMMatrixTranspose(XMMatrixInverse(NULL, XMLoadFloat4x4(&m_xmf4x4Projection))));
 	XMStoreFloat4x4(&m_pcbMappedCamera->m_xmf4x4InverseView, XMMatrixTranspose(XMMatrixInverse(NULL, XMLoadFloat4x4(&m_xmf4x4View))));
 	m_pcbMappedCamera->m_xmf3CameraPosition = GetPosition();
+	m_pcbMappedCamera->m_xmf3CameraDir = XMFLOAT3(m_xmf4x4View._13, m_xmf4x4View._23, m_xmf4x4View._33);
 
 	D3D12_GPU_VIRTUAL_ADDRESS d3dGpuVirtualAddress = m_pd3dcbCamera->GetGPUVirtualAddress();
 	pd3dCommandList->SetGraphicsRootConstantBufferView(ROOTSIGNATUREINDEX_CAMERA, d3dGpuVirtualAddress);
@@ -135,7 +145,7 @@ void CCamera::SetViewportsAndScissorRects(ID3D12GraphicsCommandList* pd3dCommand
 CThirdPersonCamera::CThirdPersonCamera() : CCamera()
 {
 	m_pPlayer = nullptr;
-	SetOffset(XMFLOAT3(0.0f, 0.0f,-10.0f));
+	SetOffset(XMFLOAT3(0.0f, 0.0f,-15.0f));
 }
 
 CThirdPersonCamera::~CThirdPersonCamera()

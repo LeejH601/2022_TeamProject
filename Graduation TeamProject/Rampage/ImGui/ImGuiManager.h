@@ -72,6 +72,8 @@ public:
 	void Render(ID3D12GraphicsCommandList* pd3dCommandList);
 	void OnPostRender();
 	void OnDestroy();
+	void OnPostRenderTarget();
+	D3D12_CPU_DESCRIPTOR_HANDLE* GetRtvDescHandle() { return &m_pd3dRtvCPUDescriptorHandles; };
 
 	ImVec4 GetColor() { return clear_color; };
 	int GetAnimationNum() { return Player_Animation_Number; };

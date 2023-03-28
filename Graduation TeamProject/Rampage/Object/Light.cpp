@@ -7,16 +7,19 @@ CLight::CLight()
 	m_pLights = new LIGHT[m_nLights];
 	::ZeroMemory(m_pLights, sizeof(LIGHT) * m_nLights);
 
-	m_xmf4GlobalAmbient = XMFLOAT4(0.25f, 0.25f, 0.25f, 1.0f);
+	m_xmf4GlobalAmbient = XMFLOAT4(0.15f, 0.15f, 0.15f, 1.0f);
+	//m_xmf4GlobalAmbient = XMFLOAT4(0.15f, 0.15f, 0.15f, 1.0f);
 
 	m_pLights[0].m_bEnable = true;
 	m_pLights[0].m_nType = DIRECTIONAL_LIGHT;
 	m_pLights[0].m_fRange = 500.0f;
-	m_pLights[0].m_xmf4Ambient = XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f);
-	m_pLights[0].m_xmf4Diffuse = XMFLOAT4(0.4f, 0.4f, 0.4f, 1.0f);
-	m_pLights[0].m_xmf4Specular = XMFLOAT4(0.3f, 0.3f, 0.3f, 0.0f);
+	m_pLights[0].m_xmf4Ambient = XMFLOAT4(0.8f, 0.8f, 0.8f, 1.0f);
+	//m_pLights[0].m_xmf4Diffuse = XMFLOAT4(0.8f, 0.8f, 0.8f, 1.0f);
+	m_pLights[0].m_xmf4Diffuse = XMFLOAT4(2.0f, 2.0f, 2.0f, 1.0f);
+	//m_pLights[0].m_xmf4Specular = XMFLOAT4(0.3f, 0.3f, 0.3f, 0.0f);
+	m_pLights[0].m_xmf4Specular = XMFLOAT4(0.6f, 0.6f, 0.6f, 0.0f);
 	m_pLights[0].m_xmf3Position = XMFLOAT3(-(_PLANE_WIDTH * 0.5f), 512.0f, 0.0f);
-	m_pLights[0].m_xmf3Position = XMFLOAT3(-25.0f, 120.0f, -100.0f);
+	m_pLights[0].m_xmf3Position = XMFLOAT3(0.0f, 120.0f, -100.0f);
 	m_pLights[0].m_xmf3Direction = XMFLOAT3(+1.0f, -1.0f, 0.0f);
 
 	m_pLights[1].m_bEnable = false;
@@ -68,10 +71,10 @@ void CLight::ReleaseLightVariables()
 
 void CLight::Update(CPlayer* pPlayer)
 {
-	if (m_pLights && m_pLights[0].m_bEnable)
+	/*if (m_pLights && m_pLights[0].m_bEnable)
 	{
 		XMFLOAT3 xmf3Position = pPlayer->GetPosition();
 
 		m_pLights[0].m_xmf3Position = XMFLOAT3{ xmf3Position.x, xmf3Position.y + 128.0f, xmf3Position.z };
-	}
+	}*/
 }

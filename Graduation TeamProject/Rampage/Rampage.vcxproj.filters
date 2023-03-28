@@ -160,6 +160,9 @@
     <ClCompile Include="Scene\LobbyScene.cpp">
       <Filter>Scene</Filter>
     </ClCompile>
+    <ClCompile Include="Shader\PostProcessShader.cpp">
+      <Filter>Shader</Filter>
+    </ClCompile>
     <ClCompile Include="Object\PhysicsObject.cpp">
       <Filter>Object</Filter>
     </ClCompile>
@@ -174,6 +177,18 @@
     </ClCompile>
     <ClCompile Include="Sound\SoundPlayer.cpp">
       <Filter>Sound</Filter>
+    </ClCompile>
+    <ClCompile Include="Shader\SunLightShader.cpp">
+      <Filter>Shader</Filter>
+    </ClCompile>
+    <ClCompile Include="Shader\ComputeShader.cpp">
+      <Filter>Shader</Filter>
+    </ClCompile>
+    <ClCompile Include="Shader\HDRComputeShader.cpp">
+      <Filter>Shader</Filter>
+    </ClCompile>
+    <ClCompile Include="Shader\BloomShader.cpp">
+      <Filter>Shader</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -321,6 +336,9 @@
     <ClInclude Include="Scene\LobbyScene.h">
       <Filter>Scene</Filter>
     </ClInclude>
+    <ClInclude Include="Shader\PostProcessShader.h">
+      <Filter>Shader</Filter>
+    </ClInclude>
     <ClInclude Include="Object\PhysicsObject.h">
       <Filter>Object</Filter>
     </ClInclude>
@@ -335,6 +353,18 @@
     </ClInclude>
     <ClInclude Include="Sound\SoundPlayer.h">
       <Filter>Sound</Filter>
+    </ClInclude>
+    <ClInclude Include="Shader\SunLightShader.h">
+      <Filter>Shader</Filter>
+    </ClInclude>
+    <ClInclude Include="Shader\ComputeShader.h">
+      <Filter>Shader</Filter>
+    </ClInclude>
+    <ClInclude Include="Shader\HDRComputeShader.h">
+      <Filter>Shader</Filter>
+    </ClInclude>
+    <ClInclude Include="Shader\BloomShader.h">
+      <Filter>Shader</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -358,6 +388,18 @@
     <FxCompile Include="Shader\ParticleSteamOutputGeometryShader.hlsl" />
     <FxCompile Include="Shader\ParticleStreamOutputVertexShader.hlsl" />
     <FxCompile Include="TreePixelShader.hlsl" />
+    <FxCompile Include="Shader\PostProcessingPixelShader.hlsl" />
+    <FxCompile Include="Shader\PostProcessingVertexShader.hlsl" />
+    <FxCompile Include="LightShaft.hlsl" />
+    <FxCompile Include="Shader\SunLightPixelShader.hlsl" />
+    <FxCompile Include="Shader\HDRComputeShader.hlsl" />
+    <FxCompile Include="Shader\BloomComputeShader.hlsl" />
+    <FxCompile Include="Shader\BloomApplyComputeShader.hlsl" />
+    <FxCompile Include="Shader\BloomAdditiveComputeShader.hlsl" />
+    <FxCompile Include="Shader\BloomUpSampleComputeShader.hlsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Shader\Header.hlsli" />
     <FxCompile Include="Shader\SkyBoxPixelShader.hlsl" />
     <FxCompile Include="Shader\SkyBoxVertexShader.hlsl" />
   </ItemGroup>

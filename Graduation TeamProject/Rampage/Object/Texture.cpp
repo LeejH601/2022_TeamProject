@@ -9,16 +9,16 @@ CTexture::CTexture(int nTextures, UINT nTextureType, int nSamplers, int nRootPar
 	m_nTextures = nTextures;
 	if (m_nTextures > 0)
 	{
-		m_ppd3dTextureUploadBuffers.resize(m_nTextures);
-		m_ppd3dTextures.resize(m_nTextures);
+		m_ppd3dTextureUploadBuffers.resize(m_nTextures); // 업로드 버퍼 생성
+		m_ppd3dTextures.resize(m_nTextures); // 텍스쳐 리소스 생성
 
-		m_ppstrTextureNames.resize(m_nTextures);
+		m_ppstrTextureNames.resize(m_nTextures); // 각 텍스쳐의 이름을 저장하는 배열 생성
 		for (int i = 0; i < m_nTextures; i++) {
 			m_ppstrTextureNames[i].resize(64);
 			m_ppstrTextureNames[i][0] = '\0';
 		}
 
-		m_pd3dSrvGpuDescriptorHandles.resize(m_nTextures);
+		m_pd3dSrvGpuDescriptorHandles.resize(m_nTextures); // 
 		for (int i = 0; i < m_nTextures; i++) m_pd3dSrvGpuDescriptorHandles[i].ptr = NULL;
 
 		m_pnResourceTypes.resize(m_nTextures);
@@ -31,6 +31,67 @@ CTexture::CTexture(int nTextures, UINT nTextureType, int nSamplers, int nRootPar
 	m_nRootParameters = nRootParameters;
 	if (nRootParameters > 0) m_pnRootParameterIndices.resize(nRootParameters);
 	for (int i = 0; i < m_nRootParameters; i++) m_pnRootParameterIndices[i] = -1;
+}
+
+CTexture::CTexture(int nTextures, UINT nTextureType, int nSamplers, int nRootParameters, int nGraphicsSrvGpuHandles, int nComputeUavRootParameters, int nComputeSrvRootParameters, int nComputeUavGpuHandles, int nComputeSrvGpuHandles)
+{
+	m_nTextureType = nTextureType;
+
+	m_nTextures = nTextures;
+	if (m_nTextures > 0)
+	{
+		m_ppd3dTextureUploadBuffers.resize(m_nTextures); // 업로드 버퍼 생성
+		m_ppd3dTextures.resize(m_nTextures); // 텍스쳐 리소스 생성
+
+		m_ppstrTextureNames.resize(m_nTextures); // 각 텍스쳐의 이름을 저장하는 배열 생성
+		for (int i = 0; i < m_nTextures; i++) {
+			m_ppstrTextureNames[i].resize(64);
+			m_ppstrTextureNames[i][0] = '\0';
+		}
+
+		m_pd3dSrvGpuDescriptorHandles.resize(nGraphicsSrvGpuHandles); // 
+		for (int i = 0; i < nGraphicsSrvGpuHandles; i++) m_pd3dSrvGpuDescriptorHandles[i].ptr = NULL;
+
+		m_pd3dComputeUavGpuDescriptorHandles.resize(nComputeUavGpuHandles);
+		for (int i = 0; i < nComputeUavGpuHandles; i++) m_pd3dComputeUavGpuDescriptorHandles[i].ptr = NULL;
+
+		m_pd3dComputeSrvGpuDescriptorHandles.resize(nComputeSrvGpuHandles);
+		for (int i = 0; i < nComputeSrvGpuHandles; i++) m_pd3dComputeSrvGpuDescriptorHandles[i].ptr = NULL;
+
+		m_pnResourceTypes.resize(m_nTextures);
+		m_pdxgiBufferFormats.resize(m_nTextures);
+		m_pnBufferElements.resize(m_nTextures);
+		for (int i = 0; i < m_nTextures; i++) m_pnBufferElements[i] = 0;
+		m_pnBufferStrides.resize(m_nTextures);
+		for (int i = 0; i < m_nTextures; i++) m_pnBufferStrides[i] = 0;
+	}
+
+	m_nRootParameters = nRootParameters;
+	if (nRootParameters > 0) m_pnRootParameterIndices.resize(nRootParameters);
+	for (int i = 0; i < m_nRootParameters; i++) m_pnRootParameterIndices[i] = -1;
+
+
+	m_nComputeUavRootParameters = nComputeUavRootParameters;
+	if (m_nComputeUavRootParameters > 0)
+	{
+		m_pnComputeUavRootParameterIndices.resize(m_nComputeUavRootParameters);
+		for (int i = 0; i < m_nComputeUavRootParameters; i++) m_pnComputeUavRootParameterIndices[i] = -1;
+		m_pnComputeUavRootParameteDescriptors.resize(m_nComputeUavRootParameters);
+		for (int i = 0; i < m_nComputeUavRootParameters; i++) m_pnComputeUavRootParameteDescriptors[i] = -1;
+		m_pd3dComputeUavRootParameterGpuDescriptorHandles.resize(m_nComputeUavRootParameters);
+		for (int i = 0; i < m_nComputeUavRootParameters; i++) m_pd3dComputeUavRootParameterGpuDescriptorHandles[i].ptr = NULL;
+	}
+
+	m_nComputeSrvRootParameters = nComputeSrvRootParameters;
+	if (m_nComputeSrvRootParameters > 0)
+	{
+		m_pnComputeSrvRootParameterIndices.resize(m_nComputeSrvRootParameters);
+		for (int i = 0; i < m_nComputeSrvRootParameters; i++) m_pnComputeSrvRootParameterIndices[i] = -1;
+		m_pnComputeSrvRootParameterDescriptors.resize(m_nComputeSrvRootParameters);
+		for (int i = 0; i < m_nComputeSrvRootParameters; i++) m_pnComputeSrvRootParameterDescriptors[i] = -1;
+		m_pd3dComputeSrvRootParameterGpuDescriptorHandles.resize(m_nComputeSrvRootParameters);
+		for (int i = 0; i < m_nComputeSrvRootParameters; i++) m_pd3dComputeSrvRootParameterGpuDescriptorHandles[i].ptr = NULL;
+	}
 }
 
 CTexture::~CTexture()
@@ -61,6 +122,34 @@ void CTexture::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
 void CTexture::UpdateShaderVariable(ID3D12GraphicsCommandList* pd3dCommandList, int nParameterIndex, int nTextureIndex)
 {
 	pd3dCommandList->SetGraphicsRootDescriptorTable(m_pnRootParameterIndices[nParameterIndex], m_pd3dSrvGpuDescriptorHandles[nTextureIndex]);
+}
+ID3D12Resource* CTexture::CreateTexture(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, UINT nIndex, UINT nResourceType, UINT nWidth,
+	UINT nHeight, UINT nElements, UINT nMipLevels, DXGI_FORMAT dxgiFormat, D3D12_RESOURCE_FLAGS d3dResourceFlags,
+	D3D12_RESOURCE_STATES d3dResourceStates, D3D12_CLEAR_VALUE* pd3dClearValue)
+{
+	m_pnResourceTypes[nIndex] = nResourceType;
+	m_ppd3dTextures[nIndex] = ::CreateTexture2DResource(pd3dDevice, nWidth, nHeight, nElements, nMipLevels, dxgiFormat, d3dResourceFlags, d3dResourceStates, pd3dClearValue);
+	return(m_ppd3dTextures[nIndex].Get());
+}
+void CTexture::SetComputeSrvRootParameter(int nIndex, int nRootParameterIndex, int nGpuHandleIndex, int nSrvDescriptors)
+{
+	m_pnComputeSrvRootParameterIndices[nIndex] = nRootParameterIndex;
+	m_pd3dComputeSrvRootParameterGpuDescriptorHandles[nIndex] = m_pd3dComputeSrvGpuDescriptorHandles[nGpuHandleIndex];
+	m_pnComputeSrvRootParameterDescriptors[nIndex] = nSrvDescriptors;
+}
+void CTexture::SetComputeUavRootParameter(int nIndex, int nRootParameterIndex, int nGpuHandleIndex, int nUavDescriptors)
+{
+	m_pnComputeUavRootParameterIndices[nIndex] = nRootParameterIndex;
+	m_pd3dComputeUavRootParameterGpuDescriptorHandles[nIndex] = m_pd3dComputeUavGpuDescriptorHandles[nGpuHandleIndex];
+	m_pnComputeUavRootParameteDescriptors[nIndex] = nUavDescriptors;
+}
+void CTexture::SetComputeSrvGpuDescriptorHandle(int nHandleIndex, D3D12_GPU_DESCRIPTOR_HANDLE d3dSrvGpuDescriptorHandle)
+{
+	m_pd3dComputeSrvGpuDescriptorHandles[nHandleIndex] = d3dSrvGpuDescriptorHandle;
+}
+void CTexture::SetComputeUavGpuDescriptorHandle(int nHandleIndex, D3D12_GPU_DESCRIPTOR_HANDLE d3dUavGpuDescriptorHandle)
+{
+	m_pd3dComputeUavGpuDescriptorHandles[nHandleIndex] = d3dUavGpuDescriptorHandle;
 }
 void CTexture::SetGpuDescriptorHandle(int nIndex, D3D12_GPU_DESCRIPTOR_HANDLE d3dSrvGpuDescriptorHandle)
 {
@@ -103,6 +192,11 @@ void CTexture::LoadTextureFromDDSFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 	m_ppd3dTextures[nIndex] = ::CreateTextureResourceFromDDSFile(pd3dDevice, pd3dCommandList, pszFileName, &m_ppd3dTextureUploadBuffers[nIndex], D3D12_RESOURCE_STATE_GENERIC_READ/*D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE*/);
 	m_ppstrTextureNames[nIndex] = pszFileName;
 }
+void CTexture::UpdateComputeSrvShaderVariable(ID3D12GraphicsCommandList* pd3dCommandList, int nIndex)
+{
+	if ((m_pnComputeSrvRootParameterIndices[nIndex] != -1) && (m_pd3dComputeSrvRootParameterGpuDescriptorHandles[nIndex].ptr != NULL)) 
+		pd3dCommandList->SetComputeRootDescriptorTable(m_pnComputeSrvRootParameterIndices[nIndex], m_pd3dComputeSrvRootParameterGpuDescriptorHandles[nIndex]);
+}
 void CTexture::CreateBuffer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, void* pData, UINT nElements, UINT nStride, DXGI_FORMAT ndxgiFormat, D3D12_HEAP_TYPE d3dHeapType, D3D12_RESOURCE_STATES d3dResourceStates, UINT nIndex)
 {
 	m_pnResourceTypes[nIndex] = RESOURCE_BUFFER;
@@ -118,10 +212,22 @@ ID3D12Resource* CTexture::CreateTexture(ID3D12Device* pd3dDevice, UINT nWidth, U
 	m_ppd3dTextures[nIndex] = ::CreateTexture2DResource(pd3dDevice, nWidth, nHeight, nElements, nMipLevels, dxgiFormat, d3dResourceFlags, d3dResourceStates, pd3dClearValue);
 	return(m_ppd3dTextures[nIndex].Get());
 }
-ID3D12Resource* CTexture::CreateTexture(ID3D12Device* pd3dDevice, UINT nWidth, UINT nHeight, DXGI_FORMAT dxgiFormat, D3D12_RESOURCE_FLAGS d3dResourceFlags, D3D12_RESOURCE_STATES d3dResourceStates, D3D12_CLEAR_VALUE* pd3dClearValue, UINT nResourceType, UINT nIndex)
+void CTexture::UpdateComputeShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	for (int i = 0; i < m_nComputeSrvRootParameters; i++)
+	{
+		if ((m_pnComputeSrvRootParameterIndices[i] != -1) && (m_pd3dComputeSrvRootParameterGpuDescriptorHandles[i].ptr != NULL)) pd3dCommandList->SetComputeRootDescriptorTable(m_pnComputeSrvRootParameterIndices[i], m_pd3dComputeSrvRootParameterGpuDescriptorHandles[i]);
+	}
+
+	for (int i = 0; i < m_nComputeUavRootParameters; i++)
+	{
+		if ((m_pnComputeUavRootParameterIndices[i] != -1) && (m_pd3dComputeUavRootParameterGpuDescriptorHandles[i].ptr != NULL)) pd3dCommandList->SetComputeRootDescriptorTable(m_pnComputeUavRootParameterIndices[i], m_pd3dComputeUavRootParameterGpuDescriptorHandles[i]);
+	}
+}
+ID3D12Resource* CTexture::CreateTexture(ID3D12Device* pd3dDevice, UINT nWidth, UINT nHeight, DXGI_FORMAT dxgiFormat, D3D12_RESOURCE_FLAGS d3dResourceFlags, D3D12_RESOURCE_STATES d3dResourceStates, D3D12_CLEAR_VALUE* pd3dClearValue, UINT nResourceType, UINT nIndex, UINT nMipLevels)
 {
 	m_pnResourceTypes[nIndex] = nResourceType;
-	m_ppd3dTextures[nIndex] = ::CreateTexture2DResource(pd3dDevice, nWidth, nHeight, 1, 0, dxgiFormat, d3dResourceFlags, d3dResourceStates, pd3dClearValue);
+	m_ppd3dTextures[nIndex] = ::CreateTexture2DResource(pd3dDevice, nWidth, nHeight, 1, nMipLevels, dxgiFormat, d3dResourceFlags, d3dResourceStates, pd3dClearValue);
 	return(m_ppd3dTextures[nIndex].Get());
 }
 int CTexture::LoadTextureFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CGameObject* pParent, FILE* pInFile, CShader* pShader, UINT nIndex)
@@ -182,6 +288,12 @@ int CTexture::LoadTextureFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 		}
 	}
 	return(bLoaded);
+}
+
+void CTexture::UpdateComputeUavShaderVariable(ID3D12GraphicsCommandList* pd3dCommandList, int nIndex)
+{
+	if ((m_pnComputeUavRootParameterIndices[nIndex] != -1) && (m_pd3dComputeUavRootParameterGpuDescriptorHandles[nIndex].ptr != NULL)) 
+		pd3dCommandList->SetComputeRootDescriptorTable(m_pnComputeUavRootParameterIndices[nIndex], m_pd3dComputeUavRootParameterGpuDescriptorHandles[nIndex]);
 }
 
 D3D12_SHADER_RESOURCE_VIEW_DESC CTexture::GetShaderResourceViewDesc(int nIndex)
@@ -246,6 +358,44 @@ D3D12_SHADER_RESOURCE_VIEW_DESC CTexture::GetShaderResourceViewDesc(int nIndex)
 		break;
 	}
 	return(d3dShaderResourceViewDesc);
+}
+
+D3D12_UNORDERED_ACCESS_VIEW_DESC CTexture::GetUnorderedAccessViewDesc(int nIndex)
+{
+	ID3D12Resource* pShaderResource = GetResource(nIndex);
+	D3D12_RESOURCE_DESC d3dResourceDesc = pShaderResource->GetDesc();
+
+	D3D12_UNORDERED_ACCESS_VIEW_DESC d3dUnorderedAccessViewDesc;
+
+	int nTextureType = GetTextureType();
+	switch (nTextureType)
+	{
+	case RESOURCE_TEXTURE2D: //(d3dResourceDesc.Dimension == D3D12_RESOURCE_DIMENSION_TEXTURE2D)(d3dResourceDesc.DepthOrArraySize == 1)
+	case RESOURCE_TEXTURE2D_ARRAY: //[]
+		d3dUnorderedAccessViewDesc.Format = d3dResourceDesc.Format;
+		d3dUnorderedAccessViewDesc.ViewDimension = D3D12_UAV_DIMENSION_TEXTURE2D;
+		d3dUnorderedAccessViewDesc.Texture2D.MipSlice = 0;
+		d3dUnorderedAccessViewDesc.Texture2D.PlaneSlice = 0;
+		break;
+	case RESOURCE_TEXTURE2DARRAY: //(d3dResourceDesc.Dimension == D3D12_RESOURCE_DIMENSION_TEXTURE2D)(d3dResourceDesc.DepthOrArraySize != 1)
+		d3dUnorderedAccessViewDesc.Format = d3dResourceDesc.Format;
+		d3dUnorderedAccessViewDesc.ViewDimension = D3D12_UAV_DIMENSION_TEXTURE2DARRAY;
+		d3dUnorderedAccessViewDesc.Texture2DArray.MipSlice = 0;
+		d3dUnorderedAccessViewDesc.Texture2DArray.FirstArraySlice = 0;
+		d3dUnorderedAccessViewDesc.Texture2DArray.ArraySize = d3dResourceDesc.DepthOrArraySize;
+		d3dUnorderedAccessViewDesc.Texture2DArray.PlaneSlice = 0;
+		break;
+	case RESOURCE_BUFFER: //(d3dResourceDesc.Dimension == D3D12_RESOURCE_DIMENSION_BUFFER)
+		d3dUnorderedAccessViewDesc.Format = m_pdxgiBufferFormats[nIndex];
+		d3dUnorderedAccessViewDesc.ViewDimension = D3D12_UAV_DIMENSION_BUFFER;
+		d3dUnorderedAccessViewDesc.Buffer.FirstElement = 0;
+		d3dUnorderedAccessViewDesc.Buffer.NumElements = 0;
+		d3dUnorderedAccessViewDesc.Buffer.StructureByteStride = 0;
+		d3dUnorderedAccessViewDesc.Buffer.CounterOffsetInBytes = 0;
+		d3dUnorderedAccessViewDesc.Buffer.Flags = D3D12_BUFFER_UAV_FLAG_NONE;
+		break;
+	}
+	return(d3dUnorderedAccessViewDesc);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
