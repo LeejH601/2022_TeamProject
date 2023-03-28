@@ -124,7 +124,7 @@ D3D12_INPUT_LAYOUT_DESC CParticleShader::CreateInputLayout(int nPipelineState)
 	pd3dInputElementDescs[0] = { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
 	pd3dInputElementDescs[1] = { "VELOCITY", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
 	pd3dInputElementDescs[2] = { "LIFETIME", 0, DXGI_FORMAT_R32_FLOAT, 0, 24, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
-	pd3dInputElementDescs[3] = { "SPANTIME", 0, DXGI_FORMAT_R32_FLOAT, 0, 28, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+	pd3dInputElementDescs[3] = { "ALPHA", 0, DXGI_FORMAT_R32_FLOAT, 0, 28, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
 
 	d3dInputLayoutDesc.pInputElementDescs = pd3dInputElementDescs;
 	d3dInputLayoutDesc.NumElements = nInputElementDescs;
@@ -144,7 +144,7 @@ D3D12_STREAM_OUTPUT_DESC CParticleShader::CreateStreamOuputState(int nPipelineSt
 		pd3dStreamOutputDecls[0] = { 0, "POSITION", 0, 0, 3, 0 };
 		pd3dStreamOutputDecls[1] = { 0, "VELOCITY", 0, 0, 3, 0 };
 		pd3dStreamOutputDecls[2] = { 0, "LIFETIME", 0, 0, 1, 0 };
-		pd3dStreamOutputDecls[3] = { 0, "SPANTIME", 0, 0, 1, 0 };
+		pd3dStreamOutputDecls[3] = { 0, "ALPHA", 0, 0, 1, 0 };
 
 		UINT* pBufferStrides = new UINT[1];
 		pBufferStrides[0] = sizeof(CParticleVertex);

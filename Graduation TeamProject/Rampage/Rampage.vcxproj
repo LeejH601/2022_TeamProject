@@ -41,7 +41,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
-    <UseDebugLibraries>true</UseDebugLibraries>
+    <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
@@ -51,6 +51,7 @@
     <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
+    <EnableUnitySupport>true</EnableUnitySupport>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -125,6 +126,7 @@
       <ConformanceMode>false</ConformanceMode>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -142,6 +144,7 @@
       <ConformanceMode>false</ConformanceMode>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <IncludeInUnityFile>false</IncludeInUnityFile>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -171,7 +174,6 @@
     <ClCompile Include="ImGui\imgui_widgets.cpp" />
     <ClCompile Include="Object\Animation.cpp" />
     <ClCompile Include="Object\AnimationComponent.cpp" />
-    <ClCompile Include="Object\BillBoardComponent.cpp" />
     <ClCompile Include="Object\BillBoardObject.cpp" />
     <ClCompile Include="Object\Light.cpp" />
     <ClCompile Include="Object\Mesh.cpp" />
@@ -227,7 +229,6 @@
     <ClInclude Include="ImGui\imstb_truetype.h" />
     <ClInclude Include="Object\Animation.h" />
     <ClInclude Include="Object\AnimationComponent.h" />
-    <ClInclude Include="Object\BillBoardComponent.h" />
     <ClInclude Include="Object\BillBoardObject.h" />
     <ClInclude Include="Object\Light.h" />
     <ClInclude Include="Object\Mesh.h" />

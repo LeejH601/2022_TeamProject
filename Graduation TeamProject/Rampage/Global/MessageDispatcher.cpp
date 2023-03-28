@@ -5,6 +5,7 @@
 #include "..\Object\Monster.h"
 #include "..\Object\MonsterState.h"
 #include "..\Object\ParticleObject.h"
+#include "..\Object\BillBoardObject.H"
 #include "..\Sound\SoundManager.h"
 
 void CMessageDispatcher::RegisterListener(MessageType messageType, IMessageListener* listener, void* filterObject)
@@ -233,19 +234,153 @@ void ParticleComponent::HandleMessage(const Message& message, const ParticleComp
 
 	if (pParticle)
 	{
-
 		pParticle->SetEnable(true);
 		pParticle->SetSize(m_fSize);
-		pParticle->SetAlpha(m_fAlpha);
+		pParticle->SetStartAlpha(m_fAlpha);
 		pParticle->SetColor(m_xmf3Color);
 		pParticle->SetSpeed(m_fSpeed);
 		pParticle->SetLifeTime(m_fLifeTime);
 		pParticle->SetMaxParticleN(m_nParticleNumber);
 		pParticle->SetEmitParticleN(m_nParticleNumber);
 		pParticle->SetPosition(params.xmf3Position);
+		pParticle->SetParticleType(m_iParticleType);
 	}
 }
+
+void CAttackSpriteComponent::SetTexture(LPCTSTR pszFileName)
+{
+	//std::shared_ptr pTexture = CTextureManager::GetInst()->LoadParticleTexture(pszFileName);
+	//if (pTexture)
+	//	m_pParticleObject->ChangeTexture(pTexture);
+}
+
+void CAttackSpriteComponent::SetSpeed(float fSpeed)
+{
+	m_fSpeed = fSpeed;
+
+	//if (m_vSprite[0].second)
+	//	m_vSprite[0].second->SetSpeed(fSpeed);
+}
+
+void CAttackSpriteComponent::SetAlpha(float fAlpha)
+{
+	m_fAlpha = fAlpha;
+
+	//if (m_vSprite[0].second)
+	//	m_vSprite[0].second->SetAlpah(m_fAlpha);
+}
+
+void CAttackSpriteComponent::UpdateData()
+{
+	//if (m_vSprite[0].second) {
+	//	m_vSprite[0].second->SetSpeed(m_fSpeed);
+	//}
+	if (m_bEnable)
+		m_bAnimation = true;
+}
+
+float& CAttackSpriteComponent::GetSpeed()
+{
+	return m_fSpeed;
+}
+
+float& CAttackSpriteComponent::GetAlpha()
+{
+	return m_fAlpha;
+}
+
+void CAttackSpriteComponent::HandleMessage(const Message& message, const AttackSpriteCompParams& params)
+{
+	//if (!m_bEnable)
+	//	return;
+
+	CMultiSpriteObject* pSpriteObject = dynamic_cast<CMultiSpriteObject*>(params.pObject);
+
+	if (pSpriteObject)
+	{
+		pSpriteObject->SetEnable(true);
+		pSpriteObject->SetPosition(params.xmf3Position);
+		pSpriteObject->SetAlpah(1.f);
+		//pSpriteObject->SetSpeed()
+		//pParticle->SetSize(m_fSize);
+		//pParticle->SetAlpha(m_fAlpha);
+		//pParticle->SetColor(m_xmf3Color);
+		//pParticle->SetSpeed(m_fSpeed);
+		//pParticle->SetLifeTime(m_fLifeTime);
+		//pParticle->SetMaxParticleN(m_nParticleNumber);
+		//pParticle->SetEmitParticleN(m_nParticleNumber);
+		//pParticle->SetPosition(params.xmf3Position);
+	}
+}
+
 void SceneCollideListener::HandleMessage(const Message& message, const CollideParams& params)
 {
 	m_pScene->HandleCollision(params);
+}
+
+void TerrainSpriteComponent::SetTexture(LPCTSTR pszFileName)
+{
+}
+
+//void TerrainSpriteComponent::SetSpeed(float fSpeed)
+//{
+//}
+//
+//void TerrainSpriteComponent::SetAlpha(float fAlpha)
+//{
+//}
+
+void TerrainSpriteComponent::UpdateData()
+{
+}
+//
+//float& TerrainSpriteComponent::GetSpeed()
+//{
+//	// // O: 여기에 return 문을 삽입합니다.
+//}
+//
+//float& TerrainSpriteComponent::GetAlpha()
+//{
+//	// // O: 여기에 return 문을 삽입합니다.
+//}
+
+void TerrainSpriteComponent::HandleMessage(const Message& message, const TerrainSpriteCompParams& params)
+{
+	CTerrainSpriteObject* pSpriteObject = dynamic_cast<CTerrainSpriteObject*>(params.pObject);
+
+	if (pSpriteObject)
+	{
+		pSpriteObject->SetEnable(true);
+		pSpriteObject->SetPosition(params.xmf3Position);
+		//pSpriteObject->SetSpeed()
+		//pParticle->SetSize(m_fSize);
+		//pParticle->SetAlpha(m_fAlpha);
+		//pParticle->SetColor(m_xmf3Color);
+		//pParticle->SetSpeed(m_fSpeed);
+		//pParticle->SetLifeTime(m_fLifeTime);
+		//pParticle->SetMaxParticleN(m_nParticleNumber);
+		//pParticle->SetEmitParticleN(m_nParticleNumber);
+		//pParticle->SetPosition(params.xmf3Position);
+	}
+}
+
+void SmokeParticleComponent::HandleMessage(const Message& message, const ParticleSmokeParams& params)
+{
+	CParticleObject* pParticleObject = dynamic_cast<CParticleObject*>(params.pObject);
+
+	if (pParticleObject)
+	{
+		pParticleObject->SetEnable(true);
+		pParticleObject->SetPosition(params.xmf3Position);
+		pParticleObject->SetParticleType(m_iParticleType);
+		//pSpriteObject->SetSpeed()
+		pParticleObject->SetSize(m_fSize);
+		pParticleObject->SetStartAlpha(m_fAlpha);
+		pParticleObject->SetColor(m_xmf3Color);
+		//pParticle->SetSpeed(m_fSpeed);
+		pParticleObject->SetLifeTime(m_fLifeTime);
+		//pParticle->SetMaxParticleN(m_nParticleNumber);
+		//pParticle->SetEmitParticleN(m_nParticleNumber);
+		//pParticle->SetPosition(params.xmf3Position);
+	}
 }

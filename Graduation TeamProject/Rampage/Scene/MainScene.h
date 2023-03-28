@@ -31,6 +31,10 @@ private:
 	std::unique_ptr<CTextureManager> m_pTextureManager = NULL;
 	std::unique_ptr<CParticleShader> m_pParticleShader;
 	std::vector<std::unique_ptr<CGameObject>> m_pParticleObjects;
+	std::vector<std::unique_ptr<CGameObject>> m_pSpriteAttackObjects;
+	std::vector<std::unique_ptr<CGameObject>> m_pTerrainSpriteObject;
+	
+	std::unique_ptr<CGameObject> m_pSmokeObject;
 
 	std::unique_ptr<CSkyBoxShader> m_pSkyBoxShader;
 	std::unique_ptr<CSkyBox> m_pSkyBoxObject;

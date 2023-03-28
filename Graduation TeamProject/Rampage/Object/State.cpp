@@ -108,6 +108,21 @@ Atk1_Player::Atk1_Player()
 	std::unique_ptr<ParticleComponent> pParticlenComponent = std::make_unique<ParticleComponent>();
 	m_pListeners.push_back(std::move(pParticlenComponent));
 	CMessageDispatcher::GetInst()->RegisterListener(MessageType::UPDATE_PARTICLE, m_pListeners.back().get(), this);
+
+	// SMOKEPARTICLE ANIMATION
+	std::unique_ptr<SmokeParticleComponent> pSmokeParticlenComponent = std::make_unique<SmokeParticleComponent>();
+	m_pListeners.push_back(std::move(pSmokeParticlenComponent));
+	CMessageDispatcher::GetInst()->RegisterListener(MessageType::UPDATE_PARTICLE, m_pListeners.back().get(), this);
+
+	// ATTACK_SPRITE ANIMATION
+	std::unique_ptr<CAttackSpriteComponent> pAttackSpriteComponent = std::make_unique<CAttackSpriteComponent>();
+	m_pListeners.push_back(std::move(pAttackSpriteComponent));
+	CMessageDispatcher::GetInst()->RegisterListener(MessageType::UPDATE_SPRITE, m_pListeners.back().get(), this);\
+	
+	// TERRAIN SPRITE  ANIMATION
+	std::unique_ptr<TerrainSpriteComponent> pTerrainSpriteComponent = std::make_unique<TerrainSpriteComponent>();
+	m_pListeners.push_back(std::move(pTerrainSpriteComponent));
+	CMessageDispatcher::GetInst()->RegisterListener(MessageType::UPDATE_SPRITE, m_pListeners.back().get(), this);
 }
 
 Atk1_Player::~Atk1_Player()
@@ -224,6 +239,21 @@ Atk2_Player::Atk2_Player()
 	std::unique_ptr<ParticleComponent> pParticlenComponent = std::make_unique<ParticleComponent>();
 	m_pListeners.push_back(std::move(pParticlenComponent));
 	CMessageDispatcher::GetInst()->RegisterListener(MessageType::UPDATE_PARTICLE, m_pListeners.back().get(), this);
+
+	// SMOKEPARTICLE ANIMATION
+	std::unique_ptr<SmokeParticleComponent> pSmokeParticlenComponent = std::make_unique<SmokeParticleComponent>();
+	m_pListeners.push_back(std::move(pSmokeParticlenComponent));
+	CMessageDispatcher::GetInst()->RegisterListener(MessageType::UPDATE_PARTICLE, m_pListeners.back().get(), this);
+
+	// ATTACK_SPRITE ANIMATION
+	std::unique_ptr<CAttackSpriteComponent> pAttackSpriteComponent = std::make_unique<CAttackSpriteComponent>();
+	m_pListeners.push_back(std::move(pAttackSpriteComponent));
+	CMessageDispatcher::GetInst()->RegisterListener(MessageType::UPDATE_SPRITE, m_pListeners.back().get(), this); \
+
+	// TERRAIN SPRITE  ANIMATION
+	std::unique_ptr<TerrainSpriteComponent> pTerrainSpriteComponent = std::make_unique<TerrainSpriteComponent>();
+	m_pListeners.push_back(std::move(pTerrainSpriteComponent));
+	CMessageDispatcher::GetInst()->RegisterListener(MessageType::UPDATE_SPRITE, m_pListeners.back().get(), this);
 }
 
 Atk2_Player::~Atk2_Player()
@@ -340,6 +370,21 @@ Atk3_Player::Atk3_Player()
 	std::unique_ptr<ParticleComponent> pParticlenComponent = std::make_unique<ParticleComponent>();
 	m_pListeners.push_back(std::move(pParticlenComponent));
 	CMessageDispatcher::GetInst()->RegisterListener(MessageType::UPDATE_PARTICLE, m_pListeners.back().get(), this);
+
+	// SMOKEPARTICLE ANIMATION
+	std::unique_ptr<SmokeParticleComponent> pSmokeParticlenComponent = std::make_unique<SmokeParticleComponent>();
+	m_pListeners.push_back(std::move(pSmokeParticlenComponent));
+	CMessageDispatcher::GetInst()->RegisterListener(MessageType::UPDATE_PARTICLE, m_pListeners.back().get(), this);
+
+	// ATTACK_SPRITE ANIMATION
+	std::unique_ptr<CAttackSpriteComponent> pAttackSpriteComponent = std::make_unique<CAttackSpriteComponent>();
+	m_pListeners.push_back(std::move(pAttackSpriteComponent));
+	CMessageDispatcher::GetInst()->RegisterListener(MessageType::UPDATE_SPRITE, m_pListeners.back().get(), this); \
+
+		// TERRAIN SPRITE  ANIMATION
+	std::unique_ptr<TerrainSpriteComponent> pTerrainSpriteComponent = std::make_unique<TerrainSpriteComponent>();
+	m_pListeners.push_back(std::move(pTerrainSpriteComponent));
+	CMessageDispatcher::GetInst()->RegisterListener(MessageType::UPDATE_SPRITE, m_pListeners.back().get(), this);
 }
 
 Atk3_Player::~Atk3_Player()

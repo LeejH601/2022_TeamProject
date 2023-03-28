@@ -7,6 +7,7 @@ enum class MessageType {
 	UPDATE_CAMERA,
 	UPDATE_OBJECT,
 	UPDATE_PARTICLE,
+	UPDATE_SPRITE
 };
 
 enum class MESSAGE_TYPE

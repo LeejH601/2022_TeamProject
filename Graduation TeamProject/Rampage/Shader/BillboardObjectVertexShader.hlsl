@@ -11,13 +11,13 @@ SamplerState gSamplerState : register(s0);
 
 struct VS_OUT
 {
-	//float3 centerW : POSITION;
 	float2 sizeW : SIZE;
+	bool   useBillBoard : USEBILLBOARD;
 };
 struct VS_IN
 {
-	//float3 posW : POSITION;
 	float2 sizeW : SIZE;
+	uint   useBillBoard : USEBILLBOARD;
 };
 
 VS_OUT Billboard_VS(VS_IN input)
@@ -25,5 +25,6 @@ VS_OUT Billboard_VS(VS_IN input)
 	VS_OUT output;
 	//output.centerW = input.posW;
 	output.sizeW = input.sizeW;
+	output.useBillBoard = input.useBillBoard;
 	return output;
 }

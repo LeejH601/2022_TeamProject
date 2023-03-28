@@ -38,8 +38,24 @@ struct ParticleCompParams {
     XMFLOAT3 xmf3Position;
 };
 
+struct ParticleSmokeParams {
+    CGameObject* pObject;
+    XMFLOAT3 xmf3Position;
+    XMFLOAT3 xmfShift;
+};
+
 struct CollideParams {
     XMFLOAT3 xmf3CollidePosition;
+};
+
+struct AttackSpriteCompParams {
+    CGameObject* pObject;
+    XMFLOAT3 xmf3Position;
+};
+
+struct TerrainSpriteCompParams {
+    CGameObject* pObject;
+    XMFLOAT3 xmf3Position;
 };
 
 // Define message listener interface
@@ -56,6 +72,10 @@ public:
     virtual void HandleMessage(const Message& message, const CameraUpdateParams& params) {}
     virtual void HandleMessage(const Message& message, const AnimationCompParams& params) {}
     virtual void HandleMessage(const Message& message, const ParticleCompParams& params) {}
+    virtual void HandleMessage(const Message& message, const ParticleSmokeParams& params) {}
+    virtual void HandleMessage(const Message& message, const AttackSpriteCompParams& params) {}
+    virtual void HandleMessage(const Message& message, const TerrainSpriteCompParams& params) {}
+
 };
 
 // Define Player Attack component
@@ -208,15 +228,19 @@ class StunAnimationComponent : public IMessageListener {
 public:
     float& GetStunTime() { return m_fStunTime; }
 
-    void SetStunTime(float stun_time) { m_fStunTime = stun_time; }
+    void SetStunTime(float stun_time) { m_fStunTime = stun_time; } 
 
     virtual void HandleMessage(const Message& message, const AnimationCompParams& params);
 };
 
 // Define Particle Animation component
+#define SPHERE_PARITLCE 0
+#define SMOKE_PARITLCE 1
+
 #define MAX_PARTICLES				250
 class ParticleComponent : public IMessageListener {
     int m_nParticleNumber = MAX_PARTICLES;
+    int m_iParticleType = SPHERE_PARITLCE;
     int m_nParticleIndex = 0;
     float m_fSize = 1.f;
     float m_fAlpha = 1.f;
@@ -234,6 +258,7 @@ public:
 
     void SetParticleNumber(int nParticleNumber) { m_nParticleNumber = nParticleNumber; }
     void SetParticleIndex(int nParticleIndex) { m_nParticleIndex = nParticleIndex; }
+    void SetParticleType(int iParticleType) { m_iParticleType = iParticleType; }
     void SetSize(float fSize) { m_fSize = fSize; }
     void SetAlpha(float fAlpha) { m_fSize = fAlpha; }
     void SetLifeTime(float fLifeTime) { m_fSize = fLifeTime; }
@@ -243,6 +268,81 @@ public:
     virtual void HandleMessage(const Message& message, const ParticleCompParams& params);
 };
 
+class SmokeParticleComponent : public IMessageListener {
+    int m_nParticleNumber = 4;
+    int m_iParticleType = SMOKE_PARITLCE;
+    int m_nParticleIndex = 0;
+    float m_fSize = 5.f;
+    float m_fAlpha = 0.9f;
+    float m_fLifeTime = 0.05f;
+    float m_fSpeed = 20.f;
+
+    XMFLOAT3 m_xmf3Color = XMFLOAT3(0.55f, 0.5f, 0.51f);
+public:
+    int& GetParticleNumber() { return m_nParticleNumber; }
+    int& GetParticleIndex() { return m_nParticleIndex; }
+    float& GetSize() { return m_fSize; }
+    float& GetAlpha() { return m_fSize; }
+    float& GetLifeTime() { return m_fSize; }
+    float& GetSpeed() { return m_fSize; }
+    XMFLOAT3& GetColor() { return m_xmf3Color; }
+
+    void SetParticleNumber(int nParticleNumber) { m_nParticleNumber = nParticleNumber; }
+    void SetParticleIndex(int nParticleIndex) { m_nParticleIndex = nParticleIndex; }
+    void SetParticleType(int iParticleType) { m_iParticleType = iParticleType; }
+    void SetSize(float fSize) { m_fSize = fSize; }
+    void SetAlpha(float fAlpha) { m_fSize = fAlpha; }
+    void SetLifeTime(float fLifeTime) { m_fLifeTime = fLifeTime; }
+    void SetSpeed(float fSpeed) { m_fSize = fSpeed; }
+    void SetColor(XMFLOAT3 xmf3Color) { m_xmf3Color = xmf3Color; }
+
+    virtual void HandleMessage(const Message& message, const ParticleSmokeParams& params);
+};
+
+class CAttackSpriteComponent : public IMessageListener
+{
+private:
+    float   m_fSpeed = 5.f;
+    float   m_fAlpha = 1.f;
+    float   m_fSize = 0.8f;
+    bool    m_bAnimation = false;
+
+public:
+    void SetTexture(LPCTSTR pszFileName);
+    void SetSpeed(float fSpeed);
+    void SetAlpha(float fAlpha);
+    void UpdateData();
+
+public:
+    float& GetSpeed();
+    float& GetAlpha();
+
+    virtual void HandleMessage(const Message& message, const AttackSpriteCompParams& params);
+};
+
+class TerrainSpriteComponent : public IMessageListener
+{
+private:
+    float   m_fSpeed = 5.f;
+    float   m_fAlpha = 1.f;
+    float   m_fSize = 0.5f;
+    bool    m_bAnimation = false;
+
+public:
+    void SetTexture(LPCTSTR pszFileName);
+    //void SetSpeed(float fSpeed);
+    //void SetAlpha(float fAlpha);
+    void UpdateData();
+
+public:
+    //float& GetSpeed();
+    //float& GetAlpha();
+
+    virtual void HandleMessage(const Message& message, const TerrainSpriteCompParams& params);
+};
+
+
+
 struct ListenerInfo {
     IMessageListener* listener;
     void* filterObject;
@@ -251,7 +351,7 @@ struct ListenerInfo {
 // Define message dispatcher
 class CMessageDispatcher {
 private:
-    std::vector<ListenerInfo> m_listeners[static_cast<int>(MessageType::UPDATE_PARTICLE) + 1];
+    std::vector<ListenerInfo> m_listeners[static_cast<int>(MessageType::UPDATE_SPRITE) + 1];
 public:
     DECLARE_SINGLE(CMessageDispatcher);
     CMessageDispatcher() { }

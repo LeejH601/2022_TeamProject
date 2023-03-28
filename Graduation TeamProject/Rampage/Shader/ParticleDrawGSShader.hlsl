@@ -3,7 +3,7 @@ struct VS_PARTICLE_DRAW_OUTPUT
 	float3 position : POSITION;
 	float4 color : COLOR;
 	float size : SCALE;
-	float spantime : SPANTIME;
+	float alpha : ALPHA;
 };
 
 struct GS_PARTICLE_DRAW_OUTPUT
@@ -11,7 +11,7 @@ struct GS_PARTICLE_DRAW_OUTPUT
 	float4 position : SV_Position;
 	float4 color : COLOR;
 	float2 uv : TEXTURE;
-	float spantime : SPANTIME;
+	float alpha : ALPHA;
 };
 
 cbuffer cbGameObjectInfo : register(b0)
@@ -39,12 +39,12 @@ void GSParticleDraw(point VS_PARTICLE_DRAW_OUTPUT input[1], inout TriangleStream
 {
 	GS_PARTICLE_DRAW_OUTPUT output = (GS_PARTICLE_DRAW_OUTPUT)0;
 
-	output.spantime = input[0].spantime;
+	output.alpha = input[0].alpha;
 	output.color = input[0].color;
 	for (int i = 0; i < 4; i++)
 	{
-		float3 centerW = gmtxGameObject._41_42_43;
-		float3 positionW = (gf3Positions[i] + centerW) * input[0].size + input[0].position;
+		float3 positionW = mul((gf3Positions[i] * input[0].size), (float3x3)(gmtxInverseView)) + input[0].position;
+		//float3 positionW = (gf3Positions[i] + centerW) * input[0].size + input[0].position;
 		output.position = mul(mul(float4(positionW, 1.0f), gmtxView), gmtxProjection);
 		output.uv = gf2QuadUVs[i];
 

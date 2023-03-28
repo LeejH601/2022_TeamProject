@@ -3,7 +3,7 @@
 #include "../Object/Mesh.h"
 #include "../Global/Camera.h"
 
-CBillBoardObject::CBillBoardObject(std::shared_ptr<CTexture> pSpriteTexture, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CShader* pShader, float fSize)
+CBillBoardObject::CBillBoardObject(std::shared_ptr<CTexture> pSpriteTexture, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CShader* pShader, float fSize, bool bBillBoard)
 {
 	m_xmf4x4World = Matrix4x4::Identity();
 	m_xmf4x4Transform = Matrix4x4::Identity();
@@ -12,7 +12,7 @@ CBillBoardObject::CBillBoardObject(std::shared_ptr<CTexture> pSpriteTexture, ID3
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
 	SetTexture(pSpriteTexture);
-	SetMesh(std::make_shared<CBillBoardMesh>(pd3dDevice, pd3dCommandList, fSize));
+	SetMesh(std::make_shared<CSpriteMesh>(pd3dDevice, pd3dCommandList, fSize, bBillBoard));
 }
 
 CBillBoardObject::~CBillBoardObject()
@@ -42,13 +42,13 @@ void CBillBoardObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, bool b
 		CGameObject::Render(pd3dCommandList, b_UseTexture, pCamera);
 }
 
-void CBillBoardObject::Set_Target(CGameObject* pTarget)
+void CBillBoardObject::SetTarget(CGameObject* pTarget)
 {
 	if (pTarget)
 		m_pTarget = pTarget;
 }
 
-void CBillBoardObject::Set_Enable(bool bEnable)
+void CBillBoardObject::SetEnable(bool bEnable)
 {
 	m_bEnable = bEnable;
 }
@@ -75,7 +75,7 @@ void CBillBoardObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dComm
 	m_pcbMappedFrameworkInfo->m_xmf3Gravity = XMFLOAT3(0.0f, -9.8f, 0.0f);
 	m_pcbMappedFrameworkInfo->m_nMaxFlareType2Particles = 15 * 1.5f;
 	m_pcbMappedFrameworkInfo->m_xmf3Color = XMFLOAT3(1.f, 0.f, 0.f);
-	m_pcbMappedFrameworkInfo->m_nParticleType = PARTICLE_TYPE_EMITTER;
+	m_pcbMappedFrameworkInfo->m_nParticleType = 0;
 	m_pcbMappedFrameworkInfo->m_fLifeTime = m_fLifeTime;
 	m_pcbMappedFrameworkInfo->m_fSize = m_fSize;
 
@@ -84,7 +84,7 @@ void CBillBoardObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dComm
 }
 
 
-CMultiSpriteObject::CMultiSpriteObject(std::shared_ptr<CTexture> pSpriteTexture, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CShader* pShader, int nRows, int nCols, float fSize, float fSpeed) : CBillBoardObject(pSpriteTexture, pd3dDevice, pd3dCommandList, pShader, fSize)
+CMultiSpriteObject::CMultiSpriteObject(std::shared_ptr<CTexture> pSpriteTexture, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CShader* pShader, int nRows, int nCols, float fSize, bool bBillBoard, float fSpeed) : CBillBoardObject(pSpriteTexture, pd3dDevice, pd3dCommandList, pShader, fSize, bBillBoard)
 {
 	m_fSpeed = fSpeed;
 }
@@ -126,7 +126,7 @@ void CMultiSpriteObject::AnimateRowColumn(float fTimeElapsed)
 
 void CMultiSpriteObject::SetEnable(bool bEnable)
 {
-	CBillBoardObject::Set_Enable(bEnable);
+	CBillBoardObject::SetEnable(bEnable);
 	m_nRow = 0;
 	m_nCol = 0;
 }
@@ -160,6 +160,30 @@ void CMultiSpriteObject::Animate(float fTimeElapsed)
 
 		if (m_fTime <= 0.f)
 			m_fTime = 0.5f;
+	}
+}
+
+CTerrainSpriteObject::CTerrainSpriteObject(std::shared_ptr<CTexture> pSpriteTexture, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CShader* pShader, int nRows, int nCols, float fSize, float fSpeed) : CMultiSpriteObject(pSpriteTexture, pd3dDevice, pd3dCommandList, pShader, nRows, nCols, fSize, false, fSpeed)
+{
+}
+
+CTerrainSpriteObject::~CTerrainSpriteObject()
+{
+}
+
+void CTerrainSpriteObject::Animate(CHeightMapTerrain* pTerrain, float fTimeElapsed)
+{
+	if (pTerrain)
+	{
+		XMFLOAT3 xmf3Scale = pTerrain->GetScale();
+		XMFLOAT3 xmf3BillBoardPosition = GetPosition();
+		int z = (int)(xmf3BillBoardPosition.z / xmf3Scale.z);
+		bool bReverseQuad = ((z % 2) != 0);
+		// 86.4804, -46.8876 - 46.8876 * 0.38819 + 6.5f, -183.7856
+		float fHeight = pTerrain->GetHeight(xmf3BillBoardPosition.x - 86.4804f, xmf3BillBoardPosition.z + 183.7856f, bReverseQuad);
+		XMFLOAT3 Pos = GetPosition();
+		Pos.y = fHeight - 46.8876 - 46.8876 * 0.38819 + 6.5f;
+		SetPosition(Pos);
 	}
 }
 
