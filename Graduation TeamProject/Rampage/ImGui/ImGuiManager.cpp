@@ -1207,7 +1207,6 @@ void CImGuiManager::OnPrepareRender(ID3D12GraphicsCommandList* pd3dCommandList, 
 
 	CSimulatorScene::GetInst()->OnPreRender(pd3dCommandList, fTimeElapsed);
 
-	//PrepareRenderTarget(pd3dCommandList, d3dDsvDescriptorCPUHandle);
 	CSimulatorScene::GetInst()->OnPrepareRenderTarget(pd3dCommandList, 1, &m_pd3dRtvCPUDescriptorHandles, *d3dDsvDescriptorCPUHandle);
 	CSimulatorScene::GetInst()->SetHDRRenderSource(m_pRTTexture->GetResource(0));
 

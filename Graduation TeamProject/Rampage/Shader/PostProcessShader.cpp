@@ -146,15 +146,16 @@ void CPostProcessShader::OnPrepareRenderTarget(ID3D12GraphicsCommandList* pd3dCo
 void CPostProcessShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState)
 {
 	int nResources = m_pTexture->GetTextures();
-	for (int i = 0; i < nResources; i++)
-	{
-		::SynchronizeResourceTransition(pd3dCommandList, GetTextureResource(i), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_COMMON);
-	}
-
+	
 	CShader::Render(pd3dCommandList, pCamera, nPipelineState);
 
 	if (m_pTexture) m_pTexture->UpdateShaderVariables(pd3dCommandList);
 
 	pd3dCommandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	pd3dCommandList->DrawInstanced(6, 1, 0, 0);
+
+	for (int i = 0; i < nResources; i++)
+	{
+		::SynchronizeResourceTransition(pd3dCommandList, GetTextureResource(i), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_COMMON);
+	}
 }
