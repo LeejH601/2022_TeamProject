@@ -70,9 +70,6 @@ float4 PS_PostProcessing(VS_SCREEN_RECT_TEXTURED_OUTPUT input) : SV_Target1
 	float4 lightPosInClipSpace = mul(lightPosInViewSpace, gmtxProjection);
 	float3 lightPosInNDC = lightPosInClipSpace.xyz / lightPosInClipSpace.w;
 
-	/*lightPosInNDC.x = min(1.0f, max(-1.0f, lightPosInNDC.x));
-	lightPosInNDC.y = min(1.0f, max(-1.0f, lightPosInNDC.y));*/
-
 	float2 lightPosInScreenSpace = float2(lightPosInNDC.x * 0.5 + 0.5, -lightPosInNDC.y * 0.5 + 0.5);
 
 	float result = pow((input.uv.x - lightPosInScreenSpace.x), 2) + pow((input.uv.y - lightPosInScreenSpace.y), 2);
@@ -102,16 +99,12 @@ float4 PS_PostProcessing(VS_SCREEN_RECT_TEXTURED_OUTPUT input) : SV_Target1
 	// 범위를 벗어나면 weight를 0으로 고정
 	if (result < radiusPow) {
 		weight *= max(0.0f, (1.0f - ((result) / radiusPow)));
-		//Density *= max(0.0f, (1.0f - ((result) / radiusPow)));
 	}
 	else {
 		weight = 0.0f;
 	}
 
-	//Density *= (1.0f - (result / radiusPow));
 	float angle = dot(normalize(gLights[0].m_vDirection),  normalize(Pixelnormal.xyz));
-	/*if (angle > 0)
-		exposure = 0.6f;*/
 
 	float4 uvs[MAX_LIGHTS];
 
@@ -127,26 +120,9 @@ float4 PS_PostProcessing(VS_SCREEN_RECT_TEXTURED_OUTPUT input) : SV_Target1
 
 	cColor = gtxMultiRenderTargetTextures[0].Sample(gSamplerState, input.uv);
 
-	/*float3 grayscale = dot(cColor.xyz, float3(0.3, 0.59, 0.11));
-	if (grayscale.r < 0.45f)
-		cColor.xyz = lerp(cColor.xyz, float3(0.0f,0.0f,0.0f), 0.5f);
-	else {*/
-		float3 ShaftColor;
-		ShaftColor = LightShaft(input.uv, lightPosInScreenSpace, weight, exposure, Density, Decay);
-		cColor.xyz += ShaftColor.xyz;
-	//}
-
-	//
-	//if (lightPosInClipSpace.z > 0.0f) {
-	//	//Density *= (1.0f - lightPosInClipSpace.z);e
-	//	if (!(lightPosInNDC.z > 1.0f))
-	//		ShaftColor = LightShaft(input.uv, lightPosInScreenSpace, weight, exposure, Density, Decay);
-	//}
-	//else
-	//	ShaftColor = LightShaft(input.uv, lightPosInScreenSpace, weight, exposure, 0.0, Decay);
-
-
-	
+	float3 ShaftColor;
+	ShaftColor = LightShaft(input.uv, lightPosInScreenSpace, weight, exposure, Density, Decay);
+	cColor.xyz += ShaftColor.xyz;
 
 	cColor = Lighting(positionW.xyz, normal, cColor, true, uvs);
 

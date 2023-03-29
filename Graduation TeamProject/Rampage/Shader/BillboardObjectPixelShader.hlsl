@@ -31,7 +31,7 @@ struct GS_OUT
 	uint primID : SV_PrimitiveID;
 };
 
-PS_MULTIPLE_RENDER_TARGETS_OUTPUT Billboard_PS(GS_OUT input) : SV_Target1
+PS_MULTIPLE_RENDER_TARGETS_OUTPUT Billboard_PS(GS_OUT input)
 {
 	PS_MULTIPLE_RENDER_TARGETS_OUTPUT output;
 	float3 uvw = float3(input.uv, input.primID % 4); // ¼öÁ¤ float3 uvw = float3(input.uv, input.primID ); 
