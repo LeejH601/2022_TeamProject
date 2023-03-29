@@ -461,6 +461,7 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pMainSceneCamera->Init(pd3dDevice, pd3dCommandList);
 
 	m_pCurrentCamera = m_pFloatingCamera.get();
+
 #ifdef RENDER_BOUNDING_BOX
 	CBoundingBoxShader::GetInst()->CreateShader(pd3dDevice, GetGraphicsRootSignature(), 7, pdxgiObjectRtvFormats, DXGI_FORMAT_D32_FLOAT, 0);
 #endif
