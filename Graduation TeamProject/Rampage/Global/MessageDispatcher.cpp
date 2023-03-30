@@ -155,6 +155,8 @@ void DamageAnimationComponent::HandleMessage(const Message& message, const Anima
 
 		if (pMonster)
 		{
+			XMFLOAT3 xmf3DamageVec = XMFLOAT3(0.0f, 0.0f, 0.0f);
+
 			pMonster->m_fDamageDistance = 0.0f;
 
 			if ((pMonster->m_pStateMachine->GetCurrentState() == Damaged_Monster::GetInst()
@@ -169,6 +171,9 @@ void DamageAnimationComponent::HandleMessage(const Message& message, const Anima
 						pMonster->m_fDamageDistance -= (pMonster->m_fTotalDamageDistance - m_fMaxDistance);
 				}
 			}
+
+			xmf3DamageVec = Vector3::ScalarProduct(pMonster->GetHitterVec(), pMonster->m_fDamageDistance, false);
+			pMonster->Move(xmf3DamageVec, true);
 		}
 	}
 }
@@ -185,12 +190,17 @@ void ShakeAnimationComponent::HandleMessage(const Message& message, const Animat
 
 		if (pMonster)
 		{
+			XMFLOAT3 xmf3ShakeVec = XMFLOAT3(0.0f, 0.0f, 0.0f);
+
 			pMonster->m_fShakeDistance = 0.0f;
 
 			float fShakeDistance = m_fDistance * sin((2 * PI * pMonster->m_pSkinnedAnimationController->m_fTime + pMonster->m_fStunTime) / m_fFrequency);
 			
 			if (pMonster->m_pStateMachine->GetCurrentState() == Damaged_Monster::GetInst() || pMonster->m_pStateMachine->GetCurrentState() == Stun_Monster::GetInst())
 				pMonster->m_fShakeDistance = fShakeDistance;
+
+			xmf3ShakeVec = Vector3::ScalarProduct(pMonster->GetRight(), pMonster->m_fShakeDistance, false);
+			pMonster->Move(xmf3ShakeVec, true);
 		}
 	}
 }
@@ -263,12 +273,10 @@ void ImpactEffectComponent::HandleMessage(const Message& message, const ImpactCo
 		pMultiSprite->ChangeTexture(m_pTexture);
 	}
 }
-
 void SceneCollideListener::HandleMessage(const Message& message, const CollideParams& params)
 {
 	m_pScene->HandleCollision(params);
 }
-
 void TerrainSpriteComponent::SetTexture(LPCTSTR pszFileName)
 {
 }

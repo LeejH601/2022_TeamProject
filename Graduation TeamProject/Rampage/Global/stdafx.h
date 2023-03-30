@@ -48,6 +48,7 @@
 #include <algorithm>
 #include <thread>
 #include <chrono>
+#include <random>
 #include <atlstr.h>
 #include "..\ImGui\imgui.h"
 #include "..\ImGui\imgui_impl_dx12.h"
@@ -144,6 +145,7 @@ extern void SynchronizeResourceTransition(ID3D12GraphicsCommandList* pd3dCommand
 extern void SwapResourcePointer(ID3D12Resource** ppd3dResourceA, ID3D12Resource** ppd3dResourceB);
 extern physx::PxMat44 convertToPhysXCoordSystem(const DirectX::XMFLOAT4X4& matrix);
 extern DirectX::XMFLOAT4X4 convertToDirectXCoordSystem(const physx::PxMat44& matrix);
+extern float RandomFloatInRange(float min, float max);
 
 // Forward declare message handler from imgui_impl_win32.cpp
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
@@ -154,7 +156,6 @@ inline bool IsZero(float fValue, float fEpsilon) { return((fabsf(fValue) < fEpsi
 inline bool IsEqual(float fA, float fB, float fEpsilon) { return(::IsZero(fA - fB, fEpsilon)); }
 inline float InverseSqrt(float fValue) { return 1.0f / sqrtf(fValue); }
 inline void Swap(float* pfS, float* pfT) { float fTemp = *pfS; *pfS = *pfT; *pfT = fTemp; }
-
 
 
 

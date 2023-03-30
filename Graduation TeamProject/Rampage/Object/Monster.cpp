@@ -1,5 +1,4 @@
 #include "Monster.h"
-#include "MonsterState.h"
 #include "ModelManager.h"
 #include "AnimationComponent.h"
 #include "..\Global\Locator.h"
@@ -18,6 +17,10 @@ CMonster::CMonster()
 	m_fDissolveTime = 0.0f;
 	TestDissolvetime = 0.0f;
 
+	m_fSpeedKperH = 2.0f;
+	m_fSpeedMperS = m_fSpeedKperH * 1000.0f / 3600.0f;
+	m_fSpeedUperS = m_fSpeedMperS * 8.0f / 1.0f;
+
 	std::unique_ptr<PlayerAttackComponent> pCollisionComponent = std::make_unique<PlayerAttackComponent>();
 	pCollisionComponent->SetObject(this);
 	m_pListeners.push_back(std::move(pCollisionComponent));
@@ -27,6 +30,14 @@ CMonster::CMonster()
 
 CMonster::~CMonster()
 {
+}
+
+void CMonster::SetWanderVec()
+{
+	m_xmf3WanderVec.x = RandomFloatInRange(-10.0f, 10.0f);
+	m_xmf3WanderVec.z = RandomFloatInRange(-10.0f, 10.0f);
+
+	m_xmf3WanderVec = Vector3::Normalize(m_xmf3WanderVec);
 }
 
 void CMonster::SetScale(float x, float y, float z)
@@ -53,11 +64,10 @@ void CMonster::Animate(float fTimeElapsed)
 
 void CMonster::Update(float fTimeElapsed)
 {
+	// 현재 행동을 선택함
 	m_pStateMachine->Update(fTimeElapsed);
 
 	CPhysicsObject::Apply_Gravity(fTimeElapsed);
-
-	Animate(fTimeElapsed);
 
 	if (!m_bDissolved) {
 		if (m_bSimulateArticulate) {
@@ -69,16 +79,6 @@ void CMonster::Update(float fTimeElapsed)
 	else{
 		m_fDissolveTime += fTimeElapsed;
 		m_fDissolveThrethHold = m_fDissolveTime / m_fMaxDissolveTime;
-	}
-
-	if (m_pStateMachine->GetCurrentState() == Damaged_Monster::GetInst() ||
-		m_pStateMachine->GetCurrentState() == Stun_Monster::GetInst())
-	{
-		XMFLOAT3 xmf3ShakeVec = Vector3::ScalarProduct(GetRight(), m_fShakeDistance, false);
-		XMFLOAT3 xmf3DamageVec = Vector3::ScalarProduct(m_xmf3HitterVec, m_fDamageDistance, false);
-		XMFLOAT3 xmf3Pos = Vector3::Add(Vector3::Add(GetPosition(), xmf3ShakeVec), xmf3DamageVec);
-
-		SetPosition(xmf3Pos);
 	}
 
 	CPhysicsObject::Move(m_xmf3Velocity, false);

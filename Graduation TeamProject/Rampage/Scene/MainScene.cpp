@@ -482,7 +482,7 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pGoblinObject->SetPosition(XMFLOAT3(200, 300, -120));
 	m_pGoblinObject->SetScale(4.0f, 4.0f, 4.0f);
 	m_pGoblinObject->Rotate(0.0f, 180.0f, 0.0f);
-	m_pGoblinObject->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 5);
+	m_pGoblinObject->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
 	m_pGoblinObject->m_pSkinnedAnimationController->m_xmf3RootObjectScale = XMFLOAT3(10.0f, 10.0f, 10.0f);
 	m_pObjects.push_back(std::move(m_pGoblinObject));
 
@@ -490,7 +490,7 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pGoblinObject->SetPosition(XMFLOAT3(200, 300, -60));
 	m_pGoblinObject->SetScale(4.0f, 4.0f, 4.0f);
 	m_pGoblinObject->Rotate(0.0f, 180.0f, 0.0f);
-	m_pGoblinObject->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 5);
+	m_pGoblinObject->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
 	m_pObjects.push_back(std::move(m_pGoblinObject));
 
 	std::unique_ptr<CGoblinObject> m_pGoblin = std::make_unique<CGoblinObject>(pd3dDevice, pd3dCommandList, 1);
@@ -499,7 +499,7 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 		m_pGoblin->SetPosition(XMFLOAT3(150, 300, -120));
 		m_pGoblin->SetScale(4.0f, 4.0f, 4.0f);
 		m_pGoblin->Rotate(0.0f, 0.0f, 0.0f);
-		m_pGoblin->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 5);
+		m_pGoblin->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
 		m_pGoblin->CreateArticulation(1.0f);
 		m_pGoblin->m_bSimulateArticulate = false;
 		m_pGoblin->Animate(0.0f);
@@ -523,7 +523,7 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pOrc->SetPosition(XMFLOAT3(150, 300, -90));
 	m_pOrc->SetScale(4.0f, 4.0f, 4.0f);
 	m_pOrc->Rotate(0.0f, 0.0f, 0.0f);
-	m_pOrc->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 5);
+	m_pOrc->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
 	m_pOrc->CreateArticulation(1.0f);
 	m_pOrc->m_bSimulateArticulate = false;
 	m_pOrc->Animate(0.0f);
@@ -547,7 +547,7 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pGoblin->SetPosition(XMFLOAT3(150, 300, -150));
 	m_pGoblin->SetScale(4.0f, 4.0f, 4.0f);
 	m_pGoblin->Rotate(0.0f, 0.0f, 0.0f);
-	m_pGoblin->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 5);
+	m_pGoblin->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
 	m_pGoblin->CreateArticulation(1.0f);
 	m_pGoblin->m_bSimulateArticulate = false;
 	m_pGoblin->Animate(0.0f);
@@ -568,7 +568,7 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pGoblin->SetPosition(XMFLOAT3(150, 300, -180));
 	m_pGoblin->SetScale(4.0f, 4.0f, 4.0f);
 	m_pGoblin->Rotate(0.0f, 0.0f, 0.0f);
-	m_pGoblin->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 5);
+	m_pGoblin->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
 	m_pGoblin->CreateArticulation(1.0f);
 	m_pGoblin->m_bSimulateArticulate = false;
 	m_pGoblin->Animate(0.0f);
@@ -592,7 +592,7 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 		m_pGoblin->SetPosition(testpos);
 		m_pGoblin->SetScale(14.0f, 14.0f, 14.0f);
 		m_pGoblin->Rotate(0.0f, 0.0f, 0.0f);
-		m_pGoblin->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 5);
+		m_pGoblin->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
 		m_pGoblin->CreateArticulation(1.0f);
 		m_pGoblin->m_bSimulateArticulate = false;
 		m_pGoblin->Animate(0.0f);

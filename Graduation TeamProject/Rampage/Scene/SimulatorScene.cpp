@@ -351,7 +351,7 @@ void CSimulatorScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 	m_pDummyEnemy->SetPosition(XMFLOAT3(50 + offset.x, 100, 50 + offset.z));
 	m_pDummyEnemy->SetScale(4.0f, 4.0f, 4.0f);
 	m_pDummyEnemy->Rotate(0.0f, -90.0f, 0.0f);
-	m_pDummyEnemy->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 5);
+	m_pDummyEnemy->m_pStateMachine->ChangeState(Wander_Monster::GetInst());
 	m_pEnemys.push_back(std::move(m_pDummyEnemy));
 
 	// 3->IDLE

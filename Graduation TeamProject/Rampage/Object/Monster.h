@@ -2,13 +2,20 @@
 #pragma once
 #include "PhysicsObject.h"
 #include "StateMachine.h"
+#include "MonsterState.h"
 
 class CMonster : public CPhysicsObject
 {
 public:
 	XMFLOAT3 m_xmf3HitterVec;
+	XMFLOAT3 m_xmf3WanderVec;
 
 	bool m_bStunned;
+	bool m_bArrived;
+	
+	float m_fIdleTime;
+	float m_fWanderTime;
+	
 	float m_fStunTime;
 	float m_fStunStartTime;
 	float m_fShakeDistance;
@@ -29,13 +36,19 @@ public:
 	CMonster();
 	virtual ~CMonster();
 
+	XMFLOAT3 GetHitterVec() { return m_xmf3HitterVec; }
+	XMFLOAT3 GetWanderVec() { return m_xmf3WanderVec; }
+	void SetWanderVec();
+
 	virtual void SetScale(float x, float y, float z);
 	virtual void Animate(float fTimeElapsed);
 	virtual void Update(float fTimeElapsed);
 	virtual void UpdateTransform(XMFLOAT4X4* pxmf4x4Parent = NULL);
 	virtual void SetHit(CGameObject* pHitter)
 	{
-		bHit = true;
+		m_pStateMachine->ChangeState(Idle_Monster::GetInst());
+		m_pStateMachine->ChangeState(Damaged_Monster::GetInst());
+
 		m_xmf3HitterVec = Vector3::Normalize(Vector3::Subtract(GetPosition(), pHitter->GetPosition()));
 		m_xmf3HitterVec.y = 0.0f;
 
@@ -55,7 +68,6 @@ public:
 		}
 		return false;
 	}
-
 	virtual void UpdateTransformFromArticulation(XMFLOAT4X4* pxmf4x4Parent, std::vector<std::string> pArtiLinkNames, std::vector<XMFLOAT4X4>& AritculatCacheMatrixs, float scale = 1.0f);
 };
 
