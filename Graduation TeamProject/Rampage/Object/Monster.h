@@ -11,6 +11,8 @@ public:
 	XMFLOAT3 m_xmf3WanderVec;
 	XMFLOAT3 m_xmf3ChasingVec;
 
+	bool m_bIsDummy = false;
+
 	bool m_bStunned;
 	bool m_bCanChase;
 	
