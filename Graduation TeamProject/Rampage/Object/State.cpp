@@ -155,9 +155,9 @@ void Atk1_Player::Execute(CPlayer* player, float fElapsedTime)
 	if (0.3 < player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition && 
 		0.7 > player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition)
 	{
-		PlayerAttackParams PlayerAttackParam;
-		PlayerAttackParam.pPlayer = player;
-		CMessageDispatcher::GetInst()->Dispatch_Message<PlayerAttackParams>(MessageType::PLAYER_ATTACK, &PlayerAttackParam, player);
+		PlayerParams PlayerParam;
+		PlayerParam.pPlayer = player;
+		CMessageDispatcher::GetInst()->Dispatch_Message<PlayerParams>(MessageType::PLAYER_ATTACK, &PlayerParam, player);
 	}
 
 	// 사용자가 좌클릭을 했으면 애니메이션을 0.7초 진행 후 Atk2_Player로 상태 변경
@@ -291,9 +291,9 @@ void Atk2_Player::Execute(CPlayer* player, float fElapsedTime)
 	if (0.3 < player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition &&
 		0.7 > player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition)
 	{
-		PlayerAttackParams PlayerAttackParam;
-		PlayerAttackParam.pPlayer = player;
-		CMessageDispatcher::GetInst()->Dispatch_Message<PlayerAttackParams>(MessageType::PLAYER_ATTACK, &PlayerAttackParam, player);
+		PlayerParams PlayerParam;
+		PlayerParam.pPlayer = player;
+		CMessageDispatcher::GetInst()->Dispatch_Message<PlayerParams>(MessageType::PLAYER_ATTACK, &PlayerParam, player);
 	}
 
 	// 사용자가 좌클릭을 했으면 애니메이션을 0.7초 진행 후 Atk2_Player로 상태 변경
@@ -425,9 +425,9 @@ void Atk3_Player::Execute(CPlayer* player, float fElapsedTime)
 	if (0.3 < player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition &&
 		0.7 > player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition)
 	{
-		PlayerAttackParams PlayerAttackParam;
-		PlayerAttackParam.pPlayer = player;
-		CMessageDispatcher::GetInst()->Dispatch_Message<PlayerAttackParams>(MessageType::PLAYER_ATTACK, &PlayerAttackParam, player);
+		PlayerParams PlayerParam;
+		PlayerParam.pPlayer = player;
+		CMessageDispatcher::GetInst()->Dispatch_Message<PlayerParams>(MessageType::PLAYER_ATTACK, &PlayerParam, player);
 	}
 
 	//player->Animate(fElapsedTime);

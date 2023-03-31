@@ -9,12 +9,14 @@ class CMonster : public CPhysicsObject
 public:
 	XMFLOAT3 m_xmf3HitterVec;
 	XMFLOAT3 m_xmf3WanderVec;
+	XMFLOAT3 m_xmf3ChasingVec;
 
 	bool m_bStunned;
-	bool m_bArrived;
+	bool m_bCanChase;
 	
 	float m_fIdleTime;
 	float m_fWanderTime;
+	float m_fToPlayerLength;
 	
 	float m_fStunTime;
 	float m_fStunStartTime;
@@ -38,8 +40,10 @@ public:
 
 	XMFLOAT3 GetHitterVec() { return m_xmf3HitterVec; }
 	XMFLOAT3 GetWanderVec() { return m_xmf3WanderVec; }
-	void SetWanderVec();
+	XMFLOAT3 GetChasingVec() { return m_xmf3ChasingVec; }
 
+	void SetWanderVec();
+	void CheckIsPlayerInFrontOfThis(XMFLOAT3 xmf3PlayerPosition);
 	virtual void SetScale(float x, float y, float z);
 	virtual void Animate(float fTimeElapsed);
 	virtual void Update(float fTimeElapsed);

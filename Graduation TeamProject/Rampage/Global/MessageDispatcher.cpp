@@ -13,7 +13,7 @@ void CMessageDispatcher::RegisterListener(MessageType messageType, IMessageListe
 	ListenerInfo info = { listener, filterObject };
 	m_listeners[static_cast<int>(messageType)].push_back(info);
 }
-void PlayerAttackComponent::HandleMessage(const Message& message, const PlayerAttackParams& params)
+void PlayerAttackListener::HandleMessage(const Message& message, const PlayerParams& params)
 {
     if (message.getType() == MessageType::PLAYER_ATTACK) {
 		if (params.pPlayer->CheckCollision(m_pObject))
@@ -341,5 +341,14 @@ void SmokeParticleComponent::HandleMessage(const Message& message, const Particl
 		//pParticle->SetMaxParticleN(m_nParticleNumber);
 		//pParticle->SetEmitParticleN(m_nParticleNumber);
 		//pParticle->SetPosition(params.xmf3Position);
+	}
+}
+
+void PlayerLocationListener::HandleMessage(const Message& message, const PlayerParams& params)
+{
+	if (message.getType() == MessageType::CHECK_IS_PLAYER_IN_FRONT_OF_MONSTER) {
+		CMonster* pMonster = dynamic_cast<CMonster*>(m_pObject);
+
+		pMonster->CheckIsPlayerInFrontOfThis(params.pPlayer->GetPosition());
 	}
 }

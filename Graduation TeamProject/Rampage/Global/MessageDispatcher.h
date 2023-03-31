@@ -16,7 +16,7 @@ public:
     MessageType getType() const { return m_type; }
 };
 
-struct PlayerAttackParams {
+struct PlayerParams {
     CGameObject* pPlayer;
 };
 
@@ -73,7 +73,7 @@ public:
     void SetEnable(bool bEnable) { m_bEnable = bEnable; }
 
     virtual void HandleMessage(const Message& message, const CollideParams& params) {}
-    virtual void HandleMessage(const Message& message, const PlayerAttackParams& params) {}
+    virtual void HandleMessage(const Message& message, const PlayerParams& params) {}
     virtual void HandleMessage(const Message& message, const SoundPlayParams& params) {}
     virtual void HandleMessage(const Message& message, const CameraUpdateParams& params) {}
     virtual void HandleMessage(const Message& message, const AnimationCompParams& params) {}
@@ -85,12 +85,21 @@ public:
 };
 
 // Define Player Attack component
-class PlayerAttackComponent : public IMessageListener {
+class PlayerAttackListener : public IMessageListener {
 private:
     CGameObject* m_pObject;
 public:
     void SetObject(CGameObject* pObject) { m_pObject = pObject; }
-    virtual void HandleMessage(const Message& message, const PlayerAttackParams& params);
+    virtual void HandleMessage(const Message& message, const PlayerParams& params);
+};
+
+// Define Player Attack component
+class PlayerLocationListener : public IMessageListener {
+private:
+    CGameObject* m_pObject;
+public:
+    void SetObject(CGameObject* pObject) { m_pObject = pObject; }
+    virtual void HandleMessage(const Message& message, const PlayerParams& params);
 };
 
 // Define CollideListener

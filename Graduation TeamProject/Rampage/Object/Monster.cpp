@@ -21,11 +21,17 @@ CMonster::CMonster()
 	m_fSpeedMperS = m_fSpeedKperH * 1000.0f / 3600.0f;
 	m_fSpeedUperS = m_fSpeedMperS * 8.0f / 1.0f;
 
-	std::unique_ptr<PlayerAttackComponent> pCollisionComponent = std::make_unique<PlayerAttackComponent>();
+	std::unique_ptr<PlayerAttackListener> pCollisionComponent = std::make_unique<PlayerAttackListener>();
 	pCollisionComponent->SetObject(this);
 	m_pListeners.push_back(std::move(pCollisionComponent));
 
 	CMessageDispatcher::GetInst()->RegisterListener(MessageType::PLAYER_ATTACK, m_pListeners.back().get());
+
+	std::unique_ptr<PlayerLocationListener> pPlayerLocationListener = std::make_unique<PlayerLocationListener>();
+	pPlayerLocationListener->SetObject(this);
+	m_pListeners.push_back(std::move(pPlayerLocationListener));
+
+	CMessageDispatcher::GetInst()->RegisterListener(MessageType::CHECK_IS_PLAYER_IN_FRONT_OF_MONSTER, m_pListeners.back().get());
 }
 
 CMonster::~CMonster()
@@ -38,6 +44,27 @@ void CMonster::SetWanderVec()
 	m_xmf3WanderVec.z = RandomFloatInRange(-10.0f, 10.0f);
 
 	m_xmf3WanderVec = Vector3::Normalize(m_xmf3WanderVec);
+}
+
+void CMonster::CheckIsPlayerInFrontOfThis(XMFLOAT3 xmf3PlayerPosition)
+{
+	if (!m_bCanChase)
+		return;
+
+	XMFLOAT3 xmf3MonsterLook = GetLook();
+	XMFLOAT3 xmf3ToPlayerVec = Vector3::Subtract(xmf3PlayerPosition, GetPosition());
+
+	float fDotProduct = Vector3::DotProduct(xmf3MonsterLook, xmf3ToPlayerVec);
+	m_fToPlayerLength = Vector3::Length(xmf3ToPlayerVec);
+
+	if (fDotProduct > 0.0f && m_fToPlayerLength < 40.0f)
+	{
+		m_xmf3ChasingVec = Vector3::Normalize(xmf3ToPlayerVec);
+
+		// 플레이어가 몬스터의 앞에 있음
+		if (m_pStateMachine->GetCurrentState() != Chasing_Monster::GetInst())
+			m_pStateMachine->ChangeState(Chasing_Monster::GetInst());
+	}
 }
 
 void CMonster::SetScale(float x, float y, float z)
