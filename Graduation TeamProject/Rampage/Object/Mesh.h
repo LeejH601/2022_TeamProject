@@ -286,6 +286,21 @@ public:
 	virtual ~CTexturedRectMesh();
 };
 
+class CLensFlareVertex
+{
+public:
+	XMFLOAT2						m_xmf2Size;
+	UINT							m_iIndex;
+public:
+	CLensFlareVertex() { m_xmf2Size = XMFLOAT2(0.f, 0.f), m_iIndex = -1; }
+	CLensFlareVertex(XMFLOAT2 xmf2Size, UINT iIndex)
+	{
+		m_xmf2Size = xmf2Size;
+		m_iIndex = iIndex;
+	}
+	~CLensFlareVertex() { }
+};
+
 class CSpriteVertex
 {
 public:

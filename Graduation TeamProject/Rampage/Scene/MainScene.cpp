@@ -81,7 +81,7 @@ void CMainTMPScene::CreateGraphicsRootSignature(ID3D12Device* pd3dDevice)
 	pd3dDescriptorRanges[5].RegisterSpace = 0;
 	pd3dDescriptorRanges[5].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
-	D3D12_ROOT_PARAMETER pd3dRootParameters[14];
+	D3D12_ROOT_PARAMETER pd3dRootParameters[15];
 
 	pd3dRootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
 	pd3dRootParameters[0].Constants.Num32BitValues = 34;
@@ -120,7 +120,7 @@ void CMainTMPScene::CreateGraphicsRootSignature(ID3D12Device* pd3dDevice)
 	pd3dRootParameters[6].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
 
 	pd3dRootParameters[7].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
-	pd3dRootParameters[7].Descriptor.ShaderRegister = 5; // b5 : Parallex constant
+	pd3dRootParameters[7].Descriptor.ShaderRegister = 5; // b5 : Dissolve
 	pd3dRootParameters[7].Descriptor.RegisterSpace = 0;
 	pd3dRootParameters[7].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
 
@@ -153,6 +153,11 @@ void CMainTMPScene::CreateGraphicsRootSignature(ID3D12Device* pd3dDevice)
 	pd3dRootParameters[13].DescriptorTable.NumDescriptorRanges = 1;
 	pd3dRootParameters[13].DescriptorTable.pDescriptorRanges = &pd3dDescriptorRanges[5];
 	pd3dRootParameters[13].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+
+	pd3dRootParameters[14].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
+	pd3dRootParameters[14].Descriptor.ShaderRegister = 8; // b8 : cbLensFlarePOsitions
+	pd3dRootParameters[14].Descriptor.RegisterSpace = 0;
+	pd3dRootParameters[14].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 
 	D3D12_STATIC_SAMPLER_DESC d3dSamplerDesc[5];
 
@@ -737,6 +742,10 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pBloomComputeShader = std::make_unique<CBloomShader>();
 	m_pBloomComputeShader->CreateShader(pd3dDevice, pd3dCommandList, GetComputeRootSignature());
 	m_pBloomComputeShader->CreateBloomUAVResource(pd3dDevice, pd3dCommandList, 1920, 1080);
+
+	m_pLensFlareShader = std::make_unique<CLensFlareShader>();
+	m_pLensFlareShader->CreateShader(pd3dDevice, GetGraphicsRootSignature(), 7, pdxgiObjectRtvFormats, 0);
+	m_pLensFlareShader->BuildObjects(pd3dDevice, pd3dCommandList);
 }
 bool CMainTMPScene::ProcessInput(DWORD dwDirection, float cxDelta, float cyDelta, float fTimeElapsed)
 {
@@ -854,6 +863,7 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 		m_pObjects[i]->Render(pd3dCommandList, true);
 	}
 
+
 #ifdef RENDER_BOUNDING_BOX
 	CBoundingBoxShader::GetInst()->Render(pd3dCommandList, 0);
 #endif
@@ -863,6 +873,9 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 #ifdef PostProcessing
 	m_pPostProcessShader->Render(pd3dCommandList, pCamera);
 #endif // PostProcessing
+
+	m_pLensFlareShader->CalculateFlaresPlace(m_pCurrentCamera, &m_pLight->GetLights()[0]);
+	m_pLensFlareShader->Render(pd3dCommandList, 0);
 
 	if (m_pd3dComputeRootSignature) pd3dCommandList->SetComputeRootSignature(m_pd3dComputeRootSignature.Get());
 	ID3D12Resource* pd3dSource;
