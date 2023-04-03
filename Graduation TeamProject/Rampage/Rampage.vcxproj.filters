@@ -127,9 +127,6 @@
     <ClCompile Include="Shader\DepthRenderShader.cpp">
       <Filter>Shader</Filter>
     </ClCompile>
-    <ClCompile Include="Sound\SoundComponent.cpp">
-      <Filter>Sound</Filter>
-    </ClCompile>
     <ClCompile Include="Object\AnimationComponent.cpp">
       <Filter>Object</Filter>
     </ClCompile>
@@ -302,9 +299,6 @@
     </ClInclude>
     <ClInclude Include="Shader\DepthRenderShader.h">
       <Filter>Shader</Filter>
-    </ClInclude>
-    <ClInclude Include="Sound\SoundComponent.h">
-      <Filter>Sound</Filter>
     </ClInclude>
     <ClInclude Include="Object\AnimationComponent.h">
       <Filter>Object</Filter>

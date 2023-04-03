@@ -162,6 +162,8 @@ void CMonster::UpdateTransformFromArticulation(XMFLOAT4X4* pxmf4x4Parent, std::v
 //
 COrcObject::COrcObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks)
 {
+	m_MonsterType = MONSTER_TYPE::ORC;
+
 	CLoadedModelInfo* pOrcModel = CModelManager::GetInst()->GetModelInfo("Object/Orc.bin");;
 	if (!pOrcModel) pOrcModel = CModelManager::GetInst()->LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, "Object/Orc.bin");
 
@@ -191,6 +193,8 @@ void COrcObject::PrepareBoundingBox(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 //
 CGoblinObject::CGoblinObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks)
 {
+	m_MonsterType = MONSTER_TYPE::GOBLIN;
+
 	m_fStunTime = 0.0f;
 	m_fStunStartTime = 0.2f;
 
@@ -221,6 +225,8 @@ void CGoblinObject::PrepareBoundingBox(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 //
 CSkeletonObject::CSkeletonObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks)
 {
+	m_MonsterType = MONSTER_TYPE::SKELETON;
+
 	CLoadedModelInfo* pSkeletonModel = CModelManager::GetInst()->GetModelInfo("Object/SK_Skeleton.bin");;
 	if (!pSkeletonModel) pSkeletonModel = CModelManager::GetInst()->LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, "Object/SK_Skeleton.bin");
 

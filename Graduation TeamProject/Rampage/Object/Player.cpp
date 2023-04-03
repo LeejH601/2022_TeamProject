@@ -60,7 +60,8 @@ bool CPlayer::CheckCollision(CGameObject* pTargetObject)
 	if (m_pChild.get()) {
 		if (!m_bAttacked && m_pChild->CheckCollision(pTargetObject)) {
 
-			SoundPlayParams SoundPlayParam{ SOUND_CATEGORY::SOUND_SHOCK };
+			SoundPlayParams SoundPlayParam;
+			SoundPlayParam.sound_category = SOUND_CATEGORY::SOUND_SHOCK;
 			CMessageDispatcher::GetInst()->Dispatch_Message<SoundPlayParams>(MessageType::PLAY_SOUND, &SoundPlayParam, m_pStateMachine->GetCurrentState());
 
 			if (m_pCamera)

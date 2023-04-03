@@ -58,6 +58,34 @@ Atk1_Player::Atk1_Player()
 	m_pListeners.push_back(std::move(pSoundComponent));
 	CMessageDispatcher::GetInst()->RegisterListener(MessageType::PLAY_SOUND, m_pListeners.back().get(), this);
 
+	// GOBLIN MOAN SOUND
+	pSoundComponent = std::make_unique<SoundPlayComponent>();
+	pSoundComponent->SetEnable(true);
+	pSoundComponent->SetSoundNumber(0);
+	pSoundComponent->SetDelay(0.10f);
+	pSoundComponent->SetVolume(0.75f);
+	pSoundComponent->SetSC(SOUND_CATEGORY::SOUND_VOICE);
+	m_pListeners.push_back(std::move(pSoundComponent));
+	CMessageDispatcher::GetInst()->RegisterListener(MessageType::PLAY_SOUND, m_pListeners.back().get(), this);
+
+	// ORC MOAN SOUND
+	pSoundComponent = std::make_unique<SoundPlayComponent>();
+	pSoundComponent->SetSoundNumber(0);
+	pSoundComponent->SetDelay(0.05f);
+	pSoundComponent->SetVolume(0.75f);
+	pSoundComponent->SetSC(SOUND_CATEGORY::SOUND_VOICE);
+	m_pListeners.push_back(std::move(pSoundComponent));
+	CMessageDispatcher::GetInst()->RegisterListener(MessageType::PLAY_SOUND, m_pListeners.back().get(), this);
+
+	// SKELETON MOAN SOUND
+	pSoundComponent = std::make_unique<SoundPlayComponent>();
+	pSoundComponent->SetSoundNumber(0);
+	pSoundComponent->SetDelay(0.05f);
+	pSoundComponent->SetVolume(0.75f);
+	pSoundComponent->SetSC(SOUND_CATEGORY::SOUND_VOICE);
+	m_pListeners.push_back(std::move(pSoundComponent));
+	CMessageDispatcher::GetInst()->RegisterListener(MessageType::PLAY_SOUND, m_pListeners.back().get(), this);
+
 	// CAMERA SHAKE
 	std::unique_ptr<CameraShakeComponent> pShakeComponent = std::make_unique<CameraShakeComponent>();
 	pShakeComponent->SetDuration(1.0f);
@@ -142,7 +170,8 @@ void Atk1_Player::Enter(CPlayer* player)
 	player->m_xmf3CameraMoveDirection = Vector3::Normalize(XMFLOAT3(-1.0f, -1.0f, 0.0f));
 	player->m_fCMDConstant = 1.0f;
 
-	SoundPlayParams SoundPlayParam{ SOUND_CATEGORY::SOUND_SHOOT };
+	SoundPlayParams SoundPlayParam;
+	SoundPlayParam.sound_category = SOUND_CATEGORY::SOUND_SHOOT;
 	CMessageDispatcher::GetInst()->Dispatch_Message<SoundPlayParams>(MessageType::PLAY_SOUND, &SoundPlayParam, this);
 }
 
@@ -191,6 +220,34 @@ Atk2_Player::Atk2_Player()
 	pSoundComponent->SetDelay(0.05f);
 	pSoundComponent->SetVolume(0.75f);
 	pSoundComponent->SetSC(SOUND_CATEGORY::SOUND_SHOCK);
+	m_pListeners.push_back(std::move(pSoundComponent));
+	CMessageDispatcher::GetInst()->RegisterListener(MessageType::PLAY_SOUND, m_pListeners.back().get(), this);
+
+	// GOBLIN MOAN SOUND
+	pSoundComponent = std::make_unique<SoundPlayComponent>();
+	pSoundComponent->SetEnable(true);
+	pSoundComponent->SetSoundNumber(0);
+	pSoundComponent->SetDelay(0.10f);
+	pSoundComponent->SetVolume(0.75f);
+	pSoundComponent->SetSC(SOUND_CATEGORY::SOUND_VOICE);
+	m_pListeners.push_back(std::move(pSoundComponent));
+	CMessageDispatcher::GetInst()->RegisterListener(MessageType::PLAY_SOUND, m_pListeners.back().get(), this);
+
+	// ORC MOAN SOUND
+	pSoundComponent = std::make_unique<SoundPlayComponent>();
+	pSoundComponent->SetSoundNumber(0);
+	pSoundComponent->SetDelay(0.05f);
+	pSoundComponent->SetVolume(0.75f);
+	pSoundComponent->SetSC(SOUND_CATEGORY::SOUND_VOICE);
+	m_pListeners.push_back(std::move(pSoundComponent));
+	CMessageDispatcher::GetInst()->RegisterListener(MessageType::PLAY_SOUND, m_pListeners.back().get(), this);
+
+	// SKELETON MOAN SOUND
+	pSoundComponent = std::make_unique<SoundPlayComponent>();
+	pSoundComponent->SetSoundNumber(0);
+	pSoundComponent->SetDelay(0.05f);
+	pSoundComponent->SetVolume(0.75f);
+	pSoundComponent->SetSC(SOUND_CATEGORY::SOUND_VOICE);
 	m_pListeners.push_back(std::move(pSoundComponent));
 	CMessageDispatcher::GetInst()->RegisterListener(MessageType::PLAY_SOUND, m_pListeners.back().get(), this);
 
@@ -278,7 +335,8 @@ void Atk2_Player::Enter(CPlayer* player)
 	player->m_xmf3CameraMoveDirection = Vector3::Normalize(XMFLOAT3(1.0f, -1.0f, 0.0f));
 	player->m_fCMDConstant = 1.0f;
 
-	SoundPlayParams SoundPlayParam{ SOUND_CATEGORY::SOUND_SHOOT };
+	SoundPlayParams SoundPlayParam;
+	SoundPlayParam.sound_category = SOUND_CATEGORY::SOUND_SHOOT;
 	CMessageDispatcher::GetInst()->Dispatch_Message<SoundPlayParams>(MessageType::PLAY_SOUND, &SoundPlayParam, this);
 }
 
@@ -327,6 +385,34 @@ Atk3_Player::Atk3_Player()
 	pSoundComponent->SetDelay(0.05f);
 	pSoundComponent->SetVolume(0.75f);
 	pSoundComponent->SetSC(SOUND_CATEGORY::SOUND_SHOCK);
+	m_pListeners.push_back(std::move(pSoundComponent));
+	CMessageDispatcher::GetInst()->RegisterListener(MessageType::PLAY_SOUND, m_pListeners.back().get(), this);
+
+	// GOBLIN MOAN SOUND
+	pSoundComponent = std::make_unique<SoundPlayComponent>();
+	pSoundComponent->SetEnable(true);
+	pSoundComponent->SetSoundNumber(0);
+	pSoundComponent->SetDelay(0.10f);
+	pSoundComponent->SetVolume(0.75f);
+	pSoundComponent->SetSC(SOUND_CATEGORY::SOUND_VOICE);
+	m_pListeners.push_back(std::move(pSoundComponent));
+	CMessageDispatcher::GetInst()->RegisterListener(MessageType::PLAY_SOUND, m_pListeners.back().get(), this);
+
+	// ORC MOAN SOUND
+	pSoundComponent = std::make_unique<SoundPlayComponent>();
+	pSoundComponent->SetSoundNumber(0);
+	pSoundComponent->SetDelay(0.05f);
+	pSoundComponent->SetVolume(0.75f);
+	pSoundComponent->SetSC(SOUND_CATEGORY::SOUND_VOICE);
+	m_pListeners.push_back(std::move(pSoundComponent));
+	CMessageDispatcher::GetInst()->RegisterListener(MessageType::PLAY_SOUND, m_pListeners.back().get(), this);
+
+	// SKELETON MOAN SOUND
+	pSoundComponent = std::make_unique<SoundPlayComponent>();
+	pSoundComponent->SetSoundNumber(0);
+	pSoundComponent->SetDelay(0.05f);
+	pSoundComponent->SetVolume(0.75f);
+	pSoundComponent->SetSC(SOUND_CATEGORY::SOUND_VOICE);
 	m_pListeners.push_back(std::move(pSoundComponent));
 	CMessageDispatcher::GetInst()->RegisterListener(MessageType::PLAY_SOUND, m_pListeners.back().get(), this);
 
@@ -414,7 +500,8 @@ void Atk3_Player::Enter(CPlayer* player)
 	player->m_bAttack = false; // 사용자가 좌클릭시 true가 되는 변수
 	player->m_iAttack_Limit = 1;
 
-	SoundPlayParams SoundPlayParam{ SOUND_CATEGORY::SOUND_SHOOT };
+	SoundPlayParams SoundPlayParam;
+	SoundPlayParam.sound_category = SOUND_CATEGORY::SOUND_SHOOT;
 	CMessageDispatcher::GetInst()->Dispatch_Message<SoundPlayParams>(MessageType::PLAY_SOUND, &SoundPlayParam, this);
 }
 

@@ -21,6 +21,7 @@ struct PlayerParams {
 };
 
 struct SoundPlayParams {
+    MONSTER_TYPE monster_type = MONSTER_TYPE::NONE;
     SOUND_CATEGORY sound_category = SOUND_CATEGORY::SOUND_SHOCK;
 };
 
@@ -112,7 +113,6 @@ public:
 
 // Define Sound Play component
 class SoundPlayComponent : public IMessageListener {
-
     unsigned int m_nSoundNumber = 0;
     float m_fDelay = 0.0f;
     float m_fVolume = 0.0f;

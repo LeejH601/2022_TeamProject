@@ -209,7 +209,6 @@
     <ClCompile Include="Shader\SunLightShader.cpp" />
     <ClCompile Include="Shader\TerrainShader.cpp" />
     <ClCompile Include="Sound\Sound.cpp" />
-    <ClCompile Include="Sound\SoundComponent.cpp" />
     <ClCompile Include="Sound\SoundManager.cpp" />
     <ClCompile Include="Sound\SoundPlayer.cpp" />
   </ItemGroup>
@@ -269,7 +268,6 @@
     <ClInclude Include="Shader\SunLightShader.h" />
     <ClInclude Include="Shader\TerrainShader.h" />
     <ClInclude Include="Sound\Sound.h" />
-    <ClInclude Include="Sound\SoundComponent.h" />
     <ClInclude Include="Sound\SoundManager.h" />
     <ClInclude Include="Sound\SoundPlayer.h" />
   </ItemGroup>

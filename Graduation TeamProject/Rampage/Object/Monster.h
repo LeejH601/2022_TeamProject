@@ -27,6 +27,7 @@ public:
 	float m_fTotalDamageDistance;
 	float TestDissolvetime = 0.0f;
 
+	MONSTER_TYPE m_MonsterType;
 	std::unique_ptr<CStateMachine<CMonster>> m_pStateMachine;
 
 	CGameObject* pWeapon;
@@ -39,6 +40,8 @@ public:
 public:
 	CMonster();
 	virtual ~CMonster();
+
+	MONSTER_TYPE GetMonsterType() { return m_MonsterType; }
 
 	XMFLOAT3 GetHitterVec() { return m_xmf3HitterVec; }
 	XMFLOAT3 GetWanderVec() { return m_xmf3WanderVec; }
@@ -60,7 +63,7 @@ public:
 
 		SetLookAt(Vector3::Add(GetPosition(), XMFLOAT3(-m_xmf3HitterVec.x, 0.0f, -m_xmf3HitterVec.z)));
 
-		SoundPlayParams SoundPlayParam{ };
+		SoundPlayParams SoundPlayParam{ MONSTER_TYPE::NONE, SOUND_CATEGORY::SOUND_SHOCK };
 		CMessageDispatcher::GetInst()->Dispatch_Message<SoundPlayParams>(MessageType::PLAY_SOUND, &SoundPlayParam, this);
 	}
 	virtual bool CheckCollision(CGameObject* pTargetObject) {

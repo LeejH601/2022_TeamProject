@@ -1,4 +1,7 @@
 #pragma once
+#define GOBLIN_MOAN_SOUND_NUM 3
+#define ORC_MOAN_SOUND_NUM 6
+#define SKELETON_MOAN_SOUND_NUM 1
 
 enum class MessageType {
 	PLAYER_ATTACK,
@@ -45,4 +48,12 @@ enum class SCENE_TYPE
 enum class PARTICLE_CATEGORY
 {
 	PARTICLE_SPHERE
+};
+
+enum class MONSTER_TYPE
+{
+	NONE,
+	GOBLIN,
+	ORC,
+	SKELETON
 };

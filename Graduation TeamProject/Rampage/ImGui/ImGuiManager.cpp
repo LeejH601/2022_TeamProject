@@ -5,7 +5,6 @@
 #include "..\Object\Texture.h"
 #include "..\Global\GameFramework.h"
 #include "..\Global\Locator.h"
-#include "..\Sound\SoundComponent.h"
 #include "..\Sound\SoundManager.h"
 #include "..\Object\TextureManager.h"
 #include "..\Object\AnimationComponent.h"
@@ -1146,12 +1145,12 @@ void CImGuiManager::SetUI()
 
 		if (ImGui::CollapsingHeader("Damage Moan Sound Effect"))
 		{
-			std::vector<std::string> paths = CSoundManager::GetInst()->getSoundPathsByCategory(SOUND_CATEGORY::SOUND_VOICE);
+			/*std::vector<std::string> paths = CSoundManager::GetInst()->getSoundPathsByCategory(SOUND_CATEGORY::SOUND_VOICE);
 			
 			std::vector<const char*> items;
 			for (auto& path : paths) {
 				items.push_back(path.c_str());
-			}
+			}*/
 
 			/*initial_curpos.y += 25.f;
 			ImGui::SetCursorPos(initial_curpos);

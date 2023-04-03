@@ -2,6 +2,7 @@
 #include "Camera.h"
 #include "..\Scene\Scene.h"
 #include "..\Object\Object.h"
+#include "..\Object\Player.h"
 #include "..\Object\Monster.h"
 #include "..\Object\MonsterState.h"
 #include "..\Object\ParticleObject.h"
@@ -21,6 +22,11 @@ void PlayerAttackListener::HandleMessage(const Message& message, const PlayerPar
 			CollideParams collide_params;
 			collide_params.xmf3CollidePosition = m_pObject->GetPosition();
 			CMessageDispatcher::GetInst()->Dispatch_Message<CollideParams>(MessageType::COLLISION, &collide_params, nullptr);
+
+			SoundPlayParams sound_play_params;
+			sound_play_params.monster_type = ((CMonster*)m_pObject)->GetMonsterType();
+			sound_play_params.sound_category = SOUND_CATEGORY::SOUND_VOICE;
+			CMessageDispatcher::GetInst()->Dispatch_Message<SoundPlayParams>(MessageType::PLAY_SOUND, &sound_play_params, ((CPlayer*)(params.pPlayer))->m_pStateMachine->GetCurrentState());
 		}
     }
 }
@@ -30,8 +36,28 @@ void SoundPlayComponent::HandleMessage(const Message& message, const SoundPlayPa
 		return;
 
     if (message.getType() == MessageType::PLAY_SOUND && m_sc == params.sound_category) {
-        auto pSound = CSoundManager::GetInst()->FindSound(m_nSoundNumber, m_sc);
-        CSoundManager::GetInst()->PlaySound(pSound->GetPath(), m_fVolume, m_fDelay);
+		std::vector<CSound>::iterator pSound;
+		if (m_sc == SOUND_CATEGORY::SOUND_VOICE)
+		{
+			switch (params.monster_type)
+			{
+			case MONSTER_TYPE::GOBLIN:
+				pSound = CSoundManager::GetInst()->FindSound(m_nSoundNumber, m_sc);
+				break;
+			case MONSTER_TYPE::ORC:
+				pSound = CSoundManager::GetInst()->FindSound(GOBLIN_MOAN_SOUND_NUM + m_nSoundNumber, m_sc);
+				break;
+			case MONSTER_TYPE::SKELETON:
+				pSound = CSoundManager::GetInst()->FindSound(GOBLIN_MOAN_SOUND_NUM + ORC_MOAN_SOUND_NUM + m_nSoundNumber, m_sc);
+				break;
+			default:
+				break;
+			}
+		}
+		else
+			pSound = CSoundManager::GetInst()->FindSound(m_nSoundNumber, m_sc);
+
+		CSoundManager::GetInst()->PlaySound(pSound->GetPath(), m_fVolume, m_fDelay);
     }
 }
 void CameraShakeComponent::Update(CCamera* pCamera, float fElapsedTime)
