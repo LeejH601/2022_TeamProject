@@ -58,6 +58,8 @@ static int gnMaxSamples = 20;
 static int gnMinSamples = 4;
 static float gfscale = 0.0001f;
 
+//#define USE_PARALLAX
+
 PS_MULTIPLE_RENDER_TARGETS_OUTPUT PSParallaxTerrain(VS_TERRAIN_OUTPUT input) : SV_TARGET
 {
 	PS_MULTIPLE_RENDER_TARGETS_OUTPUT output;
@@ -96,7 +98,10 @@ PS_MULTIPLE_RENDER_TARGETS_OUTPUT PSParallaxTerrain(VS_TERRAIN_OUTPUT input) : S
 	}*/
 
 
+	float2 vFinalCoords;
 
+
+#ifdef USE_PARALLAX
 	[unroll(20)]
 	while (nCurrSample < nSamples) {
 		for (int i = 0; i < 4; ++i) {
@@ -133,8 +138,10 @@ PS_MULTIPLE_RENDER_TARGETS_OUTPUT PSParallaxTerrain(VS_TERRAIN_OUTPUT input) : S
 		}
 	}
 
-	float2 vFinalCoords = input.uv0 + vCurrOffset;
-	//float2 vFinalCoords = input.uv0;
+	vFinalCoords = input.uv0 + vCurrOffset;
+#endif
+
+	vFinalCoords = input.uv0;
 	float4 vFinalNormal;
 	float4 vFinalColor;
 	float4 cBaseTexColor[4];

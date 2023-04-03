@@ -903,7 +903,7 @@ CSplatGridMesh::CSplatGridMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 			fHeight = (1 - fx) * ((1 - fz) * hLT + fz * hLB) + fx * ((1 - fz) * hRT + fz * hRB);
 			m_pxmf3Positions[i] = XMFLOAT3((x * m_xmf3Scale.x), fHeight, (z * m_xmf3Scale.z));
 			m_pxmf4Colors[i] = Vector4::Add(OnGetColor(x, z, pContext), xmf4Color);
-			m_pxmf2TextureCoords0[i] = XMFLOAT2(float(x) / float(m_xmf3Scale.x * 100.0f), float(z) / float(m_xmf3Scale.z * 100.0f));
+			m_pxmf2TextureCoords0[i] = XMFLOAT2(float(x) / float(m_xmf3Scale.x * 35.0f), float(z) / float(m_xmf3Scale.z * 35.0f));
 			m_pxmf2TextureCoords1[i] = XMFLOAT2(float(x) / float(cxHeightMap - 1), float(czHeightMap - 1 - z) / float(czHeightMap - 1));
 			if (fHeight < fMinHeight) fMinHeight = fHeight;
 			if (fHeight > fMaxHeight) fMaxHeight = fHeight;

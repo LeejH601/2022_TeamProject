@@ -74,7 +74,7 @@ CSplatTerrain::CSplatTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 	int czQuadsPerBlock = nBlockLength - 1;
 
 	m_xmf3Scale = xmf3Scale;
-	XMStoreFloat3(&m_xmf3Scale, XMVectorScale(XMLoadFloat3(&m_xmf3Scale), 0.38819f));
+	XMStoreFloat3(&m_xmf3Scale, XMVectorScale(XMLoadFloat3(&m_xmf3Scale), 0.38819f*2));
 	m_xmf3Scale.y = xmf3Scale.y;
 
 	m_pHeightMapImage = new CHeightMapImage(pFileName, nWidth, nLength, m_xmf3Scale);
