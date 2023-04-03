@@ -158,7 +158,14 @@ void Attack_Monster::Execute(CMonster* monster, float fElapsedTime)
 
 	if (monster->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition == pAnimationSet->m_fLength)
 	{
-		monster->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
+		if (monster->m_fToPlayerLength < 5.0f)
+		{
+			monster->m_pSkinnedAnimationController->m_fTime = 0.0f;
+			monster->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition = 0.0f;
+		}
+
+		else
+			monster->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
 	}
 }
 

@@ -48,14 +48,14 @@ void CMonster::SetWanderVec()
 
 void CMonster::CheckIsPlayerInFrontOfThis(XMFLOAT3 xmf3PlayerPosition)
 {
-	if (!m_bCanChase)
-		return;
-
 	XMFLOAT3 xmf3MonsterLook = GetLook();
 	XMFLOAT3 xmf3ToPlayerVec = Vector3::Subtract(xmf3PlayerPosition, GetPosition());
 
 	float fDotProduct = Vector3::DotProduct(xmf3MonsterLook, xmf3ToPlayerVec);
 	m_fToPlayerLength = Vector3::Length(xmf3ToPlayerVec);
+
+	if (!m_bCanChase)
+		return;
 
 	if (fDotProduct > 0.0f && m_fToPlayerLength < 40.0f)
 	{
@@ -236,11 +236,6 @@ CSkeletonObject::CSkeletonObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
 	PrepareBoundingBox(pd3dDevice, pd3dCommandList);
-	/*CLoadedModelInfo* pArmorModel = CModelManager::GetInst()->GetModelInfo("Object/SK_Armor.bin");;
-	if (!pArmorModel) pArmorModel = CModelManager::GetInst()->LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, "Object/SK_Armor.bin");
-
-	SetChild(pArmorModel->m_pModelRootObject, true);*/
-	//m_pSkinnedAnimationController = std::make_unique<CAnimationController>(pd3dDevice, pd3dCommandList, nAnimationTracks, pArmorModel);
 }
 CSkeletonObject::~CSkeletonObject()
 {

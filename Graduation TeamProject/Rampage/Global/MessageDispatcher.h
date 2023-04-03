@@ -116,16 +116,19 @@ class SoundPlayComponent : public IMessageListener {
     unsigned int m_nSoundNumber = 0;
     float m_fDelay = 0.0f;
     float m_fVolume = 0.0f;
+    MONSTER_TYPE m_mt = MONSTER_TYPE::NONE;
     SOUND_CATEGORY m_sc = SOUND_CATEGORY::SOUND_SHOCK;
 public:
     float& GetDelay() { return m_fDelay; }
     float& GetVolume() { return m_fVolume; }
     unsigned int& GetSoundNumber() { return m_nSoundNumber; }
+    MONSTER_TYPE GetMonsterCategory() { return m_mt; }
     SOUND_CATEGORY GetSoundCategory() { return m_sc; }
 
     void SetSoundNumber(unsigned int SoundNumber) { m_nSoundNumber = SoundNumber; }
     void SetDelay(float Delay) { m_fDelay = Delay; }
     void SetVolume(float Volume) { m_fVolume = Volume; }
+    void SetMT(MONSTER_TYPE mt) { m_mt = mt; }
     void SetSC(SOUND_CATEGORY sc) { m_sc = sc; }
 
     virtual void HandleMessage(const Message& message, const SoundPlayParams& params);

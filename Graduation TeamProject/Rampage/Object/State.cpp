@@ -42,28 +42,30 @@ Atk1_Player::Atk1_Player()
 {
 	// ATK1 SOUND
 	std::unique_ptr<SoundPlayComponent> pSoundComponent = std::make_unique<SoundPlayComponent>();
-	pSoundComponent->SetSoundNumber(0);
+	pSoundComponent->SetSoundNumber(2);
 	pSoundComponent->SetDelay(0.0f);
 	pSoundComponent->SetVolume(1.25f);
+	pSoundComponent->SetMT(MONSTER_TYPE::NONE);
 	pSoundComponent->SetSC(SOUND_CATEGORY::SOUND_SHOOT);
 	m_pListeners.push_back(std::move(pSoundComponent));
 	CMessageDispatcher::GetInst()->RegisterListener(MessageType::PLAY_SOUND, m_pListeners.back().get(), this);
 
 	// DAMAGE SOUND
 	pSoundComponent = std::make_unique<SoundPlayComponent>();
-	pSoundComponent->SetSoundNumber(0);
+	pSoundComponent->SetSoundNumber(2);
 	pSoundComponent->SetDelay(0.05f);
 	pSoundComponent->SetVolume(0.75f);
+	pSoundComponent->SetMT(MONSTER_TYPE::NONE);
 	pSoundComponent->SetSC(SOUND_CATEGORY::SOUND_SHOCK);
 	m_pListeners.push_back(std::move(pSoundComponent));
 	CMessageDispatcher::GetInst()->RegisterListener(MessageType::PLAY_SOUND, m_pListeners.back().get(), this);
 
 	// GOBLIN MOAN SOUND
 	pSoundComponent = std::make_unique<SoundPlayComponent>();
-	pSoundComponent->SetEnable(true);
 	pSoundComponent->SetSoundNumber(0);
 	pSoundComponent->SetDelay(0.10f);
 	pSoundComponent->SetVolume(0.75f);
+	pSoundComponent->SetMT(MONSTER_TYPE::GOBLIN);
 	pSoundComponent->SetSC(SOUND_CATEGORY::SOUND_VOICE);
 	m_pListeners.push_back(std::move(pSoundComponent));
 	CMessageDispatcher::GetInst()->RegisterListener(MessageType::PLAY_SOUND, m_pListeners.back().get(), this);
@@ -73,6 +75,7 @@ Atk1_Player::Atk1_Player()
 	pSoundComponent->SetSoundNumber(0);
 	pSoundComponent->SetDelay(0.05f);
 	pSoundComponent->SetVolume(0.75f);
+	pSoundComponent->SetMT(MONSTER_TYPE::ORC);
 	pSoundComponent->SetSC(SOUND_CATEGORY::SOUND_VOICE);
 	m_pListeners.push_back(std::move(pSoundComponent));
 	CMessageDispatcher::GetInst()->RegisterListener(MessageType::PLAY_SOUND, m_pListeners.back().get(), this);
@@ -82,6 +85,7 @@ Atk1_Player::Atk1_Player()
 	pSoundComponent->SetSoundNumber(0);
 	pSoundComponent->SetDelay(0.05f);
 	pSoundComponent->SetVolume(0.75f);
+	pSoundComponent->SetMT(MONSTER_TYPE::SKELETON);
 	pSoundComponent->SetSC(SOUND_CATEGORY::SOUND_VOICE);
 	m_pListeners.push_back(std::move(pSoundComponent));
 	CMessageDispatcher::GetInst()->RegisterListener(MessageType::PLAY_SOUND, m_pListeners.back().get(), this);
@@ -207,28 +211,30 @@ Atk2_Player::Atk2_Player()
 {
 	// ATK2 SOUND
 	std::unique_ptr<SoundPlayComponent> pSoundComponent = std::make_unique<SoundPlayComponent>();
-	pSoundComponent->SetSoundNumber(1);
+	pSoundComponent->SetSoundNumber(2);
 	pSoundComponent->SetDelay(0.0f);
 	pSoundComponent->SetVolume(1.25f);
+	pSoundComponent->SetMT(MONSTER_TYPE::NONE);
 	pSoundComponent->SetSC(SOUND_CATEGORY::SOUND_SHOOT);
 	m_pListeners.push_back(std::move(pSoundComponent));
 	CMessageDispatcher::GetInst()->RegisterListener(MessageType::PLAY_SOUND, m_pListeners.back().get(), this);
 
 	// DAMAGE SOUND
 	pSoundComponent = std::make_unique<SoundPlayComponent>();
-	pSoundComponent->SetSoundNumber(1);
+	pSoundComponent->SetSoundNumber(2);
 	pSoundComponent->SetDelay(0.05f);
 	pSoundComponent->SetVolume(0.75f);
+	pSoundComponent->SetMT(MONSTER_TYPE::NONE);
 	pSoundComponent->SetSC(SOUND_CATEGORY::SOUND_SHOCK);
 	m_pListeners.push_back(std::move(pSoundComponent));
 	CMessageDispatcher::GetInst()->RegisterListener(MessageType::PLAY_SOUND, m_pListeners.back().get(), this);
 
 	// GOBLIN MOAN SOUND
 	pSoundComponent = std::make_unique<SoundPlayComponent>();
-	pSoundComponent->SetEnable(true);
 	pSoundComponent->SetSoundNumber(0);
 	pSoundComponent->SetDelay(0.10f);
 	pSoundComponent->SetVolume(0.75f);
+	pSoundComponent->SetMT(MONSTER_TYPE::GOBLIN);
 	pSoundComponent->SetSC(SOUND_CATEGORY::SOUND_VOICE);
 	m_pListeners.push_back(std::move(pSoundComponent));
 	CMessageDispatcher::GetInst()->RegisterListener(MessageType::PLAY_SOUND, m_pListeners.back().get(), this);
@@ -238,6 +244,7 @@ Atk2_Player::Atk2_Player()
 	pSoundComponent->SetSoundNumber(0);
 	pSoundComponent->SetDelay(0.05f);
 	pSoundComponent->SetVolume(0.75f);
+	pSoundComponent->SetMT(MONSTER_TYPE::ORC);
 	pSoundComponent->SetSC(SOUND_CATEGORY::SOUND_VOICE);
 	m_pListeners.push_back(std::move(pSoundComponent));
 	CMessageDispatcher::GetInst()->RegisterListener(MessageType::PLAY_SOUND, m_pListeners.back().get(), this);
@@ -247,6 +254,7 @@ Atk2_Player::Atk2_Player()
 	pSoundComponent->SetSoundNumber(0);
 	pSoundComponent->SetDelay(0.05f);
 	pSoundComponent->SetVolume(0.75f);
+	pSoundComponent->SetMT(MONSTER_TYPE::SKELETON);
 	pSoundComponent->SetSC(SOUND_CATEGORY::SOUND_VOICE);
 	m_pListeners.push_back(std::move(pSoundComponent));
 	CMessageDispatcher::GetInst()->RegisterListener(MessageType::PLAY_SOUND, m_pListeners.back().get(), this);
@@ -375,6 +383,7 @@ Atk3_Player::Atk3_Player()
 	pSoundComponent->SetSoundNumber(2);
 	pSoundComponent->SetDelay(0.0f);
 	pSoundComponent->SetVolume(1.25f);
+	pSoundComponent->SetMT(MONSTER_TYPE::NONE);
 	pSoundComponent->SetSC(SOUND_CATEGORY::SOUND_SHOOT);
 	m_pListeners.push_back(std::move(pSoundComponent));
 	CMessageDispatcher::GetInst()->RegisterListener(MessageType::PLAY_SOUND, m_pListeners.back().get(), this);
@@ -384,16 +393,17 @@ Atk3_Player::Atk3_Player()
 	pSoundComponent->SetSoundNumber(2);
 	pSoundComponent->SetDelay(0.05f);
 	pSoundComponent->SetVolume(0.75f);
+	pSoundComponent->SetMT(MONSTER_TYPE::NONE);
 	pSoundComponent->SetSC(SOUND_CATEGORY::SOUND_SHOCK);
 	m_pListeners.push_back(std::move(pSoundComponent));
 	CMessageDispatcher::GetInst()->RegisterListener(MessageType::PLAY_SOUND, m_pListeners.back().get(), this);
 
 	// GOBLIN MOAN SOUND
 	pSoundComponent = std::make_unique<SoundPlayComponent>();
-	pSoundComponent->SetEnable(true);
 	pSoundComponent->SetSoundNumber(0);
 	pSoundComponent->SetDelay(0.10f);
 	pSoundComponent->SetVolume(0.75f);
+	pSoundComponent->SetMT(MONSTER_TYPE::GOBLIN);
 	pSoundComponent->SetSC(SOUND_CATEGORY::SOUND_VOICE);
 	m_pListeners.push_back(std::move(pSoundComponent));
 	CMessageDispatcher::GetInst()->RegisterListener(MessageType::PLAY_SOUND, m_pListeners.back().get(), this);
@@ -403,6 +413,7 @@ Atk3_Player::Atk3_Player()
 	pSoundComponent->SetSoundNumber(0);
 	pSoundComponent->SetDelay(0.05f);
 	pSoundComponent->SetVolume(0.75f);
+	pSoundComponent->SetMT(MONSTER_TYPE::ORC);
 	pSoundComponent->SetSC(SOUND_CATEGORY::SOUND_VOICE);
 	m_pListeners.push_back(std::move(pSoundComponent));
 	CMessageDispatcher::GetInst()->RegisterListener(MessageType::PLAY_SOUND, m_pListeners.back().get(), this);
@@ -412,6 +423,7 @@ Atk3_Player::Atk3_Player()
 	pSoundComponent->SetSoundNumber(0);
 	pSoundComponent->SetDelay(0.05f);
 	pSoundComponent->SetVolume(0.75f);
+	pSoundComponent->SetMT(MONSTER_TYPE::SKELETON);
 	pSoundComponent->SetSC(SOUND_CATEGORY::SOUND_VOICE);
 	m_pListeners.push_back(std::move(pSoundComponent));
 	CMessageDispatcher::GetInst()->RegisterListener(MessageType::PLAY_SOUND, m_pListeners.back().get(), this);

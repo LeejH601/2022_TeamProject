@@ -101,12 +101,12 @@ void CGameFramework::InitSound()
 	CSoundManager::GetInst()->RegisterSound("Sound/Voice/Goblin/GoblinMoan02.mp3", false, SOUND_CATEGORY::SOUND_VOICE);
 	CSoundManager::GetInst()->RegisterSound("Sound/Voice/Goblin/GoblinMoan03.mp3", false, SOUND_CATEGORY::SOUND_VOICE);
 
-	CSoundManager::GetInst()->RegisterSound("Sound/Voice/Oak/OakMoan01.mp3", false, SOUND_CATEGORY::SOUND_VOICE);
-	CSoundManager::GetInst()->RegisterSound("Sound/Voice/Oak/OakMoan02.mp3", false, SOUND_CATEGORY::SOUND_VOICE);
-	CSoundManager::GetInst()->RegisterSound("Sound/Voice/Oak/OakMoan03.mp3", false, SOUND_CATEGORY::SOUND_VOICE);
-	CSoundManager::GetInst()->RegisterSound("Sound/Voice/Oak/OakMoan04.mp3", false, SOUND_CATEGORY::SOUND_VOICE);
-	CSoundManager::GetInst()->RegisterSound("Sound/Voice/Oak/OakMoan05.mp3", false, SOUND_CATEGORY::SOUND_VOICE);
-	CSoundManager::GetInst()->RegisterSound("Sound/Voice/Oak/OakMoan06.mp3", false, SOUND_CATEGORY::SOUND_VOICE);
+	CSoundManager::GetInst()->RegisterSound("Sound/Voice/Orc/OrcMoan01.mp3", false, SOUND_CATEGORY::SOUND_VOICE);
+	CSoundManager::GetInst()->RegisterSound("Sound/Voice/Orc/OrcMoan02.mp3", false, SOUND_CATEGORY::SOUND_VOICE);
+	CSoundManager::GetInst()->RegisterSound("Sound/Voice/Orc/OrcMoan03.mp3", false, SOUND_CATEGORY::SOUND_VOICE);
+	CSoundManager::GetInst()->RegisterSound("Sound/Voice/Orc/OrcMoan04.mp3", false, SOUND_CATEGORY::SOUND_VOICE);
+	CSoundManager::GetInst()->RegisterSound("Sound/Voice/Orc/OrcMoan05.mp3", false, SOUND_CATEGORY::SOUND_VOICE);
+	CSoundManager::GetInst()->RegisterSound("Sound/Voice/Orc/OrcMoan06.mp3", false, SOUND_CATEGORY::SOUND_VOICE);
 
 	CSoundManager::GetInst()->RegisterSound("Sound/Voice/Skeleton/SkeletonMoan01.mp3", false, SOUND_CATEGORY::SOUND_VOICE);
 

@@ -35,11 +35,11 @@ void SoundPlayComponent::HandleMessage(const Message& message, const SoundPlayPa
 	if (!m_bEnable)
 		return;
 
-    if (message.getType() == MessageType::PLAY_SOUND && m_sc == params.sound_category) {
+    if (message.getType() == MessageType::PLAY_SOUND && m_sc == params.sound_category && m_mt == params.monster_type) {
 		std::vector<CSound>::iterator pSound;
 		if (m_sc == SOUND_CATEGORY::SOUND_VOICE)
 		{
-			switch (params.monster_type)
+			switch (m_mt)
 			{
 			case MONSTER_TYPE::GOBLIN:
 				pSound = CSoundManager::GetInst()->FindSound(m_nSoundNumber, m_sc);
