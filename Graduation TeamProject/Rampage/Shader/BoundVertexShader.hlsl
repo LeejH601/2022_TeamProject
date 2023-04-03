@@ -12,7 +12,6 @@ cbuffer cbCameraInfo : register(b1)
 	matrix gmtxInverseProjection : packoffset(c8);
 	matrix gmtxInverseView : packoffset(c12);
 	float3 gf3CameraPosition : packoffset(c16);
-	//float3 gf3CameraDirection : packoffset(c17);
 };
 
 struct VS_INPUT

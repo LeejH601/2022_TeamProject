@@ -1,9 +1,16 @@
+#include "Header.hlsli"
+
 struct VS_OUTPUT
 {
 	float4 position : SV_POSITION;
 };
 
-float4 PS_Bound(VS_OUTPUT input) : SV_TARGET
+PS_MULTIPLE_RENDER_TARGETS_OUTPUT PS_Bound(VS_OUTPUT input)
 {
-	return(float4(1.0f, 0.0f, 0.0f, 1.0f));
+	PS_MULTIPLE_RENDER_TARGETS_OUTPUT output;
+
+	output.f4Scene = float4(1.0f, 0.0f, 0.0f, 1.0f);
+	output.f4Color = float4(1.0f, 0.0f, 0.0f, 1.0f);
+
+	return(output);
 }
