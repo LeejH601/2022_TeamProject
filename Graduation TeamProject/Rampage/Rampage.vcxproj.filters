@@ -199,6 +199,9 @@
     <ClCompile Include="Object\Animation.cpp">
       <Filter>Object\Animation</Filter>
     </ClCompile>
+    <ClCompile Include="Scene\LagdollSimulateFramework.cpp">
+      <Filter>Scene</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Global\stdafx.h">
@@ -377,6 +380,9 @@
     </ClInclude>
     <ClInclude Include="Object\Animation.h">
       <Filter>Object\Animation</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene\LagdollSimulateFramework.h">
+      <Filter>Scene</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

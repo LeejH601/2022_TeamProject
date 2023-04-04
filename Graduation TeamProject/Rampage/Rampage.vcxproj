@@ -192,6 +192,7 @@
     <ClCompile Include="Object\Texture.cpp" />
     <ClCompile Include="Object\TextureManager.cpp" />
     <ClCompile Include="Rampage.cpp" />
+    <ClCompile Include="Scene\LagdollSimulateFramework.cpp" />
     <ClCompile Include="Scene\LobbyScene.cpp" />
     <ClCompile Include="Scene\MainScene.cpp" />
     <ClCompile Include="Scene\Scene.cpp" />
@@ -253,6 +254,7 @@
     <ClInclude Include="Object\Terrain.h" />
     <ClInclude Include="Object\Texture.h" />
     <ClInclude Include="Object\TextureManager.h" />
+    <ClInclude Include="Scene\LagdollSimulateFramework.h" />
     <ClInclude Include="Scene\LobbyScene.h" />
     <ClInclude Include="Scene\MainScene.h" />
     <ClInclude Include="Scene\Scene.h" />
