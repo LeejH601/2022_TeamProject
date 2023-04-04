@@ -2,8 +2,9 @@
 
 cbuffer cbCenterPositions : register(b8) 
 {
-	float2 gfCenterPositions[MAX_FLARES];
+	float4 gfCenterPositions[MAX_FLARES];
 }
+
 
 SamplerState gSamplerState : register(s0);
 
@@ -26,5 +27,7 @@ VS_OUT LensFlare_VS(VS_IN input)
 	output.sizeW = input.sizeW;
 	output.positionS = gfCenterPositions[input.index].xy;
 	output.index = input.index;
+
+
 	return output;
 }

@@ -26,7 +26,7 @@ cbuffer cbToLightSpace : register(b6)
 	CB_TOOBJECTSPACE gcbToLightSpaces[MAX_LIGHTS];
 };
 
-#define NUM_SAMPLES 128
+#define NUM_SAMPLES 90
 
 float3 LightShaft(float2 uv, float2 ScreenLightPos, float Weight, float Exposure, float Density, float Decay)
 {
@@ -77,8 +77,8 @@ float4 PS_PostProcessing(VS_SCREEN_RECT_TEXTURED_OUTPUT input) : SV_Target1
 	// LightShaft Values
 	float weight = 0.8f;
 	float exposure = 0.6f;
-	float Density = 2.0f;
-	float Decay = 0.95f;
+	float Density = 1.0f;
+	float Decay = 0.85f;
 	float radiusPow = pow(radius, 2);
 
 	float4 cColor;

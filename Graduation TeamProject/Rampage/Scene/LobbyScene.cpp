@@ -26,7 +26,7 @@ bool CLobbyScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM
 	case WM_KEYDOWN:
 		switch (wParam)
 		{
-		case VK_RETURN:
+		case VK_SPACE:
 			return 1;
 		default:
 			break;

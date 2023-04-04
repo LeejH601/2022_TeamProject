@@ -6,6 +6,16 @@ cbuffer cbCenterPositions : register(b8)
 	float4 gxmf4UpandRight;
 }
 
+//struct CB_TOOBJECTSPACE
+//{
+//	matrix		mtxToTexture;
+//	float4		f4Position;
+//};
+//cbuffer cbToLightSpace : register(b6)
+//{
+//	CB_TOOBJECTSPACE gcbToLightSpaces[MAX_LIGHTS];
+//};
+
 struct VS_OUT
 {
 	float2 sizeW : SIZE;
@@ -55,6 +65,10 @@ void LensFlare_GS(point VS_OUT input[1], uint primID : SV_PrimitiveID, inout Tri
 		output.posH = pVertices[i];
 		output.uv = pUVs[i];
 		output.index = input[0].index;
+
+		//if (gcbToLightSpaces[i].f4Position.w != 0.0f) output.uvs[i] = mul(pVertices[i], gcbToLightSpaces[i].mtxToTexture);
+
+
 		outStream.Append(output);
 	}
 }

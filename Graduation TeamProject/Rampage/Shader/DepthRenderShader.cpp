@@ -249,11 +249,11 @@ void CDepthRenderShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCam
 		m_pObjects[i]->Animate(fTimeElapsed);
 		m_pObjects[i]->Render(pd3dCommandList, false);
 	}
-	if (m_pTerrain)
+	/*if (m_pTerrain)
 	{
 		CShader::Render(pd3dCommandList, 1);
 		m_pTerrain->Render(pd3dCommandList, false);
-	}
+	}*/
 }
 void CDepthRenderShader::PrepareShadowMap(ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed)
 {

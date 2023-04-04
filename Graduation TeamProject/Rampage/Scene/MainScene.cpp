@@ -14,6 +14,8 @@
 #include "..\Object\TextureManager.h"
 #include "..\Global\Locator.h"
 
+#include <PxForceMode.h>
+
 #define MAX_PARTICLE_OBJECT 50
 #define MAX_ATTACKSPRITE_OBJECT 50
 #define MAX_TERRAINSPRITE_OBJECT 50
@@ -544,7 +546,13 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	tobonetrans.column3.y += rootWorld._42;
 	tobonetrans.column3.z += rootWorld._43;
 	*rootLInkTrans = physx::PxTransform(tobonetrans).getNormalized();
-	m_pOrc->m_pArticulation->applyCache(*m_pOrc->m_pArticulationCache, physx::PxArticulationCacheFlag::eROOT_TRANSFORM);
+	m_pOrc->m_pArticulation->applyCache(*m_pOrc->m_pArticulationCache, physx::PxArticulationCacheFlag::eALL);
+
+	
+	m_pOrc->m_pArticulationLinks[15]->addForce(physx::PxVec3(0.0f, -10000.0f, 0.0f), physx::PxForceMode::eIMPULSE);
+	
+	
+	//m_pOrc->m_pArticulation->applyCache(*m_pOrc->m_pArticulationCache, physx::PxArticulationCacheFlag::e);
 
 	m_pObjects.push_back(std::move(m_pOrc));
 
@@ -809,6 +817,7 @@ void CMainTMPScene::Update(float fTimeElapsed)
 
 #endif // WITH_LAG_DOLL_SIMULATION
 	UpdateObjects(fTimeElapsed);
+	m_pLensFlareShader->UpdateFlareAlpha(fTimeElapsed);
 }
 void CMainTMPScene::OnPrepareRenderTarget(ID3D12GraphicsCommandList* pd3dCommandList, int nRenderTargets, D3D12_CPU_DESCRIPTOR_HANDLE* pd3dRtvCPUHandles, D3D12_CPU_DESCRIPTOR_HANDLE d3dDepthStencilBufferDSVCPUHandle)
 {
@@ -946,6 +955,9 @@ void CMainTMPScene::LoadSceneFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 			float buffer[16];
 			std::string objPath{ "Object/Scene/" };
 			objPath += static_cast<std::string>(pstrToken) + ".bin";
+
+		
+
 			FILE* objFile = NULL;
 			::fopen_s(&objFile, objPath.data(), "rb");
 			::rewind(objFile);
@@ -1022,6 +1034,7 @@ void CMainTMPScene::LoadSceneFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 			};
 			pObject->UpdateTransform(NULL);
 
+			//if (!objPath.contains("Rock"))
 			m_pObjects.push_back(std::move(pObject));
 
 			fclose(objFile);

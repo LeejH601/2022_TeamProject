@@ -52,6 +52,7 @@ void CLensFlareShader::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dComm
 		m_pcbMappedLensFlareInfo->m_xmf2LensFlarePositions[i] = XMFLOAT4(m_vLensFlarePositions[i].x, m_vLensFlarePositions[i].y, 0.0f, 0.0f);
 	}
 	m_pcbMappedLensFlareInfo->m_xmf4UpandRight = m_xmf4UpandRightVector;
+	m_pcbMappedLensFlareInfo->m_fFlareAlpha = m_fFlareAlpha;
 
 	D3D12_GPU_VIRTUAL_ADDRESS d3dGpuVirtualAddress = m_pd3dcbLensFlareInfo->GetGPUVirtualAddress();
 	pd3dCommandList->SetGraphicsRootConstantBufferView(14, d3dGpuVirtualAddress);
@@ -75,7 +76,7 @@ void CLensFlareShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 	m_vfLensFlareWeights[2] = 0.0f;
 	m_vfLensFlareWeights[3] = 0.3f;
 	m_vfLensFlareWeights[4] = 0.75f;
-	m_vfLensFlareWeights[5] = 0.8f;
+	m_vfLensFlareWeights[5] = 0.9f;
 
 	m_nStride = sizeof(CLensFlareVertex);
 	m_nVertices = MAX_FLARES;
@@ -118,8 +119,25 @@ void CLensFlareShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 
 }
 
+void CLensFlareShader::UpdateFlareAlpha(float fTimeElapsed)
+{
+	if (m_bEnable) {
+		m_fCurrentTime += fTimeElapsed;
+		m_fCurrentTime = min(m_fCurrentTime, m_fFlareAppearTime);
+		m_fFlareAlpha = m_fCurrentTime / m_fFlareAppearTime;
+	}
+	else {
+		m_fCurrentTime -= fTimeElapsed * 3.0f;
+		m_fCurrentTime = max(m_fCurrentTime, 0.0f);
+		m_fFlareAlpha = m_fCurrentTime / m_fFlareAppearTime;
+	}
+}
+
 void CLensFlareShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, int nPipelineState)
 {
+	/*if (!m_bEnable)
+		return;*/
+
 	if (m_ppd3dPipelineStates.data() && m_ppd3dPipelineStates[nPipelineState]) pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[nPipelineState].Get());
 	if (m_pd3dCbvSrvUavDescriptorHeap) pd3dCommandList->SetDescriptorHeaps(1, m_pd3dCbvSrvUavDescriptorHeap.GetAddressOf());
 
@@ -150,6 +168,19 @@ void CLensFlareShader::CalculateFlaresPlace(CCamera* pCamera, LIGHT* pLight)
 	};
 
 	//(dot(normalize(float3(gLights[0].m_vDirection.x, 0.0f, gLights[0].m_vDirection.z)), normalize(float3(CameraDir.x, 0.0f, CameraDir.z))) > 0.0)
+	XMVECTOR LightDir = XMLoadFloat3(&pLight->m_xmf3Direction);
+	XMFLOAT3 xmf3cameraDir{ -pCamera->GetViewMatrix()._13,-pCamera->GetViewMatrix()._23,-pCamera->GetViewMatrix()._33 };
+	XMVECTOR CameraDir = XMLoadFloat3(&xmf3cameraDir);
+	XMVECTOR result = XMVector3Dot(XMVector3Normalize(LightDir), XMVector3Normalize(CameraDir));
+
+	if (result.m128_f32[0] > 0.8f) {
+		m_bEnable = true;
+	}
+	else {
+		m_bEnable = false;
+		/*m_fCurrentTime = 0.0f;
+		m_fFlareAlpha = 0.0f;*/
+	}
 
 	XMFLOAT2 FlareVector{ (0.0f - lightPosInNDC.x) * 2, (0.0f - lightPosInNDC.y) * 2 };
 	for (int i = 0; i < m_nVertices; ++i) {

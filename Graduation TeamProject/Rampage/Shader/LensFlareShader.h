@@ -8,6 +8,7 @@ struct VS_CB_LENSFLARE_INFO
 {
 	XMFLOAT4 m_xmf2LensFlarePositions[MAX_FLARES];
 	XMFLOAT4 m_xmf4UpandRight;
+	float m_fFlareAlpha;
 };
 
 
@@ -31,6 +32,12 @@ private:
 
 	std::unique_ptr<CTexture> m_pTexture = NULL;
 
+	bool m_bEnable = true;
+	float m_fFlareAlpha = 0.0f;
+
+	float m_fFlareAppearTime = 3.0f;
+	float m_fCurrentTime = 0.0f;
+
 public:
 	virtual void CreateShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature, UINT nRenderTargets, DXGI_FORMAT* pdxgiRtvFormats, int nPipelineState);
 	virtual void CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
@@ -39,6 +46,7 @@ public:
 	
 	virtual void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, void* pContext = NULL);
 
+	void UpdateFlareAlpha(float fTimeElapsed);
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, int nPipelineState);
 
 	void CalculateFlaresPlace(CCamera* pCamera, LIGHT* pLight);
