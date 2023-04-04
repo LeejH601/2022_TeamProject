@@ -89,6 +89,10 @@ void DataLoader::SaveComponentSet(FILE* pInFile, CState<CPlayer>* pState)
 	SoundPlayComponent* pShockSoundComponent = dynamic_cast<SoundPlayComponent*>(pState->GetShockSoundComponent());
 	SoundPlayComponent* pShootSoundComponent = dynamic_cast<SoundPlayComponent*>(pState->GetShootSoundComponent());
 
+	SoundPlayComponent* pGoblinMoanComponent = dynamic_cast<SoundPlayComponent*>(pState->GetGoblinMoanComponent());
+	SoundPlayComponent* pOrcMoanComponent = dynamic_cast<SoundPlayComponent*>(pState->GetOrcMoanComponent());
+	SoundPlayComponent* pSkeletonMoanComponent = dynamic_cast<SoundPlayComponent*>(pState->GetSkeletonMoanComponent());
+
 	ParticleComponent* pParticleComponent = dynamic_cast<ParticleComponent*>(pState->GetParticleComponent());
 	ImpactEffectComponent* pImpactComponent = dynamic_cast<ImpactEffectComponent*>(pState->GetImpactComponent());
 
@@ -175,17 +179,38 @@ void DataLoader::SaveComponentSet(FILE* pInFile, CState<CPlayer>* pState)
 	WriteFloatFromFile(pInFile, pShootSoundComponent->GetVolume());
 	WriteStringFromFile(pInFile, std::string("</CShootSoundComponent>:"));
 
-	// 데미지 사운드 없는거 아닌가?
-	/*WriteStringFromFile(pInFile, std::string("<CDamageSoundComponent>:"));
+	WriteStringFromFile(pInFile, std::string("<GoblinMoanComponent>:"));
 	WriteStringFromFile(pInFile, std::string("<Enable>:"));
-	WriteIntegerFromFile(pInFile, pDamageSoundComponent->GetEnable());
+	WriteIntegerFromFile(pInFile, pGoblinMoanComponent->GetEnable());
 	WriteStringFromFile(pInFile, std::string("<Sound>:"));
-	WriteIntegerFromFile(pInFile, pDamageAnimationComponent->GetSoundNumber());
+	WriteIntegerFromFile(pInFile, pGoblinMoanComponent->GetSoundNumber());
 	WriteStringFromFile(pInFile, std::string("<Delay>:"));
-	WriteFloatFromFile(pInFile, pDamageAnimationComponent->GetDelay());
+	WriteFloatFromFile(pInFile, pGoblinMoanComponent->GetDelay());
 	WriteStringFromFile(pInFile, std::string("<Volume>:"));
-	WriteFloatFromFile(pInFile, pDamageAnimationComponent->GetVolume());
-	WriteStringFromFile(pInFile, std::string("</CDamageSoundComponent>:"));*/
+	WriteFloatFromFile(pInFile, pGoblinMoanComponent->GetVolume());
+	WriteStringFromFile(pInFile, std::string("</GoblinMoanComponent>:"));
+
+	WriteStringFromFile(pInFile, std::string("<OrcMoanComponent>:"));
+	WriteStringFromFile(pInFile, std::string("<Enable>:"));
+	WriteIntegerFromFile(pInFile, pOrcMoanComponent->GetEnable());
+	WriteStringFromFile(pInFile, std::string("<Sound>:"));
+	WriteIntegerFromFile(pInFile, pOrcMoanComponent->GetSoundNumber());
+	WriteStringFromFile(pInFile, std::string("<Delay>:"));
+	WriteFloatFromFile(pInFile, pOrcMoanComponent->GetDelay());
+	WriteStringFromFile(pInFile, std::string("<Volume>:"));
+	WriteFloatFromFile(pInFile, pOrcMoanComponent->GetVolume());
+	WriteStringFromFile(pInFile, std::string("</OrcMoanComponent>:"));
+
+	WriteStringFromFile(pInFile, std::string("<SkeletonMoanComponent>:"));
+	WriteStringFromFile(pInFile, std::string("<Enable>:"));
+	WriteIntegerFromFile(pInFile, pSkeletonMoanComponent->GetEnable());
+	WriteStringFromFile(pInFile, std::string("<Sound>:"));
+	WriteIntegerFromFile(pInFile, pSkeletonMoanComponent->GetSoundNumber());
+	WriteStringFromFile(pInFile, std::string("<Delay>:"));
+	WriteFloatFromFile(pInFile, pSkeletonMoanComponent->GetDelay());
+	WriteStringFromFile(pInFile, std::string("<Volume>:"));
+	WriteFloatFromFile(pInFile, pSkeletonMoanComponent->GetVolume());
+	WriteStringFromFile(pInFile, std::string("</SkeletonMoanComponent>:"));
 
 	WriteStringFromFile(pInFile, std::string("<ParticleComponent>:"));
 	WriteStringFromFile(pInFile, std::string("<Enable>:"));
@@ -239,6 +264,10 @@ void DataLoader::LoadComponentSet(FILE* pInFile, CState<CPlayer>* pState)
 
 	SoundPlayComponent* pShockSoundComponent = dynamic_cast<SoundPlayComponent*>(pState->GetShockSoundComponent());
 	SoundPlayComponent* pShootSoundComponent = dynamic_cast<SoundPlayComponent*>(pState->GetShootSoundComponent());
+
+	SoundPlayComponent* pGoblinMoanComponent = dynamic_cast<SoundPlayComponent*>(pState->GetGoblinMoanComponent());
+	SoundPlayComponent* pOrcMoanComponent = dynamic_cast<SoundPlayComponent*>(pState->GetOrcMoanComponent());
+	SoundPlayComponent* pSkeletonMoanComponent = dynamic_cast<SoundPlayComponent*>(pState->GetSkeletonMoanComponent());
 
 	ParticleComponent* pParticleComponent = dynamic_cast<ParticleComponent*>(pState->GetParticleComponent());
 	ImpactEffectComponent* pImpactComponent = dynamic_cast<ImpactEffectComponent*>(pState->GetImpactComponent());
@@ -460,8 +489,7 @@ void DataLoader::LoadComponentSet(FILE* pInFile, CState<CPlayer>* pState)
 				}
 			}
 		}
-		// 없으니까 일단 주석처리
-		/*else if (!strcmp(buf, "<CDamageSoundComponent>:"))
+		else if (!strcmp(buf, "<GoblinMoanComponent>:"))
 		{
 			for (; ; )
 			{
@@ -469,26 +497,82 @@ void DataLoader::LoadComponentSet(FILE* pInFile, CState<CPlayer>* pState)
 
 				if (!strcmp(buf, "<Enable>:"))
 				{
-					component->SetEnable(ReadIntegerFromFile(pInFile));
+					pGoblinMoanComponent->SetEnable(ReadIntegerFromFile(pInFile));
 				}
 				else if (!strcmp(buf, "<Sound>:"))
 				{
-					component->m_nSoundNumber = ReadIntegerFromFile(pInFile);
+					pGoblinMoanComponent->SetSoundNumber(ReadIntegerFromFile(pInFile));
 				}
 				else if (!strcmp(buf, "<Delay>:"))
 				{
-					component->m_fDelay = ReadFloatFromFile(pInFile);
+					pGoblinMoanComponent->SetDelay(ReadFloatFromFile(pInFile));
 				}
 				else if (!strcmp(buf, "<Volume>:"))
 				{
-					component->m_fVolume = ReadFloatFromFile(pInFile);
+					pGoblinMoanComponent->SetVolume(ReadFloatFromFile(pInFile));
 				}
-				else if (!strcmp(buf, "</CDamageSoundComponent>:"))
+				else if (!strcmp(buf, "</GoblinMoanComponent>:"))
 				{
 					break;
 				}
 			}
-		}*/
+		}
+		else if (!strcmp(buf, "<OrcMoanComponent>:"))
+		{
+			for (; ; )
+			{
+				ReadStringFromFile(pInFile, buf);
+
+				if (!strcmp(buf, "<Enable>:"))
+				{
+					pOrcMoanComponent->SetEnable(ReadIntegerFromFile(pInFile));
+				}
+				else if (!strcmp(buf, "<Sound>:"))
+				{
+					pOrcMoanComponent->SetSoundNumber(ReadIntegerFromFile(pInFile));
+				}
+				else if (!strcmp(buf, "<Delay>:"))
+				{
+					pOrcMoanComponent->SetDelay(ReadFloatFromFile(pInFile));
+				}
+				else if (!strcmp(buf, "<Volume>:"))
+				{
+					pOrcMoanComponent->SetVolume(ReadFloatFromFile(pInFile));
+				}
+				else if (!strcmp(buf, "</OrcMoanComponent>:"))
+				{
+					break;
+				}
+			}
+		}
+		else if (!strcmp(buf, "<SkeletonMoanComponent>:"))
+		{
+			for (; ; )
+			{
+				ReadStringFromFile(pInFile, buf);
+
+				if (!strcmp(buf, "<Enable>:"))
+				{
+					pSkeletonMoanComponent->SetEnable(ReadIntegerFromFile(pInFile));
+				}
+				else if (!strcmp(buf, "<Sound>:"))
+				{
+					pSkeletonMoanComponent->SetSoundNumber(ReadIntegerFromFile(pInFile));
+				}
+				else if (!strcmp(buf, "<Delay>:"))
+				{
+					pSkeletonMoanComponent->SetDelay(ReadFloatFromFile(pInFile));
+				}
+				else if (!strcmp(buf, "<Volume>:"))
+				{
+					pSkeletonMoanComponent->SetVolume(ReadFloatFromFile(pInFile));
+				}
+				else if (!strcmp(buf, "</SkeletonMoanComponent>:"))
+				{
+					break;
+				}
+			}
+		}
 		else if (!strcmp(buf, "<ParticleComponent>:"))
 		{
 			for (; ; )
