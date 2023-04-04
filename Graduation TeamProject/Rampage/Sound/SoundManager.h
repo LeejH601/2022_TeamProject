@@ -14,8 +14,7 @@ typedef std::map<SOUND_CATEGORY, std::vector<CSound>> CategoryMap;
 class CSoundManager {
 private:
     FMOD_SYSTEM* g_sound_system = nullptr;
-   /* std::vector<CSound> m_Sounds;
-    std::vector<std::string> m_vSoundPaths;*/
+    FMOD_CHANNELGROUP* m_channelgroup;
     CSoundPlayer m_SoundPlayer;
 
     SoundIndexMap m_mSoundIndexMap;

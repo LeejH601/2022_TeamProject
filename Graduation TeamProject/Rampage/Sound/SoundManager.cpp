@@ -48,6 +48,8 @@ CSoundManager::~CSoundManager() {
 void CSoundManager::Init() {
 	FMOD_System_Create(&g_sound_system, FMOD_VERSION);
 	FMOD_System_Init(g_sound_system, 32, FMOD_INIT_NORMAL, NULL);
+
+	FMOD_System_CreateChannelGroup(g_sound_system, "Group", &m_channelgroup);
 }
 
 void CSoundManager::Release() {
@@ -56,6 +58,7 @@ void CSoundManager::Release() {
 			sound.Release();
 		}
 	}
+
 	FMOD_System_Close(g_sound_system);
 	FMOD_System_Release(g_sound_system);
 }
@@ -77,7 +80,8 @@ std::vector<std::string> CSoundManager::getSoundPathsByCategory(SOUND_CATEGORY c
 
 void CSoundManager::UpdateSound()
 {
-	m_SoundPlayer.PlaySounds(g_sound_system);
+	FMOD_System_Update(g_sound_system);
+	m_SoundPlayer.PlaySounds(g_sound_system, m_channelgroup);
 }
 
 void CSoundManager::PlaySound(std::string path, float volume, float fDelay) {
