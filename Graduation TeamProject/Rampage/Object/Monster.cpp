@@ -86,7 +86,7 @@ void CMonster::Update(float fTimeElapsed)
 	// 플레이어가 터레인보다 아래에 있지 않도록 하는 코드
 	if (m_pUpdatedContext) CPhysicsObject::OnUpdateCallback(fTimeElapsed);
 
-	Animate(fTimeElapsed);
+	//Animate(fTimeElapsed); // 이거 왜 두 번 있음??
 
 	CPhysicsObject::Apply_Friction(fTimeElapsed);
 }

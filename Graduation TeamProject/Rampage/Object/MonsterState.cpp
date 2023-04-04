@@ -66,3 +66,35 @@ void Stun_Monster::Exit(CMonster* monster)
 {
 	monster->m_fStunTime = 0.0f;
 }
+
+void Dead_Monster::Enter(CMonster* monster)
+{
+	monster->Animate(0.f);
+	monster->m_bSimulateArticulate = true;
+	int index = 0;
+	for (XMFLOAT4X4& matrix : monster->m_AritculatCacheMatrixs) {
+		std::string linkName = monster->m_pArtiLinkNames[index];
+		CGameObject* obj = monster->FindFrame(linkName.c_str());
+		matrix = obj->m_xmf4x4World;
+
+		float data[16] = {
+			matrix._11,matrix._12,matrix._13,matrix._14,
+			matrix._21,matrix._22,matrix._23,matrix._24,
+			matrix._31,matrix._32,matrix._33,matrix._34,
+			matrix._41,matrix._42,matrix._43,matrix._44,
+		};
+		physx::PxTransform transform{ physx::PxMat44(data) };
+		monster->m_pArticulationLinks[index]->setGlobalPose(transform);
+		index++;
+	}
+}
+
+void Dead_Monster::Execute(CMonster* monster, float fElapsedTime)
+{
+
+}
+
+void Dead_Monster::Exit(CMonster* monster)
+{
+	monster->m_bSimulateArticulate = false;
+}

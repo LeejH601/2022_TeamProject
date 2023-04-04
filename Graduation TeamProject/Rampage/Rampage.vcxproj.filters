@@ -23,6 +23,12 @@
       <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
       <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
     </Filter>
+    <Filter Include="Object\State">
+      <UniqueIdentifier>{65977d9e-d583-41a0-9dc7-f46d8e5a91b9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Object\Animation">
+      <UniqueIdentifier>{1b65366e-4340-4995-a046-0e1e2189194e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Global\stdafx.cpp">
@@ -88,9 +94,6 @@
     <ClCompile Include="Scene\MainScene.cpp">
       <Filter>Scene</Filter>
     </ClCompile>
-    <ClCompile Include="Object\Animation.cpp">
-      <Filter>Object</Filter>
-    </ClCompile>
     <ClCompile Include="Object\ModelManager.cpp">
       <Filter>Object</Filter>
     </ClCompile>
@@ -121,20 +124,11 @@
     <ClCompile Include="Global\Locator.cpp">
       <Filter>Global</Filter>
     </ClCompile>
-    <ClCompile Include="Object\State.cpp">
-      <Filter>Object</Filter>
-    </ClCompile>
     <ClCompile Include="Shader\DepthRenderShader.cpp">
       <Filter>Shader</Filter>
     </ClCompile>
     <ClCompile Include="Sound\SoundComponent.cpp">
       <Filter>Sound</Filter>
-    </ClCompile>
-    <ClCompile Include="Object\AnimationComponent.cpp">
-      <Filter>Object</Filter>
-    </ClCompile>
-    <ClCompile Include="Object\MonsterState.cpp">
-      <Filter>Object</Filter>
     </ClCompile>
     <ClCompile Include="Object\Monster.cpp">
       <Filter>Object</Filter>
@@ -192,6 +186,18 @@
     </ClCompile>
     <ClCompile Include="Shader\LensFlareShader.cpp">
       <Filter>Shader</Filter>
+    </ClCompile>
+    <ClCompile Include="Object\MonsterState.cpp">
+      <Filter>Object\State</Filter>
+    </ClCompile>
+    <ClCompile Include="Object\State.cpp">
+      <Filter>Object\State</Filter>
+    </ClCompile>
+    <ClCompile Include="Object\AnimationComponent.cpp">
+      <Filter>Object\Animation</Filter>
+    </ClCompile>
+    <ClCompile Include="Object\Animation.cpp">
+      <Filter>Object\Animation</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -261,9 +267,6 @@
     <ClInclude Include="Scene\MainScene.h">
       <Filter>Scene</Filter>
     </ClInclude>
-    <ClInclude Include="Object\Animation.h">
-      <Filter>Object</Filter>
-    </ClInclude>
     <ClInclude Include="Object\ModelManager.h">
       <Filter>Object</Filter>
     </ClInclude>
@@ -297,23 +300,11 @@
     <ClInclude Include="Object\Player.h">
       <Filter>Object</Filter>
     </ClInclude>
-    <ClInclude Include="Object\State.h">
-      <Filter>Object</Filter>
-    </ClInclude>
-    <ClInclude Include="Object\StateMachine.h">
-      <Filter>Object</Filter>
-    </ClInclude>
     <ClInclude Include="Shader\DepthRenderShader.h">
       <Filter>Shader</Filter>
     </ClInclude>
     <ClInclude Include="Sound\SoundComponent.h">
       <Filter>Sound</Filter>
-    </ClInclude>
-    <ClInclude Include="Object\AnimationComponent.h">
-      <Filter>Object</Filter>
-    </ClInclude>
-    <ClInclude Include="Object\MonsterState.h">
-      <Filter>Object</Filter>
     </ClInclude>
     <ClInclude Include="Object\Monster.h">
       <Filter>Object</Filter>
@@ -371,6 +362,21 @@
     </ClInclude>
     <ClInclude Include="Shader\LensFlareShader.h">
       <Filter>Shader</Filter>
+    </ClInclude>
+    <ClInclude Include="Object\MonsterState.h">
+      <Filter>Object\State</Filter>
+    </ClInclude>
+    <ClInclude Include="Object\State.h">
+      <Filter>Object\State</Filter>
+    </ClInclude>
+    <ClInclude Include="Object\StateMachine.h">
+      <Filter>Object\State</Filter>
+    </ClInclude>
+    <ClInclude Include="Object\AnimationComponent.h">
+      <Filter>Object\Animation</Filter>
+    </ClInclude>
+    <ClInclude Include="Object\Animation.h">
+      <Filter>Object\Animation</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -28,3 +28,11 @@ public:
     virtual void Execute(CMonster* monster, float fElapsedTime);
     virtual void Exit(CMonster* monster);
 };
+
+class Dead_Monster : public CState<CMonster>
+{
+public:
+    virtual void Enter(CMonster* monster);
+    virtual void Execute(CMonster* monster, float fElapsedTime);
+    virtual void Exit(CMonster* monster);
+};
