@@ -120,6 +120,21 @@ public:\
 
 //#define RENDER_BOUNDING_BOX
 
+class CGameObject;
+struct LinkForceParam
+{
+	physx::PxVec3 froces;
+	physx::PxForceMode mode;
+	int linkindex;
+};
+
+struct RequestArticulationParam
+{
+	RequestArticulationParam() {};
+	std::vector<LinkForceParam> linkForceParams;
+	CGameObject* object;
+};
+
 extern UINT	gnCbvSrvDescriptorIncrementSize;
 extern UINT gnRtvDescriptorIncrementSize;
 extern std::default_random_engine dre;

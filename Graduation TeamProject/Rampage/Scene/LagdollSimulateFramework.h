@@ -1,31 +1,36 @@
 #pragma once
+#include <list>
+
 #include "..\Global\stdafx.h"
 #include "..\Object\Object.h"
+#include "..\Global\Timer.h"
 
-struct LinkForceParam
-{
-	physx::PxVec3 froces;
-	physx::PxForceMode mode;
-	int linkindex;
-};
 
-struct RequestArticulationParam
-{
-	physx::PxArticulationReducedCoordinate& articulation;
-	std::vector<LinkForceParam> linkForceParams;
-};
+
 
 class CLagdollSimulateFramework
 {
+private:
+	std::vector<RequestArticulationParam> m_vRequestParams;
+	std::list<CGameObject*> simulateObjects;
+
+	CGameTimer m_Timer;
+
+public:
+	bool m_bEnd = false;
+	bool m_bReleased = false;
+
 public:
 	CLagdollSimulateFramework();
 	~CLagdollSimulateFramework();
 
+	void Run();
 	void Update(float fTimeElapsed);
-	void ReadbackArticulationMatrix(std::vector<std::unique_ptr<CGameObject>>& pObjects);
+	void ReadbackArticulationMatrix();
 	void RequestRegisterArticulation(RequestArticulationParam& requsetParam);
 
 private:
 	void RegisterArticulation();
 };
 
+extern DWORD WINAPI LagdollRun(LPVOID arg);

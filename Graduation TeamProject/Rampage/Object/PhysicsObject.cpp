@@ -5,7 +5,11 @@
 void CPhysicsObject::OnPrepareRender()
 {
 	if (m_bSimulateArticulate) {
+		//Locator.WaitUpdateMatrix();
+		Locator.EnterUpdateMatrix();
 		UpdateTransformFromArticulation(NULL, m_pArtiLinkNames, m_AritculatCacheMatrixs, m_xmf3Scale.x);
+		Locator.LeaveUpdateMatrix();
+		//Locator.WaitApplyUpdate();
 	}
 	else {
 		m_xmf4x4Transform._11 = m_xmf3Right.x; m_xmf4x4Transform._12 = m_xmf3Right.y; m_xmf4x4Transform._13 = m_xmf3Right.z;
@@ -763,22 +767,24 @@ void CPhysicsObject::CreateArticulation(float meshScale)
 
 	m_pArticulation->setSleepThreshold(0.6f);
 
-	Locator.GetPxScene()->addArticulation(*m_pArticulation);
 
 	physx::PxU32 nbLinks = m_pArticulation->getNbLinks();
 	m_pArticulationLinks.resize(nbLinks);
-	m_pArticulation->getLinks(m_pArticulationLinks.data(), nbLinks, 0);
 	m_AritculatCacheMatrixs.resize(nbLinks);
-	int index = 0;
+	m_pArticulation->getLinks(m_pArticulationLinks.data(), nbLinks, 0);
+
+
+	/*int index = 0;
 	for (XMFLOAT4X4& world : m_AritculatCacheMatrixs) {
 		physx::PxMat44 mat = m_pArticulationLinks[index++]->getGlobalPose();
 
 		memcpy(&world, &mat, sizeof(XMFLOAT4X4));
 		world = Matrix4x4::Multiply(XMMatrixScaling(m_xmf3Scale.x, m_xmf3Scale.y, m_xmf3Scale.z), world);
-	}
+	}*/
 
+	/*Locator.GetPxScene()->addArticulation(*m_pArticulation);
 
 	m_pArticulationCache = m_pArticulation->createCache();
-	m_nArtiCache = m_pArticulation->getCacheDataSize();
-	m_bSimulateArticulate = true;
+	m_nArtiCache = m_pArticulation->getCacheDataSize();*/
+	//m_bSimulateArticulate = true;
 }

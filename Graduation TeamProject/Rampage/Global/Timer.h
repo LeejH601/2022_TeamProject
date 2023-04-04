@@ -42,6 +42,6 @@ private:
 	unsigned long					m_nFramesPerSecond;
 	float							m_fFPSTimeElapsed;
 
-	bool							m_bStopped;
+	bool							m_bStopped = false;
 };
 

@@ -17,8 +17,8 @@ CSceneManager::CSceneManager(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 	m_pLobbyScene = std::make_unique<CLobbyScene>();
 	m_pLobbyScene->BuildObjects(pd3dDevice, pd3dCommandList);
 
-	m_pCurrentScene = m_pLobbyScene.get();
-	//m_pCurrentScene = m_pMainScene.get();
+	//m_pCurrentScene = m_pLobbyScene.get();
+	m_pCurrentScene = m_pMainScene.get();
 }
 
 void CSceneManager::SetPlayer(CPlayer* pPlayer)

@@ -14,6 +14,7 @@
 #include "..\Shader\SunLightShader.h"
 #include "..\Shader\HDRComputeShader.h"
 #include "..\Shader\LensFlareShader.h"
+#include "LagdollSimulateFramework.h"
 
 #define MAX_OBJECT 1000
 struct DissolveParams {
@@ -55,9 +56,14 @@ private:
 
 	DissolveParams* m_pcbMappedDisolveParams = nullptr;
 	ComPtr<ID3D12Resource> m_pd3dcbDisolveParams = nullptr;
+
+	CLagdollSimulateFramework m_LSFramework;
+public:
+	HANDLE hThread;
+
 public:
 	CMainTMPScene() {}
-	virtual ~CMainTMPScene() {}
+	virtual ~CMainTMPScene();
 	
 	virtual void SetPlayer(CGameObject* pPlayer);
 

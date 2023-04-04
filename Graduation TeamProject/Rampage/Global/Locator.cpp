@@ -6,6 +6,15 @@
 
 CLocator::~CLocator()
 {
+	CloseHandle(hRequsetEvent);
+	CloseHandle(hRequsetApplyEvent);
+	CloseHandle(hPxSimulateEvent);
+	CloseHandle(hPxFetchEvent);
+	CloseHandle(hUpdateMatrixEvent);
+	CloseHandle(hApplyUpdateMatrixEvent);
+
+	DeleteCriticalSection(&Cs_Request);
+	DeleteCriticalSection(&Cs_UpdateMatrix);
 }
 
 bool CLocator::Init()
@@ -33,6 +42,19 @@ bool CLocator::Init()
 		pvdClient->setScenePvdFlag(physx::PxPvdSceneFlag::eTRANSMIT_CONTACTS, true);
 		pvdClient->setScenePvdFlag(physx::PxPvdSceneFlag::eTRANSMIT_SCENEQUERIES, true);
 	}
+
+	hRequsetEvent = CreateEvent(NULL, FALSE, FALSE, TEXT("RequestEvent"));
+	hRequsetApplyEvent = CreateEvent(NULL, FALSE, FALSE, TEXT("RequestApplyEvent"));
+	hPxSimulateEvent = CreateEvent(NULL, FALSE, FALSE, TEXT("PxSimulateEvent"));
+	hPxFetchEvent = CreateEvent(NULL, FALSE, FALSE, TEXT("PxFetchEvent"));
+	hUpdateMatrixEvent = CreateEvent(NULL, FALSE, FALSE, TEXT("UpdateMatrixEvent"));
+	hApplyUpdateMatrixEvent = CreateEvent(NULL, FALSE, FALSE, TEXT("ApplyUpdateMatrixEvent"));
+
+	SetEvent(hRequsetEvent);
+	SetEvent(hApplyUpdateMatrixEvent);
+
+	InitializeCriticalSection(&Cs_Request);
+	InitializeCriticalSection(&Cs_UpdateMatrix);
 
 	return true;
 }

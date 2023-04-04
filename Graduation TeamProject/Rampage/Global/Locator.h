@@ -26,6 +26,18 @@ class CLocator
 
 	MOUSE_CUROSR_MODE m_eMouseCursorMode = MOUSE_CUROSR_MODE::FLOATING_MODE;
 
+	HANDLE hRequsetApplyEvent;
+	HANDLE hRequsetEvent;
+	HANDLE hPxSimulateEvent;
+	HANDLE hPxFetchEvent;
+	HANDLE hUpdateMatrixEvent;
+	HANDLE hApplyUpdateMatrixEvent;
+
+	CRITICAL_SECTION Cs_UpdateMatrix;
+	CRITICAL_SECTION Cs_Request;
+	CRITICAL_SECTION Cs_Apply;
+	HANDLE hLagdollThread;
+
 public:
 	CLocator() = default;
 	~CLocator();
@@ -40,6 +52,29 @@ public:
 
 	void SetMouseCursorMode(MOUSE_CUROSR_MODE mode) { m_eMouseCursorMode = mode; };
 	MOUSE_CUROSR_MODE GetMouseCursorMode() { return m_eMouseCursorMode; };
+
+	void SetRequsetEvent() { SetEvent(hRequsetEvent); };
+	void SetRequsetApplyEvent() { SetEvent(hRequsetApplyEvent); };
+	void SetSimluateEvent() { SetEvent(hPxSimulateEvent); };
+	void SetFetchEvent() { SetEvent(hPxFetchEvent); };
+	void SetUpdateMatrixEvent() { SetEvent(hUpdateMatrixEvent); };
+	void SetApplyUpdateEvent() { SetEvent(hApplyUpdateMatrixEvent); };
+
+	void WaitRequset() { WaitForSingleObject(hRequsetEvent, INFINITE); };
+	void WaitRequsetApply() { WaitForSingleObject(hRequsetApplyEvent, INFINITE); };
+	void WaitSimluate() { WaitForSingleObject(hPxSimulateEvent, INFINITE); };
+	void WaitFetch() { WaitForSingleObject(hPxFetchEvent, INFINITE); };
+	void WaitUpdateMatrix() { WaitForSingleObject(hUpdateMatrixEvent, INFINITE); };
+	void WaitApplyUpdate() { WaitForSingleObject(hApplyUpdateMatrixEvent, INFINITE); };
+
+	void EnterRequest() { EnterCriticalSection(&Cs_Request); };
+	void LeaveRequest() { LeaveCriticalSection(&Cs_Request); };
+	
+	void EnterUpdateMatrix() { EnterCriticalSection(&Cs_UpdateMatrix); };
+	void LeaveUpdateMatrix() { LeaveCriticalSection(&Cs_UpdateMatrix); };
+
+	void SetLagdollThreadHandle(HANDLE hThread) { hLagdollThread = hThread; };
+	HANDLE GetLagdollThreadHandl() { return hLagdollThread; };
 };
 
 extern CLocator Locator;

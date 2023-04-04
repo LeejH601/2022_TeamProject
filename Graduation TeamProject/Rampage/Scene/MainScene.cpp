@@ -20,6 +20,11 @@
 #define MAX_ATTACKSPRITE_OBJECT 50
 #define MAX_TERRAINSPRITE_OBJECT 50
 
+CMainTMPScene::~CMainTMPScene()
+{
+	m_LSFramework.m_bEnd = true;
+}
+
 void CMainTMPScene::SetPlayer(CGameObject* pPlayer)
 {
 	m_pPlayer = pPlayer;
@@ -501,6 +506,7 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pObjects.push_back(std::move(m_pGoblinObject));
 
 	std::unique_ptr<CGoblinObject> m_pGoblin = std::make_unique<CGoblinObject>(pd3dDevice, pd3dCommandList, 1);
+	RequestArticulationParam param;
 
 	{
 		m_pGoblin->SetPosition(XMFLOAT3(150, 300, -120));
@@ -508,7 +514,10 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 		m_pGoblin->Rotate(0.0f, 0.0f, 0.0f);
 		m_pGoblin->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 5);
 		m_pGoblin->CreateArticulation(1.0f);
-		m_pGoblin->m_bSimulateArticulate = false;
+		param.object = m_pGoblin.get();
+		m_LSFramework.RequestRegisterArticulation(param);
+		m_pGoblin->m_bSimulateArticulate = true;
+		/*m_pGoblin->m_bSimulateArticulate = false;
 		m_pGoblin->Animate(0.0f);
 		m_pGoblin->OnPrepareRender();
 		m_pGoblin->m_bSimulateArticulate = true;
@@ -520,7 +529,7 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 		tobonetrans.column3.y += rootWorld._42;
 		tobonetrans.column3.z += rootWorld._43;
 		*rootLInkTrans = physx::PxTransform(tobonetrans).getNormalized();
-		m_pGoblin->m_pArticulation->applyCache(*m_pGoblin->m_pArticulationCache, physx::PxArticulationCacheFlag::eALL);
+		m_pGoblin->m_pArticulation->applyCache(*m_pGoblin->m_pArticulationCache, physx::PxArticulationCacheFlag::eALL);*/
 
 		m_pObjects.push_back(std::move(m_pGoblin));
 	}
@@ -532,7 +541,10 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pOrc->Rotate(0.0f, 0.0f, 0.0f);
 	m_pOrc->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 5);
 	m_pOrc->CreateArticulation(1.0f);
-	m_pOrc->m_bSimulateArticulate = false;
+	param.object = m_pOrc.get();
+	m_LSFramework.RequestRegisterArticulation(param);
+	m_pOrc->m_bSimulateArticulate = true;
+	/*m_pOrc->m_bSimulateArticulate = false;
 	m_pOrc->Animate(0.0f);
 	m_pOrc->OnPrepareRender();
 	m_pOrc->m_bSimulateArticulate = true;
@@ -549,7 +561,7 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pOrc->m_pArticulation->applyCache(*m_pOrc->m_pArticulationCache, physx::PxArticulationCacheFlag::eALL);
 
 	
-	m_pOrc->m_pArticulationLinks[15]->addForce(physx::PxVec3(0.0f, -10000.0f, 0.0f), physx::PxForceMode::eIMPULSE);
+	m_pOrc->m_pArticulationLinks[15]->addForce(physx::PxVec3(0.0f, -10000.0f, 0.0f), physx::PxForceMode::eIMPULSE);*/
 	
 	
 	//m_pOrc->m_pArticulation->applyCache(*m_pOrc->m_pArticulationCache, physx::PxArticulationCacheFlag::e);
@@ -562,7 +574,10 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pGoblin->Rotate(0.0f, 0.0f, 0.0f);
 	m_pGoblin->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 5);
 	m_pGoblin->CreateArticulation(1.0f);
-	m_pGoblin->m_bSimulateArticulate = false;
+	param.object = m_pGoblin.get();
+	m_LSFramework.RequestRegisterArticulation(param);
+	m_pGoblin->m_bSimulateArticulate = true;
+	/*m_pGoblin->m_bSimulateArticulate = false;
 	m_pGoblin->Animate(0.0f);
 	m_pGoblin->OnPrepareRender();
 	m_pGoblin->m_bSimulateArticulate = true;
@@ -574,7 +589,7 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	tobonetrans.column3.y += rootWorld._42;
 	tobonetrans.column3.z += rootWorld._43;
 	*rootLInkTrans = physx::PxTransform(tobonetrans).getNormalized();
-	m_pGoblin->m_pArticulation->applyCache(*m_pGoblin->m_pArticulationCache, physx::PxArticulationCacheFlag::eALL);
+	m_pGoblin->m_pArticulation->applyCache(*m_pGoblin->m_pArticulationCache, physx::PxArticulationCacheFlag::eALL);*/
 	m_pObjects.push_back(std::move(m_pGoblin));
 
 	m_pGoblin = std::make_unique<CGoblinObject>(pd3dDevice, pd3dCommandList, 1);
@@ -583,7 +598,10 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pGoblin->Rotate(0.0f, 0.0f, 0.0f);
 	m_pGoblin->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 5);
 	m_pGoblin->CreateArticulation(1.0f);
-	m_pGoblin->m_bSimulateArticulate = false;
+	param.object = m_pGoblin.get();
+	m_LSFramework.RequestRegisterArticulation(param);
+	m_pGoblin->m_bSimulateArticulate = true;
+	/*m_pGoblin->m_bSimulateArticulate = false;
 	m_pGoblin->Animate(0.0f);
 	m_pGoblin->OnPrepareRender();
 	m_pGoblin->m_bSimulateArticulate = true;
@@ -595,7 +613,7 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	tobonetrans.column3.y += rootWorld._42;
 	tobonetrans.column3.z += rootWorld._43;
 	*rootLInkTrans = physx::PxTransform(tobonetrans).getNormalized();
-	m_pGoblin->m_pArticulation->applyCache(*m_pGoblin->m_pArticulationCache, physx::PxArticulationCacheFlag::eALL);
+	m_pGoblin->m_pArticulation->applyCache(*m_pGoblin->m_pArticulationCache, physx::PxArticulationCacheFlag::eALL);*/
 	m_pObjects.push_back(std::move(m_pGoblin));
 
 	XMFLOAT3 testpos = XMFLOAT3(300.0f, 600.0f, 0.0f);
@@ -607,7 +625,7 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 		m_pGoblin->Rotate(0.0f, 0.0f, 0.0f);
 		m_pGoblin->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 5);
 		m_pGoblin->CreateArticulation(1.0f);
-		m_pGoblin->m_bSimulateArticulate = false;
+		/*m_pGoblin->m_bSimulateArticulate = false;
 		m_pGoblin->Animate(0.0f);
 		m_pGoblin->OnPrepareRender();
 		m_pGoblin->m_bSimulateArticulate = true;
@@ -623,7 +641,7 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 		randDir.normalize();
 		randDir *= 10.0f;
 		memcpy(&m_pGoblin->m_pArticulationCache->jointForce[3], &randDir, sizeof(physx::PxVec3));
-		m_pGoblin->m_pArticulation->applyCache(*m_pGoblin->m_pArticulationCache, physx::PxArticulationCacheFlag::eALL);
+		m_pGoblin->m_pArticulation->applyCache(*m_pGoblin->m_pArticulationCache, physx::PxArticulationCacheFlag::eALL);*/
 
 		m_pObjects.push_back(std::move(m_pGoblin));
 	}
@@ -755,6 +773,10 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pLensFlareShader = std::make_unique<CLensFlareShader>();
 	m_pLensFlareShader->CreateShader(pd3dDevice, GetGraphicsRootSignature(), 7, pdxgiObjectRtvFormats, 0);
 	m_pLensFlareShader->BuildObjects(pd3dDevice, pd3dCommandList);
+
+	
+	hThread = CreateThread(NULL, 0, LagdollRun, (LPVOID)&m_LSFramework, 0, NULL);
+	CloseHandle(hThread);
 }
 bool CMainTMPScene::ProcessInput(DWORD dwDirection, float cxDelta, float cyDelta, float fTimeElapsed)
 {
@@ -802,18 +824,7 @@ void CMainTMPScene::UpdateObjects(float fTimeElapsed)
 void CMainTMPScene::Update(float fTimeElapsed)
 {
 #ifdef WITH_LAG_DOLL_SIMULATION
-	static float SimulateElapsedTime = 0.0f;
-
-	SimulateElapsedTime += fTimeElapsed;
-	if (!b_simulation) {
-		Locator.GetPxScene()->simulate(SimulateElapsedTime);
-		SimulateElapsedTime = 0.0f;
-		b_simulation = true;
-	}
-	if (Locator.GetPxScene()->fetchResults(false)) {
-		UpdateObjectArticulation();
-		b_simulation = false;
-	}
+	
 
 #endif // WITH_LAG_DOLL_SIMULATION
 	UpdateObjects(fTimeElapsed);

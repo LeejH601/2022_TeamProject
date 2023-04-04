@@ -57,7 +57,7 @@ void CGameFramework::OnDestroy()
 {
 	//GPU가 모든 명령 리스트를 실행할 때 까지 기다린다. 
 	::WaitForGpuComplete(m_pd3dCommandQueue.Get(), m_pd3dFence.Get(), ++m_nFenceValues[m_nSwapChainBufferIndex], m_hFenceEvent);
-
+	//Locator.GetPxScene()->fetchResults(true);
 	//게임 객체(게임 월드 객체)를 소멸한다. 
 	ReleaseObjects();
 
@@ -354,6 +354,7 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 		switch (wParam)
 		{
 		case VK_ESCAPE:
+			WaitForSingleObject(Locator.GetLagdollThreadHandl(), INFINITE);
 			::PostQuitMessage(0);
 			break;
 		case VK_F9:
