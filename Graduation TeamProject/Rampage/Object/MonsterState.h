@@ -32,6 +32,7 @@ public:
 class Dead_Monster : public CState<CMonster>
 {
 public:
+    DECLARE_SINGLE(Dead_Monster);
     virtual void Enter(CMonster* monster);
     virtual void Execute(CMonster* monster, float fElapsedTime);
     virtual void Exit(CMonster* monster);

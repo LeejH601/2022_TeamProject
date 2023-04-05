@@ -350,6 +350,51 @@ void CMainTMPScene::CreateComputeRootSignature(ID3D12Device* pd3dDevice)
 	if (pd3dSignatureBlob) pd3dSignatureBlob->Release();
 	if (pd3dErrorBlob) pd3dErrorBlob->Release();
 }
+void CMainTMPScene::RequestRegisterArticulation(RegisterArticulationParams param)
+{
+	m_lRequestObjects.emplace_back(param);
+}
+void CMainTMPScene::RegisterArticulations()
+{
+	for (RegisterArticulationParams& param : m_lRequestObjects) {
+		CGameObject* obj = param.pObject;
+		Locator.GetPxScene()->addArticulation(*obj->m_pArticulation);
+
+		int index = 0;
+		for (XMFLOAT4X4& world : obj->m_AritculatCacheMatrixs) {
+			physx::PxMat44 mat = obj->m_pArticulationLinks[index++]->getGlobalPose();
+
+			memcpy(&world, &mat, sizeof(XMFLOAT4X4));
+			XMFLOAT3 scale = ((CPhysicsObject*)obj)->GetScale();
+			world = Matrix4x4::Multiply(XMMatrixScaling(scale.x, scale.y, scale.z), world);
+		}
+
+		obj->m_pArticulationCache = obj->m_pArticulation->createCache();
+		obj->m_nArtiCache = obj->m_pArticulation->getCacheDataSize();
+
+		obj->m_bSimulateArticulate = false;
+		obj->Animate(0.0f);
+		((CPhysicsObject*)obj)->OnPrepareRender();
+		XMFLOAT4X4 rootWorld = obj->FindFrame("root")->GetWorld();
+		float _rootWorld[16] = {
+			rootWorld._11,rootWorld._12,rootWorld._13,rootWorld._14,
+			rootWorld._21,rootWorld._22,rootWorld._23,rootWorld._24,
+			rootWorld._31,rootWorld._32,rootWorld._33,rootWorld._34,
+			rootWorld._41,rootWorld._42,rootWorld._43,rootWorld._44,
+		};
+		obj->m_pArticulation->copyInternalStateToCache(*obj->m_pArticulationCache, physx::PxArticulationCacheFlag::eALL);
+		physx::PxTransform* rootLInkTrans = &obj->m_pArticulationCache->rootLinkData->transform;
+		physx::PxMat44 tobonetrans = physx::PxMat44(_rootWorld);
+
+		*rootLInkTrans = physx::PxTransform(tobonetrans).getNormalized();
+		obj->m_pArticulation->applyCache(*obj->m_pArticulationCache, physx::PxArticulationCacheFlag::eALL);
+		obj->m_bSimulateArticulate = true;
+
+		XMFLOAT3 force = param.m_force;
+		obj->m_pArticulationLinks[1]->addForce(physx::PxVec3(force.x, force.y, force.z), physx::PxForceMode::eIMPULSE);
+	}
+	m_lRequestObjects.clear();
+}
 bool CMainTMPScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
 {
 	switch (nMessageID)
@@ -453,6 +498,13 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	CreateGraphicsRootSignature(pd3dDevice);
 	CreateComputeRootSignature(pd3dDevice);
 
+	std::unique_ptr<RegisterArticulationListener> listener = std::make_unique<RegisterArticulationListener>();
+	listener->SetScene(this);
+	listener->SetEnable(true);
+	m_pListeners.push_back(std::move(listener));
+
+	CMessageDispatcher::GetInst()->RegisterListener(MessageType::REQUEST_REGISTERARTI, m_pListeners.back().get(), nullptr);
+
 	UINT ncbElementBytes = ((sizeof(DissolveParams) + 255) & ~255); //256ÀÇ ¹è¼ö
 	m_pd3dcbDisolveParams = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, ncbElementBytes, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
 	m_pd3dcbDisolveParams->Map(0, NULL, (void**)&m_pcbMappedDisolveParams);
@@ -491,6 +543,7 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pGoblinObject->Rotate(0.0f, 180.0f, 0.0f);
 	m_pGoblinObject->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 5);
 	m_pGoblinObject->m_pSkinnedAnimationController->m_xmf3RootObjectScale = XMFLOAT3(10.0f, 10.0f, 10.0f);
+	m_pGoblinObject->CreateArticulation(1.0f);
 	m_pObjects.push_back(std::move(m_pGoblinObject));
 
 	m_pGoblinObject = std::make_unique<CGoblinObject>(pd3dDevice, pd3dCommandList, 1);
@@ -498,6 +551,7 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pGoblinObject->SetScale(4.0f, 4.0f, 4.0f);
 	m_pGoblinObject->Rotate(0.0f, 180.0f, 0.0f);
 	m_pGoblinObject->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 5);
+	m_pGoblinObject->CreateArticulation(1.0f);
 	m_pObjects.push_back(std::move(m_pGoblinObject));
 
 	std::unique_ptr<CGoblinObject> m_pGoblin = std::make_unique<CGoblinObject>(pd3dDevice, pd3dCommandList, 1);
@@ -508,19 +562,6 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 		m_pGoblin->Rotate(0.0f, 0.0f, 0.0f);
 		m_pGoblin->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 5);
 		m_pGoblin->CreateArticulation(1.0f);
-		m_pGoblin->m_bSimulateArticulate = false;
-		m_pGoblin->Animate(0.0f);
-		m_pGoblin->OnPrepareRender();
-		m_pGoblin->m_bSimulateArticulate = true;
-		XMFLOAT4X4 rootWorld = m_pGoblin->FindFrame("root")->m_xmf4x4World;
-		m_pGoblin->m_pArticulation->copyInternalStateToCache(*m_pGoblin->m_pArticulationCache, physx::PxArticulationCacheFlag::eALL);
-		physx::PxTransform* rootLInkTrans = &m_pGoblin->m_pArticulationCache->rootLinkData->transform;
-		physx::PxMat44 tobonetrans = physx::PxMat44(*rootLInkTrans);
-		tobonetrans.column3.x += rootWorld._41;
-		tobonetrans.column3.y += rootWorld._42;
-		tobonetrans.column3.z += rootWorld._43;
-		*rootLInkTrans = physx::PxTransform(tobonetrans).getNormalized();
-		m_pGoblin->m_pArticulation->applyCache(*m_pGoblin->m_pArticulationCache, physx::PxArticulationCacheFlag::eALL);
 
 		m_pObjects.push_back(std::move(m_pGoblin));
 	}
@@ -532,22 +573,6 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pOrc->Rotate(0.0f, 0.0f, 0.0f);
 	m_pOrc->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 5);
 	m_pOrc->CreateArticulation(1.0f);
-	m_pOrc->m_bSimulateArticulate = false;
-	m_pOrc->Animate(0.0f);
-	m_pOrc->OnPrepareRender();
-	m_pOrc->m_bSimulateArticulate = true;
-	physx::PxMat44 mat = m_pOrc->m_pArticulation->getRootGlobalPose();
-	XMFLOAT4X4 rootWorld = m_pOrc->FindFrame("root")->m_xmf4x4World;
-	XMFLOAT4X4 gobworld = m_pOrc->FindFrame("pelvis")->m_xmf4x4World;
-	m_pOrc->m_pArticulation->copyInternalStateToCache(*m_pOrc->m_pArticulationCache, physx::PxArticulationCacheFlag::eALL);
-	physx::PxTransform* rootLInkTrans = &m_pOrc->m_pArticulationCache->rootLinkData->transform;
-	physx::PxMat44 tobonetrans = physx::PxMat44(*rootLInkTrans);
-	tobonetrans.column3.x += rootWorld._41;
-	tobonetrans.column3.y += rootWorld._42;
-	tobonetrans.column3.z += rootWorld._43;
-	*rootLInkTrans = physx::PxTransform(tobonetrans).getNormalized();
-	m_pOrc->m_pArticulation->applyCache(*m_pOrc->m_pArticulationCache, physx::PxArticulationCacheFlag::eALL);
-
 	
 	m_pOrc->m_pArticulationLinks[15]->addForce(physx::PxVec3(0.0f, -10000.0f, 0.0f), physx::PxForceMode::eIMPULSE);
 	
@@ -562,19 +587,6 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pGoblin->Rotate(0.0f, 0.0f, 0.0f);
 	m_pGoblin->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 5);
 	m_pGoblin->CreateArticulation(1.0f);
-	m_pGoblin->m_bSimulateArticulate = false;
-	m_pGoblin->Animate(0.0f);
-	m_pGoblin->OnPrepareRender();
-	m_pGoblin->m_bSimulateArticulate = true;
-	rootWorld = m_pGoblin->FindFrame("root")->m_xmf4x4World;
-	m_pGoblin->m_pArticulation->copyInternalStateToCache(*m_pGoblin->m_pArticulationCache, physx::PxArticulationCacheFlag::eALL);
-	rootLInkTrans = &m_pGoblin->m_pArticulationCache->rootLinkData->transform;
-	tobonetrans = physx::PxMat44(*rootLInkTrans);
-	tobonetrans.column3.x += rootWorld._41;
-	tobonetrans.column3.y += rootWorld._42;
-	tobonetrans.column3.z += rootWorld._43;
-	*rootLInkTrans = physx::PxTransform(tobonetrans).getNormalized();
-	m_pGoblin->m_pArticulation->applyCache(*m_pGoblin->m_pArticulationCache, physx::PxArticulationCacheFlag::eALL);
 	m_pObjects.push_back(std::move(m_pGoblin));
 
 	m_pGoblin = std::make_unique<CGoblinObject>(pd3dDevice, pd3dCommandList, 1);
@@ -583,19 +595,6 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pGoblin->Rotate(0.0f, 0.0f, 0.0f);
 	m_pGoblin->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 5);
 	m_pGoblin->CreateArticulation(1.0f);
-	m_pGoblin->m_bSimulateArticulate = false;
-	m_pGoblin->Animate(0.0f);
-	m_pGoblin->OnPrepareRender();
-	m_pGoblin->m_bSimulateArticulate = true;
-	rootWorld = m_pGoblin->FindFrame("root")->m_xmf4x4World;
-	m_pGoblin->m_pArticulation->copyInternalStateToCache(*m_pGoblin->m_pArticulationCache, physx::PxArticulationCacheFlag::eALL);
-	rootLInkTrans = &m_pGoblin->m_pArticulationCache->rootLinkData->transform;
-	tobonetrans = physx::PxMat44(*rootLInkTrans);
-	tobonetrans.column3.x += rootWorld._41;
-	tobonetrans.column3.y += rootWorld._42;
-	tobonetrans.column3.z += rootWorld._43;
-	*rootLInkTrans = physx::PxTransform(tobonetrans).getNormalized();
-	m_pGoblin->m_pArticulation->applyCache(*m_pGoblin->m_pArticulationCache, physx::PxArticulationCacheFlag::eALL);
 	m_pObjects.push_back(std::move(m_pGoblin));
 
 	XMFLOAT3 testpos = XMFLOAT3(300.0f, 600.0f, 0.0f);
@@ -607,24 +606,6 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 		m_pGoblin->Rotate(0.0f, 0.0f, 0.0f);
 		m_pGoblin->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 5);
 		m_pGoblin->CreateArticulation(1.0f);
-		m_pGoblin->m_bSimulateArticulate = false;
-		m_pGoblin->Animate(0.0f);
-		m_pGoblin->OnPrepareRender();
-		m_pGoblin->m_bSimulateArticulate = true;
-		rootWorld = m_pGoblin->FindFrame("root")->m_xmf4x4World;
-		m_pGoblin->m_pArticulation->copyInternalStateToCache(*m_pGoblin->m_pArticulationCache, physx::PxArticulationCacheFlag::eALL);
-		rootLInkTrans = &m_pGoblin->m_pArticulationCache->rootLinkData->transform;
-		tobonetrans = physx::PxMat44(*rootLInkTrans);
-		tobonetrans.column3.x += rootWorld._41;
-		tobonetrans.column3.y += rootWorld._42;
-		tobonetrans.column3.z += rootWorld._43;
-		*rootLInkTrans = physx::PxTransform(tobonetrans).getNormalized();
-		physx::PxVec3 randDir = physx::PxVec3(rand() % 10 - 5, rand() % 10 - 5, rand() % 10 - 5);
-		randDir.normalize();
-		randDir *= 10.0f;
-		memcpy(&m_pGoblin->m_pArticulationCache->jointForce[3], &randDir, sizeof(physx::PxVec3));
-		m_pGoblin->m_pArticulation->applyCache(*m_pGoblin->m_pArticulationCache, physx::PxArticulationCacheFlag::eALL);
-
 		m_pObjects.push_back(std::move(m_pGoblin));
 	}
 
@@ -811,6 +792,7 @@ void CMainTMPScene::Update(float fTimeElapsed)
 		b_simulation = true;
 	}
 	if (Locator.GetPxScene()->fetchResults(false)) {
+		RegisterArticulations();
 		UpdateObjectArticulation();
 		b_simulation = false;
 	}

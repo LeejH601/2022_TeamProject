@@ -7,6 +7,7 @@
 #include "..\Object\ParticleObject.h"
 #include "..\Object\BillBoardObject.h"
 #include "..\Sound\SoundManager.h"
+#include "..\Scene\MainScene.h"
 
 void CMessageDispatcher::RegisterListener(MessageType messageType, IMessageListener* listener, void* filterObject)
 {
@@ -334,4 +335,9 @@ void SmokeParticleComponent::HandleMessage(const Message& message, const Particl
 		//pParticle->SetEmitParticleN(m_nParticleNumber);
 		//pParticle->SetPosition(params.xmf3Position);
 	}
+}
+
+void RegisterArticulationListener::HandleMessage(const Message& message, const RegisterArticulationParams& params)
+{
+	m_pScene->RequestRegisterArticulation(params);
 }

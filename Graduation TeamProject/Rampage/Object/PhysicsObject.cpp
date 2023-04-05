@@ -763,13 +763,14 @@ void CPhysicsObject::CreateArticulation(float meshScale)
 
 	m_pArticulation->setSleepThreshold(0.6f);
 
-	Locator.GetPxScene()->addArticulation(*m_pArticulation);
+	//Locator.GetPxScene()->addArticulation(*m_pArticulation);
 
 	physx::PxU32 nbLinks = m_pArticulation->getNbLinks();
 	m_pArticulationLinks.resize(nbLinks);
 	m_pArticulation->getLinks(m_pArticulationLinks.data(), nbLinks, 0);
 	m_AritculatCacheMatrixs.resize(nbLinks);
-	int index = 0;
+
+	/*int index = 0;
 	for (XMFLOAT4X4& world : m_AritculatCacheMatrixs) {
 		physx::PxMat44 mat = m_pArticulationLinks[index++]->getGlobalPose();
 
@@ -779,6 +780,6 @@ void CPhysicsObject::CreateArticulation(float meshScale)
 
 
 	m_pArticulationCache = m_pArticulation->createCache();
-	m_nArtiCache = m_pArticulation->getCacheDataSize();
-	m_bSimulateArticulate = true;
+	m_nArtiCache = m_pArticulation->getCacheDataSize();*/
+	//m_bSimulateArticulate = true;
 }

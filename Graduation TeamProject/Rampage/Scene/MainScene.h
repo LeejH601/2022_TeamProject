@@ -1,4 +1,5 @@
 #pragma once
+#include <list>
 #include "Scene.h"
 #include "..\Object\Object.h"
 #include "..\Object\Light.h"
@@ -19,6 +20,7 @@
 struct DissolveParams {
 	float dissolveThreshold[MAX_OBJECT];
 };
+
 
 class CMainTMPScene : public CScene
 {
@@ -55,6 +57,8 @@ private:
 
 	DissolveParams* m_pcbMappedDisolveParams = nullptr;
 	ComPtr<ID3D12Resource> m_pd3dcbDisolveParams = nullptr;
+
+	std::list<RegisterArticulationParams> m_lRequestObjects;
 public:
 	CMainTMPScene() {}
 	virtual ~CMainTMPScene() {}
@@ -72,6 +76,8 @@ public:
 			m_pObjects[i]->updateArticulationMatrix();
 		}
 	}
+	virtual void RequestRegisterArticulation(RegisterArticulationParams param);
+	virtual void RegisterArticulations();
 
 	virtual bool OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
 	virtual bool OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam, DWORD& dwDirection);

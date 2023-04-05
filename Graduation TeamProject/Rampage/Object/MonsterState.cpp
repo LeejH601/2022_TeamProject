@@ -15,7 +15,8 @@ void Idle_Monster::Execute(CMonster* monster, float fElapsedTime)
 {
 	if (monster->GetHit())
 	{
-		monster->m_pStateMachine->ChangeState(Damaged_Monster::GetInst());
+		//monster->m_pStateMachine->ChangeState(Damaged_Monster::GetInst());
+		monster->m_pStateMachine->ChangeState(Dead_Monster::GetInst());
 	}
 }
 
@@ -87,6 +88,12 @@ void Dead_Monster::Enter(CMonster* monster)
 		monster->m_pArticulationLinks[index]->setGlobalPose(transform);
 		index++;
 	}
+	RegisterArticulationParams Request_params;
+	Request_params.pObject = monster;
+	XMFLOAT3 force = monster->GetHitDirection();
+	force = Vector3::ScalarProduct(force, 300.0f, false);
+	Request_params.m_force = force;
+	CMessageDispatcher::GetInst()->Dispatch_Message<RegisterArticulationParams>(MessageType::REQUEST_REGISTERARTI, &Request_params, nullptr);
 }
 
 void Dead_Monster::Execute(CMonster* monster, float fElapsedTime)

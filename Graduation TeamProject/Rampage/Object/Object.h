@@ -47,6 +47,7 @@ class CGameObject
 {
 public:
 	bool bHit = false;
+	XMFLOAT3 m_xmf3HitDir;
 
 	char m_pstrFrameName[MAX_FRAMENAME];
 
@@ -117,6 +118,8 @@ public:
 	void SetWorld(XMFLOAT4X4 xmf4x4World) { m_xmf4x4World = xmf4x4World; }
 	virtual void SetHit(CGameObject* pHitter) { bHit = true; }
 	virtual void SetNotHit() { bHit = false; }
+	virtual void SetHitDirection(XMFLOAT3 direction) { m_xmf3HitDir = direction; };
+	virtual XMFLOAT3 GetHitDirection() { return m_xmf3HitDir; };
 	
 	virtual void Rotate(float fPitch = 10.0f, float fYaw = 10.0f, float fRoll = 10.0f);
 	void Rotate(XMFLOAT3* pxmf3Axis, float fAngle);

@@ -5,6 +5,7 @@
 class CGameObject;
 class CCamera;
 class CScene;
+class CMainTMPScene;
 class CTexture;
 
 // Define base message class
@@ -64,6 +65,11 @@ struct TerrainSpriteCompParams {
     XMFLOAT3 xmf3Position;
 };
 
+struct RegisterArticulationParams {
+    CGameObject* pObject;
+    XMFLOAT3 m_force;
+};
+
 // Define message listener interface
 class IMessageListener {
 protected:
@@ -81,7 +87,16 @@ public:
     virtual void HandleMessage(const Message& message, const ImpactCompParams& params) {}
     virtual void HandleMessage(const Message& message, const ParticleSmokeParams& params) {}
     virtual void HandleMessage(const Message& message, const TerrainSpriteCompParams& params) {}
+    virtual void HandleMessage(const Message& message, const RegisterArticulationParams& params) {}
 
+};
+
+// Define Player Attack component
+class RegisterArticulationListener : public IMessageListener {
+    CMainTMPScene* m_pScene;
+public:
+    void SetScene(CMainTMPScene* pScene) { m_pScene = pScene; };
+    virtual void HandleMessage(const Message& message, const RegisterArticulationParams& params);
 };
 
 // Define Player Attack component
@@ -363,7 +378,7 @@ struct ListenerInfo {
 // Define message dispatcher
 class CMessageDispatcher {
 private:
-    std::vector<ListenerInfo> m_listeners[static_cast<int>(MessageType::UPDATE_SPRITE) + 1];
+    std::vector<ListenerInfo> m_listeners[static_cast<int>(MessageType::MESSAGE_END)];
 public:
     DECLARE_SINGLE(CMessageDispatcher);
     CMessageDispatcher() { }
