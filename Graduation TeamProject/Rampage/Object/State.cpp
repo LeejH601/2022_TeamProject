@@ -100,7 +100,6 @@ Atk1_Player::Atk1_Player()
 	// CAMERA ZOOM IN/OUT
 	std::unique_ptr<CameraZoomerComponent> pZoomerComponent = std::make_unique<CameraZoomerComponent>();
 	pZoomerComponent->SetIsIn(false);
-	pZoomerComponent->SetDirection(XMFLOAT3{ 0.0f, 0.0f, 1.0f });
 	pZoomerComponent->SetMaxDistance(10.0f);
 	pZoomerComponent->SetMovingTime(0.25f);
 	pZoomerComponent->SetRollBackTime(0.25f);
@@ -109,7 +108,6 @@ Atk1_Player::Atk1_Player()
 
 	// CAMERA MOVE
 	std::unique_ptr<CameraMoveComponent> pMoveComponent = std::make_unique<CameraMoveComponent>();
-	pMoveComponent->SetDirection(XMFLOAT3{ 0.0f, 1.0f, 0.0f });
 	pMoveComponent->SetMaxDistance(5.0f);
 	pMoveComponent->SetMovingTime(0.5f);
 	pMoveComponent->SetRollBackTime(0.5f);
@@ -170,8 +168,6 @@ void Atk1_Player::Enter(CPlayer* player)
 	player->m_bAttacked = false;
 	player->m_bAttack = false; // 사용자가 좌클릭시 true가 되는 변수
 	player->m_iAttack_Limit = 1;
-
-	player->m_xmf3CameraMoveDirection = Vector3::Normalize(XMFLOAT3(-1.0f, -1.0f, 0.0f));
 	player->m_fCMDConstant = 1.0f;
 
 	SoundPlayParams SoundPlayParam;
@@ -269,7 +265,6 @@ Atk2_Player::Atk2_Player()
 	// CAMERA ZOOM IN/OUT
 	std::unique_ptr<CameraZoomerComponent> pZoomerComponent = std::make_unique<CameraZoomerComponent>();
 	pZoomerComponent->SetIsIn(false);
-	pZoomerComponent->SetDirection(XMFLOAT3{ 0.0f, 0.0f, 1.0f });
 	pZoomerComponent->SetMaxDistance(10.0f);
 	pZoomerComponent->SetMovingTime(0.25f);
 	pZoomerComponent->SetRollBackTime(0.25f);
@@ -278,7 +273,6 @@ Atk2_Player::Atk2_Player()
 
 	// CAMERA MOVE
 	std::unique_ptr<CameraMoveComponent> pMoveComponent = std::make_unique<CameraMoveComponent>();
-	pMoveComponent->SetDirection(XMFLOAT3{ 0.0f, 1.0f, 0.0f });
 	pMoveComponent->SetMaxDistance(5.0f);
 	pMoveComponent->SetMovingTime(0.5f);
 	pMoveComponent->SetRollBackTime(0.5f);
@@ -339,8 +333,6 @@ void Atk2_Player::Enter(CPlayer* player)
 	player->m_bAttacked = false;
 	player->m_bAttack = false; // 사용자가 좌클릭시 true가 되는 변수
 	player->m_iAttack_Limit = 1;
-
-	player->m_xmf3CameraMoveDirection = Vector3::Normalize(XMFLOAT3(1.0f, -1.0f, 0.0f));
 	player->m_fCMDConstant = 1.0f;
 
 	SoundPlayParams SoundPlayParam;
@@ -438,7 +430,6 @@ Atk3_Player::Atk3_Player()
 	// CAMERA ZOOM IN/OUT
 	std::unique_ptr<CameraZoomerComponent> pZoomerComponent = std::make_unique<CameraZoomerComponent>();
 	pZoomerComponent->SetIsIn(false);
-	pZoomerComponent->SetDirection(XMFLOAT3{ 0.0f, 0.0f, 1.0f });
 	pZoomerComponent->SetMaxDistance(10.0f);
 	pZoomerComponent->SetMovingTime(0.25f);
 	pZoomerComponent->SetRollBackTime(0.25f);
@@ -447,7 +438,6 @@ Atk3_Player::Atk3_Player()
 
 	// CAMERA MOVE
 	std::unique_ptr<CameraMoveComponent> pMoveComponent = std::make_unique<CameraMoveComponent>();
-	pMoveComponent->SetDirection(XMFLOAT3{ 0.0f, 1.0f, 0.0f });
 	pMoveComponent->SetMaxDistance(5.0f);
 	pMoveComponent->SetMovingTime(0.5f);
 	pMoveComponent->SetRollBackTime(0.5f);
@@ -501,7 +491,6 @@ Atk3_Player::~Atk3_Player()
 
 void Atk3_Player::Enter(CPlayer* player)
 {
-	player->m_xmf3CameraMoveDirection = Vector3::Normalize(XMFLOAT3(1.0f, -1.0f, 0.0f));
 	player->m_fCMDConstant = 1.0f;
 
 	player->m_pChild->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 2);

@@ -155,8 +155,6 @@ public:
 
 // Define CameraMove component
 class CameraMoveComponent : public IMessageListener {
-    XMFLOAT3 m_xmf3Direction = XMFLOAT3(0.0f, 0.0f, 1.0f);
-
     float m_fMaxDistance = 2.0f;
     float m_fCurrDistance = 0.0f;
     float m_fMovingTime = 0.02f;
@@ -167,12 +165,10 @@ class CameraMoveComponent : public IMessageListener {
 
     XMFLOAT3 offset = XMFLOAT3(0.0f, 0.0f, 0.0f);;
 public:
-    XMFLOAT3& GetDirection() { return m_xmf3Direction; }
     float& GetMaxDistance() { return m_fMaxDistance; }
     float& GetMovingTime() { return m_fMovingTime; }
     float& GetRollBackTime() { return m_fRollBackTime; }
 
-    void SetDirection(XMFLOAT3 xmf3direction) { m_xmf3Direction = xmf3direction; }
     void SetMaxDistance(float max_distance) { m_fMaxDistance = max_distance; }
     void SetMovingTime(float moving_time) { m_fMovingTime = moving_time; }
     void SetRollBackTime(float rollback_time) { m_fRollBackTime = rollback_time; }
@@ -183,8 +179,6 @@ public:
 
 // Define Zoom In/Out component
 class CameraZoomerComponent : public IMessageListener {
-    XMFLOAT3 m_xmf3Direction = XMFLOAT3(0.0f, 0.0f, 1.0f);
-
     bool m_bIsIN = true;
 
     float m_fMaxDistance = 2.0f;
@@ -197,19 +191,17 @@ class CameraZoomerComponent : public IMessageListener {
 
     XMFLOAT3 offset = XMFLOAT3(0.0f, 0.0f, 0.0f);
 public:
-    XMFLOAT3& GetDirection() { return m_xmf3Direction; }
     float& GetMaxDistance() { return m_fMaxDistance; }
     float& GetMovingTime() { return m_fMovingTime; }
     float& GetRollBackTime() { return m_fRollBackTime; }
     bool& GetIsIn() { return m_bIsIN; }
 
-    void SetDirection(XMFLOAT3 direction) { m_xmf3Direction = direction; }
     void SetMaxDistance(float max_distance) { m_fMaxDistance = max_distance; }
     void SetMovingTime(float moving_time) { m_fMovingTime = moving_time; }
     void SetRollBackTime(float roolback_time) { m_fRollBackTime = roolback_time; }
     void SetIsIn(bool is_in) { m_bIsIN = is_in; }
 
-    void Update(CCamera* pCamera, float fElapsedTime);
+    void Update(CCamera* pCamera, float fElapsedTime, const CameraUpdateParams& params);
     virtual void HandleMessage(const Message& message, const CameraUpdateParams& params);
 };
 

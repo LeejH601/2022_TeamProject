@@ -59,6 +59,11 @@ XMFLOAT3 CPlayer::GetATKDirection()
 	return XMFLOAT3(xmf3Direction);
 }
 
+XMFLOAT3 CPlayer::GetTargetPosition()
+{
+	return m_xmf3TargetPosition;
+}
+
 void CPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity, CCamera* pCamera)
 {
 	if (dwDirection)
@@ -93,7 +98,7 @@ bool CPlayer::CheckCollision(CGameObject* pTargetObject)
 				m_pCamera->m_bCameraZooming = true;
 				m_pCamera->m_bCameraMoving = true;
 			}
-
+			m_xmf3TargetPosition = pTargetObject->GetPosition();
 			pTargetObject->SetHit(this);
 
 			flag = true;
