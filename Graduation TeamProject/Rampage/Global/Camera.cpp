@@ -151,11 +151,11 @@ void CThirdPersonCamera::ProcessInput(DWORD dwDirection, float cxDelta, float cy
 
 	GetKeyboardState(pKeysBuffer);
 
-	if (pKeysBuffer[VK_RBUTTON] & 0xF0)
-	{
+	/*if (pKeysBuffer[VK_RBUTTON] & 0xF0)
+	{*/
 		if (cxDelta || cyDelta)
 			Rotate(cyDelta, cxDelta, 0.0f);
-	}
+	//}
 }
 
 void CThirdPersonCamera::Rotate(float fPitch, float fYaw, float fRoll)

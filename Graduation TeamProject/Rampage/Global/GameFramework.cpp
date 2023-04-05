@@ -381,6 +381,7 @@ LRESULT CALLBACK CGameFramework::OnProcessingWindowMessage(HWND hWnd, UINT nMess
 			m_GameTimer.Start();*/
 		RECT screenRect;
 		GetWindowRect(hWnd, &screenRect);
+		m_ScreendRect = screenRect;
 		MOUSE_CUROSR_MODE eMouseMode = Locator.GetMouseCursorMode();
 		switch (eMouseMode)
 		{
@@ -428,12 +429,24 @@ void CGameFramework::ProcessInput()
 {
 	float cxDelta = 0.0f, cyDelta = 0.0f;
 	POINT ptCursorPos;
-	if (GetCapture() == m_hWnd)
-	{
-		SetCursor(NULL);
+	if (Locator.GetMouseCursorMode() == MOUSE_CUROSR_MODE::FLOATING_MODE) {
+		if (GetCapture() == m_hWnd)
+		{
+			SetCursor(NULL);
+			GetCursorPos(&ptCursorPos);
+			cxDelta = (float)(ptCursorPos.x - m_ptOldCursorPos.x) / 3.0f;
+			cyDelta = (float)(ptCursorPos.y - m_ptOldCursorPos.y) / 3.0f;
+			SetCursorPos(m_ptOldCursorPos.x, m_ptOldCursorPos.y);
+		}
+	}
+	else if (Locator.GetMouseCursorMode() == MOUSE_CUROSR_MODE::THIRD_FERSON_MODE) {
+		m_ptOldCursorPos = POINT(m_ScreendRect.left + (m_ScreendRect.right - m_ScreendRect.left) / 2,
+			m_ScreendRect.top + (m_ScreendRect.bottom - m_ScreendRect.top) / 2
+		);
 		GetCursorPos(&ptCursorPos);
-		cxDelta = (float)(ptCursorPos.x - m_ptOldCursorPos.x) / 3.0f;
-		cyDelta = (float)(ptCursorPos.y - m_ptOldCursorPos.y) / 3.0f;
+		cxDelta = (float)(ptCursorPos.x - m_ptOldCursorPos.x) / 8.0f;
+		cyDelta = (float)(ptCursorPos.y - m_ptOldCursorPos.y) / 8.0f;
+
 		SetCursorPos(m_ptOldCursorPos.x, m_ptOldCursorPos.y);
 	}
 
