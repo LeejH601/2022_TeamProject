@@ -36,6 +36,29 @@ CPlayer::~CPlayer()
 	ReleaseShaderVariables();
 }
 
+XMFLOAT3 CPlayer::GetATKDirection()
+{
+	CState<CPlayer>* pPlayerState = m_pStateMachine->GetCurrentState();
+	XMFLOAT3 xmf3Direction = { 0.0f, 0.0f, 0.0f };
+	if (pPlayerState == Atk1_Player::GetInst())
+	{
+		xmf3Direction = Vector3::Add(GetUp(), GetRight());
+		xmf3Direction = Vector3::ScalarProduct(xmf3Direction, -1.0f);
+	}
+
+	else if (pPlayerState == Atk2_Player::GetInst())
+	{
+		xmf3Direction = GetRight();
+	}
+
+	else if (pPlayerState == Atk3_Player::GetInst())
+	{
+		xmf3Direction = GetLook();
+	}
+
+	return XMFLOAT3(xmf3Direction);
+}
+
 void CPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity, CCamera* pCamera)
 {
 	if (dwDirection)

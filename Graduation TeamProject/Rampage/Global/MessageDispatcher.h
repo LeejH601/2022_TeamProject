@@ -27,6 +27,7 @@ struct SoundPlayParams {
 
 struct CameraUpdateParams {
     CCamera* pCamera = NULL;
+    CGameObject* pPlayer = NULL;
     float fElapsedTime;
 };
 
@@ -176,7 +177,7 @@ public:
     void SetMovingTime(float moving_time) { m_fMovingTime = moving_time; }
     void SetRollBackTime(float rollback_time) { m_fRollBackTime = rollback_time; }
 
-    void Update(CCamera* pCamera, float fElapsedTime);
+    void Update(CCamera* pCamera, float fElapsedTime, const CameraUpdateParams& params);
     virtual void HandleMessage(const Message& message, const CameraUpdateParams& params);
 };
 

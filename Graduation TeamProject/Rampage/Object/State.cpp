@@ -53,7 +53,7 @@ Atk1_Player::Atk1_Player()
 	// DAMAGE SOUND
 	pSoundComponent = std::make_unique<SoundPlayComponent>();
 	pSoundComponent->SetSoundNumber(2);
-	pSoundComponent->SetDelay(0.05f);
+	pSoundComponent->SetDelay(0.0f);
 	pSoundComponent->SetVolume(0.75f);
 	pSoundComponent->SetMT(MONSTER_TYPE::NONE);
 	pSoundComponent->SetSC(SOUND_CATEGORY::SOUND_SHOCK);
@@ -63,7 +63,7 @@ Atk1_Player::Atk1_Player()
 	// GOBLIN MOAN SOUND
 	pSoundComponent = std::make_unique<SoundPlayComponent>();
 	pSoundComponent->SetSoundNumber(0);
-	pSoundComponent->SetDelay(0.10f);
+	pSoundComponent->SetDelay(0.0f);
 	pSoundComponent->SetVolume(0.75f);
 	pSoundComponent->SetMT(MONSTER_TYPE::GOBLIN);
 	pSoundComponent->SetSC(SOUND_CATEGORY::SOUND_VOICE);
@@ -73,7 +73,7 @@ Atk1_Player::Atk1_Player()
 	// ORC MOAN SOUND
 	pSoundComponent = std::make_unique<SoundPlayComponent>();
 	pSoundComponent->SetSoundNumber(0);
-	pSoundComponent->SetDelay(0.05f);
+	pSoundComponent->SetDelay(0.0f);
 	pSoundComponent->SetVolume(0.75f);
 	pSoundComponent->SetMT(MONSTER_TYPE::ORC);
 	pSoundComponent->SetSC(SOUND_CATEGORY::SOUND_VOICE);
@@ -83,7 +83,7 @@ Atk1_Player::Atk1_Player()
 	// SKELETON MOAN SOUND
 	pSoundComponent = std::make_unique<SoundPlayComponent>();
 	pSoundComponent->SetSoundNumber(0);
-	pSoundComponent->SetDelay(0.05f);
+	pSoundComponent->SetDelay(0.0f);
 	pSoundComponent->SetVolume(0.75f);
 	pSoundComponent->SetMT(MONSTER_TYPE::SKELETON);
 	pSoundComponent->SetSC(SOUND_CATEGORY::SOUND_VOICE);
@@ -183,7 +183,7 @@ void Atk1_Player::Execute(CPlayer* player, float fElapsedTime)
 {
 	// player->Animate(fElapsedTime);
 	CAnimationSet* pAnimationSet = player->m_pChild->m_pSkinnedAnimationController->m_pAnimationSets->m_pAnimationSets[player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_nAnimationSet];
-	
+	 
 	// 충돌 판정 메세지 전달
 	if (0.3 < player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition && 
 		0.7 > player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition)
@@ -222,7 +222,7 @@ Atk2_Player::Atk2_Player()
 	// DAMAGE SOUND
 	pSoundComponent = std::make_unique<SoundPlayComponent>();
 	pSoundComponent->SetSoundNumber(2);
-	pSoundComponent->SetDelay(0.05f);
+	pSoundComponent->SetDelay(0.0f);
 	pSoundComponent->SetVolume(0.75f);
 	pSoundComponent->SetMT(MONSTER_TYPE::NONE);
 	pSoundComponent->SetSC(SOUND_CATEGORY::SOUND_SHOCK);
@@ -232,7 +232,7 @@ Atk2_Player::Atk2_Player()
 	// GOBLIN MOAN SOUND
 	pSoundComponent = std::make_unique<SoundPlayComponent>();
 	pSoundComponent->SetSoundNumber(0);
-	pSoundComponent->SetDelay(0.10f);
+	pSoundComponent->SetDelay(0.0f);
 	pSoundComponent->SetVolume(0.75f);
 	pSoundComponent->SetMT(MONSTER_TYPE::GOBLIN);
 	pSoundComponent->SetSC(SOUND_CATEGORY::SOUND_VOICE);
@@ -242,7 +242,7 @@ Atk2_Player::Atk2_Player()
 	// ORC MOAN SOUND
 	pSoundComponent = std::make_unique<SoundPlayComponent>();
 	pSoundComponent->SetSoundNumber(0);
-	pSoundComponent->SetDelay(0.05f);
+	pSoundComponent->SetDelay(0.0f);
 	pSoundComponent->SetVolume(0.75f);
 	pSoundComponent->SetMT(MONSTER_TYPE::ORC);
 	pSoundComponent->SetSC(SOUND_CATEGORY::SOUND_VOICE);
@@ -252,7 +252,7 @@ Atk2_Player::Atk2_Player()
 	// SKELETON MOAN SOUND
 	pSoundComponent = std::make_unique<SoundPlayComponent>();
 	pSoundComponent->SetSoundNumber(0);
-	pSoundComponent->SetDelay(0.05f);
+	pSoundComponent->SetDelay(0.0f);
 	pSoundComponent->SetVolume(0.75f);
 	pSoundComponent->SetMT(MONSTER_TYPE::SKELETON);
 	pSoundComponent->SetSC(SOUND_CATEGORY::SOUND_VOICE);
@@ -355,7 +355,7 @@ void Atk2_Player::Execute(CPlayer* player, float fElapsedTime)
 	
 	// 충돌 판정 메세지 전달
 	if (0.3 < player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition &&
-		0.7 > player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition)
+		0.4 > player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition)
 	{
 		PlayerParams PlayerParam;
 		PlayerParam.pPlayer = player;
@@ -391,7 +391,7 @@ Atk3_Player::Atk3_Player()
 	// DAMAGE SOUND
 	pSoundComponent = std::make_unique<SoundPlayComponent>();
 	pSoundComponent->SetSoundNumber(2);
-	pSoundComponent->SetDelay(0.05f);
+	pSoundComponent->SetDelay(0.0f);
 	pSoundComponent->SetVolume(0.75f);
 	pSoundComponent->SetMT(MONSTER_TYPE::NONE);
 	pSoundComponent->SetSC(SOUND_CATEGORY::SOUND_SHOCK);
@@ -401,7 +401,7 @@ Atk3_Player::Atk3_Player()
 	// GOBLIN MOAN SOUND
 	pSoundComponent = std::make_unique<SoundPlayComponent>();
 	pSoundComponent->SetSoundNumber(0);
-	pSoundComponent->SetDelay(0.10f);
+	pSoundComponent->SetDelay(0.0f);
 	pSoundComponent->SetVolume(0.75f);
 	pSoundComponent->SetMT(MONSTER_TYPE::GOBLIN);
 	pSoundComponent->SetSC(SOUND_CATEGORY::SOUND_VOICE);
@@ -411,7 +411,7 @@ Atk3_Player::Atk3_Player()
 	// ORC MOAN SOUND
 	pSoundComponent = std::make_unique<SoundPlayComponent>();
 	pSoundComponent->SetSoundNumber(0);
-	pSoundComponent->SetDelay(0.05f);
+	pSoundComponent->SetDelay(0.0f);
 	pSoundComponent->SetVolume(0.75f);
 	pSoundComponent->SetMT(MONSTER_TYPE::ORC);
 	pSoundComponent->SetSC(SOUND_CATEGORY::SOUND_VOICE);
@@ -421,7 +421,7 @@ Atk3_Player::Atk3_Player()
 	// SKELETON MOAN SOUND
 	pSoundComponent = std::make_unique<SoundPlayComponent>();
 	pSoundComponent->SetSoundNumber(0);
-	pSoundComponent->SetDelay(0.05f);
+	pSoundComponent->SetDelay(0.0f);
 	pSoundComponent->SetVolume(0.75f);
 	pSoundComponent->SetMT(MONSTER_TYPE::SKELETON);
 	pSoundComponent->SetSC(SOUND_CATEGORY::SOUND_VOICE);
@@ -522,7 +522,7 @@ void Atk3_Player::Execute(CPlayer* player, float fElapsedTime)
 
 	// 충돌 판정 메세지 전달
 	if (0.3 < player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition &&
-		0.7 > player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition)
+		0.5 > player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition)
 	{
 		PlayerParams PlayerParam;
 		PlayerParam.pPlayer = player;

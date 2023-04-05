@@ -57,13 +57,11 @@ void SoundPlayComponent::HandleMessage(const Message& message, const SoundPlayPa
 		else
 			pSound = CSoundManager::GetInst()->FindSound(m_nSoundNumber, m_sc);
 
-		CSoundManager::GetInst()->PlaySound(pSound->GetPath(), m_fVolume, m_fDelay);
+ 		CSoundManager::GetInst()->PlaySound(pSound->GetPath(), m_fVolume, m_fDelay);
     }
 }
 void CameraShakeComponent::Update(CCamera* pCamera, float fElapsedTime)
 {
-	if (!m_bEnable)
-		return;
 	if (pCamera->m_bCameraShaking && m_fDuration > m_ft) {
 		m_ft += fElapsedTime;
 
@@ -76,8 +74,8 @@ void CameraShakeComponent::Update(CCamera* pCamera, float fElapsedTime)
 		CameraDir = Vector3::ScalarProduct(CameraDir, ShakeConstant * m_fMagnitude, false);
 		XMMATRIX RotateMatrix = XMMatrixRotationAxis(XMLoadFloat3(&pCamera->GetLookVector()), RotateConstant);
 
-		XMFLOAT3 ShakeOffset; XMStoreFloat3(&ShakeOffset, XMVector3TransformCoord(XMLoadFloat3(&CameraDir), RotateMatrix));
-
+		XMFLOAT3 ShakeOffset; 
+		XMStoreFloat3(&ShakeOffset, XMVector3TransformCoord(XMLoadFloat3(&CameraDir), RotateMatrix));
 		pCamera->m_xmf3CalculatedPosition = Vector3::Add(pCamera->m_xmf3CalculatedPosition, ShakeOffset);
 	}
 	else {
@@ -87,12 +85,14 @@ void CameraShakeComponent::Update(CCamera* pCamera, float fElapsedTime)
 }
 void CameraShakeComponent::HandleMessage(const Message& message, const CameraUpdateParams& params)
 {
-	if (m_bEnable)
-		Update(params.pCamera, params.fElapsedTime);
+	if (!m_bEnable)
+		return;
+
+	Update(params.pCamera, params.fElapsedTime);
 }
 void CameraZoomerComponent::Update(CCamera* pCamera, float fElapsedTime)
 {
-	if (!m_bEnable || !pCamera->m_bCameraZooming)
+	if (!pCamera->m_bCameraZooming)
 		return;
 
 	m_fSpeed = m_fMaxDistance / m_fMovingTime;
@@ -126,12 +126,13 @@ void CameraZoomerComponent::Update(CCamera* pCamera, float fElapsedTime)
 }
 void CameraZoomerComponent::HandleMessage(const Message& message, const CameraUpdateParams& params)
 {
-	if (m_bEnable)
-		Update(params.pCamera, params.fElapsedTime);
+	if (!m_bEnable)
+		return;
+	Update(params.pCamera, params.fElapsedTime);
 }
-void CameraMoveComponent::Update(CCamera* pCamera, float fElapsedTime)
+void CameraMoveComponent::Update(CCamera* pCamera, float fElapsedTime, const CameraUpdateParams& params)
 {
-	if (!m_bEnable || !pCamera->m_bCameraMoving)
+	if (!pCamera->m_bCameraMoving)
 		return;
 
 	m_fSpeed = m_fMaxDistance / m_fMovingTime;
@@ -139,9 +140,10 @@ void CameraMoveComponent::Update(CCamera* pCamera, float fElapsedTime)
 
 	if (m_fCurrDistance < m_fMaxDistance) {
 		float length = m_fSpeed * 1.0f * fElapsedTime;
+
 		m_fCurrDistance += length;
 
-		offset = Vector3::Add(offset, Vector3::ScalarProduct(m_xmf3Direction, length, false));
+		offset = Vector3::Add(offset, Vector3::ScalarProduct(((CPlayer*)(params.pPlayer))->GetATKDirection(), length, false));
 
 		pCamera->m_xmf3CalculatedPosition = Vector3::Add(pCamera->m_xmf3CalculatedPosition, offset);
 	}
@@ -156,15 +158,17 @@ void CameraMoveComponent::Update(CCamera* pCamera, float fElapsedTime)
 		float length = m_fBackSpeed * 1.0f * fElapsedTime;
 		m_fCurrDistance += length;
 
-		offset = Vector3::Add(offset, Vector3::ScalarProduct(m_xmf3Direction, -length, false));
+		offset = Vector3::Add(offset, Vector3::ScalarProduct(((CPlayer*)(params.pPlayer))->GetATKDirection(), -length, false));
 
 		pCamera->m_xmf3CalculatedPosition = Vector3::Add(pCamera->m_xmf3CalculatedPosition, offset);
 	}
 }
 void CameraMoveComponent::HandleMessage(const Message& message, const CameraUpdateParams& params)
 {
-	if (m_bEnable)
-		Update(params.pCamera, params.fElapsedTime);
+	if (!m_bEnable)
+		return;
+
+	Update(params.pCamera, params.fElapsedTime, params);
 }
 void DamageAnimationComponent::HandleMessage(const Message& message, const AnimationCompParams& params)
 {

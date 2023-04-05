@@ -775,6 +775,7 @@ void CMainTMPScene::UpdateObjects(float fTimeElapsed)
 
 	CameraUpdateParams camera_update_params;
 	camera_update_params.pCamera = m_pMainSceneCamera.get();
+	camera_update_params.pPlayer = m_pPlayer;
 	camera_update_params.fElapsedTime = fTimeElapsed;
 	CMessageDispatcher::GetInst()->Dispatch_Message<CameraUpdateParams>(MessageType::UPDATE_CAMERA, &camera_update_params, ((CPlayer*)m_pPlayer)->m_pStateMachine->GetCurrentState());
 
