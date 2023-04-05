@@ -104,7 +104,7 @@ void CameraZoomerComponent::Update(CCamera* pCamera, float fElapsedTime, const C
 		float length = m_fSpeed * fElapsedTime;
 		m_fCurrDistance += length;
 
-		XMFLOAT3 xmf3ZoomDirection = Vector3::Subtract(pCamera->GetPosition(), ((CPlayer*)(params.pPlayer))->GetTargetPosition());
+		XMFLOAT3 xmf3ZoomDirection = Vector3::Normalize(Vector3::Subtract(pCamera->GetPosition(), ((CPlayer*)(params.pPlayer))->GetTargetPosition()));
 		offset = Vector3::Add(offset, Vector3::ScalarProduct(xmf3ZoomDirection, length * ZoomConstant, false));
 
 		pCamera->m_xmf3CalculatedPosition = Vector3::Add(pCamera->m_xmf3CalculatedPosition, offset);
@@ -120,7 +120,7 @@ void CameraZoomerComponent::Update(CCamera* pCamera, float fElapsedTime, const C
 		float length = m_fBackSpeed * fElapsedTime;
 		m_fCurrDistance += length;
 
-		XMFLOAT3 xmf3ZoomDirection = Vector3::Subtract(pCamera->GetPosition(), ((CPlayer*)(params.pPlayer))->GetTargetPosition());
+		XMFLOAT3 xmf3ZoomDirection = Vector3::Normalize(Vector3::Subtract(pCamera->GetPosition(), ((CPlayer*)(params.pPlayer))->GetTargetPosition()));
 		offset = Vector3::Add(offset, Vector3::ScalarProduct(xmf3ZoomDirection, -length * ZoomConstant, false));
 
 		pCamera->m_xmf3CalculatedPosition = Vector3::Add(pCamera->m_xmf3CalculatedPosition, offset);
