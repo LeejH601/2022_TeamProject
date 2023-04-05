@@ -179,10 +179,10 @@ void Atk1_Player::Execute(CPlayer* player, float fElapsedTime)
 {
 	// player->Animate(fElapsedTime);
 	CAnimationSet* pAnimationSet = player->m_pChild->m_pSkinnedAnimationController->m_pAnimationSets->m_pAnimationSets[player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_nAnimationSet];
-	 
+	
 	// 충돌 판정 메세지 전달
-	if (0.3 < player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition && 
-		0.7 > player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition)
+	if (0.3f < player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition && 
+		0.7f > player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition)
 	{
 		PlayerParams PlayerParam;
 		PlayerParam.pPlayer = player;

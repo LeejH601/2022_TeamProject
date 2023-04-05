@@ -64,7 +64,7 @@ public:
 		SetLookAt(Vector3::Add(GetPosition(), XMFLOAT3(-m_xmf3HitterVec.x, 0.0f, -m_xmf3HitterVec.z)));
 
 		SoundPlayParams SoundPlayParam{ MONSTER_TYPE::NONE, SOUND_CATEGORY::SOUND_SHOCK };
-		CMessageDispatcher::GetInst()->Dispatch_Message<SoundPlayParams>(MessageType::PLAY_SOUND, &SoundPlayParam, this);
+		CMessageDispatcher::GetInst()->Dispatch_Message<SoundPlayParams>(MessageType::PLAY_SOUND, &SoundPlayParam, this);  
 	}
 	virtual bool CheckCollision(CGameObject* pTargetObject) {
 		if (pTargetObject)
