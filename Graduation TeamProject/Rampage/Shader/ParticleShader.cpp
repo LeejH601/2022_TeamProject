@@ -19,7 +19,7 @@ void CParticleShader::CreateShader(ID3D12Device* pd3dDevice, ID3D12RootSignature
 	d3dPipelineStateDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_POINT;
 	d3dPipelineStateDesc.NumRenderTargets = nRenderTargets;
 	for (UINT i = 0; i < nRenderTargets; i++) d3dPipelineStateDesc.RTVFormats[i] = (pdxgiRtvFormats) ? pdxgiRtvFormats[i] : DXGI_FORMAT_R8G8B8A8_UNORM;
-	d3dPipelineStateDesc.DSVFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	d3dPipelineStateDesc.DSVFormat = DXGI_FORMAT_D32_FLOAT;
 	d3dPipelineStateDesc.SampleDesc.Count = 1;
 	d3dPipelineStateDesc.Flags = D3D12_PIPELINE_STATE_FLAG_NONE;
 	HRESULT hResult = pd3dDevice->CreateGraphicsPipelineState(&d3dPipelineStateDesc, __uuidof(ID3D12PipelineState), (void**)m_ppd3dPipelineStates[nPipelineState].GetAddressOf());
@@ -168,8 +168,6 @@ void CParticleShader::CreateGraphicsPipelineState(ID3D12Device* pd3dDevice, ID3D
 	DXGI_FORMAT pdxgiRtvFormat = DXGI_FORMAT_UNKNOWN;
 	DXGI_FORMAT pdxgiRtvFormats[7] = { DXGI_FORMAT_R8G8B8A8_UNORM, DXGI_FORMAT_R16G16B16A16_FLOAT, DXGI_FORMAT_R16G16B16A16_UNORM, DXGI_FORMAT_R32G32B32A32_FLOAT,
 		DXGI_FORMAT_R8G8B8A8_UNORM, DXGI_FORMAT_R32_FLOAT, DXGI_FORMAT_R32_FLOAT };
-
-
 
 	CParticleShader::CreateShader(pd3dDevice, pd3dGraphicsRootSignature, 0, &pdxgiRtvFormat, 0); //Stream Output Pipeline State // DXGI_FORMAT_UNKNOWN
 	CParticleShader::CreateShader(pd3dDevice, pd3dGraphicsRootSignature, 7, pdxgiRtvFormats, 1); //Draw Pipeline State // DXGI_FORMAT_R8G8B8A8_UNORM

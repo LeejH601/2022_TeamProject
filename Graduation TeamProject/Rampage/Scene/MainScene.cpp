@@ -729,8 +729,9 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 		m_pUpDownParticleObjects.push_back(std::move(m_pMeterorObject));
 	}
 
-	Idle_Monster::GetInst()->SetUpDownParticleObjects(&m_pUpDownParticleObjects);
 	Run_Player::GetInst()->SetSmokeObjects(&m_pSmokeObjects);
+	Damaged_Monster::GetInst()->SetUpDownParticleObjects(&m_pUpDownParticleObjects);
+
 	// COLLIDE LISTENER
 	std::unique_ptr<SceneCollideListener> pCollideListener = std::make_unique<SceneCollideListener>();																																																																																																																				
 	pCollideListener->SetScene(this);
@@ -752,22 +753,7 @@ bool CMainTMPScene::ProcessInput(DWORD dwDirection, float cxDelta, float cyDelta
 {
 	m_pCurrentCamera->ProcessInput(dwDirection, cxDelta, cyDelta, fTimeElapsed);
 	((CPlayer*)m_pPlayer)->ProcessInput(dwDirection, cxDelta, cyDelta, fTimeElapsed, m_pCurrentCamera);
-	
-	//bool bInput = false;
-	//for (int i = 0; i < m_pSmokeObjects.size(); i++)
-	//{
-	//	if (((CParticleObject*)m_pSmokeObjects[i].get())->ProcessInput(dwDirection, cxDelta, cyDelta, fTimeElapsed, m_pCurrentCamera))
-	//		bInput = true;
-	//}
-	//if (bInput)
-	//{
-	//	ParticleSmokeParams Particlesmoke_comp_params;
-	//	Particlesmoke_comp_params.pObjects = &m_pSmokeObjects;
-	//	Particlesmoke_comp_params.xmf3Position = m_pPlayer->GetPosition();
-	//	Particlesmoke_comp_params.xmfShift = ((CParticleObject*)m_pSmokeObjects[0].get())->GetDirection();
-	//	Particlesmoke_comp_params.m_bRender = true;
-	//	CMessageDispatcher::GetInst()->Dispatch_Message<ParticleSmokeParams>(MessageType::UPDATE_PARTICLE, &Particlesmoke_comp_params, ((CPlayer*)m_pPlayer)->m_pStateMachine->GetCurrentState());
-	//}
+
 	return true;
 }
 
@@ -1095,7 +1081,6 @@ void CMainTMPScene::HandleCollision(const CollideParams& params)
 		particle_comp_params.pObject = (*it).get();
 		particle_comp_params.xmf3Position = params.xmf3CollidePosition;
 		CMessageDispatcher::GetInst()->Dispatch_Message<ParticleCompParams>(MessageType::UPDATE_PARTICLE, &particle_comp_params, ((CPlayer*)m_pPlayer)->m_pStateMachine->GetCurrentState());
-
 	}
 
 

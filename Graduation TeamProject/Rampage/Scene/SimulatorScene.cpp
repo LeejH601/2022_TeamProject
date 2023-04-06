@@ -443,7 +443,7 @@ void CSimulatorScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 		m_pTerrainSpriteObject.push_back(std::move(m_pSpriteObject));
 	}
 
-	Idle_Monster::GetInst()->SetUpDownParticleObjects(&m_pUpDownParticleObjects);
+	Damaged_Monster::GetInst()->SetUpDownParticleObjects(&m_pUpDownParticleObjects);
 
 	m_pPostProcessShader = std::make_unique<CPostProcessShader>();
 	m_pPostProcessShader->CreateShader(pd3dDevice, GetGraphicsRootSignature(), 7, pdxgiObjectRtvFormats, DXGI_FORMAT_D32_FLOAT, 0);

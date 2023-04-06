@@ -592,7 +592,7 @@ void Run_Player::Execute(CPlayer* player, float fElapsedTime)
 
 		Particlesmoke_comp_params.xmfDirection = player->m_xmfDirection;
 		Particlesmoke_comp_params.iIndex = (++iIndex) % m_pSmokeObjects->size();
-
+		
 		CMessageDispatcher::GetInst()->Dispatch_Message<ParticleSmokeParams>(MessageType::UPDATE_PARTICLE, &Particlesmoke_comp_params, player->m_pStateMachine->GetCurrentState());
 	}
 

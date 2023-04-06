@@ -55,16 +55,16 @@ public:
 	virtual void UpdateTransform(XMFLOAT4X4* pxmf4x4Parent = NULL);
 	virtual void SetHit(CGameObject* pHitter)
 	{
-		m_pStateMachine->ChangeState(Idle_Monster::GetInst());
-		m_pStateMachine->ChangeState(Damaged_Monster::GetInst());
-
 		m_xmf3HitterVec = Vector3::Normalize(Vector3::Subtract(GetPosition(), pHitter->GetPosition()));
-		m_xmf3HitterVec.y = 0.0f;
 
 		SetLookAt(Vector3::Add(GetPosition(), XMFLOAT3(-m_xmf3HitterVec.x, 0.0f, -m_xmf3HitterVec.z)));
 
 		SoundPlayParams SoundPlayParam{ MONSTER_TYPE::NONE, SOUND_CATEGORY::SOUND_SHOCK };
 		CMessageDispatcher::GetInst()->Dispatch_Message<SoundPlayParams>(MessageType::PLAY_SOUND, &SoundPlayParam, this);  
+
+		m_pStateMachine->ChangeState(Idle_Monster::GetInst());
+		m_pStateMachine->ChangeState(Damaged_Monster::GetInst());
+		//m_pStateMachine->ChangeState(Dead_Monster::GetInst());
 	}
 	virtual bool CheckCollision(CGameObject* pTargetObject) {
 		if (pTargetObject)

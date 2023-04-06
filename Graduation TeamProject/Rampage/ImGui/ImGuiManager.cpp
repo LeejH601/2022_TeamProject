@@ -7,7 +7,6 @@
 #include "..\Global\Locator.h"
 #include "..\Sound\SoundManager.h"
 #include "..\Object\TextureManager.h"
-#include "..\Object\AnimationComponent.h"
 
 #define NUM_FRAMES_IN_FLIGHT 3
 //========================================================================

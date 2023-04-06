@@ -29,7 +29,7 @@ public:
 	XMFLOAT3 GetATKDirection();
 	XMFLOAT3 GetTargetPosition();
 
-	void ProcessInput(DWORD dwDirection, float cxDelta, float cyDelta, float fTimeElapsed, CCamera* pCamera, class CParticleObject* pObject);
+	void ProcessInput(DWORD dwDirection, float cxDelta, float cyDelta, float fTimeElapsed, CCamera* pCamera);
 	virtual void Update(float fTimeElapsed);
 	virtual bool CheckCollision(CGameObject* pTargetObject);
 

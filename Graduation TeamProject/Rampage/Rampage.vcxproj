@@ -175,7 +175,6 @@
     <ClCompile Include="ImGui\imgui_tables.cpp" />
     <ClCompile Include="ImGui\imgui_widgets.cpp" />
     <ClCompile Include="Object\Animation.cpp" />
-    <ClCompile Include="Object\AnimationComponent.cpp" />
     <ClCompile Include="Object\BillBoardObject.cpp" />
     <ClCompile Include="Object\Light.cpp" />
     <ClCompile Include="Object\Mesh.cpp" />
@@ -235,7 +234,6 @@
     <ClInclude Include="ImGui\imstb_textedit.h" />
     <ClInclude Include="ImGui\imstb_truetype.h" />
     <ClInclude Include="Object\Animation.h" />
-    <ClInclude Include="Object\AnimationComponent.h" />
     <ClInclude Include="Object\BillBoardObject.h" />
     <ClInclude Include="Object\Light.h" />
     <ClInclude Include="Object\Mesh.h" />

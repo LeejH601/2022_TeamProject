@@ -205,7 +205,7 @@ void DamageAnimationComponent::HandleMessage(const Message& message, const Anima
 				}
 			}
 
-			xmf3DamageVec = Vector3::ScalarProduct(pMonster->GetHitterVec(), pMonster->m_fDamageDistance, false);
+			xmf3DamageVec = Vector3::ScalarProduct(XMFLOAT3{ pMonster->GetHitterVec().x, 0.0f, pMonster->GetHitterVec().z }, pMonster->m_fDamageDistance, false);
 			pMonster->Move(xmf3DamageVec, true);
 		}
 	}

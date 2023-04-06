@@ -100,8 +100,6 @@ bool CPlayer::CheckCollision(CGameObject* pTargetObject)
 			}
 			m_xmf3TargetPosition = pTargetObject->GetPosition();
 			pTargetObject->SetHit(this);
-			XMFLOAT3 direction = Vector3::Subtract(pTargetObject->GetPosition(), GetPosition());
-			pTargetObject->SetHitDirection(Vector3::Normalize(direction));
 
 			flag = true;
 			m_iAttack_Limit--;
