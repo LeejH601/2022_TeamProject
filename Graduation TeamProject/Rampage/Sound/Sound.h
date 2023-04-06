@@ -31,7 +31,7 @@ public:
 
 
     void Release();
-    void play(FMOD_SYSTEM* g_sound_system);
+    void play(FMOD_SYSTEM* g_sound_system, FMOD_CHANNELGROUP* m_channelgroup);
     void pause();
     void resume();
     void stop();

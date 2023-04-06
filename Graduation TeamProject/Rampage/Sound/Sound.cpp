@@ -50,9 +50,9 @@ void CSound::Release()
 	FMOD_Sound_Release(m_sound);
 }
 
-void CSound::play(FMOD_SYSTEM* g_sound_system)
+void CSound::play(FMOD_SYSTEM* g_sound_system, FMOD_CHANNELGROUP* m_channelgroup)
 {
-	FMOD_System_PlaySound(g_sound_system, m_sound, NULL, false, &m_channel);
+	FMOD_System_PlaySound(g_sound_system, m_sound, m_channelgroup, false, &m_channel);
 	FMOD_Channel_SetVolume(m_channel, m_volume);
 }
 
@@ -94,6 +94,7 @@ void CSound::volumeDown() {
 
 void CSound::Update(FMOD_SYSTEM* g_sound_system) {
 	FMOD_Channel_IsPlaying(m_channel, &m_bool);
+
 	if (m_bool) {
 		FMOD_System_Update(g_sound_system);
 	}

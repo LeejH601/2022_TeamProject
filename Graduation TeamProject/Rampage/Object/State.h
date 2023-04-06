@@ -14,6 +14,9 @@ public:
     virtual IMessageListener* GetShockSoundComponent();
     virtual IMessageListener* GetShootSoundComponent();
     virtual IMessageListener* GetEffectSoundComponent();
+    virtual IMessageListener* GetGoblinMoanComponent();
+    virtual IMessageListener* GetOrcMoanComponent();
+    virtual IMessageListener* GetSkeletonMoanComponent();
     virtual IMessageListener* GetCameraShakeComponent();
     virtual IMessageListener* GetCameraMoveComponent();
     virtual IMessageListener* GetCameraZoomerComponent();
@@ -139,6 +142,57 @@ inline IMessageListener* CState<entity_type>::GetEffectSoundComponent()
         }
         return false;
     });
+
+    if (p != m_pListeners.end())
+        return (*p).get();
+
+    return nullptr;
+}
+
+template<class entity_type>
+inline IMessageListener* CState<entity_type>::GetGoblinMoanComponent()
+{
+    std::vector<std::unique_ptr<IMessageListener>>::iterator p = std::find_if(m_pListeners.begin(), m_pListeners.end(), [](const std::unique_ptr<IMessageListener>& listener) {
+        SoundPlayComponent* pSoundPlayComponent = dynamic_cast<SoundPlayComponent*>(listener.get());
+        if (pSoundPlayComponent && pSoundPlayComponent->GetSoundCategory() == SOUND_CATEGORY::SOUND_VOICE && pSoundPlayComponent->GetMonsterCategory() == MONSTER_TYPE::GOBLIN) {
+            return true;
+        }
+        return false;
+        });
+
+    if (p != m_pListeners.end())
+        return (*p).get();
+
+    return nullptr;
+}
+
+template<class entity_type>
+inline IMessageListener* CState<entity_type>::GetOrcMoanComponent()
+{
+    std::vector<std::unique_ptr<IMessageListener>>::iterator p = std::find_if(m_pListeners.begin(), m_pListeners.end(), [](const std::unique_ptr<IMessageListener>& listener) {
+        SoundPlayComponent* pSoundPlayComponent = dynamic_cast<SoundPlayComponent*>(listener.get());
+        if (pSoundPlayComponent && pSoundPlayComponent->GetSoundCategory() == SOUND_CATEGORY::SOUND_VOICE && pSoundPlayComponent->GetMonsterCategory() == MONSTER_TYPE::ORC) {
+            return true;
+        }
+        return false;
+        });
+
+    if (p != m_pListeners.end())
+        return (*p).get();
+
+    return nullptr;
+}
+
+template<class entity_type>
+inline IMessageListener* CState<entity_type>::GetSkeletonMoanComponent()
+{
+    std::vector<std::unique_ptr<IMessageListener>>::iterator p = std::find_if(m_pListeners.begin(), m_pListeners.end(), [](const std::unique_ptr<IMessageListener>& listener) {
+        SoundPlayComponent* pSoundPlayComponent = dynamic_cast<SoundPlayComponent*>(listener.get());
+        if (pSoundPlayComponent && pSoundPlayComponent->GetSoundCategory() == SOUND_CATEGORY::SOUND_VOICE && pSoundPlayComponent->GetMonsterCategory() == MONSTER_TYPE::SKELETON) {
+            return true;
+        }
+        return false;
+        });
 
     if (p != m_pListeners.end())
         return (*p).get();

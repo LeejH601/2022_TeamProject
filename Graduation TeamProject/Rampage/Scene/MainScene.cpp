@@ -543,7 +543,7 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pGoblinObject->SetPosition(XMFLOAT3(200, 300, -120));
 	m_pGoblinObject->SetScale(4.0f, 4.0f, 4.0f);
 	m_pGoblinObject->Rotate(0.0f, 180.0f, 0.0f);
-	m_pGoblinObject->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 5);
+	m_pGoblinObject->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
 	m_pGoblinObject->m_pSkinnedAnimationController->m_xmf3RootObjectScale = XMFLOAT3(10.0f, 10.0f, 10.0f);
 	m_pGoblinObject->CreateArticulation(1.0f);
 	m_pObjects.push_back(std::move(m_pGoblinObject));
@@ -552,7 +552,7 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pGoblinObject->SetPosition(XMFLOAT3(200, 300, -60));
 	m_pGoblinObject->SetScale(4.0f, 4.0f, 4.0f);
 	m_pGoblinObject->Rotate(0.0f, 180.0f, 0.0f);
-	m_pGoblinObject->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 5);
+	m_pGoblinObject->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
 	m_pGoblinObject->CreateArticulation(1.0f);
 	m_pObjects.push_back(std::move(m_pGoblinObject));
 
@@ -562,7 +562,7 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 		m_pGoblin->SetPosition(XMFLOAT3(150, 300, -120));
 		m_pGoblin->SetScale(4.0f, 4.0f, 4.0f);
 		m_pGoblin->Rotate(0.0f, 0.0f, 0.0f);
-		m_pGoblin->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 5);
+		m_pGoblin->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
 		m_pGoblin->CreateArticulation(1.0f);
 
 		m_pObjects.push_back(std::move(m_pGoblin));
@@ -573,7 +573,7 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pOrc->SetPosition(XMFLOAT3(150, 300, -90));
 	m_pOrc->SetScale(4.0f, 4.0f, 4.0f);
 	m_pOrc->Rotate(0.0f, 0.0f, 0.0f);
-	m_pOrc->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 5);
+	m_pOrc->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
 	m_pOrc->CreateArticulation(1.0f);
 	
 	m_pOrc->m_pArticulationLinks[15]->addForce(physx::PxVec3(0.0f, -10000.0f, 0.0f), physx::PxForceMode::eIMPULSE);
@@ -587,7 +587,7 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pGoblin->SetPosition(XMFLOAT3(150, 300, -150));
 	m_pGoblin->SetScale(4.0f, 4.0f, 4.0f);
 	m_pGoblin->Rotate(0.0f, 0.0f, 0.0f);
-	m_pGoblin->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 5);
+	m_pGoblin->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
 	m_pGoblin->CreateArticulation(1.0f);
 	m_pObjects.push_back(std::move(m_pGoblin));
 
@@ -595,7 +595,7 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pGoblin->SetPosition(XMFLOAT3(150, 300, -180));
 	m_pGoblin->SetScale(4.0f, 4.0f, 4.0f);
 	m_pGoblin->Rotate(0.0f, 0.0f, 0.0f);
-	m_pGoblin->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 5);
+	m_pGoblin->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
 	m_pGoblin->CreateArticulation(1.0f);
 	m_pObjects.push_back(std::move(m_pGoblin));
 
@@ -606,7 +606,7 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 		m_pGoblin->SetPosition(testpos);
 		m_pGoblin->SetScale(14.0f, 14.0f, 14.0f);
 		m_pGoblin->Rotate(0.0f, 0.0f, 0.0f);
-		m_pGoblin->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 5);
+		m_pGoblin->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
 		m_pGoblin->CreateArticulation(1.0f);
 		m_pObjects.push_back(std::move(m_pGoblin));
 	}
@@ -738,7 +738,6 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	CMessageDispatcher::GetInst()->RegisterListener(MessageType::COLLISION, m_pListeners.back().get(), nullptr);
 
 	m_pHDRComputeShader = std::make_unique<CHDRComputeShader>();
-	//m_pHDRComputeShader->SetTextureSource(m_pPostProcessShader->GetTextureShared());
 	m_pHDRComputeShader->CreateShader(pd3dDevice, pd3dCommandList, GetComputeRootSignature());
 
 	m_pBloomComputeShader = std::make_unique<CBloomShader>();
@@ -799,10 +798,15 @@ void CMainTMPScene::UpdateObjects(float fTimeElapsed)
 
 	m_pMainSceneCamera->Update(xmf3PlayerPos, fTimeElapsed);
 
-	CameraUpdateParams camera_shake_params;
-	camera_shake_params.pCamera = m_pMainSceneCamera.get();
-	camera_shake_params.fElapsedTime = fTimeElapsed;
-	CMessageDispatcher::GetInst()->Dispatch_Message<CameraUpdateParams>(MessageType::UPDATE_CAMERA, &camera_shake_params, ((CPlayer*)m_pPlayer)->m_pStateMachine->GetCurrentState());
+	CameraUpdateParams camera_update_params;
+	camera_update_params.pCamera = m_pMainSceneCamera.get();
+	camera_update_params.pPlayer = m_pPlayer;
+	camera_update_params.fElapsedTime = fTimeElapsed;
+	CMessageDispatcher::GetInst()->Dispatch_Message<CameraUpdateParams>(MessageType::UPDATE_CAMERA, &camera_update_params, ((CPlayer*)m_pPlayer)->m_pStateMachine->GetCurrentState());
+
+	PlayerParams player_params;
+	player_params.pPlayer = m_pPlayer;
+	CMessageDispatcher::GetInst()->Dispatch_Message<PlayerParams>(MessageType::CHECK_IS_PLAYER_IN_FRONT_OF_MONSTER, &player_params, nullptr);
 }
 
 #define WITH_LAG_DOLL_SIMULATION
@@ -924,7 +928,7 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 		pd3dDestination = m_pHDRComputeShader->m_pSourceTexture->GetResource(0);
 
 		::SynchronizeResourceTransition(pd3dCommandList, pd3dSource, D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE);
-		::SynchronizeResourceTransition(pd3dCommandList, pd3dDestination, D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_COPY_DEST);
+		::SynchronizeResourceTransition(pd3dCommandList, pd3dDestination, D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_COPY_DEST);
 		pd3dCommandList->CopyResource(pd3dDestination, pd3dSource);
 		::SynchronizeResourceTransition(pd3dCommandList, pd3dSource, D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 		::SynchronizeResourceTransition(pd3dCommandList, pd3dDestination, D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_COMMON);

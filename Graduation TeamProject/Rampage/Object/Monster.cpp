@@ -1,5 +1,4 @@
 #include "Monster.h"
-#include "MonsterState.h"
 #include "ModelManager.h"
 #include "AnimationComponent.h"
 #include "..\Global\Locator.h"
@@ -18,15 +17,54 @@ CMonster::CMonster()
 	m_fDissolveTime = 0.0f;
 	TestDissolvetime = 0.0f;
 
-	std::unique_ptr<PlayerAttackComponent> pCollisionComponent = std::make_unique<PlayerAttackComponent>();
+	m_fSpeedKperH = 2.0f;
+	m_fSpeedMperS = m_fSpeedKperH * 1000.0f / 3600.0f;
+	m_fSpeedUperS = m_fSpeedMperS * 8.0f / 1.0f;
+
+	std::unique_ptr<PlayerAttackListener> pCollisionComponent = std::make_unique<PlayerAttackListener>();
 	pCollisionComponent->SetObject(this);
 	m_pListeners.push_back(std::move(pCollisionComponent));
 
 	CMessageDispatcher::GetInst()->RegisterListener(MessageType::PLAYER_ATTACK, m_pListeners.back().get());
+
+	std::unique_ptr<PlayerLocationListener> pPlayerLocationListener = std::make_unique<PlayerLocationListener>();
+	pPlayerLocationListener->SetObject(this);
+	m_pListeners.push_back(std::move(pPlayerLocationListener));
+
+	CMessageDispatcher::GetInst()->RegisterListener(MessageType::CHECK_IS_PLAYER_IN_FRONT_OF_MONSTER, m_pListeners.back().get());
 }
 
 CMonster::~CMonster()
 {
+}
+
+void CMonster::SetWanderVec()
+{
+	m_xmf3WanderVec.x = RandomFloatInRange(-10.0f, 10.0f);
+	m_xmf3WanderVec.z = RandomFloatInRange(-10.0f, 10.0f);
+
+	m_xmf3WanderVec = Vector3::Normalize(m_xmf3WanderVec);
+}
+
+void CMonster::CheckIsPlayerInFrontOfThis(XMFLOAT3 xmf3PlayerPosition)
+{
+	XMFLOAT3 xmf3MonsterLook = GetLook();
+	XMFLOAT3 xmf3ToPlayerVec = Vector3::Subtract(xmf3PlayerPosition, GetPosition());
+
+	float fDotProduct = Vector3::DotProduct(xmf3MonsterLook, xmf3ToPlayerVec);
+	m_fToPlayerLength = Vector3::Length(xmf3ToPlayerVec);
+
+	if (!m_bCanChase)
+		return;
+
+	if (fDotProduct > 0.0f && m_fToPlayerLength < 40.0f)
+	{
+		m_xmf3ChasingVec = Vector3::Normalize(xmf3ToPlayerVec);
+
+		// 플레이어가 몬스터의 앞에 있음
+		if (m_pStateMachine->GetCurrentState() != Chasing_Monster::GetInst())
+			m_pStateMachine->ChangeState(Chasing_Monster::GetInst());
+	}
 }
 
 void CMonster::SetScale(float x, float y, float z)
@@ -53,11 +91,10 @@ void CMonster::Animate(float fTimeElapsed)
 
 void CMonster::Update(float fTimeElapsed)
 {
+	// 현재 행동을 선택함
 	m_pStateMachine->Update(fTimeElapsed);
 
 	CPhysicsObject::Apply_Gravity(fTimeElapsed);
-
-	Animate(fTimeElapsed);
 
 	if (!m_bDissolved) {
 		if (m_bSimulateArticulate) {
@@ -69,16 +106,6 @@ void CMonster::Update(float fTimeElapsed)
 	else{
 		m_fDissolveTime += fTimeElapsed;
 		m_fDissolveThrethHold = m_fDissolveTime / m_fMaxDissolveTime;
-	}
-
-	if (m_pStateMachine->GetCurrentState() == Damaged_Monster::GetInst() ||
-		m_pStateMachine->GetCurrentState() == Stun_Monster::GetInst())
-	{
-		XMFLOAT3 xmf3ShakeVec = Vector3::ScalarProduct(GetRight(), m_fShakeDistance, false);
-		XMFLOAT3 xmf3DamageVec = Vector3::ScalarProduct(m_xmf3HitterVec, m_fDamageDistance, false);
-		XMFLOAT3 xmf3Pos = Vector3::Add(Vector3::Add(GetPosition(), xmf3ShakeVec), xmf3DamageVec);
-
-		SetPosition(xmf3Pos);
 	}
 
 	CPhysicsObject::Move(m_xmf3Velocity, false);
@@ -135,6 +162,8 @@ void CMonster::UpdateTransformFromArticulation(XMFLOAT4X4* pxmf4x4Parent, std::v
 //
 COrcObject::COrcObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks)
 {
+	m_MonsterType = MONSTER_TYPE::ORC;
+
 	CLoadedModelInfo* pOrcModel = CModelManager::GetInst()->GetModelInfo("Object/Orc.bin");;
 	if (!pOrcModel) pOrcModel = CModelManager::GetInst()->LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, "Object/Orc.bin");
 
@@ -164,6 +193,8 @@ void COrcObject::PrepareBoundingBox(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 //
 CGoblinObject::CGoblinObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks)
 {
+	m_MonsterType = MONSTER_TYPE::GOBLIN;
+
 	m_fStunTime = 0.0f;
 	m_fStunStartTime = 0.2f;
 
@@ -194,6 +225,8 @@ void CGoblinObject::PrepareBoundingBox(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 //
 CSkeletonObject::CSkeletonObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks)
 {
+	m_MonsterType = MONSTER_TYPE::SKELETON;
+
 	CLoadedModelInfo* pSkeletonModel = CModelManager::GetInst()->GetModelInfo("Object/SK_Skeleton.bin");;
 	if (!pSkeletonModel) pSkeletonModel = CModelManager::GetInst()->LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, "Object/SK_Skeleton.bin");
 
@@ -203,11 +236,6 @@ CSkeletonObject::CSkeletonObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
 	PrepareBoundingBox(pd3dDevice, pd3dCommandList);
-	/*CLoadedModelInfo* pArmorModel = CModelManager::GetInst()->GetModelInfo("Object/SK_Armor.bin");;
-	if (!pArmorModel) pArmorModel = CModelManager::GetInst()->LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, "Object/SK_Armor.bin");
-
-	SetChild(pArmorModel->m_pModelRootObject, true);*/
-	//m_pSkinnedAnimationController = std::make_unique<CAnimationController>(pd3dDevice, pd3dCommandList, nAnimationTracks, pArmorModel);
 }
 CSkeletonObject::~CSkeletonObject()
 {

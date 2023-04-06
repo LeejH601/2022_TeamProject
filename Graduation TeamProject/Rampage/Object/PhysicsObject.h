@@ -47,6 +47,10 @@ public:
 	float& GetRoll() { return(m_fRoll); }
 	float& GetYaw() { return(m_fYaw); }
 
+	float& GetSpeedKperH() { return m_fSpeedKperH; }
+	float& GetSpeedMperS() { return m_fSpeedMperS; }
+	float& GetSpeedUperS() { return m_fSpeedUperS; }
+
 	virtual void Animate(float fTimeElapsed);
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, bool b_UseTexture, CCamera* pCamera = NULL);
 

@@ -353,7 +353,8 @@ void CSimulatorScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 	m_pDummyEnemy->SetPosition(XMFLOAT3(50 + offset.x, 100, 50 + offset.z));
 	m_pDummyEnemy->SetScale(4.0f, 4.0f, 4.0f);
 	m_pDummyEnemy->Rotate(0.0f, -90.0f, 0.0f);
-	m_pDummyEnemy->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 5);
+	m_pDummyEnemy->m_bIsDummy = true;
+	m_pDummyEnemy->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
 	m_pEnemys.push_back(std::move(m_pDummyEnemy));
 
 	// 3->IDLE
@@ -486,11 +487,11 @@ void CSimulatorScene::UpdateObjects(float fTimeElapsed)
 
 	m_pSimulaterCamera->Update(XMFLOAT3{ 0.0f, 0.0f, 0.0f }, fTimeElapsed);
 
-	CameraUpdateParams camera_shake_params;
-	camera_shake_params.pCamera = m_pSimulaterCamera.get();
-	camera_shake_params.fElapsedTime = fTimeElapsed;
-	CMessageDispatcher::GetInst()->Dispatch_Message<CameraUpdateParams>(MessageType::UPDATE_CAMERA, &camera_shake_params, m_pMainCharacter->m_pStateMachine->GetCurrentState());
-
+	CameraUpdateParams camera_update_params;
+	camera_update_params.pCamera = m_pSimulaterCamera.get();
+	camera_update_params.pPlayer = m_pMainCharacter.get();
+	camera_update_params.fElapsedTime = fTimeElapsed;
+	CMessageDispatcher::GetInst()->Dispatch_Message<CameraUpdateParams>(MessageType::UPDATE_CAMERA, &camera_update_params, m_pMainCharacter->m_pStateMachine->GetCurrentState());
 }
 
 void CSimulatorScene::OnPrepareRenderTarget(ID3D12GraphicsCommandList* pd3dCommandList, int nRenderTargets, D3D12_CPU_DESCRIPTOR_HANDLE* pd3dRtvCPUHandles, D3D12_CPU_DESCRIPTOR_HANDLE d3dDepthStencilBufferDSVCPUHandle)

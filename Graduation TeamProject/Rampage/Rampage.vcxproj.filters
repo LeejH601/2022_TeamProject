@@ -127,8 +127,11 @@
     <ClCompile Include="Shader\DepthRenderShader.cpp">
       <Filter>Shader</Filter>
     </ClCompile>
-    <ClCompile Include="Sound\SoundComponent.cpp">
-      <Filter>Sound</Filter>
+    <ClCompile Include="Object\MonsterState.cpp">
+      <Filter>Object</Filter>
+    </ClCompile>
+    <ClCompile Include="Object\MonsterState.cpp">
+      <Filter>Object</Filter>
     </ClCompile>
     <ClCompile Include="Object\Monster.cpp">
       <Filter>Object</Filter>
@@ -297,14 +300,23 @@
     <ClInclude Include="Global\Locator.h">
       <Filter>Global</Filter>
     </ClInclude>
-    <ClInclude Include="Object\Player.h">
+    <ClInclude Include="Object\MonsterState.h">
       <Filter>Object</Filter>
     </ClInclude>
-    <ClInclude Include="Shader\DepthRenderShader.h">
-      <Filter>Shader</Filter>
+    <ClInclude Include="Object\MonsterState.h">
+      <Filter>Object</Filter>
     </ClInclude>
-    <ClInclude Include="Sound\SoundComponent.h">
-      <Filter>Sound</Filter>
+    <ClInclude Include="Object\MonsterState.h">
+      <Filter>Object</Filter>
+    </ClInclude>
+    <ClInclude Include="Object\MonsterState.h">
+      <Filter>Object</Filter>
+    </ClInclude>
+    <ClInclude Include="Object\AnimationComponent.h">
+      <Filter>Object</Filter>
+    </ClInclude>
+    <ClInclude Include="Object\MonsterState.h">
+      <Filter>Object</Filter>
     </ClInclude>
     <ClInclude Include="Object\Monster.h">
       <Filter>Object</Filter>

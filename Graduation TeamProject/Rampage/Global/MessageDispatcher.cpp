@@ -2,6 +2,7 @@
 #include "Camera.h"
 #include "..\Scene\Scene.h"
 #include "..\Object\Object.h"
+#include "..\Object\Player.h"
 #include "..\Object\Monster.h"
 #include "..\Object\MonsterState.h"
 #include "..\Object\ParticleObject.h"
@@ -14,7 +15,7 @@ void CMessageDispatcher::RegisterListener(MessageType messageType, IMessageListe
 	ListenerInfo info = { listener, filterObject };
 	m_listeners[static_cast<int>(messageType)].push_back(info);
 }
-void PlayerAttackComponent::HandleMessage(const Message& message, const PlayerAttackParams& params)
+void PlayerAttackListener::HandleMessage(const Message& message, const PlayerParams& params)
 {
     if (message.getType() == MessageType::PLAYER_ATTACK) {
 		if (params.pPlayer->CheckCollision(m_pObject))
@@ -22,6 +23,11 @@ void PlayerAttackComponent::HandleMessage(const Message& message, const PlayerAt
 			CollideParams collide_params;
 			collide_params.xmf3CollidePosition = m_pObject->GetPosition();
 			CMessageDispatcher::GetInst()->Dispatch_Message<CollideParams>(MessageType::COLLISION, &collide_params, nullptr);
+
+			SoundPlayParams sound_play_params;
+			sound_play_params.monster_type = ((CMonster*)m_pObject)->GetMonsterType();
+			sound_play_params.sound_category = SOUND_CATEGORY::SOUND_VOICE;
+			CMessageDispatcher::GetInst()->Dispatch_Message<SoundPlayParams>(MessageType::PLAY_SOUND, &sound_play_params, ((CPlayer*)(params.pPlayer))->m_pStateMachine->GetCurrentState());
 		}
     }
 }
@@ -30,15 +36,33 @@ void SoundPlayComponent::HandleMessage(const Message& message, const SoundPlayPa
 	if (!m_bEnable)
 		return;
 
-    if (message.getType() == MessageType::PLAY_SOUND && m_sc == params.sound_category) {
-        auto pSound = CSoundManager::GetInst()->FindSound(m_nSoundNumber, m_sc);
-        CSoundManager::GetInst()->PlaySound(pSound->GetPath(), m_fVolume, m_fDelay);
+    if (message.getType() == MessageType::PLAY_SOUND && m_sc == params.sound_category && m_mt == params.monster_type) {
+		std::vector<CSound>::iterator pSound;
+		if (m_sc == SOUND_CATEGORY::SOUND_VOICE)
+		{
+			switch (m_mt)
+			{
+			case MONSTER_TYPE::GOBLIN:
+				pSound = CSoundManager::GetInst()->FindSound(m_nSoundNumber, m_sc);
+				break;
+			case MONSTER_TYPE::ORC:
+				pSound = CSoundManager::GetInst()->FindSound(GOBLIN_MOAN_SOUND_NUM + m_nSoundNumber, m_sc);
+				break;
+			case MONSTER_TYPE::SKELETON:
+				pSound = CSoundManager::GetInst()->FindSound(GOBLIN_MOAN_SOUND_NUM + ORC_MOAN_SOUND_NUM + m_nSoundNumber, m_sc);
+				break;
+			default:
+				break;
+			}
+		}
+		else
+			pSound = CSoundManager::GetInst()->FindSound(m_nSoundNumber, m_sc);
+
+ 		CSoundManager::GetInst()->PlaySound(pSound->GetPath(), m_fVolume, m_fDelay);
     }
 }
 void CameraShakeComponent::Update(CCamera* pCamera, float fElapsedTime)
 {
-	if (!m_bEnable)
-		return;
 	if (pCamera->m_bCameraShaking && m_fDuration > m_ft) {
 		m_ft += fElapsedTime;
 
@@ -51,8 +75,8 @@ void CameraShakeComponent::Update(CCamera* pCamera, float fElapsedTime)
 		CameraDir = Vector3::ScalarProduct(CameraDir, ShakeConstant * m_fMagnitude, false);
 		XMMATRIX RotateMatrix = XMMatrixRotationAxis(XMLoadFloat3(&pCamera->GetLookVector()), RotateConstant);
 
-		XMFLOAT3 ShakeOffset; XMStoreFloat3(&ShakeOffset, XMVector3TransformCoord(XMLoadFloat3(&CameraDir), RotateMatrix));
-
+		XMFLOAT3 ShakeOffset; 
+		XMStoreFloat3(&ShakeOffset, XMVector3TransformCoord(XMLoadFloat3(&CameraDir), RotateMatrix));
 		pCamera->m_xmf3CalculatedPosition = Vector3::Add(pCamera->m_xmf3CalculatedPosition, ShakeOffset);
 	}
 	else {
@@ -62,12 +86,14 @@ void CameraShakeComponent::Update(CCamera* pCamera, float fElapsedTime)
 }
 void CameraShakeComponent::HandleMessage(const Message& message, const CameraUpdateParams& params)
 {
-	if (m_bEnable)
-		Update(params.pCamera, params.fElapsedTime);
+	if (!m_bEnable)
+		return;
+
+	Update(params.pCamera, params.fElapsedTime);
 }
-void CameraZoomerComponent::Update(CCamera* pCamera, float fElapsedTime)
+void CameraZoomerComponent::Update(CCamera* pCamera, float fElapsedTime, const CameraUpdateParams& params)
 {
-	if (!m_bEnable || !pCamera->m_bCameraZooming)
+	if (!pCamera->m_bCameraZooming)
 		return;
 
 	m_fSpeed = m_fMaxDistance / m_fMovingTime;
@@ -79,7 +105,8 @@ void CameraZoomerComponent::Update(CCamera* pCamera, float fElapsedTime)
 		float length = m_fSpeed * fElapsedTime;
 		m_fCurrDistance += length;
 
-		offset = Vector3::Add(offset, Vector3::ScalarProduct(m_xmf3Direction, length * ZoomConstant, false));
+		XMFLOAT3 xmf3ZoomDirection = Vector3::Normalize(Vector3::Subtract(pCamera->GetPosition(), ((CPlayer*)(params.pPlayer))->GetTargetPosition()));
+		offset = Vector3::Add(offset, Vector3::ScalarProduct(xmf3ZoomDirection, length * ZoomConstant, false));
 
 		pCamera->m_xmf3CalculatedPosition = Vector3::Add(pCamera->m_xmf3CalculatedPosition, offset);
 	}
@@ -94,19 +121,21 @@ void CameraZoomerComponent::Update(CCamera* pCamera, float fElapsedTime)
 		float length = m_fBackSpeed * fElapsedTime;
 		m_fCurrDistance += length;
 
-		offset = Vector3::Add(offset, Vector3::ScalarProduct(m_xmf3Direction, -length * ZoomConstant, false));
+		XMFLOAT3 xmf3ZoomDirection = Vector3::Normalize(Vector3::Subtract(pCamera->GetPosition(), ((CPlayer*)(params.pPlayer))->GetTargetPosition()));
+		offset = Vector3::Add(offset, Vector3::ScalarProduct(xmf3ZoomDirection, -length * ZoomConstant, false));
 
 		pCamera->m_xmf3CalculatedPosition = Vector3::Add(pCamera->m_xmf3CalculatedPosition, offset);
 	}
 }
 void CameraZoomerComponent::HandleMessage(const Message& message, const CameraUpdateParams& params)
 {
-	if (m_bEnable)
-		Update(params.pCamera, params.fElapsedTime);
+	if (!m_bEnable)
+		return;
+	Update(params.pCamera, params.fElapsedTime, params);
 }
-void CameraMoveComponent::Update(CCamera* pCamera, float fElapsedTime)
+void CameraMoveComponent::Update(CCamera* pCamera, float fElapsedTime, const CameraUpdateParams& params)
 {
-	if (!m_bEnable || !pCamera->m_bCameraMoving)
+	if (!pCamera->m_bCameraMoving)
 		return;
 
 	m_fSpeed = m_fMaxDistance / m_fMovingTime;
@@ -114,9 +143,10 @@ void CameraMoveComponent::Update(CCamera* pCamera, float fElapsedTime)
 
 	if (m_fCurrDistance < m_fMaxDistance) {
 		float length = m_fSpeed * 1.0f * fElapsedTime;
+
 		m_fCurrDistance += length;
 
-		offset = Vector3::Add(offset, Vector3::ScalarProduct(m_xmf3Direction, length, false));
+		offset = Vector3::Add(offset, Vector3::ScalarProduct(((CPlayer*)(params.pPlayer))->GetATKDirection(), length, false));
 
 		pCamera->m_xmf3CalculatedPosition = Vector3::Add(pCamera->m_xmf3CalculatedPosition, offset);
 	}
@@ -131,15 +161,17 @@ void CameraMoveComponent::Update(CCamera* pCamera, float fElapsedTime)
 		float length = m_fBackSpeed * 1.0f * fElapsedTime;
 		m_fCurrDistance += length;
 
-		offset = Vector3::Add(offset, Vector3::ScalarProduct(m_xmf3Direction, -length, false));
+		offset = Vector3::Add(offset, Vector3::ScalarProduct(((CPlayer*)(params.pPlayer))->GetATKDirection(), -length, false));
 
 		pCamera->m_xmf3CalculatedPosition = Vector3::Add(pCamera->m_xmf3CalculatedPosition, offset);
 	}
 }
 void CameraMoveComponent::HandleMessage(const Message& message, const CameraUpdateParams& params)
 {
-	if (m_bEnable)
-		Update(params.pCamera, params.fElapsedTime);
+	if (!m_bEnable)
+		return;
+
+	Update(params.pCamera, params.fElapsedTime, params);
 }
 void DamageAnimationComponent::HandleMessage(const Message& message, const AnimationCompParams& params)
 {
@@ -156,6 +188,8 @@ void DamageAnimationComponent::HandleMessage(const Message& message, const Anima
 
 		if (pMonster)
 		{
+			XMFLOAT3 xmf3DamageVec = XMFLOAT3(0.0f, 0.0f, 0.0f);
+
 			pMonster->m_fDamageDistance = 0.0f;
 
 			if ((pMonster->m_pStateMachine->GetCurrentState() == Damaged_Monster::GetInst()
@@ -170,6 +204,9 @@ void DamageAnimationComponent::HandleMessage(const Message& message, const Anima
 						pMonster->m_fDamageDistance -= (pMonster->m_fTotalDamageDistance - m_fMaxDistance);
 				}
 			}
+
+			xmf3DamageVec = Vector3::ScalarProduct(pMonster->GetHitterVec(), pMonster->m_fDamageDistance, false);
+			pMonster->Move(xmf3DamageVec, true);
 		}
 	}
 }
@@ -186,12 +223,17 @@ void ShakeAnimationComponent::HandleMessage(const Message& message, const Animat
 
 		if (pMonster)
 		{
+			XMFLOAT3 xmf3ShakeVec = XMFLOAT3(0.0f, 0.0f, 0.0f);
+
 			pMonster->m_fShakeDistance = 0.0f;
 
 			float fShakeDistance = m_fDistance * sin((2 * PI * pMonster->m_pSkinnedAnimationController->m_fTime + pMonster->m_fStunTime) / m_fFrequency);
 			
 			if (pMonster->m_pStateMachine->GetCurrentState() == Damaged_Monster::GetInst() || pMonster->m_pStateMachine->GetCurrentState() == Stun_Monster::GetInst())
 				pMonster->m_fShakeDistance = fShakeDistance;
+
+			xmf3ShakeVec = Vector3::ScalarProduct(pMonster->GetRight(), pMonster->m_fShakeDistance, false);
+			pMonster->Move(xmf3ShakeVec, true);
 		}
 	}
 }
@@ -263,12 +305,10 @@ void ImpactEffectComponent::HandleMessage(const Message& message, const ImpactCo
 		pMultiSprite->ChangeTexture(m_pTexture);
 	}
 }
-
 void SceneCollideListener::HandleMessage(const Message& message, const CollideParams& params)
 {
 	m_pScene->HandleCollision(params);
 }
-
 void TerrainSpriteComponent::SetTexture(LPCTSTR pszFileName)
 {
 }
@@ -346,4 +386,13 @@ void UpDownParticleComponent::HandleMessage(const Message& message, const Partic
 void RegisterArticulationListener::HandleMessage(const Message& message, const RegisterArticulationParams& params)
 {
 	m_pScene->RequestRegisterArticulation(params);
+}
+
+void PlayerLocationListener::HandleMessage(const Message& message, const PlayerParams& params)
+{
+	if (message.getType() == MessageType::CHECK_IS_PLAYER_IN_FRONT_OF_MONSTER) {
+		CMonster* pMonster = dynamic_cast<CMonster*>(m_pObject);
+
+		pMonster->CheckIsPlayerInFrontOfThis(params.pPlayer->GetPosition());
+	}
 }

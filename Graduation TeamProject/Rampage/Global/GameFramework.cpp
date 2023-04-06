@@ -97,6 +97,19 @@ void CGameFramework::InitSound()
 	CSoundManager::GetInst()->RegisterSound("Sound/effect/HammerFlesh4.wav", false, SOUND_CATEGORY::SOUND_SHOCK);
 	CSoundManager::GetInst()->RegisterSound("Sound/effect/HammerFlesh5.wav", false, SOUND_CATEGORY::SOUND_SHOCK);
 
+	CSoundManager::GetInst()->RegisterSound("Sound/Voice/Goblin/GoblinMoan01.mp3", false, SOUND_CATEGORY::SOUND_VOICE);
+	CSoundManager::GetInst()->RegisterSound("Sound/Voice/Goblin/GoblinMoan02.mp3", false, SOUND_CATEGORY::SOUND_VOICE);
+	CSoundManager::GetInst()->RegisterSound("Sound/Voice/Goblin/GoblinMoan03.mp3", false, SOUND_CATEGORY::SOUND_VOICE);
+
+	CSoundManager::GetInst()->RegisterSound("Sound/Voice/Orc/OrcMoan01.mp3", false, SOUND_CATEGORY::SOUND_VOICE);
+	CSoundManager::GetInst()->RegisterSound("Sound/Voice/Orc/OrcMoan02.mp3", false, SOUND_CATEGORY::SOUND_VOICE);
+	CSoundManager::GetInst()->RegisterSound("Sound/Voice/Orc/OrcMoan03.mp3", false, SOUND_CATEGORY::SOUND_VOICE);
+	CSoundManager::GetInst()->RegisterSound("Sound/Voice/Orc/OrcMoan04.mp3", false, SOUND_CATEGORY::SOUND_VOICE);
+	CSoundManager::GetInst()->RegisterSound("Sound/Voice/Orc/OrcMoan05.mp3", false, SOUND_CATEGORY::SOUND_VOICE);
+	CSoundManager::GetInst()->RegisterSound("Sound/Voice/Orc/OrcMoan06.mp3", false, SOUND_CATEGORY::SOUND_VOICE);
+
+	CSoundManager::GetInst()->RegisterSound("Sound/Voice/Skeleton/SkeletonMoan01.mp3", false, SOUND_CATEGORY::SOUND_VOICE);
+
 	CSoundManager::GetInst()->PlaySound("Sound/Background/Action 2 (Loop).wav", 0.25f, 0.0f);
 }
 void CGameFramework::InitLocator()

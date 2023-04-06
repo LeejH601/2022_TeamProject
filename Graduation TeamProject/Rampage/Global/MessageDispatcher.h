@@ -17,16 +17,18 @@ public:
     MessageType getType() const { return m_type; }
 };
 
-struct PlayerAttackParams {
+struct PlayerParams {
     CGameObject* pPlayer;
 };
 
 struct SoundPlayParams {
+    MONSTER_TYPE monster_type = MONSTER_TYPE::NONE;
     SOUND_CATEGORY sound_category = SOUND_CATEGORY::SOUND_SHOCK;
 };
 
 struct CameraUpdateParams {
     CCamera* pCamera = NULL;
+    CGameObject* pPlayer = NULL;
     float fElapsedTime;
 };
 
@@ -86,7 +88,7 @@ public:
     void SetEnable(bool bEnable) { m_bEnable = bEnable; }
 
     virtual void HandleMessage(const Message& message, const CollideParams& params) {}
-    virtual void HandleMessage(const Message& message, const PlayerAttackParams& params) {}
+    virtual void HandleMessage(const Message& message, const PlayerParams& params) {}
     virtual void HandleMessage(const Message& message, const SoundPlayParams& params) {}
     virtual void HandleMessage(const Message& message, const CameraUpdateParams& params) {}
     virtual void HandleMessage(const Message& message, const AnimationCompParams& params) {}
@@ -108,12 +110,21 @@ public:
 };
 
 // Define Player Attack component
-class PlayerAttackComponent : public IMessageListener {
+class PlayerAttackListener : public IMessageListener {
 private:
     CGameObject* m_pObject;
 public:
     void SetObject(CGameObject* pObject) { m_pObject = pObject; }
-    virtual void HandleMessage(const Message& message, const PlayerAttackParams& params);
+    virtual void HandleMessage(const Message& message, const PlayerParams& params);
+};
+
+// Define Player Attack component
+class PlayerLocationListener : public IMessageListener {
+private:
+    CGameObject* m_pObject;
+public:
+    void SetObject(CGameObject* pObject) { m_pObject = pObject; }
+    virtual void HandleMessage(const Message& message, const PlayerParams& params);
 };
 
 // Define CollideListener
@@ -126,20 +137,22 @@ public:
 
 // Define Sound Play component
 class SoundPlayComponent : public IMessageListener {
-
     unsigned int m_nSoundNumber = 0;
     float m_fDelay = 0.0f;
     float m_fVolume = 0.0f;
+    MONSTER_TYPE m_mt = MONSTER_TYPE::NONE;
     SOUND_CATEGORY m_sc = SOUND_CATEGORY::SOUND_SHOCK;
 public:
     float& GetDelay() { return m_fDelay; }
     float& GetVolume() { return m_fVolume; }
     unsigned int& GetSoundNumber() { return m_nSoundNumber; }
+    MONSTER_TYPE GetMonsterCategory() { return m_mt; }
     SOUND_CATEGORY GetSoundCategory() { return m_sc; }
 
     void SetSoundNumber(unsigned int SoundNumber) { m_nSoundNumber = SoundNumber; }
     void SetDelay(float Delay) { m_fDelay = Delay; }
     void SetVolume(float Volume) { m_fVolume = Volume; }
+    void SetMT(MONSTER_TYPE mt) { m_mt = mt; }
     void SetSC(SOUND_CATEGORY sc) { m_sc = sc; }
 
     virtual void HandleMessage(const Message& message, const SoundPlayParams& params);
@@ -165,8 +178,6 @@ public:
 
 // Define CameraMove component
 class CameraMoveComponent : public IMessageListener {
-    XMFLOAT3 m_xmf3Direction = XMFLOAT3(0.0f, 0.0f, 1.0f);
-
     float m_fMaxDistance = 2.0f;
     float m_fCurrDistance = 0.0f;
     float m_fMovingTime = 0.02f;
@@ -177,24 +188,20 @@ class CameraMoveComponent : public IMessageListener {
 
     XMFLOAT3 offset = XMFLOAT3(0.0f, 0.0f, 0.0f);;
 public:
-    XMFLOAT3& GetDirection() { return m_xmf3Direction; }
     float& GetMaxDistance() { return m_fMaxDistance; }
     float& GetMovingTime() { return m_fMovingTime; }
     float& GetRollBackTime() { return m_fRollBackTime; }
 
-    void SetDirection(XMFLOAT3 xmf3direction) { m_xmf3Direction = xmf3direction; }
     void SetMaxDistance(float max_distance) { m_fMaxDistance = max_distance; }
     void SetMovingTime(float moving_time) { m_fMovingTime = moving_time; }
     void SetRollBackTime(float rollback_time) { m_fRollBackTime = rollback_time; }
 
-    void Update(CCamera* pCamera, float fElapsedTime);
+    void Update(CCamera* pCamera, float fElapsedTime, const CameraUpdateParams& params);
     virtual void HandleMessage(const Message& message, const CameraUpdateParams& params);
 };
 
 // Define Zoom In/Out component
 class CameraZoomerComponent : public IMessageListener {
-    XMFLOAT3 m_xmf3Direction = XMFLOAT3(0.0f, 0.0f, 1.0f);
-
     bool m_bIsIN = true;
 
     float m_fMaxDistance = 2.0f;
@@ -207,19 +214,17 @@ class CameraZoomerComponent : public IMessageListener {
 
     XMFLOAT3 offset = XMFLOAT3(0.0f, 0.0f, 0.0f);
 public:
-    XMFLOAT3& GetDirection() { return m_xmf3Direction; }
     float& GetMaxDistance() { return m_fMaxDistance; }
     float& GetMovingTime() { return m_fMovingTime; }
     float& GetRollBackTime() { return m_fRollBackTime; }
     bool& GetIsIn() { return m_bIsIN; }
 
-    void SetDirection(XMFLOAT3 direction) { m_xmf3Direction = direction; }
     void SetMaxDistance(float max_distance) { m_fMaxDistance = max_distance; }
     void SetMovingTime(float moving_time) { m_fMovingTime = moving_time; }
     void SetRollBackTime(float roolback_time) { m_fRollBackTime = roolback_time; }
     void SetIsIn(bool is_in) { m_bIsIN = is_in; }
 
-    void Update(CCamera* pCamera, float fElapsedTime);
+    void Update(CCamera* pCamera, float fElapsedTime, const CameraUpdateParams& params);
     virtual void HandleMessage(const Message& message, const CameraUpdateParams& params);
 };
 

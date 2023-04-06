@@ -5,7 +5,6 @@
 #include "..\Object\Texture.h"
 #include "..\Global\GameFramework.h"
 #include "..\Global\Locator.h"
-#include "..\Sound\SoundComponent.h"
 #include "..\Sound\SoundManager.h"
 #include "..\Object\TextureManager.h"
 #include "..\Object\AnimationComponent.h"
@@ -89,6 +88,10 @@ void DataLoader::SaveComponentSet(FILE* pInFile, CState<CPlayer>* pState)
 
 	SoundPlayComponent* pShockSoundComponent = dynamic_cast<SoundPlayComponent*>(pState->GetShockSoundComponent());
 	SoundPlayComponent* pShootSoundComponent = dynamic_cast<SoundPlayComponent*>(pState->GetShootSoundComponent());
+
+	SoundPlayComponent* pGoblinMoanComponent = dynamic_cast<SoundPlayComponent*>(pState->GetGoblinMoanComponent());
+	SoundPlayComponent* pOrcMoanComponent = dynamic_cast<SoundPlayComponent*>(pState->GetOrcMoanComponent());
+	SoundPlayComponent* pSkeletonMoanComponent = dynamic_cast<SoundPlayComponent*>(pState->GetSkeletonMoanComponent());
 
 	ParticleComponent* pParticleComponent = dynamic_cast<ParticleComponent*>(pState->GetParticleComponent());
 	ImpactEffectComponent* pImpactComponent = dynamic_cast<ImpactEffectComponent*>(pState->GetImpactComponent());
@@ -176,17 +179,38 @@ void DataLoader::SaveComponentSet(FILE* pInFile, CState<CPlayer>* pState)
 	WriteFloatFromFile(pInFile, pShootSoundComponent->GetVolume());
 	WriteStringFromFile(pInFile, std::string("</CShootSoundComponent>:"));
 
-	// 데미지 사운드 없는거 아닌가?
-	/*WriteStringFromFile(pInFile, std::string("<CDamageSoundComponent>:"));
+	WriteStringFromFile(pInFile, std::string("<GoblinMoanComponent>:"));
 	WriteStringFromFile(pInFile, std::string("<Enable>:"));
-	WriteIntegerFromFile(pInFile, pDamageSoundComponent->GetEnable());
+	WriteIntegerFromFile(pInFile, pGoblinMoanComponent->GetEnable());
 	WriteStringFromFile(pInFile, std::string("<Sound>:"));
-	WriteIntegerFromFile(pInFile, pDamageAnimationComponent->GetSoundNumber());
+	WriteIntegerFromFile(pInFile, pGoblinMoanComponent->GetSoundNumber());
 	WriteStringFromFile(pInFile, std::string("<Delay>:"));
-	WriteFloatFromFile(pInFile, pDamageAnimationComponent->GetDelay());
+	WriteFloatFromFile(pInFile, pGoblinMoanComponent->GetDelay());
 	WriteStringFromFile(pInFile, std::string("<Volume>:"));
-	WriteFloatFromFile(pInFile, pDamageAnimationComponent->GetVolume());
-	WriteStringFromFile(pInFile, std::string("</CDamageSoundComponent>:"));*/
+	WriteFloatFromFile(pInFile, pGoblinMoanComponent->GetVolume());
+	WriteStringFromFile(pInFile, std::string("</GoblinMoanComponent>:"));
+
+	WriteStringFromFile(pInFile, std::string("<OrcMoanComponent>:"));
+	WriteStringFromFile(pInFile, std::string("<Enable>:"));
+	WriteIntegerFromFile(pInFile, pOrcMoanComponent->GetEnable());
+	WriteStringFromFile(pInFile, std::string("<Sound>:"));
+	WriteIntegerFromFile(pInFile, pOrcMoanComponent->GetSoundNumber());
+	WriteStringFromFile(pInFile, std::string("<Delay>:"));
+	WriteFloatFromFile(pInFile, pOrcMoanComponent->GetDelay());
+	WriteStringFromFile(pInFile, std::string("<Volume>:"));
+	WriteFloatFromFile(pInFile, pOrcMoanComponent->GetVolume());
+	WriteStringFromFile(pInFile, std::string("</OrcMoanComponent>:"));
+
+	WriteStringFromFile(pInFile, std::string("<SkeletonMoanComponent>:"));
+	WriteStringFromFile(pInFile, std::string("<Enable>:"));
+	WriteIntegerFromFile(pInFile, pSkeletonMoanComponent->GetEnable());
+	WriteStringFromFile(pInFile, std::string("<Sound>:"));
+	WriteIntegerFromFile(pInFile, pSkeletonMoanComponent->GetSoundNumber());
+	WriteStringFromFile(pInFile, std::string("<Delay>:"));
+	WriteFloatFromFile(pInFile, pSkeletonMoanComponent->GetDelay());
+	WriteStringFromFile(pInFile, std::string("<Volume>:"));
+	WriteFloatFromFile(pInFile, pSkeletonMoanComponent->GetVolume());
+	WriteStringFromFile(pInFile, std::string("</SkeletonMoanComponent>:"));
 
 	WriteStringFromFile(pInFile, std::string("<ParticleComponent>:"));
 	WriteStringFromFile(pInFile, std::string("<Enable>:"));
@@ -240,6 +264,10 @@ void DataLoader::LoadComponentSet(FILE* pInFile, CState<CPlayer>* pState)
 
 	SoundPlayComponent* pShockSoundComponent = dynamic_cast<SoundPlayComponent*>(pState->GetShockSoundComponent());
 	SoundPlayComponent* pShootSoundComponent = dynamic_cast<SoundPlayComponent*>(pState->GetShootSoundComponent());
+
+	SoundPlayComponent* pGoblinMoanComponent = dynamic_cast<SoundPlayComponent*>(pState->GetGoblinMoanComponent());
+	SoundPlayComponent* pOrcMoanComponent = dynamic_cast<SoundPlayComponent*>(pState->GetOrcMoanComponent());
+	SoundPlayComponent* pSkeletonMoanComponent = dynamic_cast<SoundPlayComponent*>(pState->GetSkeletonMoanComponent());
 
 	ParticleComponent* pParticleComponent = dynamic_cast<ParticleComponent*>(pState->GetParticleComponent());
 	ImpactEffectComponent* pImpactComponent = dynamic_cast<ImpactEffectComponent*>(pState->GetImpactComponent());
@@ -461,8 +489,7 @@ void DataLoader::LoadComponentSet(FILE* pInFile, CState<CPlayer>* pState)
 				}
 			}
 		}
-		// 없으니까 일단 주석처리
-		/*else if (!strcmp(buf, "<CDamageSoundComponent>:"))
+		else if (!strcmp(buf, "<GoblinMoanComponent>:"))
 		{
 			for (; ; )
 			{
@@ -470,26 +497,82 @@ void DataLoader::LoadComponentSet(FILE* pInFile, CState<CPlayer>* pState)
 
 				if (!strcmp(buf, "<Enable>:"))
 				{
-					component->SetEnable(ReadIntegerFromFile(pInFile));
+					pGoblinMoanComponent->SetEnable(ReadIntegerFromFile(pInFile));
 				}
 				else if (!strcmp(buf, "<Sound>:"))
 				{
-					component->m_nSoundNumber = ReadIntegerFromFile(pInFile);
+					pGoblinMoanComponent->SetSoundNumber(ReadIntegerFromFile(pInFile));
 				}
 				else if (!strcmp(buf, "<Delay>:"))
 				{
-					component->m_fDelay = ReadFloatFromFile(pInFile);
+					pGoblinMoanComponent->SetDelay(ReadFloatFromFile(pInFile));
 				}
 				else if (!strcmp(buf, "<Volume>:"))
 				{
-					component->m_fVolume = ReadFloatFromFile(pInFile);
+					pGoblinMoanComponent->SetVolume(ReadFloatFromFile(pInFile));
 				}
-				else if (!strcmp(buf, "</CDamageSoundComponent>:"))
+				else if (!strcmp(buf, "</GoblinMoanComponent>:"))
 				{
 					break;
 				}
 			}
-		}*/
+		}
+		else if (!strcmp(buf, "<OrcMoanComponent>:"))
+		{
+			for (; ; )
+			{
+				ReadStringFromFile(pInFile, buf);
+
+				if (!strcmp(buf, "<Enable>:"))
+				{
+					pOrcMoanComponent->SetEnable(ReadIntegerFromFile(pInFile));
+				}
+				else if (!strcmp(buf, "<Sound>:"))
+				{
+					pOrcMoanComponent->SetSoundNumber(ReadIntegerFromFile(pInFile));
+				}
+				else if (!strcmp(buf, "<Delay>:"))
+				{
+					pOrcMoanComponent->SetDelay(ReadFloatFromFile(pInFile));
+				}
+				else if (!strcmp(buf, "<Volume>:"))
+				{
+					pOrcMoanComponent->SetVolume(ReadFloatFromFile(pInFile));
+				}
+				else if (!strcmp(buf, "</OrcMoanComponent>:"))
+				{
+					break;
+				}
+			}
+		}
+		else if (!strcmp(buf, "<SkeletonMoanComponent>:"))
+		{
+			for (; ; )
+			{
+				ReadStringFromFile(pInFile, buf);
+
+				if (!strcmp(buf, "<Enable>:"))
+				{
+					pSkeletonMoanComponent->SetEnable(ReadIntegerFromFile(pInFile));
+				}
+				else if (!strcmp(buf, "<Sound>:"))
+				{
+					pSkeletonMoanComponent->SetSoundNumber(ReadIntegerFromFile(pInFile));
+				}
+				else if (!strcmp(buf, "<Delay>:"))
+				{
+					pSkeletonMoanComponent->SetDelay(ReadFloatFromFile(pInFile));
+				}
+				else if (!strcmp(buf, "<Volume>:"))
+				{
+					pSkeletonMoanComponent->SetVolume(ReadFloatFromFile(pInFile));
+				}
+				else if (!strcmp(buf, "</SkeletonMoanComponent>:"))
+				{
+					break;
+				}
+			}
+		}
 		else if (!strcmp(buf, "<ParticleComponent>:"))
 		{
 			for (; ; )
@@ -1152,31 +1235,75 @@ void CImGuiManager::SetUI()
 		if (ImGui::CollapsingHeader("Damage Moan Sound Effect"))
 		{
 			std::vector<std::string> paths = CSoundManager::GetInst()->getSoundPathsByCategory(SOUND_CATEGORY::SOUND_VOICE);
-			
+
+			SoundPlayComponent* pGoblinMoanComponent = dynamic_cast<SoundPlayComponent*>(pCurrentAnimation->GetGoblinMoanComponent());
+			SoundPlayComponent* pOrcMoanComponent = dynamic_cast<SoundPlayComponent*>(pCurrentAnimation->GetOrcMoanComponent());
+			SoundPlayComponent* pSkeletonMoanComponent = dynamic_cast<SoundPlayComponent*>(pCurrentAnimation->GetSkeletonMoanComponent());
+
 			std::vector<const char*> items;
 			for (auto& path : paths) {
 				items.push_back(path.c_str());
 			}
 
-			/*initial_curpos.y += 25.f;
+			initial_curpos.y += 25.f;
 			ImGui::SetCursorPos(initial_curpos);
-			ImGui::SetNextItemWidth(190.f);
-			ImGui::Checkbox("On/Off##damagesound", &damage->GetEnable());
+			ImGui::SetNextItemWidth(240.f);
+			ImGui::Checkbox("On/Off(Goblin)##goblinmoansound", &pGoblinMoanComponent->GetEnable());
 
 			initial_curpos.y += 25.f;
 			ImGui::SetCursorPos(initial_curpos);
 			ImGui::SetNextItemWidth(190.f);
-			ImGui::Combo("Sound##damagesound", (int*)&damage->m_nSoundNumber, items.data(), items.size());
+			ImGui::Combo("Sound(Goblin)##goblinmoansound", (int*)&pGoblinMoanComponent->GetSoundNumber(), items.data(), GOBLIN_MOAN_SOUND_NUM);
 
 			initial_curpos.y += 25.f;
 			ImGui::SetCursorPos(initial_curpos);
 			ImGui::SetNextItemWidth(190.f);
-			ImGui::DragFloat("Delay##damagesound", &damage->m_fDelay, 0.01f, 0.0f, 10.0f, "%.2f", 0);
+			ImGui::DragFloat("Delay(Goblin)##goblinmoansound", &pGoblinMoanComponent->GetDelay(), 0.01f, 0.0f, 10.0f, "%.2f", 0);
 
 			initial_curpos.y += 25.f;
 			ImGui::SetCursorPos(initial_curpos);
 			ImGui::SetNextItemWidth(190.f);
-			ImGui::DragFloat("Volume##damagesound", &damage->m_fVolume, 0.01f, 0.0f, 10.0f, "%.2f", 0);*/
+			ImGui::DragFloat("Volume(Goblin)##goblinmoansound", &pGoblinMoanComponent->GetVolume(), 0.01f, 0.0f, 10.0f, "%.2f", 0);
+
+			initial_curpos.y += 50.f;
+			ImGui::SetCursorPos(initial_curpos);
+			ImGui::SetNextItemWidth(240.f);
+			ImGui::Checkbox("On/Off(Orc)##orcmoansound", &pOrcMoanComponent->GetEnable());
+
+			initial_curpos.y += 25.f;
+			ImGui::SetCursorPos(initial_curpos);
+			ImGui::SetNextItemWidth(190.f);
+			ImGui::Combo("Sound(Orc)##orcmoansound", (int*)&pOrcMoanComponent->GetSoundNumber(), items.data() + GOBLIN_MOAN_SOUND_NUM, ORC_MOAN_SOUND_NUM);
+
+			initial_curpos.y += 25.f;
+			ImGui::SetCursorPos(initial_curpos);
+			ImGui::SetNextItemWidth(190.f);
+			ImGui::DragFloat("Delay(Orc)##orcmoansound", &pOrcMoanComponent->GetDelay(), 0.01f, 0.0f, 10.0f, "%.2f", 0);
+
+			initial_curpos.y += 25.f;
+			ImGui::SetCursorPos(initial_curpos);
+			ImGui::SetNextItemWidth(190.f);
+			ImGui::DragFloat("Volume(Orc)##orcmoansound", &pOrcMoanComponent->GetVolume(), 0.01f, 0.0f, 10.0f, "%.2f", 0);
+
+			initial_curpos.y += 50.f;
+			ImGui::SetCursorPos(initial_curpos);
+			ImGui::SetNextItemWidth(240.f);
+			ImGui::Checkbox("On/Off(Skeleton)##skeletonmoansound", &pSkeletonMoanComponent->GetEnable());
+
+			initial_curpos.y += 25.f;
+			ImGui::SetCursorPos(initial_curpos);
+			ImGui::SetNextItemWidth(190.f);
+			ImGui::Combo("Sound(Skeleton)##orcmoansound", (int*)&pSkeletonMoanComponent->GetSoundNumber(), items.data() + GOBLIN_MOAN_SOUND_NUM + ORC_MOAN_SOUND_NUM, SKELETON_MOAN_SOUND_NUM);
+
+			initial_curpos.y += 25.f;
+			ImGui::SetCursorPos(initial_curpos);
+			ImGui::SetNextItemWidth(190.f);
+			ImGui::DragFloat("Delay(Skeleton)##orcmoansound", &pSkeletonMoanComponent->GetDelay(), 0.01f, 0.0f, 10.0f, "%.2f", 0);
+
+			initial_curpos.y += 25.f;
+			ImGui::SetCursorPos(initial_curpos);
+			ImGui::SetNextItemWidth(190.f);
+			ImGui::DragFloat("Volume(Skeleton)##orcmoansound", &pSkeletonMoanComponent->GetVolume(), 0.01f, 0.0f, 10.0f, "%.2f", 0);
 		}
 
 		button_pos.y += 5.f;

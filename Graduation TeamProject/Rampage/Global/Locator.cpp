@@ -1,7 +1,6 @@
 #include "Locator.h"
 #include "Component.h"
 #include "..\Object\AnimationComponent.h"
-#include "..\Sound\SoundComponent.h"
 #include "..\Sound\SoundManager.h"
 
 CLocator::~CLocator()

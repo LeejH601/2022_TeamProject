@@ -42,19 +42,51 @@ Atk1_Player::Atk1_Player()
 {
 	// ATK1 SOUND
 	std::unique_ptr<SoundPlayComponent> pSoundComponent = std::make_unique<SoundPlayComponent>();
-	pSoundComponent->SetSoundNumber(0);
+	pSoundComponent->SetSoundNumber(2);
 	pSoundComponent->SetDelay(0.0f);
 	pSoundComponent->SetVolume(1.25f);
+	pSoundComponent->SetMT(MONSTER_TYPE::NONE);
 	pSoundComponent->SetSC(SOUND_CATEGORY::SOUND_SHOOT);
 	m_pListeners.push_back(std::move(pSoundComponent));
 	CMessageDispatcher::GetInst()->RegisterListener(MessageType::PLAY_SOUND, m_pListeners.back().get(), this);
 
 	// DAMAGE SOUND
 	pSoundComponent = std::make_unique<SoundPlayComponent>();
-	pSoundComponent->SetSoundNumber(0);
-	pSoundComponent->SetDelay(0.05f);
+	pSoundComponent->SetSoundNumber(2);
+	pSoundComponent->SetDelay(0.0f);
 	pSoundComponent->SetVolume(0.75f);
+	pSoundComponent->SetMT(MONSTER_TYPE::NONE);
 	pSoundComponent->SetSC(SOUND_CATEGORY::SOUND_SHOCK);
+	m_pListeners.push_back(std::move(pSoundComponent));
+	CMessageDispatcher::GetInst()->RegisterListener(MessageType::PLAY_SOUND, m_pListeners.back().get(), this);
+
+	// GOBLIN MOAN SOUND
+	pSoundComponent = std::make_unique<SoundPlayComponent>();
+	pSoundComponent->SetSoundNumber(0);
+	pSoundComponent->SetDelay(0.0f);
+	pSoundComponent->SetVolume(0.75f);
+	pSoundComponent->SetMT(MONSTER_TYPE::GOBLIN);
+	pSoundComponent->SetSC(SOUND_CATEGORY::SOUND_VOICE);
+	m_pListeners.push_back(std::move(pSoundComponent));
+	CMessageDispatcher::GetInst()->RegisterListener(MessageType::PLAY_SOUND, m_pListeners.back().get(), this);
+
+	// ORC MOAN SOUND
+	pSoundComponent = std::make_unique<SoundPlayComponent>();
+	pSoundComponent->SetSoundNumber(0);
+	pSoundComponent->SetDelay(0.0f);
+	pSoundComponent->SetVolume(0.75f);
+	pSoundComponent->SetMT(MONSTER_TYPE::ORC);
+	pSoundComponent->SetSC(SOUND_CATEGORY::SOUND_VOICE);
+	m_pListeners.push_back(std::move(pSoundComponent));
+	CMessageDispatcher::GetInst()->RegisterListener(MessageType::PLAY_SOUND, m_pListeners.back().get(), this);
+
+	// SKELETON MOAN SOUND
+	pSoundComponent = std::make_unique<SoundPlayComponent>();
+	pSoundComponent->SetSoundNumber(0);
+	pSoundComponent->SetDelay(0.0f);
+	pSoundComponent->SetVolume(0.75f);
+	pSoundComponent->SetMT(MONSTER_TYPE::SKELETON);
+	pSoundComponent->SetSC(SOUND_CATEGORY::SOUND_VOICE);
 	m_pListeners.push_back(std::move(pSoundComponent));
 	CMessageDispatcher::GetInst()->RegisterListener(MessageType::PLAY_SOUND, m_pListeners.back().get(), this);
 
@@ -68,7 +100,6 @@ Atk1_Player::Atk1_Player()
 	// CAMERA ZOOM IN/OUT
 	std::unique_ptr<CameraZoomerComponent> pZoomerComponent = std::make_unique<CameraZoomerComponent>();
 	pZoomerComponent->SetIsIn(false);
-	pZoomerComponent->SetDirection(XMFLOAT3{ 0.0f, 0.0f, 1.0f });
 	pZoomerComponent->SetMaxDistance(10.0f);
 	pZoomerComponent->SetMovingTime(0.25f);
 	pZoomerComponent->SetRollBackTime(0.25f);
@@ -77,7 +108,6 @@ Atk1_Player::Atk1_Player()
 
 	// CAMERA MOVE
 	std::unique_ptr<CameraMoveComponent> pMoveComponent = std::make_unique<CameraMoveComponent>();
-	pMoveComponent->SetDirection(XMFLOAT3{ 0.0f, 1.0f, 0.0f });
 	pMoveComponent->SetMaxDistance(5.0f);
 	pMoveComponent->SetMovingTime(0.5f);
 	pMoveComponent->SetRollBackTime(0.5f);
@@ -143,11 +173,10 @@ void Atk1_Player::Enter(CPlayer* player)
 	player->m_bAttacked = false;
 	player->m_bAttack = false; // 사용자가 좌클릭시 true가 되는 변수
 	player->m_iAttack_Limit = 1;
-
-	player->m_xmf3CameraMoveDirection = Vector3::Normalize(XMFLOAT3(-1.0f, -1.0f, 0.0f));
 	player->m_fCMDConstant = 1.0f;
 
-	SoundPlayParams SoundPlayParam{ SOUND_CATEGORY::SOUND_SHOOT };
+	SoundPlayParams SoundPlayParam;
+	SoundPlayParam.sound_category = SOUND_CATEGORY::SOUND_SHOOT;
 	CMessageDispatcher::GetInst()->Dispatch_Message<SoundPlayParams>(MessageType::PLAY_SOUND, &SoundPlayParam, this);
 }
 
@@ -157,12 +186,12 @@ void Atk1_Player::Execute(CPlayer* player, float fElapsedTime)
 	CAnimationSet* pAnimationSet = player->m_pChild->m_pSkinnedAnimationController->m_pAnimationSets->m_pAnimationSets[player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_nAnimationSet];
 	
 	// 충돌 판정 메세지 전달
-	if (0.3 < player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition && 
-		0.7 > player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition)
+	if (0.3f < player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition && 
+		0.7f > player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition)
 	{
-		PlayerAttackParams PlayerAttackParam;
-		PlayerAttackParam.pPlayer = player;
-		CMessageDispatcher::GetInst()->Dispatch_Message<PlayerAttackParams>(MessageType::PLAYER_ATTACK, &PlayerAttackParam, player);
+		PlayerParams PlayerParam;
+		PlayerParam.pPlayer = player;
+		CMessageDispatcher::GetInst()->Dispatch_Message<PlayerParams>(MessageType::PLAYER_ATTACK, &PlayerParam, player);
 	}
 
 	// 사용자가 좌클릭을 했으면 애니메이션을 0.7초 진행 후 Atk2_Player로 상태 변경
@@ -183,19 +212,51 @@ Atk2_Player::Atk2_Player()
 {
 	// ATK2 SOUND
 	std::unique_ptr<SoundPlayComponent> pSoundComponent = std::make_unique<SoundPlayComponent>();
-	pSoundComponent->SetSoundNumber(1);
+	pSoundComponent->SetSoundNumber(2);
 	pSoundComponent->SetDelay(0.0f);
 	pSoundComponent->SetVolume(1.25f);
+	pSoundComponent->SetMT(MONSTER_TYPE::NONE);
 	pSoundComponent->SetSC(SOUND_CATEGORY::SOUND_SHOOT);
 	m_pListeners.push_back(std::move(pSoundComponent));
 	CMessageDispatcher::GetInst()->RegisterListener(MessageType::PLAY_SOUND, m_pListeners.back().get(), this);
 
 	// DAMAGE SOUND
 	pSoundComponent = std::make_unique<SoundPlayComponent>();
-	pSoundComponent->SetSoundNumber(1);
-	pSoundComponent->SetDelay(0.05f);
+	pSoundComponent->SetSoundNumber(2);
+	pSoundComponent->SetDelay(0.0f);
 	pSoundComponent->SetVolume(0.75f);
+	pSoundComponent->SetMT(MONSTER_TYPE::NONE);
 	pSoundComponent->SetSC(SOUND_CATEGORY::SOUND_SHOCK);
+	m_pListeners.push_back(std::move(pSoundComponent));
+	CMessageDispatcher::GetInst()->RegisterListener(MessageType::PLAY_SOUND, m_pListeners.back().get(), this);
+
+	// GOBLIN MOAN SOUND
+	pSoundComponent = std::make_unique<SoundPlayComponent>();
+	pSoundComponent->SetSoundNumber(0);
+	pSoundComponent->SetDelay(0.0f);
+	pSoundComponent->SetVolume(0.75f);
+	pSoundComponent->SetMT(MONSTER_TYPE::GOBLIN);
+	pSoundComponent->SetSC(SOUND_CATEGORY::SOUND_VOICE);
+	m_pListeners.push_back(std::move(pSoundComponent));
+	CMessageDispatcher::GetInst()->RegisterListener(MessageType::PLAY_SOUND, m_pListeners.back().get(), this);
+
+	// ORC MOAN SOUND
+	pSoundComponent = std::make_unique<SoundPlayComponent>();
+	pSoundComponent->SetSoundNumber(0);
+	pSoundComponent->SetDelay(0.0f);
+	pSoundComponent->SetVolume(0.75f);
+	pSoundComponent->SetMT(MONSTER_TYPE::ORC);
+	pSoundComponent->SetSC(SOUND_CATEGORY::SOUND_VOICE);
+	m_pListeners.push_back(std::move(pSoundComponent));
+	CMessageDispatcher::GetInst()->RegisterListener(MessageType::PLAY_SOUND, m_pListeners.back().get(), this);
+
+	// SKELETON MOAN SOUND
+	pSoundComponent = std::make_unique<SoundPlayComponent>();
+	pSoundComponent->SetSoundNumber(0);
+	pSoundComponent->SetDelay(0.0f);
+	pSoundComponent->SetVolume(0.75f);
+	pSoundComponent->SetMT(MONSTER_TYPE::SKELETON);
+	pSoundComponent->SetSC(SOUND_CATEGORY::SOUND_VOICE);
 	m_pListeners.push_back(std::move(pSoundComponent));
 	CMessageDispatcher::GetInst()->RegisterListener(MessageType::PLAY_SOUND, m_pListeners.back().get(), this);
 
@@ -209,7 +270,6 @@ Atk2_Player::Atk2_Player()
 	// CAMERA ZOOM IN/OUT
 	std::unique_ptr<CameraZoomerComponent> pZoomerComponent = std::make_unique<CameraZoomerComponent>();
 	pZoomerComponent->SetIsIn(false);
-	pZoomerComponent->SetDirection(XMFLOAT3{ 0.0f, 0.0f, 1.0f });
 	pZoomerComponent->SetMaxDistance(10.0f);
 	pZoomerComponent->SetMovingTime(0.25f);
 	pZoomerComponent->SetRollBackTime(0.25f);
@@ -218,7 +278,6 @@ Atk2_Player::Atk2_Player()
 
 	// CAMERA MOVE
 	std::unique_ptr<CameraMoveComponent> pMoveComponent = std::make_unique<CameraMoveComponent>();
-	pMoveComponent->SetDirection(XMFLOAT3{ 0.0f, 1.0f, 0.0f });
 	pMoveComponent->SetMaxDistance(5.0f);
 	pMoveComponent->SetMovingTime(0.5f);
 	pMoveComponent->SetRollBackTime(0.5f);
@@ -284,11 +343,10 @@ void Atk2_Player::Enter(CPlayer* player)
 	player->m_bAttacked = false;
 	player->m_bAttack = false; // 사용자가 좌클릭시 true가 되는 변수
 	player->m_iAttack_Limit = 1;
-
-	player->m_xmf3CameraMoveDirection = Vector3::Normalize(XMFLOAT3(1.0f, -1.0f, 0.0f));
 	player->m_fCMDConstant = 1.0f;
 
-	SoundPlayParams SoundPlayParam{ SOUND_CATEGORY::SOUND_SHOOT };
+	SoundPlayParams SoundPlayParam;
+	SoundPlayParam.sound_category = SOUND_CATEGORY::SOUND_SHOOT;
 	CMessageDispatcher::GetInst()->Dispatch_Message<SoundPlayParams>(MessageType::PLAY_SOUND, &SoundPlayParam, this);
 }
 
@@ -299,11 +357,11 @@ void Atk2_Player::Execute(CPlayer* player, float fElapsedTime)
 	
 	// 충돌 판정 메세지 전달
 	if (0.3 < player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition &&
-		0.7 > player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition)
+		0.4 > player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition)
 	{
-		PlayerAttackParams PlayerAttackParam;
-		PlayerAttackParam.pPlayer = player;
-		CMessageDispatcher::GetInst()->Dispatch_Message<PlayerAttackParams>(MessageType::PLAYER_ATTACK, &PlayerAttackParam, player);
+		PlayerParams PlayerParam;
+		PlayerParam.pPlayer = player;
+		CMessageDispatcher::GetInst()->Dispatch_Message<PlayerParams>(MessageType::PLAYER_ATTACK, &PlayerParam, player);
 	}
 
 	// 사용자가 좌클릭을 했으면 애니메이션을 0.7초 진행 후 Atk2_Player로 상태 변경
@@ -327,6 +385,7 @@ Atk3_Player::Atk3_Player()
 	pSoundComponent->SetSoundNumber(2);
 	pSoundComponent->SetDelay(0.0f);
 	pSoundComponent->SetVolume(1.25f);
+	pSoundComponent->SetMT(MONSTER_TYPE::NONE);
 	pSoundComponent->SetSC(SOUND_CATEGORY::SOUND_SHOOT);
 	m_pListeners.push_back(std::move(pSoundComponent));
 	CMessageDispatcher::GetInst()->RegisterListener(MessageType::PLAY_SOUND, m_pListeners.back().get(), this);
@@ -334,9 +393,40 @@ Atk3_Player::Atk3_Player()
 	// DAMAGE SOUND
 	pSoundComponent = std::make_unique<SoundPlayComponent>();
 	pSoundComponent->SetSoundNumber(2);
-	pSoundComponent->SetDelay(0.05f);
+	pSoundComponent->SetDelay(0.0f);
 	pSoundComponent->SetVolume(0.75f);
+	pSoundComponent->SetMT(MONSTER_TYPE::NONE);
 	pSoundComponent->SetSC(SOUND_CATEGORY::SOUND_SHOCK);
+	m_pListeners.push_back(std::move(pSoundComponent));
+	CMessageDispatcher::GetInst()->RegisterListener(MessageType::PLAY_SOUND, m_pListeners.back().get(), this);
+
+	// GOBLIN MOAN SOUND
+	pSoundComponent = std::make_unique<SoundPlayComponent>();
+	pSoundComponent->SetSoundNumber(0);
+	pSoundComponent->SetDelay(0.0f);
+	pSoundComponent->SetVolume(0.75f);
+	pSoundComponent->SetMT(MONSTER_TYPE::GOBLIN);
+	pSoundComponent->SetSC(SOUND_CATEGORY::SOUND_VOICE);
+	m_pListeners.push_back(std::move(pSoundComponent));
+	CMessageDispatcher::GetInst()->RegisterListener(MessageType::PLAY_SOUND, m_pListeners.back().get(), this);
+
+	// ORC MOAN SOUND
+	pSoundComponent = std::make_unique<SoundPlayComponent>();
+	pSoundComponent->SetSoundNumber(0);
+	pSoundComponent->SetDelay(0.0f);
+	pSoundComponent->SetVolume(0.75f);
+	pSoundComponent->SetMT(MONSTER_TYPE::ORC);
+	pSoundComponent->SetSC(SOUND_CATEGORY::SOUND_VOICE);
+	m_pListeners.push_back(std::move(pSoundComponent));
+	CMessageDispatcher::GetInst()->RegisterListener(MessageType::PLAY_SOUND, m_pListeners.back().get(), this);
+
+	// SKELETON MOAN SOUND
+	pSoundComponent = std::make_unique<SoundPlayComponent>();
+	pSoundComponent->SetSoundNumber(0);
+	pSoundComponent->SetDelay(0.0f);
+	pSoundComponent->SetVolume(0.75f);
+	pSoundComponent->SetMT(MONSTER_TYPE::SKELETON);
+	pSoundComponent->SetSC(SOUND_CATEGORY::SOUND_VOICE);
 	m_pListeners.push_back(std::move(pSoundComponent));
 	CMessageDispatcher::GetInst()->RegisterListener(MessageType::PLAY_SOUND, m_pListeners.back().get(), this);
 
@@ -350,7 +440,6 @@ Atk3_Player::Atk3_Player()
 	// CAMERA ZOOM IN/OUT
 	std::unique_ptr<CameraZoomerComponent> pZoomerComponent = std::make_unique<CameraZoomerComponent>();
 	pZoomerComponent->SetIsIn(false);
-	pZoomerComponent->SetDirection(XMFLOAT3{ 0.0f, 0.0f, 1.0f });
 	pZoomerComponent->SetMaxDistance(10.0f);
 	pZoomerComponent->SetMovingTime(0.25f);
 	pZoomerComponent->SetRollBackTime(0.25f);
@@ -359,7 +448,6 @@ Atk3_Player::Atk3_Player()
 
 	// CAMERA MOVE
 	std::unique_ptr<CameraMoveComponent> pMoveComponent = std::make_unique<CameraMoveComponent>();
-	pMoveComponent->SetDirection(XMFLOAT3{ 0.0f, 1.0f, 0.0f });
 	pMoveComponent->SetMaxDistance(5.0f);
 	pMoveComponent->SetMovingTime(0.5f);
 	pMoveComponent->SetRollBackTime(0.5f);
@@ -418,7 +506,6 @@ Atk3_Player::~Atk3_Player()
 
 void Atk3_Player::Enter(CPlayer* player)
 {
-	player->m_xmf3CameraMoveDirection = Vector3::Normalize(XMFLOAT3(1.0f, -1.0f, 0.0f));
 	player->m_fCMDConstant = 1.0f;
 
 	player->m_pChild->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 2);
@@ -429,7 +516,8 @@ void Atk3_Player::Enter(CPlayer* player)
 	player->m_bAttack = false; // 사용자가 좌클릭시 true가 되는 변수
 	player->m_iAttack_Limit = 1;
 
-	SoundPlayParams SoundPlayParam{ SOUND_CATEGORY::SOUND_SHOOT };
+	SoundPlayParams SoundPlayParam;
+	SoundPlayParam.sound_category = SOUND_CATEGORY::SOUND_SHOOT;
 	CMessageDispatcher::GetInst()->Dispatch_Message<SoundPlayParams>(MessageType::PLAY_SOUND, &SoundPlayParam, this);
 }
 
@@ -438,11 +526,11 @@ void Atk3_Player::Execute(CPlayer* player, float fElapsedTime)
 
 	// 충돌 판정 메세지 전달
 	if (0.3 < player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition &&
-		0.7 > player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition)
+		0.5 > player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition)
 	{
-		PlayerAttackParams PlayerAttackParam;
-		PlayerAttackParam.pPlayer = player;
-		CMessageDispatcher::GetInst()->Dispatch_Message<PlayerAttackParams>(MessageType::PLAYER_ATTACK, &PlayerAttackParam, player);
+		PlayerParams PlayerParam;
+		PlayerParam.pPlayer = player;
+		CMessageDispatcher::GetInst()->Dispatch_Message<PlayerParams>(MessageType::PLAYER_ATTACK, &PlayerParam, player);
 	}
 
 	//player->Animate(fElapsedTime);

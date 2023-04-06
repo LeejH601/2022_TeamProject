@@ -2,13 +2,24 @@
 #pragma once
 #include "PhysicsObject.h"
 #include "StateMachine.h"
+#include "MonsterState.h"
 
 class CMonster : public CPhysicsObject
 {
 public:
 	XMFLOAT3 m_xmf3HitterVec;
+	XMFLOAT3 m_xmf3WanderVec;
+	XMFLOAT3 m_xmf3ChasingVec;
+
+	bool m_bIsDummy = false;
 
 	bool m_bStunned;
+	bool m_bCanChase;
+	
+	float m_fIdleTime;
+	float m_fWanderTime;
+	float m_fToPlayerLength;
+	
 	float m_fStunTime;
 	float m_fStunStartTime;
 	float m_fShakeDistance;
@@ -16,6 +27,7 @@ public:
 	float m_fTotalDamageDistance;
 	float TestDissolvetime = 0.0f;
 
+	MONSTER_TYPE m_MonsterType;
 	std::unique_ptr<CStateMachine<CMonster>> m_pStateMachine;
 
 	CGameObject* pWeapon;
@@ -29,20 +41,30 @@ public:
 	CMonster();
 	virtual ~CMonster();
 
+	MONSTER_TYPE GetMonsterType() { return m_MonsterType; }
+
+	XMFLOAT3 GetHitterVec() { return m_xmf3HitterVec; }
+	XMFLOAT3 GetWanderVec() { return m_xmf3WanderVec; }
+	XMFLOAT3 GetChasingVec() { return m_xmf3ChasingVec; }
+
+	void SetWanderVec();
+	void CheckIsPlayerInFrontOfThis(XMFLOAT3 xmf3PlayerPosition);
 	virtual void SetScale(float x, float y, float z);
 	virtual void Animate(float fTimeElapsed);
 	virtual void Update(float fTimeElapsed);
 	virtual void UpdateTransform(XMFLOAT4X4* pxmf4x4Parent = NULL);
 	virtual void SetHit(CGameObject* pHitter)
 	{
-		bHit = true;
+		m_pStateMachine->ChangeState(Idle_Monster::GetInst());
+		m_pStateMachine->ChangeState(Damaged_Monster::GetInst());
+
 		m_xmf3HitterVec = Vector3::Normalize(Vector3::Subtract(GetPosition(), pHitter->GetPosition()));
 		m_xmf3HitterVec.y = 0.0f;
 
 		SetLookAt(Vector3::Add(GetPosition(), XMFLOAT3(-m_xmf3HitterVec.x, 0.0f, -m_xmf3HitterVec.z)));
 
-		SoundPlayParams SoundPlayParam{ };
-		CMessageDispatcher::GetInst()->Dispatch_Message<SoundPlayParams>(MessageType::PLAY_SOUND, &SoundPlayParam, this);
+		SoundPlayParams SoundPlayParam{ MONSTER_TYPE::NONE, SOUND_CATEGORY::SOUND_SHOCK };
+		CMessageDispatcher::GetInst()->Dispatch_Message<SoundPlayParams>(MessageType::PLAY_SOUND, &SoundPlayParam, this);  
 	}
 	virtual bool CheckCollision(CGameObject* pTargetObject) {
 		if (pTargetObject)
@@ -55,7 +77,6 @@ public:
 		}
 		return false;
 	}
-
 	virtual void UpdateTransformFromArticulation(XMFLOAT4X4* pxmf4x4Parent, std::vector<std::string> pArtiLinkNames, std::vector<XMFLOAT4X4>& AritculatCacheMatrixs, float scale = 1.0f);
 };
 
