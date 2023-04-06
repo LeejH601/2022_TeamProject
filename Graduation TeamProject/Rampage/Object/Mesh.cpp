@@ -1234,16 +1234,11 @@ CTexturedRectMesh::~CTexturedRectMesh()
 CSpriteMesh::CSpriteMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float m_fSize, bool m_bBillBoard)
 {
 	m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_POINTLIST;
-	int nBillBoard = 1;
 	m_nStride = sizeof(CSpriteVertex);
-	m_nVertices = nBillBoard;
+	m_nVertices = 1;
 	std::vector<CSpriteVertex> m_BillBordVertices;
-	m_BillBordVertices.reserve(nBillBoard);
-
-	for (int i = 0; i < nBillBoard; i++)
-	{
-		m_BillBordVertices.push_back(CSpriteVertex(XMFLOAT2(m_fSize, m_fSize), m_bBillBoard));
-	}
+	m_BillBordVertices.reserve(1);
+	m_BillBordVertices.push_back(CSpriteVertex(XMFLOAT2(m_fSize, m_fSize), m_bBillBoard));
 
 	m_pd3dPositionBuffer = CreateBufferResource(pd3dDevice, pd3dCommandList, m_BillBordVertices.data(), m_nStride * m_nVertices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dPositionUploadBuffer);
 

@@ -45,9 +45,16 @@ struct ImpactCompParams {
 };
 
 struct ParticleSmokeParams {
-    CGameObject* pObject;
+    std::vector<std::unique_ptr<CGameObject>>* pObjects;
     XMFLOAT3 xmf3Position;
-    XMFLOAT3 xmfShift;
+    XMFLOAT3 xmfDirection;
+    int iIndex;
+};
+
+struct ParticleUpDownParams {
+    std::vector<std::unique_ptr<CGameObject>>* pObjects;
+    XMFLOAT3 xmf3Position;
+    int iIndex;
 };
 
 struct CollideParams {
@@ -81,7 +88,7 @@ public:
     virtual void HandleMessage(const Message& message, const ImpactCompParams& params) {}
     virtual void HandleMessage(const Message& message, const ParticleSmokeParams& params) {}
     virtual void HandleMessage(const Message& message, const TerrainSpriteCompParams& params) {}
-
+    virtual void HandleMessage(const Message& message, const ParticleUpDownParams& params) {}
 };
 
 // Define Player Attack component
@@ -240,17 +247,18 @@ public:
 };
 
 // Define Particle Animation component
-#define SPHERE_PARITLCE 0
-#define SMOKE_PARITLCE 1
+#define SPHERE_PARTICLE 0
+#define RECOVERY_PARTICLE 1
+#define SMOKE_PARTICLE 2
 
-#define MAX_PARTICLES				250
+#define MAX_PARTICLES				10000
 class ParticleComponent : public IMessageListener {
     int m_nParticleNumber = MAX_PARTICLES;
-    int m_iParticleType = SPHERE_PARITLCE;
+    int m_iParticleType = SPHERE_PARTICLE;
     int m_nParticleIndex = 0;
     float m_fSize = 1.f;
     float m_fAlpha = 1.f;
-    float m_fLifeTime = 5.f;
+    float m_fLifeTime = 10.f;
     float m_fSpeed = 20.f;
     XMFLOAT3 m_xmf3Color = XMFLOAT3(1.f, 1.f, 1.f);
     std::shared_ptr<CTexture> m_pTexture;
@@ -281,35 +289,67 @@ public:
 };
 
 class SmokeParticleComponent : public IMessageListener {
-    int m_nParticleNumber = 4;
-    int m_iParticleType = SMOKE_PARITLCE;
+    int m_nParticleNumber = MAX_PARTICLES;
+    int m_iParticleType = SMOKE_PARTICLE;
     int m_nParticleIndex = 0;
-    float m_fSize = 5.f;
-    float m_fAlpha = 0.9f;
-    float m_fLifeTime = 0.05f;
-    float m_fSpeed = 20.f;
+    float m_fSize = 2.f;
+    float m_fAlpha = 0.04f;
+    float m_fLifeTime = 0.1f;
+    float m_fSpeed = 30.f;
 
-    XMFLOAT3 m_xmf3Color = XMFLOAT3(0.55f, 0.5f, 0.51f);
+    XMFLOAT3 m_xmf3Color = XMFLOAT3(0.191f, 0.167f, 0.096f);
 public:
     int& GetParticleNumber() { return m_nParticleNumber; }
     int& GetParticleIndex() { return m_nParticleIndex; }
     float& GetSize() { return m_fSize; }
-    float& GetAlpha() { return m_fSize; }
-    float& GetLifeTime() { return m_fSize; }
-    float& GetSpeed() { return m_fSize; }
+    float& GetAlpha() { return m_fAlpha; }
+    float& GetLifeTime() { return m_fLifeTime; }
+    float& GetSpeed() { return m_fSpeed; }
     XMFLOAT3& GetColor() { return m_xmf3Color; }
 
     void SetParticleNumber(int nParticleNumber) { m_nParticleNumber = nParticleNumber; }
     void SetParticleIndex(int nParticleIndex) { m_nParticleIndex = nParticleIndex; }
     void SetParticleType(int iParticleType) { m_iParticleType = iParticleType; }
     void SetSize(float fSize) { m_fSize = fSize; }
-    void SetAlpha(float fAlpha) { m_fSize = fAlpha; }
+    void SetAlpha(float fAlpha) { m_fAlpha = fAlpha; }
     void SetLifeTime(float fLifeTime) { m_fLifeTime = fLifeTime; }
-    void SetSpeed(float fSpeed) { m_fSize = fSpeed; }
+    void SetSpeed(float fSpeed) { m_fSpeed = fSpeed; }
     void SetColor(XMFLOAT3 xmf3Color) { m_xmf3Color = xmf3Color; }
 
     virtual void HandleMessage(const Message& message, const ParticleSmokeParams& params);
 };
+
+class UpDownParticleComponent : public IMessageListener {
+    int m_nParticleNumber = MAX_PARTICLES;
+    int m_iParticleType = RECOVERY_PARTICLE;
+    int m_nParticleIndex = 0;
+    float m_fSize = 0.5f;
+    float m_fAlpha = 1.f;
+    float m_fLifeTime = 5.f;
+    float m_fSpeed = 30.f;
+
+    XMFLOAT3 m_xmf3Color = XMFLOAT3(5.f, 5.f, 0.f);
+public:
+    int& GetParticleNumber() { return m_nParticleNumber; }
+    int& GetParticleIndex() { return m_nParticleIndex; }
+    float& GetSize() { return m_fSize; }
+    float& GetAlpha() { return m_fAlpha; }
+    float& GetLifeTime() { return m_fLifeTime; }
+    float& GetSpeed() { return m_fSpeed; }
+    XMFLOAT3& GetColor() { return m_xmf3Color; }
+
+    void SetParticleNumber(int nParticleNumber) { m_nParticleNumber = nParticleNumber; }
+    void SetParticleIndex(int nParticleIndex) { m_nParticleIndex = nParticleIndex; }
+    void SetParticleType(int iParticleType) { m_iParticleType = iParticleType; }
+    void SetSize(float fSize) { m_fSize = fSize; }
+    void SetAlpha(float fAlpha) { m_fAlpha = fAlpha; }
+    void SetLifeTime(float fLifeTime) { m_fLifeTime = fLifeTime; }
+    void SetSpeed(float fSpeed) { m_fSpeed = fSpeed; }
+    void SetColor(XMFLOAT3 xmf3Color) { m_xmf3Color = xmf3Color; }
+
+    virtual void HandleMessage(const Message& message, const ParticleUpDownParams& params);
+};
+
 
 class TerrainSpriteComponent : public IMessageListener
 {
@@ -317,13 +357,12 @@ private:
     float   m_fSpeed = 5.f;
     float   m_fAlpha = 1.f;
     float   m_fSize = 0.5f;
-    bool    m_bAnimation = false;
+    float   m_fLifeTime = 6.f;
 
 public:
     void SetTexture(LPCTSTR pszFileName);
     //void SetSpeed(float fSpeed);
     //void SetAlpha(float fAlpha);
-    void UpdateData();
 
 public:
     //float& GetSpeed();
@@ -337,7 +376,7 @@ class ImpactEffectComponent : public IMessageListener {
     int m_nTextureIndex = 0;
     float m_fSpeed = 5.f;
     float m_fAlpha = 1.f;
-    float m_fSize = 0.5f;
+    float m_fSize = 3.f;
     std::shared_ptr<CTexture> m_pTexture;
 public:
     int& GetTextureIndex() { return m_nTextureIndex; }

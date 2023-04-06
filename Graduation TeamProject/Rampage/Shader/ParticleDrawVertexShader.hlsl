@@ -42,7 +42,7 @@ VS_PARTICLE_DRAW_OUTPUT VSParticleDraw(VS_PARTICLE_INPUT input)
 	VS_PARTICLE_DRAW_OUTPUT output = (VS_PARTICLE_DRAW_OUTPUT)0;
 
 	output.position = input.position;
-	output.size = 0.8f;
+	output.size = gfSize;
 	output.alpha = input.alpha;
 
 	return(output);

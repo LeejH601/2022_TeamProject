@@ -21,6 +21,7 @@ public:
     virtual IMessageListener* GetShakeAnimationComponent();
     virtual IMessageListener* GetStunAnimationComponent();
     virtual IMessageListener* GetParticleComponent();
+    virtual IMessageListener* GetUpDownParticleComponent();
     virtual IMessageListener* GetImpactComponent();
 
 	virtual void Enter(entity_type*) = 0;
@@ -78,6 +79,9 @@ public:
 
 class Run_Player : public CState<CPlayer>
 {
+protected:
+    std::vector<std::unique_ptr<CGameObject>>* m_pSmokeObjects = NULL;
+
 public:
     DECLARE_SINGLE(Run_Player);
     Run_Player();
@@ -86,6 +90,9 @@ public:
     virtual void Enter(CPlayer* player);
     virtual void Execute(CPlayer* player, float fElapsedTime);
     virtual void Exit(CPlayer* player);
+
+    void SetSmokeObjects(std::vector<std::unique_ptr<CGameObject>>* pSmokeObjects);
+
 };
 
 template<class entity_type>
@@ -251,6 +258,23 @@ inline IMessageListener* CState<entity_type>::GetParticleComponent()
         }
         return false;
     });
+
+    if (p != m_pListeners.end())
+        return (*p).get();
+
+    return nullptr;
+}
+
+template<class entity_type>
+inline IMessageListener* CState<entity_type>::GetUpDownParticleComponent()
+{
+    std::vector<std::unique_ptr<IMessageListener>>::iterator p = std::find_if(m_pListeners.begin(), m_pListeners.end(), [](const std::unique_ptr<IMessageListener>& listener) {
+        UpDownParticleComponent* pUpDownParticleComponent = dynamic_cast<UpDownParticleComponent*>(listener.get());
+        if (pUpDownParticleComponent) {
+            return true;
+        }
+        return false;
+        });
 
     if (p != m_pListeners.end())
         return (*p).get();

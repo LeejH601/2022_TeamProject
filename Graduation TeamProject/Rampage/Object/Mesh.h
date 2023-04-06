@@ -290,13 +290,15 @@ class CSpriteVertex
 {
 public:
 	XMFLOAT2						m_xmf2Size;
-	bool							m_bBillBoard;
+	int								m_iBillBoard;
+	float							m_fLifetime;
 public:
-	CSpriteVertex() { m_xmf2Size = XMFLOAT2(0.f, 0.f), m_bBillBoard = true; }
+	CSpriteVertex() { m_xmf2Size = XMFLOAT2(0.f, 0.f), m_iBillBoard = true; m_fLifetime = 0.f; }
 	CSpriteVertex(XMFLOAT2 xmf2Size, bool bBillBoard)
 	{
 		m_xmf2Size = xmf2Size;
-		m_bBillBoard = bBillBoard;
+		m_iBillBoard = bBillBoard;
+		m_fLifetime = 0.f;
 	}
 	~CSpriteVertex() { }
 };
@@ -339,7 +341,7 @@ public:
 	~CParticleVertex() { }
 };
 
-#define MAX_PARTICLES				250
+#define MAX_PARTICLES				10000
 
 //#define _WITH_QUERY_DATA_SO_STATISTICS
 

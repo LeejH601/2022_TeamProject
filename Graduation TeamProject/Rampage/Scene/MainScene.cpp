@@ -13,11 +13,13 @@
 #include "..\Object\Monster.h"
 #include "..\Object\TextureManager.h"
 #include "..\Global\Locator.h"
+#include "..\Object\MonsterState.h"
 
 #define MAX_PARTICLE_OBJECT 50
 #define MAX_ATTACKSPRITE_OBJECT 50
 #define MAX_TERRAINSPRITE_OBJECT 50
-
+#define MAX_SMOKE_PARTICLE_OBJECT 15
+#define MAX_UPDOWN_PARTICLE_OBJECT 30
 void CMainTMPScene::SetPlayer(CGameObject* pPlayer)
 {
 	m_pPlayer = pPlayer;
@@ -677,6 +679,9 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 
 	m_pTextureManager->LoadBillBoardTexture(pd3dDevice, pd3dCommandList, L"Image/Explode_8x8.dds", m_pBillBoardObjectShader.get(), 8, 8);
 	m_pTextureManager->LoadBillBoardTexture(pd3dDevice, pd3dCommandList, L"Image/Fire_Effect.dds", m_pBillBoardObjectShader.get(), 5, 6);
+	m_pTextureManager->LoadBillBoardTexture(pd3dDevice, pd3dCommandList, L"Image/Explode_8x8.dds", m_pBillBoardObjectShader.get(), 8, 8);
+	m_pTextureManager->LoadBillBoardTexture(pd3dDevice, pd3dCommandList, L"Image/Fire_Effect.dds", m_pBillBoardObjectShader.get(), 5, 6);
+	m_pTextureManager->LoadBillBoardTexture(pd3dDevice, pd3dCommandList, L"Image/Circle1.dds", m_pBillBoardObjectShader.get(), 0, 0);
 
 	for (int i = 0; i < 50; ++i)
 	{
@@ -689,6 +694,7 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pParticleShader->CreateGraphicsPipelineState(pd3dDevice, GetGraphicsRootSignature(), 0);
 
 	m_pTextureManager->LoadParticleTexture(pd3dDevice, pd3dCommandList, L"ParticleImage/RoundSoftParticle.dds", m_pParticleShader.get(), 0, 0);
+	m_pTextureManager->LoadParticleTexture(pd3dDevice, pd3dCommandList, L"ParticleImage/Meteor.dds", m_pParticleShader.get(), 0, 0);
 	m_pTextureManager->LoadParticleTexture(pd3dDevice, pd3dCommandList, L"ParticleImage/Smoke.dds", m_pParticleShader.get(), 0, 0);
 	m_pTextureManager->LoadParticleTexture(pd3dDevice, pd3dCommandList, L"ParticleImage/Smoke2.dds", m_pParticleShader.get(), 0, 0);
 	m_pTextureManager->LoadParticleTexture(pd3dDevice, pd3dCommandList, L"Image/Effect0.dds", m_pParticleShader.get(), 0, 0);
@@ -698,17 +704,6 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pTextureManager->LoadParticleTexture(pd3dDevice, pd3dCommandList, L"Image/Effect4.dds", m_pParticleShader.get(), 0, 0);
 	m_pTextureManager->LoadParticleTexture(pd3dDevice, pd3dCommandList, L"Image/Effect5.dds", m_pParticleShader.get(), 0, 0);
 
-	m_pTextureManager->LoadBillBoardTexture(pd3dDevice, pd3dCommandList, L"Image/Explode_8x8.dds", m_pBillBoardObjectShader.get(), 8, 8);
-	m_pTextureManager->LoadBillBoardTexture(pd3dDevice, pd3dCommandList, L"Image/Fire_Effect.dds", m_pBillBoardObjectShader.get(), 5, 6);
-	m_pTextureManager->LoadBillBoardTexture(pd3dDevice, pd3dCommandList, L"Image/Circle0.dds", m_pBillBoardObjectShader.get(), 0, 0);
-
-	for (int i = 0; i < MAX_PARTICLE_OBJECT; ++i) 
-	{
-		std::unique_ptr<CGameObject> m_pParticleObject = std::make_unique<CParticleObject>(m_pTextureManager->LoadParticleTexture(L"ParticleImage/RoundSoftParticle.dds"), pd3dDevice, pd3dCommandList, GetGraphicsRootSignature(), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), 2.0f, XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT2(2.0f, 2.0f), MAX_PARTICLES, m_pParticleShader.get());
-		m_pParticleObjects.push_back(std::move(m_pParticleObject));
-	}
-
-
 	for (int i = 0; i < MAX_ATTACKSPRITE_OBJECT; ++i)
 	{
 		std::unique_ptr<CGameObject> m_pSpriteObject = std::make_unique<CMultiSpriteObject>(m_pTextureManager->LoadBillBoardTexture(L"Image/Fire_Effect.dds"), pd3dDevice, pd3dCommandList, m_pBillBoardObjectShader.get(), 5, 6, 8.f, true, 5.f);
@@ -717,15 +712,32 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 
 	for (int i = 0; i < MAX_TERRAINSPRITE_OBJECT; ++i)
 	{
-		std::unique_ptr<CGameObject> m_pSpriteObject = std::make_unique<CTerrainSpriteObject>(m_pTextureManager->LoadBillBoardTexture(L"Image/Circle0.dds"), pd3dDevice, pd3dCommandList, m_pBillBoardObjectShader.get(), 0, 0, 15.f, 5.f);
+		std::unique_ptr<CGameObject> m_pSpriteObject = std::make_unique<CTerrainSpriteObject>(m_pTextureManager->LoadBillBoardTexture(L"Image/Circle1.dds"), pd3dDevice, pd3dCommandList, m_pBillBoardObjectShader.get(), 0, 0, 15.f, 5.f);
 		m_pTerrainSpriteObject.push_back(std::move(m_pSpriteObject));
 	}
 
-	m_pSmokeObject = std::make_unique<CParticleObject>(m_pTextureManager->LoadParticleTexture(L"ParticleImage/Smoke2.dds"), pd3dDevice, pd3dCommandList, GetGraphicsRootSignature(), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), 2.0f, XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT2(2.0f, 2.0f), MAX_PARTICLES, m_pParticleShader.get());
-	((CParticleObject*)m_pSmokeObject.get())->SetEnable(true);
+	for (int i = 0; i < MAX_PARTICLE_OBJECT; ++i)
+	{
+		std::unique_ptr<CGameObject> m_pParticleObject = std::make_unique<CParticleObject>(m_pTextureManager->LoadParticleTexture(L"ParticleImage/RoundSoftParticle.dds"), pd3dDevice, pd3dCommandList, GetGraphicsRootSignature(), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), 2.0f, XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT2(2.0f, 2.0f), MAX_PARTICLES, m_pParticleShader.get(), SPHERE_PARTICLE);
+		m_pParticleObjects.push_back(std::move(m_pParticleObject));
+	}
 
+	for (int i = 0; i < MAX_SMOKE_PARTICLE_OBJECT; i++)
+	{
+		std::unique_ptr<CParticleObject> m_pSmokeObject = std::make_unique<CParticleObject>(m_pTextureManager->LoadParticleTexture(L"ParticleImage/Smoke2.dds"), pd3dDevice, pd3dCommandList, GetGraphicsRootSignature(), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), 2.0f, XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT2(2.0f, 2.0f), MAX_PARTICLES, m_pParticleShader.get(), SMOKE_PARTICLE);
+		m_pSmokeObjects.push_back(std::move(m_pSmokeObject));
+	}
+
+	for (int i = 0; i < MAX_UPDOWN_PARTICLE_OBJECT; i++)
+	{
+		std::unique_ptr<CParticleObject> m_pMeterorObject = std::make_unique<CParticleObject>(m_pTextureManager->LoadParticleTexture(L"ParticleImage/Meteor.dds"), pd3dDevice, pd3dCommandList, GetGraphicsRootSignature(), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), 2.0f, XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT2(2.0f, 2.0f), MAX_PARTICLES, m_pParticleShader.get(), RECOVERY_PARTICLE);
+		m_pUpDownParticleObjects.push_back(std::move(m_pMeterorObject));
+	}
+
+	Idle_Monster::GetInst()->SetUpDownParticleObjects(&m_pUpDownParticleObjects);
+	Run_Player::GetInst()->SetSmokeObjects(&m_pSmokeObjects);
 	// COLLIDE LISTENER
-	std::unique_ptr<SceneCollideListener> pCollideListener = std::make_unique<SceneCollideListener>();
+	std::unique_ptr<SceneCollideListener> pCollideListener = std::make_unique<SceneCollideListener>();																																																																																																																				
 	pCollideListener->SetScene(this);
 	m_pListeners.push_back(std::move(pCollideListener));
 	CMessageDispatcher::GetInst()->RegisterListener(MessageType::COLLISION, m_pListeners.back().get(), nullptr);
@@ -741,8 +753,23 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 bool CMainTMPScene::ProcessInput(DWORD dwDirection, float cxDelta, float cyDelta, float fTimeElapsed)
 {
 	m_pCurrentCamera->ProcessInput(dwDirection, cxDelta, cyDelta, fTimeElapsed);
-	((CPlayer*)m_pPlayer)->ProcessInput(dwDirection, cxDelta, cyDelta, fTimeElapsed, m_pCurrentCamera, (CParticleObject*)m_pSmokeObject.get());
-	((CParticleObject*)m_pSmokeObject.get())->ProcessInput(dwDirection, cxDelta, cyDelta, fTimeElapsed, m_pCurrentCamera);
+	((CPlayer*)m_pPlayer)->ProcessInput(dwDirection, cxDelta, cyDelta, fTimeElapsed, m_pCurrentCamera);
+	
+	//bool bInput = false;
+	//for (int i = 0; i < m_pSmokeObjects.size(); i++)
+	//{
+	//	if (((CParticleObject*)m_pSmokeObjects[i].get())->ProcessInput(dwDirection, cxDelta, cyDelta, fTimeElapsed, m_pCurrentCamera))
+	//		bInput = true;
+	//}
+	//if (bInput)
+	//{
+	//	ParticleSmokeParams Particlesmoke_comp_params;
+	//	Particlesmoke_comp_params.pObjects = &m_pSmokeObjects;
+	//	Particlesmoke_comp_params.xmf3Position = m_pPlayer->GetPosition();
+	//	Particlesmoke_comp_params.xmfShift = ((CParticleObject*)m_pSmokeObjects[0].get())->GetDirection();
+	//	Particlesmoke_comp_params.m_bRender = true;
+	//	CMessageDispatcher::GetInst()->Dispatch_Message<ParticleSmokeParams>(MessageType::UPDATE_PARTICLE, &Particlesmoke_comp_params, ((CPlayer*)m_pPlayer)->m_pStateMachine->GetCurrentState());
+	//}
 	return true;
 }
 
@@ -823,17 +850,34 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 	for (int i = 0; i < m_pTerrainSpriteObject.size(); ++i)
 	{
 		(static_cast<CTerrainSpriteObject*>(m_pTerrainSpriteObject[i].get()))->UpdateShaderVariables(pd3dCommandList, fCurrentTime, fTimeElapsed);
+		(static_cast<CTerrainSpriteObject*>(m_pTerrainSpriteObject[i].get()))->Animate(m_pTerrain.get(), fTimeElapsed);
 		m_pTerrainSpriteObject[i]->Render(pd3dCommandList, true);
 	}
 
 	for (int i = 0; i < m_pBillBoardObjects.size(); ++i)
+	{
+		(static_cast<CBillBoardObject*>(m_pBillBoardObjects[i].get()))->UpdateShaderVariables(pd3dCommandList, fCurrentTime, fTimeElapsed);
 		m_pBillBoardObjects[i]->Render(pd3dCommandList, true);
+	}
 
 	for (int i = 0; i < m_pParticleObjects.size(); ++i)
 	{
 		((CParticleObject*)m_pParticleObjects[i].get())->UpdateShaderVariables(pd3dCommandList, fCurrentTime, fTimeElapsed);
 		((CParticleObject*)m_pParticleObjects[i].get())->Render(pd3dCommandList, nullptr, m_pParticleShader.get());
 	}
+
+	for (int i = 0; i < m_pSmokeObjects.size(); ++i)
+	{
+		((CParticleObject*)m_pSmokeObjects[i].get())->UpdateShaderVariables(pd3dCommandList, fCurrentTime, fTimeElapsed);
+		((CParticleObject*)m_pSmokeObjects[i].get())->Render(pd3dCommandList, nullptr, m_pParticleShader.get());
+	}
+
+	for (int i = 0; i < m_pUpDownParticleObjects.size(); ++i)
+	{
+		((CParticleObject*)m_pUpDownParticleObjects[i].get())->UpdateShaderVariables(pd3dCommandList, fCurrentTime, fTimeElapsed);
+		((CParticleObject*)m_pUpDownParticleObjects[i].get())->Render(pd3dCommandList, nullptr, m_pParticleShader.get());
+	}
+	
 
 	CModelShader::GetInst()->Render(pd3dCommandList, 0);
 
@@ -903,7 +947,16 @@ void CMainTMPScene::OnPostRender()
 		((CParticleObject*)m_pParticleObjects[i].get())->OnPostRender();
 	}
 
-	((CParticleObject*)m_pSmokeObject.get())->OnPostRender();
+	for (int i = 0; i < m_pSmokeObjects.size(); ++i)
+	{
+		((CParticleObject*)m_pSmokeObjects[i].get())->OnPostRender();
+	}
+
+	for (int i = 0; i < m_pUpDownParticleObjects.size(); ++i)
+	{
+		((CParticleObject*)m_pUpDownParticleObjects[i].get())->OnPostRender();
+	}
+
 }
 
 void CMainTMPScene::LoadSceneFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, char* pstrFileName)
@@ -1032,6 +1085,7 @@ void CMainTMPScene::HandleCollision(const CollideParams& params)
 
 	}
 
+
 	it = std::find_if(m_pBillBoardObjects.begin(), m_pBillBoardObjects.end(), [](const std::unique_ptr<CGameObject>& pBillBoardObject) {
 		if (!((CParticleObject*)pBillBoardObject.get())->GetEnable())
 			return true;
@@ -1062,3 +1116,4 @@ void CMainTMPScene::HandleCollision(const CollideParams& params)
 }
 
 
+// ·±
