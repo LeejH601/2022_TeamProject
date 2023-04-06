@@ -4,14 +4,16 @@
 #include "../Object/BillBoardObject.h"
 #include "../Global/Camera.h"
 
-#define SPHERE_PARITLCE 0
-#define SMOKE_PARITLCE 1
+#define SPHERE_PARTILCE 0
+#define RECOVERY_PARTILCE 1
+#define SMOKE_PARTILCE 2
+
 class CParticleShader;
 
 class CParticleObject : public CGameObject
 {
 public:
-	CParticleObject(std::shared_ptr<CTexture> pSpriteTexture, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, XMFLOAT3 xmf3Position, XMFLOAT3 xmf3Velocity, float fLifetime, XMFLOAT3 xmf3Acceleration, XMFLOAT3 xmf3Color, XMFLOAT2 xmf2Size, UINT nMaxParticles, CParticleShader* pShader, bool bEnable = false);
+	CParticleObject(std::shared_ptr<CTexture> pSpriteTexture, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, XMFLOAT3 xmf3Position, XMFLOAT3 xmf3Velocity, float fLifetime, XMFLOAT3 xmf3Acceleration, XMFLOAT3 xmf3Color, XMFLOAT2 xmf2Size, UINT nMaxParticles, CParticleShader* pShader, int iParticleType, bool bEnable = false);
 	virtual ~CParticleObject();
 
 
@@ -32,11 +34,11 @@ public:
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, CShader* pShader);
 	virtual void OnPostRender();
 
-	virtual void ProcessInput(DWORD dwDirection, float cxDelta, float cyDelta, float fTimeElapsed, CCamera* pCamera);
+	virtual bool ProcessInput(DWORD dwDirection, float cxDelta, float cyDelta, float fTimeElapsed, CCamera* pCamera);
 
 	bool& GetEnable();
+	void SetStart(bool bStart);
 	void SetEnable(bool bEnable);
-
 	void SetSize(float fSize);
 	void SetLifeTime(float fLifeTime);
 	void SetStartAlpha(float fAlpha);
@@ -48,10 +50,11 @@ public:
 	int	 GetParticleType();
 
 	void SetDirection(XMFLOAT3 xmf3Direction);
+	XMFLOAT3 GetDirection();
 
 private:
 	bool		m_bEnable = false;
-	float		m_fSize = 0.8f;
+	float		m_fSize = 1.f;
 	float		m_fAlpha = 1.f;
 	float		m_fLifeTime = 1.f;
 	float		m_fTime = 0.f;

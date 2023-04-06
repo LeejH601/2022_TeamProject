@@ -798,7 +798,7 @@ void CImGuiManager::SetUI()
 			initial_curpos.y += 25.f;
 			ImGui::SetCursorPos(initial_curpos);
 			ImGui::SetNextItemWidth(190.f);
-			ImGui::Checkbox("On/Off##SpriteEffect", &pImpactEffectComponent->GetEnable());
+			ImGui::Checkbox("On/Off##Impact Effect", &pImpactEffectComponent->GetEnable());
 
 			std::vector<std::shared_ptr<CTexture>> vTexture = CSimulatorScene::GetInst()->GetTextureManager()->GetBillBoardTextureList();
 			std::vector<const char*> items;
@@ -814,7 +814,7 @@ void CImGuiManager::SetUI()
 			ImGui::SetCursorPos(initial_curpos);
 			ImGui::SetNextItemWidth(190.f);
 
-			if(ImGui::Combo("##Attack", (int*)(&pImpactEffectComponent->GetTextureIndex()), items.data(), items.size()));
+			if(ImGui::Combo("Attack##Impact Effect", (int*)(&pImpactEffectComponent->GetTextureIndex()), items.data(), items.size()));
 			{
 				std::shared_ptr<CTexture> pTexture = vTexture[pImpactEffectComponent->GetTextureIndex()];
 				pImpactEffectComponent->SetImpactTexture(pTexture);
@@ -823,12 +823,17 @@ void CImGuiManager::SetUI()
 			initial_curpos.y += 25.f;
 			ImGui::SetCursorPos(initial_curpos);
 			ImGui::SetNextItemWidth(190.f);
-			ImGui::DragFloat("Speed", &pImpactEffectComponent->GetSpeed(), 0.01f, 0.0f, 10.0f, "%.2f", 0);
+			ImGui::DragFloat("Speed##Impact Effect", &pImpactEffectComponent->GetSpeed(), 0.01f, 0.0f, 10.0f, "%.2f", 0);
 
 			initial_curpos.y += 25.f;
 			ImGui::SetCursorPos(initial_curpos);
 			ImGui::SetNextItemWidth(190.f);
-			ImGui::DragFloat("Alpha", &pImpactEffectComponent->GetAlpha(), 0.01f, 0.0f, 10.0f, "%.2f", 0);
+			ImGui::DragFloat("Alpha##Impact Effect", &pImpactEffectComponent->GetAlpha(), 0.01f, 0.0f, 10.0f, "%.2f", 0);
+
+			initial_curpos.y += 25.f;
+			ImGui::SetCursorPos(initial_curpos);
+			ImGui::SetNextItemWidth(190.f);
+			ImGui::DragFloat("Size##Impact Effect", &pImpactEffectComponent->GetSize(), 0.01f, 0.0f, 10.0f, "%.2f", 0);
 		}
 
 		initial_curpos.y += 25.f;

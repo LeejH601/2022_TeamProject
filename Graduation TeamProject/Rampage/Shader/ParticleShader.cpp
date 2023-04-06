@@ -73,7 +73,7 @@ D3D12_DEPTH_STENCIL_DESC CParticleShader::CreateDepthStencilState(int nPipelineS
 {
 	D3D12_DEPTH_STENCIL_DESC d3dDepthStencilDesc;
 	::ZeroMemory(&d3dDepthStencilDesc, sizeof(D3D12_DEPTH_STENCIL_DESC));
-	d3dDepthStencilDesc.DepthEnable = FALSE;
+	d3dDepthStencilDesc.DepthEnable = TRUE; 
 	d3dDepthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ZERO;
 	d3dDepthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS;
 	d3dDepthStencilDesc.StencilEnable = FALSE;
@@ -163,6 +163,7 @@ void CParticleShader::CreateGraphicsPipelineState(ID3D12Device* pd3dDevice, ID3D
 {
 	m_nPipelineStates = 2;
 	m_ppd3dPipelineStates.resize(m_nPipelineStates);
+	
 
 	DXGI_FORMAT pdxgiRtvFormat = DXGI_FORMAT_UNKNOWN;
 	DXGI_FORMAT pdxgiRtvFormats[7] = { DXGI_FORMAT_R8G8B8A8_UNORM, DXGI_FORMAT_R16G16B16A16_FLOAT, DXGI_FORMAT_R16G16B16A16_UNORM, DXGI_FORMAT_R32G32B32A32_FLOAT,

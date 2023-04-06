@@ -3,7 +3,7 @@
 #include "ParticleObject.h"
 #include "../Shader/ParticleShader.h"
 
-CParticleObject::CParticleObject(std::shared_ptr<CTexture> pSpriteTexture, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, XMFLOAT3 xmf3Position, XMFLOAT3 xmf3Velocity, float fLifetime, XMFLOAT3 xmf3Acceleration, XMFLOAT3 xmf3Color, XMFLOAT2 xmf2Size, UINT nMaxParticles, CParticleShader* pShader, bool bEnable) : m_bEnable(bEnable)
+CParticleObject::CParticleObject(std::shared_ptr<CTexture> pSpriteTexture, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, XMFLOAT3 xmf3Position, XMFLOAT3 xmf3Velocity, float fLifetime, XMFLOAT3 xmf3Acceleration, XMFLOAT3 xmf3Color, XMFLOAT2 xmf2Size, UINT nMaxParticles, CParticleShader* pShader, int iParticleType, bool bEnable) : m_bEnable(bEnable)
 {
 	m_xmf4x4World = Matrix4x4::Identity();
 	m_xmf4x4Transform = Matrix4x4::Identity();
@@ -12,6 +12,8 @@ CParticleObject::CParticleObject(std::shared_ptr<CTexture> pSpriteTexture, ID3D1
 	std::shared_ptr<CParticleMesh> pParticleMesh = std::make_shared<CParticleMesh>(pd3dDevice, pd3dCommandList, xmf3Position, xmf3Velocity, fLifetime, xmf3Acceleration, xmf3Color, xmf2Size, nMaxParticles);
 	SetMesh(pParticleMesh);
 
+	m_iParticleType = iParticleType;
+	
 	SetTexture(pSpriteTexture);
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
@@ -36,8 +38,6 @@ void CParticleObject::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12Grap
 void CParticleObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList, float fCurrentTime, float fElapsedTime)
 {
 	CGameObject::UpdateShaderVariables(pd3dCommandList);
-	m_fTime -= fElapsedTime;
-
 	m_pcbMappedFrameworkInfo->m_fCurrentTime = fCurrentTime;
 	m_pcbMappedFrameworkInfo->m_fElapsedTime = fElapsedTime;
 
@@ -52,12 +52,6 @@ void CParticleObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dComma
 
 	if (m_bStart) // 1번만 파티클을 생성하도록(emit particle) - Sphere일 경우에만
 		m_bStart = !m_bStart;
-
-	//if (m_fTime < 0.f) {
-	//	m_fTime = m_fLifeTime;
-	//	m_bStart = false;
-	//}
-
 	D3D12_GPU_VIRTUAL_ADDRESS d3dGpuVirtualAddress = m_pd3dcbFrameworkInfo->GetGPUVirtualAddress();
 	pd3dCommandList->SetGraphicsRootConstantBufferView(11, d3dGpuVirtualAddress);
 }
@@ -98,8 +92,6 @@ void CParticleObject::DrawRender(ID3D12GraphicsCommandList* pd3dCommandList, CCa
 
 void CParticleObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, CShader* pShader)
 {
-	//if (!m_bEnable)
-	//	return;
 	StreamOutRender(pd3dCommandList, pCamera, pShader);
 	DrawRender(pd3dCommandList, pCamera, pShader);
 }
@@ -109,7 +101,7 @@ void CParticleObject::OnPostRender()
 	if (m_pMesh) m_pMesh->OnPostRender(0); //Read Stream Output Buffer Filled Size
 }
 
-void CParticleObject::ProcessInput(DWORD dwDirection, float cxDelta, float cyDelta, float fTimeElapsed, CCamera* pCamera)
+bool CParticleObject::ProcessInput(DWORD dwDirection, float cxDelta, float cyDelta, float fTimeElapsed, CCamera* pCamera)
 {
 	static UCHAR pKeysBuffer[256];
 
@@ -126,8 +118,10 @@ void CParticleObject::ProcessInput(DWORD dwDirection, float cxDelta, float cyDel
 			if (dwDirection & DIR_LEFT)xmf3Shift = Vector3::Add(xmf3Shift, Vector3::Normalize(XMFLOAT3(pCamera->GetRightVector().x, 0.0f, pCamera->GetRightVector().z)), -1.0f);
 
 			SetDirection(xmf3Shift);
+			return true;
 		}
 	}
+	return false;
 }
 
 bool& CParticleObject::GetEnable()
@@ -135,11 +129,15 @@ bool& CParticleObject::GetEnable()
 	return m_bEnable;
 }
 
+void CParticleObject::SetStart(bool bStart)
+{
+	m_bStart = bStart;
+}
+
 void CParticleObject::SetEnable(bool bEnable)
 {
 	m_bEnable = bEnable;
-	if (m_bEnable)
-		m_bStart = true;
+	m_fTime = m_fLifeTime; // 계속 터지는 파티클에 LifeTime을 주기 위해(Sphere 제외)
 }
 
 void CParticleObject::SetSize(float fSize)
@@ -194,4 +192,9 @@ int CParticleObject::GetParticleType()
 void CParticleObject::SetDirection(XMFLOAT3 xmf3Direction)
 {
 	m_xmf3Direction = xmf3Direction;
+}
+
+XMFLOAT3 CParticleObject::GetDirection()
+{
+	return m_xmf3Direction;
 }

@@ -233,7 +233,7 @@ void ParticleComponent::HandleMessage(const Message& message, const ParticleComp
 
 	if (pParticle)
 	{
-		pParticle->SetEnable(true);
+		pParticle->SetStart(true);
 		pParticle->SetSize(m_fSize);
 		pParticle->SetStartAlpha(m_fAlpha);
 		pParticle->SetColor(m_xmf3Color);
@@ -256,10 +256,9 @@ void ImpactEffectComponent::HandleMessage(const Message& message, const ImpactCo
 	if (pMultiSprite)
 	{
 		pMultiSprite->SetEnable(true);
-		// SetSize() 함수 원래 없나?
-		// pMultiSprite->SetSize(m_fSize);
+		pMultiSprite->SetSize(m_fSize);
 		pMultiSprite->SetSpeed(m_fSpeed);
-		pMultiSprite->SetAlpha(m_fAlpha);
+		pMultiSprite->SetStartAlpha(m_fAlpha);
 		pMultiSprite->SetPosition(params.xmf3Position);
 		pMultiSprite->ChangeTexture(m_pTexture);
 	}
@@ -282,9 +281,6 @@ void TerrainSpriteComponent::SetTexture(LPCTSTR pszFileName)
 //{
 //}
 
-void TerrainSpriteComponent::UpdateData()
-{
-}
 //
 //float& TerrainSpriteComponent::GetSpeed()
 //{
@@ -304,37 +300,47 @@ void TerrainSpriteComponent::HandleMessage(const Message& message, const Terrain
 	{
 		pSpriteObject->SetEnable(true);
 		pSpriteObject->SetPosition(params.xmf3Position);
-		//pSpriteObject->SetSpeed()
-		//pParticle->SetSize(m_fSize);
-		//pParticle->SetAlpha(m_fAlpha);
-		//pParticle->SetColor(m_xmf3Color);
-		//pParticle->SetSpeed(m_fSpeed);
-		//pParticle->SetLifeTime(m_fLifeTime);
-		//pParticle->SetMaxParticleN(m_nParticleNumber);
-		//pParticle->SetEmitParticleN(m_nParticleNumber);
-		//pParticle->SetPosition(params.xmf3Position);
+		pSpriteObject->SetLifeTime(m_fLifeTime);
+		pSpriteObject->SetStart(true);
+		pSpriteObject->SetStartAlpha(1.f);
 	}
 }
 
 void SmokeParticleComponent::HandleMessage(const Message& message, const ParticleSmokeParams& params)
 {
-	CParticleObject* pParticleObject = dynamic_cast<CParticleObject*>(params.pObject);
 
-	if (pParticleObject)
-	{
-		pParticleObject->SetEnable(true);
-		pParticleObject->SetPosition(params.xmf3Position);
-		pParticleObject->SetParticleType(m_iParticleType);
-		//pSpriteObject->SetSpeed()
-		pParticleObject->SetSize(m_fSize);
-		pParticleObject->SetStartAlpha(m_fAlpha);
-		pParticleObject->SetColor(m_xmf3Color);
-		//pParticle->SetSpeed(m_fSpeed);
-		pParticleObject->SetLifeTime(m_fLifeTime);
-		//pParticle->SetMaxParticleN(m_nParticleNumber);
-		//pParticle->SetEmitParticleN(m_nParticleNumber);
-		//pParticle->SetPosition(params.xmf3Position);
-	}
+	CParticleObject* pParticleObject = dynamic_cast<CParticleObject*>(((*params.pObjects)[params.iIndex]).get());
+	
+	pParticleObject->SetStart(true);
+	pParticleObject->SetPosition(params.xmf3Position);
+	pParticleObject->SetParticleType(m_iParticleType);
+	
+	pParticleObject->SetSize(m_fSize - m_fSize * params.iIndex * 0.05f);
+	pParticleObject->SetStartAlpha(m_fAlpha);
+	pParticleObject->SetColor(m_xmf3Color);
+	pParticleObject->SetLifeTime(m_fLifeTime);
+	pParticleObject->SetDirection(params.xmfDirection);
+	pParticleObject->SetSpeed(m_fSpeed);
+	
+	
+
+}
+
+void UpDownParticleComponent::HandleMessage(const Message& message, const ParticleUpDownParams& params)
+{
+	CParticleObject* pParticleObject = dynamic_cast<CParticleObject*>(((*params.pObjects)[params.iIndex]).get());
+
+	pParticleObject->SetStart(true);
+	pParticleObject->SetPosition(params.xmf3Position);
+	pParticleObject->SetParticleType(m_iParticleType);
+
+	pParticleObject->SetSize(m_fSize);
+	pParticleObject->SetStartAlpha(m_fAlpha);
+	pParticleObject->SetColor(m_xmf3Color);
+	pParticleObject->SetLifeTime(m_fLifeTime);
+	pParticleObject->SetSpeed(m_fSpeed);
+	pParticleObject->SetDirection(XMFLOAT3(0.f, 1.f, 0.f));
+	
 }
 
 void RegisterArticulationListener::HandleMessage(const Message& message, const RegisterArticulationParams& params)

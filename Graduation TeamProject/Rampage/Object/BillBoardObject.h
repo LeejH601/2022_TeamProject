@@ -27,6 +27,7 @@ public:
 	virtual void CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList, float fCurrentTime, float fElapsedTime);
 	virtual void Animate(float fTimeElapsed);
+	void Disappear(float fTimeElapsed);
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, bool b_UseTexture, CCamera* pCamera = NULL);
 
 	virtual void SetTarget(CGameObject* m_pTarget);
@@ -39,14 +40,16 @@ protected:
 	float							m_fSpeed = 5.f;
 	float							m_fTime = 0.0f;
 	float							m_fAlpha = 1.f;
-	float							m_fSize = 55.f;
-	float							m_fLifeTime = 0.f;
+	float							m_fSize = 15.f;
+	float							m_fLifeTime = 5.f;
+	XMFLOAT3						m_xmf3Color = XMFLOAT3(1.f, 1.f, 1.f);
+	bool							m_bStart = false;
 
 protected:
 	ComPtr<ID3D12Resource>			m_pd3dcbFrameworkInfo = NULL;
 	CB_FRAMEWORK_INFO*				m_pcbMappedFrameworkInfo = NULL;
 };
-
+ // 일단 빌보드에는 시간값을 적용x(현재 쉐이더에 바닥 이펙트를 수정하면 적용 가능)
 class CMultiSpriteObject : public CBillBoardObject
 {
 public:
@@ -57,14 +60,19 @@ public:
 	virtual void AnimateRowColumn(float fTimeElapsed);
 	virtual void SetEnable(bool bEnable);
 
+
+
 	void SetSize(float fSize);
 	void SetSpeed(float fSpeed);
-	void SetAlpha(float fAlpha);
+	void SetStartAlpha(float fAlpha);
+	void SetLifeTime(float fLifeTime);
+	void SetStart(bool bStart);
 	bool& GetAnimation();
-	bool	m_bAnimation = true;
+	bool m_bAnimation = true;
 protected:
 	int 							m_nRow = 0;
 	int 							m_nCol = 0;
+	//int								m_nMaxCol = 1; // 최대 출력 열 지정
 
 };
 
@@ -74,4 +82,9 @@ public:
 	CTerrainSpriteObject(std::shared_ptr<CTexture> pSpriteTexture, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CShader* pShader, int nRows, int nCols, float fSize, float fSpeed = 5.f);
 	virtual ~CTerrainSpriteObject();
 	virtual void Animate(CHeightMapTerrain* pTerrain, float fTimeElapsed); // 해당 오브젝트를 터레인 위에 위치시키는 함수
+	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList, float fCurrentTime, float fElapsedTime);
+
+	virtual void SetEnable(bool bEnable);
+
 };
+

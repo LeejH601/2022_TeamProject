@@ -20,6 +20,22 @@ cbuffer cbCameraInfo : register(b1)
 	//float3 gf3CameraDirection : packoffset(c17);
 };
 
+cbuffer cbFrameworkInfo : register(b7)
+{
+	float		gfCurrentTime : packoffset(c0.x);
+	float		gfElapsedTime : packoffset(c0.y);
+	//float		gfSecondsPerFirework : packoffset(c0.z); // EmmitParticles에서 사용 잠시 주석
+	float		gfSpeed : packoffset(c0.z);
+	int			gnFlareParticlesToEmit : packoffset(c0.w);;
+	float3		gf3Gravity : packoffset(c1.x);
+	int			gnMaxFlareType2Particles : packoffset(c1.w);
+	float3		gfColor : packoffset(c2.x);
+	int			gnParticleType : packoffset(c2.w);
+	float		gfLifeTime : packoffset(c3.x);
+	float		gfSize : packoffset(c3.y);
+	bool		bStart : packoffset(c3.z);
+};
+
 #include "Light.hlsl"
 
 struct GS_OUT
@@ -37,7 +53,8 @@ PS_MULTIPLE_RENDER_TARGETS_OUTPUT Billboard_PS(GS_OUT input)
 	float3 uvw = float3(input.uv, input.primID % 4); // 수정 float3 uvw = float3(input.uv, input.primID ); 
 	float4 cTexture = gtxtTexture.Sample(gSamplerState, uvw);
 	float4 cColor = cTexture; //  // cIllumination * cTexture;
-	//cColor.a *= gnTexturesMask * 0.01f; // 0~100으로 받아 0.00 ~1.00으로 변경
+	cColor.rgb *= gfColor;
+	cColor.a *= gnTexturesMask * 0.01f; // 0~100으로 받아 0.00 ~1.00으로 변경
 	float4 cIllumination = Lighting(input.posW, input.normalW, cColor);
 
 	output.f4Scene = cIllumination;
