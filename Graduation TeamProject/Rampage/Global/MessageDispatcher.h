@@ -101,7 +101,7 @@ public:
     virtual void HandleMessage(const Message& message, const ParticleUpDownParams& params) {}
 };
 
-// Define Player Attack component
+// Define RegisterAriticulationListner
 class RegisterArticulationListener : public IMessageListener {
     CMainTMPScene* m_pScene;
 public:

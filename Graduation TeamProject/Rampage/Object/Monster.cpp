@@ -8,6 +8,7 @@ CMonster::CMonster()
 	m_pStateMachine = std::make_unique<CStateMachine<CMonster>>(this);
 	m_pStateMachine->SetCurrentState(Idle_Monster::GetInst());
 	m_pStateMachine->SetPreviousState(Idle_Monster::GetInst());
+	m_pStateMachine->SetGlobalState(Global_Monster::GetInst());
 	m_fStunStartTime = 0.0f;
 	m_fShakeDistance = 0.0f;
 	m_fStunTime = 0.0f;
@@ -15,6 +16,8 @@ CMonster::CMonster()
 	m_fDissolveThrethHold = 0.0f;
 	m_fDissolveTime = 0.0f;
 	TestDissolvetime = 0.0f;
+
+	m_fHP = 100.0f;
 
 	m_fSpeedKperH = 2.0f;
 	m_fSpeedMperS = m_fSpeedKperH * 1000.0f / 3600.0f;

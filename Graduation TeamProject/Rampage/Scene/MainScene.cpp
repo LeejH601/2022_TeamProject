@@ -857,11 +857,11 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 		((CParticleObject*)m_pParticleObjects[i].get())->Render(pd3dCommandList, nullptr, m_pParticleShader.get());
 	}
 
-	for (int i = 0; i < m_pSmokeObjects.size(); ++i)
+	/*for (int i = 0; i < m_pSmokeObjects.size(); ++i)
 	{
 		((CParticleObject*)m_pSmokeObjects[i].get())->UpdateShaderVariables(pd3dCommandList, fCurrentTime, fTimeElapsed);
 		((CParticleObject*)m_pSmokeObjects[i].get())->Render(pd3dCommandList, nullptr, m_pParticleShader.get());
-	}
+	}*/
 
 	for (int i = 0; i < m_pUpDownParticleObjects.size(); ++i)
 	{

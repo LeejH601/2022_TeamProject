@@ -51,6 +51,8 @@ void Damaged_Monster::Enter(CMonster* monster)
 {
 	if (monster->m_pStateMachine->GetPreviousState() != Stun_Monster::GetInst())
 	{
+		monster->m_fHP -= 30.0f; // 몬스터 체력 고정 감소
+
 		monster->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 4);
 		monster->m_pSkinnedAnimationController->m_fTime = 0.0f;
 		monster->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition = 0.2f;
@@ -235,12 +237,18 @@ void Dead_Monster::Enter(CMonster* monster)
 		monster->m_pArticulationLinks[index]->setGlobalPose(transform);
 		index++;
 	}
-	RegisterArticulationParams Request_params;
-	Request_params.pObject = monster;
-	XMFLOAT3 force = monster->GetHitterVec();
-	force = Vector3::ScalarProduct(force, 300.0f, false);
-	Request_params.m_force = force;
-	CMessageDispatcher::GetInst()->Dispatch_Message<RegisterArticulationParams>(MessageType::REQUEST_REGISTERARTI, &Request_params, nullptr);
+	if (monster->m_bArticulationOnPxScene) {
+
+	}
+	else {
+		RegisterArticulationParams Request_params;
+		Request_params.pObject = monster;
+		XMFLOAT3 force = monster->GetHitterVec();
+		force = Vector3::ScalarProduct(force, 300.0f, false);
+		Request_params.m_force = force;
+		CMessageDispatcher::GetInst()->Dispatch_Message<RegisterArticulationParams>(MessageType::REQUEST_REGISTERARTI, &Request_params, nullptr);
+		monster->m_bArticulationOnPxScene = true;
+	}
 }
 
 void Dead_Monster::Execute(CMonster* monster, float fElapsedTime)
@@ -251,4 +259,28 @@ void Dead_Monster::Execute(CMonster* monster, float fElapsedTime)
 void Dead_Monster::Exit(CMonster* monster)
 {
 	monster->m_bSimulateArticulate = false;
+}
+
+Global_Monster::Global_Monster()
+{
+}
+
+Global_Monster::~Global_Monster()
+{
+}
+
+void Global_Monster::Enter(CMonster* monster)
+{
+}
+
+void Global_Monster::Execute(CMonster* monster, float fElapsedTime)
+{
+	if (monster->m_fHP < 0.0f) {
+		if(monster->m_pStateMachine->GetCurrentState() != Dead_Monster::GetInst())
+			monster->m_pStateMachine->ChangeState(Dead_Monster::GetInst());
+	}
+}
+
+void Global_Monster::Exit(CMonster* monster)
+{
 }

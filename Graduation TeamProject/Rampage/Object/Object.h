@@ -73,6 +73,7 @@ public:
 	std::vector<XMFLOAT4X4> m_AritculatCacheMatrixs;
 
 	bool m_bSimulateArticulate = false;
+	bool m_bArticulationOnPxScene = false;
 	bool m_bDissolved = false;
 	float m_fDissolveThrethHold = 0.0f;
 	float m_fDissolveTime;

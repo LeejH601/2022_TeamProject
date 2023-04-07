@@ -2,6 +2,18 @@
 #include "State.h"
 
 class CMonster;
+
+class Global_Monster : public CState<CMonster>
+{
+public:
+    DECLARE_SINGLE(Global_Monster);
+    Global_Monster();
+    ~Global_Monster();
+    virtual void Enter(CMonster* monster);
+    virtual void Execute(CMonster* monster, float fElapsedTime);
+    virtual void Exit(CMonster* monster);
+};
+
 class Idle_Monster : public CState<CMonster>
 {
 private:

@@ -127,9 +127,6 @@
     <ClCompile Include="Shader\DepthRenderShader.cpp">
       <Filter>Shader</Filter>
     </ClCompile>
-    <ClCompile Include="Object\MonsterState.cpp">
-      <Filter>Object</Filter>
-    </ClCompile>
     <ClCompile Include="Object\Monster.cpp">
       <Filter>Object</Filter>
     </ClCompile>
@@ -195,6 +192,9 @@
     </ClCompile>
     <ClCompile Include="Object\Animation.cpp">
       <Filter>Object\Animation</Filter>
+    </ClCompile>
+    <ClCompile Include="Object\MonsterState.cpp">
+      <Filter>Object\State</Filter>
     </ClCompile>
     <ClCompile Include="Object\MonsterState.cpp">
       <Filter>Object\State</Filter>
@@ -306,9 +306,6 @@
     <ClInclude Include="Object\MonsterState.h">
       <Filter>Object</Filter>
     </ClInclude>
-    <ClInclude Include="Object\MonsterState.h">
-      <Filter>Object</Filter>
-    </ClInclude>
     <ClInclude Include="Object\Monster.h">
       <Filter>Object</Filter>
     </ClInclude>
@@ -375,9 +372,6 @@
     <ClInclude Include="Object\StateMachine.h">
       <Filter>Object\State</Filter>
     </ClInclude>
-    <ClInclude Include="Object\AnimationComponent.h">
-      <Filter>Object\Animation</Filter>
-    </ClInclude>
     <ClInclude Include="Object\Animation.h">
       <Filter>Object\Animation</Filter>
     </ClInclude>
@@ -386,6 +380,9 @@
     </ClInclude>
     <ClInclude Include="Object\Player.h">
       <Filter>Object</Filter>
+    </ClInclude>
+    <ClInclude Include="Object\MonsterState.h">
+      <Filter>Object\State</Filter>
     </ClInclude>
     <ClInclude Include="Object\MonsterState.h">
       <Filter>Object\State</Filter>
