@@ -88,7 +88,7 @@ public:
 	bool RequestDataTable();
 	bool ReturnDataTable(std::vector<Test_Record>& records);
 	bool ReceiveRequest(SearchData& searchData);
-	bool RecvDataTable();
+	bool RecvDataTable(std::vector<Test_Record>& records);
 
 	bool SendToNetwork() {};
 	bool RecvByNetwork() {};

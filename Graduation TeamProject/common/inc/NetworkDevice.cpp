@@ -125,7 +125,7 @@ bool CNetworkDevice::ReceiveRequest(SearchData& searchData)
 	return true;
 }
 
-bool CNetworkDevice::RecvDataTable()
+bool CNetworkDevice::RecvDataTable(std::vector<Test_Record>& records)
 {
 	int retval;
 	int len;
@@ -136,7 +136,6 @@ bool CNetworkDevice::RecvDataTable()
 	if (retval == 0)
 		return false;
 
-	std::vector<Test_Record> records;
 	records.resize(len / sizeof(Test_Record));
 
 	char* Data = new char[len];
@@ -169,6 +168,7 @@ bool CNetworkDevice::RecvDataTable()
 		std::cout << record.WID << " " << record.WName << " " << record.WGrade << " " 
 			<< record.Atk << " " << record.Sharpness << " " << record.Critical << " " << record.Type << std::endl;
 	}
+
 	system("puase");
 	return false;
 }

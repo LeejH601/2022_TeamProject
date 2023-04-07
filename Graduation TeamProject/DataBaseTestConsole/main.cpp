@@ -8,6 +8,7 @@ char* address = (char*)"127.0.0.1";
 int main()
 {
 	CNetworkDevice NetworkDevice;
+	std::vector<Test_Record> records;
 
 	SOCKET sock;
 	int retval = 0;
@@ -33,5 +34,5 @@ int main()
 	NetworkDevice.init(sock);
 
 	NetworkDevice.RequestDataTable();
-	NetworkDevice.RecvDataTable();
+	NetworkDevice.RecvDataTable(records);
 }
