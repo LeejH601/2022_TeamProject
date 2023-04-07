@@ -12,9 +12,22 @@
 #define SERVERPORT 9000
 char* SERVERIP = (char*)"127.0.0.1";
 
+sql::Driver* driver;
+sql::Connection* connection;
+sql::Statement* statement;
+sql::PreparedStatement* PreStatement;
+
+std::string SELECT{ "SELECT" };
+std::string FROM{ "FROM" };
+std::string WHERE{ "WHERE" };
+
+void SearchDataFromQuery(SearchData& searchData);
+
 DWORD WINAPI ProcessClient(LPVOID arg)
 {
 	CNetworkDevice Network_Device;
+
+	//sql::ResultSet* result;
 
 	SOCKET Arg;
 	memcpy(&Arg, arg, sizeof(arg));
@@ -23,8 +36,36 @@ DWORD WINAPI ProcessClient(LPVOID arg)
 
 	std::cout << "connect client" << std::endl;
 
-	Network_Device.ReturnDataTable();
+	SearchData searchData;
+	Network_Device.ReceiveRequest(searchData);
+	SearchDataFromQuery(searchData);
 	return 0;
+}
+
+void SearchDataFromQuery(SearchData& searchData)
+{
+	sql::ResultSet* result;
+
+	try
+	{
+		driver = get_driver_instance();
+		connection = driver->connect("tcp://127.0.0.1:3306", "root", "wlfjd36796001!");
+	}
+	catch (const std::exception& e)
+	{
+		std::cout << "Could not connect to server. Error message: " << e.what() << std::endl;
+		system("pause");
+		exit(1);
+	}
+
+	connection->setSchema("sakila");
+
+	std::string query;
+	query = SELECT + " " + "*" + " " + FROM + "sakila";
+	PreStatement = connection->prepareStatement(query.c_str());
+	result = PreStatement->executeQuery();
+
+
 }
 
 void TestDataBaseConnect() {

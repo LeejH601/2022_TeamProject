@@ -36,6 +36,7 @@ public:
 	std::string GetWord() { return searchWord; };
 	SEARCH_METHOD GetSortinMethod() { return sortingMethod; };
 	SORT_BY GetSortBy() { return sortBy; };
+	SearchData() {};
 
 private:
 	SearchData(SearchDataBuilder& builder);
@@ -73,6 +74,7 @@ public:
 	void init(SOCKET sock);
 bool RequestDataTable();
 	bool ReturnDataTable();
+	bool ReceiveRequest(SearchData& searchData);
 	
 
 	bool SendToNetwork() {};

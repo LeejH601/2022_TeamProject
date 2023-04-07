@@ -33,7 +33,7 @@ bool CNetworkDevice::RequestDataTable()
 	char buf[BUFSIZE + 1];
 
 	len = searchData.GetWord().size();
-	memcpy(buf, (void*)len, sizeof(int));
+	memcpy(buf, (void*)&len, sizeof(int));
 	retval = send(m_client_sock, (const char*)buf, sizeof(int), 0);
 
 	if (retval == 0)
@@ -53,12 +53,18 @@ bool CNetworkDevice::RequestDataTable()
 
 bool CNetworkDevice::ReturnDataTable()
 {
+
+	return true;
+}
+
+bool CNetworkDevice::ReceiveRequest(SearchData searchData)
+{
 	int retval;
 	int len;
 	char buf[BUFSIZE + 1];
 
-	retval = recv(m_client_sock, buf, sizeof(int), MSG_WAITALL);
-	memcpy(&len, buf, sizeof(int));
+	retval = recv(m_client_sock, (char*)&len, sizeof(int), MSG_WAITALL);
+	//memcpy(&len, buf, sizeof(int));
 
 	if (retval == 0)
 		return false;
@@ -66,8 +72,8 @@ bool CNetworkDevice::ReturnDataTable()
 	std::string str;
 	str.resize(len);
 
-	retval = recv(m_client_sock, (char*)buf, len + sizeof(SEARCH_METHOD) + sizeof(SORT_BY), 0);
-	
+	retval = recv(m_client_sock, (char*)buf, len + sizeof(SEARCH_METHOD) + sizeof(SORT_BY), MSG_WAITALL);
+
 	if (retval == 0)
 		return false;
 
@@ -75,12 +81,13 @@ bool CNetworkDevice::ReturnDataTable()
 	SearchDataBuilder builder{ str };
 	memcpy(&builder, buf, sizeof(SEARCH_METHOD) + sizeof(SORT_BY));
 
-	SearchData searchData = builder.Build();
+	searchData = builder.Build();
 
 #ifdef DEBUG_SHOW_SEARCH_DATA
 	std::cout << searchData.GetWord() << " " << (int)(searchData.GetSortinMethod()) << " " << (int)(searchData.GetSortBy()) << std::endl;
 #endif // DEBUG_SHOW_SEARCH_DATA
 
-
 	return true;
 }
+
+
