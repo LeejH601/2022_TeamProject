@@ -20,14 +20,22 @@ sql::PreparedStatement* PreStatement;
 std::string SELECT{ "SELECT" };
 std::string FROM{ "FROM" };
 std::string WHERE{ "WHERE" };
+std::string REGEXP{ "REGEXP" };
+std::string ORDERBY{ "ORDER BY" };
 
-void SearchDataFromQuery(SearchData& searchData);
+sql::ResultSet* SearchDataFromQuery(SearchData& searchData);
+
+//class IRecord {
+//public:
+//	
+//};
+
 
 DWORD WINAPI ProcessClient(LPVOID arg)
 {
 	CNetworkDevice Network_Device;
 
-	//sql::ResultSet* result;
+	sql::ResultSet* result;
 
 	SOCKET Arg;
 	memcpy(&Arg, arg, sizeof(arg));
@@ -38,18 +46,35 @@ DWORD WINAPI ProcessClient(LPVOID arg)
 
 	SearchData searchData;
 	Network_Device.ReceiveRequest(searchData);
-	SearchDataFromQuery(searchData);
+	result = SearchDataFromQuery(searchData);
+	std::vector<Test_Record> records;
+	while (result->next())
+	{
+		Test_Record record;
+		record.WID = result->getInt("WID");
+		record.WName = result->getString("WName").c_str();
+		record.WGrade = result->getInt("WGrade");
+		record.Atk = result->getInt("Atk");
+		record.Sharpness = result->getInt("Sharpness");
+		record.Critical = result->getInt("Critical");
+		record.Type = result->getString("Type");
+		records.push_back(record);
+	}
+	Network_Device.ReturnDataTable(records);
+
+
+	delete result;
 	return 0;
 }
 
-void SearchDataFromQuery(SearchData& searchData)
+sql::ResultSet* SearchDataFromQuery(SearchData& searchData)
 {
 	sql::ResultSet* result;
 
 	try
 	{
 		driver = get_driver_instance();
-		connection = driver->connect("tcp://127.0.0.1:3306", "root", "wlfjd36796001!");
+		connection = driver->connect("tcp://localhost:3306", "root", "wlfjd36796001!");
 	}
 	catch (const std::exception& e)
 	{
@@ -58,14 +83,30 @@ void SearchDataFromQuery(SearchData& searchData)
 		exit(1);
 	}
 
-	connection->setSchema("sakila");
+	connection->setSchema("mhdb");
 
 	std::string query;
-	query = SELECT + " " + "*" + " " + FROM + "sakila";
+	query = SELECT + " " + "*" + " " + FROM + " " + "weapon" + " " + ORDERBY + " " + "WName";
 	PreStatement = connection->prepareStatement(query.c_str());
 	result = PreStatement->executeQuery();
 
+	/*while (result->next())
+	{
+		int WID = result->getInt("WID");
+		sql::SQLString WName_SQL = result->getString("WName");
+		std::string WName = result->getString("WName").c_str();
+		int WGrade = result->getInt("WGrade");
+		int Atk = result->getInt("Atk");
+		int Sharpness = result->getInt("Sharpness");
+		int Critical = result->getInt("Critical");
+		std::string Type = result->getString("Type");
+		std::cout << WID << " " << WName << " " << WGrade << " " << Atk << " " << Sharpness << " " << Critical << " " << Type << std::endl;
+	}*/
 
+	delete PreStatement;
+	delete connection;
+
+	return result;
 }
 
 void TestDataBaseConnect() {

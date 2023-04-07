@@ -51,8 +51,43 @@ bool CNetworkDevice::RequestDataTable()
 
 #define DEBUG_SHOW_SEARCH_DATA
 
-bool CNetworkDevice::ReturnDataTable()
+bool CNetworkDevice::ReturnDataTable(std::vector<Test_Record>& records)
 {
+	int recordSize = records.size();
+	char buf[BUFSIZE + 1];
+	int len;
+	int retval;
+
+	len = recordSize * sizeof(Test_Record);
+	std::cout << "len " << len << std::endl;
+	std::cout << "recordSize " << recordSize << std::endl;
+	memcpy(buf, (void*)&len, sizeof(int));
+	retval = send(m_client_sock, (const char*)buf, sizeof(int), 0);
+
+	if (retval == 0)
+		return false;
+
+	char* data = (char*)records.data();
+	int offset = 0;
+	int remainSize = len;
+	while (true)
+	{
+		int sendSize = 0;
+		if (remainSize > BUFSIZE)
+			sendSize = BUFSIZE;
+		else
+			sendSize = remainSize;
+		memcpy(buf, data + offset, sendSize);
+		retval = send(m_client_sock, (const char*)buf, sendSize, 0);
+		offset += sendSize;
+
+		if (retval == 0)
+			return false;
+
+		remainSize -= BUFSIZE;
+		if (remainSize <= 0)
+			break;
+	}
 
 	return true;
 }
@@ -88,6 +123,54 @@ bool CNetworkDevice::ReceiveRequest(SearchData& searchData)
 #endif // DEBUG_SHOW_SEARCH_DATA
 
 	return true;
+}
+
+bool CNetworkDevice::RecvDataTable()
+{
+	int retval;
+	int len;
+	char buf[BUFSIZE + 1];
+
+	retval = recv(m_client_sock, (char*)&len, sizeof(int), MSG_WAITALL);
+
+	if (retval == 0)
+		return false;
+
+	std::vector<Test_Record> records;
+	records.resize(len / sizeof(Test_Record));
+
+	char* Data = new char[len];
+
+	int remainSize = len;
+	int offset = 0;
+	while (true)
+	{
+		int recvSize;
+		if (remainSize > BUFSIZE)
+			recvSize = BUFSIZE;
+		else
+			recvSize = remainSize;
+
+		retval = recv(m_client_sock, Data + offset, recvSize, 0);
+
+		if (retval == 0)
+			return false;
+
+		offset += retval;
+		remainSize -= retval;
+
+		if (remainSize <= 0)
+			break;
+	}
+
+	memcpy(records.data(), Data, len);
+
+	for (Test_Record& record : records) {
+		std::cout << record.WID << " " << record.WName << " " << record.WGrade << " " 
+			<< record.Atk << " " << record.Sharpness << " " << record.Critical << " " << record.Type << std::endl;
+	}
+	system("puase");
+	return false;
 }
 
 

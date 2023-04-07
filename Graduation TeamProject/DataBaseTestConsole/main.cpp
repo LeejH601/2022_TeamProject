@@ -33,4 +33,5 @@ int main()
 	NetworkDevice.init(sock);
 
 	NetworkDevice.RequestDataTable();
+	NetworkDevice.RecvDataTable();
 }

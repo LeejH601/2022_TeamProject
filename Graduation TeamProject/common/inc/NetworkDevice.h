@@ -8,7 +8,20 @@
 #include <ws2tcpip.h>
 #include <string>
 #include <iostream>
+#include <vector>
 
+
+class Test_Record
+{
+public:
+	int WID;
+	std::string WName;
+	int WGrade;
+	int Atk;
+	int Sharpness;
+	int Critical;
+	std::string Type;
+};
 
 enum class SEARCH_METHOD {
 	ASCENDING,
@@ -72,10 +85,10 @@ public:
 	~CNetworkDevice();
 
 	void init(SOCKET sock);
-bool RequestDataTable();
-	bool ReturnDataTable();
+	bool RequestDataTable();
+	bool ReturnDataTable(std::vector<Test_Record>& records);
 	bool ReceiveRequest(SearchData& searchData);
-	
+	bool RecvDataTable();
 
 	bool SendToNetwork() {};
 	bool RecvByNetwork() {};
