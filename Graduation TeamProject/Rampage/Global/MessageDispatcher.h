@@ -138,16 +138,18 @@ public:
 // Define Shake Movement component
 class CameraShakeComponent : public IMessageListener {
     std::uniform_real_distribution<float> urd{ -1.0f, 1.0f };
-
     float m_ft = 0.0f;;
     float m_fDuration;
     float m_fMagnitude;
+    float m_fFrequency = 0.015f;
 public:
     float& GetDuration() { return m_fDuration; }
     float& GetMagnitude() { return m_fMagnitude; }
+    float& GetFrequency() { return m_fFrequency; }
 
     void SetDuration(float duration) { m_fDuration = duration; }
     void SetMagnitude(float magnitude) { m_fMagnitude = magnitude; }
+    void SetFrequency(float frequency) { m_fFrequency = frequency; }
 
     void Update(CCamera* pCamera, float fElapsedTime);
     virtual void HandleMessage(const Message& message, const CameraUpdateParams& params);
@@ -221,12 +223,15 @@ public:
 
 // Define Shake Animation component
 class ShakeAnimationComponent : public IMessageListener {
+    float m_fMaxTime = 1.0f;
     float m_fDistance = 0.15f;
     float m_fFrequency = 0.05f;
 public:
+    float& GetMaxTime() { return m_fMaxTime; }
     float& GetDistance() { return m_fDistance; }
     float& GetFrequency() { return m_fFrequency; }
 
+    void SetMaxTime(float fMaxtime) { m_fMaxTime = fMaxtime; }
     void SetDistance(float distance) { m_fDistance = distance; }
     void SetFrequency(float frequency) { m_fFrequency = frequency; }
 

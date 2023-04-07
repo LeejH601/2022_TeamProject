@@ -67,11 +67,12 @@ void CameraShakeComponent::Update(CCamera* pCamera, float fElapsedTime)
 
 		XMFLOAT3 CameraDir = pCamera->GetRightVector();
 
-		float ShakeConstant = urd(dre);
+		float fShakeDistance = (m_fMagnitude - (m_fMagnitude / m_fDuration) * m_ft) * cos((2 * PI * m_ft) / m_fFrequency);
+
 		float RotateConstant = urd(dre);
 		RotateConstant *= XM_PI;
 
-		CameraDir = Vector3::ScalarProduct(CameraDir, ShakeConstant * m_fMagnitude, false);
+		CameraDir = Vector3::ScalarProduct(CameraDir, fShakeDistance, false);
 		XMMATRIX RotateMatrix = XMMatrixRotationAxis(XMLoadFloat3(&pCamera->GetLookVector()), RotateConstant);
 
 		XMFLOAT3 ShakeOffset; 
@@ -204,7 +205,8 @@ void DamageAnimationComponent::HandleMessage(const Message& message, const Anima
 				}
 			}
 
-			xmf3DamageVec = Vector3::ScalarProduct(pMonster->GetHitterVec(), pMonster->m_fDamageDistance, false);
+			xmf3DamageVec = Vector3::ScalarProduct(pMonster->GetHitterVec(), pMonster->m_fDamageDistance);
+
 			pMonster->Move(xmf3DamageVec, true);
 		}
 	}
@@ -226,13 +228,16 @@ void ShakeAnimationComponent::HandleMessage(const Message& message, const Animat
 
 			pMonster->m_fShakeDistance = 0.0f;
 
-			float fShakeDistance = m_fDistance * sin((2 * PI * pMonster->m_pSkinnedAnimationController->m_fTime + pMonster->m_fStunTime) / m_fFrequency);
-			
-			if (pMonster->m_pStateMachine->GetCurrentState() == Damaged_Monster::GetInst() || pMonster->m_pStateMachine->GetCurrentState() == Stun_Monster::GetInst())
-				pMonster->m_fShakeDistance = fShakeDistance;
+			float fTimeElapsed = pMonster->m_pSkinnedAnimationController->m_fTime + pMonster->m_fStunTime;
 
-			xmf3ShakeVec = Vector3::ScalarProduct(pMonster->GetRight(), pMonster->m_fShakeDistance, false);
-			pMonster->Move(xmf3ShakeVec, true);
+			if (m_fMaxTime < fTimeElapsed)
+				return;
+
+			if (pMonster->m_pStateMachine->GetCurrentState() == Damaged_Monster::GetInst() || pMonster->m_pStateMachine->GetCurrentState() == Stun_Monster::GetInst())
+			{
+				float fShakeDistance = (m_fDistance - (m_fDistance / m_fMaxTime) * fTimeElapsed) * cos((2 * PI * fTimeElapsed) / m_fFrequency);
+				pMonster->m_fShakeDistance = fShakeDistance;
+			}
 		}
 	}
 }

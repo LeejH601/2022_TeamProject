@@ -1035,7 +1035,7 @@ void CImGuiManager::SetUI()
 			ImGui::SetCursorPos(initial_curpos);
 			ImGui::SetNextItemWidth(190.f);
 
-			if (ImGui::DragFloat("Distance##ShakeAnimation", &pShakeAnimationComponent->GetDistance(), 0.01f, 0.0f, 1.0f, "%.2f", 0))
+			if(ImGui::DragFloat("Distance##ShakeAnimation", &pShakeAnimationComponent->GetDistance(), 0.01f, 0.0f, 1.0f, "%.2f", 0))
 				pShakeAnimationComponent->GetDistance() = std::clamp(pShakeAnimationComponent->GetDistance(), 0.0f, 1.0f);
 
 			initial_curpos.y += 25.f;
