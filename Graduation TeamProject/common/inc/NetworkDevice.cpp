@@ -57,7 +57,7 @@ bool CNetworkDevice::ReturnDataTable()
 	return true;
 }
 
-bool CNetworkDevice::ReceiveRequest(SearchData searchData)
+bool CNetworkDevice::ReceiveRequest(SearchData& searchData)
 {
 	int retval;
 	int len;
