@@ -138,6 +138,7 @@ public:
 // Define Shake Movement component
 class CameraShakeComponent : public IMessageListener {
     std::uniform_real_distribution<float> urd{ -1.0f, 1.0f };
+
     float m_ft = 0.0f;;
     float m_fDuration;
     float m_fMagnitude;

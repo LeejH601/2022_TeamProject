@@ -94,10 +94,14 @@ bool CPlayer::CheckCollision(CGameObject* pTargetObject)
 
 			if (m_pCamera)
 			{
-				m_pCamera->m_bCameraShaking = true;
-				m_pCamera->m_bCameraZooming = true;
-				m_pCamera->m_bCameraMoving = true;
+				if (m_pStateMachine->GetCurrentState()->GetCameraShakeComponent()->GetEnable())
+					m_pCamera->m_bCameraShaking = true;
+				if (m_pStateMachine->GetCurrentState()->GetCameraZoomerComponent()->GetEnable())
+					m_pCamera->m_bCameraZooming = true;
+				if (m_pStateMachine->GetCurrentState()->GetCameraMoveComponent()->GetEnable())
+					m_pCamera->m_bCameraMoving = true;
 			}
+
 			m_xmf3TargetPosition = pTargetObject->GetPosition();
 			pTargetObject->SetHit(this);
 

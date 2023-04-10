@@ -68,7 +68,6 @@ void CameraShakeComponent::Update(CCamera* pCamera, float fElapsedTime)
 		XMFLOAT3 CameraDir = pCamera->GetRightVector();
 
 		float fShakeDistance = (m_fMagnitude - (m_fMagnitude / m_fDuration) * m_ft) * cos((2 * PI * m_ft) / m_fFrequency);
-
 		float RotateConstant = urd(dre);
 		RotateConstant *= XM_PI;
 
