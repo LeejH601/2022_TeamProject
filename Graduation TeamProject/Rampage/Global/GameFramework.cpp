@@ -141,6 +141,16 @@ void CGameFramework::CreateDirect3DDevice()
 	ComPtr<IDXGIAdapter1> pd3dAdapter = NULL;
 	for (UINT i = 0; DXGI_ERROR_NOT_FOUND != m_pdxgiFactory->EnumAdapters1(i, pd3dAdapter.GetAddressOf()); i++)
 	{
+		//사용자 데스크탑의 해상도를 가져옵니다.
+		ComPtr<IDXGIOutput> pd3dOutput = NULL;
+		DXGI_OUTPUT_DESC pd3dOutputDesc;
+
+		pd3dAdapter->EnumOutputs(0, pd3dOutput.GetAddressOf());
+		pd3dOutput->GetDesc(&pd3dOutputDesc);
+
+		m_DeskTopCoordinatesRect = pd3dOutputDesc.DesktopCoordinates;
+		
+		//
 		DXGI_ADAPTER_DESC1 dxgiAdapterDesc;
 		pd3dAdapter->GetDesc1(&dxgiAdapterDesc);
 		if (dxgiAdapterDesc.Flags & DXGI_ADAPTER_FLAG_SOFTWARE)
@@ -177,7 +187,7 @@ void CGameFramework::CreateDirect3DDevice()
 	/*펜스와 동기화를 위한 이벤트 객체를 생성한다(이벤트 객체의 초기값을 FALSE이다). 이벤트가 실행되면(Signal) 이
 	벤트의 값을 자동적으로 FALSE가 되도록 생성한다.*/
 	m_hFenceEvent = ::CreateEvent(NULL, FALSE, FALSE, NULL);
-
+	
 	::gnRtvDescriptorIncrementSize = m_pd3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
 	::gnCbvSrvDescriptorIncrementSize = m_pd3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 
