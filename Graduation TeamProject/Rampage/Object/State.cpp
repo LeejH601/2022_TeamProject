@@ -201,6 +201,15 @@ void Atk1_Player::Execute(CPlayer* player, float fElapsedTime)
 
 void Atk1_Player::Exit(CPlayer* player)
 {
+	if (player->m_pCamera)
+	{
+		player->m_pCamera->m_bCameraShaking = false;
+		GetShakeAnimationComponent()->Reset();
+		player->m_pCamera->m_bCameraZooming = false;
+		GetCameraZoomerComponent()->Reset();
+		player->m_pCamera->m_bCameraMoving = false;
+		GetCameraMoveComponent()->Reset();
+	}
 }
 
 Atk2_Player::Atk2_Player()
@@ -366,6 +375,15 @@ void Atk2_Player::Execute(CPlayer* player, float fElapsedTime)
 
 void Atk2_Player::Exit(CPlayer* player)
 {
+	if (player->m_pCamera)
+	{
+		player->m_pCamera->m_bCameraShaking = false;
+		GetShakeAnimationComponent()->Reset();
+		player->m_pCamera->m_bCameraZooming = false;
+		GetCameraZoomerComponent()->Reset();
+		player->m_pCamera->m_bCameraMoving = false;
+		GetCameraMoveComponent()->Reset();
+	}
 }
 
 Atk3_Player::Atk3_Player()
@@ -533,6 +551,15 @@ void Atk3_Player::Execute(CPlayer* player, float fElapsedTime)
 
 void Atk3_Player::Exit(CPlayer* player)
 {
+	if (player->m_pCamera)
+	{
+		player->m_pCamera->m_bCameraShaking = false;
+		GetShakeAnimationComponent()->Reset();
+		player->m_pCamera->m_bCameraZooming = false;
+		GetCameraZoomerComponent()->Reset();
+		player->m_pCamera->m_bCameraMoving = false;
+		GetCameraMoveComponent()->Reset();
+	}
 }
 
 Run_Player::Run_Player()

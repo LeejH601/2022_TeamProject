@@ -73,6 +73,7 @@ protected:
 public:
     bool& GetEnable() { return m_bEnable; }
     void SetEnable(bool bEnable) { m_bEnable = bEnable; }
+    virtual void Reset() { }
 
     virtual void HandleMessage(const Message& message, const CollideParams& params) {}
     virtual void HandleMessage(const Message& message, const PlayerParams& params) {}
@@ -140,8 +141,8 @@ class CameraShakeComponent : public IMessageListener {
     std::uniform_real_distribution<float> urd{ -1.0f, 1.0f };
 
     float m_ft = 0.0f;;
-    float m_fDuration;
-    float m_fMagnitude;
+    float m_fDuration = 0.5f;
+    float m_fMagnitude = 0.5f;
     float m_fFrequency = 0.015f;
 public:
     float& GetDuration() { return m_fDuration; }
@@ -153,6 +154,7 @@ public:
     void SetFrequency(float frequency) { m_fFrequency = frequency; }
 
     void Update(CCamera* pCamera, float fElapsedTime);
+    virtual void Reset();
     virtual void HandleMessage(const Message& message, const CameraUpdateParams& params);
 };
 
@@ -177,6 +179,7 @@ public:
     void SetRollBackTime(float rollback_time) { m_fRollBackTime = rollback_time; }
 
     void Update(CCamera* pCamera, float fElapsedTime, const CameraUpdateParams& params);
+    virtual void Reset();
     virtual void HandleMessage(const Message& message, const CameraUpdateParams& params);
 };
 
@@ -205,6 +208,7 @@ public:
     void SetIsIn(bool is_in) { m_bIsIN = is_in; }
 
     void Update(CCamera* pCamera, float fElapsedTime, const CameraUpdateParams& params);
+    virtual void Reset();
     virtual void HandleMessage(const Message& message, const CameraUpdateParams& params);
 };
 

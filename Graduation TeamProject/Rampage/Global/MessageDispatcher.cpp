@@ -83,6 +83,10 @@ void CameraShakeComponent::Update(CCamera* pCamera, float fElapsedTime)
 		pCamera->m_bCameraShaking = false;
 	}
 }
+void CameraShakeComponent::Reset()
+{
+	m_ft = 0.0f;
+}
 void CameraShakeComponent::HandleMessage(const Message& message, const CameraUpdateParams& params)
 {
 	if (!m_bEnable)
@@ -126,6 +130,13 @@ void CameraZoomerComponent::Update(CCamera* pCamera, float fElapsedTime, const C
 		pCamera->m_xmf3CalculatedPosition = Vector3::Add(pCamera->m_xmf3CalculatedPosition, offset);
 	}
 }
+void CameraZoomerComponent::Reset()
+{
+	m_fCurrDistance = 0.f;
+	offset.x = 0.0f;
+	offset.y = 0.0f;
+	offset.z = 0.0f;
+}
 void CameraZoomerComponent::HandleMessage(const Message& message, const CameraUpdateParams& params)
 {
 	if (!m_bEnable)
@@ -164,6 +175,13 @@ void CameraMoveComponent::Update(CCamera* pCamera, float fElapsedTime, const Cam
 
 		pCamera->m_xmf3CalculatedPosition = Vector3::Add(pCamera->m_xmf3CalculatedPosition, offset);
 	}
+}
+void CameraMoveComponent::Reset()
+{
+	m_fCurrDistance = 0.f;
+	offset.x = 0.0f;
+	offset.y = 0.0f;
+	offset.z = 0.0f;
 }
 void CameraMoveComponent::HandleMessage(const Message& message, const CameraUpdateParams& params)
 {

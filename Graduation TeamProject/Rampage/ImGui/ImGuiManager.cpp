@@ -117,6 +117,8 @@ void DataLoader::SaveComponentSet(FILE* pInFile, CState<CPlayer>* pState)
 	WriteFloatFromFile(pInFile, pCameraShakerComponent->GetDuration());
 	WriteStringFromFile(pInFile, std::string("<Magnitude>:"));
 	WriteFloatFromFile(pInFile, pCameraShakerComponent->GetMagnitude());
+	WriteStringFromFile(pInFile, std::string("<Frequency>:"));
+	WriteFloatFromFile(pInFile, pCameraShakerComponent->GetFrequency());
 	WriteStringFromFile(pInFile, std::string("</CCameraShaker>:"));
 
 	WriteStringFromFile(pInFile, std::string("<CCameraZoomer>:"));
@@ -144,6 +146,8 @@ void DataLoader::SaveComponentSet(FILE* pInFile, CState<CPlayer>* pState)
 	WriteStringFromFile(pInFile, std::string("<ShakeAnimationComponent>:"));
 	WriteStringFromFile(pInFile, std::string("<Enable>:"));
 	WriteIntegerFromFile(pInFile, pShakeAnimationComponent->GetEnable());
+	WriteStringFromFile(pInFile, std::string("<MaxTime>:"));
+	WriteFloatFromFile(pInFile, pShakeAnimationComponent->GetMaxTime());
 	WriteStringFromFile(pInFile, std::string("<Distance>:"));
 	WriteFloatFromFile(pInFile, pShakeAnimationComponent->GetDistance());
 	WriteStringFromFile(pInFile, std::string("<Frequency>:"));
@@ -327,6 +331,10 @@ void DataLoader::LoadComponentSet(FILE* pInFile, CState<CPlayer>* pState)
 				{
 					pCameraShakerComponent->SetEnable(ReadIntegerFromFile(pInFile));
 				}
+				else if (!strcmp(buf, "<Frequency>:"))
+				{
+					pCameraShakerComponent->SetFrequency(ReadFloatFromFile(pInFile));
+				}
 				else if (!strcmp(buf, "</CCameraShaker>:"))
 				{
 					break;
@@ -398,6 +406,10 @@ void DataLoader::LoadComponentSet(FILE* pInFile, CState<CPlayer>* pState)
 				if (!strcmp(buf, "<Enable>:"))
 				{
 					pShakeAnimationComponent->SetEnable(ReadIntegerFromFile(pInFile));
+				}
+				else if (!strcmp(buf, "<MaxTime>:"))
+				{
+					pShakeAnimationComponent->SetMaxTime(ReadFloatFromFile(pInFile));
 				}
 				else if (!strcmp(buf, "<Distance>:"))
 				{
@@ -1035,6 +1047,13 @@ void CImGuiManager::SetUI()
 			ImGui::SetCursorPos(initial_curpos);
 			ImGui::SetNextItemWidth(190.f);
 
+			if (ImGui::DragFloat("MaxTime##ShakeAnimation", &pShakeAnimationComponent->GetDistance(), 0.01f, 0.0f, 1.0f, "%.2f", 0))
+				pShakeAnimationComponent->GetMaxTime() = std::clamp(pShakeAnimationComponent->GetMaxTime(), 0.0f, 1.0f);
+
+			initial_curpos.y += 25.f;
+			ImGui::SetCursorPos(initial_curpos);
+			ImGui::SetNextItemWidth(190.f);
+
 			if(ImGui::DragFloat("Distance##ShakeAnimation", &pShakeAnimationComponent->GetDistance(), 0.01f, 0.0f, 1.0f, "%.2f", 0))
 				pShakeAnimationComponent->GetDistance() = std::clamp(pShakeAnimationComponent->GetDistance(), 0.0f, 1.0f);
 
@@ -1042,7 +1061,7 @@ void CImGuiManager::SetUI()
 			ImGui::SetCursorPos(initial_curpos);
 			ImGui::SetNextItemWidth(190.f);
 
-			if (ImGui::DragFloat("Frequency##ShakeAnimation", &pShakeAnimationComponent->GetFrequency(), 0.01f, 0.0f, 1.0f, "%.2f", 0))
+			if (ImGui::DragFloat("Frequency##ShakeAnimation", &pShakeAnimationComponent->GetFrequency(), 0.01f, 0.0f, 1.0f, "%.3f", 0))
 				pShakeAnimationComponent->GetFrequency() = std::clamp(pShakeAnimationComponent->GetFrequency(), 0.0f, 1.0f);
 		}
 
@@ -1117,6 +1136,11 @@ void CImGuiManager::SetUI()
 			ImGui::SetCursorPos(initial_curpos);
 			ImGui::SetNextItemWidth(190.f);
 			ImGui::DragFloat("Duration##Shake", &pCameraShakerComponent->GetDuration(), 0.01f, 0.0f, 10.0f, "%.2f", 0);
+
+			initial_curpos.y += 25.f;
+			ImGui::SetCursorPos(initial_curpos);
+			ImGui::SetNextItemWidth(190.f);
+			ImGui::DragFloat("Frequency##Shake", &pCameraShakerComponent->GetFrequency(), 0.01f, 0.0f, 10.0f, "%.3f", 0);
 		}
 
 		initial_curpos.y += 25.f;
