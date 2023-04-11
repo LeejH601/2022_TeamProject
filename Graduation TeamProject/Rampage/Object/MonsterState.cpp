@@ -40,7 +40,7 @@ Damaged_Monster::Damaged_Monster()
 	// UPDOWNPARTICLE ANIMATION
 	std::unique_ptr<UpDownParticleComponent> pUpDownParticlenComponent = std::make_unique<UpDownParticleComponent>();
 	m_pListeners.push_back(std::move(pUpDownParticlenComponent));
-	CMessageDispatcher::GetInst()->RegisterListener(MessageType::UPDATE_PARTICLE, m_pListeners.back().get(), this);
+	CMessageDispatcher::GetInst()->RegisterListener(MessageType::UPDATE_UPDOWNPARTICLE, m_pListeners.back().get(), this);
 }
 
 Damaged_Monster::~Damaged_Monster()
@@ -59,21 +59,6 @@ void Damaged_Monster::Enter(CMonster* monster)
 		monster->m_bCanChase = false;
 
 		monster->m_fTotalDamageDistance = 0.0f;
-
-		static int iIndex = 0;
-
-		for (int i = 0; i < 2; i++)
-		{
-			XMFLOAT3 xmf3Position;
-			ParticleUpDownParams ParticlesUpDown_comp_params;
-			if (m_pUpDownParticle)
-			{
-				ParticlesUpDown_comp_params.pObjects = m_pUpDownParticle;
-				ParticlesUpDown_comp_params.xmf3Position = monster->GetPosition();
-				ParticlesUpDown_comp_params.iIndex = (++iIndex) % m_pUpDownParticle->size();
-				CMessageDispatcher::GetInst()->Dispatch_Message<ParticleUpDownParams>(MessageType::UPDATE_PARTICLE, &ParticlesUpDown_comp_params, monster->m_pStateMachine->GetCurrentState());
-			}
-		}		
 	}
 }
 
@@ -92,10 +77,6 @@ void Damaged_Monster::Exit(CMonster* monster)
 {
 }
 
-void Damaged_Monster::SetUpDownParticleObjects(std::vector<std::unique_ptr<CGameObject>>* pParticleObjects)
-{
-	m_pUpDownParticle = pParticleObjects;
-}
 
 
 void Stun_Monster::Enter(CMonster* monster)

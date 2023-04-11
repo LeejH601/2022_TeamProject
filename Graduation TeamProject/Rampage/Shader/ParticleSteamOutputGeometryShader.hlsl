@@ -4,6 +4,7 @@ Buffer<float4> gRandomSphereBuffer : register(t33);
 #define SPHERE_PARTILCE 0
 #define RECOVERY_PARTILCE 1
 #define SMOKE_PARTILCE 2
+#define TRAIL_PARTILCE 3
 
 cbuffer cbFrameworkInfo : register(b7)
 {
@@ -37,7 +38,7 @@ cbuffer cbGameObjectInfo : register(b0)
 	uint gnTexturesMask : packoffset(c8);
 }
 
-float rand(float2 seed) // 양수
+float rand(float2 seed) // 양수 
 {
 	return frac(sin(dot(seed.xy, float2(12.9898, 78.233))) * 43758.5453);
 }
@@ -122,7 +123,11 @@ void SphereParticles(VS_PARTICLE_INPUT input, inout PointStream<VS_PARTICLE_INPU
 	else if (input.lifetime >= 0.0f)
 	{
 		if ((particle.lifetime / gfLifeTime) < 0.3f) // 생존 시간이 30%보다 작을때 alpha값 줄임
+		{
 			particle.alpha -= gfElapsedTime;
+			if (particle.alpha < 0.f)
+				particle.alpha = 0.f;
+		}
 		OutputParticleToStream(particle, output);
 	}
 }
@@ -130,41 +135,24 @@ void SphereParticles(VS_PARTICLE_INPUT input, inout PointStream<VS_PARTICLE_INPU
 
 void SmokeParticles(VS_PARTICLE_INPUT input, inout PointStream<VS_PARTICLE_INPUT> output)
 {
-	float3 Smokevelocity ={float3(0.f, 0.f, 0.5f)};
+	float3 Smokevelocity = {-float3(rand(gfCurrentTime), 0.f, 0.5f)};
 
 	VS_PARTICLE_INPUT particle = input;
 	if (bStart) // 생성시점
 	{
 		particle.position = gmtxGameObject._41_42_43;
 		particle.alpha = particle.lifetime / gfLifeTime;
-		for (int i = 0; i < 2; i++) // 2번 반복
-		{
-			for (int j = 0; j < 4; j++) // 같은 lifetime 4개 생성
-			{
-				particle.lifetime = gfLifeTime + gfLifeTime * abs(rand(gfCurrentTime + i)) * 2.f;
-				Smokevelocity.x = rand(gfCurrentTime - i + j) * 0.5f;
-				Smokevelocity.y = abs(rand(gfCurrentTime + i + j)) * 2.f;
-				Smokevelocity.z = rand(gfCurrentTime + j);
-				Smokevelocity = -Smokevelocity;
-				particle.velocity = Smokevelocity * gfSpeed;
-				particle.position.x += rand(gfCurrentTime - i + j) * 20.f - rand(gfCurrentTime - i + j) * 20.f;
-				output.Append(particle);
-			}
-		}
+
+		particle.lifetime = gfLifeTime;
+		particle.velocity = Smokevelocity * gfSpeed;
+		output.Append(particle);
 	}
 	else if (particle.lifetime > 0.f)
 	{
 		particle.alpha = particle.lifetime / gfLifeTime;
 		OutputRandomParticleToStream(particle, output);
 	}
-	//else
-	//{
-	//	particle.position = gmtxGameObject._41_42_43;
-	//	particle.lifetime = gfLifeTime  + gfLifeTime * abs(rand(gfCurrentTime)) * 5.f;
-	//	particle.alpha = particle.lifetime / gfLifeTime;
 
-	//	OutputParticleToStream(particle, output);
-	//}
 }
 
 void RecoveryParticles(VS_PARTICLE_INPUT input, inout PointStream<VS_PARTICLE_INPUT> output)
@@ -191,40 +179,42 @@ void RecoveryParticles(VS_PARTICLE_INPUT input, inout PointStream<VS_PARTICLE_IN
 		if (MoveValue > 7.f)
 		{
 			particle.position.y = position.y;
-			//particle.velocity = float3(0.f, 3.f + rand(gfCurrentTime) * 3.f, 0.f);
-			// 0 ~ 1
-			//particle.alpha = 1.f;
 		}
 		else if (MoveValue > 3.5f)
 		{
 			particle.alpha = particle.lifetime / gfLifeTime;
 		}
-
-		
 		OutputRandomAccelerationParticleToStream(particle, output);
-
-
 	}
-	//else
-	//{
-	//	particle.position = gmtxGameObject._41_42_43;
-	//	for (int i = 0; i < 2; i++) // 2번 반복
-	//	{
-	//		for (int j = 0; j < 4; j++) // 같은 lifetime 4개 생성
-	//		{
-	//			particle.lifetime = gfLifeTime + gfLifeTime * abs(rand(gfCurrentTime + i)) * 2.f;
-	//			particle.alpha = particle.lifetime / gfLifeTime;
-	//			particle.velocity = float3(0.f, 5.f, 0.f);
-	//			particle.position.x += rand(gfCurrentTime - i + j) * 10.f - rand(gfCurrentTime - i + j) * 10.f;
-	//			particle.position.z += rand(gfCurrentTime - i + j) * 10.f - rand(gfCurrentTime - i + j) * 10.f;
-	//			output.Append(particle);
-	//		}
-	//	}
-	//}
+}
+
+void TrailParticles(VS_PARTICLE_INPUT input, inout PointStream<VS_PARTICLE_INPUT> output)
+{
+	VS_PARTICLE_INPUT particle = input;
+	if (bStart) // 생성시점
+	{
+		float3 position = gmtxGameObject._41_42_43;
+		//float3 rotation = gmtxGameObject._11_12_13;
+		particle.lifetime = gfLifeTime;
+		particle.alpha = 1.f;
+		//particle.velocity = rotation;
+	
+		particle.position = position;
+		output.Append(particle);
+	}
+	else if (particle.lifetime > 0.f)
+	{
+		particle.lifetime -= gfElapsedTime;
+		particle.alpha  -= gfElapsedTime * 1.5f;
+		if (particle.alpha < 0.f)
+			particle.alpha = 0.f;
+		output.Append(particle);
+	}
+
 }
 
 [maxvertexcount(128)]
-void GSParticleStreamOutput(point VS_PARTICLE_INPUT input[1], inout PointStream<VS_PARTICLE_INPUT> output)
+void GSParticlePointStreamOutput(point VS_PARTICLE_INPUT input[1], inout PointStream<VS_PARTICLE_INPUT> output)
 {
 	VS_PARTICLE_INPUT particle = input[0];
 	if(gnParticleType == SPHERE_PARTILCE)
@@ -233,5 +223,6 @@ void GSParticleStreamOutput(point VS_PARTICLE_INPUT input[1], inout PointStream<
 		RecoveryParticles(particle, output);
 	else if (gnParticleType == SMOKE_PARTILCE)
 		SmokeParticles(particle, output);
-
+	else if (gnParticleType == TRAIL_PARTILCE)
+		TrailParticles(particle, output);
 }

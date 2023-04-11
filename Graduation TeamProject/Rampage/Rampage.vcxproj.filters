@@ -199,6 +199,9 @@
     <ClCompile Include="Object\MonsterState.cpp">
       <Filter>Object\State</Filter>
     </ClCompile>
+    <ClCompile Include="Object\PlayerParticleObject.cpp">
+      <Filter>Object</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Global\stdafx.h">
@@ -375,9 +378,6 @@
     <ClInclude Include="Object\StateMachine.h">
       <Filter>Object\State</Filter>
     </ClInclude>
-    <ClInclude Include="Object\AnimationComponent.h">
-      <Filter>Object\Animation</Filter>
-    </ClInclude>
     <ClInclude Include="Object\Animation.h">
       <Filter>Object\Animation</Filter>
     </ClInclude>
@@ -389,6 +389,9 @@
     </ClInclude>
     <ClInclude Include="Object\MonsterState.h">
       <Filter>Object\State</Filter>
+    </ClInclude>
+    <ClInclude Include="Object\PlayerParticleObject.h">
+      <Filter>Object</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

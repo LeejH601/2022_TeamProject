@@ -10,7 +10,6 @@
 #include "..\Shader\DepthRenderShader.h"
 #include "..\Object\TextureManager.h"
 #include "..\Shader\PostProcessShader.h"
-#include "..\Object\MonsterState.h"
 
 #define MAX_PARTICLE_OBJECT 50
 #define MAX_RECOVERYPARTICLE_OBJECT 50
@@ -443,8 +442,6 @@ void CSimulatorScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 		m_pTerrainSpriteObject.push_back(std::move(m_pSpriteObject));
 	}
 
-	Damaged_Monster::GetInst()->SetUpDownParticleObjects(&m_pUpDownParticleObjects);
-
 	m_pPostProcessShader = std::make_unique<CPostProcessShader>();
 	m_pPostProcessShader->CreateShader(pd3dDevice, GetGraphicsRootSignature(), 7, pdxgiObjectRtvFormats, DXGI_FORMAT_D32_FLOAT, 0);
 	m_pPostProcessShader->BuildObjects(pd3dDevice, pd3dCommandList);
@@ -636,21 +633,20 @@ void CSimulatorScene::HandleCollision(const CollideParams& params)
 		CMessageDispatcher::GetInst()->Dispatch_Message<ParticleCompParams>(MessageType::UPDATE_PARTICLE, &particle_comp_params, m_pMainCharacter->m_pStateMachine->GetCurrentState());
 	}
 
+	it = std::find_if(m_pUpDownParticleObjects.begin(), m_pUpDownParticleObjects.end(), [](const std::unique_ptr<CGameObject>& pBillBoardObject) {
+		if (!((CParticleObject*)pBillBoardObject.get())->GetEnable())
+			return true;
+		return false;
+		});
 
-	//it = std::find_if(m_pUpDownParticleObjects.begin(), m_pUpDownParticleObjects.end(), [](const std::unique_ptr<CGameObject>& pParticleObject) {
-	//	if (!((CParticleObject*)pParticleObject.get())->GetEnable())
-	//		return true;
-	//	return false;
-	//	});
 
-	//if (it != m_pUpDownParticleObjects.end())
-	//{
-	//	ParticleUpDownParams particle_comp_params;
-	//	particle_comp_params.pObject = (*it).get();
-	//	particle_comp_params.xmf3Position = params.xmf3CollidePosition;
-	//	CMessageDispatcher::GetInst()->Dispatch_Message<ParticleUpDownParams>(MessageType::UPDATE_PARTICLE, &particle_comp_params, m_pMainCharacter->m_pStateMachine->GetCurrentState());
-	//}
-
+	if (it != m_pUpDownParticleObjects.end())
+	{
+		ParticleUpDownParams particleUpdown_comp_params;
+		particleUpdown_comp_params.pObject = (*it).get();
+		particleUpdown_comp_params.xmf3Position = params.xmf3CollidePosition;
+		CMessageDispatcher::GetInst()->Dispatch_Message<ParticleUpDownParams>(MessageType::UPDATE_UPDOWNPARTICLE, &particleUpdown_comp_params, Damaged_Monster::GetInst());
+	}
 	
 	it = std::find_if(m_pBillBoardObjects.begin(), m_pBillBoardObjects.end(), [](const std::unique_ptr<CGameObject>& pBillBoardObject) {
 		if (!((CParticleObject*)pBillBoardObject.get())->GetEnable())

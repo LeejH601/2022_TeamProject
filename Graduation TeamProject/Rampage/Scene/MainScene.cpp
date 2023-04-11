@@ -13,15 +13,10 @@
 #include "..\Object\Monster.h"
 #include "..\Object\TextureManager.h"
 #include "..\Global\Locator.h"
-#include "..\Object\MonsterState.h"
+#include "..\Object\PlayerParticleObject.h"
 
 #include <PxForceMode.h>
 
-#define MAX_PARTICLE_OBJECT 50
-#define MAX_ATTACKSPRITE_OBJECT 50
-#define MAX_TERRAINSPRITE_OBJECT 50
-#define MAX_SMOKE_PARTICLE_OBJECT 15
-#define MAX_UPDOWN_PARTICLE_OBJECT 30
 void CMainTMPScene::SetPlayer(CGameObject* pPlayer)
 {
 	m_pPlayer = pPlayer;
@@ -539,77 +534,77 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	CModelShader::GetInst()->CreateShaderVariables(pd3dDevice, pd3dCommandList);
 	CModelShader::GetInst()->CreateCbvSrvUavDescriptorHeaps(pd3dDevice, 0, 200);
 
-	std::unique_ptr<CGoblinObject> m_pGoblinObject = std::make_unique<CGoblinObject>(pd3dDevice, pd3dCommandList, 1);
-	m_pGoblinObject->SetPosition(XMFLOAT3(200, 300, -120));
-	m_pGoblinObject->SetScale(4.0f, 4.0f, 4.0f);
-	m_pGoblinObject->Rotate(0.0f, 180.0f, 0.0f);
-	m_pGoblinObject->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
-	m_pGoblinObject->m_pSkinnedAnimationController->m_xmf3RootObjectScale = XMFLOAT3(10.0f, 10.0f, 10.0f);
-	m_pGoblinObject->CreateArticulation(1.0f);
-	m_pObjects.push_back(std::move(m_pGoblinObject));
+	//std::unique_ptr<CGoblinObject> m_pGoblinObject = std::make_unique<CGoblinObject>(pd3dDevice, pd3dCommandList, 1);
+	//m_pGoblinObject->SetPosition(XMFLOAT3(200, 300, -120));
+	//m_pGoblinObject->SetScale(4.0f, 4.0f, 4.0f);
+	//m_pGoblinObject->Rotate(0.0f, 180.0f, 0.0f);
+	//m_pGoblinObject->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
+	//m_pGoblinObject->m_pSkinnedAnimationController->m_xmf3RootObjectScale = XMFLOAT3(10.0f, 10.0f, 10.0f);
+	//m_pGoblinObject->CreateArticulation(1.0f);
+	//m_pObjects.push_back(std::move(m_pGoblinObject));
 
-	m_pGoblinObject = std::make_unique<CGoblinObject>(pd3dDevice, pd3dCommandList, 1);
-	m_pGoblinObject->SetPosition(XMFLOAT3(200, 300, -60));
-	m_pGoblinObject->SetScale(4.0f, 4.0f, 4.0f);
-	m_pGoblinObject->Rotate(0.0f, 180.0f, 0.0f);
-	m_pGoblinObject->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
-	m_pGoblinObject->CreateArticulation(1.0f);
-	m_pObjects.push_back(std::move(m_pGoblinObject));
+	//m_pGoblinObject = std::make_unique<CGoblinObject>(pd3dDevice, pd3dCommandList, 1);
+	//m_pGoblinObject->SetPosition(XMFLOAT3(200, 300, -60));
+	//m_pGoblinObject->SetScale(4.0f, 4.0f, 4.0f);
+	//m_pGoblinObject->Rotate(0.0f, 180.0f, 0.0f);
+	//m_pGoblinObject->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
+	//m_pGoblinObject->CreateArticulation(1.0f);
+	//m_pObjects.push_back(std::move(m_pGoblinObject));
 
-	std::unique_ptr<CGoblinObject> m_pGoblin = std::make_unique<CGoblinObject>(pd3dDevice, pd3dCommandList, 1);
+	//std::unique_ptr<CGoblinObject> m_pGoblin = std::make_unique<CGoblinObject>(pd3dDevice, pd3dCommandList, 1);
 
-	{
-		m_pGoblin->SetPosition(XMFLOAT3(150, 300, -120));
-		m_pGoblin->SetScale(4.0f, 4.0f, 4.0f);
-		m_pGoblin->Rotate(0.0f, 0.0f, 0.0f);
-		m_pGoblin->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
-		m_pGoblin->CreateArticulation(1.0f);
+	//{
+	//	m_pGoblin->SetPosition(XMFLOAT3(150, 300, -120));
+	//	m_pGoblin->SetScale(4.0f, 4.0f, 4.0f);
+	//	m_pGoblin->Rotate(0.0f, 0.0f, 0.0f);
+	//	m_pGoblin->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
+	//	m_pGoblin->CreateArticulation(1.0f);
 
-		m_pObjects.push_back(std::move(m_pGoblin));
-	}
+	//	m_pObjects.push_back(std::move(m_pGoblin));
+	//}
 
 
-	std::unique_ptr<COrcObject> m_pOrc = std::make_unique<COrcObject>(pd3dDevice, pd3dCommandList, 1);
-	m_pOrc->SetPosition(XMFLOAT3(150, 300, -90));
-	m_pOrc->SetScale(4.0f, 4.0f, 4.0f);
-	m_pOrc->Rotate(0.0f, 0.0f, 0.0f);
-	m_pOrc->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
-	m_pOrc->CreateArticulation(1.0f);
-	
-	m_pOrc->m_pArticulationLinks[15]->addForce(physx::PxVec3(0.0f, -10000.0f, 0.0f), physx::PxForceMode::eIMPULSE);
-	
-	
-	//m_pOrc->m_pArticulation->applyCache(*m_pOrc->m_pArticulationCache, physx::PxArticulationCacheFlag::e);
+	//std::unique_ptr<COrcObject> m_pOrc = std::make_unique<COrcObject>(pd3dDevice, pd3dCommandList, 1);
+	//m_pOrc->SetPosition(XMFLOAT3(150, 300, -90));
+	//m_pOrc->SetScale(4.0f, 4.0f, 4.0f);
+	//m_pOrc->Rotate(0.0f, 0.0f, 0.0f);
+	//m_pOrc->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
+	//m_pOrc->CreateArticulation(1.0f);
+	//
+	//m_pOrc->m_pArticulationLinks[15]->addForce(physx::PxVec3(0.0f, -10000.0f, 0.0f), physx::PxForceMode::eIMPULSE);
+	//
+	//
+	////m_pOrc->m_pArticulation->applyCache(*m_pOrc->m_pArticulationCache, physx::PxArticulationCacheFlag::e);
 
-	m_pObjects.push_back(std::move(m_pOrc));
+	//m_pObjects.push_back(std::move(m_pOrc));
 
-	m_pGoblin = std::make_unique<CGoblinObject>(pd3dDevice, pd3dCommandList, 1);
-	m_pGoblin->SetPosition(XMFLOAT3(150, 300, -150));
-	m_pGoblin->SetScale(4.0f, 4.0f, 4.0f);
-	m_pGoblin->Rotate(0.0f, 0.0f, 0.0f);
-	m_pGoblin->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
-	m_pGoblin->CreateArticulation(1.0f);
-	m_pObjects.push_back(std::move(m_pGoblin));
+	//m_pGoblin = std::make_unique<CGoblinObject>(pd3dDevice, pd3dCommandList, 1);
+	//m_pGoblin->SetPosition(XMFLOAT3(150, 300, -150));
+	//m_pGoblin->SetScale(4.0f, 4.0f, 4.0f);
+	//m_pGoblin->Rotate(0.0f, 0.0f, 0.0f);
+	//m_pGoblin->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
+	//m_pGoblin->CreateArticulation(1.0f);
+	//m_pObjects.push_back(std::move(m_pGoblin));
 
-	m_pGoblin = std::make_unique<CGoblinObject>(pd3dDevice, pd3dCommandList, 1);
-	m_pGoblin->SetPosition(XMFLOAT3(150, 300, -180));
-	m_pGoblin->SetScale(4.0f, 4.0f, 4.0f);
-	m_pGoblin->Rotate(0.0f, 0.0f, 0.0f);
-	m_pGoblin->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
-	m_pGoblin->CreateArticulation(1.0f);
-	m_pObjects.push_back(std::move(m_pGoblin));
+	//m_pGoblin = std::make_unique<CGoblinObject>(pd3dDevice, pd3dCommandList, 1);
+	//m_pGoblin->SetPosition(XMFLOAT3(150, 300, -180));
+	//m_pGoblin->SetScale(4.0f, 4.0f, 4.0f);
+	//m_pGoblin->Rotate(0.0f, 0.0f, 0.0f);
+	//m_pGoblin->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
+	//m_pGoblin->CreateArticulation(1.0f);
+	//m_pObjects.push_back(std::move(m_pGoblin));
 
-	XMFLOAT3 testpos = XMFLOAT3(300.0f, 600.0f, 0.0f);
-	for (int i = 0; i < 0; ++i) {
-		testpos.x -= 25.0f;
-		m_pGoblin = std::make_unique<CGoblinObject>(pd3dDevice, pd3dCommandList, 1);
-		m_pGoblin->SetPosition(testpos);
-		m_pGoblin->SetScale(14.0f, 14.0f, 14.0f);
-		m_pGoblin->Rotate(0.0f, 0.0f, 0.0f);
-		m_pGoblin->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
-		m_pGoblin->CreateArticulation(1.0f);
-		m_pObjects.push_back(std::move(m_pGoblin));
-	}
+	//XMFLOAT3 testpos = XMFLOAT3(300.0f, 600.0f, 0.0f);
+	//for (int i = 0; i < 0; ++i) {
+	//	testpos.x -= 25.0f;
+	//	m_pGoblin = std::make_unique<CGoblinObject>(pd3dDevice, pd3dCommandList, 1);
+	//	m_pGoblin->SetPosition(testpos);
+	//	m_pGoblin->SetScale(14.0f, 14.0f, 14.0f);
+	//	m_pGoblin->Rotate(0.0f, 0.0f, 0.0f);
+	//	m_pGoblin->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
+	//	m_pGoblin->CreateArticulation(1.0f);
+	//	m_pObjects.push_back(std::move(m_pGoblin));
+	//}
 
 	// Light »ý¼º
 	m_pLight = std::make_unique<CLight>();
@@ -697,7 +692,8 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pTextureManager->LoadParticleTexture(pd3dDevice, pd3dCommandList, L"Image/Effect2.dds", m_pParticleShader.get(), 0, 0);
 	m_pTextureManager->LoadParticleTexture(pd3dDevice, pd3dCommandList, L"Image/Effect3.dds", m_pParticleShader.get(), 0, 0);
 	m_pTextureManager->LoadParticleTexture(pd3dDevice, pd3dCommandList, L"Image/Effect4.dds", m_pParticleShader.get(), 0, 0);
-	m_pTextureManager->LoadParticleTexture(pd3dDevice, pd3dCommandList, L"Image/Effect5.dds", m_pParticleShader.get(), 0, 0);
+	m_pTextureManager->LoadParticleTexture(pd3dDevice, pd3dCommandList, L"Image/Effect6.dds", m_pParticleShader.get(), 0, 0);
+	m_pTextureManager->LoadParticleTexture(pd3dDevice, pd3dCommandList, L"ParticleImage/Fire1.dds", m_pParticleShader.get(), 0, 0);
 
 	for (int i = 0; i < MAX_ATTACKSPRITE_OBJECT; ++i)
 	{
@@ -729,8 +725,14 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 		m_pUpDownParticleObjects.push_back(std::move(m_pMeterorObject));
 	}
 
-	Run_Player::GetInst()->SetSmokeObjects(&m_pSmokeObjects);
-	Damaged_Monster::GetInst()->SetUpDownParticleObjects(&m_pUpDownParticleObjects);
+	for (int i = 0; i < MAX_TRAIL_PARTICLE_OBJECT; i++)
+	{
+		std::unique_ptr<CParticleObject> m_pTrailObject = std::make_unique<CParticleObject>(m_pTextureManager->LoadParticleTexture(L"Image/Effect1.dds"), pd3dDevice, pd3dCommandList, GetGraphicsRootSignature(), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), 2.0f, XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT2(2.0f, 2.0f), MAX_PARTICLES, m_pParticleShader.get(), RECOVERY_PARTICLE);
+		m_pTrailParticleObjects.push_back(std::move(m_pTrailObject));
+	}
+
+	CPlayerParticleObject::GetInst()->SetSmokeObjects(&m_pSmokeObjects);
+	CPlayerParticleObject::GetInst()->SetTrailObjects(&m_pTrailParticleObjects);
 
 	// COLLIDE LISTENER
 	std::unique_ptr<SceneCollideListener> pCollideListener = std::make_unique<SceneCollideListener>();																																																																																																																				
@@ -869,7 +871,12 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 		((CParticleObject*)m_pUpDownParticleObjects[i].get())->Render(pd3dCommandList, nullptr, m_pParticleShader.get());
 	}
 	
-
+	for (int i = 0; i < m_pTrailParticleObjects.size(); ++i)
+	{
+		((CParticleObject*)m_pTrailParticleObjects[i].get())->UpdateShaderVariables(pd3dCommandList, fCurrentTime, fTimeElapsed);
+		((CParticleObject*)m_pTrailParticleObjects[i].get())->Render(pd3dCommandList, nullptr, m_pParticleShader.get());
+	}
+	
 	CModelShader::GetInst()->Render(pd3dCommandList, 0);
 
 	if (m_pPlayer)
@@ -952,6 +959,10 @@ void CMainTMPScene::OnPostRender()
 		((CParticleObject*)m_pUpDownParticleObjects[i].get())->OnPostRender();
 	}
 
+	for (int i = 0; i < m_pTrailParticleObjects.size(); ++i)
+	{
+		((CParticleObject*)m_pTrailParticleObjects[i].get())->OnPostRender();
+	}
 }
 
 void CMainTMPScene::LoadSceneFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, char* pstrFileName)
@@ -1090,12 +1101,35 @@ void CMainTMPScene::HandleCollision(const CollideParams& params)
 		return false;
 		});
 
-	if (it != m_pBillBoardObjects.end())
+
+	it = std::find_if(m_pParticleObjects.begin(), m_pParticleObjects.end(), [](const std::unique_ptr<CGameObject>& pParticleObject) {
+		if (!((CParticleObject*)pParticleObject.get())->GetEnable())
+			return true;
+		return false;
+		});
+
+	if (it != m_pParticleObjects.end())
 	{
-		ImpactCompParams impact_comp_params;
-		impact_comp_params.pObject = (*it).get();
-		impact_comp_params.xmf3Position = params.xmf3CollidePosition;
-		CMessageDispatcher::GetInst()->Dispatch_Message<ImpactCompParams>(MessageType::UPDATE_BILLBOARD, &impact_comp_params, ((CPlayer*)m_pPlayer)->m_pStateMachine->GetCurrentState());
+		ParticleCompParams particle_comp_params;
+		particle_comp_params.pObject = (*it).get();
+		particle_comp_params.xmf3Position = params.xmf3CollidePosition;
+		CMessageDispatcher::GetInst()->Dispatch_Message<ParticleCompParams>(MessageType::UPDATE_PARTICLE, &particle_comp_params, ((CPlayer*)m_pPlayer)->m_pStateMachine->GetCurrentState());
+	}
+
+
+	it = std::find_if(m_pUpDownParticleObjects.begin(), m_pUpDownParticleObjects.end(), [](const std::unique_ptr<CGameObject>& pBillBoardObject) {
+		if (!((CParticleObject*)pBillBoardObject.get())->GetEnable())
+			return true;
+		return false;
+		});
+
+	
+	if (it != m_pUpDownParticleObjects.end())
+	{
+		ParticleUpDownParams particleUpdown_comp_params;
+		particleUpdown_comp_params.pObject = (*it).get();
+		particleUpdown_comp_params.xmf3Position = params.xmf3CollidePosition;
+		CMessageDispatcher::GetInst()->Dispatch_Message<ParticleUpDownParams>(MessageType::UPDATE_UPDOWNPARTICLE, &particleUpdown_comp_params, Damaged_Monster::GetInst());
 	}
 
 	std::vector<std::unique_ptr<CGameObject>>::iterator TerrainSpriteit = std::find_if(m_pTerrainSpriteObject.begin(), m_pTerrainSpriteObject.end(), [](const std::unique_ptr<CGameObject>& pSpriteAttackObject) {

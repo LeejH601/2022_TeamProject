@@ -1312,7 +1312,7 @@ void CParticleMesh::CreateVertexBuffer(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 {
 	m_nVertices = 1;
 	m_nStride = sizeof(CParticleVertex);
-	m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_POINTLIST;
+	m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_POINTLIST; // 
 
 	CParticleVertex pVertices[1];
 

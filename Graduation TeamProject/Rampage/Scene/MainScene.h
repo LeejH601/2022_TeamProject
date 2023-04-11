@@ -39,6 +39,7 @@ private:
 	std::vector<std::unique_ptr<CGameObject>> m_pUpDownParticleObjects;
 	std::vector<std::unique_ptr<CGameObject>> m_pSpriteAttackObjects;
 	std::vector<std::unique_ptr<CGameObject>> m_pTerrainSpriteObject;
+	std::vector<std::unique_ptr<CGameObject>> m_pTrailParticleObjects;
 	
 	std::vector<std::unique_ptr<CGameObject>> m_pSmokeObjects;
 

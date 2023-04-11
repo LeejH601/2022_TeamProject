@@ -6,6 +6,7 @@
 #include "..\Sound\Sound.h"
 #include "..\Sound\SoundManager.h"
 #include "..\ImGui\ImGuiManager.h"
+#include "..\Object\PlayerParticleObject.h"
 
 Idle_Player::Idle_Player()
 {
@@ -158,6 +159,11 @@ Atk1_Player::Atk1_Player()
 	std::unique_ptr<TerrainSpriteComponent> pTerrainSpriteComponent = std::make_unique<TerrainSpriteComponent>();
 	m_pListeners.push_back(std::move(pTerrainSpriteComponent));
 	CMessageDispatcher::GetInst()->RegisterListener(MessageType::UPDATE_SPRITE, m_pListeners.back().get(), this);
+
+	// TRAIL ANIMATION
+	std::unique_ptr<TrailParticleComponent> pTrailParticlenComponent = std::make_unique<TrailParticleComponent>();
+	m_pListeners.push_back(std::move(pTrailParticlenComponent));
+	CMessageDispatcher::GetInst()->RegisterListener(MessageType::UPDATE_TRAILPARTICLE, m_pListeners.back().get(), this);
 }
 
 Atk1_Player::~Atk1_Player()
@@ -192,6 +198,7 @@ void Atk1_Player::Execute(CPlayer* player, float fElapsedTime)
 		PlayerParams PlayerParam;
 		PlayerParam.pPlayer = player;
 		CMessageDispatcher::GetInst()->Dispatch_Message<PlayerParams>(MessageType::PLAYER_ATTACK, &PlayerParam, player);
+		
 	}
 
 	// 사용자가 좌클릭을 했으면 애니메이션을 0.7초 진행 후 Atk2_Player로 상태 변경
@@ -328,6 +335,11 @@ Atk2_Player::Atk2_Player()
 	std::unique_ptr<TerrainSpriteComponent> pTerrainSpriteComponent = std::make_unique<TerrainSpriteComponent>();
 	m_pListeners.push_back(std::move(pTerrainSpriteComponent));
 	CMessageDispatcher::GetInst()->RegisterListener(MessageType::UPDATE_SPRITE, m_pListeners.back().get(), this);
+
+	// TRAIL ANIMATION
+	std::unique_ptr<TrailParticleComponent> pTrailParticlenComponent = std::make_unique<TrailParticleComponent>();
+	m_pListeners.push_back(std::move(pTrailParticlenComponent));
+	CMessageDispatcher::GetInst()->RegisterListener(MessageType::UPDATE_TRAILPARTICLE, m_pListeners.back().get(), this);
 }
 
 Atk2_Player::~Atk2_Player()
@@ -372,6 +384,7 @@ void Atk2_Player::Execute(CPlayer* player, float fElapsedTime)
 	{
 		player->m_pStateMachine->ChangeState(Idle_Player::GetInst());
 	}
+
 }
 
 void Atk2_Player::Exit(CPlayer* player)
@@ -498,6 +511,11 @@ Atk3_Player::Atk3_Player()
 	std::unique_ptr<TerrainSpriteComponent> pTerrainSpriteComponent = std::make_unique<TerrainSpriteComponent>();
 	m_pListeners.push_back(std::move(pTerrainSpriteComponent));
 	CMessageDispatcher::GetInst()->RegisterListener(MessageType::UPDATE_SPRITE, m_pListeners.back().get(), this);
+
+	// TRAIL ANIMATION
+	std::unique_ptr<TrailParticleComponent> pTrailParticlenComponent = std::make_unique<TrailParticleComponent>();
+	m_pListeners.push_back(std::move(pTrailParticlenComponent));
+	CMessageDispatcher::GetInst()->RegisterListener(MessageType::UPDATE_TRAILPARTICLE, m_pListeners.back().get(), this);
 }
 
 Atk3_Player::~Atk3_Player()
@@ -544,6 +562,10 @@ void Atk3_Player::Execute(CPlayer* player, float fElapsedTime)
 	{
 
 	}
+
+
+	
+
 }
 
 void Atk3_Player::Exit(CPlayer* player)
@@ -577,46 +599,33 @@ void Run_Player::Execute(CPlayer* player, float fElapsedTime)
 		player->m_pStateMachine->ChangeState(Atk1_Player::GetInst());
 	// 발바닥 뼈에
 
-	static int iIndex = 0;
 	float fTime = player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition;
 	XMFLOAT3 xmf3Position;
 	ParticleSmokeParams Particlesmoke_comp_params;
-	if (m_pSmokeObjects && (((int)(fTime * 10.f)) % 9)) // 0.5f마다
+	Particlesmoke_comp_params.pObjects = CPlayerParticleObject::GetInst()->GetSmokeObjects();
+	if (Particlesmoke_comp_params.pObjects && (((int)(fTime * 10.f)) == 9)) // 0.5f마다
 	{
 		CGameObject* pFoot_Left = player->FindFrame("foot_l");
-
-		Particlesmoke_comp_params.pObjects = m_pSmokeObjects;
-
 		memcpy(&xmf3Position, &(pFoot_Left->m_xmf4x4World._41), sizeof(XMFLOAT3));
 		Particlesmoke_comp_params.xmf3Position = xmf3Position;
-
 		Particlesmoke_comp_params.xmfDirection = player->m_xmfDirection;
-		Particlesmoke_comp_params.iIndex = (++iIndex) % m_pSmokeObjects->size();
 		
 		CMessageDispatcher::GetInst()->Dispatch_Message<ParticleSmokeParams>(MessageType::UPDATE_PARTICLE, &Particlesmoke_comp_params, player->m_pStateMachine->GetCurrentState());
 	}
 
-	if (m_pSmokeObjects && (((int)(fTime * 10.f)) % 2)) // 0.6f마다
+	if (Particlesmoke_comp_params.pObjects && (((int)(fTime * 10.f)) == 2)) // 0.6f마다
 	{
 		CGameObject* pFoot_Right = player->FindFrame("foot_r");
-		Particlesmoke_comp_params.pObjects = m_pSmokeObjects;
-
 		memcpy(&xmf3Position, &(pFoot_Right->m_xmf4x4World._41), sizeof(XMFLOAT3));
 		Particlesmoke_comp_params.xmf3Position = xmf3Position;
-
 		Particlesmoke_comp_params.xmfDirection = player->m_xmfDirection;
-		Particlesmoke_comp_params.iIndex = (++iIndex) % m_pSmokeObjects->size();
 
 		CMessageDispatcher::GetInst()->Dispatch_Message<ParticleSmokeParams>(MessageType::UPDATE_PARTICLE, &Particlesmoke_comp_params, player->m_pStateMachine->GetCurrentState());
 	}
+
 
 }
 
 void Run_Player::Exit(CPlayer* player)
 {
-}
-
-void Run_Player::SetSmokeObjects(std::vector<std::unique_ptr<CGameObject>>* pSmokeObjects)
-{
-	m_pSmokeObjects = pSmokeObjects;
 }

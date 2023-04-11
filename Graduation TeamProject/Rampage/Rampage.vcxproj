@@ -184,6 +184,7 @@
     <ClCompile Include="Object\Object.cpp" />
     <ClCompile Include="Object\PhysicsObject.cpp" />
     <ClCompile Include="Object\Player.cpp" />
+    <ClCompile Include="Object\PlayerParticleObject.cpp" />
     <ClCompile Include="Object\SkyBox.cpp" />
     <ClCompile Include="Object\State.cpp" />
     <ClCompile Include="Object\ParticleObject.cpp" />
@@ -243,6 +244,7 @@
     <ClInclude Include="Object\Object.h" />
     <ClInclude Include="Object\PhysicsObject.h" />
     <ClInclude Include="Object\Player.h" />
+    <ClInclude Include="Object\PlayerParticleObject.h" />
     <ClInclude Include="Object\SkyBox.h" />
     <ClInclude Include="Object\State.h" />
     <ClInclude Include="Object\StateMachine.h" />
@@ -501,7 +503,7 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Geometry</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.1</ShaderModel>
       <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(Filename).cso</ObjectFileOutput>
-      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">GSParticleStreamOutput</EntryPointName>
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">GSParticlePointStreamOutput</EntryPointName>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Geometry</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.1</ShaderModel>
       <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(Filename).cso</ObjectFileOutput>

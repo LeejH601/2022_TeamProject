@@ -313,25 +313,6 @@ void TerrainSpriteComponent::SetTexture(LPCTSTR pszFileName)
 {
 }
 
-//void TerrainSpriteComponent::SetSpeed(float fSpeed)
-//{
-//}
-//
-//void TerrainSpriteComponent::SetAlpha(float fAlpha)
-//{
-//}
-
-//
-//float& TerrainSpriteComponent::GetSpeed()
-//{
-//	// // O: 여기에 return 문을 삽입합니다.
-//}
-//
-//float& TerrainSpriteComponent::GetAlpha()
-//{
-//	// // O: 여기에 return 문을 삽입합니다.
-//}
-
 void TerrainSpriteComponent::HandleMessage(const Message& message, const TerrainSpriteCompParams& params)
 {
 	CTerrainSpriteObject* pSpriteObject = dynamic_cast<CTerrainSpriteObject*>(params.pObject);
@@ -348,27 +329,23 @@ void TerrainSpriteComponent::HandleMessage(const Message& message, const Terrain
 
 void SmokeParticleComponent::HandleMessage(const Message& message, const ParticleSmokeParams& params)
 {
-
-	CParticleObject* pParticleObject = dynamic_cast<CParticleObject*>(((*params.pObjects)[params.iIndex]).get());
+	CParticleObject* pParticleObject = dynamic_cast<CParticleObject*>(((*params.pObjects)[m_iIndex++ % MAX_SMOKE_PARTICLE_OBJECT]).get());
 	
 	pParticleObject->SetStart(true);
 	pParticleObject->SetPosition(params.xmf3Position);
 	pParticleObject->SetParticleType(m_iParticleType);
 	
-	pParticleObject->SetSize(m_fSize - m_fSize * params.iIndex * 0.05f);
+	pParticleObject->SetSize(m_fSize);
 	pParticleObject->SetStartAlpha(m_fAlpha);
 	pParticleObject->SetColor(m_xmf3Color);
 	pParticleObject->SetLifeTime(m_fLifeTime);
 	pParticleObject->SetDirection(params.xmfDirection);
 	pParticleObject->SetSpeed(m_fSpeed);
-	
-	
-
 }
 
 void UpDownParticleComponent::HandleMessage(const Message& message, const ParticleUpDownParams& params)
 {
-	CParticleObject* pParticleObject = dynamic_cast<CParticleObject*>(((*params.pObjects)[params.iIndex]).get());
+	CParticleObject* pParticleObject = dynamic_cast<CParticleObject*>(params.pObject);
 
 	pParticleObject->SetStart(true);
 	pParticleObject->SetPosition(params.xmf3Position);
@@ -380,7 +357,46 @@ void UpDownParticleComponent::HandleMessage(const Message& message, const Partic
 	pParticleObject->SetLifeTime(m_fLifeTime);
 	pParticleObject->SetSpeed(m_fSpeed);
 	pParticleObject->SetDirection(XMFLOAT3(0.f, 1.f, 0.f));
-	
+}
+
+
+void TrailParticleComponent::HandleMessage(const Message& message, const ParticleTrailParams& params)
+{
+	if (params.iPlayerAttack != m_iPlayerAttack)
+	{
+		m_iPlayerAttack = params.iPlayerAttack;
+		vec3BezierPosition.clear();
+	}
+	else if (params.m_fTime < m_fPlayerFrameTime) // 새로운 애니메이션이 시작되었으면(프레임 시간값)
+	{
+		vec3BezierPosition.clear();
+	}
+	float fTime = 0.f;
+	vec3BezierPosition.emplace_back(params.xmf3Position);
+	if (vec3BezierPosition.size() >= 4)
+	{
+		float Length = Vector3::Length(Vector3::Subtract(vec3BezierPosition[0], vec3BezierPosition[3])) * 3;
+
+		for (int i = 0; i < ((int)Length); i++)
+		{
+			CParticleObject* pParticleObject = dynamic_cast<CParticleObject*>(((*params.pObjects)[m_iIndex % MAX_TRAIL_PARTICLE_OBJECT]).get());
+			pParticleObject->SetStart(true);
+			XMFLOAT3 xmf3Position = Vector3::BezierCurve(fTime, vec3BezierPosition[0], vec3BezierPosition[1], vec3BezierPosition[2], vec3BezierPosition[3]);
+			pParticleObject->SetPosition(xmf3Position);
+			pParticleObject->SetParticleType(m_iParticleType);
+
+			pParticleObject->SetSize(m_fSize);
+			pParticleObject->SetStartAlpha(m_fAlpha);
+			pParticleObject->SetColor(m_xmf3Color);
+			pParticleObject->SetLifeTime(m_fLifeTime);
+			pParticleObject->SetSpeed(m_fSpeed);
+			pParticleObject->SetDirection(XMFLOAT3(0.f, 0.f, 0.f));
+			fTime = i * (1.f / ((int)Length));
+			m_iIndex++;
+		}
+		vec3BezierPosition.clear();
+	}
+	m_fPlayerFrameTime = params.m_fTime;
 }
 
 void RegisterArticulationListener::HandleMessage(const Message& message, const RegisterArticulationParams& params)
@@ -396,3 +412,4 @@ void PlayerLocationListener::HandleMessage(const Message& message, const PlayerP
 		pMonster->CheckIsPlayerInFrontOfThis(params.pPlayer->GetPosition());
 	}
 }
+

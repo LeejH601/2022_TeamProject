@@ -8,7 +8,7 @@ class CPlayer : public CPhysicsObject
 {
 public:
 	CCamera* m_pCamera = nullptr;
-
+	CGameObject* m_pChildObject = nullptr;
 	std::unique_ptr<CStateMachine<CPlayer>> m_pStateMachine;
 
 	int m_nAnimationNum = 0;
@@ -22,6 +22,9 @@ public:
 	float m_fCMDConstant = 1.0f;
 
 	XMFLOAT3 m_xmfDirection = XMFLOAT3(0.0f, 0.0f, 0.0f);
+
+	float m_fTime = 0.f;
+	float m_fMaxTime = 0.f;
 public:
 	CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks);
 	virtual ~CPlayer();

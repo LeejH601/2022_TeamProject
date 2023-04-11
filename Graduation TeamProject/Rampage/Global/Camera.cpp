@@ -3,7 +3,6 @@
 #include "Global.h"
 #include "Locator.h"
 #include "..\Object\Player.h"
-#include <DirectXMath.h>
 
 CCamera::CCamera()
 {
