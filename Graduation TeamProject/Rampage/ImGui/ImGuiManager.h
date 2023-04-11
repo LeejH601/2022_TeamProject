@@ -28,6 +28,9 @@ private:
 	ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);;
 	float clear_color_with_alpha[4] = { clear_color.x * clear_color.w, clear_color.y * clear_color.w, clear_color.z * clear_color.w, clear_color.w };
 	
+	long m_lDesktopWidth = 0.0f;
+	long m_lDesktopHeight = 0.0f;
+
 	float ParallaxScale = 0.0f;
 	float ParallaxBias = 0.0f;
 	int Terrain_Mapping_mode = 0;
@@ -39,6 +42,7 @@ private:
 	bool show_my_window = true;
 
 	CCamera* m_pCamera = NULL;
+	ImVec2 dearImGuiSize;
 
 	std::unique_ptr<CTexture> m_pRTTexture;
 	D3D12_CPU_DESCRIPTOR_HANDLE m_pd3dRtvCPUDescriptorHandles;
@@ -63,7 +67,7 @@ public:
 	}
 	ID3D12Resource* GetRTTextureResource(); 
 
-	void Init(HWND hWnd, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, D3D12_CPU_DESCRIPTOR_HANDLE d3dRtvCPUDescriptorHandle);
+	void Init(HWND hWnd, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, D3D12_CPU_DESCRIPTOR_HANDLE d3dRtvCPUDescriptorHandle, const RECT& DeskTopCoordinatesRect);
 
 	void DemoRendering();
 	void SetUI();

@@ -181,7 +181,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	if (ImGui_ImplWin32_WndProcHandler(hWnd, message, wParam, lParam))
 		return true;
-
+	
 	switch (message)
 	{
 	case WM_ACTIVATE:
@@ -193,7 +193,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	case WM_MOUSEMOVE:
 	case WM_KEYDOWN:
 	case WM_KEYUP:
-		gGameFramework.OnProcessingWindowMessage(hWnd, message, wParam, lParam);
+		//gGameFramework.OnProcessingWindowMessage(hWnd, message, wParam, lParam);
 		break;
 	case WM_DESTROY:
 		::PostQuitMessage(0);
@@ -201,5 +201,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	default:
 		return(::DefWindowProc(hWnd, message, wParam, lParam));
 	}
+
 	return 0;
 }

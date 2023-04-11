@@ -110,7 +110,7 @@ void CGameFramework::InitSound()
 
 	CSoundManager::GetInst()->RegisterSound("Sound/Voice/Skeleton/SkeletonMoan01.mp3", false, SOUND_CATEGORY::SOUND_VOICE);
 
-	CSoundManager::GetInst()->PlaySound("Sound/Background/Action 2 (Loop).wav", 0.25f, 0.0f);
+	//CSoundManager::GetInst()->PlaySound("Sound/Background/Action 2 (Loop).wav", 0.25f, 0.0f);
 }
 void CGameFramework::InitLocator()
 {
@@ -122,7 +122,7 @@ void CGameFramework::InitImgui()
 	D3D12_CPU_DESCRIPTOR_HANDLE d3dRtvCPUDescriptorHandle = m_pd3dRtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
 	d3dRtvCPUDescriptorHandle.ptr += (::gnRtvDescriptorIncrementSize * m_nSwapChainBuffers);
 
-	CImGuiManager::GetInst()->Init(m_hWnd, m_pd3dDevice.Get(), m_pd3dCommandList.Get(), d3dRtvCPUDescriptorHandle);
+	CImGuiManager::GetInst()->Init(m_hWnd, m_pd3dDevice.Get(), m_pd3dCommandList.Get(), d3dRtvCPUDescriptorHandle, m_DeskTopCoordinatesRect);
 }
 void CGameFramework::CreateDirect3DDevice()
 {
@@ -149,8 +149,7 @@ void CGameFramework::CreateDirect3DDevice()
 		pd3dOutput->GetDesc(&pd3dOutputDesc);
 
 		m_DeskTopCoordinatesRect = pd3dOutputDesc.DesktopCoordinates;
-		
-		//
+
 		DXGI_ADAPTER_DESC1 dxgiAdapterDesc;
 		pd3dAdapter->GetDesc1(&dxgiAdapterDesc);
 		if (dxgiAdapterDesc.Flags & DXGI_ADAPTER_FLAG_SOFTWARE)

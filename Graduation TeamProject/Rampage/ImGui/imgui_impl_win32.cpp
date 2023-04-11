@@ -539,10 +539,15 @@ IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hwnd, UINT msg, WPARA
         if (msg == WM_RBUTTONDOWN || msg == WM_RBUTTONDBLCLK) { button = 1; }
         if (msg == WM_MBUTTONDOWN || msg == WM_MBUTTONDBLCLK) { button = 2; }
         if (msg == WM_XBUTTONDOWN || msg == WM_XBUTTONDBLCLK) { button = (GET_XBUTTON_WPARAM(wParam) == XBUTTON1) ? 3 : 4; }
+
+        // ? 이거 주석하면 왜 문제가 없지
         if (bd->MouseButtonsDown == 0 && ::GetCapture() == nullptr)
+        {
             ::SetCapture(hwnd);
+        }
+
         bd->MouseButtonsDown |= 1 << button;
-        io.AddMouseButtonEvent(button, true);
+        io.AddMouseButtonEvent(button, true); 
         return 0;
     }
     case WM_LBUTTONUP:
