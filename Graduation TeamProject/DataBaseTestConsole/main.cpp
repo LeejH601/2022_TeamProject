@@ -7,6 +7,8 @@
 #define SERVERPORT 9000
 char* address = (char*)"127.0.0.1";
 
+void ShowRecords(std::vector<WorkShop_Record>& records);
+
 int main()
 {
 	CNetworkDevice NetworkDevice;
@@ -78,7 +80,8 @@ int main()
 	case eSERVICE_TYPE::UPDATE_TABLE:
 		records.clear();
 		NetworkDevice.RequestDataTable();
-		NetworkDevice.RecvDataTable(records); // 수정 필요
+		NetworkDevice.RecvDataTable(records);
+		ShowRecords(records);
 		break;
 	case eSERVICE_TYPE::NEXT_TABLE:
 		break;
@@ -94,4 +97,12 @@ int main()
 
 	system("pause");
 	return 0;
+}
+
+void ShowRecords(std::vector<WorkShop_Record>& records)
+{
+	for (WorkShop_Record& record : records) {
+		std::cout << record.RecordID << " " << record.RecordTitle << " " << record.LastUploadDate << " "
+			<< record.nLike << " " << record.nLike << " " << record.DownloadNum << std::endl;
+	}
 }

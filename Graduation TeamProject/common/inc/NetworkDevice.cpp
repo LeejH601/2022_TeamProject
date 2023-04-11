@@ -243,6 +243,7 @@ bool CNetworkDevice::RecvUploadData(UploadData& uploadData)
 	//	std::cout << bytes.data() << std::endl;
 	//}
 
+	delete[] Data;
 	return true;
 }
 
@@ -397,11 +398,6 @@ bool CNetworkDevice::RecvDataTable(std::vector<WorkShop_Record>& records)
 	
 	records.resize(len / sizeof(WorkShop_Record));
 	memcpy(records.data(), Data, len);
-
-	for (WorkShop_Record& record : records) {
-		std::cout << record.RecordID << " " << record.RecordTitle << " " << record.LastUploadDate << " "
-			<< record.nLike << " " << record.nLike << " " << record.DownloadNum << std::endl;
-	}
 
 	delete[] Data;
 	system("puase");
