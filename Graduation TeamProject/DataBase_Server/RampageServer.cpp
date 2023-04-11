@@ -37,6 +37,7 @@ void UploadWorkShop(UploadData& uploadData);
 //	
 //};
 
+#define TEST_RETURN_TABLE
 
 DWORD WINAPI ProcessClient(LPVOID arg)
 {
@@ -72,21 +73,44 @@ DWORD WINAPI ProcessClient(LPVOID arg)
 			SearchData searchData;
 			std::vector<WorkShop_Record> records;
 			Network_Device.ReceiveRequest(searchData);
+
+#ifdef TEST_RETURN_TABLE
+			for (int i = 0; i < 20; ++i) {
+				WorkShop_Record record;
+				record.RecordID = i + 1;
+				std::string testDataStr = "2023-04-1";
+				testDataStr += std::to_string(i);
+				memcpy( record.LastUploadDate, testDataStr.c_str(), testDataStr.length());
+				record.DownloadNum = i * 10;
+				std::string testStr = "testtesttesttesttesttesttesttest";
+				testStr += std::to_string(i + 1);
+				memcpy(record.RecordTitle, testStr.c_str(), testStr.length());
+				record.nLike = 0;
+				record.nHate = 0;
+				records.push_back(record);
+			}
+#else
 			result = SearchDataFromQuery(searchData);
 			while (result->next())
 			{
 				WorkShop_Record record;
 				record.RecordID = result->getInt("Record_ID");
-				record.LastUploadDate = result->getString("Last_Upload_Date").c_str();
+				sql::SQLString LUDStr = result->getString("Last_Upload_Date");
+				memcpy(record.LastUploadDate, LUDStr.c_str(), LUDStr.length());
 				record.DownloadNum = result->getInt("Download_Num");
-				record.RecordTitle = result->getString("Record_Title").c_str();
+				sql::SQLString RcTitle = result->getString("Record_Title");
+				memcpy(record.RecordTitle, RcTitle.c_str(), RcTitle.length());
 				record.nLike = 0;
 				record.nHate = 0;
 				records.push_back(record);
 			}
+			if (result)
+				delete result;
+#endif
+			
 			Network_Device.ReturnDataTable(records);
 			records.clear();
-			delete result;
+			
 		}
 			break;
 		case eSERVICE_TYPE::NEXT_TABLE:

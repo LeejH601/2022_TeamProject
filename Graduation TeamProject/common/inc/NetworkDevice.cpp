@@ -277,95 +277,25 @@ bool CNetworkDevice::RequestDataTable()
 
 bool CNetworkDevice::ReturnDataTable(std::vector<WorkShop_Record>& records)
 {
-	int recordBaseSize = 4 * 4;
 	int recordSize = records.size();
-
-	int recordEachDynamicSizes = sizeof(WorkShop_RecordInfo) * records.size();
-	std::vector<WorkShop_RecordInfo> EachDynaimcSizeInfos;
 
 	char buf[BUFSIZE + 1];
 	int len;
 	int retval;
 
-	len = recordBaseSize * records.size();
-	for (WorkShop_Record& record : records) {
-		len += record.RecordTitle.size();
-		len += record.LastUploadDate.size();
-
-		WorkShop_RecordInfo info; info.RecordTitleSize = record.RecordTitle.size(); info.LastUploadDateSize = record.LastUploadDate.size();
-		EachDynaimcSizeInfos.push_back(info);
-	}
-
-	memcpy(buf, (void*)&recordSize, sizeof(int));
-	retval = send(m_client_sock, (const char*)buf, sizeof(int), 0);
+	len = sizeof(WorkShop_Record) * records.size();
 
 	memcpy(buf, (void*)&len, sizeof(int));
 	retval = send(m_client_sock, (const char*)buf, sizeof(int), 0);
 
-	char* metaInfo = (char*)EachDynaimcSizeInfos.data();
-	int offset = 0;
-	int remainSize = len;
-	while (true)
-	{
-		int sendSize = 0;
-		if (remainSize > BUFSIZE)
-			sendSize = BUFSIZE;
-		else
-			sendSize = remainSize;
-		memcpy(buf, metaInfo + offset, sendSize);
-		retval = send(m_client_sock, (const char*)buf, sendSize, 0);
-		offset += retval;
-
-		if (retval == 0)
-			return false;
-
-		remainSize -= retval;
-		if (remainSize <= 0)
-			break;
-	}
-
-	//len = recordSize * sizeof(WorkShop_Record);
-	//std::cout << "len " << len << std::endl;
-	//std::cout << "recordSize " << recordSize << std::endl;
-
+	
 	if (retval == 0)
 		return false;
 
-	char* data = new char[len];
-	offset = 0;
-	for (WorkShop_Record& record : records) {
-		memcpy((void*)(data + offset), (const char*)&record.RecordID, sizeof(int));
-		offset += sizeof(int);
-		memcpy((void*)(data + offset), (const char*)&record.DownloadNum, sizeof(int));
-		offset += sizeof(int);
-		memcpy((void*)(data + offset), (const char*)&record.nLike, sizeof(int));
-		offset += sizeof(int);
-		memcpy((void*)(data + offset), (const char*)&record.nHate, sizeof(int));
-		offset += sizeof(int);
-
-		memcpy((void*)(data + offset), record.RecordTitle.c_str(), record.RecordTitle.size());
-		offset += record.RecordTitle.size();
-		memcpy((void*)(data + offset), record.LastUploadDate.c_str(), record.LastUploadDate.size());
-		offset += record.LastUploadDate.size();
-	}
-
-	/*WorkShop_Record TestRecord;
-	offset = 0;
-	memcpy(&TestRecord.RecordID, data + offset, sizeof(int));
-	offset += sizeof(int);
-	memcpy(&TestRecord.DownloadNum, data + offset, sizeof(int));
-	offset += sizeof(int);
-	memcpy(&TestRecord.nLike, data + offset, sizeof(int));
-	offset += sizeof(int);
-	memcpy(&TestRecord.nHate, data + offset, sizeof(int));
-	offset += sizeof(int);
-
-	TestRecord.RecordTitle.resize(30);
-	memcpy(TestRecord.RecordTitle.data(), data + offset, 30);
-	offset += 30;
-	memcpy(TestRecord.LastUploadDate.data(), data + offset,10);
-	offset += 10;*/
-
+	char* data = (char*)records.data();
+	int offset = 0;
+	int remainSize = len;
+	
 	offset = 0;
 	remainSize = len;
 	while (true)
@@ -426,53 +356,21 @@ bool CNetworkDevice::ReceiveRequest(SearchData& searchData)
 
 bool CNetworkDevice::RecvDataTable(std::vector<WorkShop_Record>& records)
 {
-	int recordBaseSize = 4 * 4;
 	int recordSize;
-
-	int recordEachDynamicSizes;
-	std::vector<WorkShop_RecordInfo> EachDynaimcSizeInfos;
 
 	int retval;
 	int len;
 	char buf[BUFSIZE + 1];
-
-
-	retval = recv(m_client_sock, (char*)&recordSize, sizeof(int), MSG_WAITALL);
 
 	retval = recv(m_client_sock, (char*)&len, sizeof(int), MSG_WAITALL);
 
 	if (retval == 0)
 		return false;
 
-	EachDynaimcSizeInfos.resize(recordSize);
 
-	//records.resize(len / sizeof(WorkShop_Record));
-
-
-	char* metaInfo = new char[recordSize * sizeof(WorkShop_RecordInfo)];
 	int offset = 0;
-	int remainSize = recordSize * sizeof(WorkShop_RecordInfo);
-	while (true)
-	{
-		int recvSize;
-		if (remainSize > BUFSIZE)
-			recvSize = BUFSIZE;
-		else
-			recvSize = remainSize;
-
-		retval = recv(m_client_sock, metaInfo + offset, recvSize, 0);
-
-		if (retval == 0)
-			return false;
-
-		offset += retval;
-		remainSize -= retval;
-
-		if (remainSize <= 0)
-			break;
-	}
-	memcpy(EachDynaimcSizeInfos.data(), metaInfo, recordSize * sizeof(WorkShop_RecordInfo));
-
+	int remainSize = len;
+	
 	char* Data = new char[len];
 
 	remainSize = len;
@@ -497,36 +395,8 @@ bool CNetworkDevice::RecvDataTable(std::vector<WorkShop_Record>& records)
 			break;
 	}
 	
-
-	//memcpy(records.data(), Data, len);
-	offset = 0;
-	for (int i = 0; i < recordSize; ++i) {
-		WorkShop_Record record;
-
-		memcpy((char*)&record.RecordID, Data + offset, sizeof(int));
-		offset += sizeof(int);
-		memcpy((char*)&record.DownloadNum, Data + offset, sizeof(int));
-		offset += sizeof(int);
-		memcpy((char*)&record.nLike, Data + offset, sizeof(int));
-		offset += sizeof(int);
-		memcpy((char*)&record.nHate, Data + offset, sizeof(int));
-		offset += sizeof(int);
-
-		record.RecordTitle.resize(EachDynaimcSizeInfos[i].RecordTitleSize);
-		memcpy((char*)record.RecordTitle.c_str(), (Data + offset), record.RecordTitle.size());
-		offset += record.RecordTitle.size();
-
-		record.LastUploadDate.resize(EachDynaimcSizeInfos[i].LastUploadDateSize);
-		memcpy((char*)record.LastUploadDate.c_str(), (Data + offset), record.LastUploadDate.size());
-		offset += record.LastUploadDate.size();
-
-
-		
-
-		
-
-		records.push_back(record);
-	}
+	records.resize(len / sizeof(WorkShop_Record));
+	memcpy(records.data(), Data, len);
 
 	for (WorkShop_Record& record : records) {
 		std::cout << record.RecordID << " " << record.RecordTitle << " " << record.LastUploadDate << " "

@@ -24,6 +24,9 @@ public:
 	std::string Type;
 };
 
+#define MAX_RECORDTITLE 100
+#define MAX_LASTDATESTR 20
+
 class WorkShop_Record
 {
 public:
@@ -31,8 +34,8 @@ public:
 	int DownloadNum;
 	int nLike;
 	int nHate;
-	std::string RecordTitle;
-	std::string LastUploadDate;
+	char RecordTitle[MAX_RECORDTITLE];
+	char LastUploadDate[MAX_LASTDATESTR];
 };
 
 class WorkShop_RecordInfo
