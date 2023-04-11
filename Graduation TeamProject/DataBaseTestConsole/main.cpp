@@ -1,4 +1,6 @@
 #include <iostream>
+#include <fstream>
+#include <filesystem>
 #include <NetworkDevice.h>
 
 #define BUFSIZE 4096
@@ -8,7 +10,7 @@ char* address = (char*)"127.0.0.1";
 int main()
 {
 	CNetworkDevice NetworkDevice;
-	std::vector<Test_Record> records;
+	std::vector<WorkShop_Record> records;
 
 	SOCKET sock;
 	int retval = 0;
@@ -31,8 +33,65 @@ int main()
 	retval = connect(sock, (struct sockaddr*)&serveraddr, sizeof(serveraddr));
 	//if (retval == SOCKET_ERROR) err_quit("connect()");
 
+	std::ifstream in_0{ "Data/Component0.bin", std::ios_base::binary };
+	std::ifstream in_1{ "Data/Component1.bin", std::ios_base::binary };
+	std::ifstream in_2{ "Data/Component2.bin", std::ios_base::binary };
+
+	in_0.seekg(0, std::ios::end);
+	size_t in0_Size = in_0.tellg();
+	in_0.seekg(0, std::ios::beg);
+
+	in_1.seekg(0, std::ios::end);
+	size_t in1_Size = in_1.tellg();
+	in_1.seekg(0, std::ios::beg);
+
+	in_2.seekg(0, std::ios::end);
+	size_t in2_Size = in_2.tellg();
+	in_2.seekg(0, std::ios::beg);
+
+	UploadData uploadData;
+	uploadData.RecordTitle = "test1";
+	uploadData.UserName = "testUser";
+	uploadData.ComponentBlobs.resize(3);
+	uploadData.ComponentBlobs[0].resize(in0_Size);
+	in_0.read(uploadData.ComponentBlobs[0].data(), in0_Size);
+
+	uploadData.ComponentBlobs[1].resize(in1_Size);
+	in_1.read(uploadData.ComponentBlobs[1].data(), in1_Size); 
+
+	uploadData.ComponentBlobs[2].resize(in2_Size);
+	in_2.read(uploadData.ComponentBlobs[2].data(), in2_Size);
+
+
 	NetworkDevice.init(sock);
 
-	NetworkDevice.RequestDataTable();
-	NetworkDevice.RecvDataTable(records);
+	eSERVICE_TYPE serviceType = eSERVICE_TYPE::UPDATE_TABLE;
+	NetworkDevice.SendServiceType(serviceType);
+
+	switch (serviceType)
+	{
+	case eSERVICE_TYPE::UPLOAD_RECORD:
+		NetworkDevice.UploadWorkShop(uploadData);
+		break;
+	case eSERVICE_TYPE::DOWNLOAD_RECORD:
+		break;
+	case eSERVICE_TYPE::UPDATE_TABLE:
+		records.clear();
+		NetworkDevice.RequestDataTable();
+		NetworkDevice.RecvDataTable(records); // 수정 필요
+		break;
+	case eSERVICE_TYPE::NEXT_TABLE:
+		break;
+	case eSERVICE_TYPE::PREV_TABLE:
+		break;
+	default:
+		break;
+	}
+
+	//NetworkDevice.RequestDataTable();
+	//NetworkDevice.RecvDataTable(records);
+	//NetworkDevice.UploadWorkShop(uploadData);
+
+	system("pause");
+	return 0;
 }

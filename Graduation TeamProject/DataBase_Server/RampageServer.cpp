@@ -1,3 +1,4 @@
+#pragma warning(disable:4996)
 #include <iostream>
 #include <string>
 #include <jdbc/mysql_connection.h>
@@ -7,6 +8,7 @@
 #include <jdbc/cppconn/datatype.h>
 #include <jdbc/cppconn/variant.h>
 #include <NetworkDevice.h>
+#include <chrono>
 
 #define BUFSIZE 4096
 #define SERVERPORT 9000
@@ -22,8 +24,13 @@ std::string FROM{ "FROM" };
 std::string WHERE{ "WHERE" };
 std::string REGEXP{ "REGEXP" };
 std::string ORDERBY{ "ORDER BY" };
+std::string INSERT{ "INSERT " };
+std::string INTO{ "INTO " };
+std::string member_table{ "member_table " };
+std::string VALUE{ "VALUE" };
 
 sql::ResultSet* SearchDataFromQuery(SearchData& searchData);
+void UploadWorkShop(UploadData& uploadData);
 
 //class IRecord {
 //public:
@@ -34,6 +41,7 @@ sql::ResultSet* SearchDataFromQuery(SearchData& searchData);
 DWORD WINAPI ProcessClient(LPVOID arg)
 {
 	CNetworkDevice Network_Device;
+	UploadData uploadData;
 
 	sql::ResultSet* result;
 
@@ -44,11 +52,55 @@ DWORD WINAPI ProcessClient(LPVOID arg)
 
 	std::cout << "connect client" << std::endl;
 
-	SearchData searchData;
-	Network_Device.ReceiveRequest(searchData);
-	result = SearchDataFromQuery(searchData);
-	std::vector<Test_Record> records;
-	while (result->next())
+	eSERVICE_TYPE serviceType;
+
+	while (true)
+	{
+		if (!Network_Device.RecvServiceType(serviceType))
+			break;
+
+		switch (serviceType)
+		{
+		case eSERVICE_TYPE::UPLOAD_RECORD:
+			Network_Device.RecvUploadData(uploadData);
+			UploadWorkShop(uploadData);
+			break;
+		case eSERVICE_TYPE::DOWNLOAD_RECORD:
+			break;
+		case eSERVICE_TYPE::UPDATE_TABLE:
+		{
+			SearchData searchData;
+			std::vector<WorkShop_Record> records;
+			Network_Device.ReceiveRequest(searchData);
+			result = SearchDataFromQuery(searchData);
+			while (result->next())
+			{
+				WorkShop_Record record;
+				record.RecordID = result->getInt("Record_ID");
+				record.LastUploadDate = result->getString("Last_Upload_Date").c_str();
+				record.DownloadNum = result->getInt("Download_Num");
+				record.RecordTitle = result->getString("Record_Title").c_str();
+				record.nLike = 0;
+				record.nHate = 0;
+				records.push_back(record);
+			}
+			Network_Device.ReturnDataTable(records);
+			records.clear();
+			delete result;
+		}
+			break;
+		case eSERVICE_TYPE::NEXT_TABLE:
+			break;
+		case eSERVICE_TYPE::PREV_TABLE:
+			break;
+		default:
+			break;
+		}
+	}
+
+	//Network_Device.ReceiveRequest(searchData);
+	//result = SearchDataFromQuery(searchData);
+	/*while (result->next())
 	{
 		Test_Record record;
 		record.WID = result->getInt("WID");
@@ -59,11 +111,10 @@ DWORD WINAPI ProcessClient(LPVOID arg)
 		record.Critical = result->getInt("Critical");
 		record.Type = result->getString("Type");
 		records.push_back(record);
-	}
-	Network_Device.ReturnDataTable(records);
+	}*/
+	/*Network_Device.RecvUploadData(uploadData);
+	UploadWorkShop(uploadData);*/
 
-
-	delete result;
 	return 0;
 }
 
@@ -83,10 +134,10 @@ sql::ResultSet* SearchDataFromQuery(SearchData& searchData)
 		exit(1);
 	}
 
-	connection->setSchema("mhdb");
+	connection->setSchema("mydb");
 
 	std::string query;
-	query = SELECT + " " + "*" + " " + FROM + " " + "weapon" + " " + ORDERBY + " " + "WName";
+	query = SELECT + " " + "Record_ID, Last_Upload_Date, Download_Num, Record_Title" + " " + FROM + " " + "record" + " " + ORDERBY + " " + "Record_ID";
 	PreStatement = connection->prepareStatement(query.c_str());
 	result = PreStatement->executeQuery();
 
@@ -107,6 +158,69 @@ sql::ResultSet* SearchDataFromQuery(SearchData& searchData)
 	delete connection;
 
 	return result;
+}
+
+void UploadWorkShop(UploadData& uploadData)
+{
+	try
+	{
+		driver = get_driver_instance();
+		connection = driver->connect("tcp://localhost:3306", "root", "wlfjd36796001!");
+	}
+	catch (const std::exception& e)
+	{
+		std::cout << "Could not connect to server. Error message: " << e.what() << std::endl;
+		system("pause");
+		exit(1);
+	}
+
+	connection->setSchema("mydb");
+
+	std::time_t nowTimeT = std::time(nullptr);
+
+	std::string query;
+	int record_ID = 1;
+	std::string timeStamp; std::asctime(std::localtime(&nowTimeT));
+	char buf[20];
+	std::strftime(buf, 20, "%Y-%m-%d", std::localtime(&nowTimeT));
+	timeStamp = buf;
+	std::string title = uploadData.RecordTitle;
+	std::vector<int> componentSizes;
+	std::stringstream stream[3];
+
+	int index = 0;
+	for (std::vector<char>& Blobs : uploadData.ComponentBlobs) {
+		componentSizes.push_back(Blobs.size());
+
+		stream[index].write(Blobs.data(), Blobs.size());
+		stream[index].setf(std::ios_base::binary);
+		index++;
+	}
+
+	sql::ResultSet* result;
+
+	sql::SQLString sqlString;
+
+
+	query = INSERT + INTO + "record " + "(" + "Record_ID, Record_Title, Last_Upload_Date, ComponentSize_One, ComponentSize_Two, ComponentSize_Three, ComponentBlob_One, ComponentBlob_Two, ComponentBlob_Three" + ") " +
+		VALUE + " (?, ?, ?, ?, ?, ?, ?, ?, ?);";
+
+	PreStatement = connection->prepareStatement(query.c_str());
+	PreStatement->setInt(1, record_ID);
+	PreStatement->setString(2, sql::SQLString(title));
+	PreStatement->setString(3, sql::SQLString(timeStamp));
+	PreStatement->setInt(4, componentSizes[0]);
+	PreStatement->setInt(5, componentSizes[1]);
+	PreStatement->setInt(6, componentSizes[2]);
+	PreStatement->setBlob(7, &stream[0]);
+	PreStatement->setBlob(8, &stream[1]);
+	PreStatement->setBlob(9, &stream[2]);
+	PreStatement->executeUpdate();
+
+	//delete result;
+	//delete PreStatement;
+	delete connection;
+	system("pause");
 }
 
 void TestDataBaseConnect() {

@@ -9,7 +9,8 @@
 #include <string>
 #include <iostream>
 #include <vector>
-
+#include <bitset>
+#include <fstream>
 
 class Test_Record
 {
@@ -23,6 +24,24 @@ public:
 	std::string Type;
 };
 
+class WorkShop_Record
+{
+public:
+	int RecordID;
+	int DownloadNum;
+	int nLike;
+	int nHate;
+	std::string RecordTitle;
+	std::string LastUploadDate;
+};
+
+class WorkShop_RecordInfo
+{
+public:
+	int RecordTitleSize;
+	int LastUploadDateSize;
+};
+
 enum class SEARCH_METHOD {
 	ASCENDING,
 	DESCENDING,
@@ -34,6 +53,14 @@ enum class SORT_BY {
 	LIKED,
 	DISLIKE,
 	DOWNLOAD,
+};
+
+enum class eSERVICE_TYPE {
+	UPLOAD_RECORD,
+	DOWNLOAD_RECORD,
+	UPDATE_TABLE,
+	NEXT_TABLE,
+	PREV_TABLE,
 };
 
 class SearchDataBuilder;
@@ -53,6 +80,14 @@ public:
 
 private:
 	SearchData(SearchDataBuilder& builder);
+};
+
+class UploadData
+{
+public:
+	std::string UserName;
+	std::string RecordTitle;
+	std::vector<std::vector<char>> ComponentBlobs;
 };
 
 class SearchDataBuilder
@@ -85,10 +120,14 @@ public:
 	~CNetworkDevice();
 
 	void init(SOCKET sock);
+	bool RecvServiceType(eSERVICE_TYPE& serviceType);
+	bool SendServiceType(eSERVICE_TYPE& serviceType);
+	bool UploadWorkShop(UploadData& uploadData);
+	bool RecvUploadData(UploadData& uploadData);
 	bool RequestDataTable();
-	bool ReturnDataTable(std::vector<Test_Record>& records);
+	bool ReturnDataTable(std::vector<WorkShop_Record>& records);
 	bool ReceiveRequest(SearchData& searchData);
-	bool RecvDataTable(std::vector<Test_Record>& records);
+	bool RecvDataTable(std::vector<WorkShop_Record>& records);
 
 	bool SendToNetwork() {};
 	bool RecvByNetwork() {};
