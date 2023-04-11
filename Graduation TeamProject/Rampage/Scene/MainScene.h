@@ -50,6 +50,8 @@ private:
 	std::unique_ptr<CCamera> m_pMainSceneCamera = NULL;
 	CCamera* m_pCurrentCamera = NULL;
 
+	POINT m_ptOldCursorPos;
+
 	DissolveParams* m_pcbMappedDisolveParams = nullptr;
 	ComPtr<ID3D12Resource> m_pd3dcbDisolveParams = nullptr;
 public:
@@ -76,7 +78,7 @@ public:
 	virtual void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	virtual void ReleaseObjects() {}
 
-	virtual bool ProcessInput(DWORD dwDirection, float cxDelta, float cyDelta, float fTimeElapsed);
+	virtual bool ProcessInput(HWND hWnd, DWORD dwDirection, float fTimeElapsed);
 	virtual void UpdateObjects(float fTimeElapsed);
 	virtual void OnPrepareRenderTarget(ID3D12GraphicsCommandList* pd3dCommandList, int nRenderTargets, D3D12_CPU_DESCRIPTOR_HANDLE* pd3dRtvCPUHandles, D3D12_CPU_DESCRIPTOR_HANDLE d3dDepthStencilBufferDSVCPUHandle);
 	virtual void Update(float fTimeElapsed);

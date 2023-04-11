@@ -346,26 +346,6 @@ void CGameFramework::ReleaseObjects()
 }
 void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
 {
-	switch (nMessageID)
-	{
-	case WM_LBUTTONDOWN:
-		::SetCapture(hWnd);
-		::GetCursorPos(&m_ptOldCursorPos);
-		break;
-	case WM_RBUTTONDOWN:
-		::SetCapture(hWnd);
-		::GetCursorPos(&m_ptOldCursorPos);
-		break;
-	case WM_LBUTTONUP:
-	case WM_RBUTTONUP:
-		::ReleaseCapture();
-		break;
-	case WM_MOUSEMOVE:
-		break;
-	default:
-		break;
-	}
-
 	m_pSceneManager->OnProcessingMouseMessage(hWnd, nMessageID, wParam, lParam);
 }
 void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
@@ -448,18 +428,7 @@ LRESULT CALLBACK CGameFramework::OnProcessingWindowMessage(HWND hWnd, UINT nMess
 }
 void CGameFramework::ProcessInput()
 {
-	float cxDelta = 0.0f, cyDelta = 0.0f;
-	POINT ptCursorPos;
-	if (GetCapture() == m_hWnd)
-	{
-		SetCursor(NULL);
-		GetCursorPos(&ptCursorPos);
-		cxDelta = (float)(ptCursorPos.x - m_ptOldCursorPos.x) / 3.0f;
-		cyDelta = (float)(ptCursorPos.y - m_ptOldCursorPos.y) / 3.0f;
-		SetCursorPos(m_ptOldCursorPos.x, m_ptOldCursorPos.y);
-	}
-
-	m_pSceneManager->ProcessInput(dwDirection, cxDelta, cyDelta, m_GameTimer.GetFrameTimeElapsed());
+	m_pSceneManager->ProcessInput(m_hWnd, dwDirection, m_GameTimer.GetFrameTimeElapsed());
 }
 void CGameFramework::UpdateObjects()
 {

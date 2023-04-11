@@ -55,9 +55,9 @@ void CSceneManager::Update(float fTimeElapsed)
 	m_pCurrentScene->Update(fTimeElapsed);
 }
 
-bool CSceneManager::ProcessInput(DWORD dwDirection, float cxDelta, float cyDelta, float fTimeElapsed)
+bool CSceneManager::ProcessInput(HWND hWnd, DWORD dwDirection, float fTimeElapsed)
 {
-	m_pCurrentScene->ProcessInput(dwDirection, cxDelta, cyDelta, fTimeElapsed);
+	m_pCurrentScene->ProcessInput(hWnd, dwDirection, fTimeElapsed);
 
 	return false;
 }

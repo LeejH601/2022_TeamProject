@@ -24,7 +24,7 @@ public:
 	void OnPostRender();
 	void Update(float fTimeElapsed);
 
-	bool ProcessInput(DWORD dwDirection, float cxDelta, float cyDelta, float fTimeElapsed);
+	bool ProcessInput(HWND hWnd, DWORD dwDirection, float fTimeElapsed);
 	bool OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
 	bool OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam, DWORD& dwDirection);
 
