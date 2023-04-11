@@ -45,6 +45,13 @@ public:
 	int LastUploadDateSize;
 };
 
+class Download_Info
+{
+public:
+	int RecordID;
+	char RecordTitle[MAX_RECORDTITLE];
+};
+
 enum class SEARCH_METHOD {
 	ASCENDING,
 	DESCENDING,
@@ -131,6 +138,10 @@ public:
 	bool ReturnDataTable(std::vector<WorkShop_Record>& records);
 	bool ReceiveRequest(SearchData& searchData);
 	bool RecvDataTable(std::vector<WorkShop_Record>& records);
+	bool RecvUploadRecordInfo(Download_Info& info);
+	bool SendRequestDownload(Download_Info& info);
+	bool SendComponentDataSet(std::vector<std::vector<char>>& Blobs);
+	bool RecvComponentDataSet(std::vector<std::vector<char>>& Blobs);
 
 	bool SendToNetwork() {};
 	bool RecvByNetwork() {};

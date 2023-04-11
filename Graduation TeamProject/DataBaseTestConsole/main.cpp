@@ -67,7 +67,7 @@ int main()
 
 	NetworkDevice.init(sock);
 
-	eSERVICE_TYPE serviceType = eSERVICE_TYPE::UPDATE_TABLE;
+	eSERVICE_TYPE serviceType = eSERVICE_TYPE::DOWNLOAD_RECORD;
 	NetworkDevice.SendServiceType(serviceType);
 
 	switch (serviceType)
@@ -76,6 +76,15 @@ int main()
 		NetworkDevice.UploadWorkShop(uploadData);
 		break;
 	case eSERVICE_TYPE::DOWNLOAD_RECORD:
+	{
+		Download_Info info;
+		info.RecordID = 1;
+		std::string testStr = "test";
+		memcpy(info.RecordTitle, testStr.data(), testStr.length());
+		NetworkDevice.SendRequestDownload(info);
+		std::vector<std::vector<char>> Blobs;
+		NetworkDevice.RecvComponentDataSet(Blobs);
+	}
 		break;
 	case eSERVICE_TYPE::UPDATE_TABLE:
 		records.clear();
@@ -103,6 +112,6 @@ void ShowRecords(std::vector<WorkShop_Record>& records)
 {
 	for (WorkShop_Record& record : records) {
 		std::cout << record.RecordID << " " << record.RecordTitle << " " << record.LastUploadDate << " "
-			<< record.nLike << " " << record.nLike << " " << record.DownloadNum << std::endl;
+			<< record.nLike << " " << record.nHate << " " << record.DownloadNum << std::endl;
 	}
 }

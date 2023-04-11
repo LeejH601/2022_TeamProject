@@ -30,6 +30,7 @@ std::string member_table{ "member_table " };
 std::string VALUE{ "VALUE" };
 
 sql::ResultSet* SearchDataFromQuery(SearchData& searchData);
+sql::ResultSet* FindComponentSet(int RecordID);
 void UploadWorkShop(UploadData& uploadData);
 
 //class IRecord {
@@ -37,7 +38,7 @@ void UploadWorkShop(UploadData& uploadData);
 //	
 //};
 
-#define TEST_RETURN_TABLE
+//#define TEST_RETURN_TABLE
 
 DWORD WINAPI ProcessClient(LPVOID arg)
 {
@@ -53,6 +54,7 @@ DWORD WINAPI ProcessClient(LPVOID arg)
 
 	std::cout << "connect client" << std::endl;
 
+
 	eSERVICE_TYPE serviceType;
 
 	while (true)
@@ -67,6 +69,36 @@ DWORD WINAPI ProcessClient(LPVOID arg)
 			UploadWorkShop(uploadData);
 			break;
 		case eSERVICE_TYPE::DOWNLOAD_RECORD:
+		{
+			Download_Info info;
+			Network_Device.RecvUploadRecordInfo(info);
+			std::cout << info.RecordID << "    " << info.RecordTitle << std::endl;
+
+			std::vector<std::vector<char>> Blobs;
+			Blobs.resize(3);
+			//Blobs.resize(3);
+			result = FindComponentSet(info.RecordID);
+			result->next();
+			int Component_Size = result->getInt("ComponentSize_One");
+			std::stringstream* stream = (std::stringstream*)( result->getBlob("ComponentBlob_One"));
+
+			Blobs[0].resize(Component_Size);
+			stream->read(Blobs[0].data(), Component_Size);
+
+			Component_Size = result->getInt("ComponentSize_Two");
+			stream = (std::stringstream*)(result->getBlob("ComponentBlob_Two"));
+
+			Blobs[1].resize(Component_Size);
+			stream->read(Blobs[1].data(), Component_Size);
+
+			Component_Size = result->getInt("ComponentSize_Three");
+			stream = (std::stringstream*)(result->getBlob("ComponentBlob_Three"));
+
+			Blobs[2].resize(Component_Size);
+			stream->read(Blobs[2].data(), Component_Size);
+
+			Network_Device.SendComponentDataSet(Blobs);
+		}
 			break;
 		case eSERVICE_TYPE::UPDATE_TABLE:
 		{
@@ -100,8 +132,8 @@ DWORD WINAPI ProcessClient(LPVOID arg)
 				record.DownloadNum = result->getInt("Download_Num");
 				sql::SQLString RcTitle = result->getString("Record_Title");
 				memcpy(record.RecordTitle, RcTitle.c_str(), RcTitle.length());
-				record.nLike = 0;
-				record.nHate = 0;
+				record.nLike = result->getInt("Like");
+				record.nHate = result->getInt("Hate");
 				records.push_back(record);
 			}
 			if (result)
@@ -146,22 +178,9 @@ sql::ResultSet* SearchDataFromQuery(SearchData& searchData)
 {
 	sql::ResultSet* result;
 
-	try
-	{
-		driver = get_driver_instance();
-		connection = driver->connect("tcp://localhost:3306", "root", "wlfjd36796001!");
-	}
-	catch (const std::exception& e)
-	{
-		std::cout << "Could not connect to server. Error message: " << e.what() << std::endl;
-		system("pause");
-		exit(1);
-	}
-
-	connection->setSchema("mydb");
-
 	std::string query;
-	query = SELECT + " " + "Record_ID, Last_Upload_Date, Download_Num, Record_Title" + " " + FROM + " " + "record" + " " + ORDERBY + " " + "Record_ID";
+	query = SELECT + " " + "*" + " " + FROM + " " + "record" + " " + ORDERBY + " " + "Record_ID";
+	//query = SELECT + " " + "Record_ID, Last_Upload_Date, Download_Num, Like, Hate, Record_Title" + " " + FROM + " " + "record" + " " + ORDERBY + " " + "Record_ID";
 	PreStatement = connection->prepareStatement(query.c_str());
 	result = PreStatement->executeQuery();
 
@@ -179,27 +198,25 @@ sql::ResultSet* SearchDataFromQuery(SearchData& searchData)
 	}*/
 
 	delete PreStatement;
-	delete connection;
+
+	return result;
+}
+
+sql::ResultSet* FindComponentSet(int RecordID)
+{
+	sql::ResultSet* result;
+
+
+	std::string query;
+	query = SELECT + " " + "*" + " " + FROM + " " + "record" + " " + WHERE + " " + "Record_ID = " + std::to_string(RecordID) + ";";
+	PreStatement = connection->prepareStatement(query.c_str());
+	result = PreStatement->executeQuery();
 
 	return result;
 }
 
 void UploadWorkShop(UploadData& uploadData)
 {
-	try
-	{
-		driver = get_driver_instance();
-		connection = driver->connect("tcp://localhost:3306", "root", "wlfjd36796001!");
-	}
-	catch (const std::exception& e)
-	{
-		std::cout << "Could not connect to server. Error message: " << e.what() << std::endl;
-		system("pause");
-		exit(1);
-	}
-
-	connection->setSchema("mydb");
-
 	std::time_t nowTimeT = std::time(nullptr);
 
 	std::string query;
@@ -243,7 +260,6 @@ void UploadWorkShop(UploadData& uploadData)
 
 	//delete result;
 	//delete PreStatement;
-	delete connection;
 	system("pause");
 }
 
@@ -283,13 +299,26 @@ void TestDataBaseConnect() {
 
 	delete result;
 	delete PreStatement;
-	delete connection;
 	system("pause");
 	return;
 }
 
 int main(int argc, char* argv[])
 {
+	try
+	{
+		driver = get_driver_instance();
+		connection = driver->connect("tcp://localhost:3306", "root", "wlfjd36796001!");
+	}
+	catch (const std::exception& e)
+	{
+		std::cout << "Could not connect to server. Error message: " << e.what() << std::endl;
+		system("pause");
+		exit(1);
+	}
+
+	connection->setSchema("mydb");
+
 	int retval;
 
 	if (argc > 1) {

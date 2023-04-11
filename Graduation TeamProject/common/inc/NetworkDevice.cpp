@@ -289,14 +289,14 @@ bool CNetworkDevice::ReturnDataTable(std::vector<WorkShop_Record>& records)
 	memcpy(buf, (void*)&len, sizeof(int));
 	retval = send(m_client_sock, (const char*)buf, sizeof(int), 0);
 
-	
+
 	if (retval == 0)
 		return false;
 
 	char* data = (char*)records.data();
 	int offset = 0;
 	int remainSize = len;
-	
+
 	offset = 0;
 	remainSize = len;
 	while (true)
@@ -371,7 +371,7 @@ bool CNetworkDevice::RecvDataTable(std::vector<WorkShop_Record>& records)
 
 	int offset = 0;
 	int remainSize = len;
-	
+
 	char* Data = new char[len];
 
 	remainSize = len;
@@ -395,13 +395,135 @@ bool CNetworkDevice::RecvDataTable(std::vector<WorkShop_Record>& records)
 		if (remainSize <= 0)
 			break;
 	}
-	
+
 	records.resize(len / sizeof(WorkShop_Record));
 	memcpy(records.data(), Data, len);
 
 	delete[] Data;
 	system("puase");
 	return false;
+}
+
+bool CNetworkDevice::RecvUploadRecordInfo(Download_Info& info)
+{
+	int retval;
+
+	retval = recv(m_client_sock, (char*)&info, sizeof(Download_Info), MSG_WAITALL);
+
+	if (retval == 0)
+		return false;
+
+	return true;
+}
+
+bool CNetworkDevice::SendRequestDownload(Download_Info& info)
+{
+	int retval;
+
+	char* Data = (char*)&info;
+	retval = send(m_client_sock, Data, sizeof(Download_Info), 0);
+
+	if (retval == 0)
+		return false;
+
+	return true;
+}
+
+bool CNetworkDevice::SendComponentDataSet(std::vector<std::vector<char>>& Blobs)
+{
+	int ComponentSizes[3] = { Blobs[0].size(),Blobs[1].size(),Blobs[2].size() };
+	int len = 0;
+	for (int i = 0; i < 3; ++i)
+		len += ComponentSizes[i];
+
+	char buf[BUFSIZE + 1];
+	int retval;
+	
+	memcpy(buf, ComponentSizes, sizeof(int) * 3);
+	retval = send(m_client_sock, buf, sizeof(int) * 3, 0);
+
+	if (retval == 0)
+		return false;
+
+	int remainSize = len;
+	int offset = 0;
+	char* Data = new char[len];
+
+	for (std::vector<char>& blob : Blobs) {
+		memcpy(Data + offset, blob.data(), blob.size());
+		offset += blob.size();
+	}
+
+	offset = 0;
+	while (true)
+	{
+		int sendSize;
+		if (remainSize > BUFSIZE)
+			sendSize = BUFSIZE;
+		else
+			sendSize = remainSize;
+
+		memcpy(buf, Data + offset, sendSize);
+		retval = send(m_client_sock, buf, sendSize, 0);
+
+		remainSize -= retval;
+		offset += retval;
+		if (remainSize <= 0)
+			break;
+	}
+
+	delete[] Data;
+	return true;
+}
+
+bool CNetworkDevice::RecvComponentDataSet(std::vector<std::vector<char>>& Blobs)
+{
+	int retval;
+
+	int ComponentSizes[3];
+	retval = recv(m_client_sock, (char*)ComponentSizes, sizeof(int) * 3, MSG_WAITALL);
+
+	if (retval == 0)
+		return false;
+
+	Blobs.resize(3);
+	for (int i = 0; i < 3; ++i) {
+		Blobs[i].resize(ComponentSizes[i]);
+	}
+
+	char buf[BUFSIZE + 1];
+	int offset = 0;
+	int remainSize = 0;
+	for (int i = 0; i < 3; ++i) {
+		remainSize += ComponentSizes[i];
+	}
+	char* Data = new char[remainSize];
+
+	while (true)
+	{
+		int recvSize;
+		if (remainSize > BUFSIZE)
+			recvSize = BUFSIZE;
+		else
+			recvSize = remainSize;
+
+		retval = recv(m_client_sock, buf, recvSize, 0);
+		memcpy(Data + offset, buf, retval);
+
+		remainSize -= retval;
+		offset += retval;
+		if (remainSize <= 0)
+			break;
+	}
+
+	offset = 0;
+	for (int i = 0; i < 3; ++i) {
+		memcpy(Blobs[i].data(), Data + offset, Blobs[i].size());
+		offset += Blobs[i].size();
+	}
+
+	delete[] Data;
+	return true;
 }
 
 
