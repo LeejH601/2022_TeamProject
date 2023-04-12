@@ -31,7 +31,7 @@ std::string INTO{ "INTO " };
 std::string member_table{ "member_table " };
 std::string VALUE{ "VALUE" };
 
-sql::ResultSet* SearchDataFromQuery(SearchData& searchData);
+sql::ResultSet* SearchDataFromQuery(SearchData& searchData, int currentPage);
 sql::ResultSet* FindComponentSet(int RecordID);
 void IncreaseWorkshopParams(int RecordID, int updateParams);
 void UploadWorkShop(UploadData& uploadData);
@@ -47,8 +47,10 @@ DWORD WINAPI ProcessClient(LPVOID arg)
 {
 	CNetworkDevice Network_Device;
 	UploadData uploadData;
+	int TablePage = 0;
 
 	sql::ResultSet* result;
+	sql::PreparedStatement* PreStatement;
 
 	SOCKET Arg;
 	memcpy(&Arg, arg, sizeof(arg));
@@ -59,6 +61,7 @@ DWORD WINAPI ProcessClient(LPVOID arg)
 
 
 	eSERVICE_TYPE serviceType;
+	SearchData searchData;
 
 	while (true)
 	{
@@ -70,6 +73,11 @@ DWORD WINAPI ProcessClient(LPVOID arg)
 		case eSERVICE_TYPE::UPLOAD_RECORD:
 			Network_Device.RecvUploadData(uploadData);
 			UploadWorkShop(uploadData);
+
+			/*for (int i = 0; i < 40; ++i) {
+				uploadData.RecordTitle = "test" + std::to_string(i);
+				UploadWorkShop(uploadData);
+			}*/
 			break;
 		case eSERVICE_TYPE::DOWNLOAD_RECORD:
 		{
@@ -109,7 +117,6 @@ DWORD WINAPI ProcessClient(LPVOID arg)
 			break;
 		case eSERVICE_TYPE::UPDATE_TABLE:
 		{
-			SearchData searchData;
 			std::vector<WorkShop_Record> records;
 			Network_Device.ReceiveRequest(searchData);
 
@@ -129,15 +136,17 @@ DWORD WINAPI ProcessClient(LPVOID arg)
 				records.push_back(record);
 			}
 #else
-			result = SearchDataFromQuery(searchData);
+			result = SearchDataFromQuery(searchData, TablePage);
 			while (result->next())
 			{
 				WorkShop_Record record;
 				record.RecordID = result->getInt("Record_ID");
 				sql::SQLString LUDStr = result->getString("Last_Upload_Date");
+				ZeroMemory(record.LastUploadDate, sizeof(record.LastUploadDate));
 				memcpy(record.LastUploadDate, LUDStr.c_str(), LUDStr.length());
 				record.DownloadNum = result->getInt("Download_Num");
 				sql::SQLString RcTitle = result->getString("Record_Title");
+				ZeroMemory(record.RecordTitle, sizeof(record.RecordTitle));
 				memcpy(record.RecordTitle, RcTitle.c_str(), RcTitle.length());
 				record.nLike = result->getInt("nlike");
 				record.nHate = result->getInt("Hate");
@@ -153,8 +162,72 @@ DWORD WINAPI ProcessClient(LPVOID arg)
 		}
 			break;
 		case eSERVICE_TYPE::NEXT_TABLE:
+		{
+			std::vector<WorkShop_Record> records;
+			std::string query;
+			query = "SELECT COUNT(*) as cnt FROM record;";
+			PreStatement = connection->prepareStatement(query.c_str());
+			result = PreStatement->executeQuery();
+
+			result->next();
+			int TableCnt = result->getInt("cnt");
+			if(TableCnt > TablePage + 20)
+				TablePage += 20;
+
+			delete PreStatement;
+
+			result = SearchDataFromQuery(searchData, TablePage);
+			while (result->next())
+			{
+				WorkShop_Record record;
+				record.RecordID = result->getInt("Record_ID");
+				sql::SQLString LUDStr = result->getString("Last_Upload_Date");
+				ZeroMemory(record.LastUploadDate, sizeof(record.LastUploadDate));
+				memcpy(record.LastUploadDate, LUDStr.c_str(), LUDStr.length());
+				record.DownloadNum = result->getInt("Download_Num");
+				sql::SQLString RcTitle = result->getString("Record_Title");
+				ZeroMemory(record.RecordTitle, sizeof(record.RecordTitle));
+				memcpy(record.RecordTitle, RcTitle.c_str(), RcTitle.length());
+				record.nLike = result->getInt("nlike");
+				record.nHate = result->getInt("Hate");
+				records.push_back(record);
+			}
+			if (result)
+				delete result;
+
+			Network_Device.ReturnDataTable(records);
+			records.clear();
+		}
 			break;
 		case eSERVICE_TYPE::PREV_TABLE:
+		{
+			std::vector<WorkShop_Record> records;
+			if (TablePage >= 20)
+				TablePage -= 20;
+			else
+				TablePage = 0;
+			result = SearchDataFromQuery(searchData, TablePage);
+			while (result->next())
+			{
+				WorkShop_Record record;
+				record.RecordID = result->getInt("Record_ID");
+				sql::SQLString LUDStr = result->getString("Last_Upload_Date");
+				ZeroMemory(record.LastUploadDate, sizeof(record.LastUploadDate));
+				memcpy(record.LastUploadDate, LUDStr.c_str(), LUDStr.length());
+				record.DownloadNum = result->getInt("Download_Num");
+				sql::SQLString RcTitle = result->getString("Record_Title");
+				ZeroMemory(record.RecordTitle, sizeof(record.RecordTitle));
+				memcpy(record.RecordTitle, RcTitle.c_str(), RcTitle.length());
+				record.nLike = result->getInt("nlike");
+				record.nHate = result->getInt("Hate");
+				records.push_back(record);
+			}
+			if (result)
+				delete result;
+
+			Network_Device.ReturnDataTable(records);
+			records.clear();
+		}
 			break;
 		case eSERVICE_TYPE::INCREASE_LIKE:
 		{
@@ -201,14 +274,14 @@ DWORD WINAPI ProcessClient(LPVOID arg)
 	return 0;
 }
 
-sql::ResultSet* SearchDataFromQuery(SearchData& searchData)
+sql::ResultSet* SearchDataFromQuery(SearchData& searchData, int currentPage)
 {
 	sql::ResultSet* result;
 	sql::PreparedStatement* PreStatement;
 
 
 	std::string query;
-	query = SELECT + " " + "*" + " " + FROM + " " + "record" + " " + ORDERBY + " " + "Record_ID";
+	query = SELECT + " " + "*" + " " + FROM + " " + "record" + " " + ORDERBY + " " + "Record_ID" + " limit " + std::to_string(currentPage) + ", 20;";
 	//query = SELECT + " " + "Record_ID, Last_Upload_Date, Download_Num, Like, Hate, Record_Title" + " " + FROM + " " + "record" + " " + ORDERBY + " " + "Record_ID";
 	PreStatement = connection->prepareStatement(query.c_str());
 	result = PreStatement->executeQuery();
@@ -295,24 +368,24 @@ void UploadWorkShop(UploadData& uploadData)
 	sql::SQLString sqlString;
 
 
-	query = INSERT + INTO + "record " + "(" + "Record_ID, Record_Title, Last_Upload_Date, ComponentSize_One, ComponentSize_Two, ComponentSize_Three, ComponentBlob_One, ComponentBlob_Two, ComponentBlob_Three" + ") " +
-		VALUE + " (?, ?, ?, ?, ?, ?, ?, ?, ?);";
+	query = INSERT + INTO + "record " + "(" + "Record_Title, Last_Upload_Date, ComponentSize_One, ComponentSize_Two, ComponentSize_Three, ComponentBlob_One, ComponentBlob_Two, ComponentBlob_Three" + ") " +
+		VALUE + " (?, ?, ?, ?, ?, ?, ?, ?);";
 
 	PreStatement = connection->prepareStatement(query.c_str());
-	PreStatement->setInt(1, record_ID);
-	PreStatement->setString(2, sql::SQLString(title));
-	PreStatement->setString(3, sql::SQLString(timeStamp));
-	PreStatement->setInt(4, componentSizes[0]);
-	PreStatement->setInt(5, componentSizes[1]);
-	PreStatement->setInt(6, componentSizes[2]);
-	PreStatement->setBlob(7, &stream[0]);
-	PreStatement->setBlob(8, &stream[1]);
-	PreStatement->setBlob(9, &stream[2]);
+	//PreStatement->setInt(1, record_ID);
+	PreStatement->setString(1, sql::SQLString(title));
+	PreStatement->setString(2, sql::SQLString(timeStamp));
+	PreStatement->setInt(3, componentSizes[0]);
+	PreStatement->setInt(4, componentSizes[1]);
+	PreStatement->setInt(5, componentSizes[2]);
+	PreStatement->setBlob(6, &stream[0]);
+	PreStatement->setBlob(7, &stream[1]);
+	PreStatement->setBlob(8, &stream[2]);
 	PreStatement->executeUpdate();
 
 	//delete result;
 	//delete PreStatement;
-	system("pause");
+	//system("pause");
 }
 
 void TestDataBaseConnect() {

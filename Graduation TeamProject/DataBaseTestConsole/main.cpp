@@ -67,56 +67,77 @@ int main()
 
 	NetworkDevice.init(sock);
 
-	eSERVICE_TYPE serviceType = eSERVICE_TYPE::INCREASE_LIKE;
-	NetworkDevice.SendServiceType(serviceType);
+	eSERVICE_TYPE serviceType = eSERVICE_TYPE::UPLOAD_RECORD;
 
-	switch (serviceType)
+	while (true)
 	{
-	case eSERVICE_TYPE::UPLOAD_RECORD:
-		NetworkDevice.UploadWorkShop(uploadData);
+		int input;
+		std::cout << "Upload : 0, DownLoad : 1, UpdateTable : 2, Next : 3, Prev : 4, Like : 5, Hate : 6" << std::endl;
+		std::cin >> input;
+		serviceType = (eSERVICE_TYPE)input;
+
+		NetworkDevice.SendServiceType(serviceType);
+
+		switch (serviceType)
+		{
+		case eSERVICE_TYPE::UPLOAD_RECORD:
+			NetworkDevice.UploadWorkShop(uploadData);
+			break;
+		case eSERVICE_TYPE::DOWNLOAD_RECORD:
+		{
+			Download_Info info;
+			info.RecordID = 1;
+			std::string testStr = "test";
+			memcpy(info.RecordTitle, testStr.data(), testStr.length());
+			NetworkDevice.SendRequestDownload(info);
+			std::vector<std::vector<char>> Blobs;
+			NetworkDevice.RecvComponentDataSet(Blobs);
+		}
 		break;
-	case eSERVICE_TYPE::DOWNLOAD_RECORD:
-	{
-		Download_Info info;
-		info.RecordID = 1;
-		std::string testStr = "test";
-		memcpy(info.RecordTitle, testStr.data(), testStr.length());
-		NetworkDevice.SendRequestDownload(info);
-		std::vector<std::vector<char>> Blobs;
-		NetworkDevice.RecvComponentDataSet(Blobs);
+		case eSERVICE_TYPE::UPDATE_TABLE:
+			records.clear();
+			NetworkDevice.RequestDataTable();
+			NetworkDevice.RecvDataTable(records);
+			ShowRecords(records);
+			break;
+		case eSERVICE_TYPE::NEXT_TABLE:
+			NetworkDevice.RecvDataTable(records);
+			ShowRecords(records);
+			break;
+		case eSERVICE_TYPE::PREV_TABLE:
+			NetworkDevice.RecvDataTable(records);
+			ShowRecords(records);
+			break;
+		case eSERVICE_TYPE::INCREASE_LIKE:
+		{
+			int rid;
+			std::cout << "input Record ID" << std::endl;
+			std::cin >> rid;
+			Download_Info info;
+			info.RecordID = rid;
+			std::string testStr = "test";
+			memcpy(info.RecordTitle, testStr.data(), testStr.length());
+			NetworkDevice.SendRequestDownload(info);
+		}
+		break;
+		case eSERVICE_TYPE::INCREASE_HATE:
+		{
+			int rid;
+			std::cout << "input Record ID" << std::endl;
+			std::cin >> rid;
+			Download_Info info;
+			info.RecordID = rid;
+			std::string testStr = "test";
+			memcpy(info.RecordTitle, testStr.data(), testStr.length());
+			NetworkDevice.SendRequestDownload(info);
+		}
+		break;
+		default:
+			break;
+		}
 	}
-		break;
-	case eSERVICE_TYPE::UPDATE_TABLE:
-		records.clear();
-		NetworkDevice.RequestDataTable();
-		NetworkDevice.RecvDataTable(records);
-		ShowRecords(records);
-		break;
-	case eSERVICE_TYPE::NEXT_TABLE:
-		break;
-	case eSERVICE_TYPE::PREV_TABLE:
-		break;
-	case eSERVICE_TYPE::INCREASE_LIKE:
-	{
-		Download_Info info;
-		info.RecordID = 1;
-		std::string testStr = "test";
-		memcpy(info.RecordTitle, testStr.data(), testStr.length());
-		NetworkDevice.SendRequestDownload(info);
-	}
-	break;
-	case eSERVICE_TYPE::INCREASE_HATE:
-	{
-		Download_Info info;
-		info.RecordID = 1;
-		std::string testStr = "test";
-		memcpy(info.RecordTitle, testStr.data(), testStr.length());
-		NetworkDevice.SendRequestDownload(info);
-	}
-	break;
-	default:
-		break;
-	}
+
+	
 
 	//NetworkDevice.RequestDataTable();
 	//NetworkDevice.RecvDataTable(records);
