@@ -135,10 +135,10 @@ void CMonster::Update(float fTimeElapsed)
 	
 	CPhysicsObject::Move(m_xmf3Velocity, false);
 
-	CalculateResultPosition();
-
 	// 플레이어가 터레인보다 아래에 있지 않도록 하는 코드
 	if (m_pUpdatedContext) CPhysicsObject::OnUpdateCallback(fTimeElapsed);
+
+	CalculateResultPosition();
 
 	Animate(fTimeElapsed);
 

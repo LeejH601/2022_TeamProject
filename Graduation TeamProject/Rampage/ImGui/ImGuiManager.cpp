@@ -870,14 +870,11 @@ void CImGuiManager::SetUI()
 
 	// Show my window.
 	{
-		ImGuiWindowFlags my_window_flags = 0;
+		ImGuiWindowFlags my_window_flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize;
 		bool* p_open = NULL;
 
-		my_window_flags |= ImGuiWindowFlags_NoResize;
-
 		const ImGuiViewport* main_viewport = ImGui::GetMainViewport();
-		ImGui::SetNextWindowPos(ImVec2(main_viewport->WorkPos.x + 25, main_viewport->WorkPos.y + 25));
-		ImGui::SetNextWindowSize(ImVec2(m_lDesktopWidth - 50, m_lDesktopHeight - 105), ImGuiCond_None);
+		ImGui::SetNextWindowSize(ImVec2(m_lDesktopWidth * 0.85f, 0.0f), ImGuiCond_Always);
 		ImGui::Begin("Simulator", p_open, my_window_flags);   // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
 		ImVec2 initial_curpos = ImGui::GetCursorPos();
 		{

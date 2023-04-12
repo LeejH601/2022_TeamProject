@@ -7,6 +7,7 @@
 void CLobbyScene::OnPrepareRender(ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	CImGuiManager::GetInst()->SetUI();
+	//CImGuiManager::GetInst()->DemoRendering();
 
 	pd3dCommandList->SetGraphicsRootSignature(m_pd3dGraphicsRootSignature.Get());
 }
