@@ -67,7 +67,7 @@ int main()
 
 	NetworkDevice.init(sock);
 
-	eSERVICE_TYPE serviceType = eSERVICE_TYPE::DOWNLOAD_RECORD;
+	eSERVICE_TYPE serviceType = eSERVICE_TYPE::INCREASE_LIKE;
 	NetworkDevice.SendServiceType(serviceType);
 
 	switch (serviceType)
@@ -96,6 +96,24 @@ int main()
 		break;
 	case eSERVICE_TYPE::PREV_TABLE:
 		break;
+	case eSERVICE_TYPE::INCREASE_LIKE:
+	{
+		Download_Info info;
+		info.RecordID = 1;
+		std::string testStr = "test";
+		memcpy(info.RecordTitle, testStr.data(), testStr.length());
+		NetworkDevice.SendRequestDownload(info);
+	}
+	break;
+	case eSERVICE_TYPE::INCREASE_HATE:
+	{
+		Download_Info info;
+		info.RecordID = 1;
+		std::string testStr = "test";
+		memcpy(info.RecordTitle, testStr.data(), testStr.length());
+		NetworkDevice.SendRequestDownload(info);
+	}
+	break;
 	default:
 		break;
 	}

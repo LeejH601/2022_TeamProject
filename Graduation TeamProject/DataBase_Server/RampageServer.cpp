@@ -12,12 +12,14 @@
 
 #define BUFSIZE 4096
 #define SERVERPORT 9000
+#define UPDATE_LIKE 0x01
+#define UPDATE_HATE 0x02
+#define UPDATE_DOWN 0x04
 char* SERVERIP = (char*)"127.0.0.1";
 
 sql::Driver* driver;
 sql::Connection* connection;
 sql::Statement* statement;
-sql::PreparedStatement* PreStatement;
 
 std::string SELECT{ "SELECT" };
 std::string FROM{ "FROM" };
@@ -31,6 +33,7 @@ std::string VALUE{ "VALUE" };
 
 sql::ResultSet* SearchDataFromQuery(SearchData& searchData);
 sql::ResultSet* FindComponentSet(int RecordID);
+void IncreaseWorkshopParams(int RecordID, int updateParams);
 void UploadWorkShop(UploadData& uploadData);
 
 //class IRecord {
@@ -98,6 +101,10 @@ DWORD WINAPI ProcessClient(LPVOID arg)
 			stream->read(Blobs[2].data(), Component_Size);
 
 			Network_Device.SendComponentDataSet(Blobs);
+
+			int UpdateParams = 0;
+			UpdateParams |= UPDATE_DOWN;
+			IncreaseWorkshopParams(info.RecordID, UpdateParams);
 		}
 			break;
 		case eSERVICE_TYPE::UPDATE_TABLE:
@@ -132,7 +139,7 @@ DWORD WINAPI ProcessClient(LPVOID arg)
 				record.DownloadNum = result->getInt("Download_Num");
 				sql::SQLString RcTitle = result->getString("Record_Title");
 				memcpy(record.RecordTitle, RcTitle.c_str(), RcTitle.length());
-				record.nLike = result->getInt("Like");
+				record.nLike = result->getInt("nlike");
 				record.nHate = result->getInt("Hate");
 				records.push_back(record);
 			}
@@ -148,6 +155,26 @@ DWORD WINAPI ProcessClient(LPVOID arg)
 		case eSERVICE_TYPE::NEXT_TABLE:
 			break;
 		case eSERVICE_TYPE::PREV_TABLE:
+			break;
+		case eSERVICE_TYPE::INCREASE_LIKE:
+		{
+			Download_Info info;
+			Network_Device.RecvUploadRecordInfo(info);
+
+			int UpdateParams = 0;
+			UpdateParams |= UPDATE_LIKE;
+			IncreaseWorkshopParams(info.RecordID, UpdateParams);
+		}
+			break;
+		case eSERVICE_TYPE::INCREASE_HATE:
+		{
+			Download_Info info;
+			Network_Device.RecvUploadRecordInfo(info);
+
+			int UpdateParams = 0;
+			UpdateParams |= UPDATE_HATE;
+			IncreaseWorkshopParams(info.RecordID, UpdateParams);
+		}
 			break;
 		default:
 			break;
@@ -177,6 +204,8 @@ DWORD WINAPI ProcessClient(LPVOID arg)
 sql::ResultSet* SearchDataFromQuery(SearchData& searchData)
 {
 	sql::ResultSet* result;
+	sql::PreparedStatement* PreStatement;
+
 
 	std::string query;
 	query = SELECT + " " + "*" + " " + FROM + " " + "record" + " " + ORDERBY + " " + "Record_ID";
@@ -205,6 +234,7 @@ sql::ResultSet* SearchDataFromQuery(SearchData& searchData)
 sql::ResultSet* FindComponentSet(int RecordID)
 {
 	sql::ResultSet* result;
+	sql::PreparedStatement* PreStatement;
 
 
 	std::string query;
@@ -214,6 +244,27 @@ sql::ResultSet* FindComponentSet(int RecordID)
 
 	return result;
 }
+
+void IncreaseWorkshopParams(int RecordID, int updateParams)
+{
+	std::string UpDate = "UPDATE record ";
+	std::string Where = "WHERE Record_ID = " + std::to_string(RecordID) + ";";
+	std::string Set = "SET";
+	if (updateParams & UPDATE_LIKE) Set += " nlike = nlike + 1,";
+	if (updateParams & UPDATE_HATE) Set += " Hate = Hate + 1,";
+	if (updateParams & UPDATE_DOWN) Set += " Download_Num = Download_Num + 1,";
+	Set.pop_back();
+
+	std::string query = UpDate + Set + " " + Where;
+	sql::PreparedStatement* PreStatement;
+
+	PreStatement = connection->prepareStatement(query.c_str());
+	PreStatement->executeQuery();
+
+	if (PreStatement)
+		delete PreStatement;
+}
+
 
 void UploadWorkShop(UploadData& uploadData)
 {
@@ -239,6 +290,7 @@ void UploadWorkShop(UploadData& uploadData)
 	}
 
 	sql::ResultSet* result;
+	sql::PreparedStatement* PreStatement;
 
 	sql::SQLString sqlString;
 
@@ -369,6 +421,11 @@ int main(int argc, char* argv[])
 	}
 
 	closesocket(listen_sock);
+
+	if (connection) {
+		delete connection;
+		connection = nullptr;
+	}
 
 	WSACleanup();
 	return 0;
