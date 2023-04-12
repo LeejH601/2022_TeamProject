@@ -526,4 +526,29 @@ bool CNetworkDevice::RecvComponentDataSet(std::vector<std::vector<char>>& Blobs)
 	return true;
 }
 
+bool CNetworkDevice::SendRequestLogin(Login_Info& logininfo)
+{
+	int retval;
+
+	char* Data = (char*)&logininfo;
+	retval = send(m_client_sock, Data, sizeof(Login_Info), 0);
+
+	if (retval == 0)
+		return false;
+
+	return true;
+}
+
+bool CNetworkDevice::RecvRequesLogin(Login_Info& logininfo)
+{
+	int retval;
+
+	retval = recv(m_client_sock, (char*)&logininfo, sizeof(Login_Info), MSG_WAITALL);
+
+	if (retval == 0)
+		return false;
+
+	return true;
+}
+
 

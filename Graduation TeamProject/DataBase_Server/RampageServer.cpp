@@ -59,6 +59,11 @@ DWORD WINAPI ProcessClient(LPVOID arg)
 
 	std::cout << "connect client" << std::endl;
 
+	// login Test
+	/*while (true)
+	{
+
+	}*/
 
 	eSERVICE_TYPE serviceType;
 	SearchData searchData;

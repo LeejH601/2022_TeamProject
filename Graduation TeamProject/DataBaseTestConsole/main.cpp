@@ -35,6 +35,14 @@ int main()
 	retval = connect(sock, (struct sockaddr*)&serveraddr, sizeof(serveraddr));
 	//if (retval == SOCKET_ERROR) err_quit("connect()");
 
+	//while (true)
+	//{
+	//	Login_Info info;
+	//	std::cout << info.LoginID;
+	//	
+	//	NetworkDevice.SendRequestLogin()
+	//}
+
 	std::ifstream in_0{ "Data/Component0.bin", std::ios_base::binary };
 	std::ifstream in_1{ "Data/Component1.bin", std::ios_base::binary };
 	std::ifstream in_2{ "Data/Component2.bin", std::ios_base::binary };

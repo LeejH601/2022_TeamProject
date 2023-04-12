@@ -26,6 +26,8 @@ public:
 
 #define MAX_RECORDTITLE 100
 #define MAX_LASTDATESTR 20
+#define MAX_LOGINIDLENGTH 45
+#define MAX_PASSWORDLENGTH 45
 
 class WorkShop_Record
 {
@@ -50,6 +52,13 @@ class Download_Info
 public:
 	int RecordID;
 	char RecordTitle[MAX_RECORDTITLE];
+};
+
+class Login_Info
+{
+public:
+	char LoginID[MAX_LOGINIDLENGTH];
+	char Password[MAX_PASSWORDLENGTH];
 };
 
 enum class SEARCH_METHOD {
@@ -146,6 +155,8 @@ public:
 	bool SendRequestDownload(Download_Info& info);
 	bool SendComponentDataSet(std::vector<std::vector<char>>& Blobs);
 	bool RecvComponentDataSet(std::vector<std::vector<char>>& Blobs);
+	bool SendRequestLogin(Login_Info& logininfo);
+	bool RecvRequesLogin(Login_Info& logininfo);
 
 	bool SendToNetwork() {};
 	bool RecvByNetwork() {};
