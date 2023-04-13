@@ -58,14 +58,47 @@ DWORD WINAPI ProcessClient(LPVOID arg)
 	Network_Device.init(Arg);
 
 	std::cout << "connect client" << std::endl;
+	eSERVICE_TYPE serviceType;
 
 	// login Test
-	/*while (true)
+	while (true)
 	{
+		Network_Device.RecvServiceType(serviceType);
+		switch (serviceType)
+		{
+		case eSERVICE_TYPE::SINE_UP:
+		{
+			SineUp_Info info;
+			Network_Device.RecvRequestSineUp(info);
 
-	}*/
+			std::string query;
+			query = INSERT + INTO + "user " + "(" + "User_Name, User_Password, User_LoginID" + ") " +
+				VALUE + " (?, ?, ?);";
+			PreStatement = connection->prepareStatement(query.c_str());
+			//PreStatement->setInt(1, record_ID);
+			PreStatement->setString(1, sql::SQLString(info.UserName));
+			PreStatement->setString(2, sql::SQLString(info.Password));
+			PreStatement->setString(3, sql::SQLString(info.LoginID));
+			int ret = PreStatement->executeUpdate();
 
-	eSERVICE_TYPE serviceType;
+			Network_Device.RecvApproveSineUp(ret);
+
+			if (PreStatement)
+				delete PreStatement;
+		}
+			break;
+		case eSERVICE_TYPE::SINE_IN:
+		{
+			Login_Info info;
+			Network_Device.RecvRequesLogin(info);
+		}
+			break;
+		default:
+			break;
+		}
+	}
+
+	
 	SearchData searchData;
 
 	while (true)
@@ -388,6 +421,8 @@ void UploadWorkShop(UploadData& uploadData)
 	PreStatement->setBlob(8, &stream[2]);
 	PreStatement->executeUpdate();
 
+	if (PreStatement)
+		delete PreStatement;
 	//delete result;
 	//delete PreStatement;
 	//system("pause");

@@ -28,6 +28,7 @@ public:
 #define MAX_LASTDATESTR 20
 #define MAX_LOGINIDLENGTH 45
 #define MAX_PASSWORDLENGTH 45
+#define MAX_USERNAME 45
 
 class WorkShop_Record
 {
@@ -61,6 +62,14 @@ public:
 	char Password[MAX_PASSWORDLENGTH];
 };
 
+class SineUp_Info
+{
+public:
+	char LoginID[MAX_LOGINIDLENGTH];
+	char Password[MAX_PASSWORDLENGTH];
+	char UserName[MAX_USERNAME];
+};
+
 enum class SEARCH_METHOD {
 	ASCENDING,
 	DESCENDING,
@@ -84,6 +93,8 @@ enum class eSERVICE_TYPE {
 	INCREASE_HATE,
 	DECREASE_LIKE,
 	DECREASE_HATE,
+	SINE_UP,
+	SINE_IN,
 };
 
 class SearchDataBuilder;
@@ -155,8 +166,17 @@ public:
 	bool SendRequestDownload(Download_Info& info);
 	bool SendComponentDataSet(std::vector<std::vector<char>>& Blobs);
 	bool RecvComponentDataSet(std::vector<std::vector<char>>& Blobs);
+
 	bool SendRequestLogin(Login_Info& logininfo);
 	bool RecvRequesLogin(Login_Info& logininfo);
+	bool SendApproveLogin();
+	bool RecvApproveLogin();
+
+	bool SendRequestSineUp(SineUp_Info& sineUpInfo);
+	bool RecvRequestSineUp(SineUp_Info& sineUpInfo);
+	bool SendApproveSineUp(int result);
+	bool RecvApproveSineUp(int& result);
+
 
 	bool SendToNetwork() {};
 	bool RecvByNetwork() {};

@@ -35,13 +35,60 @@ int main()
 	retval = connect(sock, (struct sockaddr*)&serveraddr, sizeof(serveraddr));
 	//if (retval == SOCKET_ERROR) err_quit("connect()");
 
-	//while (true)
-	//{
-	//	Login_Info info;
-	//	std::cout << info.LoginID;
-	//	
-	//	NetworkDevice.SendRequestLogin()
-	//}
+	NetworkDevice.init(sock);
+
+	while (true)
+	{
+		int input;
+		std::cout << "Sine in : 0, Sine Up : 1" << std::endl << "input : ";
+		std::cin >> input;
+
+		switch (input)
+		{
+		case 0:
+		{
+			eSERVICE_TYPE svType = eSERVICE_TYPE::SINE_IN;
+			NetworkDevice.SendServiceType(svType);
+
+			Login_Info info;
+			std::cout << "ID : ";
+			std::cin >> info.LoginID;
+			std::cout << "Password : ";
+			std::cin >> info.Password;
+
+			NetworkDevice.SendRequestLogin(info);
+		}
+			break;
+		case 1:
+		{
+			eSERVICE_TYPE svType = eSERVICE_TYPE::SINE_UP;
+			NetworkDevice.SendServiceType(svType);
+
+			SineUp_Info info;
+			std::cout << "ID : ";
+			std::cin >> info.LoginID;
+			std::cout << "Password : ";
+			std::cin >> info.Password;
+			std::cout << "UserName : ";
+			std::cin >> info.UserName;
+
+			NetworkDevice.SendRequestSineUp(info);
+			
+			int ret;
+			NetworkDevice.RecvApproveSineUp(ret);
+
+			if (ret == 0)
+				std::cout << "Failed Sine Up" << std::endl;
+			else
+				std::cout << "Success Sine Up" << std::endl;
+		}
+			break;
+		default:
+			break;
+		}
+	
+
+	}
 
 	std::ifstream in_0{ "Data/Component0.bin", std::ios_base::binary };
 	std::ifstream in_1{ "Data/Component1.bin", std::ios_base::binary };
@@ -73,7 +120,6 @@ int main()
 	in_2.read(uploadData.ComponentBlobs[2].data(), in2_Size);
 
 
-	NetworkDevice.init(sock);
 
 	eSERVICE_TYPE serviceType = eSERVICE_TYPE::UPLOAD_RECORD;
 

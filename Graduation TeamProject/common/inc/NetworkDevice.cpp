@@ -551,4 +551,57 @@ bool CNetworkDevice::RecvRequesLogin(Login_Info& logininfo)
 	return true;
 }
 
+bool CNetworkDevice::SendRequestSineUp(SineUp_Info& sineUpInfo)
+{
+	int retval;
+
+	char* Data = (char*)&sineUpInfo;
+	retval = send(m_client_sock, (char*)&sineUpInfo, sizeof(SineUp_Info), 0);
+
+	if (retval == 0)
+		return false;
+
+	return true;
+}
+
+bool CNetworkDevice::RecvRequestSineUp(SineUp_Info& sineUpInfo)
+{
+	int retval;
+
+	char buf[BUFSIZE + 1];
+
+	retval = recv(m_client_sock, buf, sizeof(SineUp_Info), MSG_WAITALL);
+	memcpy(&sineUpInfo, buf, sizeof(SineUp_Info));
+
+	if (retval == 0)
+		return false;
+
+	return true;
+}
+
+bool CNetworkDevice::SendApproveSineUp(int result)
+{
+	int retval;
+
+	char* Data = (char*)&result;
+	retval = send(m_client_sock, (char*)&Data, sizeof(int), 0);
+
+	if (retval == 0)
+		return false;
+
+	return true;
+}
+
+bool CNetworkDevice::RecvApproveSineUp(int& result)
+{
+	int retval;
+
+	retval = recv(m_client_sock, (char*)&result, sizeof(int), MSG_WAITALL);
+
+	if (retval == 0)
+		return false;
+
+	return true;
+}
+
 
