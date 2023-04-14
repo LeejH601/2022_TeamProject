@@ -61,7 +61,8 @@ DWORD WINAPI ProcessClient(LPVOID arg)
 	eSERVICE_TYPE serviceType;
 
 	// login Test
-	while (true)
+	bool isLoginig = true;
+	while (isLoginig)
 	{
 		Network_Device.RecvServiceType(serviceType);
 		switch (serviceType)
@@ -81,7 +82,7 @@ DWORD WINAPI ProcessClient(LPVOID arg)
 			PreStatement->setString(3, sql::SQLString(info.LoginID));
 			int ret = PreStatement->executeUpdate();
 
-			Network_Device.RecvApproveSineUp(ret);
+			Network_Device.SendApproveSineUp(ret);
 
 			if (PreStatement)
 				delete PreStatement;
@@ -91,6 +92,8 @@ DWORD WINAPI ProcessClient(LPVOID arg)
 		{
 			Login_Info info;
 			Network_Device.RecvRequesLogin(info);
+
+			//isLoginig = false;
 		}
 			break;
 		default:
