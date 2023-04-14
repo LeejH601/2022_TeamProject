@@ -922,12 +922,14 @@ void CImGuiManager::SetUI()
 			initial_curpos.y += 0.023f * m_lDesktopHeight;
 			ImGui::SetCursorPos(initial_curpos);
 			ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
-			ImGui::DragFloat("Speed", &pImpactEffectComponent->GetSpeed(), DRAG_FLOAT_UNIT, IMPACT_SPEED_MIN, IMPACT_SPEED_MAX, "%.2f", 0);
+			if (ImGui::DragFloat("Speed", &pImpactEffectComponent->GetSpeed(), DRAG_FLOAT_UNIT, IMPACT_SPEED_MIN, IMPACT_SPEED_MAX, "%.2f", 0))
+				pImpactEffectComponent->GetSpeed() = std::clamp(pImpactEffectComponent->GetSpeed(), IMPACT_SPEED_MIN, IMPACT_SPEED_MAX);
 
 			initial_curpos.y += 0.023f * m_lDesktopHeight;
 			ImGui::SetCursorPos(initial_curpos);
 			ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
-			ImGui::DragFloat("Alpha", &pImpactEffectComponent->GetAlpha(), DRAG_FLOAT_UNIT, IMPACT_ALPHA_MIN, IMPACT_ALPHA_MAX, "%.2f", 0);
+			if (ImGui::DragFloat("Alpha", &pImpactEffectComponent->GetAlpha(), DRAG_FLOAT_UNIT, IMPACT_ALPHA_MIN, IMPACT_ALPHA_MAX, "%.2f", 0))
+				pImpactEffectComponent->GetAlpha() = std::clamp(pImpactEffectComponent->GetAlpha(), IMPACT_ALPHA_MIN, IMPACT_ALPHA_MAX);
 		}
 
 		initial_curpos.y += 0.023f * m_lDesktopHeight;
@@ -970,22 +972,26 @@ void CImGuiManager::SetUI()
 			initial_curpos.y += 0.023f * m_lDesktopHeight;
 			ImGui::SetCursorPos(initial_curpos);
 			ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
-			ImGui::DragFloat("Alpha##ParticleEffect", &pParticleComponent->GetAlpha(), DRAG_FLOAT_UNIT, PARTICLE_ALPHA_MIN, PARTICLE_ALPHA_MAX, "%.2f", 0);
+			if (ImGui::DragFloat("Alpha##ParticleEffect", &pParticleComponent->GetAlpha(), DRAG_FLOAT_UNIT, PARTICLE_ALPHA_MIN, PARTICLE_ALPHA_MAX, "%.2f", 0))
+				pParticleComponent->GetAlpha() = std::clamp(pParticleComponent->GetAlpha(), PARTICLE_ALPHA_MIN, PARTICLE_ALPHA_MAX);
 
 			initial_curpos.y += 0.023f * m_lDesktopHeight;
 			ImGui::SetCursorPos(initial_curpos);
 			ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
-			ImGui::DragFloat("LifeTime##ParticleEffect", &pParticleComponent->GetLifeTime(), DRAG_FLOAT_UNIT, PARTICLE_LIFETIME_MIN, PARTICLE_LIFETIME_MAX, "%.1f", 0);
+			if (ImGui::DragFloat("LifeTime##ParticleEffect", &pParticleComponent->GetLifeTime(), DRAG_FLOAT_UNIT, PARTICLE_LIFETIME_MIN, PARTICLE_LIFETIME_MAX, "%.1f", 0))
+				pParticleComponent->GetLifeTime() = std::clamp(pParticleComponent->GetLifeTime(), PARTICLE_LIFETIME_MIN, PARTICLE_LIFETIME_MAX);
 
 			initial_curpos.y += 0.023f * m_lDesktopHeight;
 			ImGui::SetCursorPos(initial_curpos);
 			ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
-			ImGui::DragInt("ParticleCount##ParticleEffect", &pParticleComponent->GetParticleNumber(), DRAG_FLOAT_UNIT, PARTICLE_COUNT_MIN, PARTICLE_COUNT_MAX, "%d", 0);
-
+			if (ImGui::DragInt("ParticleCount##ParticleEffect", &pParticleComponent->GetParticleNumber(), DRAG_FLOAT_UNIT, PARTICLE_COUNT_MIN, PARTICLE_COUNT_MAX, "%d", 0))
+				pParticleComponent->GetParticleNumber() = std::clamp(pParticleComponent->GetParticleNumber(), PARTICLE_COUNT_MIN, PARTICLE_COUNT_MAX);
+			
 			initial_curpos.y += 0.023f * m_lDesktopHeight;
 			ImGui::SetCursorPos(initial_curpos);
 			ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
-			ImGui::DragFloat("Speed##ParticleEffect", &pParticleComponent->GetSpeed(), DRAG_FLOAT_UNIT, PARTICLE_SPEED_MIN, PARTICLE_SPEED_MAX, "%.1f", 0);
+			if (ImGui::DragFloat("Speed##ParticleEffect", &pParticleComponent->GetSpeed(), DRAG_FLOAT_UNIT, PARTICLE_SPEED_MIN, PARTICLE_SPEED_MAX, "%.1f", 0))
+				pParticleComponent->GetSpeed() = std::clamp(pParticleComponent->GetSpeed(), PARTICLE_SPEED_MIN, PARTICLE_SPEED_MAX);
 
 			initial_curpos.y += 0.023f * m_lDesktopHeight;
 			ImGui::SetCursorPos(initial_curpos);
@@ -1101,17 +1107,20 @@ void CImGuiManager::SetUI()
 			ImGui::SetCursorPos(initial_curpos);
 			ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
 
-			ImGui::DragFloat("Distance##Move", &pCameraMoveComponent->GetMaxDistance(), DRAG_FLOAT_UNIT, CAMERA_MOVE_DISTANCE_MIN, CAMERA_MOVE_DISTANCE_MAX, "%.2f", 0);
+			if (ImGui::DragFloat("Distance##Move", &pCameraMoveComponent->GetMaxDistance(), DRAG_FLOAT_UNIT, CAMERA_MOVE_DISTANCE_MIN, CAMERA_MOVE_DISTANCE_MAX, "%.2f", 0))
+				pCameraMoveComponent->GetMaxDistance() = std::clamp(pCameraMoveComponent->GetMaxDistance(), CAMERA_MOVE_DISTANCE_MIN, CAMERA_MOVE_DISTANCE_MAX);
 
 			initial_curpos.y += 0.023f * m_lDesktopHeight;
 			ImGui::SetCursorPos(initial_curpos);
 			ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
-			ImGui::DragFloat("Time##Move", &pCameraMoveComponent->GetMovingTime(), DRAG_FLOAT_UNIT, CAMERA_MOVE_TIME_MIN, CAMERA_MOVE_TIME_MAX, "%.2f", 0);
-
+			if (ImGui::DragFloat("Time##Move", &pCameraMoveComponent->GetMovingTime(), DRAG_FLOAT_UNIT, CAMERA_MOVE_TIME_MIN, CAMERA_MOVE_TIME_MAX, "%.2f", 0))
+				pCameraMoveComponent->GetMovingTime() = std::clamp(pCameraMoveComponent->GetMovingTime(), CAMERA_MOVE_TIME_MIN, CAMERA_MOVE_TIME_MAX);
+			
 			initial_curpos.y += 0.023f * m_lDesktopHeight;
 			ImGui::SetCursorPos(initial_curpos);
 			ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
-			ImGui::DragFloat("RollBackTime##Move", &pCameraMoveComponent->GetRollBackTime(), DRAG_FLOAT_UNIT, CAMERA_MOVE_ROLLBACKTIME_MIN, CAMERA_MOVE_ROLLBACKTIME_MAX, "%.2f", 0);
+			if (ImGui::DragFloat("RollBackTime##Move", &pCameraMoveComponent->GetRollBackTime(), DRAG_FLOAT_UNIT, CAMERA_MOVE_ROLLBACKTIME_MIN, CAMERA_MOVE_ROLLBACKTIME_MAX, "%.2f", 0))
+				pCameraMoveComponent->GetRollBackTime() = std::clamp(pCameraMoveComponent->GetRollBackTime(), CAMERA_MOVE_ROLLBACKTIME_MIN, CAMERA_MOVE_ROLLBACKTIME_MAX);
 		}
 
 		initial_curpos.y += 0.023f * m_lDesktopHeight;
@@ -1130,17 +1139,20 @@ void CImGuiManager::SetUI()
 			ImGui::SetCursorPos(initial_curpos);
 			ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
 
-			ImGui::DragFloat("Magnitude##Shake", &pCameraShakerComponent->GetMagnitude(), DRAG_FLOAT_UNIT, CAMERA_SHAKE_MAGNITUDE_MIN, CAMERA_SHAKE_MAGNITUDE_MAX, "%.2f", 0);
+			if (ImGui::DragFloat("Magnitude##Shake", &pCameraShakerComponent->GetMagnitude(), DRAG_FLOAT_UNIT, CAMERA_SHAKE_MAGNITUDE_MIN, CAMERA_SHAKE_MAGNITUDE_MAX, "%.2f", 0))
+				pCameraShakerComponent->GetMagnitude() = std::clamp(pCameraShakerComponent->GetMagnitude(), CAMERA_SHAKE_MAGNITUDE_MIN, CAMERA_SHAKE_MAGNITUDE_MAX);
+			
+			initial_curpos.y += 0.023f * m_lDesktopHeight;
+			ImGui::SetCursorPos(initial_curpos);
+			ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
+			if (ImGui::DragFloat("Duration##Shake", &pCameraShakerComponent->GetDuration(), DRAG_FLOAT_UNIT, CAMERA_SHAKE_DURATION_MIN, CAMERA_SHAKE_DURATION_MAX, "%.2f", 0))
+				pCameraShakerComponent->GetDuration() = std::clamp(pCameraShakerComponent->GetDuration(), CAMERA_SHAKE_DURATION_MIN, CAMERA_SHAKE_DURATION_MAX);
 
 			initial_curpos.y += 0.023f * m_lDesktopHeight;
 			ImGui::SetCursorPos(initial_curpos);
 			ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
-			ImGui::DragFloat("Duration##Shake", &pCameraShakerComponent->GetDuration(), DRAG_FLOAT_UNIT, CAMERA_SHAKE_DURATION_MIN, CAMERA_SHAKE_DURATION_MAX, "%.2f", 0);
-
-			initial_curpos.y += 0.023f * m_lDesktopHeight;
-			ImGui::SetCursorPos(initial_curpos);
-			ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
-			ImGui::DragFloat("Frequency##Shake", &pCameraShakerComponent->GetFrequency(), DRAG_FLOAT_UNIT, CAMERA_SHAKE_FREQUENCY_MIN, CAMERA_SHAKE_FREQUENCY_MAX, "%.3f", 0);
+			if(ImGui::DragFloat("Frequency##Shake", &pCameraShakerComponent->GetFrequency(), DRAG_FLOAT_UNIT, CAMERA_SHAKE_FREQUENCY_MIN, CAMERA_SHAKE_FREQUENCY_MAX, "%.3f", 0))
+				pCameraShakerComponent->GetFrequency() = std::clamp(pCameraShakerComponent->GetFrequency(), CAMERA_SHAKE_FREQUENCY_MIN, CAMERA_SHAKE_FREQUENCY_MAX);
 		}
 
 		initial_curpos.y += 0.023f * m_lDesktopHeight;
@@ -1159,17 +1171,20 @@ void CImGuiManager::SetUI()
 			ImGui::SetCursorPos(initial_curpos);
 			ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
 
-			ImGui::DragFloat("Distance##Zoom", &pCameraZoomerComponent->GetMaxDistance(), DRAG_FLOAT_UNIT, CAMERA_ZOOMINOUT_DISTANCE_MIN, CAMERA_ZOOMINOUT_DISTANCE_MAX, "%.2f", 0);
+			if (ImGui::DragFloat("Distance##Zoom", &pCameraZoomerComponent->GetMaxDistance(), DRAG_FLOAT_UNIT, CAMERA_ZOOMINOUT_DISTANCE_MIN, CAMERA_ZOOMINOUT_DISTANCE_MAX, "%.2f", 0))
+				pCameraZoomerComponent->GetMaxDistance() = std::clamp(pCameraZoomerComponent->GetMaxDistance(), CAMERA_ZOOMINOUT_DISTANCE_MIN, CAMERA_ZOOMINOUT_DISTANCE_MAX);
 
 			initial_curpos.y += 0.023f * m_lDesktopHeight;
 			ImGui::SetCursorPos(initial_curpos);
 			ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
-			ImGui::DragFloat("Time##Zoom", &pCameraZoomerComponent->GetMovingTime(), DRAG_FLOAT_UNIT, CAMERA_ZOOMINOUT_TIME_MIN, CAMERA_ZOOMINOUT_TIME_MAX, "%.2f", 0);
+			if (ImGui::DragFloat("Time##Zoom", &pCameraZoomerComponent->GetMovingTime(), DRAG_FLOAT_UNIT, CAMERA_ZOOMINOUT_TIME_MIN, CAMERA_ZOOMINOUT_TIME_MAX, "%.2f", 0))
+				pCameraZoomerComponent->GetMovingTime() = std::clamp(pCameraZoomerComponent->GetMovingTime(), CAMERA_ZOOMINOUT_TIME_MIN, CAMERA_ZOOMINOUT_TIME_MAX);
 
 			initial_curpos.y += 0.023f * m_lDesktopHeight;
 			ImGui::SetCursorPos(initial_curpos);
 			ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
-			ImGui::DragFloat("RollBackTime##Zoom", &pCameraZoomerComponent->GetRollBackTime(), DRAG_FLOAT_UNIT, CAMERA_ZOOMINOUT_ROLLBACKTIME_MIN, CAMERA_ZOOMINOUT_ROLLBACKTIME_MAX, "%.2f", 0);
+			if (ImGui::DragFloat("RollBackTime##Zoom", &pCameraZoomerComponent->GetRollBackTime(), DRAG_FLOAT_UNIT, CAMERA_ZOOMINOUT_ROLLBACKTIME_MIN, CAMERA_ZOOMINOUT_ROLLBACKTIME_MAX, "%.2f", 0))
+				pCameraZoomerComponent->GetRollBackTime() = std::clamp(pCameraZoomerComponent->GetRollBackTime(), CAMERA_ZOOMINOUT_ROLLBACKTIME_MIN, CAMERA_ZOOMINOUT_ROLLBACKTIME_MAX);
 
 			initial_curpos.y += 0.023f * m_lDesktopHeight;
 			ImGui::SetCursorPos(initial_curpos);
@@ -1204,12 +1219,14 @@ void CImGuiManager::SetUI()
 			initial_curpos.y += 0.023f * m_lDesktopHeight;
 			ImGui::SetCursorPos(initial_curpos);
 			ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
-			ImGui::DragFloat("Delay##effectsound", &pShockSoundComponent->GetDelay(), DRAG_FLOAT_UNIT, SHOCK_SOUND_DELAY_MIN, SHOCK_SOUND_DELAY_MAX, "%.2f", 0);
+			if (ImGui::DragFloat("Delay##effectsound", &pShockSoundComponent->GetDelay(), DRAG_FLOAT_UNIT, SHOCK_SOUND_DELAY_MIN, SHOCK_SOUND_DELAY_MAX, "%.2f", 0))
+				pShockSoundComponent->GetDelay() = std::clamp(pShockSoundComponent->GetDelay(), SHOCK_SOUND_DELAY_MIN, SHOCK_SOUND_DELAY_MAX);
 
 			initial_curpos.y += 0.023f * m_lDesktopHeight;
 			ImGui::SetCursorPos(initial_curpos);
 			ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
-			ImGui::DragFloat("Volume##effectsound", &pShockSoundComponent->GetVolume(), DRAG_FLOAT_UNIT, SHOCK_SOUND_VOLUME_MIN, SHOCK_SOUND_VOLUME_MAX, "%.2f", 0);
+			if (ImGui::DragFloat("Volume##effectsound", &pShockSoundComponent->GetVolume(), DRAG_FLOAT_UNIT, SHOCK_SOUND_VOLUME_MIN, SHOCK_SOUND_VOLUME_MAX, "%.2f", 0))
+				pShockSoundComponent->GetVolume() = std::clamp(pShockSoundComponent->GetVolume(), SHOCK_SOUND_VOLUME_MIN, SHOCK_SOUND_VOLUME_MAX);
 		}
 
 		initial_curpos.y += 0.023f * m_lDesktopHeight;
@@ -1239,12 +1256,14 @@ void CImGuiManager::SetUI()
 			initial_curpos.y += 0.023f * m_lDesktopHeight;
 			ImGui::SetCursorPos(initial_curpos);
 			ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
-			ImGui::DragFloat("Delay##shootsound", &pShootSoundComponent->GetDelay(), DRAG_FLOAT_UNIT, SHOOTING_SOUND_DELAY_MIN, SHOOTING_SOUND_DELAY_MAX, "%.2f", 0);
+			if (ImGui::DragFloat("Delay##shootsound", &pShootSoundComponent->GetDelay(), DRAG_FLOAT_UNIT, SHOOTING_SOUND_DELAY_MIN, SHOOTING_SOUND_DELAY_MAX, "%.2f", 0))
+				pShootSoundComponent->GetDelay() = std::clamp(pShootSoundComponent->GetDelay(), SHOOTING_SOUND_DELAY_MIN, SHOOTING_SOUND_DELAY_MAX);
 
 			initial_curpos.y += 0.023f * m_lDesktopHeight;
 			ImGui::SetCursorPos(initial_curpos);
 			ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
-			ImGui::DragFloat("Volume##shootsound", &pShootSoundComponent->GetVolume(), DRAG_FLOAT_UNIT, SHOOTING_SOUND_VOLUME_MIN, SHOOTING_SOUND_VOLUME_MAX, "%.2f", 0);
+			if (ImGui::DragFloat("Volume##shootsound", &pShootSoundComponent->GetVolume(), DRAG_FLOAT_UNIT, SHOOTING_SOUND_VOLUME_MIN, SHOOTING_SOUND_VOLUME_MAX, "%.2f", 0))
+				pShootSoundComponent->GetVolume() = std::clamp(pShootSoundComponent->GetVolume(), SHOOTING_SOUND_VOLUME_MIN, SHOOTING_SOUND_VOLUME_MAX);
 
 		}
 
@@ -1277,12 +1296,14 @@ void CImGuiManager::SetUI()
 			initial_curpos.y += 0.023f * m_lDesktopHeight;
 			ImGui::SetCursorPos(initial_curpos);
 			ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
-			ImGui::DragFloat("Delay(Goblin)##goblinmoansound", &pGoblinMoanComponent->GetDelay(), DRAG_FLOAT_UNIT, MOAN_SOUND_DELAY_MIN, MOAN_SOUND_DELAY_MAX, "%.2f", 0);
+			if (ImGui::DragFloat("Delay(Goblin)##goblinmoansound", &pGoblinMoanComponent->GetDelay(), DRAG_FLOAT_UNIT, MOAN_SOUND_DELAY_MIN, MOAN_SOUND_DELAY_MAX, "%.2f", 0))
+				pGoblinMoanComponent->GetDelay() = std::clamp(pGoblinMoanComponent->GetDelay(), MOAN_SOUND_DELAY_MIN, MOAN_SOUND_DELAY_MAX);
 
 			initial_curpos.y += 0.023f * m_lDesktopHeight;
 			ImGui::SetCursorPos(initial_curpos);
 			ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
-			ImGui::DragFloat("Volume(Goblin)##goblinmoansound", &pGoblinMoanComponent->GetVolume(), DRAG_FLOAT_UNIT, MOAN_SOUND_VOLUME_MIN, MOAN_SOUND_VOLUME_MAX, "%.2f", 0);
+			if (ImGui::DragFloat("Volume(Goblin)##goblinmoansound", &pGoblinMoanComponent->GetVolume(), DRAG_FLOAT_UNIT, MOAN_SOUND_VOLUME_MIN, MOAN_SOUND_VOLUME_MAX, "%.2f", 0))
+				pGoblinMoanComponent->GetVolume() = std::clamp(pGoblinMoanComponent->GetVolume(), MOAN_SOUND_VOLUME_MIN, MOAN_SOUND_VOLUME_MAX);
 
 			initial_curpos.y += 50.f;
 			ImGui::SetCursorPos(initial_curpos);
@@ -1297,12 +1318,14 @@ void CImGuiManager::SetUI()
 			initial_curpos.y += 0.023f * m_lDesktopHeight;
 			ImGui::SetCursorPos(initial_curpos);
 			ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
-			ImGui::DragFloat("Delay(Orc)##orcmoansound", &pOrcMoanComponent->GetDelay(), DRAG_FLOAT_UNIT, MOAN_SOUND_DELAY_MIN, MOAN_SOUND_DELAY_MAX, "%.2f", 0);
+			if (ImGui::DragFloat("Delay(Orc)##orcmoansound", &pOrcMoanComponent->GetDelay(), DRAG_FLOAT_UNIT, MOAN_SOUND_DELAY_MIN, MOAN_SOUND_DELAY_MAX, "%.2f", 0))
+				pOrcMoanComponent->GetDelay() = std::clamp(pOrcMoanComponent->GetDelay(), MOAN_SOUND_DELAY_MIN, MOAN_SOUND_DELAY_MAX);
 
 			initial_curpos.y += 0.023f * m_lDesktopHeight;
 			ImGui::SetCursorPos(initial_curpos);
 			ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
-			ImGui::DragFloat("Volume(Orc)##orcmoansound", &pOrcMoanComponent->GetVolume(), DRAG_FLOAT_UNIT, MOAN_SOUND_VOLUME_MIN, MOAN_SOUND_VOLUME_MAX, "%.2f", 0);
+			if (ImGui::DragFloat("Volume(Orc)##orcmoansound", &pOrcMoanComponent->GetVolume(), DRAG_FLOAT_UNIT, MOAN_SOUND_VOLUME_MIN, MOAN_SOUND_VOLUME_MAX, "%.2f", 0))
+				pOrcMoanComponent->GetVolume() = std::clamp(pOrcMoanComponent->GetVolume(), MOAN_SOUND_VOLUME_MIN, MOAN_SOUND_VOLUME_MAX);
 
 			initial_curpos.y += 50.f;
 			ImGui::SetCursorPos(initial_curpos);
@@ -1317,12 +1340,14 @@ void CImGuiManager::SetUI()
 			initial_curpos.y += 0.023f * m_lDesktopHeight;
 			ImGui::SetCursorPos(initial_curpos);
 			ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
-			ImGui::DragFloat("Delay(Skeleton)##orcmoansound", &pSkeletonMoanComponent->GetDelay(), DRAG_FLOAT_UNIT, MOAN_SOUND_DELAY_MIN, MOAN_SOUND_DELAY_MAX, "%.2f", 0);
+			if (ImGui::DragFloat("Delay(Skeleton)##orcmoansound", &pSkeletonMoanComponent->GetDelay(), DRAG_FLOAT_UNIT, MOAN_SOUND_DELAY_MIN, MOAN_SOUND_DELAY_MAX, "%.2f", 0))
+				pSkeletonMoanComponent->GetDelay() = std::clamp(pSkeletonMoanComponent->GetDelay(), MOAN_SOUND_DELAY_MIN, MOAN_SOUND_DELAY_MAX);
 
 			initial_curpos.y += 0.023f * m_lDesktopHeight;
 			ImGui::SetCursorPos(initial_curpos);
 			ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
-			ImGui::DragFloat("Volume(Skeleton)##orcmoansound", &pSkeletonMoanComponent->GetVolume(), DRAG_FLOAT_UNIT, MOAN_SOUND_VOLUME_MIN, MOAN_SOUND_VOLUME_MAX, "%.2f", 0);
+			if (ImGui::DragFloat("Volume(Skeleton)##orcmoansound", &pSkeletonMoanComponent->GetVolume(), DRAG_FLOAT_UNIT, MOAN_SOUND_VOLUME_MIN, MOAN_SOUND_VOLUME_MAX, "%.2f", 0))
+				pSkeletonMoanComponent->GetVolume() = std::clamp(pSkeletonMoanComponent->GetVolume(), MOAN_SOUND_VOLUME_MIN, MOAN_SOUND_VOLUME_MAX);
 		}
 
 		button_pos.y += 5.f;
