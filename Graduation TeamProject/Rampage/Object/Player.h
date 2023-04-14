@@ -15,6 +15,7 @@ public:
 	int m_iAttack_Limit;
 	bool m_bAttacked = false;
 	bool m_bAttack = false;
+	bool m_bAttack2 = false;
 
 	LPVOID m_pPlayerUpdatedContext = NULL;
 

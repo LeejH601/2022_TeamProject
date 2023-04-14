@@ -80,6 +80,30 @@ public:
     virtual void Exit(CPlayer* player);
 };
 
+class Atk4_Player : public CState<CPlayer>
+{
+public:
+    DECLARE_SINGLE(Atk4_Player);
+    Atk4_Player();
+    ~Atk4_Player();
+
+    virtual void Enter(CPlayer* player);
+    virtual void Execute(CPlayer* player, float fElapsedTime);
+    virtual void Exit(CPlayer* player);
+};
+
+class Atk5_Player : public CState<CPlayer>
+{
+public:
+    DECLARE_SINGLE(Atk5_Player);
+    Atk5_Player();
+    ~Atk5_Player();
+
+    virtual void Enter(CPlayer* player);
+    virtual void Execute(CPlayer* player, float fElapsedTime);
+    virtual void Exit(CPlayer* player);
+};
+
 class Run_Player : public CState<CPlayer>
 {
 protected:

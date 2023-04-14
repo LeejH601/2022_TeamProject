@@ -406,6 +406,10 @@ bool CMainTMPScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM 
 		if (m_pPlayer)
 			((CPlayer*)m_pPlayer)->m_bAttack = true;
 		break;
+	case WM_RBUTTONDOWN:
+		if(m_pPlayer)
+			((CPlayer*)m_pPlayer)->m_bAttack2 = true;
+		break;
 	default:
 		break;
 	}
