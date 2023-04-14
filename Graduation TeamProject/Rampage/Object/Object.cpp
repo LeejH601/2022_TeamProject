@@ -608,8 +608,8 @@ void CEagleObject::Animate(float fTimeElapsed)
 #define KNIGHT_ROOT_MOTION
 CKnightObject::CKnightObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks)
 {
-	CLoadedModelInfo* pKnightModel = CModelManager::GetInst()->GetModelInfo("Object/SK_FKnightB_long_sword.bin");;
-	if (!pKnightModel) pKnightModel = CModelManager::GetInst()->LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, "Object/SK_FKnightB_long_sword.bin");
+	CLoadedModelInfo* pKnightModel = CModelManager::GetInst()->GetModelInfo("Object/SK_FKnightB_long_sword_2.bin");;
+	if (!pKnightModel) pKnightModel = CModelManager::GetInst()->LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, "Object/SK_FKnightB_long_sword_2.bin");
 
 	CGameObject* obj = pKnightModel->m_pModelRootObject->FindFrame("SK_FKnightB_05");
 
@@ -628,10 +628,10 @@ CKnightObject::CKnightObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 
 	PrepareBoundingBox(pd3dDevice, pd3dCommandList);
 #ifdef KNIGHT_ROOT_MOTION
-	m_pSkinnedAnimationController->m_pRootMotionObject = pKnightModel->m_pModelRootObject->FindFrame("root");
+	m_pSkinnedAnimationController->m_pRootMotionObject = pKnightModel->m_pModelRootObject->FindFrame("SK_FKnightB");
 	if (m_pSkinnedAnimationController->m_pRootMotionObject) {
 		m_pSkinnedAnimationController->m_bRootMotion = true;
-		m_pSkinnedAnimationController->m_xmf3RootObjectScale = XMFLOAT3(5.0f, 5.0f, 5.0f);
+		m_pSkinnedAnimationController->m_xmf3RootObjectScale = XMFLOAT3(4.0f, 4.0f, 4.0f);
 	}
 #endif // KNIGHT_ROOT_MOTION
 }

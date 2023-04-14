@@ -564,6 +564,7 @@ Run_Player::~Run_Player()
 
 void Run_Player::Enter(CPlayer* player)
 {
+	//player->m_pChild->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 19);
 	player->m_pChild->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 16);
 	player->m_pChild->m_pSkinnedAnimationController->m_fTime = 0.0f;
 	player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition = 0.0f;

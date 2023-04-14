@@ -26,9 +26,9 @@ CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 	SetScale(4.0f, 4.0f, 4.0f);
 	Rotate(0.0f, 90.0f, 0.0f);
 
-	m_fSpeedKperH = 10.0f;
+	m_fSpeedKperH = 2.0f;
 	m_fSpeedMperS = m_fSpeedKperH * 1000.0f / 3600.0f;
-	m_fSpeedUperS = m_fSpeedMperS * 8.0f / 1.0f;
+	m_fSpeedUperS = m_fSpeedMperS * 4.0f / 1.0f;
 }
 
 CPlayer::~CPlayer()
@@ -77,6 +77,7 @@ void CPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity, CCa
 		if (dwDirection & DIR_BACKWARD)xmf3Shift = Vector3::Add(xmf3Shift, Vector3::Normalize(XMFLOAT3(pCamera->GetLookVector().x, 0.0f, pCamera->GetLookVector().z)), -1.0f);
 		if (dwDirection & DIR_RIGHT)xmf3Shift = Vector3::Add(xmf3Shift, Vector3::Normalize(XMFLOAT3(pCamera->GetRightVector().x, 0.0f, pCamera->GetRightVector().z)));
 		if (dwDirection & DIR_LEFT)xmf3Shift = Vector3::Add(xmf3Shift, Vector3::Normalize(XMFLOAT3(pCamera->GetRightVector().x, 0.0f, pCamera->GetRightVector().z)), -1.0f);
+		xmf3Shift = Vector3::Normalize(xmf3Shift);
 
 		CPhysicsObject::Move(xmf3Shift, bUpdateVelocity);
 	}
