@@ -224,6 +224,7 @@
     <ClInclude Include="Global\Timer.h" />
     <ClInclude Include="ImGui\imconfig.h" />
     <ClInclude Include="ImGui\imgui.h" />
+    <ClInclude Include="ImGui\ImGuiConstants.h" />
     <ClInclude Include="ImGui\ImGuiManager.h" />
     <ClInclude Include="ImGui\imgui_impl_dx12.h" />
     <ClInclude Include="ImGui\imgui_impl_win32.h" />

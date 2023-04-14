@@ -228,15 +228,15 @@ public:
 
 // Define Shake Animation component
 class ShakeAnimationComponent : public IMessageListener {
-    float m_fMaxTime = 1.0f;
+    float m_fDuration = 1.0f;
     float m_fDistance = 0.15f;
     float m_fFrequency = 0.05f;
 public:
-    float& GetMaxTime() { return m_fMaxTime; }
+    float& GetDuration() { return m_fDuration; }
     float& GetDistance() { return m_fDistance; }
     float& GetFrequency() { return m_fFrequency; }
 
-    void SetMaxTime(float fMaxtime) { m_fMaxTime = fMaxtime; }
+    void SetDuration(float fDuration) { m_fDuration = fDuration; }
     void SetDistance(float distance) { m_fDistance = distance; }
     void SetFrequency(float frequency) { m_fFrequency = frequency; }
 

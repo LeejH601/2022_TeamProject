@@ -247,12 +247,12 @@ void ShakeAnimationComponent::HandleMessage(const Message& message, const Animat
 
 			float fTimeElapsed = pMonster->m_pSkinnedAnimationController->m_fTime + pMonster->m_fStunTime;
 
-			if (m_fMaxTime < fTimeElapsed)
+			if (m_fDuration < fTimeElapsed)
 				return;
 
 			if (pMonster->m_pStateMachine->GetCurrentState() == Damaged_Monster::GetInst() || pMonster->m_pStateMachine->GetCurrentState() == Stun_Monster::GetInst())
 			{
-				float fShakeDistance = (m_fDistance - (m_fDistance / m_fMaxTime) * fTimeElapsed) * cos((2 * PI * fTimeElapsed) / m_fFrequency);
+				float fShakeDistance = (m_fDistance - (m_fDistance / m_fDuration) * fTimeElapsed) * cos((2 * PI * fTimeElapsed) / m_fFrequency);
 				pMonster->m_fShakeDistance = fShakeDistance;
 			}
 		}
