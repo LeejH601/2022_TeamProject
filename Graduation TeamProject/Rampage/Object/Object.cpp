@@ -714,7 +714,7 @@ void CKnightObject::UpdateTransform(XMFLOAT4X4* pxmf4x4Parent)
 
 		XMFLOAT3 xmf3Position = XMFLOAT3{ xmf4x4World._41, xmf4x4World._42, xmf4x4World._43 };
 
-		XMFLOAT3 controllBasePos = XMFLOAT3(0.0f, 0.2f, 0.0f);
+		XMFLOAT3 controllBasePos = XMFLOAT3(0.0f, 0.3f, 0.0f);
 		controllBasePos = Vector3::TransformCoord(controllBasePos, xmf4x4World);
 		XMFLOAT3 offsetPosition = XMFLOAT3(0.0f, 1.2f, 0.0f);
 		offsetPosition = Vector3::TransformCoord(offsetPosition, xmf4x4World);

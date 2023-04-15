@@ -126,7 +126,7 @@ void CMainTMPScene::CreateGraphicsRootSignature(ID3D12Device* pd3dDevice)
 	pd3dRootParameters[7].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
 	pd3dRootParameters[7].Descriptor.ShaderRegister = 5; // b5 : Dissolve
 	pd3dRootParameters[7].Descriptor.RegisterSpace = 0;
-	pd3dRootParameters[7].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+	pd3dRootParameters[7].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 
 	pd3dRootParameters[8].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
 	pd3dRootParameters[8].Descriptor.ShaderRegister = 6; // b6 : ToLight
@@ -755,6 +755,7 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 
 	m_pSwordTrailShader = std::make_unique<CSwordTrailShader>();
 	m_pSwordTrailShader->CreateGraphicsPipelineState(pd3dDevice, GetGraphicsRootSignature(), 0);
+	m_pSwordTrailShader->BuildObjects(pd3dDevice, pd3dCommandList);
 }
 bool CMainTMPScene::ProcessInput(DWORD dwDirection, float cxDelta, float cyDelta, float fTimeElapsed)
 {
@@ -885,11 +886,16 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 		m_pPlayer->Render(pd3dCommandList, true);
 	}
 
-	m_pSwordTrailShader->SetNextControllPoint(((CPlayer*)m_pPlayer)->GetTrailControllPoint(0), ((CPlayer*)m_pPlayer)->GetTrailControllPoint(1));
-	m_pSwordTrailShader->Render(pd3dCommandList, pCamera, 0);
-	m_pSwordTrailShader->Render(pd3dCommandList, pCamera, 1);
+	static float trailUpdateT = 0.0f;
+	trailUpdateT += fTimeElapsed;
+	if (trailUpdateT > 0.016f) {
+		m_pSwordTrailShader->SetNextControllPoint(((CPlayer*)m_pPlayer)->GetTrailControllPoint(0), ((CPlayer*)m_pPlayer)->GetTrailControllPoint(1));
+		trailUpdateT = 0.0f;
+	}
 
-	CModelShader::GetInst()->Render(pd3dCommandList, 0);
+	//m_pSwordTrailShader->Render(pd3dCommandList, pCamera, 1);
+
+	//CModelShader::GetInst()->Render(pd3dCommandList, 0);
 
 	D3D12_GPU_VIRTUAL_ADDRESS d3dGpuVirtualAddress = m_pd3dcbDisolveParams->GetGPUVirtualAddress();
 	pd3dCommandList->SetGraphicsRootConstantBufferView(7, d3dGpuVirtualAddress);
@@ -912,6 +918,8 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 #ifdef PostProcessing
 	m_pPostProcessShader->Render(pd3dCommandList, pCamera);
 #endif // PostProcessing
+
+	m_pSwordTrailShader->Render(pd3dCommandList, pCamera, 0);
 
 	m_pLensFlareShader->CalculateFlaresPlace(m_pCurrentCamera, &m_pLight->GetLights()[0]);
 	m_pLensFlareShader->Render(pd3dCommandList, 0);

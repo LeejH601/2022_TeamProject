@@ -1,13 +1,14 @@
 #include "SwordTrailShader.h"
+#include "..\Object\Texture.h"
 
 CSwordTrailShader::CSwordTrailShader()
 {
 	ZeroMemory(&m_xmf4x4SwordTrailControllPointers, sizeof(XMFLOAT4X4));
-	m_xmf4TrailControllPoints.resize(MAX_TRAILCONTROLLPOINTS);
-}
+	m_xmf4TrailControllPoints1.resize(MAX_TRAILCONTROLLPOINTS);
+	m_xmf4TrailControllPoints2.resize(MAX_TRAILCONTROLLPOINTS);
 
-CSwordTrailShader::~CSwordTrailShader()
-{
+	m_xmf4TrailBasePoints1.resize(14);
+	m_xmf4TrailBasePoints2.resize(14);
 }
 
 void CSwordTrailShader::CreateShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature, UINT nRenderTargets, DXGI_FORMAT* pdxgiRtvFormats, int nPipelineState)
@@ -79,7 +80,7 @@ D3D12_RASTERIZER_DESC CSwordTrailShader::CreateRasterizerState(int nPipelineStat
 	d3dRasterizerDesc.MultisampleEnable = FALSE;
 	d3dRasterizerDesc.AntialiasedLineEnable = FALSE;
 	d3dRasterizerDesc.ForcedSampleCount = 0;
-	d3dRasterizerDesc.ConservativeRaster = D3D12_CONSERVATIVE_RASTERIZATION_MODE_ON;
+	d3dRasterizerDesc.ConservativeRaster = D3D12_CONSERVATIVE_RASTERIZATION_MODE_OFF;
 
 	return(d3dRasterizerDesc);
 }
@@ -158,6 +159,19 @@ D3D12_INPUT_LAYOUT_DESC CSwordTrailShader::CreateInputLayout(int nPipelineState)
 	return(d3dInputLayoutDesc);
 }
 
+void CSwordTrailShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, void* pContext)
+{
+	CreateShaderVariables(pd3dDevice, pd3dCommandList);
+
+	CreateCbvSrvUavDescriptorHeaps(pd3dDevice, 0, 6, 0);
+
+	m_pTexture = std::make_unique<CTexture>(2, RESOURCE_TEXTURE2D, 0, 1);
+	m_pTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/T_Sword_Slash_21.dds", RESOURCE_TEXTURE2D, 0);
+	m_pTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/VAP1_Noise_14.dds", RESOURCE_TEXTURE2D, 1);
+
+	CreateShaderResourceViews(pd3dDevice, m_pTexture.get(), 0, 2);
+}
+
 void CSwordTrailShader::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	UINT ncbElementBytes = ((sizeof(VS_CB_SWTRAIL_INFO) + 255) & ~255); //256의 배수
@@ -168,11 +182,21 @@ void CSwordTrailShader::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12Gr
 
 void CSwordTrailShader::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
 {
-	memcpy(m_pcbMappedTrail->m_xmf4TrailControllPoints, m_xmf4TrailControllPoints.data(), MAX_TRAILCONTROLLPOINTS * sizeof(XMFLOAT4));
+	if (m_pTexture)
+		m_pTexture->UpdateShaderVariables(pd3dCommandList);
+
+	memcpy(m_pcbMappedTrail->m_xmf4TrailControllPoints1, m_xmf4TrailControllPoints1.data(), sizeof(m_pcbMappedTrail->m_xmf4TrailControllPoints1));
+	memcpy(m_pcbMappedTrail->m_xmf4TrailControllPoints2, m_xmf4TrailControllPoints2.data(), sizeof(m_pcbMappedTrail->m_xmf4TrailControllPoints2));
 	m_pcbMappedTrail->m_nDrawedControllPoints = m_nDrawedControllPoints;
 
 	D3D12_GPU_VIRTUAL_ADDRESS d3dGpuVirtualAddress = m_pd3dcbTrail->GetGPUVirtualAddress();
-	pd3dCommandList->SetGraphicsRootConstantBufferView(ROOTSIGNATUREINDEX_CAMERA, d3dGpuVirtualAddress);
+	pd3dCommandList->SetGraphicsRootConstantBufferView(7, d3dGpuVirtualAddress);
+}
+
+void CSwordTrailShader::ReleaseShaderVariables()
+{
+	if (m_pd3dcbTrail)
+		m_pd3dcbTrail->Unmap(0, NULL);
 }
 
 void CSwordTrailShader::CreateGraphicsPipelineState(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature, int nPipelineState)
@@ -189,7 +213,7 @@ void CSwordTrailShader::CreateGraphicsPipelineState(ID3D12Device* pd3dDevice, ID
 
 void CSwordTrailShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState)
 {
-	CShader::Render(pd3dCommandList, pCamera, nPipelineState);
+	//CShader::Render(pd3dCommandList, pCamera, nPipelineState);
 
 	//if (nPipelineState == 0) {
 	//	pd3dCommandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
@@ -205,10 +229,13 @@ void CSwordTrailShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCame
 	//	pd3dCommandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_POINTLIST);
 	//	pd3dCommandList->DrawInstanced(1, 1, 0, 0);
 	//}
+	if (m_nDrawedControllPoints < 2)
+		return;
 
+	CShader::Render(pd3dCommandList, pCamera, 1);
 
 	pd3dCommandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_POINTLIST);
-	pd3dCommandList->DrawInstanced(1, m_nDrawedControllPoints, 0, 0);
+	pd3dCommandList->DrawInstanced(m_nDrawedControllPoints - 1, 1, 0, 0);
 }
 
 void CSwordTrailShader::SetNextControllPoint(XMFLOAT4 point1, XMFLOAT4 point2)
@@ -238,17 +265,66 @@ void CSwordTrailShader::SetNextControllPoint(XMFLOAT4 point1, XMFLOAT4 point2)
 	m_xmf4x4SwordTrailControllPointers._42 = point2.y;
 	m_xmf4x4SwordTrailControllPointers._43 = point2.z;
 	m_xmf4x4SwordTrailControllPointers._44 = point2.w;*/
-}
 
-void CSwordTrailShader::SetNextControllPoint(XMFLOAT4 point1)
-{
-
-	if (m_nDrawedControllPoints < MAX_TRAILCONTROLLPOINTS) {
-		m_xmf4TrailControllPoints[m_nDrawedControllPoints++] = point1;
+	// 기본
+	/*if (m_nDrawedControllPoints < MAX_TRAILCONTROLLPOINTS) {
+		m_xmf4TrailControllPoints1[m_nDrawedControllPoints] = point1;
+		m_xmf4TrailControllPoints2[m_nDrawedControllPoints++] = point2;
 	}
 	else {
-		memcpy(m_xmf4TrailControllPoints.data(), m_xmf4TrailControllPoints.data() + 1, (m_nDrawedControllPoints - 1) * sizeof(XMFLOAT4));
+		memcpy(m_xmf4TrailControllPoints1.data(), m_xmf4TrailControllPoints1.data() + 1, (m_nDrawedControllPoints - 1) * sizeof(XMFLOAT4));
+		memcpy(m_xmf4TrailControllPoints2.data(), m_xmf4TrailControllPoints2.data() + 1, (m_nDrawedControllPoints - 1) * sizeof(XMFLOAT4));
 
-		m_xmf4TrailControllPoints[m_nDrawedControllPoints] = point1;
+		m_xmf4TrailControllPoints1[m_nDrawedControllPoints - 1] = point1;
+		m_xmf4TrailControllPoints2[m_nDrawedControllPoints - 1] = point2;
+	}*/
+
+	// 스플라인
+	int dummy = 1;
+	if (m_nTrailBasePoints < 10) {
+		m_xmf4TrailBasePoints1[dummy + m_nTrailBasePoints] = point1;
+		m_xmf4TrailBasePoints2[dummy + m_nTrailBasePoints++] = point2;
 	}
+	else {
+		memcpy(m_xmf4TrailBasePoints1.data() + dummy, m_xmf4TrailBasePoints1.data() + dummy + 1, (m_nTrailBasePoints - 1) * sizeof(XMFLOAT4));
+		memcpy(m_xmf4TrailBasePoints2.data() + dummy, m_xmf4TrailBasePoints2.data() + dummy + 1, (m_nTrailBasePoints - 1) * sizeof(XMFLOAT4));
+
+		m_xmf4TrailBasePoints1[dummy + m_nTrailBasePoints - 1] = point1;
+		m_xmf4TrailBasePoints2[dummy + m_nTrailBasePoints - 1] = point2;
+	}
+
+	m_xmf4TrailBasePoints1[0] = m_xmf4TrailBasePoints1[1];
+	m_xmf4TrailBasePoints2[0] = m_xmf4TrailBasePoints2[1];
+
+	for (int i = 1; i <= 3; ++i) {
+		m_xmf4TrailBasePoints1[m_nTrailBasePoints + i] = m_xmf4TrailBasePoints1[m_nTrailBasePoints];
+		m_xmf4TrailBasePoints2[m_nTrailBasePoints + i] = m_xmf4TrailBasePoints2[m_nTrailBasePoints];
+	}
+
+	int index = 0;
+	for (int i = 0; i < 10; ++i) {
+		m_xmf4TrailControllPoints1[index] = m_xmf4TrailBasePoints1[i + 1];
+		m_xmf4TrailControllPoints2[index++] = m_xmf4TrailBasePoints2[i + 1];
+		for (int j = 1; j < 10; ++j) {
+			float t = j * 0.10f;
+			XMVECTOR points[4];
+			points[0] = XMLoadFloat4(&m_xmf4TrailBasePoints1[i]);
+			points[1] = XMLoadFloat4(&m_xmf4TrailBasePoints1[i + 1]);
+			points[2] = XMLoadFloat4(&m_xmf4TrailBasePoints1[i + 2]);
+			points[3] = XMLoadFloat4(&m_xmf4TrailBasePoints1[i + 3]);
+
+			XMStoreFloat4(&m_xmf4TrailControllPoints1[index], XMVectorCatmullRom(points[0], points[1], points[2], points[3], t));
+
+			points[0] = XMLoadFloat4(&m_xmf4TrailBasePoints2[i]);
+			points[1] = XMLoadFloat4(&m_xmf4TrailBasePoints2[i + 1]);
+			points[2] = XMLoadFloat4(&m_xmf4TrailBasePoints2[i + 2]);
+			points[3] = XMLoadFloat4(&m_xmf4TrailBasePoints2[i + 3]);
+
+			XMStoreFloat4(&m_xmf4TrailControllPoints2[index++], XMVectorCatmullRom(points[0], points[1], points[2], points[3], t));
+		}
+	}
+
+	m_nDrawedControllPoints = index;
+
+	printf("dsg");
 }
