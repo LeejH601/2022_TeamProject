@@ -6,7 +6,7 @@ struct PS_MULTIPLE_RENDER_TARGETS_OUTPUT
 	float4 f4Normal : SV_TARGET2;
 	float4 f4PositoinW : SV_TARGET3;
 	float4 f4Illumination : SV_TARGET4;
-	float2 f2ObjectIDzDepth : SV_TARGET5;
+	float4 f4Trail : SV_TARGET5;
 	float4 f4CameraNormal : SV_TARGET6;
 };
 

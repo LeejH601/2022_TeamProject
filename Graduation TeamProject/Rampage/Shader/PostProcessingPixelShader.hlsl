@@ -125,7 +125,8 @@ float4 PS_PostProcessing(VS_SCREEN_RECT_TEXTURED_OUTPUT input) : SV_Target1
 	cColor.xyz += ShaftColor.xyz;
 
 	cColor = Lighting(positionW.xyz, normal, cColor, true, uvs);
-
+	float4 trailColor = gtxMultiRenderTargetTextures[4].Sample(gSamplerState, input.uv);
+	cColor += trailColor;
 
 	return cColor;
 }

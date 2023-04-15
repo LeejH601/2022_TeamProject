@@ -708,20 +708,38 @@ void CKnightObject::UpdateTransform(XMFLOAT4X4* pxmf4x4Parent)
 	if (pWeapon)
 	{
 		XMFLOAT4X4 xmf4x4World = pWeapon->GetWorld();
-		
+
 		XMMATRIX mtxRotate = XMMatrixRotationRollPitchYaw(XMConvertToRadians(-15.0f), XMConvertToRadians(0.0f), XMConvertToRadians(0.0f));
 		xmf4x4World = Matrix4x4::Multiply(mtxRotate, xmf4x4World);
 
-		XMFLOAT3 xmf3Position = XMFLOAT3{xmf4x4World._41, xmf4x4World._42, xmf4x4World._43};
+		XMFLOAT3 xmf3Position = XMFLOAT3{ xmf4x4World._41, xmf4x4World._42, xmf4x4World._43 };
+
+		XMFLOAT3 controllBasePos = XMFLOAT3(0.0f, 0.2f, 0.0f);
+		controllBasePos = Vector3::TransformCoord(controllBasePos, xmf4x4World);
+		XMFLOAT3 offsetPosition = XMFLOAT3(0.0f, 1.2f, 0.0f);
+		offsetPosition = Vector3::TransformCoord(offsetPosition, xmf4x4World);
+		//offsetPosition = Vector3::Add(controllBasePos, m_TransformedWeaponBoundingBox.Extents);
+
+
 		XMFLOAT3 xmf3Direction = XMFLOAT3{ xmf4x4World._31, xmf4x4World._32, xmf4x4World._33 };
 		xmf3Position = Vector3::Add(xmf3Position, xmf3Direction, -0.8f);
 		xmf4x4World._41 = xmf3Position.x;
 		xmf4x4World._42 = xmf3Position.y;
 		xmf4x4World._43 = xmf3Position.z;
 
+		
+		//m_xmf4TrailControllPoints[1] = Vector4::Add(m_xmf4TrailControllPoints[0], Vector4::Multiply(2.0f, XMFLOAT4(offsetDir.x, offsetDir.y, offsetDir.z, 0.0f)));
+
 		pWeaponBoundingBoxMesh->SetWorld(xmf4x4World);
 
 		m_WeaponBoundingBox.Transform(m_TransformedWeaponBoundingBox, XMLoadFloat4x4(&xmf4x4World));
+
+		//offsetPosition = Vector3::TransformCoord(offsetPosition, xmf4x4World);
+		//XMFLOAT3 offsetDir = Vector3::Normalize(Vector3::Subtract(offsetPosition, controllBasePos));
+
+
+		m_xmf4TrailControllPoints[0] = XMFLOAT4(controllBasePos.x, controllBasePos.y, controllBasePos.z, 1.0f);
+		m_xmf4TrailControllPoints[1] = XMFLOAT4(offsetPosition.x, offsetPosition.y, offsetPosition.z, 1.0f);
 	}
 }
 void CKnightObject::PrepareBoundingBox(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)

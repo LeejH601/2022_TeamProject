@@ -167,7 +167,7 @@ void BloomAdditive_CS(uint3 DTid : SV_DispatchThreadID)
 	//BloomColor = gtxtRWBlurs[1][uv];
 	//BloomColor = f4Color;
 
-	float BloomFactor = 0.05f;
+	float BloomFactor = 0.03f;
 
 	BloomColor *= BloomFactor;
 

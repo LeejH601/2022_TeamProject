@@ -85,7 +85,7 @@ void BloomApply_CS(uint3 DTid : SV_DispatchThreadID)
 			}
 		}
 
-		gtxtRWBlurs[gnLevel][TexCoord] = float4(f4Color.rgb, 0.0f);
+		gtxtRWBlurs[gnLevel][TexCoord] = float4(f4Color.rgb, 0.0f) * (gnLevel + 1.0f);
 	}
 
 	else if (gnLevel > 0) {

@@ -5,6 +5,7 @@
 #include "..\Global\Timer.h"
 #include "..\Global\MessageDispatcher.h"
 #include "..\Object\ParticleObject.h"
+#include "Object.h"
 
 CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks)
 {
@@ -81,6 +82,11 @@ void CPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity, CCa
 
 		CPhysicsObject::Move(xmf3Shift, bUpdateVelocity);
 	}
+}
+
+XMFLOAT4& CPlayer::GetTrailControllPoint(int n)
+{
+	return ((CKnightObject*)(m_pChild.get()))->GetTrailControllPoint(n);
 }
 
 bool CPlayer::CheckCollision(CGameObject* pTargetObject)

@@ -39,4 +39,5 @@ public:
 	void Tmp();
 
 	virtual void Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity, CCamera* pCamera);
+	XMFLOAT4& GetTrailControllPoint(int n);
 };
