@@ -63,8 +63,10 @@ void HDR_CS(int3 nDispatchID : SV_DispatchThreadID)
 #ifdef GAMMA
     float gamma = 0.7; // gamma value to use for correction
     float4 correctedColor = float4(pow(LDRColor.xyz, 1.0 / gamma), 1.0f);
+    //correctedColor = min(float4(1.0f,1.0f,1.0f,1.0f), correctedColor);
     gtxtRWOutput[nDispatchID.xy] = correctedColor;
 #else
-    gtxtRWOutput[nDispatchID.xy] = LDRColor;
+    //LDRColor = min(float4(1.0f, 1.0f, 1.0f, 1.0f), LDRColor);
+    gtxtRWOutput[nDispatchID.xy] = saturate(LDRColor);
 #endif
 }
