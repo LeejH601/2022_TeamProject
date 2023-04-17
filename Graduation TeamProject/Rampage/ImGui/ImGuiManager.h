@@ -37,6 +37,9 @@ private:
 
 	int Player_Animation_Number = 0;
 
+	bool show_simulator_scene = false;
+	bool show_preset_menu = false;
+
 	bool show_demo_window = false;
 	bool show_another_window = false;
 	bool show_my_window = true;
@@ -71,6 +74,19 @@ public:
 
 	void DemoRendering();
 	void SetUI();
+
+	void ShowImpactManager(CState<CPlayer>* pCurrentAnimation);
+	void ShowParticleManager(CState<CPlayer>* pCurrentAnimation);
+	void ShowDamageAnimationManager(CState<CPlayer>* pCurrentAnimation);
+	void ShowShakeAnimationManager(CState<CPlayer>* pCurrentAnimation);
+	void ShowStunAnimationManager(CState<CPlayer>* pCurrentAnimation);
+	void ShowCameraMoveManager(CState<CPlayer>* pCurrentAnimation);
+	void ShowCameraShakeManager(CState<CPlayer>* pCurrentAnimation);
+	void ShowCameraZoomManager(CState<CPlayer>* pCurrentAnimation);
+	void ShowShockSoundManager(CState<CPlayer>* pCurrentAnimation);
+	void ShowShootSoundManager(CState<CPlayer>* pCurrentAnimation);
+	void ShowDamageMoanSoundManager(CState<CPlayer>* pCurrentAnimation);
+
 	void OnPrepareRender(ID3D12GraphicsCommandList* pd3dCommandList, D3D12_CPU_DESCRIPTOR_HANDLE* d3dDsvDescriptorCPUHandle, float fTimeElapsed, float fCurrentTime, CCamera* pCamera = NULL);
 	void PrepareRenderTarget(ID3D12GraphicsCommandList* pd3dCommandList, D3D12_CPU_DESCRIPTOR_HANDLE* d3dDsvDescriptorCPUHandle);
 	void Render(ID3D12GraphicsCommandList* pd3dCommandList);
