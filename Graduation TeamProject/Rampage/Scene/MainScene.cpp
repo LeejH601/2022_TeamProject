@@ -801,6 +801,8 @@ void CMainTMPScene::UpdateObjects(float fTimeElapsed)
 	PlayerParams player_params;
 	player_params.pPlayer = m_pPlayer;
 	CMessageDispatcher::GetInst()->Dispatch_Message<PlayerParams>(MessageType::CHECK_IS_PLAYER_IN_FRONT_OF_MONSTER, &player_params, nullptr);
+
+	m_pSwordTrailShader->m_faccumulateTime += fTimeElapsed * 3.0f;
 }
 
 #define WITH_LAG_DOLL_SIMULATION

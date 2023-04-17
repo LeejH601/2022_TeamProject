@@ -8,6 +8,7 @@ struct VS_CB_SWTRAIL_INFO
 	XMFLOAT4 m_xmf4TrailControllPoints1[MAX_TRAILCONTROLLPOINTS];
 	XMFLOAT4 m_xmf4TrailControllPoints2[MAX_TRAILCONTROLLPOINTS];
 	UINT m_nDrawedControllPoints;
+	float m_faccumulateTime;
 };
 
 class CSwordTrailShader : public CShader
@@ -25,6 +26,9 @@ class CSwordTrailShader : public CShader
 	VS_CB_SWTRAIL_INFO* m_pcbMappedTrail = NULL;
 
 	std::unique_ptr<CTexture> m_pTexture;
+
+public:
+	float m_faccumulateTime;
 
 public:
 	CSwordTrailShader();

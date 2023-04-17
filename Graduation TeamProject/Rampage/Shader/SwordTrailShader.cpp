@@ -188,6 +188,7 @@ void CSwordTrailShader::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCom
 	memcpy(m_pcbMappedTrail->m_xmf4TrailControllPoints1, m_xmf4TrailControllPoints1.data(), sizeof(m_pcbMappedTrail->m_xmf4TrailControllPoints1));
 	memcpy(m_pcbMappedTrail->m_xmf4TrailControllPoints2, m_xmf4TrailControllPoints2.data(), sizeof(m_pcbMappedTrail->m_xmf4TrailControllPoints2));
 	m_pcbMappedTrail->m_nDrawedControllPoints = m_nDrawedControllPoints;
+	m_pcbMappedTrail->m_faccumulateTime = m_faccumulateTime;
 
 	D3D12_GPU_VIRTUAL_ADDRESS d3dGpuVirtualAddress = m_pd3dcbTrail->GetGPUVirtualAddress();
 	pd3dCommandList->SetGraphicsRootConstantBufferView(7, d3dGpuVirtualAddress);
