@@ -202,6 +202,9 @@
     <ClCompile Include="Shader\SwordTrailShader.cpp">
       <Filter>Shader</Filter>
     </ClCompile>
+    <ClCompile Include="Object\SwordTrailObject.cpp">
+      <Filter>Object</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Global\stdafx.h">
@@ -392,6 +395,9 @@
     </ClInclude>
     <ClInclude Include="Shader\SwordTrailShader.h">
       <Filter>Shader</Filter>
+    </ClInclude>
+    <ClInclude Include="Object\SwordTrailObject.h">
+      <Filter>Object</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

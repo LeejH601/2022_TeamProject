@@ -16,6 +16,7 @@
 #include "..\Shader\HDRComputeShader.h"
 #include "..\Shader\LensFlareShader.h"
 #include "..\Shader\SwordTrailShader.h"
+#include "..\Object\SwordTrailObject.h"
 
 #define MAX_OBJECT 1000
 struct DissolveParams {
@@ -40,7 +41,7 @@ private:
 	std::vector<std::unique_ptr<CGameObject>> m_pUpDownParticleObjects;
 	std::vector<std::unique_ptr<CGameObject>> m_pSpriteAttackObjects;
 	std::vector<std::unique_ptr<CGameObject>> m_pTerrainSpriteObject;
-	
+
 	std::vector<std::unique_ptr<CGameObject>> m_pSmokeObjects;
 
 	std::unique_ptr<CBillBoardObjectShader> m_pBillBoardObjectShader;
@@ -51,6 +52,7 @@ private:
 	std::unique_ptr<CLensFlareShader> m_pLensFlareShader;
 
 	std::unique_ptr<CSwordTrailShader> m_pSwordTrailShader;
+	std::vector<std::unique_ptr<CGameObject>> m_pSwordTrailObjects;
 
 	std::unique_ptr<CSkyBoxShader> m_pSkyBoxShader;
 	std::unique_ptr<CSkyBox> m_pSkyBoxObject;
@@ -66,7 +68,7 @@ private:
 public:
 	CMainTMPScene() {}
 	virtual ~CMainTMPScene() {}
-	
+
 	virtual void SetPlayer(CGameObject* pPlayer);
 
 	virtual void OnPreRender(ID3D12GraphicsCommandList* pd3dCommandList) { }

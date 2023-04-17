@@ -756,6 +756,11 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pSwordTrailShader = std::make_unique<CSwordTrailShader>();
 	m_pSwordTrailShader->CreateGraphicsPipelineState(pd3dDevice, GetGraphicsRootSignature(), 0);
 	m_pSwordTrailShader->BuildObjects(pd3dDevice, pd3dCommandList);
+
+	for (int i = 0; i < 5; ++i) {
+		std::unique_ptr<CSwordTrailObject> pSwordtrail = std::make_unique<CSwordTrailObject>(pd3dDevice, pd3dCommandList, GetGraphicsRootSignature(), m_pSwordTrailShader.get());
+		m_pSwordTrailObjects.push_back(std::move(pSwordtrail));
+	}
 }
 bool CMainTMPScene::ProcessInput(DWORD dwDirection, float cxDelta, float cyDelta, float fTimeElapsed)
 {
@@ -784,6 +789,10 @@ void CMainTMPScene::UpdateObjects(float fTimeElapsed)
 		m_pBillBoardObjects[i]->Animate(fTimeElapsed);
 	}
 
+	for (std::unique_ptr<CGameObject>& obj : m_pSwordTrailObjects) {
+		obj->Update(fTimeElapsed);
+	}
+
 	m_pPlayer->Update(fTimeElapsed);
 
 	// Update Camera
@@ -802,7 +811,8 @@ void CMainTMPScene::UpdateObjects(float fTimeElapsed)
 	player_params.pPlayer = m_pPlayer;
 	CMessageDispatcher::GetInst()->Dispatch_Message<PlayerParams>(MessageType::CHECK_IS_PLAYER_IN_FRONT_OF_MONSTER, &player_params, nullptr);
 
-	m_pSwordTrailShader->m_faccumulateTime += fTimeElapsed * 3.0f;
+
+
 }
 
 #define WITH_LAG_DOLL_SIMULATION
@@ -891,7 +901,7 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 	static float trailUpdateT = 0.0f;
 	trailUpdateT += fTimeElapsed;
 	if (trailUpdateT > 0.016f) {
-		m_pSwordTrailShader->SetNextControllPoint(((CPlayer*)m_pPlayer)->GetTrailControllPoint(0), ((CPlayer*)m_pPlayer)->GetTrailControllPoint(1));
+		dynamic_cast<CSwordTrailObject*>(m_pSwordTrailObjects[0].get())->SetNextControllPoint(((CPlayer*)m_pPlayer)->GetTrailControllPoint(0), ((CPlayer*)m_pPlayer)->GetTrailControllPoint(1));
 		trailUpdateT = 0.0f;
 	}
 
@@ -922,6 +932,7 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 #endif // PostProcessing
 
 	m_pSwordTrailShader->Render(pd3dCommandList, pCamera, 0);
+	m_pSwordTrailObjects[0]->Render(pd3dCommandList, true);
 
 	m_pLensFlareShader->CalculateFlaresPlace(m_pCurrentCamera, &m_pLight->GetLights()[0]);
 	m_pLensFlareShader->Render(pd3dCommandList, 0);

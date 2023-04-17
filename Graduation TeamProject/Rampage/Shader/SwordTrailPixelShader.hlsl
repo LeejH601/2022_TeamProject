@@ -34,7 +34,6 @@ PS_MULTIPLE_RENDER_TARGETS_OUTPUT SwordTrail_PS(GS_OUT input)
 	//float4 fColor = float4(input.uv.x, input.uv.y, 0.0f, 1.0f);
 
 	//float EmissiveFactor = 1.5f;
-	//float EmissiveFactor = min(2.0f, uv.x * 4.0f);
 	float EmissiveFactor = min(2.0f, uv.x * 4.0f);
 	float4 EmissiveColor;
 	int index = 0;
