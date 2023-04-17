@@ -40,6 +40,7 @@
 
 //--------------------------
 #include <iostream>
+#include <shlobj_core.h>
 #include <fstream>
 #include <filesystem>
 #include <vector>

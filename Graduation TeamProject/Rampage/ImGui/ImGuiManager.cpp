@@ -11,7 +11,19 @@
 #include "..\Object\AnimationComponent.h"
 
 #define NUM_FRAMES_IN_FLIGHT 3
+#define MAX_FILENAME_SIZE 100
 #define U8STR(str) reinterpret_cast<const char*>(u8##str)
+
+int CALLBACK BrowseCallbackProc(HWND hwnd, UINT uMsg, LPARAM lParam, LPARAM lpData)
+{
+	if (uMsg == BFFM_INITIALIZED)
+	{
+		// 시작 폴더 지정
+		LPCTSTR lpStartPath = (LPCTSTR)lpData;
+		SendMessage(hwnd, BFFM_SETSELECTIONW, TRUE, (LPARAM)lpStartPath);
+	}
+	return 0;
+}
 
 //========================================================================
 void DataLoader::SaveComponentSets()
@@ -760,6 +772,8 @@ void CImGuiManager::CreateShaderResourceViews(ID3D12Device* pd3dDevice, CTexture
 ID3D12Resource* CImGuiManager::GetRTTextureResource() { return m_pRTTexture->GetResource(0); }
 void CImGuiManager::Init(HWND hWnd, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, D3D12_CPU_DESCRIPTOR_HANDLE d3dRtvCPUDescriptorHandle, const RECT& DeskTopCoordinatesRect)
 {
+	m_hWnd = hWnd;
+
 	CreateSrvDescriptorHeaps(pd3dDevice);
 
 	// Setup Dear ImGui context
@@ -800,7 +814,6 @@ void CImGuiManager::Init(HWND hWnd, ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 	m_pd3dRtvCPUDescriptorHandles = d3dRtvCPUDescriptorHandle;
 
 	m_pDataLoader = std::make_unique<DataLoader>();
-	m_pDataLoader->LoadComponentSets();
 
 	m_lDesktopWidth = DeskTopCoordinatesRect.right - DeskTopCoordinatesRect.left;
 	m_lDesktopHeight = DeskTopCoordinatesRect.bottom - DeskTopCoordinatesRect.top;
@@ -925,6 +938,26 @@ void CImGuiManager::SetUI()
 		ImGui::End();
 	}
 
+	if (show_save_menu)
+	{
+		ImGuiWindowFlags my_window_flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize;
+
+		ImGui::Begin(U8STR("저장 메뉴"), &show_save_menu, my_window_flags);
+
+		std::string folder_name;
+		folder_name.resize(MAX_PATH);
+		ImGui::InputText(U8STR("저장 이름"), folder_name.data(), MAX_PATH);
+		ImVec2 itemSize = ImGui::GetItemRectSize();
+
+		if (ImGui::Button(U8STR("저장"), itemSize))
+		{
+
+			show_save_menu = false;
+		}
+
+		ImGui::End();
+	}
+
 	// Show my window.
 	{
 		ImGuiWindowFlags my_window_flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_MenuBar;
@@ -937,7 +970,10 @@ void CImGuiManager::SetUI()
 		{
 			if (ImGui::BeginMenu(U8STR("메뉴")))
 			{
-				ImGui::MenuItem(U8STR("저장"), NULL);
+				if (ImGui::MenuItem(U8STR("저장"), NULL))
+				{
+					show_save_menu = true;
+				}
 				ImGui::Separator();
 				if(ImGui::MenuItem(U8STR("타격감 프리셋 메뉴"), NULL))
 				{
@@ -1443,6 +1479,6 @@ void CImGuiManager::OnPostRender()
 }
 void CImGuiManager::OnDestroy()
 {
-	m_pDataLoader->SaveComponentSets();
+	//m_pDataLoader->SaveComponentSets();
 }
 

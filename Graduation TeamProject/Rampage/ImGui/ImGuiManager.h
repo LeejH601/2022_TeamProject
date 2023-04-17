@@ -6,7 +6,7 @@
 
 class DataLoader
 {
-	std::string file_path = "Data\\Component";
+	std::string file_path = "Data\\";
 	std::string file_ext = ".bin";
 public:
 	void SaveComponentSets();
@@ -24,6 +24,9 @@ private:
 	// Component Sets
 	std::unique_ptr<DataLoader> m_pDataLoader = NULL;
 
+	// Handle Window
+	HWND m_hWnd;
+
 	// Our state
 	ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);;
 	float clear_color_with_alpha[4] = { clear_color.x * clear_color.w, clear_color.y * clear_color.w, clear_color.z * clear_color.w, clear_color.w };
@@ -39,6 +42,7 @@ private:
 
 	bool show_simulator_scene = false;
 	bool show_preset_menu = false;
+	bool show_save_menu = false;
 
 	bool show_demo_window = false;
 	bool show_another_window = false;
