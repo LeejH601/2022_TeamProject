@@ -11,6 +11,7 @@
 #include "..\Object\ParticleObject.h"
 #include "..\Shader\ParticleShader.h"
 #include "..\Object\TextureManager.h"
+#include "..\Shader\SwordTrailShader.h"
 
 
 class CSimulatorScene : public CScene
@@ -34,6 +35,9 @@ private:
 
 	std::unique_ptr<CBillBoardObjectShader> m_pBillBoardObjectShader;
 	std::vector<std::unique_ptr<CGameObject>> m_pBillBoardObjects;
+
+	std::unique_ptr<CSwordTrailShader> m_pSwordTrailShader;
+	std::vector<std::unique_ptr<CGameObject>> m_pSwordTrailObjects;
 
 	std::unique_ptr<CTextureManager> m_pTextureManager = NULL;
 	std::unique_ptr<CCamera> m_pSimulaterCamera = NULL;

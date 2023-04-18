@@ -11,6 +11,7 @@
 #include "..\Object\TextureManager.h"
 #include "..\Shader\PostProcessShader.h"
 #include "..\Object\MonsterState.h"
+#include "..\Object\SwordTrailObject.h"
 
 #define MAX_PARTICLE_OBJECT 50
 #define MAX_RECOVERYPARTICLE_OBJECT 50
@@ -462,6 +463,17 @@ void CSimulatorScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 	m_pBloomComputeShader = std::make_unique<CBloomShader>();
 	m_pBloomComputeShader->CreateShader(pd3dDevice, pd3dCommandList, GetComputeRootSignature());
 	m_pBloomComputeShader->CreateBloomUAVResource(pd3dDevice, pd3dCommandList, 1920, 1080);
+
+	m_pSwordTrailShader = std::make_unique<CSwordTrailShader>();
+	m_pSwordTrailShader->CreateGraphicsPipelineState(pd3dDevice, GetGraphicsRootSignature(), 0);
+	m_pSwordTrailShader->BuildObjects(pd3dDevice, pd3dCommandList);
+
+	for (int i = 0; i < 5; ++i) {
+		std::unique_ptr<CSwordTrailObject> pSwordtrail = std::make_unique<CSwordTrailObject>(pd3dDevice, pd3dCommandList, GetGraphicsRootSignature(), m_pSwordTrailShader.get());
+		m_pSwordTrailObjects.push_back(std::move(pSwordtrail));
+	}
+
+	m_pMainCharacter->m_pSwordTrailReference = m_pSwordTrailObjects.data();
 }
 void CSimulatorScene::Update(float fTimeElapsed)
 {
@@ -481,6 +493,10 @@ void CSimulatorScene::UpdateObjects(float fTimeElapsed)
 	for (int i = 0; i < m_pBillBoardObjects.size(); ++i)
 	{
 		m_pBillBoardObjects[i]->Animate(fTimeElapsed);
+	}
+
+	for (std::unique_ptr<CGameObject>& obj : m_pSwordTrailObjects) {
+		obj->Update(fTimeElapsed);
 	}
 
 	m_pMainCharacter->Update(fTimeElapsed);
@@ -529,6 +545,20 @@ void CSimulatorScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float f
 	m_pMainCharacter->Animate(0.0f);
 	m_pMainCharacter->Render(pd3dCommandList, true);
 
+	static float trailUpdateT = 0.0f;
+	trailUpdateT += fTimeElapsed;
+	if (trailUpdateT > 0.016f) {
+		for (int i = 0; i < m_pSwordTrailObjects.size(); ++i) {
+			CSwordTrailObject* trailObj = dynamic_cast<CSwordTrailObject*>(m_pSwordTrailObjects[i].get());
+			if (trailObj->m_bIsUpdateTrailVariables)
+				trailObj->SetNextControllPoint(&((CPlayer*)m_pMainCharacter.get())->GetTrailControllPoint(0), &((CPlayer*)m_pMainCharacter.get())->GetTrailControllPoint(1));
+			else
+				trailObj->SetNextControllPoint(nullptr, nullptr);
+		}
+
+		trailUpdateT = 0.0f;
+	}
+
 	for (int i = 0; i < m_pEnemys.size(); ++i)
 	{
 		m_pEnemys[i]->Animate(0.0f);
@@ -551,6 +581,11 @@ void CSimulatorScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float f
 #ifdef PostProcessing
 	m_pPostProcessShader->Render(pd3dCommandList, pCamera);
 #endif // PostProcessing
+	
+	m_pSwordTrailShader->Render(pd3dCommandList, pCamera, 0);
+	for (std::unique_ptr<CGameObject>& obj : m_pSwordTrailObjects) {
+		obj->Render(pd3dCommandList, true);
+	}
 
 	if (m_pd3dComputeRootSignature) pd3dCommandList->SetComputeRootSignature(m_pd3dComputeRootSignature.Get());
 
