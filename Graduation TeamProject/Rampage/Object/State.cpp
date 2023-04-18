@@ -6,6 +6,7 @@
 #include "..\Sound\Sound.h"
 #include "..\Sound\SoundManager.h"
 #include "..\ImGui\ImGuiManager.h"
+#include "SwordTrailObject.h"
 
 Idle_Player::Idle_Player()
 {
@@ -27,9 +28,9 @@ void Idle_Player::Enter(CPlayer* player)
 void Idle_Player::Execute(CPlayer* player, float fElapsedTime)
 {
 	//player->Animate(fElapsedTime);
-	
+
 	// 사용자가 좌클릭을 했으면 Atk1_Player로 상태 변경
-	if(player->m_bAttack)
+	if (player->m_bAttack)
 		player->m_pStateMachine->ChangeState(Atk1_Player::GetInst());
 }
 
@@ -153,7 +154,7 @@ Atk1_Player::Atk1_Player()
 	std::unique_ptr<UpDownParticleComponent> pUpDownParticlenComponent = std::make_unique<UpDownParticleComponent>();
 	m_pListeners.push_back(std::move(pUpDownParticlenComponent));
 	CMessageDispatcher::GetInst()->RegisterListener(MessageType::UPDATE_PARTICLE, m_pListeners.back().get(), this);
-	
+
 	// TERRAIN SPRITE  ANIMATION
 	std::unique_ptr<TerrainSpriteComponent> pTerrainSpriteComponent = std::make_unique<TerrainSpriteComponent>();
 	m_pListeners.push_back(std::move(pTerrainSpriteComponent));
@@ -178,15 +179,18 @@ void Atk1_Player::Enter(CPlayer* player)
 	SoundPlayParams SoundPlayParam;
 	SoundPlayParam.sound_category = SOUND_CATEGORY::SOUND_SHOOT;
 	CMessageDispatcher::GetInst()->Dispatch_Message<SoundPlayParams>(MessageType::PLAY_SOUND, &SoundPlayParam, this);
+
+	if (player->m_pSwordTrailReference)
+		dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[0].get())->m_bIsUpdateTrailVariables = true;
 }
 
 void Atk1_Player::Execute(CPlayer* player, float fElapsedTime)
 {
 	// player->Animate(fElapsedTime);
 	CAnimationSet* pAnimationSet = player->m_pChild->m_pSkinnedAnimationController->m_pAnimationSets->m_pAnimationSets[player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_nAnimationSet];
-	
+
 	// 충돌 판정 메세지 전달
-	if (0.3f < player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition && 
+	if (0.3f < player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition &&
 		0.7f > player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition)
 	{
 		PlayerParams PlayerParam;
@@ -195,8 +199,15 @@ void Atk1_Player::Execute(CPlayer* player, float fElapsedTime)
 	}
 
 	// 사용자가 좌클릭을 했으면 애니메이션을 0.7초 진행 후 Atk2_Player로 상태 변경
-	if (player->m_bAttack && 0.7 < player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition )
-		player->m_pStateMachine->ChangeState(Atk2_Player::GetInst());
+	if (0.7 < player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition) {
+		if (player->m_pSwordTrailReference)
+			dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[0].get())->m_bIsUpdateTrailVariables = false;
+		if (player->m_bAttack) {
+			player->m_pStateMachine->ChangeState(Atk2_Player::GetInst());
+
+		}
+	}
+
 
 	if (player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition == pAnimationSet->m_fLength)
 	{
@@ -206,6 +217,8 @@ void Atk1_Player::Execute(CPlayer* player, float fElapsedTime)
 
 void Atk1_Player::Exit(CPlayer* player)
 {
+	if (player->m_pSwordTrailReference)
+		dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[0].get())->m_bIsUpdateTrailVariables = false;
 }
 
 Atk2_Player::Atk2_Player()
@@ -348,13 +361,16 @@ void Atk2_Player::Enter(CPlayer* player)
 	SoundPlayParams SoundPlayParam;
 	SoundPlayParam.sound_category = SOUND_CATEGORY::SOUND_SHOOT;
 	CMessageDispatcher::GetInst()->Dispatch_Message<SoundPlayParams>(MessageType::PLAY_SOUND, &SoundPlayParam, this);
+
+	if (player->m_pSwordTrailReference)
+		dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[1].get())->m_bIsUpdateTrailVariables = true;
 }
 
 void Atk2_Player::Execute(CPlayer* player, float fElapsedTime)
 {
 	//player->Animate(fElapsedTime);
 	CAnimationSet* pAnimationSet = player->m_pChild->m_pSkinnedAnimationController->m_pAnimationSets->m_pAnimationSets[player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_nAnimationSet];
-	
+
 	// 충돌 판정 메세지 전달
 	if (0.3 < player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition &&
 		0.4 > player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition)
@@ -365,8 +381,13 @@ void Atk2_Player::Execute(CPlayer* player, float fElapsedTime)
 	}
 
 	// 사용자가 좌클릭을 했으면 애니메이션을 0.7초 진행 후 Atk2_Player로 상태 변경
-	if (player->m_bAttack && 0.7 < player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition)
-		player->m_pStateMachine->ChangeState(Atk3_Player::GetInst());
+	if (0.7 < player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition) {
+		if (player->m_pSwordTrailReference)
+			dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[1].get())->m_bIsUpdateTrailVariables = false;
+		if (player->m_bAttack)
+			player->m_pStateMachine->ChangeState(Atk3_Player::GetInst());
+	}
+
 
 	if (player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition == pAnimationSet->m_fLength)
 	{
@@ -376,6 +397,8 @@ void Atk2_Player::Execute(CPlayer* player, float fElapsedTime)
 
 void Atk2_Player::Exit(CPlayer* player)
 {
+	if (player->m_pSwordTrailReference)
+		dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[1].get())->m_bIsUpdateTrailVariables = false;
 }
 
 Atk3_Player::Atk3_Player()
@@ -519,6 +542,9 @@ void Atk3_Player::Enter(CPlayer* player)
 	SoundPlayParams SoundPlayParam;
 	SoundPlayParam.sound_category = SOUND_CATEGORY::SOUND_SHOOT;
 	CMessageDispatcher::GetInst()->Dispatch_Message<SoundPlayParams>(MessageType::PLAY_SOUND, &SoundPlayParam, this);
+
+	if (player->m_pSwordTrailReference)
+		dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[2].get())->m_bIsUpdateTrailVariables = true;
 }
 
 void Atk3_Player::Execute(CPlayer* player, float fElapsedTime)
@@ -534,8 +560,13 @@ void Atk3_Player::Execute(CPlayer* player, float fElapsedTime)
 	}
 
 	// 사용자가 좌클릭을 했으면 애니메이션을 0.7초 진행 후 Atk2_Player로 상태 변경
-	if (player->m_bAttack && 0.7 < player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition)
-		player->m_pStateMachine->ChangeState(Atk4_Player::GetInst());
+	if (0.7 < player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition) {
+		if (player->m_pSwordTrailReference)
+			dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[2].get())->m_bIsUpdateTrailVariables = false;
+		if (player->m_bAttack)
+			player->m_pStateMachine->ChangeState(Atk4_Player::GetInst());
+	}
+
 
 
 
@@ -554,6 +585,8 @@ void Atk3_Player::Execute(CPlayer* player, float fElapsedTime)
 
 void Atk3_Player::Exit(CPlayer* player)
 {
+	if (player->m_pSwordTrailReference)
+		dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[2].get())->m_bIsUpdateTrailVariables = false;
 }
 
 Run_Player::Run_Player()
@@ -599,7 +632,7 @@ void Run_Player::Execute(CPlayer* player, float fElapsedTime)
 
 		Particlesmoke_comp_params.xmfDirection = player->m_xmfDirection;
 		Particlesmoke_comp_params.iIndex = (++iIndex) % m_pSmokeObjects->size();
-		
+
 		CMessageDispatcher::GetInst()->Dispatch_Message<ParticleSmokeParams>(MessageType::UPDATE_PARTICLE, &Particlesmoke_comp_params, player->m_pStateMachine->GetCurrentState());
 	}
 
@@ -616,6 +649,7 @@ void Run_Player::Execute(CPlayer* player, float fElapsedTime)
 
 		CMessageDispatcher::GetInst()->Dispatch_Message<ParticleSmokeParams>(MessageType::UPDATE_PARTICLE, &Particlesmoke_comp_params, player->m_pStateMachine->GetCurrentState());
 	}
+
 
 }
 
@@ -649,6 +683,9 @@ void Atk4_Player::Enter(CPlayer* player)
 	player->m_bAttack = false; // 사용자가 좌클릭시 true가 되는 변수
 	player->m_iAttack_Limit = 1;
 
+	if (player->m_pSwordTrailReference)
+		dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[3].get())->m_bIsUpdateTrailVariables = true;
+
 	/*SoundPlayParams SoundPlayParam;
 	SoundPlayParam.sound_category = SOUND_CATEGORY::SOUND_SHOOT;
 	CMessageDispatcher::GetInst()->Dispatch_Message<SoundPlayParams>(MessageType::PLAY_SOUND, &SoundPlayParam, this);*/
@@ -665,8 +702,13 @@ void Atk4_Player::Execute(CPlayer* player, float fElapsedTime)
 		CMessageDispatcher::GetInst()->Dispatch_Message<PlayerParams>(MessageType::PLAYER_ATTACK, &PlayerParam, player);
 	}
 
-	if (player->m_bAttack && 0.7 < player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition)
-		player->m_pStateMachine->ChangeState(Atk5_Player::GetInst());
+	if (0.7 < player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition) {
+		if (player->m_pSwordTrailReference)
+			dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[3].get())->m_bIsUpdateTrailVariables = false;
+		if (player->m_bAttack)
+			player->m_pStateMachine->ChangeState(Atk5_Player::GetInst());
+	}
+
 
 	//player->Animate(fElapsedTime);
 	CAnimationSet* pAnimationSet = player->m_pChild->m_pSkinnedAnimationController->m_pAnimationSets->m_pAnimationSets[player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_nAnimationSet];
@@ -683,6 +725,8 @@ void Atk4_Player::Execute(CPlayer* player, float fElapsedTime)
 
 void Atk4_Player::Exit(CPlayer* player)
 {
+	if (player->m_pSwordTrailReference)
+		dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[3].get())->m_bIsUpdateTrailVariables = false;
 }
 
 Atk5_Player::Atk5_Player()
@@ -704,6 +748,9 @@ void Atk5_Player::Enter(CPlayer* player)
 	player->m_bAttacked = false;
 	player->m_bAttack = false; // 사용자가 좌클릭시 true가 되는 변수
 	player->m_iAttack_Limit = 1;
+
+	if (player->m_pSwordTrailReference)
+		dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[4].get())->m_bIsUpdateTrailVariables = true;
 
 	/*SoundPlayParams SoundPlayParam;
 	SoundPlayParam.sound_category = SOUND_CATEGORY::SOUND_SHOOT;
@@ -736,4 +783,6 @@ void Atk5_Player::Execute(CPlayer* player, float fElapsedTime)
 
 void Atk5_Player::Exit(CPlayer* player)
 {
+	if (player->m_pSwordTrailReference)
+		dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[4].get())->m_bIsUpdateTrailVariables = false;
 }

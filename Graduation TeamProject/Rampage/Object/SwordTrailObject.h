@@ -20,7 +20,7 @@ class CSwordTrailObject : public CGameObject
 
 	std::vector<XMFLOAT4> m_xmf4TrailBasePoints1;
 	std::vector<XMFLOAT4> m_xmf4TrailBasePoints2;
-	UINT m_nTrailBasePoints;
+	UINT m_nTrailBasePoints = 0;
 
 	ComPtr<ID3D12Resource> m_pd3dcbTrail = NULL;
 	VS_CB_SWTRAIL_INFO* m_pcbMappedTrail = NULL;
@@ -42,7 +42,7 @@ public:
 	virtual void Update(float fTimeElapsed);
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, bool b_UseTexture, CCamera* pCamera = NULL);
 
-	void SetNextControllPoint(XMFLOAT4 point1, XMFLOAT4 point2);
+	void SetNextControllPoint(XMFLOAT4* point1, XMFLOAT4* point2);
 };
 
 class CSwordTrailObjectEmitter : public CGameObject {

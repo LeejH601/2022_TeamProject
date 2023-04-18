@@ -2,6 +2,7 @@
 #include "PhysicsObject.h"
 #include "StateMachine.h"
 #include "..\Global\Camera.h"	// 왜 필요하지
+#include "SwordTrailObject.h"
 
 class CCamera;
 class CPlayer : public CPhysicsObject
@@ -23,6 +24,9 @@ public:
 	float m_fCMDConstant = 1.0f;
 
 	XMFLOAT3 m_xmfDirection = XMFLOAT3(0.0f, 0.0f, 0.0f);
+
+	std::unique_ptr<CGameObject>* m_pSwordTrailReference = nullptr;
+
 public:
 	CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks);
 	virtual ~CPlayer();

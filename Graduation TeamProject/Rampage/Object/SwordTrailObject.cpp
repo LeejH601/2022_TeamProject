@@ -21,6 +21,7 @@ CSwordTrailObject::CSwordTrailObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 	pTrailShader->CreateShaderResourceViews(pd3dDevice, pTexture.get(), 0, 2);
 
 	SetTexture(pTexture);
+	m_nTrailBasePoints = 0;
 }
 
 CSwordTrailObject::~CSwordTrailObject()
@@ -75,37 +76,51 @@ void CSwordTrailObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, bool 
 	UpdateShaderVariables(pd3dCommandList);
 
 	pd3dCommandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_POINTLIST);
-	pd3dCommandList->DrawInstanced(m_nDrawedControllPoints, 1, 0, 0);
+	pd3dCommandList->DrawInstanced(m_nDrawedControllPoints-1, 1, 0, 0);
 }
 
-void CSwordTrailObject::SetNextControllPoint(XMFLOAT4 point1, XMFLOAT4 point2)
+void CSwordTrailObject::SetNextControllPoint(XMFLOAT4* point1, XMFLOAT4* point2)
 {
-	memcpy(&m_xmf4x4SwordTrailControllPointers._31, &point2, sizeof(XMFLOAT4));
-	memcpy(&m_xmf4x4SwordTrailControllPointers._41, &point1, sizeof(XMFLOAT4));
-
+	/*memcpy(&m_xmf4x4SwordTrailControllPointers._31, point2, sizeof(XMFLOAT4));
+	memcpy(&m_xmf4x4SwordTrailControllPointers._41, point1, sizeof(XMFLOAT4));*/
 	int dummy = 1;
-	if (m_nTrailBasePoints < 10) {
-		m_xmf4TrailBasePoints1[dummy + m_nTrailBasePoints] = point1;
-		m_xmf4TrailBasePoints2[dummy + m_nTrailBasePoints++] = point2;
+
+	if (point1 != nullptr && point2 != nullptr) {
+		if (m_nTrailBasePoints < 10) {
+			m_xmf4TrailBasePoints1[dummy + m_nTrailBasePoints] = *point1;
+			m_xmf4TrailBasePoints2[dummy + m_nTrailBasePoints++] = *point2;
+		}
+		else {
+			memcpy(m_xmf4TrailBasePoints1.data() + dummy, m_xmf4TrailBasePoints1.data() + dummy + 1, (m_nTrailBasePoints - 1) * sizeof(XMFLOAT4));
+			memcpy(m_xmf4TrailBasePoints2.data() + dummy, m_xmf4TrailBasePoints2.data() + dummy + 1, (m_nTrailBasePoints - 1) * sizeof(XMFLOAT4));
+
+			m_xmf4TrailBasePoints1[dummy + m_nTrailBasePoints - 1] = *point1;
+			m_xmf4TrailBasePoints2[dummy + m_nTrailBasePoints - 1] = *point2;
+		}
 	}
 	else {
-		memcpy(m_xmf4TrailBasePoints1.data() + dummy, m_xmf4TrailBasePoints1.data() + dummy + 1, (m_nTrailBasePoints - 1) * sizeof(XMFLOAT4));
-		memcpy(m_xmf4TrailBasePoints2.data() + dummy, m_xmf4TrailBasePoints2.data() + dummy + 1, (m_nTrailBasePoints - 1) * sizeof(XMFLOAT4));
+		if (m_nTrailBasePoints > 0) {
+			memcpy(m_xmf4TrailBasePoints1.data() + dummy, m_xmf4TrailBasePoints1.data() + dummy + 1, (m_nTrailBasePoints - 1) * sizeof(XMFLOAT4));
+			memcpy(m_xmf4TrailBasePoints2.data() + dummy, m_xmf4TrailBasePoints2.data() + dummy + 1, (m_nTrailBasePoints - 1) * sizeof(XMFLOAT4));
+			m_nTrailBasePoints--;
+		}
 
-		m_xmf4TrailBasePoints1[dummy + m_nTrailBasePoints - 1] = point1;
-		m_xmf4TrailBasePoints2[dummy + m_nTrailBasePoints - 1] = point2;
+
 	}
 
-	m_xmf4TrailBasePoints1[0] = m_xmf4TrailBasePoints1[1];
-	m_xmf4TrailBasePoints2[0] = m_xmf4TrailBasePoints2[1];
+	if (m_nTrailBasePoints > 0) {
+		m_xmf4TrailBasePoints1[0] = m_xmf4TrailBasePoints1[1];
+		m_xmf4TrailBasePoints2[0] = m_xmf4TrailBasePoints2[1];
 
-	for (int i = 1; i <= 3; ++i) {
-		m_xmf4TrailBasePoints1[m_nTrailBasePoints + i] = m_xmf4TrailBasePoints1[m_nTrailBasePoints];
-		m_xmf4TrailBasePoints2[m_nTrailBasePoints + i] = m_xmf4TrailBasePoints2[m_nTrailBasePoints];
+		for (int i = 1; i <= 3; ++i) {
+			m_xmf4TrailBasePoints1[m_nTrailBasePoints + i] = m_xmf4TrailBasePoints1[m_nTrailBasePoints];
+			m_xmf4TrailBasePoints2[m_nTrailBasePoints + i] = m_xmf4TrailBasePoints2[m_nTrailBasePoints];
+		}
 	}
+
 
 	int index = 0;
-	for (int i = 0; i < 10; ++i) {
+	for (int i = 0; i < m_nTrailBasePoints; ++i) {
 		m_xmf4TrailControllPoints1[index] = m_xmf4TrailBasePoints1[i + 1];
 		m_xmf4TrailControllPoints2[index++] = m_xmf4TrailBasePoints2[i + 1];
 		for (int j = 1; j < 10; ++j) {

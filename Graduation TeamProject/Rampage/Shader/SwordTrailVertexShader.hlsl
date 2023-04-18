@@ -10,7 +10,7 @@ VS_OUT SwordTrail_VS(uint nVertexID : SV_VertexID)
 	VS_OUT output;
 
 	output.Position = float4(0.0f, 0.0f, 0.0f, 0.0f);
-	output.index = nVertexID;
+	output.index = nVertexID ;
 
 	return output;
 }

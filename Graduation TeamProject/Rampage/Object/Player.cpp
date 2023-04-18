@@ -6,6 +6,7 @@
 #include "..\Global\MessageDispatcher.h"
 #include "..\Object\ParticleObject.h"
 #include "Object.h"
+#include <stdio.h>
 
 CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks)
 {
@@ -27,9 +28,9 @@ CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 	SetScale(4.0f, 4.0f, 4.0f);
 	Rotate(0.0f, 90.0f, 0.0f);
 
-	m_fSpeedKperH = 2.0f;
+	m_fSpeedKperH = 6.0f;
 	m_fSpeedMperS = m_fSpeedKperH * 1000.0f / 3600.0f;
-	m_fSpeedUperS = m_fSpeedMperS * 4.0f / 1.0f;
+	m_fSpeedUperS = m_fSpeedMperS * 100.0f / 4.0f;
 }
 
 CPlayer::~CPlayer()
@@ -79,6 +80,7 @@ void CPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity, CCa
 		if (dwDirection & DIR_RIGHT)xmf3Shift = Vector3::Add(xmf3Shift, Vector3::Normalize(XMFLOAT3(pCamera->GetRightVector().x, 0.0f, pCamera->GetRightVector().z)));
 		if (dwDirection & DIR_LEFT)xmf3Shift = Vector3::Add(xmf3Shift, Vector3::Normalize(XMFLOAT3(pCamera->GetRightVector().x, 0.0f, pCamera->GetRightVector().z)), -1.0f);
 		xmf3Shift = Vector3::Normalize(xmf3Shift);
+		xmf3Shift = Vector3::ScalarProduct(xmf3Shift, fDistance, false);
 
 		CPhysicsObject::Move(xmf3Shift, bUpdateVelocity);
 	}
@@ -135,7 +137,10 @@ void CPlayer::Update(float fTimeElapsed)
 			SetLookAt(Vector3::Add(GetPosition(), Vector3::Normalize(XMFLOAT3{ m_xmf3Velocity.x, 0.0f, m_xmf3Velocity.z })));
 		
 		// 임시로 속도 조절함
-		CPhysicsObject::Move(Vector3::ScalarProduct( m_xmf3Velocity, 0.3f, false), false);
+		CPhysicsObject::Move(m_xmf3Velocity, false);
+		TCHAR pstrDebug[256] = { 0 };
+		_stprintf_s(pstrDebug, 256, L"%f, %f, %f  --- \n", m_xmf3Position.x, m_xmf3Position.y, m_xmf3Position.z);
+		OutputDebugString(pstrDebug);
 	}
 	// Run 상태가 아닐때 플레이어에게 중력만 작용하는 코드
 	else
