@@ -61,6 +61,7 @@ public:
 
 	virtual void HandleCollision(const CollideParams& params);
 
+	void ResetMonster();
 	void SetPlayerAnimationSet(int nSet);
 	CTextureManager* GetTextureManager() { return m_pTextureManager.get(); }
 };

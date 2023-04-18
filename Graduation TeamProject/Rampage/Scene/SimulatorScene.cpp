@@ -571,6 +571,17 @@ void CSimulatorScene::OnPostRender()
 	}
 }
 
+void CSimulatorScene::ResetMonster()
+{
+	XMFLOAT3 offset{ 86.4804 , 0.0f, -183.7856 };
+	XMFLOAT3 xmf3LookAt{ m_pMainCharacter->GetPosition().x, m_pEnemys[0]->GetPosition().y, m_pMainCharacter->GetPosition().z};
+	
+	m_pEnemys[0]->SetPosition(XMFLOAT3(50 + offset.x, 100, 50 + offset.z));
+	m_pEnemys[0]->SetScale(4.0f, 4.0f, 4.0f);
+	m_pEnemys[0]->SetLookAt(xmf3LookAt);
+	(dynamic_cast<CMonster*>(m_pEnemys[0].get()))->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
+}
+
 void CSimulatorScene::SetPlayerAnimationSet(int nSet)
 {
 	switch (nSet)

@@ -1008,6 +1008,10 @@ void CImGuiManager::SetUI()
 				{
 					show_preset_menu = true;
 				}
+				if (ImGui::MenuItem(U8STR("몬스터 리셋"), NULL))
+				{
+					CSimulatorScene::GetInst()->ResetMonster();
+				}
 				ImGui::EndMenu();
 			}
 			ImGui::EndMenuBar();
