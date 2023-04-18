@@ -813,9 +813,6 @@ void CImGuiManager::Init(HWND hWnd, ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 		m_pd3dSrvDescHeap->GetCPUDescriptorHandleForHeapStart(),
 		m_pd3dSrvDescHeap->GetGPUDescriptorHandleForHeapStart());
 
-	/*Locator.CreateSimulatorCamera(pd3dDevice, pd3dCommandList);
-	m_pCamera = Locator.GetSimulaterCamera();*/
-
 	D3D12_CLEAR_VALUE d3dClearValue = { DXGI_FORMAT_R8G8B8A8_UNORM, { 1.0f, 1.0f, 1.0f, 1.0f } };
 	m_pRTTexture = std::make_unique<CTexture>(1, RESOURCE_TEXTURE2D, 0, 1);
 	m_pRTTexture->CreateTexture(pd3dDevice, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, DXGI_FORMAT_R8G8B8A8_UNORM, D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET, D3D12_RESOURCE_STATE_COMMON, &d3dClearValue, RESOURCE_TEXTURE2D, 0, 1);
@@ -924,7 +921,6 @@ void CImGuiManager::SetUI()
 		std::vector<std::u8string> v;
 		for (const auto& entry : std::filesystem::directory_iterator(path))
 		{
-		
 			v.emplace_back(entry.path().u8string().substr(entry.path().u8string().find_last_of(u8"/\\") + 1));
 		}
 
@@ -943,15 +939,28 @@ void CImGuiManager::SetUI()
 		}
 		ImGui::EndListBox();
 
-		std::u8string first_string = u8"선택된 폴더: ";
-		first_string.append(v[idx]);
-
-		ImGui::Text(reinterpret_cast<const char*>(first_string.c_str()));
-		ImGui::SameLine(m_lDesktopWidth * 0.14f + ImGui::CalcTextSize(U8STR("불러오기")).x);
-		if (ImGui::Button(U8STR("불러오기")))
+		if (v.size() > 0)
 		{
-			m_pDataLoader->LoadComponentSets(ConvertU8ToW(v[idx]));
-			show_preset_menu = false;
+			std::u8string first_string = u8"선택된 폴더: ";
+			first_string.append(v[idx]);
+			ImGui::Text(reinterpret_cast<const char*>(first_string.c_str()));
+			ImGui::SameLine(m_lDesktopWidth * 0.14f + ImGui::CalcTextSize(U8STR("불러오기")).x);
+			if (ImGui::Button(U8STR("불러오기")))
+			{
+				m_pDataLoader->LoadComponentSets(ConvertU8ToW(v[idx]));
+				show_preset_menu = false;
+			}
+		}
+		else
+		{
+			std::u8string first_string = u8"Data 폴더에 프리셋이 없습니다. ";
+			ImGui::Text(reinterpret_cast<const char*>(first_string.c_str()));
+			ImGui::SameLine(m_lDesktopWidth * 0.14f + ImGui::CalcTextSize(U8STR("불러오기")).x);
+			if (ImGui::Button(U8STR("불러오기")))
+			{
+				m_pDataLoader->LoadComponentSets(ConvertU8ToW(v[idx]));
+				show_preset_menu = false;
+			}
 		}
 		ImGui::End();
 	}
@@ -1298,15 +1307,15 @@ void CImGuiManager::ShowCameraShakeManager(CState<CPlayer>* pCurrentAnimation)
 	ImGui::Checkbox(U8STR("켜기/끄기##Shake"), &pCameraShakerComponent->GetEnable());
 
 	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
-	if (ImGui::DragFloat(U8STR("Magnitude##Shake"), &pCameraShakerComponent->GetMagnitude(), DRAG_FLOAT_UNIT, CAMERA_SHAKE_MAGNITUDE_MIN, CAMERA_SHAKE_MAGNITUDE_MAX, "%.2f", 0))
+	if (ImGui::DragFloat(U8STR("흔들림 규모##Shake"), &pCameraShakerComponent->GetMagnitude(), DRAG_FLOAT_UNIT, CAMERA_SHAKE_MAGNITUDE_MIN, CAMERA_SHAKE_MAGNITUDE_MAX, "%.2f", 0))
 		pCameraShakerComponent->GetMagnitude() = std::clamp(pCameraShakerComponent->GetMagnitude(), CAMERA_SHAKE_MAGNITUDE_MIN, CAMERA_SHAKE_MAGNITUDE_MAX);
 
 	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
-	if (ImGui::DragFloat(U8STR("Duration##Shake"), &pCameraShakerComponent->GetDuration(), DRAG_FLOAT_UNIT, CAMERA_SHAKE_DURATION_MIN, CAMERA_SHAKE_DURATION_MAX, "%.2f", 0))
+	if (ImGui::DragFloat(U8STR("지속 시간##Shake"), &pCameraShakerComponent->GetDuration(), DRAG_FLOAT_UNIT, CAMERA_SHAKE_DURATION_MIN, CAMERA_SHAKE_DURATION_MAX, "%.2f", 0))
 		pCameraShakerComponent->GetDuration() = std::clamp(pCameraShakerComponent->GetDuration(), CAMERA_SHAKE_DURATION_MIN, CAMERA_SHAKE_DURATION_MAX);
 
 	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
-	if (ImGui::DragFloat(U8STR("Frequency##Shake"), &pCameraShakerComponent->GetFrequency(), DRAG_FLOAT_UNIT, CAMERA_SHAKE_FREQUENCY_MIN, CAMERA_SHAKE_FREQUENCY_MAX, "%.3f", 0))
+	if (ImGui::DragFloat(U8STR("빈도##Shake"), &pCameraShakerComponent->GetFrequency(), DRAG_FLOAT_UNIT, CAMERA_SHAKE_FREQUENCY_MIN, CAMERA_SHAKE_FREQUENCY_MAX, "%.3f", 0))
 		pCameraShakerComponent->GetFrequency() = std::clamp(pCameraShakerComponent->GetFrequency(), CAMERA_SHAKE_FREQUENCY_MIN, CAMERA_SHAKE_FREQUENCY_MAX);
 	
 	ImGui::End();
