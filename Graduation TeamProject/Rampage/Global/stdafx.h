@@ -41,6 +41,7 @@
 //--------------------------
 #include <iostream>
 #include <shlobj_core.h>
+#include <codecvt>
 #include <fstream>
 #include <filesystem>
 #include <vector>

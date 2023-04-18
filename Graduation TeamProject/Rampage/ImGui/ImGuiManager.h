@@ -6,11 +6,11 @@
 
 class DataLoader
 {
-	std::string file_path = "Data\\";
-	std::string file_ext = ".bin";
+	std::wstring file_path = L"Data\\";
+	std::wstring file_ext = L".bin";
 public:
-	void SaveComponentSets();
-	void LoadComponentSets();
+	void SaveComponentSets(std::wstring wFolderName);
+	void LoadComponentSets(std::wstring wFolderName);
 
 	void SaveComponentSet(FILE* pInFile, CState<CPlayer>* pState);
 	void LoadComponentSet(FILE* pInFile, CState<CPlayer>* pState);

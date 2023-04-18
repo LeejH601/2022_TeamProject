@@ -14,21 +14,30 @@
 #define MAX_FILENAME_SIZE 100
 #define U8STR(str) reinterpret_cast<const char*>(u8##str)
 
-int CALLBACK BrowseCallbackProc(HWND hwnd, UINT uMsg, LPARAM lParam, LPARAM lpData)
-{
-	if (uMsg == BFFM_INITIALIZED)
-	{
-		// 시작 폴더 지정
-		LPCTSTR lpStartPath = (LPCTSTR)lpData;
-		SendMessage(hwnd, BFFM_SETSELECTIONW, TRUE, (LPARAM)lpStartPath);
+bool CreateDirectoryIfNotExists(const std::wstring& path) {
+	DWORD attr = GetFileAttributesW(path.c_str());
+	if (attr == INVALID_FILE_ATTRIBUTES) {
+		if (!CreateDirectoryW(path.c_str(), NULL)) {
+			return false;
+		}
 	}
-	return 0;
+	else if (!(attr & FILE_ATTRIBUTE_DIRECTORY)) {
+		return false;
+	}
+	return true;
+}
+
+std::wstring ConvertU8ToW(const std::u8string& str)
+{
+	int size_needed = MultiByteToWideChar(CP_UTF8, 0, reinterpret_cast<const char*>(str.c_str()), static_cast<int>(str.size()), nullptr, 0);
+	std::wstring wstr(size_needed, 0);
+	MultiByteToWideChar(CP_UTF8, 0, reinterpret_cast<const char*>(str.c_str()), static_cast<int>(str.size()), &wstr[0], size_needed);
+	return wstr;
 }
 
 //========================================================================
-void DataLoader::SaveComponentSets()
+void DataLoader::SaveComponentSets(std::wstring wFolderName)
 {
-	std::string path;
 	FILE* pInFile;
 
 	for (int i = 0; i < 3; ++i)
@@ -50,18 +59,24 @@ void DataLoader::SaveComponentSets()
 			break;
 		}
 
-		path = file_path + std::to_string(i) + file_ext;
-		::fopen_s(&pInFile, path.c_str(), "wb");
+		std::wstring path;
+		wFolderName.resize(wcslen(wFolderName.c_str()));
 
+		path = file_path + wFolderName + L"\\Component" + std::to_wstring(i) + file_ext;
+		
+		std::wstring fp = file_path + wFolderName;
+		if (!CreateDirectoryIfNotExists(fp)) {
+			return;
+		}
+
+		::_wfopen_s(&pInFile, path.c_str(), L"wb");
 		SaveComponentSet(pInFile, pCurrentAnimation);
-
 		fclose(pInFile);
 	}
 }
 
-void DataLoader::LoadComponentSets()
+void DataLoader::LoadComponentSets(std::wstring wFolderName)
 {
-	std::string path;
 	FILE* pInFile;
 
 	for (int i = 0; i < 3; ++i)
@@ -82,10 +97,13 @@ void DataLoader::LoadComponentSets()
 		default:
 			break;
 		}
-		path = file_path + std::to_string(i) + file_ext;
-		::fopen_s(&pInFile, path.c_str(), "rb");
-		if (!pInFile)
-			continue;
+
+		std::wstring path;
+		wFolderName.resize(wcslen(wFolderName.c_str()));
+
+		path = file_path + wFolderName + L"\\Component" + std::to_wstring(i) + file_ext;
+
+		::_wfopen_s(&pInFile, path.c_str(), L"rb");
 		LoadComponentSet(pInFile, pCurrentAnimation);
 		fclose(pInFile);
 	}
@@ -932,7 +950,7 @@ void CImGuiManager::SetUI()
 		ImGui::SameLine(m_lDesktopWidth * 0.14f + ImGui::CalcTextSize(U8STR("불러오기")).x);
 		if (ImGui::Button(U8STR("불러오기")))
 		{
-			// 불러오기
+			m_pDataLoader->LoadComponentSets(ConvertU8ToW(v[idx]));
 			show_preset_menu = false;
 		}
 		ImGui::End();
@@ -944,14 +962,16 @@ void CImGuiManager::SetUI()
 
 		ImGui::Begin(U8STR("저장 메뉴"), &show_save_menu, my_window_flags);
 
-		std::string folder_name;
+		static std::u8string folder_name;
 		folder_name.resize(MAX_PATH);
-		ImGui::InputText(U8STR("저장 이름"), folder_name.data(), MAX_PATH);
+
+		ImGui::InputText(U8STR("저장 이름"), reinterpret_cast<char*>(folder_name.data()), 64);
+
 		ImVec2 itemSize = ImGui::GetItemRectSize();
 
 		if (ImGui::Button(U8STR("저장"), itemSize))
 		{
-
+			m_pDataLoader->SaveComponentSets(ConvertU8ToW(folder_name));
 			show_save_menu = false;
 		}
 
@@ -1479,6 +1499,5 @@ void CImGuiManager::OnPostRender()
 }
 void CImGuiManager::OnDestroy()
 {
-	//m_pDataLoader->SaveComponentSets();
 }
 
