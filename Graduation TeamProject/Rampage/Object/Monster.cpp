@@ -98,22 +98,6 @@ void CMonster::SetScale(float x, float y, float z)
 	m_pSkinnedAnimationController->m_xmf3RootObjectScale = m_xmf3Scale;
 }
 
-void CMonster::Animate(float fTimeElapsed)
-{
-	if (m_pStateMachine->GetCurrentState() == Damaged_Monster::GetInst())
-	{
-		CGameObject::Animate(fTimeElapsed);
-	}
-
-	else if (m_pStateMachine->GetCurrentState() == Stun_Monster::GetInst())
-	{
-		CGameObject::Animate(0.0f);
-	}
-
-	else
-		CGameObject::Animate(fTimeElapsed);
-}
-
 void CMonster::Update(float fTimeElapsed)
 {
 	// 현재 행동을 선택함
@@ -140,7 +124,7 @@ void CMonster::Update(float fTimeElapsed)
 
 	CalculateResultPosition();
 
-	Animate(fTimeElapsed);
+	m_pStateMachine->Animate(fTimeElapsed);
 
 	CPhysicsObject::Apply_Friction(fTimeElapsed);
 }

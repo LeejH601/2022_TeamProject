@@ -22,6 +22,11 @@ void Idle_Monster::Execute(CMonster* monster, float fElapsedTime)
 	}
 }
 
+void Idle_Monster::Animate(CMonster* monster, float fElapsedTime)
+{
+	monster->Animate(fElapsedTime);
+}
+
 void Idle_Monster::Exit(CMonster* monster)
 {
 
@@ -52,6 +57,11 @@ void Damaged_Monster::Execute(CMonster* monster, float fElapsedTime)
 	}
 }
 
+void Damaged_Monster::Animate(CMonster* monster, float fElapsedTime)
+{
+	monster->Animate(fElapsedTime);
+}
+
 void Damaged_Monster::Exit(CMonster* monster)
 {
 }
@@ -65,6 +75,11 @@ void Stun_Monster::Enter(CMonster* monster)
 
 void Stun_Monster::Execute(CMonster* monster, float fElapsedTime)
 {
+}
+
+void Stun_Monster::Animate(CMonster* monster, float fElapsedTime)
+{
+	monster->Animate(0.0f);
 }
 
 void Stun_Monster::Exit(CMonster* monster)
@@ -98,6 +113,11 @@ void Wander_Monster::Execute(CMonster* monster, float fElapsedTime)
 	{
 		monster->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
 	}
+}
+
+void Wander_Monster::Animate(CMonster* monster, float fElapsedTime)
+{
+	monster->Animate(fElapsedTime);
 }
 
 void Wander_Monster::Exit(CMonster* monster)
@@ -138,6 +158,11 @@ void Chasing_Monster::Execute(CMonster* monster, float fElapsedTime)
 	monster->Move(xmf3Shift, true);
 }
 
+void Chasing_Monster::Animate(CMonster* monster, float fElapsedTime)
+{
+	monster->Animate(fElapsedTime);
+}
+
 void Chasing_Monster::Exit(CMonster* monster)
 {
 }
@@ -167,6 +192,11 @@ void Attack_Monster::Execute(CMonster* monster, float fElapsedTime)
 		else
 			monster->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
 	}
+}
+
+void Attack_Monster::Animate(CMonster* monster, float fElapsedTime)
+{
+	monster->Animate(fElapsedTime);
 }
 
 void Attack_Monster::Exit(CMonster* monster)

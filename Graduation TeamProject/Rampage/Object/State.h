@@ -46,6 +46,7 @@ public:
 
 	virtual void Enter(entity_type*) = 0;
 	virtual void Execute(entity_type*, float) = 0;
+    virtual void Animate(entity_type*, float) = 0;
 	virtual void Exit(entity_type*) = 0;
 };
 
@@ -58,6 +59,7 @@ public:
     
     virtual void Enter(CPlayer* player);
     virtual void Execute(CPlayer* player, float fElapsedTime);
+    virtual void Animate(CPlayer* player, float fElapsedTime);
     virtual void Exit(CPlayer* player);
 };
 
@@ -70,6 +72,7 @@ public:
 
     virtual void Enter(CPlayer* player);
     virtual void Execute(CPlayer* player, float fElapsedTime);
+    virtual void Animate(CPlayer* player, float fElapsedTime);
     virtual void Exit(CPlayer* player);
 };
 
@@ -82,6 +85,7 @@ public:
 
     virtual void Enter(CPlayer* player);
     virtual void Execute(CPlayer* player, float fElapsedTime);
+    virtual void Animate(CPlayer* player, float fElapsedTime);
     virtual void Exit(CPlayer* player);
 };
 
@@ -94,6 +98,7 @@ public:
 
     virtual void Enter(CPlayer* player);
     virtual void Execute(CPlayer* player, float fElapsedTime);
+    virtual void Animate(CPlayer* player, float fElapsedTime);
     virtual void Exit(CPlayer* player);
 };
 
@@ -106,6 +111,7 @@ public:
 
     virtual void Enter(CPlayer* player);
     virtual void Execute(CPlayer* player, float fElapsedTime);
+    virtual void Animate(CPlayer* player, float fElapsedTime);
     virtual void Exit(CPlayer* player);
 };
 

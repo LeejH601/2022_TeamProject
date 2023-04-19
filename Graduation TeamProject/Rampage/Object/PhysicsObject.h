@@ -41,6 +41,7 @@ public:
 	virtual XMFLOAT3 GetLook();
 	virtual XMFLOAT3 GetUp();
 	virtual XMFLOAT3 GetRight();
+	virtual XMFLOAT3 GetVelocity();
 
 	float& GetPitch() { return(m_fPitch); }
 	float& GetRoll() { return(m_fRoll); }

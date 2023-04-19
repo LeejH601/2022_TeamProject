@@ -56,7 +56,6 @@ public:
 	virtual void OnPrepareRender();
 
 	virtual void SetScale(float x, float y, float z);
-	virtual void Animate(float fTimeElapsed);
 	virtual void Update(float fTimeElapsed);
 	virtual void UpdateTransform(XMFLOAT4X4* pxmf4x4Parent = NULL);
 	virtual void SetHit(CGameObject* pHitter)

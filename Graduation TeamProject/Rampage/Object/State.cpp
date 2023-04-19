@@ -33,6 +33,11 @@ void Idle_Player::Execute(CPlayer* player, float fElapsedTime)
 		player->m_pStateMachine->ChangeState(Atk1_Player::GetInst());
 }
 
+void Idle_Player::Animate(CPlayer* player, float fElapsedTime)
+{
+	player->Animate(fElapsedTime);
+}
+
 void Idle_Player::Exit(CPlayer* player)
 {
 
@@ -200,6 +205,21 @@ void Atk1_Player::Execute(CPlayer* player, float fElapsedTime)
 	{
 		player->m_pStateMachine->ChangeState(Idle_Player::GetInst());
 	}
+}
+
+void Atk1_Player::Animate(CPlayer* player, float fElapsedTime)
+{
+	if (m_HitlagComponent.GetEnable() && player->m_bAttacked)
+	{
+		if (m_HitlagComponent.GetCurLagTime() < m_HitlagComponent.GetMaxLagTime())
+			player->Animate(fElapsedTime * 0.01f);
+		else
+			player->Animate(fElapsedTime);
+
+		m_HitlagComponent.SetCurLagTime(m_HitlagComponent.GetCurLagTime() + fElapsedTime);
+	}
+	else
+		player->Animate(fElapsedTime);
 }
 
 void Atk1_Player::Exit(CPlayer* player)
@@ -377,6 +397,21 @@ void Atk2_Player::Execute(CPlayer* player, float fElapsedTime)
 	{
 		player->m_pStateMachine->ChangeState(Idle_Player::GetInst());
 	}
+}
+
+void Atk2_Player::Animate(CPlayer* player, float fElapsedTime)
+{
+	if (m_HitlagComponent.GetEnable() && player->m_bAttacked)
+	{
+		if (m_HitlagComponent.GetCurLagTime() < m_HitlagComponent.GetMaxLagTime())
+			player->Animate(fElapsedTime * 0.01f);
+		else
+			player->Animate(fElapsedTime);
+
+		m_HitlagComponent.SetCurLagTime(m_HitlagComponent.GetCurLagTime() + fElapsedTime);
+	}
+	else
+		player->Animate(fElapsedTime);
 }
 
 void Atk2_Player::Exit(CPlayer* player)
@@ -557,6 +592,21 @@ void Atk3_Player::Execute(CPlayer* player, float fElapsedTime)
 	}
 }
 
+void Atk3_Player::Animate(CPlayer* player, float fElapsedTime)
+{
+	if (m_HitlagComponent.GetEnable() && player->m_bAttacked)
+	{
+		if (m_HitlagComponent.GetCurLagTime() < m_HitlagComponent.GetMaxLagTime())
+			player->Animate(fElapsedTime * 0.01f);
+		else
+			player->Animate(fElapsedTime);
+
+		m_HitlagComponent.SetCurLagTime(m_HitlagComponent.GetCurLagTime() + fElapsedTime);
+	}
+	else
+		player->Animate(fElapsedTime);
+}
+
 void Atk3_Player::Exit(CPlayer* player)
 {
 	if (player->m_pCamera)
@@ -589,8 +639,23 @@ void Run_Player::Enter(CPlayer* player)
 
 void Run_Player::Execute(CPlayer* player, float fElapsedTime)
 {
+	XMFLOAT3 xmf3PlayerVel = player->GetVelocity();
+
 	if (player->m_bAttack)
 		player->m_pStateMachine->ChangeState(Atk1_Player::GetInst());
+
+	// Idle 상태로 복귀하는 코드
+	if (Vector3::Length(xmf3PlayerVel) == 0)
+		player->m_pStateMachine->ChangeState(Idle_Player::GetInst());
+
+	// 임시로 속도 조절함
+	//CPhysicsObject::Move(Vector3::ScalarProduct(m_xmf3Velocity, 0.3f, false), false);
+
+}
+
+void Run_Player::Animate(CPlayer* player, float fElapsedTime)
+{
+	player->Animate(fElapsedTime);
 }
 
 void Run_Player::Exit(CPlayer* player)
