@@ -84,6 +84,7 @@ public:
 	void ShowDamageAnimationManager(CState<CPlayer>* pCurrentAnimation);
 	void ShowShakeAnimationManager(CState<CPlayer>* pCurrentAnimation);
 	void ShowStunAnimationManager(CState<CPlayer>* pCurrentAnimation);
+	void ShowHitLagManager(CState<CPlayer>* pCurrentAnimation);
 	void ShowCameraMoveManager(CState<CPlayer>* pCurrentAnimation);
 	void ShowCameraShakeManager(CState<CPlayer>* pCurrentAnimation);
 	void ShowCameraZoomManager(CState<CPlayer>* pCurrentAnimation);

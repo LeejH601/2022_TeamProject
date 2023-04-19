@@ -903,7 +903,7 @@ void CImGuiManager::SetUI()
 	if (show_simulator_scene)
 	{
 		ImGuiWindowFlags my_window_flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize;
-		ImGui::Begin(U8STR("Simulator Scene"), &show_simulator_scene, my_window_flags);
+		ImGui::Begin(U8STR("시뮬레이터"), &show_simulator_scene, my_window_flags);
 
 		int my_image_width = 0.55f * m_lDesktopWidth;
 		int my_image_height = 0.55f * m_lDesktopHeight;
@@ -1077,6 +1077,11 @@ void CImGuiManager::SetUI()
 			if (ImGui::TreeNode(U8STR("경직 애니메이션")))
 			{
 				ShowStunAnimationManager(pCurrentAnimation);
+				ImGui::TreePop();
+			}
+			if (ImGui::TreeNode(U8STR("역경직 애니메이션")))
+			{
+				ShowHitLagManager(pCurrentAnimation);
 				ImGui::TreePop();
 			}
 		}
@@ -1273,6 +1278,22 @@ void CImGuiManager::ShowStunAnimationManager(CState<CPlayer>* pCurrentAnimation)
 	
 	ImGui::End();
 }
+void CImGuiManager::ShowHitLagManager(CState<CPlayer>* pCurrentAnimation)
+{
+	ImGuiWindowFlags my_window_flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize;
+	bool* b_open = nullptr;
+	ImGui::Begin(U8STR("역경직 관리자"), b_open, my_window_flags);
+	HitLagComponent* pHitLagComponent = pCurrentAnimation->GetHitLagComponent();
+
+	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
+	ImGui::Checkbox(U8STR("켜기/끄기##HitLag"), &pHitLagComponent->GetEnable());
+
+	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
+	if (ImGui::DragFloat(U8STR("지속시간##Move"), &pHitLagComponent->GetMaxLagTime(), DRAG_FLOAT_UNIT, HIT_LAG_MAXTIME_MIN, HIT_LAG_MAXTIME_MAX, "%.2f", 0))
+		pHitLagComponent->GetMaxLagTime() = std::clamp(pHitLagComponent->GetMaxLagTime(), HIT_LAG_MAXTIME_MIN, HIT_LAG_MAXTIME_MAX);
+
+	ImGui::End();
+}
 void CImGuiManager::ShowCameraMoveManager(CState<CPlayer>* pCurrentAnimation)
 {
 	ImGuiWindowFlags my_window_flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize;
@@ -1283,7 +1304,6 @@ void CImGuiManager::ShowCameraMoveManager(CState<CPlayer>* pCurrentAnimation)
 
 	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
 	ImGui::Checkbox(U8STR("켜기/끄기##Move"), &pCameraMoveComponent->GetEnable());
-
 
 	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
 	if (ImGui::DragFloat(U8STR("거리##Move"), &pCameraMoveComponent->GetMaxDistance(), DRAG_FLOAT_UNIT, CAMERA_MOVE_DISTANCE_MIN, CAMERA_MOVE_DISTANCE_MAX, "%.2f", 0))

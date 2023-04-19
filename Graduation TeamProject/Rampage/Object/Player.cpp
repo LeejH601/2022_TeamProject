@@ -119,6 +119,8 @@ void CPlayer::Update(float fTimeElapsed)
 {
 	m_pStateMachine->Update(fTimeElapsed);
 
+	auto current_state = m_pStateMachine->GetCurrentState();
+
 	// Idle 상태로 복귀하는 코드
 	if (!Vector3::Length(m_xmf3Velocity) && m_pStateMachine->GetCurrentState() == Run_Player::GetInst())
 		m_pStateMachine->ChangeState(Idle_Player::GetInst());
@@ -145,7 +147,20 @@ void CPlayer::Update(float fTimeElapsed)
 	// 플레이어가 터레인보다 아래에 있지 않도록 하는 코드
 	if (m_pUpdatedContext) CPhysicsObject::OnUpdateCallback(fTimeElapsed);
 
-	Animate(fTimeElapsed);
+	HitLagComponent* pHitLagComponent = current_state->GetHitLagComponent();
+
+	if (pHitLagComponent->GetEnable() && m_bAttacked 
+		&& (current_state == Atk1_Player::GetInst() || current_state == Atk2_Player::GetInst() || current_state == Atk3_Player::GetInst()) )
+	{
+		if (pHitLagComponent->GetCurLagTime() < pHitLagComponent->GetMaxLagTime())
+			Animate(fTimeElapsed * 0.01f);
+		else		
+			Animate(fTimeElapsed);
+
+		pHitLagComponent->SetCurLagTime(pHitLagComponent->GetCurLagTime() + fTimeElapsed);
+	}
+	else
+		Animate(fTimeElapsed);
 
 	CPhysicsObject::Apply_Friction(fTimeElapsed);
 }
