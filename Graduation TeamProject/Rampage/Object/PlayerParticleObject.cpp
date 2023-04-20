@@ -9,9 +9,9 @@ void CPlayerParticleObject::SetSmokeObjects(CGameObject* pSmokeObject)
 	m_pSmokeObject = pSmokeObject;
 }
 
-void CPlayerParticleObject::SetTrailObjects(CGameObject* pTrailObjects)
+void CPlayerParticleObject::SetTrailParticleObjects(CGameObject* pTrailObjects)
 {
-	m_pTrailObject = pTrailObjects;
+	m_pTrailParticleObject = pTrailObjects;
 }
 
 CGameObject* CPlayerParticleObject::GetSmokeObjects()
@@ -19,7 +19,7 @@ CGameObject* CPlayerParticleObject::GetSmokeObjects()
 	return m_pSmokeObject;
 }
 
-CGameObject* CPlayerParticleObject::GetTrailObjects()
+CGameObject* CPlayerParticleObject::GetTrailParticleObjects()
 {
-	return m_pTrailObject;
+	return m_pTrailParticleObject;
 }

@@ -15,12 +15,12 @@ public:
 	DECLARE_SINGLE(CPlayerParticleObject);
 
 	void SetSmokeObjects(CGameObject* pSmokeObject);
-	void SetTrailObjects(CGameObject* pTrailObjects);
+	void SetTrailParticleObjects(CGameObject* pTrailObjects);
 
 	CGameObject* GetSmokeObjects();
-	CGameObject* GetTrailObjects();
+	CGameObject* GetTrailParticleObjects();
 
 private:
 	CGameObject* m_pSmokeObject = NULL;
-	CGameObject* m_pTrailObject = NULL;
+	CGameObject* m_pTrailParticleObject = NULL;
 };
