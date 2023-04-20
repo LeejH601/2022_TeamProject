@@ -194,62 +194,11 @@ void CPlayer::Update(float fTimeElapsed)
 				ParticleTrail_comp_params.iPlayerAttack = 1;
 				ParticleTrail_comp_params.m_fTime = m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition;
 				CMessageDispatcher::GetInst()->Dispatch_Message<ParticleTrailParams>(MessageType::UPDATE_TRAILPARTICLE, &ParticleTrail_comp_params, m_pStateMachine->GetCurrentState());
-
 			}
-
-
 		}
-
-		//if (m_pStateMachine->GetCurrentState() == Atk3_Player::GetInst())
-		//{
-		//	if (0.3f < m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition &&
-		//		0.5f > m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition)
-		//	{
-		//		ParticleTrailParams ParticleTrail_comp_params;
-		//		CGameObject* pWeapon = m_pChild->FindFrame("Weapon_r");
-		//		pWeapon->FindFrame("Weapon_r");
-		//		XMFLOAT3 xmf3Position;
-		//		XMFLOAT3 xmf3Direction;
-		//		XMFLOAT4X4 xmf4x4World = pWeapon->GetWorld();
-
-		//		xmf3Position = static_cast<CKnightObject*>(m_pChild.get())->GetWeaponMeshBoundingBox().Center;
-		//		XMFLOAT3 Pos[4];
-		//		static_cast<CKnightObject*>(m_pChild.get())->GetWeaponMeshBoundingBox().GetCorners(Pos);
-
-		//		ParticleTrail_comp_params.pObjects = CPlayerParticleObject::GetInst()->GetTrailObjects();
-		//		ParticleTrail_comp_params.xmf3Position = xmf3Position;
-		//		ParticleTrail_comp_params.iPlayerAttack = 2;
-		//		ParticleTrail_comp_params.m_fTime = m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition;
-		//		CMessageDispatcher::GetInst()->Dispatch_Message<ParticleTrailParams>(MessageType::UPDATE_TRAILPARTICLE, &ParticleTrail_comp_params, m_pStateMachine->GetCurrentState());
-		//	}
-
-
-		//}
 		m_fTime = 0.f;
 	}
 
-	// Idle 상태로 복귀하는 코드
-	if (!Vector3::Length(m_xmf3Velocity) && m_pStateMachine->GetCurrentState() == Run_Player::GetInst())
-		m_pStateMachine->ChangeState(Idle_Player::GetInst());
-
-	// Run 상태일때 플레이어를 이동시키고 방향전환 시켜주는 코드
-	if (m_pStateMachine->GetCurrentState() == Run_Player::GetInst())
-	{
-		CPhysicsObject::Apply_Gravity(fTimeElapsed);
-
-		if (m_xmf3Velocity.x + m_xmf3Velocity.z)
-			SetLookAt(Vector3::Add(GetPosition(), Vector3::Normalize(XMFLOAT3{ m_xmf3Velocity.x, 0.0f, m_xmf3Velocity.z })));
-		
-		// 임시로 속도 조절함
-		CPhysicsObject::Move(Vector3::ScalarProduct( m_xmf3Velocity, 0.3f, false), false);
-	}
-	// Run 상태가 아닐때 플레이어에게 중력만 작용하는 코드
-	else
-	{
-		m_xmf3Velocity = XMFLOAT3{};
-		CPhysicsObject::Apply_Gravity(fTimeElapsed);
-		CPhysicsObject::Move(m_xmf3Velocity, false);
-	}
 	CPhysicsObject::Apply_Gravity(fTimeElapsed);
 	CPhysicsObject::Move(m_xmf3Velocity, false);
 

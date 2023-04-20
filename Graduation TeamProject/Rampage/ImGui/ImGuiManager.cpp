@@ -1167,24 +1167,18 @@ void CImGuiManager::ShowImpactManager(CState<CPlayer>* pCurrentAnimation)
 	if (ImGui::DragFloat(U8STR("재생 속도##ImpactEffect"), &pImpactEffectComponent->GetSpeed(), DRAG_FLOAT_UNIT, IMPACT_SPEED_MIN, IMPACT_SPEED_MAX, "%.2f", 0))
 		pImpactEffectComponent->GetSpeed() = std::clamp(pImpactEffectComponent->GetSpeed(), IMPACT_SPEED_MIN, IMPACT_SPEED_MAX);
 
-			initial_curpos.y += 25.f;
-			ImGui::SetCursorPos(initial_curpos);
-			ImGui::SetNextItemWidth(190.f);
-			ImGui::DragFloat("Alpha##Impact Effect", &pImpactEffectComponent->GetAlpha(), 0.01f, 0.0f, 10.0f, "%.2f", 0);
-
-			initial_curpos.y += 25.f;
-			ImGui::SetCursorPos(initial_curpos);
-			ImGui::SetNextItemWidth(190.f);
-			ImGui::DragFloat("XSize##Impact Effect", &pImpactEffectComponent->GetXSize(), 0.01f, 0.0f, 10.0f, "%.2f", 0);
-
-			initial_curpos.y += 25.f;
-			ImGui::SetCursorPos(initial_curpos);
-			ImGui::SetNextItemWidth(190.f);
-			ImGui::DragFloat("YSize##Impact Effect", &pImpactEffectComponent->GetYSize(), 0.01f, 0.0f, 10.0f, "%.2f", 0);
-		}
 	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
 	if (ImGui::DragFloat(U8STR("투명도##ImpactEffect"), &pImpactEffectComponent->GetAlpha(), DRAG_FLOAT_UNIT, IMPACT_ALPHA_MIN, IMPACT_ALPHA_MAX, "%.2f", 0))
 		pImpactEffectComponent->GetAlpha() = std::clamp(pImpactEffectComponent->GetAlpha(), IMPACT_ALPHA_MIN, IMPACT_ALPHA_MAX);
+
+	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
+	if(ImGui::DragFloat(U8STR("X 크기##ImpactEffect"), &pImpactEffectComponent->GetXSize(), DRAG_FLOAT_UNIT, IMPACT_SIZE_MIN, IMPACT_SIZE_MAX, "%.2f", 0))
+		pImpactEffectComponent->GetXSize() = std::clamp(pImpactEffectComponent->GetXSize(), IMPACT_SIZE_MIN, IMPACT_SIZE_MAX);
+
+	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
+	if(ImGui::DragFloat(U8STR("Y 크기##ImpactEffect"), &pImpactEffectComponent->GetYSize(), DRAG_FLOAT_UNIT, IMPACT_SIZE_MIN, IMPACT_SIZE_MAX, "%.2f", 0))
+		pImpactEffectComponent->GetYSize() = std::clamp(pImpactEffectComponent->GetYSize(), IMPACT_SIZE_MIN, IMPACT_SIZE_MAX);
+	
 	ImGui::End();
 }
 void CImGuiManager::ShowParticleManager(CState<CPlayer>* pCurrentAnimation)
@@ -1216,15 +1210,13 @@ void CImGuiManager::ShowParticleManager(CState<CPlayer>* pCurrentAnimation)
 		pParticleComponent->SetParticleTexture(pTexture);
 	}
 
-			initial_curpos.y += 25.f;
-			ImGui::SetCursorPos(initial_curpos);
-			ImGui::SetNextItemWidth(190.f);
-			ImGui::DragFloat("XSize##ParticleEffect", &pParticleComponent->GetXSize(), 0.01f, 0.0f, 10.0f, "%.2f", 0);
+	ImGui::SetNextItemWidth(190.f);
+	if(ImGui::DragFloat("XSize##ParticleEffect", &pParticleComponent->GetXSize(), DRAG_FLOAT_UNIT, PARTICLE_SIZE_MIN, PARTICLE_SIZE_MAX, "%.2f", 0))
+		pParticleComponent->GetXSize() = std::clamp(pParticleComponent->GetXSize(), PARTICLE_SIZE_MIN, PARTICLE_SIZE_MAX);
 
-			initial_curpos.y += 25.f;
-			ImGui::SetCursorPos(initial_curpos);
-			ImGui::SetNextItemWidth(190.f);
-			ImGui::DragFloat("YSize##ParticleEffect", &pParticleComponent->GetYSize(), 0.01f, 0.0f, 10.0f, "%.2f", 0);
+	ImGui::SetNextItemWidth(190.f);
+	if (ImGui::DragFloat("YSize##ParticleEffect", &pParticleComponent->GetYSize(), DRAG_FLOAT_UNIT, PARTICLE_SIZE_MIN, PARTICLE_SIZE_MAX, "%.2f", 0))
+		pParticleComponent->GetYSize() = std::clamp(pParticleComponent->GetYSize(), PARTICLE_SIZE_MIN, PARTICLE_SIZE_MAX);
 
 	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
 	if (ImGui::DragFloat(U8STR("투명도##ParticleEffect"), &pParticleComponent->GetAlpha(), DRAG_FLOAT_UNIT, PARTICLE_ALPHA_MIN, PARTICLE_ALPHA_MAX, "%.2f", 0))

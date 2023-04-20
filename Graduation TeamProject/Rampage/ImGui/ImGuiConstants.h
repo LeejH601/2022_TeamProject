@@ -5,6 +5,9 @@
 #define IMPACT_SPEED_MIN 0.0f
 #define IMPACT_SPEED_MAX 10.0f
 
+#define IMPACT_SIZE_MIN 0.0f
+#define IMPACT_SIZE_MAX 10.0f
+
 #define IMPACT_ALPHA_MIN 0.0f
 #define IMPACT_ALPHA_MAX 10.0f
 

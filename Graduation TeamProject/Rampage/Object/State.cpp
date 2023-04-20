@@ -755,7 +755,9 @@ void Run_Player::Execute(CPlayer* player, float fElapsedTime)
 	}
 }
 
-
+void Run_Player::Animate(CPlayer* player, float fTimeElapsed)
+{
+	player->Animate(fTimeElapsed);
 }
 
 void Run_Player::Exit(CPlayer* player)
