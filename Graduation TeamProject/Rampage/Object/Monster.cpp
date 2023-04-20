@@ -155,11 +155,15 @@ void CMonster::SetHit(CGameObject* pHitter)
 {
 	if (m_bSimulateArticulate == false) { // 변수 체크가 아닌 현재 상태 체크를 이용하는 것이 좋을듯
 		m_xmf3HitterVec = Vector3::Normalize(Vector3::Subtract(GetPosition(), pHitter->GetPosition()));
+		((CPlayer*)pHitter)->m_fCurLagTime = 0.f;
 
 		SetLookAt(Vector3::Add(GetPosition(), XMFLOAT3(-m_xmf3HitterVec.x, 0.0f, -m_xmf3HitterVec.z)));
 
 		SoundPlayParams SoundPlayParam{ MONSTER_TYPE::NONE, SOUND_CATEGORY::SOUND_SHOCK };
 		CMessageDispatcher::GetInst()->Dispatch_Message<SoundPlayParams>(MessageType::PLAY_SOUND, &SoundPlayParam, this);
+
+		PlayerParams PlayerParam{ pHitter };
+		CMessageDispatcher::GetInst()->Dispatch_Message<PlayerParams>(MessageType::UPDATE_HITLAG, &PlayerParam, ((CPlayer*)pHitter)->m_pStateMachine->GetCurrentState());
 
 		m_pStateMachine->ChangeState(Idle_Monster::GetInst());
 		m_pStateMachine->ChangeState(Damaged_Monster::GetInst());

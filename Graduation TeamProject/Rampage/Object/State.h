@@ -2,33 +2,16 @@
 #include "..\Global\stdafx.h"
 #include "..\Global\MessageDispatcher.h"
 #include "Object.h"
+
 class CPlayer;
-
-
-// Define Stun Animation component
-class HitLagComponent{
-    bool m_bEnable = false;
-    float m_fMaxLagTime = 0.5f;
-    float m_fCurLagTime = 0.0f;
-public:
-    bool& GetEnable() { return m_bEnable; }
-    float& GetMaxLagTime() { return m_fMaxLagTime; }
-    float GetCurLagTime() { return m_fCurLagTime; }
-
-    void SetEnable(bool bEnable) { m_bEnable = bEnable; }
-    void SetMaxLagTime(float maxlagtime) { m_fMaxLagTime = maxlagtime; }
-    void SetCurLagTime(float lagtime) { m_fCurLagTime =  lagtime; }
-};
 
 template <class entity_type>
 class CState
 {
 protected:
     std::vector<std::unique_ptr<IMessageListener>> m_pListeners;
-    HitLagComponent m_HitlagComponent;
 public:
 	virtual ~CState() {}
-    HitLagComponent* GetHitLagComponent() { return &m_HitlagComponent; }
     virtual IMessageListener* GetShockSoundComponent();
     virtual IMessageListener* GetShootSoundComponent();
     virtual IMessageListener* GetEffectSoundComponent();
@@ -41,6 +24,7 @@ public:
     virtual IMessageListener* GetDamageAnimationComponent();
     virtual IMessageListener* GetShakeAnimationComponent();
     virtual IMessageListener* GetStunAnimationComponent();
+    virtual IMessageListener* GetHitLagComponent();
     virtual IMessageListener* GetParticleComponent();
     virtual IMessageListener* GetUpDownParticleComponent();
     virtual IMessageListener* GetImpactComponent();
@@ -342,6 +326,23 @@ inline IMessageListener* CState<entity_type>::GetStunAnimationComponent()
         }
         return false;
     });
+
+    if (p != m_pListeners.end())
+        return (*p).get();
+
+    return nullptr;
+}
+
+template<class entity_type>
+inline IMessageListener* CState<entity_type>::GetHitLagComponent()
+{
+    std::vector<std::unique_ptr<IMessageListener>>::iterator p = std::find_if(m_pListeners.begin(), m_pListeners.end(), [](const std::unique_ptr<IMessageListener>& listener) {
+        HitLagComponent* pHitLagComponent = dynamic_cast<HitLagComponent*>(listener.get());
+        if (pHitLagComponent) {
+            return true;
+        }
+        return false;
+        });
 
     if (p != m_pListeners.end())
         return (*p).get();

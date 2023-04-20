@@ -128,9 +128,10 @@ bool CPlayer::CheckCollision(CGameObject* pTargetObject)
 
 void CPlayer::Update(float fTimeElapsed)
 {
-	m_pStateMachine->Update(fTimeElapsed);
-
 	m_fTime += fTimeElapsed;
+	m_fCurLagTime += fTimeElapsed;
+
+	m_pStateMachine->Update(fTimeElapsed);
 
 	if (m_fTime > m_fMaxTime)
 	{

@@ -24,6 +24,8 @@ void Idle_Player::Enter(CPlayer* player)
 	player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition = 0.0f;
 	player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_nType = ANIMATION_TYPE_LOOP;
 	player->m_bAttack = false; // 사용자가 좌클릭시 true가 되는 변수
+
+	player->m_fAnimationPlayWeight = 1.0f;
 }
 
 void Idle_Player::Execute(CPlayer* player, float fElapsedTime)
@@ -139,6 +141,13 @@ Atk1_Player::Atk1_Player()
 	m_pListeners.push_back(std::move(pStunAnimationComponent));
 	CMessageDispatcher::GetInst()->RegisterListener(MessageType::UPDATE_OBJECT, m_pListeners.back().get(), this);
 
+	// HitLag ANIMATION
+	std::unique_ptr<HitLagComponent> pHitLagComponent = std::make_unique<HitLagComponent>();
+	pHitLagComponent->SetMaxLagTime(0.5f);
+	pHitLagComponent->SetLagScale(0.5f);
+	m_pListeners.push_back(std::move(pHitLagComponent));
+	CMessageDispatcher::GetInst()->RegisterListener(MessageType::UPDATE_HITLAG, m_pListeners.back().get(), this);
+
 	// PARTICLE
 	std::unique_ptr<ParticleComponent> pParticlenComponent = std::make_unique<ParticleComponent>();
 	m_pListeners.push_back(std::move(pParticlenComponent));
@@ -184,8 +193,8 @@ void Atk1_Player::Enter(CPlayer* player)
 	player->m_bAttack = false; // 사용자가 좌클릭시 true가 되는 변수
 	player->m_fCMDConstant = 1.0f;
 
-	if (m_HitlagComponent.GetEnable())
-		m_HitlagComponent.SetCurLagTime(0.0f);
+	player->m_fCurLagTime = 0.f;
+	player->m_fAnimationPlayWeight = 1.0f;
 
 	SoundPlayParams SoundPlayParam;
 	SoundPlayParam.sound_category = SOUND_CATEGORY::SOUND_SHOOT;
@@ -215,10 +224,15 @@ void Atk1_Player::Execute(CPlayer* player, float fElapsedTime)
 			dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[0].get())->m_bIsUpdateTrailVariables = false;
 		if (player->m_bAttack) {
 			player->m_pStateMachine->ChangeState(Atk2_Player::GetInst());
-
 		}
 	}
 
+	HitLagComponent* pHitLagComponent = dynamic_cast<HitLagComponent*>(GetHitLagComponent());
+	if (player->m_fCurLagTime > pHitLagComponent->GetMaxLagTime())
+	{
+		PlayerParams PlayerParam{ player };
+		CMessageDispatcher::GetInst()->Dispatch_Message<PlayerParams>(MessageType::UPDATE_HITLAG, &PlayerParam, this);
+	}
 
 	if (player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition == pAnimationSet->m_fLength)
 	{
@@ -342,6 +356,13 @@ Atk2_Player::Atk2_Player()
 	m_pListeners.push_back(std::move(pStunAnimationComponent));
 	CMessageDispatcher::GetInst()->RegisterListener(MessageType::UPDATE_OBJECT, m_pListeners.back().get(), this);
 
+	// HitLag ANIMATION
+	std::unique_ptr<HitLagComponent> pHitLagComponent = std::make_unique<HitLagComponent>();
+	pHitLagComponent->SetMaxLagTime(0.5f);
+	pHitLagComponent->SetLagScale(0.5f);
+	m_pListeners.push_back(std::move(pHitLagComponent));
+	CMessageDispatcher::GetInst()->RegisterListener(MessageType::UPDATE_HITLAG, m_pListeners.back().get(), this);
+
 	// PARTICLE ANIMATION
 	std::unique_ptr<ParticleComponent> pParticlenComponent = std::make_unique<ParticleComponent>();
 	m_pListeners.push_back(std::move(pParticlenComponent));
@@ -387,8 +408,8 @@ void Atk2_Player::Enter(CPlayer* player)
 	player->m_bAttack = false; // 사용자가 좌클릭시 true가 되는 변수
 	player->m_fCMDConstant = 1.0f;
 
-	if (m_HitlagComponent.GetEnable())
-		m_HitlagComponent.SetCurLagTime(0.0f);
+	player->m_fCurLagTime = 0.f;
+	player->m_fAnimationPlayWeight = 1.0f;
 
 	SoundPlayParams SoundPlayParam;
 	SoundPlayParam.sound_category = SOUND_CATEGORY::SOUND_SHOOT;
@@ -419,12 +440,17 @@ void Atk2_Player::Execute(CPlayer* player, float fElapsedTime)
 			player->m_pStateMachine->ChangeState(Atk3_Player::GetInst());
 	}
 
+	HitLagComponent* pHitLagComponent = dynamic_cast<HitLagComponent*>(GetHitLagComponent());
+	if (player->m_fCurLagTime > pHitLagComponent->GetMaxLagTime())
+	{
+		PlayerParams PlayerParam{ player };
+		CMessageDispatcher::GetInst()->Dispatch_Message<PlayerParams>(MessageType::UPDATE_HITLAG, &PlayerParam, this);
+	}
 
 	if (player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition == pAnimationSet->m_fLength)
 	{
 		player->m_pStateMachine->ChangeState(Idle_Player::GetInst());
 	}
-
 }
 
 void Atk2_Player::Animate(CPlayer* player, float fElapsedTime)
@@ -538,11 +564,12 @@ Atk3_Player::Atk3_Player()
 	m_pListeners.push_back(std::move(pShakeAnimationComponent));
 	CMessageDispatcher::GetInst()->RegisterListener(MessageType::UPDATE_OBJECT, m_pListeners.back().get(), this);
 
-	// STUN ANIMATION
-	std::unique_ptr<StunAnimationComponent> pStunAnimationComponent = std::make_unique<StunAnimationComponent>();
-	pStunAnimationComponent->SetStunTime(0.5f);
-	m_pListeners.push_back(std::move(pStunAnimationComponent));
-	CMessageDispatcher::GetInst()->RegisterListener(MessageType::UPDATE_OBJECT, m_pListeners.back().get(), this);
+	// HitLag ANIMATION
+	std::unique_ptr<HitLagComponent> pHitLagComponent = std::make_unique<HitLagComponent>();
+	pHitLagComponent->SetMaxLagTime(0.5f);
+	pHitLagComponent->SetLagScale(0.5f);
+	m_pListeners.push_back(std::move(pHitLagComponent));
+	CMessageDispatcher::GetInst()->RegisterListener(MessageType::UPDATE_HITLAG, m_pListeners.back().get(), this);
 
 	// PARTICLE ANIMATION
 	std::unique_ptr<ParticleComponent> pParticlenComponent = std::make_unique<ParticleComponent>();
@@ -590,8 +617,8 @@ void Atk3_Player::Enter(CPlayer* player)
 	player->m_bAttacked = false;
 	player->m_bAttack = false; // 사용자가 좌클릭시 true가 되는 변수
 
-	if (m_HitlagComponent.GetEnable())
-		m_HitlagComponent.SetCurLagTime(0.0f);
+	player->m_fCurLagTime = 0.f;
+	player->m_fAnimationPlayWeight = 1.0f;
 
 	SoundPlayParams SoundPlayParam;
 	SoundPlayParam.sound_category = SOUND_CATEGORY::SOUND_SHOOT;
@@ -619,6 +646,13 @@ void Atk3_Player::Execute(CPlayer* player, float fElapsedTime)
 		if (player->m_bAttack)
 			player->m_pStateMachine->ChangeState(Atk4_Player::GetInst());
 	}*/
+
+	HitLagComponent* pHitLagComponent = dynamic_cast<HitLagComponent*>(GetHitLagComponent());
+	if (player->m_fCurLagTime > pHitLagComponent->GetMaxLagTime())
+	{
+		PlayerParams PlayerParam{ player };
+		CMessageDispatcher::GetInst()->Dispatch_Message<PlayerParams>(MessageType::UPDATE_HITLAG, &PlayerParam, this);
+	}
 
 	CAnimationSet* pAnimationSet = player->m_pChild->m_pSkinnedAnimationController->m_pAnimationSets->m_pAnimationSets[player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_nAnimationSet];
 	if (player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition == pAnimationSet->m_fLength)
@@ -677,6 +711,7 @@ void Run_Player::Enter(CPlayer* player)
 	player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition = 0.0f;
 	player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_nType = ANIMATION_TYPE_LOOP;
 	player->m_bAttack = false; // 사용자가 좌클릭시 true가 되는 변수
+	player->m_fAnimationPlayWeight = 1.0f;
 }
 
 void Run_Player::Execute(CPlayer* player, float fElapsedTime)
@@ -746,6 +781,9 @@ void Atk4_Player::Enter(CPlayer* player)
 	player->m_bAttacked = false;
 	player->m_bAttack = false; // 사용자가 좌클릭시 true가 되는 변수
 
+	player->m_fCurLagTime = 0.f;
+	player->m_fAnimationPlayWeight = 1.0f;
+
 	if (player->m_pSwordTrailReference)
 		dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[3].get())->m_bIsUpdateTrailVariables = true;
 
@@ -813,6 +851,9 @@ void Atk5_Player::Enter(CPlayer* player)
 	player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_nType = ANIMATION_TYPE_ONCE;
 	player->m_bAttacked = false;
 	player->m_bAttack = false; // 사용자가 좌클릭시 true가 되는 변수
+
+	player->m_fCurLagTime = 0.f;
+	player->m_fAnimationPlayWeight = 1.0f;
 
 	if (player->m_pSwordTrailReference)
 		dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[4].get())->m_bIsUpdateTrailVariables = true;

@@ -416,3 +416,20 @@ void PlayerLocationListener::HandleMessage(const Message& message, const PlayerP
 	}
 }
 
+void HitLagComponent::HandleMessage(const Message& message, const PlayerParams& params)
+{
+	if (!m_bEnable)
+		return;
+
+	if (message.getType() == MessageType::UPDATE_HITLAG) {
+		CPlayer* pPlayer = (CPlayer*)params.pPlayer;
+		if (pPlayer->m_fCurLagTime < m_fMaxLagTime)
+		{
+			pPlayer->m_fAnimationPlayWeight *= m_fLagScale;
+			if (pPlayer->m_fAnimationPlayWeight < pPlayer->m_fAnimationPlayerWeightMin)
+				pPlayer->m_fAnimationPlayWeight = pPlayer->m_fAnimationPlayerWeightMin;
+		}
+		else
+			pPlayer->m_fAnimationPlayWeight = 1.0f;
+	}
+}
