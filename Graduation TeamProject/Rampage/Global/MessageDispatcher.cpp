@@ -5,7 +5,6 @@
 #include "..\Object\Player.h"
 #include "..\Object\Monster.h"
 #include "..\Object\MonsterState.h"
-#include "..\Object\ParticleObject.h"
 #include "..\Object\BillBoardObject.h"
 #include "..\Sound\SoundManager.h"
 #include "..\Scene\MainScene.h"
@@ -275,14 +274,14 @@ void ParticleComponent::HandleMessage(const Message& message, const ParticleComp
 
 	if (pParticle)
 	{
-		pParticle->SetStart(true);
+		pParticle->SetEmit(true);
 		pParticle->SetSize(m_fSize);
 		pParticle->SetStartAlpha(m_fAlpha);
 		pParticle->SetColor(m_xmf3Color);
 		pParticle->SetSpeed(m_fSpeed);
 		pParticle->SetLifeTime(m_fLifeTime);
 		pParticle->SetMaxParticleN(m_nParticleNumber);
-		pParticle->SetEmitParticleN(m_nParticleNumber);
+		pParticle->SetEmitParticleN(m_nEmitParticleNumber);
 		pParticle->SetPosition(params.xmf3Position);
 		pParticle->SetParticleType(m_iParticleType);
 		pParticle->ChangeTexture(m_pTexture);
@@ -313,31 +312,13 @@ void TerrainSpriteComponent::SetTexture(LPCTSTR pszFileName)
 {
 }
 
-//void TerrainSpriteComponent::SetSpeed(float fSpeed)
-//{
-//}
-//
-//void TerrainSpriteComponent::SetAlpha(float fAlpha)
-//{
-//}
-
-//
-//float& TerrainSpriteComponent::GetSpeed()
-//{
-//	// // O: 여기에 return 문을 삽입합니다.
-//}
-//
-//float& TerrainSpriteComponent::GetAlpha()
-//{
-//	// // O: 여기에 return 문을 삽입합니다.
-//}
-
 void TerrainSpriteComponent::HandleMessage(const Message& message, const TerrainSpriteCompParams& params)
 {
 	CTerrainSpriteObject* pSpriteObject = dynamic_cast<CTerrainSpriteObject*>(params.pObject);
 
 	if (pSpriteObject)
 	{
+		pSpriteObject->SetType(TerrainSpriteType::TERRAINSPRITE_CROSS_FADE);
 		pSpriteObject->SetEnable(true);
 		pSpriteObject->SetPosition(params.xmf3Position);
 		pSpriteObject->SetLifeTime(m_fLifeTime);
@@ -348,29 +329,27 @@ void TerrainSpriteComponent::HandleMessage(const Message& message, const Terrain
 
 void SmokeParticleComponent::HandleMessage(const Message& message, const ParticleSmokeParams& params)
 {
-
-	CParticleObject* pParticleObject = dynamic_cast<CParticleObject*>(((*params.pObjects)[params.iIndex]).get());
+	CParticleObject* pParticleObject = dynamic_cast<CParticleObject*>(params.pObject);
 	
-	pParticleObject->SetStart(true);
-	pParticleObject->SetPosition(params.xmf3Position);
-	pParticleObject->SetParticleType(m_iParticleType);
-	
-	pParticleObject->SetSize(m_fSize - m_fSize * params.iIndex * 0.05f);
-	pParticleObject->SetStartAlpha(m_fAlpha);
-	pParticleObject->SetColor(m_xmf3Color);
-	pParticleObject->SetLifeTime(m_fLifeTime);
-	pParticleObject->SetDirection(params.xmfDirection);
-	pParticleObject->SetSpeed(m_fSpeed);
-	
-	
-
+	if (pParticleObject)
+	{
+		pParticleObject->SetEmit(true);
+		pParticleObject->SetSize(m_fSize);
+		pParticleObject->SetStartAlpha(m_fAlpha);
+		pParticleObject->SetColor(m_xmf3Color);
+		pParticleObject->SetSpeed(m_fSpeed);
+		pParticleObject->SetLifeTime(m_fLifeTime);
+		pParticleObject->SetMaxParticleN(m_nParticleNumber);
+		pParticleObject->SetPosition(params.xmf3Position);
+		pParticleObject->SetParticleType(m_iParticleType);
+	}
 }
 
 void UpDownParticleComponent::HandleMessage(const Message& message, const ParticleUpDownParams& params)
 {
-	CParticleObject* pParticleObject = dynamic_cast<CParticleObject*>(((*params.pObjects)[params.iIndex]).get());
+	CParticleObject* pParticleObject = dynamic_cast<CParticleObject*>(params.pObject);
 
-	pParticleObject->SetStart(true);
+	pParticleObject->SetEmit(true);
 	pParticleObject->SetPosition(params.xmf3Position);
 	pParticleObject->SetParticleType(m_iParticleType);
 
@@ -380,7 +359,26 @@ void UpDownParticleComponent::HandleMessage(const Message& message, const Partic
 	pParticleObject->SetLifeTime(m_fLifeTime);
 	pParticleObject->SetSpeed(m_fSpeed);
 	pParticleObject->SetDirection(XMFLOAT3(0.f, 1.f, 0.f));
-	
+}
+
+
+void TrailParticleComponent::HandleMessage(const Message& message, const ParticleTrailParams& params)
+{
+	CParticleObject* pParticleObject = dynamic_cast<CParticleObject*>(params.pObject);
+	if (pParticleObject)
+	{
+		pParticleObject->SetEmit(true);
+		pParticleObject->SetSize(m_fSize);
+		pParticleObject->SetStartAlpha(m_fAlpha);
+		pParticleObject->SetColor(m_xmf3Color);
+		pParticleObject->SetSpeed(m_fSpeed);
+		pParticleObject->SetLifeTime(m_fLifeTime);
+		pParticleObject->SetMaxParticleN(m_nParticleNumber);
+		pParticleObject->SetEmitParticleN(m_nEmitMinParticleNumber + rand() % (m_nEmitMaxParticleNumber - m_nEmitMinParticleNumber));
+		pParticleObject->SetPosition(params.xmf3Position);
+		pParticleObject->SetParticleType(m_iParticleType);
+		//pParticleObject->ChangeTexture(m_pTexture);
+	}
 }
 
 void RegisterArticulationListener::HandleMessage(const Message& message, const RegisterArticulationParams& params)
@@ -396,3 +394,4 @@ void PlayerLocationListener::HandleMessage(const Message& message, const PlayerP
 		pMonster->CheckIsPlayerInFrontOfThis(params.pPlayer->GetPosition());
 	}
 }
+

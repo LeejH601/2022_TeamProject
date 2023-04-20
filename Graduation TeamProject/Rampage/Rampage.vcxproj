@@ -184,6 +184,7 @@
     <ClCompile Include="Object\Object.cpp" />
     <ClCompile Include="Object\PhysicsObject.cpp" />
     <ClCompile Include="Object\Player.cpp" />
+    <ClCompile Include="Object\PlayerParticleObject.cpp" />
     <ClCompile Include="Object\SkyBox.cpp" />
     <ClCompile Include="Object\State.cpp" />
     <ClCompile Include="Object\ParticleObject.cpp" />
@@ -209,6 +210,7 @@
     <ClCompile Include="Shader\Shader.cpp" />
     <ClCompile Include="Shader\SkyBoxShader.cpp" />
     <ClCompile Include="Shader\SunLightShader.cpp" />
+    <ClCompile Include="Shader\TerrainObjectShader.cpp" />
     <ClCompile Include="Shader\TerrainShader.cpp" />
     <ClCompile Include="Sound\Sound.cpp" />
     <ClCompile Include="Sound\SoundManager.cpp" />
@@ -243,6 +245,7 @@
     <ClInclude Include="Object\Object.h" />
     <ClInclude Include="Object\PhysicsObject.h" />
     <ClInclude Include="Object\Player.h" />
+    <ClInclude Include="Object\PlayerParticleObject.h" />
     <ClInclude Include="Object\SkyBox.h" />
     <ClInclude Include="Object\State.h" />
     <ClInclude Include="Object\StateMachine.h" />
@@ -268,6 +271,7 @@
     <ClInclude Include="Shader\Shader.h" />
     <ClInclude Include="Shader\SkyBoxShader.h" />
     <ClInclude Include="Shader\SunLightShader.h" />
+    <ClInclude Include="Shader\TerrainObjectShader.h" />
     <ClInclude Include="Shader\TerrainShader.h" />
     <ClInclude Include="Sound\Sound.h" />
     <ClInclude Include="Sound\SoundManager.h" />
@@ -505,6 +509,7 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Geometry</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.1</ShaderModel>
       <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(Filename).cso</ObjectFileOutput>
+      <DisableOptimizations Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</DisableOptimizations>
     </FxCompile>
     <FxCompile Include="Shader\ParticleStreamOutputVertexShader.hlsl">
       <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">VSParticleStreamOutput</EntryPointName>
@@ -613,6 +618,18 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
       <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">PS_TerrainDepthWriteShader</EntryPointName>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.1</ShaderModel>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(Filename).cso</ObjectFileOutput>
+    </FxCompile>
+    <FxCompile Include="Shader\TerrainObjectPixelShader.hlsl">
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">TerrainObject_PS</EntryPointName>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.1</ShaderModel>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(Filename).cso</ObjectFileOutput>
+    </FxCompile>
+    <FxCompile Include="Shader\TerrainObjectVertexShader.hlsl">
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">TerrainObject_VS</EntryPointName>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.1</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
       <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(Filename).cso</ObjectFileOutput>
     </FxCompile>
     <FxCompile Include="Shader\TerrainParallaxPixelShader.hlsl">

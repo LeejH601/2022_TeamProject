@@ -19,7 +19,6 @@ cbuffer cbFrameworkInfo : register(b7)
 {
 	float		gfCurrentTime : packoffset(c0.x);
 	float		gfElapsedTime : packoffset(c0.y);
-	//float		gfSecondsPerFirework : packoffset(c0.z); // EmmitParticles에서 사용 잠시 주석
 	float		gfSpeed : packoffset(c0.z);
 	int			gnFlareParticlesToEmit : packoffset(c0.w);;
 	float3		gf3Gravity : packoffset(c1.x);
@@ -27,8 +26,8 @@ cbuffer cbFrameworkInfo : register(b7)
 	float3		gfColor : packoffset(c2.x);
 	int			gnParticleType : packoffset(c2.w);
 	float		gfLifeTime : packoffset(c3.x);
-	float		gfSize : packoffset(c3.y);
-	bool		bStart : packoffset(c3.z);
+	float2		gfSize : packoffset(c3.y);
+	bool		bEmit : packoffset(c3.w);
 };
 
 Texture2D gtxtTexture : register(t0);
@@ -38,8 +37,8 @@ SamplerState gSamplerState : register(s0);
 struct VS_OUT
 {
 	float2 sizeW : SIZE;
-	uint  useBillBoard : USEBILLBOARD; // BILLBOARD 사용 유무
 	float lifetime : LIFETIME;
+	uint  useBillBoard : USEBILLBOARD; // BILLBOARD 사용 유무
 };
 
 struct GS_OUT
@@ -61,9 +60,10 @@ void GS(point VS_OUT input[1], uint primID : SV_PrimitiveID, inout TriangleStrea
 	float fHalfW = input[0].sizeW.x * 0.5f;
 	float fHalfH = input[0].sizeW.y * 0.5f;
 	float4 pVertices[4];
-	float2 pUVs[4] = { float2(0.f, 1.f), float2(0.f, 0.f), float2(1.f, 1.f) , float2(1.f, 0.f) };
+
 	if (!input[0].useBillBoard)
 	{
+		float2 pUVs[4] = { float2(-0.5f, 0.5f), float2(-0.5f, -0.5f), float2(0.5f, 0.5f) , float2(0.5f, -0.5f) };
 
 		pVertices[0] = float4(centerW.x + fHalfW, centerW.y, centerW.z - fHalfH, 1.0f); 
 		pVertices[1] = float4(centerW.x + fHalfW, centerW.y, centerW.z + fHalfH, 1.0f); 
@@ -77,12 +77,14 @@ void GS(point VS_OUT input[1], uint primID : SV_PrimitiveID, inout TriangleStrea
 			output.posH = mul(pVertices[i], mul(gmtxView, gmtxProjection));
 			output.normalW = float3(0.f, 1.f, 0.f);
 			output.uv = mul(float3(pUVs[i], 1.0f), (float3x3)(gmtxGameObject)).xy;
+			output.uv += 0.5f;
 			output.primID = primID;
 			outStream.Append(output);
 		}
 	}
 	else
 	{
+		float2 pUVs[4] = { float2(0.f, 1.f), float2(0.f, 0.f), float2(1.f, 1.f), float2(1.f, 0.f) };
 		vLook = normalize(vLook);
 		float3 vRight = cross(float3(0.f, 1.0f, 0.0f), vLook);
 		pVertices[0] = float4(centerW + fHalfW * vRight - fHalfH * vUp, 1.0f);

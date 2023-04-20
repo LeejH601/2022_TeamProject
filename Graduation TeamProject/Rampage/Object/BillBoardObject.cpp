@@ -13,6 +13,8 @@ CBillBoardObject::CBillBoardObject(std::shared_ptr<CTexture> pSpriteTexture, ID3
 
 	SetTexture(pSpriteTexture);
 	SetMesh(std::make_shared<CSpriteMesh>(pd3dDevice, pd3dCommandList, fSize, bBillBoard));
+
+
 }
 
 CBillBoardObject::~CBillBoardObject()
@@ -33,12 +35,6 @@ void CBillBoardObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, bool b
 		CGameObject::Render(pd3dCommandList, b_UseTexture, pCamera);
 
 	}
-}
-
-void CBillBoardObject::SetTarget(CGameObject* pTarget)
-{
-	if (pTarget)
-		m_pTarget = pTarget;
 }
 
 void CBillBoardObject::SetEnable(bool bEnable)
@@ -72,7 +68,6 @@ void CBillBoardObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dComm
 	//m_pcbMappedFrameworkInfo->m_nParticleType = 0;
 	//m_pcbMappedFrameworkInfo->m_fLifeTime = m_fLifeTime;
 	m_pcbMappedFrameworkInfo->m_fSize = m_fSize;
-	m_pcbMappedFrameworkInfo->m_bStart = m_bStart;
 
 	if (m_bStart)
 		m_bStart = !m_bStart;
@@ -131,7 +126,7 @@ void CMultiSpriteObject::SetEnable(bool bEnable)
 }
 
 
-void CMultiSpriteObject::SetSize(float fSize)
+void CMultiSpriteObject::SetSize(XMFLOAT2 fSize)
 {
 	m_fSize = fSize;
 }
@@ -188,10 +183,45 @@ CTerrainSpriteObject::~CTerrainSpriteObject()
 
 void CTerrainSpriteObject::Animate(CHeightMapTerrain* pTerrain, float fTimeElapsed)
 {
+	if (!m_bEnable)
+		return;
+
 	m_fTime -= fTimeElapsed * m_fSpeed; 
 
 	if (m_fTime < 0.f)
 		SetEnable(false);
+
+	switch (m_eTerrainSpriteType)
+	{
+	case TERRAINSPRITE_CROSS_FADE:
+		if (m_fTime > m_fLifeTime * 0.7f)
+		{
+			if (m_fDeltaSize <= 1.f)
+			{
+				m_fDeltaSize += fTimeElapsed * 5.f;
+			}
+			Rotate(0.f, 0.f, 7.f);
+		}
+		//if (m_fTime < m_fLifeTime * 0.5f)
+		//{
+		//	if (m_fDeltaSize >= 0.f)
+		//	{
+		//		m_fDeltaSize -= fTimeElapsed * 2.f;
+		//	}
+		//	Rotate(0.f, 0.f, 7.f);
+		//}
+		
+		
+		break;
+	case TERRAINSPRITE_FADE_IN:
+		break;
+	case TERRAINSPRITE_FADE_OUT:
+		break;
+	case TERRAINSPRITETYPE_END:
+		break;
+	default:
+		break;
+	}
 	//if (pTerrain)
 	//{
 	//	XMFLOAT3 xmf3Scale = pTerrain->GetScale();
@@ -219,9 +249,8 @@ void CTerrainSpriteObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3d
 	m_pcbMappedFrameworkInfo->m_xmf3Color = XMFLOAT3(1.f, 1.f, 1.f);
 	m_pcbMappedFrameworkInfo->m_nParticleType = 0;
 	m_pcbMappedFrameworkInfo->m_fLifeTime = m_fLifeTime;
-	m_pcbMappedFrameworkInfo->m_fSize = m_fSize;
-	m_pcbMappedFrameworkInfo->m_bStart = m_bStart;
-
+	m_pcbMappedFrameworkInfo->m_fSize = Vector2::ScalarProduct(m_fSize, m_fDeltaSize, false);
+	// 중간 정도 일때
 	if (m_bStart)
 		m_bStart = !m_bStart;
 
@@ -237,7 +266,15 @@ void CTerrainSpriteObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3d
 void CTerrainSpriteObject::SetEnable(bool bEnable)
 {
 	if ((!m_bEnable) && bEnable)
+	{
 		m_fTime = m_fLifeTime;
+		m_fDeltaSize = 0.f;
+	}
 	m_bEnable = bEnable;
 
+}
+
+void CTerrainSpriteObject::SetType(TerrainSpriteType eType)
+{
+	m_eTerrainSpriteType = eType;
 }

@@ -224,8 +224,10 @@ void DataLoader::SaveComponentSet(FILE* pInFile, CState<CPlayer>* pState)
 	WriteFloatFromFile(pInFile, pParticleComponent->GetLifeTime());
 	WriteStringFromFile(pInFile, std::string("<Speed>:"));
 	WriteFloatFromFile(pInFile, pParticleComponent->GetSpeed());
-	WriteStringFromFile(pInFile, std::string("<Size>:"));
-	WriteFloatFromFile(pInFile, pParticleComponent->GetSize());
+	WriteStringFromFile(pInFile, std::string("<Size_X>:"));
+	WriteFloatFromFile(pInFile, pParticleComponent->GetSize().x);
+	WriteStringFromFile(pInFile, std::string("<Size_Y>:"));
+	WriteFloatFromFile(pInFile, pParticleComponent->GetSize().y);
 	WriteStringFromFile(pInFile, std::string("<Color_R>:"));
 	WriteFloatFromFile(pInFile, pParticleComponent->GetColor().x);
 	WriteStringFromFile(pInFile, std::string("<Color_G>:"));
@@ -239,8 +241,10 @@ void DataLoader::SaveComponentSet(FILE* pInFile, CState<CPlayer>* pState)
 	WriteIntegerFromFile(pInFile, pImpactComponent->GetEnable());
 	WriteStringFromFile(pInFile, std::string("<TextureIndex>:"));
 	WriteIntegerFromFile(pInFile, pImpactComponent->GetTextureIndex());
-	WriteStringFromFile(pInFile, std::string("<Size>:"));
-	WriteFloatFromFile(pInFile, pImpactComponent->GetSize());
+	WriteStringFromFile(pInFile, std::string("<Size_X>:"));
+	WriteFloatFromFile(pInFile, pImpactComponent->GetSize().x);
+	WriteStringFromFile(pInFile, std::string("<Size_Y>:"));
+	WriteFloatFromFile(pInFile, pImpactComponent->GetSize().y);
 	WriteStringFromFile(pInFile, std::string("<Speed>:"));
 	WriteFloatFromFile(pInFile, pImpactComponent->GetSpeed());
 	WriteStringFromFile(pInFile, std::string("<Alpha>:"));
@@ -607,9 +611,13 @@ void DataLoader::LoadComponentSet(FILE* pInFile, CState<CPlayer>* pState)
 				{
 					pParticleComponent->SetSpeed(ReadFloatFromFile(pInFile));
 				}
-				else if (!strcmp(buf, "<Size>:"))
+				else if (!strcmp(buf, "<Size_X>:"))
 				{
-					pParticleComponent->SetSize(ReadFloatFromFile(pInFile));
+					pParticleComponent->SetSizeX(ReadFloatFromFile(pInFile));
+				}
+				else if (!strcmp(buf, "<Size_Y>:"))
+				{
+					pParticleComponent->SetSizeY(ReadFloatFromFile(pInFile));
 				}
 				else if (!strcmp(buf, "<Color_R>:"))
 				{
@@ -648,9 +656,13 @@ void DataLoader::LoadComponentSet(FILE* pInFile, CState<CPlayer>* pState)
 					std::shared_ptr<CTexture> pTexture = vTexture[pImpactComponent->GetTextureIndex()];
 					pImpactComponent->SetImpactTexture(pTexture);
 				}
-				else if (!strcmp(buf, "<Size>:"))
+				else if (!strcmp(buf, "<Size_X>:"))
 				{
-					pImpactComponent->SetSize(ReadFloatFromFile(pInFile));
+					pImpactComponent->SetSizeX(ReadFloatFromFile(pInFile));
+				}
+				else if (!strcmp(buf, "<Size_Y>:"))
+				{
+					pImpactComponent->SetSizeY(ReadFloatFromFile(pInFile));
 				}
 				else if (!strcmp(buf, "<Speed>:"))
 				{
@@ -915,7 +927,12 @@ void CImGuiManager::SetUI()
 			initial_curpos.y += 25.f;
 			ImGui::SetCursorPos(initial_curpos);
 			ImGui::SetNextItemWidth(190.f);
-			ImGui::DragFloat("Size##Impact Effect", &pImpactEffectComponent->GetSize(), 0.01f, 0.0f, 10.0f, "%.2f", 0);
+			ImGui::DragFloat("XSize##Impact Effect", &pImpactEffectComponent->GetXSize(), 0.01f, 0.0f, 10.0f, "%.2f", 0);
+
+			initial_curpos.y += 25.f;
+			ImGui::SetCursorPos(initial_curpos);
+			ImGui::SetNextItemWidth(190.f);
+			ImGui::DragFloat("YSize##Impact Effect", &pImpactEffectComponent->GetYSize(), 0.01f, 0.0f, 10.0f, "%.2f", 0);
 		}
 
 		initial_curpos.y += 25.f;
@@ -957,7 +974,12 @@ void CImGuiManager::SetUI()
 			initial_curpos.y += 25.f;
 			ImGui::SetCursorPos(initial_curpos);
 			ImGui::SetNextItemWidth(190.f);
-			ImGui::DragFloat("Size##ParticleEffect", &pParticleComponent->GetSize(), 0.01f, 0.0f, 10.0f, "%.2f", 0);
+			ImGui::DragFloat("XSize##ParticleEffect", &pParticleComponent->GetXSize(), 0.01f, 0.0f, 10.0f, "%.2f", 0);
+
+			initial_curpos.y += 25.f;
+			ImGui::SetCursorPos(initial_curpos);
+			ImGui::SetNextItemWidth(190.f);
+			ImGui::DragFloat("YSize##ParticleEffect", &pParticleComponent->GetYSize(), 0.01f, 0.0f, 10.0f, "%.2f", 0);
 
 			initial_curpos.y += 25.f;
 			ImGui::SetCursorPos(initial_curpos);

@@ -50,6 +50,7 @@
 #include <chrono>
 #include <random>
 #include <atlstr.h>
+#include <DirectXMath.h>
 #include "..\ImGui\imgui.h"
 #include "..\ImGui\imgui_impl_dx12.h"
 #include "..\ImGui\imgui_impl_win32.h"
@@ -109,6 +110,13 @@ extern int gnCurrentParticles;
 #define DIR_UP						0x10
 #define DIR_DOWN					0x20
 
+//MAX PARTICLE OBJECT
+#define MAX_PARTICLE_OBJECT 2
+#define MAX_ATTACKSPRITE_OBJECT 30
+#define MAX_TERRAINSPRITE_OBJECT 1
+#define MAX_UPDOWN_PARTICLE_OBJECT 30
+#define MAX_TRAIL_PARTICLE_OBJECT 60
+
 #define ATTACK_SOUND
 
 #define DECLARE_SINGLE(MYType)\
@@ -159,7 +167,24 @@ inline void Swap(float* pfS, float* pfT) { float fTemp = *pfS; *pfS = *pfT; *pfT
 
 
 
+namespace Vector2
+{
+	// 선형 보간 함수
+	inline XMFLOAT2 Interpolate(XMFLOAT2 p1, XMFLOAT2 p2, float t)
+	{
+		return XMFLOAT2(p1.x * (1 - t) + p2.x * t, p1.y * (1 - t) + p2.y * t);
+	}
 
+	inline XMFLOAT2 ScalarProduct(const XMFLOAT2& xmf2Vector, const float fScalar, bool bNormalize = true)
+	{
+		XMFLOAT2 xmf3Result;
+		if (bNormalize)
+			XMStoreFloat2(&xmf3Result, XMVector3Normalize(XMLoadFloat2(&xmf2Vector)) * fScalar);
+		else
+			XMStoreFloat2(&xmf3Result, XMLoadFloat2(&xmf2Vector) * fScalar);
+		return(xmf3Result);
+	}
+}
 namespace Vector3
 {
 	inline XMFLOAT3 XMVectorToFloat3(const XMVECTOR& xmvVector)
@@ -259,6 +284,23 @@ namespace Vector3
 	inline XMFLOAT3 TransformCoord(const XMFLOAT3& xmf3Vector, const XMFLOAT4X4& xmmtx4x4Matrix)
 	{
 		return(TransformCoord(xmf3Vector, XMLoadFloat4x4(&xmmtx4x4Matrix)));
+	}
+
+	// 베지어 곡선 함수 -> t는 곡선의 위치, 0 ~ 1까지의 값, p0,1,2,3은 제어점 위치 벡터들
+	inline XMFLOAT3 BezierCurve(float t, XMFLOAT3 p0, XMFLOAT3 p1, XMFLOAT3 p2, XMFLOAT3 p3) {
+		float u = 1.0f - t;
+		float tt = t * t;
+		float uu = u * u;
+		float uuu = uu * u;
+		float ttt = tt * t;
+
+		// 베지어 곡선의 공식에 따른 위치 벡터를 계산
+
+		XMFLOAT3 p = ScalarProduct(p0, uuu, false);
+		p = Add(p, ScalarProduct(ScalarProduct(ScalarProduct(p1, t, false), uu, false), 3.0f, false));
+		p = Add(p, ScalarProduct(ScalarProduct(ScalarProduct(p2, tt, false), u, false), 3.f, false));
+		p = Add(p, ScalarProduct(p3, ttt, false));
+		return p;
 	}
 }
 namespace Vector4
@@ -384,4 +426,6 @@ namespace Matrix4x4
 		XMStoreFloat4x4(&xmmtx4x4Result, XMMatrixLookAtLH(XMLoadFloat3(&xmf3EyePosition), XMLoadFloat3(&xmf3LookAtPosition), XMLoadFloat3(&xmf3UpDirection)));
 		return(xmmtx4x4Result);
 	}
+
 }
+

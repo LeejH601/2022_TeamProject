@@ -60,7 +60,7 @@ public:
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList);
 	virtual void PreRender(ID3D12GraphicsCommandList* pd3dCommandList, int nPipelineState) {};
 	virtual void PostRender(ID3D12GraphicsCommandList* pd3dCommandList, int nPipelineState) {};
-	virtual void OnPostRender(int nPipelineState) {};
+	virtual int OnPostRender(int nPipelineState) {return m_nVertices;};
 	std::vector<XMFLOAT3>& GetVertexs() { return m_pxmf3Positions; };
 	std::vector<UINT>& GetIndices() { return m_ppnSubSetIndices[0]; };
 
@@ -305,8 +305,8 @@ class CSpriteVertex
 {
 public:
 	XMFLOAT2						m_xmf2Size;
-	int								m_iBillBoard;
 	float							m_fLifetime;
+	int								m_iBillBoard;
 public:
 	CSpriteVertex() { m_xmf2Size = XMFLOAT2(0.f, 0.f), m_iBillBoard = true; m_fLifetime = 0.f; }
 	CSpriteVertex(XMFLOAT2 xmf2Size, bool bBillBoard)
@@ -317,6 +317,15 @@ public:
 	}
 	~CSpriteVertex() { }
 };
+
+class CTerrainMesh : public CMesh
+{
+
+public:
+	CTerrainMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float m_fSize);
+	virtual ~CTerrainMesh();
+};
+
 
 class CSpriteAnimateVertex
 {
@@ -349,7 +358,7 @@ public:
 	XMFLOAT3						m_xmf3Position = XMFLOAT3(0.0f, 0.0f, 0.0f);
 	XMFLOAT3						m_xmf3Velocity = XMFLOAT3(0.0f, 0.0f, 0.0f);
 	float							m_fLifetime = 0.0f;
-	float							m_fSpanTime = 0.f;	
+	UINT							m_iType = 0;
 
 public:
 	CParticleVertex() { }
@@ -366,8 +375,8 @@ public:
 	CParticleMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, XMFLOAT3 xmf3Position, XMFLOAT3 xmf3Velocity, float fLifetime, XMFLOAT3 xmf3Acceleration, XMFLOAT3 xmf3Color, XMFLOAT2 xmf2Size, UINT nMaxParticles);
 	virtual ~CParticleMesh();
 
-	bool								m_bStart = true;
-
+	bool								m_bEmit = true;
+	bool								m_bInitialized = false;
 	UINT								m_nMaxParticles = MAX_PARTICLES;
 	UINT								m_nMaxParticle = MAX_PARTICLES;
 
@@ -395,7 +404,7 @@ public:
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, UINT nPipelineState);
 	virtual void PostRender(ID3D12GraphicsCommandList* pd3dCommandList, UINT nPipelineState);
 
-	virtual void OnPostRender(int nPipelineState);
+	virtual int OnPostRender(int nPipelineState);
 };
 
 
