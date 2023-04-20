@@ -147,7 +147,7 @@ void CPlayer::Update(float fTimeElapsed)
 				xmf3Position = static_cast<CKnightObject*>(m_pChild.get())->GetWeaponMeshBoundingBox().Center;
 				xmf3Position = Vector3::Add(xmf3Position, Vector3::Normalize(xmf3Direction), 4.5f);
 
-				ParticleTrail_comp_params.pObject = CPlayerParticleObject::GetInst()->GetTrailObjects();
+				ParticleTrail_comp_params.pObject = CPlayerParticleObject::GetInst()->GetTrailParticleObjects();
 				ParticleTrail_comp_params.xmf3Position = xmf3Position;
 				ParticleTrail_comp_params.iPlayerAttack = 0;
 				ParticleTrail_comp_params.m_fTime = m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition;
@@ -173,7 +173,7 @@ void CPlayer::Update(float fTimeElapsed)
 				xmf3Direction = GetATKDirection();
 				xmf3Position = Vector3::Add(xmf3Position, Vector3::Normalize(xmf3Direction), 4.2f);
 
-				ParticleTrail_comp_params.pObject = CPlayerParticleObject::GetInst()->GetTrailObjects();
+				ParticleTrail_comp_params.pObject = CPlayerParticleObject::GetInst()->GetTrailParticleObjects();
 				ParticleTrail_comp_params.xmf3Position = xmf3Position;
 				ParticleTrail_comp_params.iPlayerAttack = 1;
 				ParticleTrail_comp_params.m_fTime = m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition;
