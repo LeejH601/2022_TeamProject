@@ -433,8 +433,6 @@
     <FxCompile Include="Shader\LensFlareGeometryShader.hlsl" />
     <FxCompile Include="Shader\LensFlareVertexShader.hlsl" />
     <FxCompile Include="Shader\LensFlarePixelShader.hlsl" />
-    <FxCompile Include="Shader\TerrainObjectPixelShader.hlsl" />
-    <FxCompile Include="Shader\TerrainObjectVertexShader.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Shader\Header.hlsli" />
