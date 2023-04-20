@@ -399,14 +399,14 @@ bool CMainTMPScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM 
 	case WM_LBUTTONDOWN:
 		// 좌클릭시 사용자가 좌클릭 했음을 표현하는 변수를 true로 바꿔줌
 		if (m_pPlayer)
+		{
 			((CPlayer*)m_pPlayer)->m_bAttack = true;
+			((CPlayer*)m_pPlayer)->m_iAttackId += 1;
+		}
 		break;
 	case WM_RBUTTONDOWN:
 		::SetCapture(hWnd);
 		::GetCursorPos(&m_ptOldCursorPos);
-
-		if(m_pPlayer)
-			((CPlayer*)m_pPlayer)->m_bAttack2 = true;
 		break;
 	case WM_LBUTTONUP:
 	case WM_RBUTTONUP:

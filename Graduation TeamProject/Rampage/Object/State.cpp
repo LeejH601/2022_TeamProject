@@ -28,8 +28,6 @@ void Idle_Player::Enter(CPlayer* player)
 
 void Idle_Player::Execute(CPlayer* player, float fElapsedTime)
 {
-	//player->Animate(fElapsedTime);
-
 	// 사용자가 좌클릭을 했으면 Atk1_Player로 상태 변경
 	if (player->m_bAttack)
 		player->m_pStateMachine->ChangeState(Atk1_Player::GetInst());
@@ -37,7 +35,7 @@ void Idle_Player::Execute(CPlayer* player, float fElapsedTime)
 
 void Idle_Player::Animate(CPlayer* player, float fElapsedTime)
 {
-	player->Animate(fElapsedTime);
+	player->Animate(fElapsedTime * player->GetAnimationPlayWeight());
 }
 
 void Idle_Player::Exit(CPlayer* player)
@@ -184,7 +182,6 @@ void Atk1_Player::Enter(CPlayer* player)
 	player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_nType = ANIMATION_TYPE_ONCE;
 	player->m_bAttacked = false;
 	player->m_bAttack = false; // 사용자가 좌클릭시 true가 되는 변수
-	player->m_iAttack_Limit = 1;
 	player->m_fCMDConstant = 1.0f;
 
 	if (m_HitlagComponent.GetEnable())
@@ -200,7 +197,6 @@ void Atk1_Player::Enter(CPlayer* player)
 
 void Atk1_Player::Execute(CPlayer* player, float fElapsedTime)
 {
-	// player->Animate(fElapsedTime);
 	CAnimationSet* pAnimationSet = player->m_pChild->m_pSkinnedAnimationController->m_pAnimationSets->m_pAnimationSets[player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_nAnimationSet];
 
 	// 충돌 판정 메세지 전달
@@ -232,17 +228,7 @@ void Atk1_Player::Execute(CPlayer* player, float fElapsedTime)
 
 void Atk1_Player::Animate(CPlayer* player, float fElapsedTime)
 {
-	if (m_HitlagComponent.GetEnable() && player->m_bAttacked)
-	{
-		if (m_HitlagComponent.GetCurLagTime() < m_HitlagComponent.GetMaxLagTime())
-			player->Animate(fElapsedTime * 0.01f);
-		else
-			player->Animate(fElapsedTime);
-
-		m_HitlagComponent.SetCurLagTime(m_HitlagComponent.GetCurLagTime() + fElapsedTime);
-	}
-	else
-		player->Animate(fElapsedTime);
+	player->Animate(fElapsedTime * player->GetAnimationPlayWeight());
 }
 
 void Atk1_Player::Exit(CPlayer* player)
@@ -399,7 +385,6 @@ void Atk2_Player::Enter(CPlayer* player)
 	player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_nType = ANIMATION_TYPE_ONCE;
 	player->m_bAttacked = false;
 	player->m_bAttack = false; // 사용자가 좌클릭시 true가 되는 변수
-	player->m_iAttack_Limit = 1;
 	player->m_fCMDConstant = 1.0f;
 
 	if (m_HitlagComponent.GetEnable())
@@ -415,7 +400,6 @@ void Atk2_Player::Enter(CPlayer* player)
 
 void Atk2_Player::Execute(CPlayer* player, float fElapsedTime)
 {
-	//player->Animate(fElapsedTime);
 	CAnimationSet* pAnimationSet = player->m_pChild->m_pSkinnedAnimationController->m_pAnimationSets->m_pAnimationSets[player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_nAnimationSet];
 
 	// 충돌 판정 메세지 전달
@@ -445,17 +429,7 @@ void Atk2_Player::Execute(CPlayer* player, float fElapsedTime)
 
 void Atk2_Player::Animate(CPlayer* player, float fElapsedTime)
 {
-	if (m_HitlagComponent.GetEnable() && player->m_bAttacked)
-	{
-		if (m_HitlagComponent.GetCurLagTime() < m_HitlagComponent.GetMaxLagTime())
-			player->Animate(fElapsedTime * 0.01f);
-		else
-			player->Animate(fElapsedTime);
-
-		m_HitlagComponent.SetCurLagTime(m_HitlagComponent.GetCurLagTime() + fElapsedTime);
-	}
-	else
-		player->Animate(fElapsedTime);
+	player->Animate(fElapsedTime * player->GetAnimationPlayWeight());
 }
 
 void Atk2_Player::Exit(CPlayer* player)
@@ -615,7 +589,6 @@ void Atk3_Player::Enter(CPlayer* player)
 	player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_nType = ANIMATION_TYPE_ONCE;
 	player->m_bAttacked = false;
 	player->m_bAttack = false; // 사용자가 좌클릭시 true가 되는 변수
-	player->m_iAttack_Limit = 1;
 
 	if (m_HitlagComponent.GetEnable())
 		m_HitlagComponent.SetCurLagTime(0.0f);
@@ -647,7 +620,6 @@ void Atk3_Player::Execute(CPlayer* player, float fElapsedTime)
 			player->m_pStateMachine->ChangeState(Atk4_Player::GetInst());
 	}*/
 
-	//player->Animate(fElapsedTime);
 	CAnimationSet* pAnimationSet = player->m_pChild->m_pSkinnedAnimationController->m_pAnimationSets->m_pAnimationSets[player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_nAnimationSet];
 	if (player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition == pAnimationSet->m_fLength)
 	{
@@ -666,17 +638,7 @@ void Atk3_Player::Execute(CPlayer* player, float fElapsedTime)
 
 void Atk3_Player::Animate(CPlayer* player, float fElapsedTime)
 {
-	if (m_HitlagComponent.GetEnable() && player->m_bAttacked)
-	{
-		if (m_HitlagComponent.GetCurLagTime() < m_HitlagComponent.GetMaxLagTime())
-			player->Animate(fElapsedTime * 0.01f);
-		else
-			player->Animate(fElapsedTime);
-
-		m_HitlagComponent.SetCurLagTime(m_HitlagComponent.GetCurLagTime() + fElapsedTime);
-	}
-	else
-		player->Animate(fElapsedTime);
+	player->Animate(fElapsedTime * player->GetAnimationPlayWeight());
 }
 
 void Atk3_Player::Exit(CPlayer* player)
@@ -757,7 +719,7 @@ void Run_Player::Execute(CPlayer* player, float fElapsedTime)
 
 void Run_Player::Animate(CPlayer* player, float fTimeElapsed)
 {
-	player->Animate(fTimeElapsed);
+	player->Animate(fTimeElapsed * player->GetAnimationPlayWeight());
 }
 
 void Run_Player::Exit(CPlayer* player)
@@ -783,7 +745,6 @@ void Atk4_Player::Enter(CPlayer* player)
 	player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_nType = ANIMATION_TYPE_ONCE;
 	player->m_bAttacked = false;
 	player->m_bAttack = false; // 사용자가 좌클릭시 true가 되는 변수
-	player->m_iAttack_Limit = 1;
 
 	if (player->m_pSwordTrailReference)
 		dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[3].get())->m_bIsUpdateTrailVariables = true;
@@ -811,8 +772,6 @@ void Atk4_Player::Execute(CPlayer* player, float fElapsedTime)
 			player->m_pStateMachine->ChangeState(Atk5_Player::GetInst());
 	}
 
-
-	//player->Animate(fElapsedTime);
 	CAnimationSet* pAnimationSet = player->m_pChild->m_pSkinnedAnimationController->m_pAnimationSets->m_pAnimationSets[player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_nAnimationSet];
 	if (player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition == pAnimationSet->m_fLength)
 	{
@@ -827,7 +786,7 @@ void Atk4_Player::Execute(CPlayer* player, float fElapsedTime)
 
 void Atk4_Player::Animate(CPlayer* player, float fElapsedTime)
 {
-	player->Animate(fElapsedTime);
+	player->Animate(fElapsedTime * player->GetAnimationPlayWeight());
 }
 
 void Atk4_Player::Exit(CPlayer* player)
@@ -854,7 +813,6 @@ void Atk5_Player::Enter(CPlayer* player)
 	player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_nType = ANIMATION_TYPE_ONCE;
 	player->m_bAttacked = false;
 	player->m_bAttack = false; // 사용자가 좌클릭시 true가 되는 변수
-	player->m_iAttack_Limit = 1;
 
 	if (player->m_pSwordTrailReference)
 		dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[4].get())->m_bIsUpdateTrailVariables = true;
@@ -875,7 +833,6 @@ void Atk5_Player::Execute(CPlayer* player, float fElapsedTime)
 		CMessageDispatcher::GetInst()->Dispatch_Message<PlayerParams>(MessageType::PLAYER_ATTACK, &PlayerParam, player);
 	}
 
-	//player->Animate(fElapsedTime);
 	CAnimationSet* pAnimationSet = player->m_pChild->m_pSkinnedAnimationController->m_pAnimationSets->m_pAnimationSets[player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_nAnimationSet];
 	if (player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition == pAnimationSet->m_fLength)
 	{
@@ -890,7 +847,7 @@ void Atk5_Player::Execute(CPlayer* player, float fElapsedTime)
 
 void Atk5_Player::Animate(CPlayer* player, float fElapsedTime)
 {
-	player->Animate(fElapsedTime);
+	player->Animate(fElapsedTime * player->GetAnimationPlayWeight());
 }
 
 void Atk5_Player::Exit(CPlayer* player)

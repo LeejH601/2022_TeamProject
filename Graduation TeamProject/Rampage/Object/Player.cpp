@@ -1,4 +1,5 @@
 #include "Player.h"
+#include "Monster.h"
 #include "..\Global\Camera.h"
 #include "..\Global\Locator.h"
 #include "..\Global\Global.h"
@@ -99,9 +100,8 @@ XMFLOAT4& CPlayer::GetTrailControllPoint(int n)
 
 bool CPlayer::CheckCollision(CGameObject* pTargetObject)
 {
-	bool flag = false;
 	if (m_pChild.get()) {
-		if (!m_bAttacked && m_pChild->CheckCollision(pTargetObject)) {
+		if ( (m_iAttackId != ((CMonster*)pTargetObject)->GetPlayerAtkId()) && m_pChild->CheckCollision(pTargetObject)) {
 
 			SoundPlayParams SoundPlayParam;
 			SoundPlayParam.sound_category = SOUND_CATEGORY::SOUND_SHOCK;
@@ -120,14 +120,10 @@ bool CPlayer::CheckCollision(CGameObject* pTargetObject)
 			m_xmf3TargetPosition = pTargetObject->GetPosition();
 			pTargetObject->SetHit(this);
 
-			flag = true;
-			m_iAttack_Limit--;
-
-			if (m_iAttack_Limit < 1)
-				m_bAttacked = true;
+			return true;
 		}
 	}
-	return flag;
+	return false;
 }
 
 void CPlayer::Update(float fTimeElapsed)

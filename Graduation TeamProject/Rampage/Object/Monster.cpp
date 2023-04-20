@@ -1,4 +1,5 @@
 #include "Monster.h"
+#include "Player.h"
 #include "ModelManager.h"
 #include "..\Global\Locator.h"
 #include "..\Shader\BoundingBoxShader.h"
@@ -148,6 +149,26 @@ void CMonster::UpdateTransform(XMFLOAT4X4* pxmf4x4Parent)
 		pWeaponBoundingBoxMesh->SetWorld(pWeapon->GetWorld());
 #endif 
 		m_WeaponBoundingBox.Transform(m_TransformedWeaponBoundingBox, XMLoadFloat4x4(&pWeapon->GetWorld()));
+	}
+}
+void CMonster::SetHit(CGameObject* pHitter)
+{
+	if (m_bSimulateArticulate == false) { // 변수 체크가 아닌 현재 상태 체크를 이용하는 것이 좋을듯
+		m_xmf3HitterVec = Vector3::Normalize(Vector3::Subtract(GetPosition(), pHitter->GetPosition()));
+
+		SetLookAt(Vector3::Add(GetPosition(), XMFLOAT3(-m_xmf3HitterVec.x, 0.0f, -m_xmf3HitterVec.z)));
+
+		SoundPlayParams SoundPlayParam{ MONSTER_TYPE::NONE, SOUND_CATEGORY::SOUND_SHOCK };
+		CMessageDispatcher::GetInst()->Dispatch_Message<SoundPlayParams>(MessageType::PLAY_SOUND, &SoundPlayParam, this);
+
+		m_pStateMachine->ChangeState(Idle_Monster::GetInst());
+		m_pStateMachine->ChangeState(Damaged_Monster::GetInst());
+		m_iPlayerAtkId = ((CPlayer*)pHitter)->GetAtkId();
+	}
+	else {
+		TCHAR pstrDebug[256] = { 0 };
+		//_stprintf_s(pstrDebug, 256, "Already Dead \n");
+		OutputDebugString(L"Already Dead");
 	}
 }
 void CMonster::UpdateTransformFromArticulation(XMFLOAT4X4* pxmf4x4Parent, std::vector<std::string> pArtiLinkNames, std::vector<XMFLOAT4X4>& AritculatCacheMatrixs, float scale)

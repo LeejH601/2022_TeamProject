@@ -13,10 +13,11 @@ public:
 	std::unique_ptr<CStateMachine<CPlayer>> m_pStateMachine;
 
 	int m_nAnimationNum = 0;
-	int m_iAttack_Limit;
-	bool m_bAttacked = false;
+	float m_fAnimationPlayWeight = 1.0f;
+
+	unsigned int m_iAttackId = 0;
 	bool m_bAttack = false;
-	bool m_bAttack2 = false;
+	bool m_bAttacked = false;
 
 	LPVOID m_pPlayerUpdatedContext = NULL;
 
@@ -34,6 +35,8 @@ public:
 	CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks);
 	virtual ~CPlayer();
 
+	int GetAtkId() { return m_iAttackId; }
+	float GetAnimationPlayWeight() { return m_fAnimationPlayWeight; }
 	XMFLOAT3 GetATKDirection();
 	XMFLOAT3 GetTargetPosition();
 

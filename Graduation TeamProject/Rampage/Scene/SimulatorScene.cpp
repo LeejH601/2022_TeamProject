@@ -364,7 +364,16 @@ void CSimulatorScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 	// 4->HIT
 	// 5->IDLE
 	std::unique_ptr<CMonster> m_pDummyEnemy = std::make_unique<CGoblinObject>(pd3dDevice, pd3dCommandList, 1);
-	m_pDummyEnemy->SetPosition(XMFLOAT3(50 + offset.x, 100, 50 + offset.z));
+	m_pDummyEnemy->SetPosition(XMFLOAT3(50 + offset.x, 100, 51 + offset.z));
+	m_pDummyEnemy->SetScale(4.0f, 4.0f, 4.0f);
+	m_pDummyEnemy->Rotate(0.0f, -90.0f, 0.0f);
+	m_pDummyEnemy->m_fHP = FLT_MAX;
+	m_pDummyEnemy->m_bIsDummy = true;
+	m_pDummyEnemy->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
+	m_pEnemys.push_back(std::move(m_pDummyEnemy));
+
+	m_pDummyEnemy = std::make_unique<CGoblinObject>(pd3dDevice, pd3dCommandList, 1);
+	m_pDummyEnemy->SetPosition(XMFLOAT3(50 + offset.x, 100, 49 + offset.z));
 	m_pDummyEnemy->SetScale(4.0f, 4.0f, 4.0f);
 	m_pDummyEnemy->Rotate(0.0f, -90.0f, 0.0f);
 	m_pDummyEnemy->m_fHP = FLT_MAX;
@@ -662,12 +671,15 @@ void CSimulatorScene::SetPlayerAnimationSet(int nSet)
 	{
 	case 0:
 		m_pMainCharacter->m_pStateMachine->ChangeState(Atk1_Player::GetInst());
+		m_pMainCharacter->m_iAttackId += 1;
 		break;
 	case 1:
 		m_pMainCharacter->m_pStateMachine->ChangeState(Atk2_Player::GetInst());
+		m_pMainCharacter->m_iAttackId += 1;
 		break;
 	case 2:
 		m_pMainCharacter->m_pStateMachine->ChangeState(Atk3_Player::GetInst());
+		m_pMainCharacter->m_iAttackId += 1;
 		break;
 	default:
 		break;
