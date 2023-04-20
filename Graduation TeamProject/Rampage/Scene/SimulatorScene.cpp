@@ -354,6 +354,7 @@ void CSimulatorScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 	m_pDummyEnemy->SetPosition(XMFLOAT3(50 + offset.x, 100, 50 + offset.z));
 	m_pDummyEnemy->SetScale(4.0f, 4.0f, 4.0f);
 	m_pDummyEnemy->Rotate(0.0f, -90.0f, 0.0f);
+	m_pDummyEnemy->m_fHP = FLT_MAX;
 	m_pDummyEnemy->m_bIsDummy = true;
 	m_pDummyEnemy->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
 	m_pEnemys.push_back(std::move(m_pDummyEnemy));

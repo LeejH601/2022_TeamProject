@@ -11,6 +11,7 @@ public:
     ~Global_Monster();
     virtual void Enter(CMonster* monster);
     virtual void Execute(CMonster* monster, float fElapsedTime);
+    virtual void Animate(CMonster* monster, float fElapsedTime);
     virtual void Exit(CMonster* monster);
 };
 
@@ -92,5 +93,6 @@ public:
     DECLARE_SINGLE(Dead_Monster);
     virtual void Enter(CMonster* monster);
     virtual void Execute(CMonster* monster, float fElapsedTime);
+    virtual void Animate(CMonster* monster, float fElapsedTime);
     virtual void Exit(CMonster* monster);
 };

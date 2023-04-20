@@ -286,6 +286,11 @@ void Dead_Monster::Execute(CMonster* monster, float fElapsedTime)
 
 }
 
+void Dead_Monster::Animate(CMonster* monster, float fElapsedTime)
+{
+	monster->Animate(fElapsedTime);
+}
+
 void Dead_Monster::Exit(CMonster* monster)
 {
 	monster->m_bSimulateArticulate = false;
@@ -309,6 +314,10 @@ void Global_Monster::Execute(CMonster* monster, float fElapsedTime)
 		if(monster->m_pStateMachine->GetCurrentState() != Dead_Monster::GetInst())
 			monster->m_pStateMachine->ChangeState(Dead_Monster::GetInst());
 	}
+}
+
+void Global_Monster::Animate(CMonster* monster, float fElapsedTime)
+{
 }
 
 void Global_Monster::Exit(CMonster* monster)

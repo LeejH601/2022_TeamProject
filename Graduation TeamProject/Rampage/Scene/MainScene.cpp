@@ -427,6 +427,10 @@ bool CMainTMPScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM 
 }
 SCENE_RETURN_TYPE CMainTMPScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam, DWORD& dwDirection)
 {
+	static int CursorHideCount = 0;
+
+	MOUSE_CUROSR_MODE eMouseMode = Locator.GetMouseCursorMode();
+
 	switch (nMessageID)
 	{
 	case WM_KEYDOWN:
@@ -435,14 +439,39 @@ SCENE_RETURN_TYPE CMainTMPScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMe
 		case VK_BACK:
 			return SCENE_RETURN_TYPE::RETURN_PREVIOUS_SCENE;
 		case '1':
-			m_pCurrentCamera = m_pFloatingCamera.get();
-			Locator.SetMouseCursorMode(MOUSE_CUROSR_MODE::FLOATING_MODE);
-			PostMessage(hWnd, WM_ACTIVATE, 0, 0);
+			{
+				RECT screenRect;
+				GetWindowRect(hWnd, &screenRect);
+				m_ScreendRect = screenRect;
+
+				m_pCurrentCamera = m_pFloatingCamera.get();
+				Locator.SetMouseCursorMode(MOUSE_CUROSR_MODE::FLOATING_MODE);
+				PostMessage(hWnd, WM_ACTIVATE, 0, 0);
+
+				while (CursorHideCount > 0)
+				{
+					CursorHideCount--;
+					ShowCursor(true);
+				}
+				ClipCursor(NULL);
+			}	
 			break;
 		case '2':
-			m_pCurrentCamera = m_pMainSceneCamera.get();
-			Locator.SetMouseCursorMode(MOUSE_CUROSR_MODE::THIRD_FERSON_MODE);
-			PostMessage(hWnd, WM_ACTIVATE, 0, 0);
+			{
+				RECT screenRect;
+				GetWindowRect(hWnd, &screenRect);
+				m_ScreendRect = screenRect;
+
+				m_pCurrentCamera = m_pMainSceneCamera.get();
+				Locator.SetMouseCursorMode(MOUSE_CUROSR_MODE::THIRD_FERSON_MODE);
+				PostMessage(hWnd, WM_ACTIVATE, 0, 0);
+
+				if (CursorHideCount < 1) {
+					CursorHideCount++;
+					ShowCursor(false);
+					ClipCursor(&screenRect);
+				}
+			}
 			break;
 		case 'f':
 		case 'F':
@@ -776,16 +805,32 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 }
 bool CMainTMPScene::ProcessInput(HWND hWnd, DWORD dwDirection, float fTimeElapsed)
 {
-	float cxDelta = 0.0f, cyDelta = 0.0f;
 	POINT ptCursorPos;
+	float cxDelta, cyDelta;
 
-	if (GetCapture() == hWnd)
-	{
-		SetCursor(NULL);
-		GetCursorPos(&ptCursorPos);
-		cxDelta = (float)(ptCursorPos.x - m_ptOldCursorPos.x) / 3.0f;
-		cyDelta = (float)(ptCursorPos.y - m_ptOldCursorPos.y) / 3.0f;
-		SetCursorPos(m_ptOldCursorPos.x, m_ptOldCursorPos.y);
+	if (Locator.GetMouseCursorMode() == MOUSE_CUROSR_MODE::FLOATING_MODE) {
+		if (GetCapture() == hWnd)
+		{
+			SetCursor(NULL);
+			GetCursorPos(&ptCursorPos);
+			cxDelta = (float)(ptCursorPos.x - m_ptOldCursorPos.x) / 3.0f;
+			cyDelta = (float)(ptCursorPos.y - m_ptOldCursorPos.y) / 3.0f;
+			SetCursorPos(m_ptOldCursorPos.x, m_ptOldCursorPos.y);
+		}
+	}
+
+	else if (Locator.GetMouseCursorMode() == MOUSE_CUROSR_MODE::THIRD_FERSON_MODE) {
+		m_ptOldCursorPos = POINT(m_ScreendRect.left + (m_ScreendRect.right - m_ScreendRect.left) / 2,
+			m_ScreendRect.top + (m_ScreendRect.bottom - m_ScreendRect.top) / 2
+		);
+
+		if (hWnd == GetFocus())
+		{
+			GetCursorPos(&ptCursorPos);
+			cxDelta = (float)(ptCursorPos.x - m_ptOldCursorPos.x) / 8.0f;
+			cyDelta = (float)(ptCursorPos.y - m_ptOldCursorPos.y) / 8.0f;
+			SetCursorPos(m_ptOldCursorPos.x, m_ptOldCursorPos.y);
+		}
 	}
 
 	m_pCurrentCamera->ProcessInput(dwDirection, cxDelta, cyDelta, fTimeElapsed);

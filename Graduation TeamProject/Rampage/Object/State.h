@@ -112,6 +112,7 @@ public:
 
     virtual void Enter(CPlayer* player);
     virtual void Execute(CPlayer* player, float fElapsedTime);
+    virtual void Animate(CPlayer* player, float fElapsedTime);
     virtual void Exit(CPlayer* player);
 };
 
@@ -124,6 +125,7 @@ public:
 
     virtual void Enter(CPlayer* player);
     virtual void Execute(CPlayer* player, float fElapsedTime);
+    virtual void Animate(CPlayer* player, float fElapsedTime);
     virtual void Exit(CPlayer* player);
 };
 

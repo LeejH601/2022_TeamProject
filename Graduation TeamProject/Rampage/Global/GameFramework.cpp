@@ -372,41 +372,11 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 }
 LRESULT CALLBACK CGameFramework::OnProcessingWindowMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
 {
-	static int CursorHideCount = 0;
 	switch (nMessageID)
 	{
 	case WM_ACTIVATE:
-	{
-		/*if (LOWORD(wParam) == WA_INACTIVE)
-			m_GameTimer.Stop();
-		else
-			m_GameTimer.Start();*/
-		RECT screenRect;
-		GetWindowRect(hWnd, &screenRect);
-		m_ScreendRect = screenRect;
-		MOUSE_CUROSR_MODE eMouseMode = Locator.GetMouseCursorMode();
-		switch (eMouseMode)
-		{
-		case MOUSE_CUROSR_MODE::THIRD_FERSON_MODE:
-			if (CursorHideCount < 1) {
-				CursorHideCount++;
-				ShowCursor(false);
-				ClipCursor(&screenRect);
-			}
-			break;
-		case MOUSE_CUROSR_MODE::FLOATING_MODE:
-			while (CursorHideCount > 0)
-			{
-				CursorHideCount--;
-				ShowCursor(true);
-			}
-			ClipCursor(NULL);
-			break;
-		default:
-			break;
-		}
+
 		break;
-	}
 	case WM_SIZE:
 	{
 		m_nWndClientWidth = LOWORD(lParam);
@@ -431,27 +401,7 @@ void CGameFramework::ProcessInput()
 {
 	float cxDelta = 0.0f, cyDelta = 0.0f;
 	POINT ptCursorPos;
-	if (Locator.GetMouseCursorMode() == MOUSE_CUROSR_MODE::FLOATING_MODE) {
-		if (GetCapture() == m_hWnd)
-		{
-			SetCursor(NULL);
-			GetCursorPos(&ptCursorPos);
-			cxDelta = (float)(ptCursorPos.x - m_ptOldCursorPos.x) / 3.0f;
-			cyDelta = (float)(ptCursorPos.y - m_ptOldCursorPos.y) / 3.0f;
-			SetCursorPos(m_ptOldCursorPos.x, m_ptOldCursorPos.y);
-		}
-	}
-	else if (Locator.GetMouseCursorMode() == MOUSE_CUROSR_MODE::THIRD_FERSON_MODE) {
-		m_ptOldCursorPos = POINT(m_ScreendRect.left + (m_ScreendRect.right - m_ScreendRect.left) / 2,
-			m_ScreendRect.top + (m_ScreendRect.bottom - m_ScreendRect.top) / 2
-		);
-		GetCursorPos(&ptCursorPos);
-		cxDelta = (float)(ptCursorPos.x - m_ptOldCursorPos.x) / 8.0f;
-		cyDelta = (float)(ptCursorPos.y - m_ptOldCursorPos.y) / 8.0f;
-
-		SetCursorPos(m_ptOldCursorPos.x, m_ptOldCursorPos.y);
-	}
-
+	
 	m_pSceneManager->ProcessInput(m_hWnd, dwDirection, m_GameTimer.GetFrameTimeElapsed());
 }
 void CGameFramework::UpdateObjects()

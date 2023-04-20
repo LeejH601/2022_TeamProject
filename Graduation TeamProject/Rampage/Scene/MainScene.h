@@ -27,6 +27,8 @@ struct DissolveParams {
 class CMainTMPScene : public CScene
 {
 private:
+	RECT m_ScreendRect;
+
 	std::vector<std::unique_ptr<CGameObject>> m_pObjects;
 	std::vector<UINT> m_IObjectIndexs;
 	std::unique_ptr<CLight> m_pLight;

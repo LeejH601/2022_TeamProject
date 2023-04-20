@@ -622,15 +622,12 @@ void Atk3_Player::Execute(CPlayer* player, float fElapsedTime)
 	}
 
 	// 사용자가 좌클릭을 했으면 애니메이션을 0.7초 진행 후 Atk2_Player로 상태 변경
-	if (0.7 < player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition) {
+	/*if (0.7 < player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition) {
 		if (player->m_pSwordTrailReference)
 			dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[2].get())->m_bIsUpdateTrailVariables = false;
 		if (player->m_bAttack)
 			player->m_pStateMachine->ChangeState(Atk4_Player::GetInst());
-	}
-
-
-
+	}*/
 
 	//player->Animate(fElapsedTime);
 	CAnimationSet* pAnimationSet = player->m_pChild->m_pSkinnedAnimationController->m_pAnimationSets->m_pAnimationSets[player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_nAnimationSet];
@@ -820,6 +817,11 @@ void Atk4_Player::Execute(CPlayer* player, float fElapsedTime)
 	}
 }
 
+void Atk4_Player::Animate(CPlayer* player, float fElapsedTime)
+{
+	player->Animate(fElapsedTime);
+}
+
 void Atk4_Player::Exit(CPlayer* player)
 {
 	if (player->m_pSwordTrailReference)
@@ -876,6 +878,11 @@ void Atk5_Player::Execute(CPlayer* player, float fElapsedTime)
 	{
 
 	}
+}
+
+void Atk5_Player::Animate(CPlayer* player, float fElapsedTime)
+{
+	player->Animate(fElapsedTime);
 }
 
 void Atk5_Player::Exit(CPlayer* player)
