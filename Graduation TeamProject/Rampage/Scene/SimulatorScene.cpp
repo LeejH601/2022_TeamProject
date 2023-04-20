@@ -13,10 +13,10 @@
 #include "..\Object\MonsterState.h"
 #include "..\Object\SwordTrailObject.h"
 
-#define MAX_PARTICLE_OBJECT 50
+#define MAX_PARTICLE_OBJECT 1
 #define MAX_RECOVERYPARTICLE_OBJECT 50
 #define MAX_ATTACKSPRITE_OBJECT 50
-#define MAX_TERRAINSPRITE_OBJECT 50
+#define MAX_TERRAINSPRITE_OBJECT 1
 
 void CSimulatorScene::OnPreRender(ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed)
 {
@@ -142,7 +142,7 @@ void CSimulatorScene::CreateGraphicsRootSignature(ID3D12Device* pd3dDevice)
 	pd3dRootParameters[13].DescriptorTable.pDescriptorRanges = &pd3dDescriptorRanges[5];
 	pd3dRootParameters[13].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 
-	D3D12_STATIC_SAMPLER_DESC d3dSamplerDesc[4];
+	D3D12_STATIC_SAMPLER_DESC d3dSamplerDesc[5];
 
 	d3dSamplerDesc[0].Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;
 	d3dSamplerDesc[0].AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
@@ -198,6 +198,19 @@ void CSimulatorScene::CreateGraphicsRootSignature(ID3D12Device* pd3dDevice)
 	d3dSamplerDesc[3].ShaderRegister = 3;
 	d3dSamplerDesc[3].RegisterSpace = 0;
 	d3dSamplerDesc[3].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+
+	d3dSamplerDesc[4].Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;
+	d3dSamplerDesc[4].AddressU = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
+	d3dSamplerDesc[4].AddressV = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
+	d3dSamplerDesc[4].AddressW = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
+	d3dSamplerDesc[4].MipLODBias = 0;
+	d3dSamplerDesc[4].MaxAnisotropy = 1;
+	d3dSamplerDesc[4].ComparisonFunc = D3D12_COMPARISON_FUNC_ALWAYS;
+	d3dSamplerDesc[4].MinLOD = 0;
+	d3dSamplerDesc[4].MaxLOD = D3D12_FLOAT32_MAX;
+	d3dSamplerDesc[4].ShaderRegister = 4;
+	d3dSamplerDesc[4].RegisterSpace = 0;
+	d3dSamplerDesc[4].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
 
 	D3D12_ROOT_SIGNATURE_FLAGS d3dRootSignatureFlags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT | D3D12_ROOT_SIGNATURE_FLAG_ALLOW_STREAM_OUTPUT | D3D12_ROOT_SIGNATURE_FLAG_DENY_HULL_SHADER_ROOT_ACCESS | D3D12_ROOT_SIGNATURE_FLAG_DENY_DOMAIN_SHADER_ROOT_ACCESS;
 	D3D12_ROOT_SIGNATURE_DESC d3dRootSignatureDesc;
@@ -445,8 +458,6 @@ void CSimulatorScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 		m_pTerrainSpriteObject.push_back(std::move(m_pSpriteObject));
 	}
 
-	Damaged_Monster::GetInst()->SetUpDownParticleObjects(&m_pUpDownParticleObjects);
-
 	m_pPostProcessShader = std::make_unique<CPostProcessShader>();
 	m_pPostProcessShader->CreateShader(pd3dDevice, GetGraphicsRootSignature(), 7, pdxgiObjectRtvFormats, DXGI_FORMAT_D32_FLOAT, 0);
 	m_pPostProcessShader->BuildObjects(pd3dDevice, pd3dCommandList);
@@ -568,12 +579,14 @@ void CSimulatorScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float f
 
 	for (int i = 0; i < m_pParticleObjects.size(); ++i)
 	{
+		((CParticleObject*)m_pParticleObjects[i].get())->Update(fTimeElapsed);
 		((CParticleObject*)m_pParticleObjects[i].get())->UpdateShaderVariables(pd3dCommandList, fCurrentTime, fTimeElapsed);
 		((CParticleObject*)m_pParticleObjects[i].get())->Render(pd3dCommandList, nullptr, m_pParticleShader.get());
 	}
 
 	for (int i = 0; i < m_pUpDownParticleObjects.size(); ++i)
 	{
+		((CParticleObject*)m_pUpDownParticleObjects[i].get())->Update(fTimeElapsed);
 		((CParticleObject*)m_pUpDownParticleObjects[i].get())->UpdateShaderVariables(pd3dCommandList, fCurrentTime, fTimeElapsed);
 		((CParticleObject*)m_pUpDownParticleObjects[i].get())->Render(pd3dCommandList, nullptr, m_pParticleShader.get());
 	}
@@ -670,7 +683,7 @@ void CSimulatorScene::SetPlayerAnimationSet(int nSet)
 void CSimulatorScene::HandleCollision(const CollideParams& params)
 {
 	std::vector<std::unique_ptr<CGameObject>>::iterator it = std::find_if(m_pParticleObjects.begin(), m_pParticleObjects.end(), [](const std::unique_ptr<CGameObject>& pParticleObject) {
-		if (!((CParticleObject*)pParticleObject.get())->GetEnable())
+		if (((CParticleObject*)pParticleObject.get())->CheckCapacity())
 			return true;
 		return false;
 		});
@@ -683,24 +696,23 @@ void CSimulatorScene::HandleCollision(const CollideParams& params)
 		CMessageDispatcher::GetInst()->Dispatch_Message<ParticleCompParams>(MessageType::UPDATE_PARTICLE, &particle_comp_params, m_pMainCharacter->m_pStateMachine->GetCurrentState());
 	}
 
+	it = std::find_if(m_pUpDownParticleObjects.begin(), m_pUpDownParticleObjects.end(), [](const std::unique_ptr<CGameObject>& pBillBoardObject) {
+		if (((CParticleObject*)pBillBoardObject.get())->CheckCapacity())
+			return true;
+		return false;
+		});
 
-	//it = std::find_if(m_pUpDownParticleObjects.begin(), m_pUpDownParticleObjects.end(), [](const std::unique_ptr<CGameObject>& pParticleObject) {
-	//	if (!((CParticleObject*)pParticleObject.get())->GetEnable())
-	//		return true;
-	//	return false;
-	//	});
 
-	//if (it != m_pUpDownParticleObjects.end())
-	//{
-	//	ParticleUpDownParams particle_comp_params;
-	//	particle_comp_params.pObject = (*it).get();
-	//	particle_comp_params.xmf3Position = params.xmf3CollidePosition;
-	//	CMessageDispatcher::GetInst()->Dispatch_Message<ParticleUpDownParams>(MessageType::UPDATE_PARTICLE, &particle_comp_params, m_pMainCharacter->m_pStateMachine->GetCurrentState());
-	//}
-
+	if (it != m_pUpDownParticleObjects.end())
+	{
+		ParticleUpDownParams particleUpdown_comp_params;
+		particleUpdown_comp_params.pObject = (*it).get();
+		particleUpdown_comp_params.xmf3Position = params.xmf3CollidePosition;
+		CMessageDispatcher::GetInst()->Dispatch_Message<ParticleUpDownParams>(MessageType::UPDATE_UPDOWNPARTICLE, &particleUpdown_comp_params, Damaged_Monster::GetInst());
+	}
 	
 	it = std::find_if(m_pBillBoardObjects.begin(), m_pBillBoardObjects.end(), [](const std::unique_ptr<CGameObject>& pBillBoardObject) {
-		if (!((CParticleObject*)pBillBoardObject.get())->GetEnable())
+		if (!((CMultiSpriteObject*)pBillBoardObject.get())->GetEnable())
 			return true;
 		return false;
 		});

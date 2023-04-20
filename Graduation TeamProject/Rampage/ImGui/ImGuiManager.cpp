@@ -261,8 +261,10 @@ void DataLoader::SaveComponentSet(FILE* pInFile, CState<CPlayer>* pState)
 	WriteFloatFromFile(pInFile, pParticleComponent->GetLifeTime());
 	WriteStringFromFile(pInFile, std::string("<Speed>:"));
 	WriteFloatFromFile(pInFile, pParticleComponent->GetSpeed());
-	WriteStringFromFile(pInFile, std::string("<Size>:"));
-	WriteFloatFromFile(pInFile, pParticleComponent->GetSize());
+	WriteStringFromFile(pInFile, std::string("<Size_X>:"));
+	WriteFloatFromFile(pInFile, pParticleComponent->GetSize().x);
+	WriteStringFromFile(pInFile, std::string("<Size_Y>:"));
+	WriteFloatFromFile(pInFile, pParticleComponent->GetSize().y);
 	WriteStringFromFile(pInFile, std::string("<Color_R>:"));
 	WriteFloatFromFile(pInFile, pParticleComponent->GetColor().x);
 	WriteStringFromFile(pInFile, std::string("<Color_G>:"));
@@ -276,8 +278,10 @@ void DataLoader::SaveComponentSet(FILE* pInFile, CState<CPlayer>* pState)
 	WriteIntegerFromFile(pInFile, pImpactComponent->GetEnable());
 	WriteStringFromFile(pInFile, std::string("<TextureIndex>:"));
 	WriteIntegerFromFile(pInFile, pImpactComponent->GetTextureIndex());
-	WriteStringFromFile(pInFile, std::string("<Size>:"));
-	WriteFloatFromFile(pInFile, pImpactComponent->GetSize());
+	WriteStringFromFile(pInFile, std::string("<Size_X>:"));
+	WriteFloatFromFile(pInFile, pImpactComponent->GetSize().x);
+	WriteStringFromFile(pInFile, std::string("<Size_Y>:"));
+	WriteFloatFromFile(pInFile, pImpactComponent->GetSize().y);
 	WriteStringFromFile(pInFile, std::string("<Speed>:"));
 	WriteFloatFromFile(pInFile, pImpactComponent->GetSpeed());
 	WriteStringFromFile(pInFile, std::string("<Alpha>:"));
@@ -652,9 +656,13 @@ void DataLoader::LoadComponentSet(FILE* pInFile, CState<CPlayer>* pState)
 				{
 					pParticleComponent->SetSpeed(ReadFloatFromFile(pInFile));
 				}
-				else if (!strcmp(buf, "<Size>:"))
+				else if (!strcmp(buf, "<Size_X>:"))
 				{
-					pParticleComponent->SetSize(ReadFloatFromFile(pInFile));
+					pParticleComponent->SetSizeX(ReadFloatFromFile(pInFile));
+				}
+				else if (!strcmp(buf, "<Size_Y>:"))
+				{
+					pParticleComponent->SetSizeY(ReadFloatFromFile(pInFile));
 				}
 				else if (!strcmp(buf, "<Color_R>:"))
 				{
@@ -693,9 +701,13 @@ void DataLoader::LoadComponentSet(FILE* pInFile, CState<CPlayer>* pState)
 					std::shared_ptr<CTexture> pTexture = vTexture[pImpactComponent->GetTextureIndex()];
 					pImpactComponent->SetImpactTexture(pTexture);
 				}
-				else if (!strcmp(buf, "<Size>:"))
+				else if (!strcmp(buf, "<Size_X>:"))
 				{
-					pImpactComponent->SetSize(ReadFloatFromFile(pInFile));
+					pImpactComponent->SetSizeX(ReadFloatFromFile(pInFile));
+				}
+				else if (!strcmp(buf, "<Size_Y>:"))
+				{
+					pImpactComponent->SetSizeY(ReadFloatFromFile(pInFile));
 				}
 				else if (!strcmp(buf, "<Speed>:"))
 				{
@@ -1155,6 +1167,21 @@ void CImGuiManager::ShowImpactManager(CState<CPlayer>* pCurrentAnimation)
 	if (ImGui::DragFloat(U8STR("재생 속도##ImpactEffect"), &pImpactEffectComponent->GetSpeed(), DRAG_FLOAT_UNIT, IMPACT_SPEED_MIN, IMPACT_SPEED_MAX, "%.2f", 0))
 		pImpactEffectComponent->GetSpeed() = std::clamp(pImpactEffectComponent->GetSpeed(), IMPACT_SPEED_MIN, IMPACT_SPEED_MAX);
 
+			initial_curpos.y += 25.f;
+			ImGui::SetCursorPos(initial_curpos);
+			ImGui::SetNextItemWidth(190.f);
+			ImGui::DragFloat("Alpha##Impact Effect", &pImpactEffectComponent->GetAlpha(), 0.01f, 0.0f, 10.0f, "%.2f", 0);
+
+			initial_curpos.y += 25.f;
+			ImGui::SetCursorPos(initial_curpos);
+			ImGui::SetNextItemWidth(190.f);
+			ImGui::DragFloat("XSize##Impact Effect", &pImpactEffectComponent->GetXSize(), 0.01f, 0.0f, 10.0f, "%.2f", 0);
+
+			initial_curpos.y += 25.f;
+			ImGui::SetCursorPos(initial_curpos);
+			ImGui::SetNextItemWidth(190.f);
+			ImGui::DragFloat("YSize##Impact Effect", &pImpactEffectComponent->GetYSize(), 0.01f, 0.0f, 10.0f, "%.2f", 0);
+		}
 	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
 	if (ImGui::DragFloat(U8STR("투명도##ImpactEffect"), &pImpactEffectComponent->GetAlpha(), DRAG_FLOAT_UNIT, IMPACT_ALPHA_MIN, IMPACT_ALPHA_MAX, "%.2f", 0))
 		pImpactEffectComponent->GetAlpha() = std::clamp(pImpactEffectComponent->GetAlpha(), IMPACT_ALPHA_MIN, IMPACT_ALPHA_MAX);
@@ -1189,8 +1216,15 @@ void CImGuiManager::ShowParticleManager(CState<CPlayer>* pCurrentAnimation)
 		pParticleComponent->SetParticleTexture(pTexture);
 	}
 
-	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
-	ImGui::DragFloat(U8STR("크기##ParticleEffect"), &pParticleComponent->GetSize(), DRAG_FLOAT_UNIT, PARTICLE_SIZE_MIN, PARTICLE_SIZE_MAX, "%.2f", 0);
+			initial_curpos.y += 25.f;
+			ImGui::SetCursorPos(initial_curpos);
+			ImGui::SetNextItemWidth(190.f);
+			ImGui::DragFloat("XSize##ParticleEffect", &pParticleComponent->GetXSize(), 0.01f, 0.0f, 10.0f, "%.2f", 0);
+
+			initial_curpos.y += 25.f;
+			ImGui::SetCursorPos(initial_curpos);
+			ImGui::SetNextItemWidth(190.f);
+			ImGui::DragFloat("YSize##ParticleEffect", &pParticleComponent->GetYSize(), 0.01f, 0.0f, 10.0f, "%.2f", 0);
 
 	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
 	if (ImGui::DragFloat(U8STR("투명도##ParticleEffect"), &pParticleComponent->GetAlpha(), DRAG_FLOAT_UNIT, PARTICLE_ALPHA_MIN, PARTICLE_ALPHA_MAX, "%.2f", 0))

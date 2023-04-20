@@ -1,6 +1,6 @@
-#include "BillBoardObjectShader.h"
+#include "TerrainObjectShader.h"
 #include "../Object/Texture.h"
-void CBillBoardObjectShader::CreateShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature, UINT nRenderTargets, DXGI_FORMAT* pdxgiRtvFormats, int nPipelineState)
+void CTerrainObjectShader::CreateShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature, UINT nRenderTargets, DXGI_FORMAT* pdxgiRtvFormats, int nPipelineState)
 {
 	m_nPipelineStates = 1;
 	m_ppd3dPipelineStates.resize(m_nPipelineStates);
@@ -31,7 +31,7 @@ void CBillBoardObjectShader::CreateShader(ID3D12Device* pd3dDevice, ID3D12RootSi
 
 	if (d3dPipelineStateDesc.InputLayout.pInputElementDescs) delete[] d3dPipelineStateDesc.InputLayout.pInputElementDescs;
 }
-D3D12_DEPTH_STENCIL_DESC CBillBoardObjectShader::CreateDepthStencilState(int nPipelineState)
+D3D12_DEPTH_STENCIL_DESC CTerrainObjectShader::CreateDepthStencilState(int nPipelineState)
 {
 	D3D12_DEPTH_STENCIL_DESC d3dDepthStencilDesc;
 	::ZeroMemory(&d3dDepthStencilDesc, sizeof(D3D12_DEPTH_STENCIL_DESC));
@@ -52,7 +52,7 @@ D3D12_DEPTH_STENCIL_DESC CBillBoardObjectShader::CreateDepthStencilState(int nPi
 
 	return(d3dDepthStencilDesc);
 }
-D3D12_BLEND_DESC CBillBoardObjectShader::CreateBlendState(int nPipelineState)
+D3D12_BLEND_DESC CTerrainObjectShader::CreateBlendState(int nPipelineState)
 {
 	D3D12_BLEND_DESC d3dBlendDesc;
 	::ZeroMemory(&d3dBlendDesc, sizeof(D3D12_BLEND_DESC));
@@ -71,7 +71,7 @@ D3D12_BLEND_DESC CBillBoardObjectShader::CreateBlendState(int nPipelineState)
 
 	return(d3dBlendDesc);
 }
-D3D12_RASTERIZER_DESC CBillBoardObjectShader::CreateRasterizerState(int nPipelineState)
+D3D12_RASTERIZER_DESC CTerrainObjectShader::CreateRasterizerState(int nPipelineState)
 {
 	D3D12_RASTERIZER_DESC d3dRasterizerDesc;
 	::ZeroMemory(&d3dRasterizerDesc, sizeof(D3D12_RASTERIZER_DESC));
@@ -89,26 +89,25 @@ D3D12_RASTERIZER_DESC CBillBoardObjectShader::CreateRasterizerState(int nPipelin
 
 	return(d3dRasterizerDesc);
 }
-D3D12_SHADER_BYTECODE CBillBoardObjectShader::CreateVertexShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
+D3D12_SHADER_BYTECODE CTerrainObjectShader::CreateVertexShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
 {
-	return(CShader::ReadCompiledShaderFile(L"BillboardObjectVertexShader.cso", ppd3dShaderBlob));
+	return(CShader::ReadCompiledShaderFile(L"TerrainObjectVertexShader.cso", ppd3dShaderBlob));
 }
-D3D12_SHADER_BYTECODE CBillBoardObjectShader::CreatePixelShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
+D3D12_SHADER_BYTECODE CTerrainObjectShader::CreatePixelShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
 {
-	return(CShader::ReadCompiledShaderFile(L"BillboardObjectPixelShader.cso", ppd3dShaderBlob));
+	return(CShader::ReadCompiledShaderFile(L"TerrainObjectPixelShader.cso", ppd3dShaderBlob));
 }
-D3D12_SHADER_BYTECODE CBillBoardObjectShader::CreateGeometryShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
+D3D12_SHADER_BYTECODE CTerrainObjectShader::CreateGeometryShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
 {
-	return(CShader::ReadCompiledShaderFile(L"BillboardObjectGSShader.cso", ppd3dShaderBlob));
+	return(CShader::CreateGeometryShader(ppd3dShaderBlob, 0));
 }
-D3D12_INPUT_LAYOUT_DESC CBillBoardObjectShader::CreateInputLayout(int nPipelineState)
+D3D12_INPUT_LAYOUT_DESC CTerrainObjectShader::CreateInputLayout(int nPipelineState)
 {
-	UINT nInputElementDescs = 3;
+	UINT nInputElementDescs = 2;
 	D3D12_INPUT_ELEMENT_DESC* pd3dInputElementDescs = new D3D12_INPUT_ELEMENT_DESC[nInputElementDescs];
 
-	pd3dInputElementDescs[0] = { "SIZE", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
-	pd3dInputElementDescs[1] = { "LIFETIME", 0, DXGI_FORMAT_R32_FLOAT, 0, 8, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
-	pd3dInputElementDescs[2] = { "USEBILLBOARD", 0, DXGI_FORMAT_R8_UINT, 0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+	pd3dInputElementDescs[0] = { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+	pd3dInputElementDescs[1] = { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
 	
 
 	D3D12_INPUT_LAYOUT_DESC d3dInputLayoutDesc;

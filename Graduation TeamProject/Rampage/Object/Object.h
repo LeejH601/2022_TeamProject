@@ -224,6 +224,8 @@ public:
 	
 
 	virtual BoundingBox GetBoundingBox() { return m_TransformedBodyBoundingBox; }
+	virtual BoundingBox GetWeaponMeshBoundingBox() { return m_TransformedWeaponBoundingBox; }
+
 	virtual bool CheckCollision(CGameObject* pTargetObject);
 
 	virtual void Animate(float fTimeElapsed);

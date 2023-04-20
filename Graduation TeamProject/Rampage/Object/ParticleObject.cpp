@@ -3,7 +3,7 @@
 #include "ParticleObject.h"
 #include "../Shader/ParticleShader.h"
 
-CParticleObject::CParticleObject(std::shared_ptr<CTexture> pSpriteTexture, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, XMFLOAT3 xmf3Position, XMFLOAT3 xmf3Velocity, float fLifetime, XMFLOAT3 xmf3Acceleration, XMFLOAT3 xmf3Color, XMFLOAT2 xmf2Size, UINT nMaxParticles, CParticleShader* pShader, int iParticleType, bool bEnable) : m_bEnable(bEnable)
+CParticleObject::CParticleObject(std::shared_ptr<CTexture> pSpriteTexture, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, XMFLOAT3 xmf3Position, XMFLOAT3 xmf3Velocity, float fLifetime, XMFLOAT3 xmf3Acceleration, XMFLOAT3 xmf3Color, XMFLOAT2 xmf2Size, UINT nMaxParticles, CParticleShader* pShader, int iParticleType)
 {
 	m_xmf4x4World = Matrix4x4::Identity();
 	m_xmf4x4Transform = Matrix4x4::Identity();
@@ -48,10 +48,8 @@ void CParticleObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dComma
 	m_pcbMappedFrameworkInfo->m_nParticleType = m_iParticleType;
 	m_pcbMappedFrameworkInfo->m_fLifeTime = m_fLifeTime;
 	m_pcbMappedFrameworkInfo->m_fSize = m_fSize;
-	m_pcbMappedFrameworkInfo->m_bStart = m_bStart;
+	m_pcbMappedFrameworkInfo->m_bEmitter = dynamic_cast<CParticleMesh*>(m_pMesh.get())->m_bEmit;
 
-	if (m_bStart) // 1번만 파티클을 생성하도록(emit particle) - Sphere일 경우에만
-		m_bStart = !m_bStart;
 	D3D12_GPU_VIRTUAL_ADDRESS d3dGpuVirtualAddress = m_pd3dcbFrameworkInfo->GetGPUVirtualAddress();
 	pd3dCommandList->SetGraphicsRootConstantBufferView(11, d3dGpuVirtualAddress);
 }
@@ -90,6 +88,11 @@ void CParticleObject::DrawRender(ID3D12GraphicsCommandList* pd3dCommandList, CCa
 	if (m_pMesh) m_pMesh->Render(pd3dCommandList, 1); //Draw
 }
 
+void CParticleObject::Update(float fTimeElapsed)
+{
+
+}
+
 void CParticleObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, CShader* pShader)
 {
 	StreamOutRender(pd3dCommandList, pCamera, pShader);
@@ -98,49 +101,13 @@ void CParticleObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera
 
 void CParticleObject::OnPostRender()
 {
-	if (m_pMesh) m_pMesh->OnPostRender(0); //Read Stream Output Buffer Filled Size
-}
-
-bool CParticleObject::ProcessInput(DWORD dwDirection, float cxDelta, float cyDelta, float fTimeElapsed, CCamera* pCamera)
-{
-	static UCHAR pKeysBuffer[256];
-
-	GetKeyboardState(pKeysBuffer);
-
-	if ((dwDirection != 0) || (cxDelta != 0.0f) || (cyDelta != 0.0f))
+	if (m_pMesh)
 	{
-		if (dwDirection)
-		{
-			XMFLOAT3 xmf3Shift = XMFLOAT3{};
-			if (dwDirection & DIR_FORWARD)xmf3Shift = Vector3::Add(xmf3Shift, Vector3::Normalize(XMFLOAT3(pCamera->GetLookVector().x, 0.0f, pCamera->GetLookVector().z)));
-			if (dwDirection & DIR_BACKWARD)xmf3Shift = Vector3::Add(xmf3Shift, Vector3::Normalize(XMFLOAT3(pCamera->GetLookVector().x, 0.0f, pCamera->GetLookVector().z)), -1.0f);
-			if (dwDirection & DIR_RIGHT)xmf3Shift = Vector3::Add(xmf3Shift, Vector3::Normalize(XMFLOAT3(pCamera->GetRightVector().x, 0.0f, pCamera->GetRightVector().z)));
-			if (dwDirection & DIR_LEFT)xmf3Shift = Vector3::Add(xmf3Shift, Vector3::Normalize(XMFLOAT3(pCamera->GetRightVector().x, 0.0f, pCamera->GetRightVector().z)), -1.0f);
-
-			SetDirection(xmf3Shift);
-			return true;
-		}
+		m_nVertices = m_pMesh->OnPostRender(0); //Read Stream Output Buffer Filled Size
 	}
-	return false;
 }
 
-bool& CParticleObject::GetEnable()
-{
-	return m_bEnable;
-}
-
-void CParticleObject::SetStart(bool bStart)
-{
-	m_bStart = bStart;
-}
-
-void CParticleObject::SetEnable(bool bEnable)
-{
-	m_bEnable = bEnable;
-	m_fTime = m_fLifeTime; // 계속 터지는 파티클에 LifeTime을 주기 위해(Sphere 제외)
-}
-
-void CParticleObject::SetSize(float fSize)
+void CParticleObject::SetSize(XMFLOAT2 fSize)
 {
 	m_fSize = fSize;
 }
@@ -189,6 +156,11 @@ int CParticleObject::GetParticleType()
 	return m_iParticleType;
 }
 
+void CParticleObject::SetEmit(bool bEmit)
+{
+	dynamic_cast<CParticleMesh*>(m_pMesh.get())->m_bEmit = bEmit;
+}
+
 void CParticleObject::SetDirection(XMFLOAT3 xmf3Direction)
 {
 	m_xmf3Direction = xmf3Direction;
@@ -197,4 +169,13 @@ void CParticleObject::SetDirection(XMFLOAT3 xmf3Direction)
 XMFLOAT3 CParticleObject::GetDirection()
 {
 	return m_xmf3Direction;
+}
+
+bool CParticleObject::CheckCapacity()
+{
+	int MaxParticle = static_cast<CParticleMesh*>(m_pMesh.get())->m_nMaxParticle;
+	int Vertices = static_cast<CParticleMesh*>(m_pMesh.get())->GetVertices();
+	if ((MaxParticle - Vertices) > 1000)
+		return true;
+	return false;
 }

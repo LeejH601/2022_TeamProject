@@ -15,9 +15,10 @@ struct CB_FRAMEWORK_INFO
 	XMFLOAT3				m_xmf3Color = XMFLOAT3(0.0f, 0.f, 1.0f);
 	int						m_nParticleType = 0;
 	float					m_fLifeTime = 0.f;
-	float					m_fSize = 0.5f;
-	bool					m_bStart = false;
+	XMFLOAT2				m_fSize = XMFLOAT2(1.f, 1.f);
+	bool					m_bEmitter = false;
 };
+
 
 class CBillBoardObject : public CGameObject
 {
@@ -27,10 +28,7 @@ public:
 	virtual void CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList, float fCurrentTime, float fElapsedTime);
 	virtual void Animate(float fTimeElapsed);
-	void Disappear(float fTimeElapsed);
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, bool b_UseTexture, CCamera* pCamera = NULL);
-
-	virtual void SetTarget(CGameObject* m_pTarget);
 	virtual void SetEnable(bool bEnable);
 	virtual bool& GetEnable();
 
@@ -40,7 +38,7 @@ protected:
 	float							m_fSpeed = 5.f;
 	float							m_fTime = 0.0f;
 	float							m_fAlpha = 1.f;
-	float							m_fSize = 15.f;
+	XMFLOAT2						m_fSize = XMFLOAT2(15.f, 15.f);
 	float							m_fLifeTime = 5.f;
 	XMFLOAT3						m_xmf3Color = XMFLOAT3(1.f, 1.f, 1.f);
 	bool							m_bStart = false;
@@ -62,7 +60,7 @@ public:
 
 
 
-	void SetSize(float fSize);
+	void SetSize(XMFLOAT2 fSize);
 	void SetSpeed(float fSpeed);
 	void SetStartAlpha(float fAlpha);
 	void SetLifeTime(float fLifeTime);
@@ -86,5 +84,10 @@ public:
 
 	virtual void SetEnable(bool bEnable);
 
+	void SetType(TerrainSpriteType eType);
+
+private:
+	float m_fDeltaSize = 0.f;
+	TerrainSpriteType m_eTerrainSpriteType = TerrainSpriteType::TERRAINSPRITE_CROSS_FADE;
 };
 

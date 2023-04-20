@@ -75,6 +75,7 @@ public:
     virtual void Execute(CPlayer* player, float fElapsedTime);
     virtual void Animate(CPlayer* player, float fElapsedTime);
     virtual void Exit(CPlayer* player);
+
 };
 
 class Atk2_Player : public CState<CPlayer>
@@ -131,8 +132,6 @@ public:
 
 class Run_Player : public CState<CPlayer>
 {
-protected:
-    std::vector<std::unique_ptr<CGameObject>>* m_pSmokeObjects = NULL;
 
 public:
     DECLARE_SINGLE(Run_Player);
@@ -143,8 +142,6 @@ public:
     virtual void Execute(CPlayer* player, float fElapsedTime);
     virtual void Animate(CPlayer* player, float fElapsedTime);
     virtual void Exit(CPlayer* player);
-
-    void SetSmokeObjects(std::vector<std::unique_ptr<CGameObject>>* pSmokeObjects);
 
 };
 

@@ -5,6 +5,7 @@
 #include "..\Global\Timer.h"
 #include "..\Global\MessageDispatcher.h"
 #include "..\Object\ParticleObject.h"
+#include "..\Object\PlayerParticleObject.h"
 #include "Object.h"
 #include <stdio.h>
 
@@ -17,9 +18,10 @@ CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 	m_xmf3Velocity = XMFLOAT3{};
 
 	std::shared_ptr<CGameObject> knightObject = std::make_shared<CKnightObject>(pd3dDevice, pd3dCommandList, 1);
+	m_pChildObject = knightObject.get();
 
 	SetChild(knightObject);
-
+	
 	m_pStateMachine = std::make_unique<CStateMachine<CPlayer>>(this);
 	m_pStateMachine->SetCurrentState(Idle_Player::GetInst());
 	m_pStateMachine->ChangeState(Idle_Player::GetInst());
@@ -46,6 +48,7 @@ XMFLOAT3 CPlayer::GetATKDirection()
 	{
 		xmf3Direction = Vector3::Add(GetUp(), GetRight());
 		xmf3Direction = Vector3::ScalarProduct(xmf3Direction, -1.0f);
+
 	}
 
 	else if (pPlayerState == Atk2_Player::GetInst())
@@ -131,6 +134,122 @@ void CPlayer::Update(float fTimeElapsed)
 {
 	m_pStateMachine->Update(fTimeElapsed);
 
+	m_fTime += fTimeElapsed;
+
+	if (m_fTime > m_fMaxTime)
+	{
+		if (m_pStateMachine->GetCurrentState() == Atk1_Player::GetInst())
+		{
+			m_fMaxTime = 0.005f;
+			// 0.35 시작
+			if (0.35f < m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition &&
+				0.45f > m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition)
+			{
+				ParticleTrailParams ParticleTrail_comp_params;
+				CGameObject* pWeapon = m_pChild->FindFrame("Weapon_r");
+				pWeapon->FindFrame("Weapon_r");
+
+				XMFLOAT3 xmf3Position;
+				XMFLOAT3 xmf3Direction;
+				memcpy(&xmf3Position, &(pWeapon->m_xmf4x4World._41), sizeof(XMFLOAT3));
+				memcpy(&xmf3Direction, &(pWeapon->m_xmf4x4World._31), sizeof(XMFLOAT3));
+
+				XMFLOAT4X4 xmf4x4World = pWeapon->GetWorld();
+
+				xmf3Position = XMFLOAT3{ xmf4x4World._41, xmf4x4World._42, xmf4x4World._43 };
+				xmf3Direction = GetATKDirection();
+
+				
+				xmf3Position = static_cast<CKnightObject*>(m_pChild.get())->GetWeaponMeshBoundingBox().Center;
+				xmf3Position = Vector3::Add(xmf3Position, Vector3::Normalize(xmf3Direction), 4.5f);
+
+				ParticleTrail_comp_params.pObject = CPlayerParticleObject::GetInst()->GetTrailParticleObjects();
+				ParticleTrail_comp_params.xmf3Position = xmf3Position;
+				ParticleTrail_comp_params.iPlayerAttack = 0;
+				ParticleTrail_comp_params.m_fTime = m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition;
+				CMessageDispatcher::GetInst()->Dispatch_Message<ParticleTrailParams>(MessageType::UPDATE_TRAILPARTICLE, &ParticleTrail_comp_params, m_pStateMachine->GetCurrentState());
+			}
+		}
+		// 0.25 4
+		if (m_pStateMachine->GetCurrentState() == Atk2_Player::GetInst())
+		{
+			m_fMaxTime = 0.05f; // 0.05
+			if (0.3f < m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition &&
+				0.45f > m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition)
+			{
+				//0.3~0.6, 065
+				ParticleTrailParams ParticleTrail_comp_params;
+				CGameObject* pWeapon = m_pChild->FindFrame("Weapon_r");
+				pWeapon->FindFrame("Weapon_r");
+				XMFLOAT3 xmf3Position;
+				XMFLOAT3 xmf3Direction;
+				XMFLOAT4X4 xmf4x4World = pWeapon->GetWorld();
+				xmf3Position = static_cast<CKnightObject*>(m_pChild.get())->GetWeaponMeshBoundingBox().Center;
+
+				xmf3Direction = GetATKDirection();
+				xmf3Position = Vector3::Add(xmf3Position, Vector3::Normalize(xmf3Direction), 4.2f);
+
+				ParticleTrail_comp_params.pObject = CPlayerParticleObject::GetInst()->GetTrailParticleObjects();
+				ParticleTrail_comp_params.xmf3Position = xmf3Position;
+				ParticleTrail_comp_params.iPlayerAttack = 1;
+				ParticleTrail_comp_params.m_fTime = m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition;
+				CMessageDispatcher::GetInst()->Dispatch_Message<ParticleTrailParams>(MessageType::UPDATE_TRAILPARTICLE, &ParticleTrail_comp_params, m_pStateMachine->GetCurrentState());
+
+			}
+
+
+		}
+
+		//if (m_pStateMachine->GetCurrentState() == Atk3_Player::GetInst())
+		//{
+		//	if (0.3f < m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition &&
+		//		0.5f > m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition)
+		//	{
+		//		ParticleTrailParams ParticleTrail_comp_params;
+		//		CGameObject* pWeapon = m_pChild->FindFrame("Weapon_r");
+		//		pWeapon->FindFrame("Weapon_r");
+		//		XMFLOAT3 xmf3Position;
+		//		XMFLOAT3 xmf3Direction;
+		//		XMFLOAT4X4 xmf4x4World = pWeapon->GetWorld();
+
+		//		xmf3Position = static_cast<CKnightObject*>(m_pChild.get())->GetWeaponMeshBoundingBox().Center;
+		//		XMFLOAT3 Pos[4];
+		//		static_cast<CKnightObject*>(m_pChild.get())->GetWeaponMeshBoundingBox().GetCorners(Pos);
+
+		//		ParticleTrail_comp_params.pObjects = CPlayerParticleObject::GetInst()->GetTrailObjects();
+		//		ParticleTrail_comp_params.xmf3Position = xmf3Position;
+		//		ParticleTrail_comp_params.iPlayerAttack = 2;
+		//		ParticleTrail_comp_params.m_fTime = m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition;
+		//		CMessageDispatcher::GetInst()->Dispatch_Message<ParticleTrailParams>(MessageType::UPDATE_TRAILPARTICLE, &ParticleTrail_comp_params, m_pStateMachine->GetCurrentState());
+		//	}
+
+
+		//}
+		m_fTime = 0.f;
+	}
+
+	// Idle 상태로 복귀하는 코드
+	if (!Vector3::Length(m_xmf3Velocity) && m_pStateMachine->GetCurrentState() == Run_Player::GetInst())
+		m_pStateMachine->ChangeState(Idle_Player::GetInst());
+
+	// Run 상태일때 플레이어를 이동시키고 방향전환 시켜주는 코드
+	if (m_pStateMachine->GetCurrentState() == Run_Player::GetInst())
+	{
+		CPhysicsObject::Apply_Gravity(fTimeElapsed);
+
+		if (m_xmf3Velocity.x + m_xmf3Velocity.z)
+			SetLookAt(Vector3::Add(GetPosition(), Vector3::Normalize(XMFLOAT3{ m_xmf3Velocity.x, 0.0f, m_xmf3Velocity.z })));
+		
+		// 임시로 속도 조절함
+		CPhysicsObject::Move(Vector3::ScalarProduct( m_xmf3Velocity, 0.3f, false), false);
+	}
+	// Run 상태가 아닐때 플레이어에게 중력만 작용하는 코드
+	else
+	{
+		m_xmf3Velocity = XMFLOAT3{};
+		CPhysicsObject::Apply_Gravity(fTimeElapsed);
+		CPhysicsObject::Move(m_xmf3Velocity, false);
+	}
 	CPhysicsObject::Apply_Gravity(fTimeElapsed);
 	CPhysicsObject::Move(m_xmf3Velocity, false);
 

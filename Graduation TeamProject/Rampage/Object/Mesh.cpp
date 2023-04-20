@@ -1312,7 +1312,7 @@ void CParticleMesh::CreateVertexBuffer(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 {
 	m_nVertices = 1;
 	m_nStride = sizeof(CParticleVertex);
-	m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_POINTLIST;
+	m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_POINTLIST; // 
 
 	CParticleVertex pVertices[1];
 
@@ -1321,7 +1321,7 @@ void CParticleMesh::CreateVertexBuffer(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 		pVertices[i].m_xmf3Position = xmf3Position;
 		pVertices[i].m_xmf3Velocity = xmf3Velocity;
 		pVertices[i].m_fLifetime = fLifetime;
-		pVertices[i].m_fSpanTime = 0.f;
+		pVertices[i].m_iType = 0;
 	}
 
 	m_pd3dPositionBuffer = CreateBufferResource(pd3dDevice, pd3dCommandList, pVertices, m_nStride * m_nVertices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dPositionUploadBuffer);
@@ -1366,12 +1366,14 @@ void CParticleMesh::PreRender(ID3D12GraphicsCommandList* pd3dCommandList, int nP
 
 	if (nPipelineState == 0)
 	{
-		if (m_bStart)
+		if (m_bEmit)
 		{
 			m_nMaxParticles = m_nMaxParticle;
-
-			m_bStart = false;
-
+			m_bEmit = false;
+		}
+		if (!m_bInitialized)
+		{
+			m_bInitialized = true;
 			m_nVertices = 1;
 
 			m_pd3dPositionBufferView.BufferLocation = m_pd3dPositionBuffer->GetGPUVirtualAddress();
@@ -1449,7 +1451,7 @@ void CParticleMesh::PostRender(ID3D12GraphicsCommandList* pd3dCommandList, UINT 
 
 //#define _WITH_DEBUG_STREAM_OUTPUT_VERTICES
 
-void CParticleMesh::OnPostRender(int nPipelineState)
+int CParticleMesh::OnPostRender(int nPipelineState)
 {
 	if (nPipelineState == 0)
 	{
@@ -1465,16 +1467,21 @@ void CParticleMesh::OnPostRender(int nPipelineState)
 		m_nVertices = UINT(*pnReadBackBufferFilledSize) / m_nStride;
 		m_pd3dReadBackBufferFilledSize->Unmap(0, NULL);
 #endif
-
 		::gnCurrentParticles = m_nVertices;
 #ifdef _WITH_DEBUG_STREAM_OUTPUT_VERTICES
 		TCHAR pstrDebug[256] = { 0 };
 		_stprintf_s(pstrDebug, 256, _T("Stream Output Vertices = %d\n"), m_nVertices);
 		OutputDebugString(pstrDebug);
 #endif
-		if ((m_nVertices == 0) || (m_nVertices >= MAX_PARTICLES)) 
-			m_bStart = true;
+		//if ((m_nVertices == 0) || (m_nVertices >= MAX_PARTICLES)) 
+		//	m_bEmit = true;
+
+		TCHAR pstrDebug[256] = { 0 };
+		_stprintf_s(pstrDebug, 256, _T("Stream Output Vertices = %d\n"), m_nVertices);
+		OutputDebugString(pstrDebug);
 	}
+
+	return m_nVertices;
 }
 
 CSkyBoxMesh::CSkyBoxMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fWidth, float fHeight, float fDepth)
@@ -1543,5 +1550,37 @@ CSkyBoxMesh::CSkyBoxMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd
 }
 
 CSkyBoxMesh::~CSkyBoxMesh()
+{
+}
+
+CTerrainMesh::CTerrainMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float m_fSize) : CMesh()
+{
+	m_nVertices = 6;
+	m_nStride = sizeof(CTexturedVertex);
+	m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+
+	CTexturedVertex pVertices[6];
+
+	float fx = (m_fSize * 0.5f), fy = 0.f, fz = (m_fSize * 0.5f);
+
+	pVertices[0] = CTexturedVertex(XMFLOAT3(+fx, fy, -fz), XMFLOAT2(1.0f, 0.0f));
+	pVertices[1] = CTexturedVertex(XMFLOAT3(+fx, fy, +fz), XMFLOAT2(1.0f, 1.0f));
+	pVertices[2] = CTexturedVertex(XMFLOAT3(-fx, fy, +fz), XMFLOAT2(0.0f, 1.0f));
+	pVertices[3] = CTexturedVertex(XMFLOAT3(-fx, fy, +fz), XMFLOAT2(0.0f, 1.0f));
+	pVertices[4] = CTexturedVertex(XMFLOAT3(-fx, fy, -fz), XMFLOAT2(0.0f, 0.0f));
+	pVertices[5] = CTexturedVertex(XMFLOAT3(+fx, fy, -fz), XMFLOAT2(1.0f, 0.0f));
+
+	m_pd3dPositionBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, m_pxmf3Positions.data(), sizeof(XMFLOAT3) * m_nVertices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dPositionUploadBuffer);
+
+	m_nVertexBufferViews = 1;
+	m_pd3dVertexBufferViews.resize(m_nVertexBufferViews);
+
+	m_pd3dVertexBufferViews[0].BufferLocation = m_pd3dPositionBuffer->GetGPUVirtualAddress();
+	m_pd3dVertexBufferViews[0].StrideInBytes = sizeof(XMFLOAT3);
+	m_pd3dVertexBufferViews[0].SizeInBytes = sizeof(XMFLOAT3) * m_nVertices;
+}
+
+
+CTerrainMesh::~CTerrainMesh()
 {
 }

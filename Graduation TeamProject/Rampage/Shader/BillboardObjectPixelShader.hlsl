@@ -2,6 +2,7 @@
 
 SamplerState gSamplerState : register(s0);
 Texture2D gtxtTexture : register(t30);
+SamplerState gClampState : register(s4);
 
 cbuffer cbGameObjectInfo : register(b0)
 {
@@ -24,7 +25,6 @@ cbuffer cbFrameworkInfo : register(b7)
 {
 	float		gfCurrentTime : packoffset(c0.x);
 	float		gfElapsedTime : packoffset(c0.y);
-	//float		gfSecondsPerFirework : packoffset(c0.z); // EmmitParticles에서 사용 잠시 주석
 	float		gfSpeed : packoffset(c0.z);
 	int			gnFlareParticlesToEmit : packoffset(c0.w);;
 	float3		gf3Gravity : packoffset(c1.x);
@@ -32,8 +32,8 @@ cbuffer cbFrameworkInfo : register(b7)
 	float3		gfColor : packoffset(c2.x);
 	int			gnParticleType : packoffset(c2.w);
 	float		gfLifeTime : packoffset(c3.x);
-	float		gfSize : packoffset(c3.y);
-	bool		bStart : packoffset(c3.z);
+	float2		gfSize : packoffset(c3.y);
+	bool		bEmit : packoffset(c3.w);
 };
 
 #include "Light.hlsl"
@@ -51,7 +51,7 @@ PS_MULTIPLE_RENDER_TARGETS_OUTPUT Billboard_PS(GS_OUT input)
 {
 	PS_MULTIPLE_RENDER_TARGETS_OUTPUT output;
 	float3 uvw = float3(input.uv, input.primID % 4); // 수정 float3 uvw = float3(input.uv, input.primID ); 
-	float4 cTexture = gtxtTexture.Sample(gSamplerState, uvw);
+	float4 cTexture = gtxtTexture.Sample(gClampState, uvw);
 	float4 cColor = cTexture; //  // cIllumination * cTexture;
 	cColor.rgb *= gfColor;
 	cColor.a *= gnTexturesMask * 0.01f; // 0~100으로 받아 0.00 ~1.00으로 변경

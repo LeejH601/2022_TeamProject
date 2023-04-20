@@ -196,6 +196,12 @@
     <ClCompile Include="Object\MonsterState.cpp">
       <Filter>Object\State</Filter>
     </ClCompile>
+    <ClCompile Include="Object\PlayerParticleObject.cpp">
+      <Filter>Object</Filter>
+    </ClCompile>
+    <ClCompile Include="Shader\TerrainObjectShader.cpp">
+      <Filter>Shader</Filter>
+    </ClCompile>
     <ClCompile Include="Object\MonsterState.cpp">
       <Filter>Object\State</Filter>
     </ClCompile>
@@ -389,6 +395,12 @@
     </ClInclude>
     <ClInclude Include="Object\MonsterState.h">
       <Filter>Object\State</Filter>
+    </ClInclude>
+    <ClInclude Include="Object\PlayerParticleObject.h">
+      <Filter>Object</Filter>
+    </ClInclude>
+    <ClInclude Include="Shader\TerrainObjectShader.h">
+      <Filter>Shader</Filter>
     </ClInclude>
     <ClInclude Include="Object\MonsterState.h">
       <Filter>Object\State</Filter>
