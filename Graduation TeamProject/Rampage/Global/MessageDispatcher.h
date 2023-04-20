@@ -86,6 +86,7 @@ protected:
 public:
     bool& GetEnable() { return m_bEnable; }
     void SetEnable(bool bEnable) { m_bEnable = bEnable; }
+    virtual void Reset() { }
 
     virtual void HandleMessage(const Message& message, const CollideParams& params) {}
     virtual void HandleMessage(const Message& message, const PlayerParams& params) {}
@@ -163,16 +164,20 @@ class CameraShakeComponent : public IMessageListener {
     std::uniform_real_distribution<float> urd{ -1.0f, 1.0f };
 
     float m_ft = 0.0f;;
-    float m_fDuration;
-    float m_fMagnitude;
+    float m_fDuration = 0.5f;
+    float m_fMagnitude = 0.5f;
+    float m_fFrequency = 0.015f;
 public:
     float& GetDuration() { return m_fDuration; }
     float& GetMagnitude() { return m_fMagnitude; }
+    float& GetFrequency() { return m_fFrequency; }
 
     void SetDuration(float duration) { m_fDuration = duration; }
     void SetMagnitude(float magnitude) { m_fMagnitude = magnitude; }
+    void SetFrequency(float frequency) { m_fFrequency = frequency; }
 
     void Update(CCamera* pCamera, float fElapsedTime);
+    virtual void Reset();
     virtual void HandleMessage(const Message& message, const CameraUpdateParams& params);
 };
 
@@ -197,6 +202,7 @@ public:
     void SetRollBackTime(float rollback_time) { m_fRollBackTime = rollback_time; }
 
     void Update(CCamera* pCamera, float fElapsedTime, const CameraUpdateParams& params);
+    virtual void Reset();
     virtual void HandleMessage(const Message& message, const CameraUpdateParams& params);
 };
 
@@ -225,6 +231,7 @@ public:
     void SetIsIn(bool is_in) { m_bIsIN = is_in; }
 
     void Update(CCamera* pCamera, float fElapsedTime, const CameraUpdateParams& params);
+    virtual void Reset();
     virtual void HandleMessage(const Message& message, const CameraUpdateParams& params);
 };
 
@@ -244,12 +251,15 @@ public:
 
 // Define Shake Animation component
 class ShakeAnimationComponent : public IMessageListener {
+    float m_fDuration = 1.0f;
     float m_fDistance = 0.15f;
     float m_fFrequency = 0.05f;
 public:
+    float& GetDuration() { return m_fDuration; }
     float& GetDistance() { return m_fDistance; }
     float& GetFrequency() { return m_fFrequency; }
 
+    void SetDuration(float fDuration) { m_fDuration = fDuration; }
     void SetDistance(float distance) { m_fDistance = distance; }
     void SetFrequency(float frequency) { m_fFrequency = frequency; }
 

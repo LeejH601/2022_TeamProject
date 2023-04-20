@@ -148,6 +148,11 @@ XMFLOAT3 CPhysicsObject::GetRight()
 	return m_xmf3Right;
 }
 
+XMFLOAT3 CPhysicsObject::GetVelocity()
+{
+	return m_xmf3Velocity;
+}
+
 void CPhysicsObject::Animate(float fTimeElapsed)
 {
 	if (m_bSimulateArticulate) {

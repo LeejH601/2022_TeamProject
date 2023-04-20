@@ -21,7 +21,7 @@ protected:
 	float m_fSpeedUperS;
 	LPVOID m_pUpdatedContext = NULL;
 public:
-	void OnPrepareRender();
+	virtual void OnPrepareRender();
 
 	void OnUpdateCallback(float fTimeElapsed);
 	void SetUpdatedContext(LPVOID pContext) { m_pUpdatedContext = pContext; }
@@ -42,6 +42,7 @@ public:
 	virtual XMFLOAT3 GetUp();
 	virtual XMFLOAT3 GetRight();
 	virtual XMFLOAT3 GetScale() { return m_xmf3Scale; };
+	virtual XMFLOAT3 GetVelocity();
 
 	float& GetPitch() { return(m_fPitch); }
 	float& GetRoll() { return(m_fRoll); }

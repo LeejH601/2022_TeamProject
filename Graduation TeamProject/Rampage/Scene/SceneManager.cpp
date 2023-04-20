@@ -55,9 +55,9 @@ void CSceneManager::Update(float fTimeElapsed)
 	m_pCurrentScene->Update(fTimeElapsed);
 }
 
-bool CSceneManager::ProcessInput(DWORD dwDirection, float cxDelta, float cyDelta, float fTimeElapsed)
+bool CSceneManager::ProcessInput(HWND hWnd, DWORD dwDirection, float fTimeElapsed)
 {
-	m_pCurrentScene->ProcessInput(dwDirection, cxDelta, cyDelta, fTimeElapsed);
+	m_pCurrentScene->ProcessInput(hWnd, dwDirection, fTimeElapsed);
 
 	return false;
 }
@@ -71,10 +71,27 @@ bool CSceneManager::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM 
 
 bool CSceneManager::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam, DWORD& dwDirection)
 {
-	bool bChange = m_pCurrentScene->OnProcessingKeyboardMessage(hWnd, nMessageID, wParam, lParam, dwDirection);
+	SCENE_RETURN_TYPE scene_return_type = m_pCurrentScene->OnProcessingKeyboardMessage(hWnd, nMessageID, wParam, lParam, dwDirection);
 
-	if (bChange)
-		m_pCurrentScene = m_pMainScene.get();
+	switch (scene_return_type)
+	{
+	case SCENE_RETURN_TYPE::NONE:
+		break;
+	case SCENE_RETURN_TYPE::POP_SCENE:
+		if (m_pCurrentScene == m_pLobbyScene.get())
+			m_pCurrentScene = m_pMainScene.get();
+		break;
+	case SCENE_RETURN_TYPE::RETURN_PREVIOUS_SCENE:
+		if (m_pCurrentScene == m_pMainScene.get())
+		{
+			m_pCurrentScene = m_pLobbyScene.get();
+			Locator.SetMouseCursorMode(MOUSE_CUROSR_MODE::FLOATING_MODE);
+			PostMessage(hWnd, WM_ACTIVATE, 0, 0);
+		}
+		break;
+	default:
+		break;
+	}
 
 	return 0;
 }

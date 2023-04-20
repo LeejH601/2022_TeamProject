@@ -7,6 +7,7 @@
 void CLobbyScene::OnPrepareRender(ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	CImGuiManager::GetInst()->SetUI();
+	//CImGuiManager::GetInst()->DemoRendering();
 
 	pd3dCommandList->SetGraphicsRootSignature(m_pd3dGraphicsRootSignature.Get());
 }
@@ -19,7 +20,7 @@ bool CLobbyScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wP
 	return false;
 }
 
-bool CLobbyScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam, DWORD& dwDirection)
+SCENE_RETURN_TYPE CLobbyScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam, DWORD& dwDirection)
 {
 	switch (nMessageID)
 	{
@@ -27,7 +28,7 @@ bool CLobbyScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM
 		switch (wParam)
 		{
 		case VK_SPACE:
-			return 1;
+			return SCENE_RETURN_TYPE::POP_SCENE;
 		default:
 			break;
 		}
@@ -41,7 +42,7 @@ bool CLobbyScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM
 	default:
 		break;
 	}
-	return 0;
+	return SCENE_RETURN_TYPE::NONE;
 }
 
 void CLobbyScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)

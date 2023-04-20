@@ -24,6 +24,7 @@ public:
     ~Idle_Monster();
     virtual void Enter(CMonster* monster);
     virtual void Execute(CMonster* monster, float fElapsedTime);
+    virtual void Animate(CMonster* monster, float fElapsedTime);
     virtual void Exit(CMonster* monster);
 };
 
@@ -35,6 +36,7 @@ public:
     DECLARE_SINGLE(Wander_Monster);
     virtual void Enter(CMonster* monster);
     virtual void Execute(CMonster* monster, float fElapsedTime);
+    virtual void Animate(CMonster* monster, float fElapsedTime);
     virtual void Exit(CMonster* monster);
 };
 
@@ -44,6 +46,7 @@ public:
     DECLARE_SINGLE(Chasing_Monster);
     virtual void Enter(CMonster* monster);
     virtual void Execute(CMonster* monster, float fElapsedTime);
+    virtual void Animate(CMonster* monster, float fElapsedTime);
     virtual void Exit(CMonster* monster);
 };
 
@@ -53,6 +56,7 @@ public:
     DECLARE_SINGLE(Attack_Monster);
     virtual void Enter(CMonster* monster);
     virtual void Execute(CMonster* monster, float fElapsedTime);
+    virtual void Animate(CMonster* monster, float fElapsedTime);
     virtual void Exit(CMonster* monster);
 };
 
@@ -66,6 +70,7 @@ public:
     ~Damaged_Monster();
     virtual void Enter(CMonster* monster);
     virtual void Execute(CMonster* monster, float fElapsedTime);
+    virtual void Animate(CMonster* monster, float fElapsedTime);
     virtual void Exit(CMonster* monster);
 
     void SetUpDownParticleObjects(std::vector<std::unique_ptr<CGameObject>>* pParticleObjects);
@@ -77,6 +82,7 @@ public:
     DECLARE_SINGLE(Stun_Monster);
     virtual void Enter(CMonster* monster);
     virtual void Execute(CMonster* monster, float fElapsedTime);
+    virtual void Animate(CMonster* monster, float fElapsedTime);
     virtual void Exit(CMonster* monster);
 };
 

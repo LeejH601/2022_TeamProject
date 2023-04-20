@@ -1,4 +1,5 @@
 #include "ImGuiManager.h"
+#include "ImGuiConstants.h"
 #include "..\Global\Timer.h"
 #include "..\Global\Camera.h"
 #include "..\Scene\SimulatorScene.h"
@@ -9,10 +10,33 @@
 #include "..\Object\TextureManager.h"
 
 #define NUM_FRAMES_IN_FLIGHT 3
-//========================================================================
-void DataLoader::SaveComponentSets()
+#define MAX_FILENAME_SIZE 100
+#define U8STR(str) reinterpret_cast<const char*>(u8##str)
+
+bool CreateDirectoryIfNotExists(const std::wstring& path) {
+	DWORD attr = GetFileAttributesW(path.c_str());
+	if (attr == INVALID_FILE_ATTRIBUTES) {
+		if (!CreateDirectoryW(path.c_str(), NULL)) {
+			return false;
+		}
+	}
+	else if (!(attr & FILE_ATTRIBUTE_DIRECTORY)) {
+		return false;
+	}
+	return true;
+}
+
+std::wstring ConvertU8ToW(const std::u8string& str)
 {
-	std::string path;
+	int size_needed = MultiByteToWideChar(CP_UTF8, 0, reinterpret_cast<const char*>(str.c_str()), static_cast<int>(str.size()), nullptr, 0);
+	std::wstring wstr(size_needed, 0);
+	MultiByteToWideChar(CP_UTF8, 0, reinterpret_cast<const char*>(str.c_str()), static_cast<int>(str.size()), &wstr[0], size_needed);
+	return wstr;
+}
+
+//========================================================================
+void DataLoader::SaveComponentSets(std::wstring wFolderName)
+{
 	FILE* pInFile;
 
 	for (int i = 0; i < 3; ++i)
@@ -34,18 +58,24 @@ void DataLoader::SaveComponentSets()
 			break;
 		}
 
-		path = file_path + std::to_string(i) + file_ext;
-		::fopen_s(&pInFile, path.c_str(), "wb");
+		std::wstring path;
+		wFolderName.resize(wcslen(wFolderName.c_str()));
 
+		path = file_path + wFolderName + L"\\Component" + std::to_wstring(i) + file_ext;
+		
+		std::wstring fp = file_path + wFolderName;
+		if (!CreateDirectoryIfNotExists(fp)) {
+			return;
+		}
+
+		::_wfopen_s(&pInFile, path.c_str(), L"wb");
 		SaveComponentSet(pInFile, pCurrentAnimation);
-
 		fclose(pInFile);
 	}
 }
 
-void DataLoader::LoadComponentSets()
+void DataLoader::LoadComponentSets(std::wstring wFolderName)
 {
-	std::string path;
 	FILE* pInFile;
 
 	for (int i = 0; i < 3; ++i)
@@ -66,10 +96,13 @@ void DataLoader::LoadComponentSets()
 		default:
 			break;
 		}
-		path = file_path + std::to_string(i) + file_ext;
-		::fopen_s(&pInFile, path.c_str(), "rb");
-		if (!pInFile)
-			continue;
+
+		std::wstring path;
+		wFolderName.resize(wcslen(wFolderName.c_str()));
+
+		path = file_path + wFolderName + L"\\Component" + std::to_wstring(i) + file_ext;
+
+		::_wfopen_s(&pInFile, path.c_str(), L"rb");
 		LoadComponentSet(pInFile, pCurrentAnimation);
 		fclose(pInFile);
 	}
@@ -116,6 +149,8 @@ void DataLoader::SaveComponentSet(FILE* pInFile, CState<CPlayer>* pState)
 	WriteFloatFromFile(pInFile, pCameraShakerComponent->GetDuration());
 	WriteStringFromFile(pInFile, std::string("<Magnitude>:"));
 	WriteFloatFromFile(pInFile, pCameraShakerComponent->GetMagnitude());
+	WriteStringFromFile(pInFile, std::string("<Frequency>:"));
+	WriteFloatFromFile(pInFile, pCameraShakerComponent->GetFrequency());
 	WriteStringFromFile(pInFile, std::string("</CCameraShaker>:"));
 
 	WriteStringFromFile(pInFile, std::string("<CCameraZoomer>:"));
@@ -143,6 +178,8 @@ void DataLoader::SaveComponentSet(FILE* pInFile, CState<CPlayer>* pState)
 	WriteStringFromFile(pInFile, std::string("<ShakeAnimationComponent>:"));
 	WriteStringFromFile(pInFile, std::string("<Enable>:"));
 	WriteIntegerFromFile(pInFile, pShakeAnimationComponent->GetEnable());
+	WriteStringFromFile(pInFile, std::string("<Duration>:"));
+	WriteFloatFromFile(pInFile, pShakeAnimationComponent->GetDuration());
 	WriteStringFromFile(pInFile, std::string("<Distance>:"));
 	WriteFloatFromFile(pInFile, pShakeAnimationComponent->GetDistance());
 	WriteStringFromFile(pInFile, std::string("<Frequency>:"));
@@ -326,6 +363,10 @@ void DataLoader::LoadComponentSet(FILE* pInFile, CState<CPlayer>* pState)
 				{
 					pCameraShakerComponent->SetEnable(ReadIntegerFromFile(pInFile));
 				}
+				else if (!strcmp(buf, "<Frequency>:"))
+				{
+					pCameraShakerComponent->SetFrequency(ReadFloatFromFile(pInFile));
+				}
 				else if (!strcmp(buf, "</CCameraShaker>:"))
 				{
 					break;
@@ -397,6 +438,10 @@ void DataLoader::LoadComponentSet(FILE* pInFile, CState<CPlayer>* pState)
 				if (!strcmp(buf, "<Enable>:"))
 				{
 					pShakeAnimationComponent->SetEnable(ReadIntegerFromFile(pInFile));
+				}
+				else if (!strcmp(buf, "<Duration>:"))
+				{
+					pShakeAnimationComponent->SetDuration(ReadFloatFromFile(pInFile));
 				}
 				else if (!strcmp(buf, "<Distance>:"))
 				{
@@ -742,8 +787,10 @@ void CImGuiManager::CreateShaderResourceViews(ID3D12Device* pd3dDevice, CTexture
 	}
 }
 ID3D12Resource* CImGuiManager::GetRTTextureResource() { return m_pRTTexture->GetResource(0); }
-void CImGuiManager::Init(HWND hWnd, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, D3D12_CPU_DESCRIPTOR_HANDLE d3dRtvCPUDescriptorHandle)
+void CImGuiManager::Init(HWND hWnd, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, D3D12_CPU_DESCRIPTOR_HANDLE d3dRtvCPUDescriptorHandle, const RECT& DeskTopCoordinatesRect)
 {
+	m_hWnd = hWnd;
+
 	CreateSrvDescriptorHeaps(pd3dDevice);
 
 	// Setup Dear ImGui context
@@ -752,6 +799,7 @@ void CImGuiManager::Init(HWND hWnd, ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 	ImGuiIO& io = ImGui::GetIO(); (void)io;
 	//io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
 	//io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
+	io.Fonts->AddFontFromFileTTF("C:\\Windows\\Fonts\\malgun.ttf", 18.0f, NULL, io.Fonts->GetGlyphRangesKorean());
 
 	// Setup Dear ImGui style
 	ImGui::StyleColorsDark();
@@ -763,9 +811,6 @@ void CImGuiManager::Init(HWND hWnd, ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 		DXGI_FORMAT_R8G8B8A8_UNORM, m_pd3dSrvDescHeap.Get(),
 		m_pd3dSrvDescHeap->GetCPUDescriptorHandleForHeapStart(),
 		m_pd3dSrvDescHeap->GetGPUDescriptorHandleForHeapStart());
-
-	/*Locator.CreateSimulatorCamera(pd3dDevice, pd3dCommandList);
-	m_pCamera = Locator.GetSimulaterCamera();*/
 
 	D3D12_CLEAR_VALUE d3dClearValue = { DXGI_FORMAT_R8G8B8A8_UNORM, { 1.0f, 1.0f, 1.0f, 1.0f } };
 	m_pRTTexture = std::make_unique<CTexture>(1, RESOURCE_TEXTURE2D, 0, 1);
@@ -783,7 +828,9 @@ void CImGuiManager::Init(HWND hWnd, ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 	m_pd3dRtvCPUDescriptorHandles = d3dRtvCPUDescriptorHandle;
 
 	m_pDataLoader = std::make_unique<DataLoader>();
-	m_pDataLoader->LoadComponentSets();
+
+	m_lDesktopWidth = DeskTopCoordinatesRect.right - DeskTopCoordinatesRect.left;
+	m_lDesktopHeight = DeskTopCoordinatesRect.bottom - DeskTopCoordinatesRect.top;
 }
 void CImGuiManager::DemoRendering()
 {
@@ -834,7 +881,7 @@ void CImGuiManager::SetUI()
 	ImGui::NewFrame();
 
 	CState<CPlayer>* pCurrentAnimation = Atk1_Player::GetInst();
-	
+
 	// State 선택 로직 생각 필요
 	switch (Player_Animation_Number) {
 	case 0:
@@ -850,485 +897,603 @@ void CImGuiManager::SetUI()
 		break;
 	}
 
-	// Show my window.
+	dearImGuiSize = ImGui::GetIO().DisplaySize;
+
+	if (show_simulator_scene)
 	{
-		ImGuiWindowFlags my_window_flags = 0;
-		bool* p_open = NULL;
+		ImGuiWindowFlags my_window_flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize;
+		ImGui::Begin(U8STR("시뮬레이터"), &show_simulator_scene, my_window_flags);
 
-		my_window_flags |= ImGuiWindowFlags_NoResize;
+		int my_image_width = 0.55f * m_lDesktopWidth;
+		int my_image_height = 0.55f * m_lDesktopHeight;
+		ImGui::Image((ImTextureID)m_pRTTexture->m_pd3dSrvGpuDescriptorHandles[0].ptr, ImVec2((float)my_image_width, (float)my_image_height));
 
-		const ImGuiViewport* main_viewport = ImGui::GetMainViewport();
-		ImGui::SetNextWindowPos(ImVec2(main_viewport->WorkPos.x + 25, main_viewport->WorkPos.y + 25));
-		ImGui::SetNextWindowSize(ImVec2(FRAME_BUFFER_WIDTH - 50, FRAME_BUFFER_HEIGHT - 105), ImGuiCond_None);
-		ImGui::Begin("Simulator", p_open, my_window_flags);   // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
-		ImVec2 initial_curpos = ImGui::GetCursorPos();
+		ImGui::End();
+	}
+
+	if (show_preset_menu)
+	{
+		ImGuiWindowFlags my_window_flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize;
+		ImGui::Begin(U8STR("타격감 프리셋 메뉴"), &show_preset_menu, my_window_flags);
+		
+		std::string path = "..\\Rampage\\Data";
+		std::vector<std::u8string> v;
+		for (const auto& entry : std::filesystem::directory_iterator(path))
 		{
-			int my_image_width = 1050;
-			int my_image_height = 600;
-			ImGui::Image((ImTextureID)m_pRTTexture->m_pd3dSrvGpuDescriptorHandles[0].ptr, ImVec2((float)my_image_width, (float)my_image_height));
+			v.emplace_back(entry.path().u8string().substr(entry.path().u8string().find_last_of(u8"/\\") + 1));
 		}
-		ImVec2 button_pos = ImGui::GetCursorPos();
 
-		// Menu Bar
-		initial_curpos.x += 1055.f;
-		ImGui::SetCursorPos(initial_curpos);
-
-		if (ImGui::CollapsingHeader("Impact Effect"))
+		static int idx = 0;
+		if (ImGui::BeginListBox(U8STR("프리셋 리스트")))
 		{
-			ImpactEffectComponent* pImpactEffectComponent = dynamic_cast<ImpactEffectComponent*>(pCurrentAnimation->GetImpactComponent());
-
-			initial_curpos.y += 25.f;
-			ImGui::SetCursorPos(initial_curpos);
-			ImGui::SetNextItemWidth(190.f);
-			ImGui::Checkbox("On/Off##Impact Effect", &pImpactEffectComponent->GetEnable());
-
-			std::vector<std::shared_ptr<CTexture>> vTexture = CSimulatorScene::GetInst()->GetTextureManager()->GetBillBoardTextureList();
-			std::vector<const char*> items;
-			std::vector <std::string> str(100);
-			for (int i = 0; i < vTexture.size(); i++)
+			for (int n = 0; n < v.size(); n++)
 			{
-				std::wstring wstr = vTexture[i]->GetTextureName(0);
-				str[i].assign(wstr.begin(), wstr.end());
-				items.emplace_back(str[i].c_str());
+				const bool is_selected = (idx == n);
+				if (ImGui::Selectable(reinterpret_cast<const char*>(v[n].c_str()), is_selected))
+					idx = n;
+
+				if (is_selected)
+					ImGui::SetItemDefaultFocus();
 			}
+		}
+		ImGui::EndListBox();
 
-			initial_curpos.y += 25.f;
-			ImGui::SetCursorPos(initial_curpos);
-			ImGui::SetNextItemWidth(190.f);
-
-			if(ImGui::Combo("Attack##Impact Effect", (int*)(&pImpactEffectComponent->GetTextureIndex()), items.data(), items.size()));
+		if (v.size() > 0)
+		{
+			std::u8string first_string = u8"선택된 폴더: ";
+			first_string.append(v[idx]);
+			ImGui::Text(reinterpret_cast<const char*>(first_string.c_str()));
+			ImGui::SameLine(m_lDesktopWidth * 0.14f + ImGui::CalcTextSize(U8STR("불러오기")).x);
+			if (ImGui::Button(U8STR("불러오기")))
 			{
-				std::shared_ptr<CTexture> pTexture = vTexture[pImpactEffectComponent->GetTextureIndex()];
-				pImpactEffectComponent->SetImpactTexture(pTexture);
+				m_pDataLoader->LoadComponentSets(ConvertU8ToW(v[idx]));
+				show_preset_menu = false;
 			}
-
-			initial_curpos.y += 25.f;
-			ImGui::SetCursorPos(initial_curpos);
-			ImGui::SetNextItemWidth(190.f);
-			ImGui::DragFloat("Speed##Impact Effect", &pImpactEffectComponent->GetSpeed(), 0.01f, 0.0f, 10.0f, "%.2f", 0);
-
-			initial_curpos.y += 25.f;
-			ImGui::SetCursorPos(initial_curpos);
-			ImGui::SetNextItemWidth(190.f);
-			ImGui::DragFloat("Alpha##Impact Effect", &pImpactEffectComponent->GetAlpha(), 0.01f, 0.0f, 10.0f, "%.2f", 0);
-
-			initial_curpos.y += 25.f;
-			ImGui::SetCursorPos(initial_curpos);
-			ImGui::SetNextItemWidth(190.f);
-			ImGui::DragFloat("Size##Impact Effect", &pImpactEffectComponent->GetSize(), 0.01f, 0.0f, 10.0f, "%.2f", 0);
 		}
-
-		initial_curpos.y += 25.f;
-		ImGui::SetCursorPos(initial_curpos);
-
-		if (ImGui::CollapsingHeader("Particle Effect"))
+		else
 		{
-			ParticleComponent* pParticleComponent = dynamic_cast<ParticleComponent*>(pCurrentAnimation->GetParticleComponent());
-
-			initial_curpos.y += 25.f;
-			ImGui::SetCursorPos(initial_curpos);
-			ImGui::SetNextItemWidth(190.f);
-			ImGui::Checkbox("On/Off##ParticleEffect", &pParticleComponent->GetEnable());
-
-			std::vector<std::shared_ptr<CTexture>> vTexture = CSimulatorScene::GetInst()->GetTextureManager()->GetParticleTextureList();
-			std::vector<const char*> items;
-			std::vector <std::string> str(100);
-			for (int i = 0; i < vTexture.size(); i++)
+			std::u8string first_string = u8"Data 폴더에 프리셋이 없습니다. ";
+			ImGui::Text(reinterpret_cast<const char*>(first_string.c_str()));
+			ImGui::SameLine(m_lDesktopWidth * 0.14f + ImGui::CalcTextSize(U8STR("불러오기")).x);
+			if (ImGui::Button(U8STR("불러오기")))
 			{
-				std::wstring wstr = vTexture[i]->GetTextureName(0);
-				str[i].assign(wstr.begin(), wstr.end());
-				items.emplace_back(str[i].c_str());
+				m_pDataLoader->LoadComponentSets(ConvertU8ToW(v[idx]));
+				show_preset_menu = false;
 			}
-
-			initial_curpos.y += 25.f;
-			ImGui::SetCursorPos(initial_curpos);
-			ImGui::SetNextItemWidth(190.f);
-
-			/*pParticleComponent->SetParticleIndex(0);
-			std::shared_ptr pTexture = vTexture[pParticleComponent->GetParticleIndex()];
-			pParticleComponent->SetParticleTexture(pTexture);*/
-
-			if (ImGui::Combo("Texture##ParticleEffect", (int*)(&pParticleComponent->GetParticleIndex()), items.data(), items.size()))
-			{
-				std::shared_ptr pTexture = vTexture[pParticleComponent->GetParticleIndex()];
-				pParticleComponent->SetParticleTexture(pTexture);
-			}
-
-			initial_curpos.y += 25.f;
-			ImGui::SetCursorPos(initial_curpos);
-			ImGui::SetNextItemWidth(190.f);
-			ImGui::DragFloat("Size##ParticleEffect", &pParticleComponent->GetSize(), 0.01f, 0.0f, 10.0f, "%.2f", 0);
-
-			initial_curpos.y += 25.f;
-			ImGui::SetCursorPos(initial_curpos);
-			ImGui::SetNextItemWidth(190.f);
-			ImGui::DragFloat("Alpha##ParticleEffect", &pParticleComponent->GetAlpha(), 0.01f, 0.0f, 10.0f, "%.2f", 0);
-
-			initial_curpos.y += 25.f;
-			ImGui::SetCursorPos(initial_curpos);
-			ImGui::SetNextItemWidth(190.f);
-			ImGui::DragFloat("LifeTime##ParticleEffect", &pParticleComponent->GetLifeTime(), 0.01f, 0.0f, 10.0f, "%.1f", 0);
-
-			initial_curpos.y += 25.f;
-			ImGui::SetCursorPos(initial_curpos);
-			ImGui::SetNextItemWidth(190.f);
-			ImGui::DragInt("ParticleCount##ParticleEffect", &pParticleComponent->GetParticleNumber(), 0.01f, 0.0f, 10.0f, "%d", 0);
-
-			initial_curpos.y += 25.f;
-			ImGui::SetCursorPos(initial_curpos);
-			ImGui::SetNextItemWidth(190.f);
-			ImGui::DragFloat("Speed##ParticleEffect", &pParticleComponent->GetSpeed(), 0.01f, 0.0f, 10.0f, "%.1f", 0);
-
-			initial_curpos.y += 25.f;
-			ImGui::SetCursorPos(initial_curpos);
-			ImGui::SetNextItemWidth(30.f);
-			ImGui::ColorEdit3("ParticleEffect", (float*)&pParticleComponent->GetColor()); // Edit 3 floats representing a color
 		}
+		ImGui::End();
+	}
 
-		initial_curpos.y += 25.f;
-		ImGui::SetCursorPos(initial_curpos);
+	if (show_save_menu)
+	{
+		ImGuiWindowFlags my_window_flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize;
 
-		if (ImGui::CollapsingHeader("Afterimage Effect"))
+		ImGui::Begin(U8STR("저장 메뉴"), &show_save_menu, my_window_flags);
+
+		static std::u8string folder_name;
+		folder_name.resize(MAX_PATH);
+
+		ImGui::InputText(U8STR("저장 이름"), reinterpret_cast<char*>(folder_name.data()), 64);
+
+		ImVec2 itemSize = ImGui::GetItemRectSize();
+
+		if (ImGui::Button(U8STR("저장"), itemSize))
 		{
-			initial_curpos.y += 25.f;
-			ImGui::SetCursorPos(initial_curpos);
-			ImGui::SetNextItemWidth(190.f);
-			ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
-		}
-
-		initial_curpos.y += 25.f;
-		ImGui::SetCursorPos(initial_curpos);
-
-		if (ImGui::CollapsingHeader("Damage Animation"))
-		{
-			DamageAnimationComponent* pDamageAnimationComponent = dynamic_cast<DamageAnimationComponent*>(pCurrentAnimation->GetDamageAnimationComponent());
-
-			initial_curpos.y += 25.f;
-			ImGui::SetCursorPos(initial_curpos);
-			ImGui::SetNextItemWidth(190.f);
-			ImGui::Checkbox("On/Off##DamageAnimation", &pDamageAnimationComponent->GetEnable());
-
-			initial_curpos.y += 25.f;
-			ImGui::SetCursorPos(initial_curpos);
-			ImGui::SetNextItemWidth(190.f);
-
-			if (ImGui::DragFloat("MaxDistance##DamageAnimation", &pDamageAnimationComponent->GetMaxDistance(), 0.01f, 0.0f, 10.0f, "%.2f", 0))
-				pDamageAnimationComponent->GetMaxDistance() = std::clamp(pDamageAnimationComponent->GetMaxDistance(), 0.0f, 10.0f);
-
-			initial_curpos.y += 25.f;
-			ImGui::SetCursorPos(initial_curpos);
-			ImGui::SetNextItemWidth(190.f);
-
-			if (ImGui::DragFloat("Speed##DamageAnimation", &pDamageAnimationComponent->GetSpeed(), 0.01f, 0.0f, 200.0f, "%.2f", 0))
-				pDamageAnimationComponent->GetSpeed() = std::clamp(pDamageAnimationComponent->GetSpeed(), 0.0f, 200.0f);
-		}
-
-		initial_curpos.y += 25.f;
-		ImGui::SetCursorPos(initial_curpos);
-
-		if (ImGui::CollapsingHeader("Shake Animation"))
-		{
-			ShakeAnimationComponent* pShakeAnimationComponent = dynamic_cast<ShakeAnimationComponent*>(pCurrentAnimation->GetShakeAnimationComponent());
-
-			initial_curpos.y += 25.f;
-			ImGui::SetCursorPos(initial_curpos);
-			ImGui::SetNextItemWidth(190.f);
-			ImGui::Checkbox("On/Off##ShakeAnimation", &pShakeAnimationComponent->GetEnable());
-
-			initial_curpos.y += 25.f;
-			ImGui::SetCursorPos(initial_curpos);
-			ImGui::SetNextItemWidth(190.f);
-
-			if (ImGui::DragFloat("Distance##ShakeAnimation", &pShakeAnimationComponent->GetDistance(), 0.01f, 0.0f, 1.0f, "%.2f", 0))
-				pShakeAnimationComponent->GetDistance() = std::clamp(pShakeAnimationComponent->GetDistance(), 0.0f, 1.0f);
-
-			initial_curpos.y += 25.f;
-			ImGui::SetCursorPos(initial_curpos);
-			ImGui::SetNextItemWidth(190.f);
-
-			if (ImGui::DragFloat("Frequency##ShakeAnimation", &pShakeAnimationComponent->GetFrequency(), 0.01f, 0.0f, 1.0f, "%.2f", 0))
-				pShakeAnimationComponent->GetFrequency() = std::clamp(pShakeAnimationComponent->GetFrequency(), 0.0f, 1.0f);
-		}
-
-		initial_curpos.y += 25.f;
-		ImGui::SetCursorPos(initial_curpos);
-
-		if (ImGui::CollapsingHeader("Stun Animation"))
-		{
-			StunAnimationComponent* pStunAnimationComponent = dynamic_cast<StunAnimationComponent*>(pCurrentAnimation->GetStunAnimationComponent());
-
-			initial_curpos.y += 25.f;
-			ImGui::SetCursorPos(initial_curpos);
-			ImGui::SetNextItemWidth(190.f);
-			ImGui::Checkbox("On/Off##StunAnimation", &pStunAnimationComponent->GetEnable());
-
-			initial_curpos.y += 25.f;
-			ImGui::SetCursorPos(initial_curpos);
-			ImGui::SetNextItemWidth(190.f);
-
-			if (ImGui::DragFloat("StunTime##StunAnimation", &pStunAnimationComponent->GetStunTime(), 0.01f, 0.0f, 1.0f, "%.2f", 0))
-				pStunAnimationComponent->GetStunTime() = std::clamp(pStunAnimationComponent->GetStunTime(), 0.0f, 1.0f);
-		}
-
-		initial_curpos.y += 25.f;
-		ImGui::SetCursorPos(initial_curpos);
-
-		if (ImGui::CollapsingHeader("Camera Move"))
-		{
-			CameraMoveComponent* pCameraMoveComponent = dynamic_cast<CameraMoveComponent*>(pCurrentAnimation->GetCameraMoveComponent());
-
-			initial_curpos.y += 25.f;
-			ImGui::SetCursorPos(initial_curpos);
-			ImGui::SetNextItemWidth(190.f);
-			ImGui::Checkbox("On/Off##Move", &pCameraMoveComponent->GetEnable());
-
-			initial_curpos.y += 25.f;
-			ImGui::SetCursorPos(initial_curpos);
-			ImGui::SetNextItemWidth(190.f);
-
-			ImGui::DragFloat("Distance##Move", &pCameraMoveComponent->GetMaxDistance(), 0.01f, 0.0f, 10.0f, "%.2f", 0);
-
-			initial_curpos.y += 25.f;
-			ImGui::SetCursorPos(initial_curpos);
-			ImGui::SetNextItemWidth(190.f);
-			ImGui::DragFloat("Time##Move", &pCameraMoveComponent->GetMovingTime(), 0.01f, 0.0f, 10.0f, "%.2f", 0);
-
-			initial_curpos.y += 25.f;
-			ImGui::SetCursorPos(initial_curpos);
-			ImGui::SetNextItemWidth(190.f);
-			ImGui::DragFloat("RollBackTime##Move", &pCameraMoveComponent->GetRollBackTime(), 0.01f, 0.0f, 10.0f, "%.2f", 0);
-		}
-
-		initial_curpos.y += 25.f;
-		ImGui::SetCursorPos(initial_curpos);
-
-		if (ImGui::CollapsingHeader("Camera Shake"))
-		{
-			CameraShakeComponent* pCameraShakerComponent = dynamic_cast<CameraShakeComponent*>(pCurrentAnimation->GetCameraShakeComponent());
-
-			initial_curpos.y += 25.f;
-			ImGui::SetCursorPos(initial_curpos);
-			ImGui::SetNextItemWidth(190.f);
-			ImGui::Checkbox("On/Off##Shake", &pCameraShakerComponent->GetEnable());
-
-			initial_curpos.y += 25.f;
-			ImGui::SetCursorPos(initial_curpos);
-			ImGui::SetNextItemWidth(190.f);
-
-			ImGui::DragFloat("Magnitude##Shake", &pCameraShakerComponent->GetMagnitude(), 0.01f, 0.0f, 10.0f, "%.2f", 0);
-
-			initial_curpos.y += 25.f;
-			ImGui::SetCursorPos(initial_curpos);
-			ImGui::SetNextItemWidth(190.f);
-			ImGui::DragFloat("Duration##Shake", &pCameraShakerComponent->GetDuration(), 0.01f, 0.0f, 10.0f, "%.2f", 0);
-		}
-
-		initial_curpos.y += 25.f;
-		ImGui::SetCursorPos(initial_curpos);
-
-		if (ImGui::CollapsingHeader("Camera ZoomIn/ZoomOut"))
-		{
-			CameraZoomerComponent* pCameraZoomerComponent = dynamic_cast<CameraZoomerComponent*>(pCurrentAnimation->GetCameraZoomerComponent());
-
-			initial_curpos.y += 25.f;
-			ImGui::SetCursorPos(initial_curpos);
-			ImGui::SetNextItemWidth(190.f);
-			ImGui::Checkbox("On/Off##Zoom", &pCameraZoomerComponent->GetEnable());
-
-			initial_curpos.y += 25.f;
-			ImGui::SetCursorPos(initial_curpos);
-			ImGui::SetNextItemWidth(190.f);
-
-			ImGui::DragFloat("Distance##Zoom", &pCameraZoomerComponent->GetMaxDistance(), 0.01f, 0.0f, 10.0f, "%.2f", 0);
-
-			initial_curpos.y += 25.f;
-			ImGui::SetCursorPos(initial_curpos);
-			ImGui::SetNextItemWidth(190.f);
-			ImGui::DragFloat("Time##Zoom", &pCameraZoomerComponent->GetMovingTime(), 0.01f, 0.0f, 10.0f, "%.2f", 0);
-
-			initial_curpos.y += 25.f;
-			ImGui::SetCursorPos(initial_curpos);
-			ImGui::SetNextItemWidth(190.f);
-			ImGui::DragFloat("RollBackTime##Zoom", &pCameraZoomerComponent->GetRollBackTime(), 0.01f, 0.0f, 10.0f, "%.2f", 0);
-
-			initial_curpos.y += 25.f;
-			ImGui::SetCursorPos(initial_curpos);
-			ImGui::SetNextItemWidth(190.f);
-			ImGui::Checkbox("IN / OUT##Zoom", &pCameraZoomerComponent->GetIsIn());
-		}
-
-		initial_curpos.y += 25.f;
-		ImGui::SetCursorPos(initial_curpos);
-
-		if (ImGui::CollapsingHeader("Shock Sound Effect"))
-		{
-			std::vector<std::string> paths = CSoundManager::GetInst()->getSoundPathsByCategory(SOUND_CATEGORY::SOUND_SHOCK);
-			
-			SoundPlayComponent* pShockSoundComponent = dynamic_cast<SoundPlayComponent*>(pCurrentAnimation->GetShockSoundComponent());
-			
-			std::vector<const char*> items;
-			for (auto& path : paths) {
-				items.push_back(path.c_str());
-			}
-
-			initial_curpos.y += 25.f;
-			ImGui::SetCursorPos(initial_curpos);
-			ImGui::SetNextItemWidth(190.f);
-			ImGui::Checkbox("On/Off##effectsound", &pShockSoundComponent->GetEnable());
-
-			initial_curpos.y += 25.f;
-			ImGui::SetCursorPos(initial_curpos);
-			ImGui::SetNextItemWidth(190.f);
-			ImGui::Combo("Sound##effectsound", (int*)&pShockSoundComponent->GetSoundNumber(), items.data(), items.size());
-
-			initial_curpos.y += 25.f;
-			ImGui::SetCursorPos(initial_curpos);
-			ImGui::SetNextItemWidth(190.f);
-			ImGui::DragFloat("Delay##effectsound", &pShockSoundComponent->GetDelay(), 0.01f, 0.0f, 10.0f, "%.2f", 0);
-
-			initial_curpos.y += 25.f;
-			ImGui::SetCursorPos(initial_curpos);
-			ImGui::SetNextItemWidth(190.f);
-			ImGui::DragFloat("Volume##effectsound", &pShockSoundComponent->GetVolume(), 0.01f, 0.0f, 10.0f, "%.2f", 0);
-		}
-
-		initial_curpos.y += 25.f;
-		ImGui::SetCursorPos(initial_curpos);
-
-		if (ImGui::CollapsingHeader("Shooting Sound Effect"))
-		{
-			std::vector<std::string> paths = CSoundManager::GetInst()->getSoundPathsByCategory(SOUND_CATEGORY::SOUND_SHOOT);
-
-			SoundPlayComponent* pShootSoundComponent = dynamic_cast<SoundPlayComponent*>(pCurrentAnimation->GetShootSoundComponent());
-
-			std::vector<const char*> items;
-			for (auto& path : paths) {
-				items.push_back(path.c_str());
-			}
-
-			initial_curpos.y += 25.f;
-			ImGui::SetCursorPos(initial_curpos);
-			ImGui::SetNextItemWidth(190.f);
-			ImGui::Checkbox("On/Off##shootsound", &pShootSoundComponent->GetEnable());
-
-			initial_curpos.y += 25.f;
-			ImGui::SetCursorPos(initial_curpos);
-			ImGui::SetNextItemWidth(190.f);
-			ImGui::Combo("Sound##shootsound", (int*)&pShootSoundComponent->GetSoundNumber(), items.data(), items.size());
-
-			initial_curpos.y += 25.f;
-			ImGui::SetCursorPos(initial_curpos);
-			ImGui::SetNextItemWidth(190.f);
-			ImGui::DragFloat("Delay##shootsound", &pShootSoundComponent->GetDelay(), 0.01f, 0.0f, 10.0f, "%.2f", 0);
-
-			initial_curpos.y += 25.f;
-			ImGui::SetCursorPos(initial_curpos);
-			ImGui::SetNextItemWidth(190.f);
-			ImGui::DragFloat("Volume##shootsound", &pShootSoundComponent->GetVolume(), 0.01f, 0.0f, 10.0f, "%.2f", 0);
-
-		}
-
-		initial_curpos.y += 25.f;
-		ImGui::SetCursorPos(initial_curpos);
-
-		if (ImGui::CollapsingHeader("Damage Moan Sound Effect"))
-		{
-			std::vector<std::string> paths = CSoundManager::GetInst()->getSoundPathsByCategory(SOUND_CATEGORY::SOUND_VOICE);
-
-			SoundPlayComponent* pGoblinMoanComponent = dynamic_cast<SoundPlayComponent*>(pCurrentAnimation->GetGoblinMoanComponent());
-			SoundPlayComponent* pOrcMoanComponent = dynamic_cast<SoundPlayComponent*>(pCurrentAnimation->GetOrcMoanComponent());
-			SoundPlayComponent* pSkeletonMoanComponent = dynamic_cast<SoundPlayComponent*>(pCurrentAnimation->GetSkeletonMoanComponent());
-
-			std::vector<const char*> items;
-			for (auto& path : paths) {
-				items.push_back(path.c_str());
-			}
-
-			initial_curpos.y += 25.f;
-			ImGui::SetCursorPos(initial_curpos);
-			ImGui::SetNextItemWidth(240.f);
-			ImGui::Checkbox("On/Off(Goblin)##goblinmoansound", &pGoblinMoanComponent->GetEnable());
-
-			initial_curpos.y += 25.f;
-			ImGui::SetCursorPos(initial_curpos);
-			ImGui::SetNextItemWidth(190.f);
-			ImGui::Combo("Sound(Goblin)##goblinmoansound", (int*)&pGoblinMoanComponent->GetSoundNumber(), items.data(), GOBLIN_MOAN_SOUND_NUM);
-
-			initial_curpos.y += 25.f;
-			ImGui::SetCursorPos(initial_curpos);
-			ImGui::SetNextItemWidth(190.f);
-			ImGui::DragFloat("Delay(Goblin)##goblinmoansound", &pGoblinMoanComponent->GetDelay(), 0.01f, 0.0f, 10.0f, "%.2f", 0);
-
-			initial_curpos.y += 25.f;
-			ImGui::SetCursorPos(initial_curpos);
-			ImGui::SetNextItemWidth(190.f);
-			ImGui::DragFloat("Volume(Goblin)##goblinmoansound", &pGoblinMoanComponent->GetVolume(), 0.01f, 0.0f, 10.0f, "%.2f", 0);
-
-			initial_curpos.y += 50.f;
-			ImGui::SetCursorPos(initial_curpos);
-			ImGui::SetNextItemWidth(240.f);
-			ImGui::Checkbox("On/Off(Orc)##orcmoansound", &pOrcMoanComponent->GetEnable());
-
-			initial_curpos.y += 25.f;
-			ImGui::SetCursorPos(initial_curpos);
-			ImGui::SetNextItemWidth(190.f);
-			ImGui::Combo("Sound(Orc)##orcmoansound", (int*)&pOrcMoanComponent->GetSoundNumber(), items.data() + GOBLIN_MOAN_SOUND_NUM, ORC_MOAN_SOUND_NUM);
-
-			initial_curpos.y += 25.f;
-			ImGui::SetCursorPos(initial_curpos);
-			ImGui::SetNextItemWidth(190.f);
-			ImGui::DragFloat("Delay(Orc)##orcmoansound", &pOrcMoanComponent->GetDelay(), 0.01f, 0.0f, 10.0f, "%.2f", 0);
-
-			initial_curpos.y += 25.f;
-			ImGui::SetCursorPos(initial_curpos);
-			ImGui::SetNextItemWidth(190.f);
-			ImGui::DragFloat("Volume(Orc)##orcmoansound", &pOrcMoanComponent->GetVolume(), 0.01f, 0.0f, 10.0f, "%.2f", 0);
-
-			initial_curpos.y += 50.f;
-			ImGui::SetCursorPos(initial_curpos);
-			ImGui::SetNextItemWidth(240.f);
-			ImGui::Checkbox("On/Off(Skeleton)##skeletonmoansound", &pSkeletonMoanComponent->GetEnable());
-
-			initial_curpos.y += 25.f;
-			ImGui::SetCursorPos(initial_curpos);
-			ImGui::SetNextItemWidth(190.f);
-			ImGui::Combo("Sound(Skeleton)##orcmoansound", (int*)&pSkeletonMoanComponent->GetSoundNumber(), items.data() + GOBLIN_MOAN_SOUND_NUM + ORC_MOAN_SOUND_NUM, SKELETON_MOAN_SOUND_NUM);
-
-			initial_curpos.y += 25.f;
-			ImGui::SetCursorPos(initial_curpos);
-			ImGui::SetNextItemWidth(190.f);
-			ImGui::DragFloat("Delay(Skeleton)##orcmoansound", &pSkeletonMoanComponent->GetDelay(), 0.01f, 0.0f, 10.0f, "%.2f", 0);
-
-			initial_curpos.y += 25.f;
-			ImGui::SetCursorPos(initial_curpos);
-			ImGui::SetNextItemWidth(190.f);
-			ImGui::DragFloat("Volume(Skeleton)##orcmoansound", &pSkeletonMoanComponent->GetVolume(), 0.01f, 0.0f, 10.0f, "%.2f", 0);
-		}
-
-		button_pos.y += 5.f;
-		ImGui::SetCursorPos(button_pos);
-
-		if (ImGui::Button("Animation1", ImVec2(175.f, 45.f))) // Buttons return true when clicked (most widgets return true when edited/activated)
-		{
-			CSimulatorScene::GetInst()->SetPlayerAnimationSet(0);
-			Player_Animation_Number = 0;
-		}
-		ImGui::SameLine();
-		if (ImGui::Button("Animation2", ImVec2(175.f, 45.f))) // Buttons return true when clicked (most widgets return true when edited/activated)
-		{
-			CSimulatorScene::GetInst()->SetPlayerAnimationSet(1);
-			Player_Animation_Number = 1;
-
-		}
-		ImGui::SameLine();
-		if (ImGui::Button("Animation3", ImVec2(175.f, 45.f))) // Buttons return true when clicked (most widgets return true when edited/activated)
-		{
-			CSimulatorScene::GetInst()->SetPlayerAnimationSet(2);
-			Player_Animation_Number = 2;
+			m_pDataLoader->SaveComponentSets(ConvertU8ToW(folder_name));
+			show_save_menu = false;
 		}
 
 		ImGui::End();
 	}
+
+	// Show my window.
+	{
+		ImGuiWindowFlags my_window_flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_MenuBar;
+		bool* p_open = NULL;
+
+		ImGui::SetNextWindowSize(ImVec2(m_lDesktopWidth * 0.25f, 0.0f), ImGuiCond_Always);
+		ImGui::Begin(U8STR("시뮬레이터 관리자"), p_open, my_window_flags);
+
+		if (ImGui::BeginMenuBar())
+		{
+			if (ImGui::BeginMenu(U8STR("메뉴")))
+			{
+				if (ImGui::MenuItem(U8STR("저장"), NULL))
+				{
+					show_save_menu = true;
+				}
+				ImGui::Separator();
+				if(ImGui::MenuItem(U8STR("타격감 프리셋 메뉴"), NULL))
+				{
+					show_preset_menu = true;
+				}
+				if (ImGui::MenuItem(U8STR("몬스터 리셋"), NULL))
+				{
+					CSimulatorScene::GetInst()->ResetMonster();
+				}
+				ImGui::EndMenu();
+			}
+			ImGui::EndMenuBar();
+		}
+
+		// 시뮬레이터 씬 보여주기 여부 설정 ImGui
+		ImGui::Checkbox(U8STR("시뮬레이터"), &show_simulator_scene);
+
+		ImGui::SameLine(m_lDesktopWidth * 0.17f);
+		// 플레이어 애니메이션 출력 버튼
+		if (ImGui::Button(U8STR("공격1")))
+		{
+			if (show_simulator_scene)
+				CSimulatorScene::GetInst()->SetPlayerAnimationSet(0);
+			Player_Animation_Number = 0;
+		}
+		ImGui::SameLine();
+		if (ImGui::Button(U8STR("공격2")))
+		{
+			if(show_simulator_scene)
+				CSimulatorScene::GetInst()->SetPlayerAnimationSet(1);
+			Player_Animation_Number = 1;
+		}
+		ImGui::SameLine();
+		if (ImGui::Button(U8STR("공격3")))
+		{
+			if(show_simulator_scene)
+				CSimulatorScene::GetInst()->SetPlayerAnimationSet(2);
+			Player_Animation_Number = 2;
+		}
+
+		if (ImGui::CollapsingHeader(U8STR("특수 효과")))
+		{
+			if (ImGui::TreeNode(U8STR("충격 이펙트")))
+			{
+				ShowImpactManager(pCurrentAnimation);
+				ImGui::TreePop();
+			}
+			if (ImGui::TreeNode(U8STR("파티클 이펙트")))
+			{
+				ShowParticleManager(pCurrentAnimation);
+				ImGui::TreePop();
+			}
+			if (ImGui::TreeNode(U8STR("잔상 이펙트")))
+			{
+				ImGui::TreePop();
+			}
+		}
+
+		if (ImGui::CollapsingHeader(U8STR("애니메이션")))
+		{
+			if (ImGui::TreeNode(U8STR("대미지 애니메이션")))
+			{
+				ShowDamageAnimationManager(pCurrentAnimation);
+
+				ImGui::TreePop();
+			}
+			if (ImGui::TreeNode(U8STR("흔들림 애니메이션")))
+			{
+				ShowShakeAnimationManager(pCurrentAnimation);
+				ImGui::TreePop();
+			}
+			if (ImGui::TreeNode(U8STR("경직 애니메이션")))
+			{
+				ShowStunAnimationManager(pCurrentAnimation);
+				ImGui::TreePop();
+			}
+			if (ImGui::TreeNode(U8STR("역경직 애니메이션")))
+			{
+				ShowHitLagManager(pCurrentAnimation);
+				ImGui::TreePop();
+			}
+		}
+
+		if (ImGui::CollapsingHeader(U8STR("카메라 테크닉")))
+		{
+			if (ImGui::TreeNode(U8STR("카메라 이동")))
+			{
+				ShowCameraMoveManager(pCurrentAnimation);
+				ImGui::TreePop();
+			}
+			if (ImGui::TreeNode(U8STR("카메라 흔들림")))
+			{
+				ShowCameraShakeManager(pCurrentAnimation);
+				ImGui::TreePop();
+			}
+			if (ImGui::TreeNode(U8STR("카메라 줌인")))
+			{
+				ShowCameraZoomManager(pCurrentAnimation);
+				ImGui::TreePop();
+			}
+		}
+
+		if (ImGui::CollapsingHeader(U8STR("음향")))
+		{
+			if (ImGui::TreeNode(U8STR("충격 효과음")))
+			{
+				ShowShockSoundManager(pCurrentAnimation);
+				ImGui::TreePop();
+			}
+			if (ImGui::TreeNode(U8STR("발사 효과음")))
+			{
+				ShowShootSoundManager(pCurrentAnimation);
+				ImGui::TreePop();
+			}
+			if (ImGui::TreeNode(U8STR("대미지 음성")))
+			{
+				ShowDamageMoanSoundManager(pCurrentAnimation);
+				ImGui::TreePop();
+			}
+		}
+		ImGui::End();
+	}
+}
+void CImGuiManager::ShowImpactManager(CState<CPlayer>* pCurrentAnimation)
+{
+	ImGuiWindowFlags my_window_flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize;
+	bool* b_open = nullptr;
+
+	ImGui::Begin(U8STR("충격 이펙트 관리자"), b_open, my_window_flags);
+	ImpactEffectComponent* pImpactEffectComponent = dynamic_cast<ImpactEffectComponent*>(pCurrentAnimation->GetImpactComponent());
+	ImGui::Checkbox(U8STR("켜기/끄기##ImpactEffect"), &pImpactEffectComponent->GetEnable());
+
+	std::vector<std::shared_ptr<CTexture>> vTexture = CSimulatorScene::GetInst()->GetTextureManager()->GetBillBoardTextureList();
+	std::vector<const char*> items;
+	std::vector <std::string> str(100);
+	for (int i = 0; i < vTexture.size(); i++)
+	{
+		std::wstring wstr = vTexture[i]->GetTextureName(0);
+		str[i].assign(wstr.begin(), wstr.end());
+		items.emplace_back(str[i].c_str());
+	}
+
+	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
+	if (ImGui::Combo(U8STR("텍스쳐##ImpactEffect"), (int*)(&pImpactEffectComponent->GetTextureIndex()), items.data(), items.size()));
+	{
+		std::shared_ptr<CTexture> pTexture = vTexture[pImpactEffectComponent->GetTextureIndex()];
+		pImpactEffectComponent->SetImpactTexture(pTexture);
+	}
+
+	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
+	if (ImGui::DragFloat(U8STR("재생 속도##ImpactEffect"), &pImpactEffectComponent->GetSpeed(), DRAG_FLOAT_UNIT, IMPACT_SPEED_MIN, IMPACT_SPEED_MAX, "%.2f", 0))
+		pImpactEffectComponent->GetSpeed() = std::clamp(pImpactEffectComponent->GetSpeed(), IMPACT_SPEED_MIN, IMPACT_SPEED_MAX);
+
+	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
+	if (ImGui::DragFloat(U8STR("투명도##ImpactEffect"), &pImpactEffectComponent->GetAlpha(), DRAG_FLOAT_UNIT, IMPACT_ALPHA_MIN, IMPACT_ALPHA_MAX, "%.2f", 0))
+		pImpactEffectComponent->GetAlpha() = std::clamp(pImpactEffectComponent->GetAlpha(), IMPACT_ALPHA_MIN, IMPACT_ALPHA_MAX);
+	ImGui::End();
+}
+void CImGuiManager::ShowParticleManager(CState<CPlayer>* pCurrentAnimation)
+{
+	ImGuiWindowFlags my_window_flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize;
+	bool* b_open = nullptr;
+
+	ImGui::Begin(U8STR("파티클 이펙트 관리자"), b_open, my_window_flags);
+
+	ParticleComponent* pParticleComponent = dynamic_cast<ParticleComponent*>(pCurrentAnimation->GetParticleComponent());
+
+	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
+	ImGui::Checkbox(U8STR("켜기/끄기##ParticleEffect"), &pParticleComponent->GetEnable());
+
+	std::vector<std::shared_ptr<CTexture>> vTexture = CSimulatorScene::GetInst()->GetTextureManager()->GetParticleTextureList();
+	std::vector<const char*> items;
+	std::vector <std::string> str(100);
+	for (int i = 0; i < vTexture.size(); i++)
+	{
+		std::wstring wstr = vTexture[i]->GetTextureName(0);
+		str[i].assign(wstr.begin(), wstr.end());
+		items.emplace_back(str[i].c_str());
+	}
+
+	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
+	if (ImGui::Combo(U8STR("텍스쳐##ParticleEffect"), (int*)(&pParticleComponent->GetParticleIndex()), items.data(), items.size()))
+	{
+		std::shared_ptr pTexture = vTexture[pParticleComponent->GetParticleIndex()];
+		pParticleComponent->SetParticleTexture(pTexture);
+	}
+
+	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
+	ImGui::DragFloat(U8STR("크기##ParticleEffect"), &pParticleComponent->GetSize(), DRAG_FLOAT_UNIT, PARTICLE_SIZE_MIN, PARTICLE_SIZE_MAX, "%.2f", 0);
+
+	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
+	if (ImGui::DragFloat(U8STR("투명도##ParticleEffect"), &pParticleComponent->GetAlpha(), DRAG_FLOAT_UNIT, PARTICLE_ALPHA_MIN, PARTICLE_ALPHA_MAX, "%.2f", 0))
+		pParticleComponent->GetAlpha() = std::clamp(pParticleComponent->GetAlpha(), PARTICLE_ALPHA_MIN, PARTICLE_ALPHA_MAX);
+
+	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
+	if (ImGui::DragFloat(U8STR("수명##ParticleEffect"), &pParticleComponent->GetLifeTime(), DRAG_FLOAT_UNIT, PARTICLE_LIFETIME_MIN, PARTICLE_LIFETIME_MAX, "%.1f", 0))
+		pParticleComponent->GetLifeTime() = std::clamp(pParticleComponent->GetLifeTime(), PARTICLE_LIFETIME_MIN, PARTICLE_LIFETIME_MAX);
+
+	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
+	if (ImGui::DragInt(U8STR("파티클 개수##ParticleEffect"), &pParticleComponent->GetParticleNumber(), DRAG_FLOAT_UNIT, PARTICLE_COUNT_MIN, PARTICLE_COUNT_MAX, "%d", 0))
+		pParticleComponent->GetParticleNumber() = std::clamp(pParticleComponent->GetParticleNumber(), PARTICLE_COUNT_MIN, PARTICLE_COUNT_MAX);
+
+	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
+	if (ImGui::DragFloat(U8STR("속도##ParticleEffect"), &pParticleComponent->GetSpeed(), DRAG_FLOAT_UNIT, PARTICLE_SPEED_MIN, PARTICLE_SPEED_MAX, "%.1f", 0))
+		pParticleComponent->GetSpeed() = std::clamp(pParticleComponent->GetSpeed(), PARTICLE_SPEED_MIN, PARTICLE_SPEED_MAX);
+
+	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
+	ImGui::ColorEdit3(U8STR("색상"), (float*)&pParticleComponent->GetColor()); // Edit 3 floats representing a color
+
+	ImGui::End();
+}
+void CImGuiManager::ShowDamageAnimationManager(CState<CPlayer>* pCurrentAnimation)
+{
+	ImGuiWindowFlags my_window_flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize;
+	bool* b_open = nullptr;
+
+	ImGui::Begin(U8STR("대미지 애니메이션 관리자"), b_open, my_window_flags);
+	DamageAnimationComponent* pDamageAnimationComponent = dynamic_cast<DamageAnimationComponent*>(pCurrentAnimation->GetDamageAnimationComponent());
+
+	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
+	ImGui::Checkbox(U8STR("켜기/끄기##DamageAnimation"), &pDamageAnimationComponent->GetEnable());
+
+	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
+	if (ImGui::DragFloat(U8STR("최대거리##DamageAnimation"), &pDamageAnimationComponent->GetMaxDistance(), DRAG_FLOAT_UNIT, DAMAGE_ANIMATION_DISTANCE_MIN, DAMAGE_ANIMATION_DISTANCE_MAX, "%.2f", 0))
+		pDamageAnimationComponent->GetMaxDistance() = std::clamp(pDamageAnimationComponent->GetMaxDistance(), DAMAGE_ANIMATION_DISTANCE_MIN, DAMAGE_ANIMATION_DISTANCE_MAX);
+
+	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
+	if (ImGui::DragFloat(U8STR("속도##DamageAnimation"), &pDamageAnimationComponent->GetSpeed(), DRAG_FLOAT_UNIT, DAMAGE_ANIMATION_SPEED_MIN, DAMAGE_ANIMATION_SPEED_MAX, "%.2f", 0))
+		pDamageAnimationComponent->GetSpeed() = std::clamp(pDamageAnimationComponent->GetSpeed(), DAMAGE_ANIMATION_SPEED_MIN, DAMAGE_ANIMATION_SPEED_MAX);
+	
+	ImGui::End();
+}
+void CImGuiManager::ShowShakeAnimationManager(CState<CPlayer>* pCurrentAnimation)
+{
+	ImGuiWindowFlags my_window_flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize;
+	bool* b_open = nullptr;
+
+	ImGui::Begin(U8STR("흔들림 애니메이션 관리자"), b_open, my_window_flags);
+	ShakeAnimationComponent* pShakeAnimationComponent = dynamic_cast<ShakeAnimationComponent*>(pCurrentAnimation->GetShakeAnimationComponent());
+
+	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
+	ImGui::Checkbox(U8STR("켜기/끄기##ShakeAnimation"), &pShakeAnimationComponent->GetEnable());
+
+	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
+	if (ImGui::DragFloat(U8STR("지속시간##ShakeAnimation"), &pShakeAnimationComponent->GetDuration(), DRAG_FLOAT_UNIT, SHAKE_ANIMATION_DURATION_MIN, SHAKE_ANIMATION_DURATION_MAX, "%.2f", 0))
+		pShakeAnimationComponent->GetDuration() = std::clamp(pShakeAnimationComponent->GetDuration(), SHAKE_ANIMATION_DURATION_MIN, SHAKE_ANIMATION_DURATION_MAX);
+
+	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
+	if(ImGui::DragFloat(U8STR("거리##ShakeAnimation"), &pShakeAnimationComponent->GetDistance(), DRAG_FLOAT_UNIT, SHAKE_ANIMATION_DISTANCE_MIN, SHAKE_ANIMATION_DISTANCE_MAX, "%.2f", 0))
+		pShakeAnimationComponent->GetDistance() = std::clamp(pShakeAnimationComponent->GetDistance(), SHAKE_ANIMATION_DISTANCE_MIN, SHAKE_ANIMATION_DISTANCE_MAX);
+
+
+	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
+	if (ImGui::DragFloat(U8STR("빈도##ShakeAnimation"), &pShakeAnimationComponent->GetFrequency(), DRAG_FLOAT_UNIT, SHAKE_ANIMATION_FREQUENCY_MIN, SHAKE_ANIMATION_FREQUENCY_MAX, "%.3f", 0))
+		pShakeAnimationComponent->GetFrequency() = std::clamp(pShakeAnimationComponent->GetFrequency(), SHAKE_ANIMATION_FREQUENCY_MIN, SHAKE_ANIMATION_FREQUENCY_MAX);
+
+	ImGui::End();
+}
+void CImGuiManager::ShowStunAnimationManager(CState<CPlayer>* pCurrentAnimation)
+{
+	ImGuiWindowFlags my_window_flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize;
+	bool* b_open = nullptr;
+
+	ImGui::Begin(U8STR("경직 애니메이션 관리자"), b_open, my_window_flags);
+	StunAnimationComponent* pStunAnimationComponent = dynamic_cast<StunAnimationComponent*>(pCurrentAnimation->GetStunAnimationComponent());
+
+	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
+	ImGui::Checkbox(U8STR("켜기/끄기##StunAnimation"), &pStunAnimationComponent->GetEnable());
+
+	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
+	if (ImGui::DragFloat(U8STR("경직시간##StunAnimation"), &pStunAnimationComponent->GetStunTime(), DRAG_FLOAT_UNIT, STUN_ANIMATION_STUNTIME_MIN, STUN_ANIMATION_STUNTIME_MAX, "%.2f", 0))
+		pStunAnimationComponent->GetStunTime() = std::clamp(pStunAnimationComponent->GetStunTime(), STUN_ANIMATION_STUNTIME_MIN, STUN_ANIMATION_STUNTIME_MAX);
+	
+	ImGui::End();
+}
+void CImGuiManager::ShowHitLagManager(CState<CPlayer>* pCurrentAnimation)
+{
+	ImGuiWindowFlags my_window_flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize;
+	bool* b_open = nullptr;
+	ImGui::Begin(U8STR("역경직 관리자"), b_open, my_window_flags);
+	HitLagComponent* pHitLagComponent = pCurrentAnimation->GetHitLagComponent();
+
+	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
+	ImGui::Checkbox(U8STR("켜기/끄기##HitLag"), &pHitLagComponent->GetEnable());
+
+	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
+	if (ImGui::DragFloat(U8STR("지속시간##Move"), &pHitLagComponent->GetMaxLagTime(), DRAG_FLOAT_UNIT, HIT_LAG_MAXTIME_MIN, HIT_LAG_MAXTIME_MAX, "%.2f", 0))
+		pHitLagComponent->GetMaxLagTime() = std::clamp(pHitLagComponent->GetMaxLagTime(), HIT_LAG_MAXTIME_MIN, HIT_LAG_MAXTIME_MAX);
+
+	ImGui::End();
+}
+void CImGuiManager::ShowCameraMoveManager(CState<CPlayer>* pCurrentAnimation)
+{
+	ImGuiWindowFlags my_window_flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize;
+	bool* b_open = nullptr;
+
+	ImGui::Begin(U8STR("카메라 이동 관리자"), b_open, my_window_flags);
+	CameraMoveComponent* pCameraMoveComponent = dynamic_cast<CameraMoveComponent*>(pCurrentAnimation->GetCameraMoveComponent());
+
+	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
+	ImGui::Checkbox(U8STR("켜기/끄기##Move"), &pCameraMoveComponent->GetEnable());
+
+	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
+	if (ImGui::DragFloat(U8STR("거리##Move"), &pCameraMoveComponent->GetMaxDistance(), DRAG_FLOAT_UNIT, CAMERA_MOVE_DISTANCE_MIN, CAMERA_MOVE_DISTANCE_MAX, "%.2f", 0))
+		pCameraMoveComponent->GetMaxDistance() = std::clamp(pCameraMoveComponent->GetMaxDistance(), CAMERA_MOVE_DISTANCE_MIN, CAMERA_MOVE_DISTANCE_MAX);
+
+	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
+	if (ImGui::DragFloat(U8STR("시간##Move"), &pCameraMoveComponent->GetMovingTime(), DRAG_FLOAT_UNIT, CAMERA_MOVE_TIME_MIN, CAMERA_MOVE_TIME_MAX, "%.2f", 0))
+		pCameraMoveComponent->GetMovingTime() = std::clamp(pCameraMoveComponent->GetMovingTime(), CAMERA_MOVE_TIME_MIN, CAMERA_MOVE_TIME_MAX);
+
+	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
+	if (ImGui::DragFloat(U8STR("복귀시간##Move"), &pCameraMoveComponent->GetRollBackTime(), DRAG_FLOAT_UNIT, CAMERA_MOVE_ROLLBACKTIME_MIN, CAMERA_MOVE_ROLLBACKTIME_MAX, "%.2f", 0))
+		pCameraMoveComponent->GetRollBackTime() = std::clamp(pCameraMoveComponent->GetRollBackTime(), CAMERA_MOVE_ROLLBACKTIME_MIN, CAMERA_MOVE_ROLLBACKTIME_MAX);
+	
+	ImGui::End();
+}
+void CImGuiManager::ShowCameraShakeManager(CState<CPlayer>* pCurrentAnimation)
+{
+	ImGuiWindowFlags my_window_flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize;
+	bool* b_open = nullptr;
+
+	ImGui::Begin(U8STR("카메라 흔들림 관리자"), b_open, my_window_flags);
+	CameraShakeComponent* pCameraShakerComponent = dynamic_cast<CameraShakeComponent*>(pCurrentAnimation->GetCameraShakeComponent());
+
+	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
+	ImGui::Checkbox(U8STR("켜기/끄기##Shake"), &pCameraShakerComponent->GetEnable());
+
+	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
+	if (ImGui::DragFloat(U8STR("흔들림 규모##Shake"), &pCameraShakerComponent->GetMagnitude(), DRAG_FLOAT_UNIT, CAMERA_SHAKE_MAGNITUDE_MIN, CAMERA_SHAKE_MAGNITUDE_MAX, "%.2f", 0))
+		pCameraShakerComponent->GetMagnitude() = std::clamp(pCameraShakerComponent->GetMagnitude(), CAMERA_SHAKE_MAGNITUDE_MIN, CAMERA_SHAKE_MAGNITUDE_MAX);
+
+	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
+	if (ImGui::DragFloat(U8STR("지속 시간##Shake"), &pCameraShakerComponent->GetDuration(), DRAG_FLOAT_UNIT, CAMERA_SHAKE_DURATION_MIN, CAMERA_SHAKE_DURATION_MAX, "%.2f", 0))
+		pCameraShakerComponent->GetDuration() = std::clamp(pCameraShakerComponent->GetDuration(), CAMERA_SHAKE_DURATION_MIN, CAMERA_SHAKE_DURATION_MAX);
+
+	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
+	if (ImGui::DragFloat(U8STR("빈도##Shake"), &pCameraShakerComponent->GetFrequency(), DRAG_FLOAT_UNIT, CAMERA_SHAKE_FREQUENCY_MIN, CAMERA_SHAKE_FREQUENCY_MAX, "%.3f", 0))
+		pCameraShakerComponent->GetFrequency() = std::clamp(pCameraShakerComponent->GetFrequency(), CAMERA_SHAKE_FREQUENCY_MIN, CAMERA_SHAKE_FREQUENCY_MAX);
+	
+	ImGui::End();
+}
+void CImGuiManager::ShowCameraZoomManager(CState<CPlayer>* pCurrentAnimation)
+{
+	ImGuiWindowFlags my_window_flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize;
+	bool* b_open = nullptr;
+
+	ImGui::Begin(U8STR("카메라 줌 관리자"), b_open, my_window_flags);
+	CameraZoomerComponent* pCameraZoomerComponent = dynamic_cast<CameraZoomerComponent*>(pCurrentAnimation->GetCameraZoomerComponent());
+
+	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
+	ImGui::Checkbox(U8STR("켜기/끄기##Zoom"), &pCameraZoomerComponent->GetEnable());
+
+	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
+	if (ImGui::DragFloat(U8STR("거리##Zoom"), &pCameraZoomerComponent->GetMaxDistance(), DRAG_FLOAT_UNIT, CAMERA_ZOOMINOUT_DISTANCE_MIN, CAMERA_ZOOMINOUT_DISTANCE_MAX, "%.2f", 0))
+		pCameraZoomerComponent->GetMaxDistance() = std::clamp(pCameraZoomerComponent->GetMaxDistance(), CAMERA_ZOOMINOUT_DISTANCE_MIN, CAMERA_ZOOMINOUT_DISTANCE_MAX);
+
+	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
+	if (ImGui::DragFloat(U8STR("시간##Zoom"), &pCameraZoomerComponent->GetMovingTime(), DRAG_FLOAT_UNIT, CAMERA_ZOOMINOUT_TIME_MIN, CAMERA_ZOOMINOUT_TIME_MAX, "%.2f", 0))
+		pCameraZoomerComponent->GetMovingTime() = std::clamp(pCameraZoomerComponent->GetMovingTime(), CAMERA_ZOOMINOUT_TIME_MIN, CAMERA_ZOOMINOUT_TIME_MAX);
+
+	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
+	if (ImGui::DragFloat(U8STR("복귀시간##Zoom"), &pCameraZoomerComponent->GetRollBackTime(), DRAG_FLOAT_UNIT, CAMERA_ZOOMINOUT_ROLLBACKTIME_MIN, CAMERA_ZOOMINOUT_ROLLBACKTIME_MAX, "%.2f", 0))
+		pCameraZoomerComponent->GetRollBackTime() = std::clamp(pCameraZoomerComponent->GetRollBackTime(), CAMERA_ZOOMINOUT_ROLLBACKTIME_MIN, CAMERA_ZOOMINOUT_ROLLBACKTIME_MAX);
+
+
+	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
+	ImGui::Checkbox("IN / OUT##Zoom", &pCameraZoomerComponent->GetIsIn());
+
+	ImGui::End();
+}
+void CImGuiManager::ShowShockSoundManager(CState<CPlayer>* pCurrentAnimation)
+{
+	ImGuiWindowFlags my_window_flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize;
+	bool* b_open = nullptr;
+
+	ImGui::Begin(U8STR("충격 사운드 관리자"), b_open, my_window_flags);
+	std::vector<std::string> paths = CSoundManager::GetInst()->getSoundPathsByCategory(SOUND_CATEGORY::SOUND_SHOCK);
+
+	SoundPlayComponent* pShockSoundComponent = dynamic_cast<SoundPlayComponent*>(pCurrentAnimation->GetShockSoundComponent());
+
+	std::vector<const char*> items;
+	for (auto& path : paths) {
+		items.push_back(path.c_str());
+	}
+
+	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
+	ImGui::Checkbox(U8STR("켜기/끄기##effectsound"), &pShockSoundComponent->GetEnable());
+
+	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
+	ImGui::Combo(U8STR("소리##effectsound"), (int*)&pShockSoundComponent->GetSoundNumber(), items.data(), items.size());
+
+	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
+	if (ImGui::DragFloat(U8STR("지연시간##effectsound"), &pShockSoundComponent->GetDelay(), DRAG_FLOAT_UNIT, SHOCK_SOUND_DELAY_MIN, SHOCK_SOUND_DELAY_MAX, "%.2f", 0))
+		pShockSoundComponent->GetDelay() = std::clamp(pShockSoundComponent->GetDelay(), SHOCK_SOUND_DELAY_MIN, SHOCK_SOUND_DELAY_MAX);
+
+	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
+	if (ImGui::DragFloat(U8STR("음량##effectsound"), &pShockSoundComponent->GetVolume(), DRAG_FLOAT_UNIT, SHOCK_SOUND_VOLUME_MIN, SHOCK_SOUND_VOLUME_MAX, "%.2f", 0))
+		pShockSoundComponent->GetVolume() = std::clamp(pShockSoundComponent->GetVolume(), SHOCK_SOUND_VOLUME_MIN, SHOCK_SOUND_VOLUME_MAX);
+	
+	ImGui::End();
+}
+void CImGuiManager::ShowShootSoundManager(CState<CPlayer>* pCurrentAnimation)
+{
+	ImGuiWindowFlags my_window_flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize;
+	bool* b_open = nullptr;
+
+	ImGui::Begin(U8STR("발사 사운드 관리자"), b_open, my_window_flags);
+	std::vector<std::string> paths = CSoundManager::GetInst()->getSoundPathsByCategory(SOUND_CATEGORY::SOUND_SHOOT);
+
+	SoundPlayComponent* pShootSoundComponent = dynamic_cast<SoundPlayComponent*>(pCurrentAnimation->GetShootSoundComponent());
+
+	std::vector<const char*> items;
+	for (auto& path : paths) {
+		items.push_back(path.c_str());
+	}
+
+	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
+	ImGui::Checkbox(U8STR("켜기/끄기##shootsound"), &pShootSoundComponent->GetEnable());
+
+	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
+	ImGui::Combo(U8STR("소리##shootsound"), (int*)&pShootSoundComponent->GetSoundNumber(), items.data(), items.size());
+
+	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
+	if (ImGui::DragFloat(U8STR("지연시간##shootsound"), &pShootSoundComponent->GetDelay(), DRAG_FLOAT_UNIT, SHOOTING_SOUND_DELAY_MIN, SHOOTING_SOUND_DELAY_MAX, "%.2f", 0))
+		pShootSoundComponent->GetDelay() = std::clamp(pShootSoundComponent->GetDelay(), SHOOTING_SOUND_DELAY_MIN, SHOOTING_SOUND_DELAY_MAX);
+
+	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
+	if (ImGui::DragFloat(U8STR("음량##shootsound"), &pShootSoundComponent->GetVolume(), DRAG_FLOAT_UNIT, SHOOTING_SOUND_VOLUME_MIN, SHOOTING_SOUND_VOLUME_MAX, "%.2f", 0))
+		pShootSoundComponent->GetVolume() = std::clamp(pShootSoundComponent->GetVolume(), SHOOTING_SOUND_VOLUME_MIN, SHOOTING_SOUND_VOLUME_MAX);
+	
+	ImGui::End();
+}
+void CImGuiManager::ShowDamageMoanSoundManager(CState<CPlayer>* pCurrentAnimation)
+{
+	ImGuiWindowFlags my_window_flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize;
+	bool* b_open = nullptr;
+
+	ImGui::Begin(U8STR("대미지 신음 사운드 관리자"), b_open, my_window_flags);
+	std::vector<std::string> paths = CSoundManager::GetInst()->getSoundPathsByCategory(SOUND_CATEGORY::SOUND_VOICE);
+
+	SoundPlayComponent* pGoblinMoanComponent = dynamic_cast<SoundPlayComponent*>(pCurrentAnimation->GetGoblinMoanComponent());
+	SoundPlayComponent* pOrcMoanComponent = dynamic_cast<SoundPlayComponent*>(pCurrentAnimation->GetOrcMoanComponent());
+	SoundPlayComponent* pSkeletonMoanComponent = dynamic_cast<SoundPlayComponent*>(pCurrentAnimation->GetSkeletonMoanComponent());
+
+	std::vector<const char*> items;
+	for (auto& path : paths) {
+		items.push_back(path.c_str());
+	}
+
+	ImGui::SetNextItemWidth(0.125f * m_lDesktopWidth);
+	ImGui::Checkbox(U8STR("켜기/끄기(Goblin)##goblinmoansound"), &pGoblinMoanComponent->GetEnable());
+
+	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
+	ImGui::Combo(U8STR("소리(고블린)##goblinmoansound"), (int*)&pGoblinMoanComponent->GetSoundNumber(), items.data(), GOBLIN_MOAN_SOUND_NUM);
+
+	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
+	if (ImGui::DragFloat(U8STR("지연시간(고블린)##goblinmoansound"), &pGoblinMoanComponent->GetDelay(), DRAG_FLOAT_UNIT, MOAN_SOUND_DELAY_MIN, MOAN_SOUND_DELAY_MAX, "%.2f", 0))
+		pGoblinMoanComponent->GetDelay() = std::clamp(pGoblinMoanComponent->GetDelay(), MOAN_SOUND_DELAY_MIN, MOAN_SOUND_DELAY_MAX);
+
+	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
+	if (ImGui::DragFloat(U8STR("음량(고블린)##goblinmoansound"), &pGoblinMoanComponent->GetVolume(), DRAG_FLOAT_UNIT, MOAN_SOUND_VOLUME_MIN, MOAN_SOUND_VOLUME_MAX, "%.2f", 0))
+		pGoblinMoanComponent->GetVolume() = std::clamp(pGoblinMoanComponent->GetVolume(), MOAN_SOUND_VOLUME_MIN, MOAN_SOUND_VOLUME_MAX);
+
+	ImGui::SetNextItemWidth(0.125f * m_lDesktopWidth);
+	ImGui::Checkbox(U8STR("켜기/끄기(오크)##orcmoansound"), &pOrcMoanComponent->GetEnable());
+
+	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
+	ImGui::Combo(U8STR("소리(오크)##orcmoansound"), (int*)&pOrcMoanComponent->GetSoundNumber(), items.data() + GOBLIN_MOAN_SOUND_NUM, ORC_MOAN_SOUND_NUM);
+
+	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
+	if (ImGui::DragFloat(U8STR("지연시간(오크)##orcmoansound"), &pOrcMoanComponent->GetDelay(), DRAG_FLOAT_UNIT, MOAN_SOUND_DELAY_MIN, MOAN_SOUND_DELAY_MAX, "%.2f", 0))
+		pOrcMoanComponent->GetDelay() = std::clamp(pOrcMoanComponent->GetDelay(), MOAN_SOUND_DELAY_MIN, MOAN_SOUND_DELAY_MAX);
+
+	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
+	if (ImGui::DragFloat(U8STR("음량(오크)##orcmoansound"), &pOrcMoanComponent->GetVolume(), DRAG_FLOAT_UNIT, MOAN_SOUND_VOLUME_MIN, MOAN_SOUND_VOLUME_MAX, "%.2f", 0))
+		pOrcMoanComponent->GetVolume() = std::clamp(pOrcMoanComponent->GetVolume(), MOAN_SOUND_VOLUME_MIN, MOAN_SOUND_VOLUME_MAX);
+
+	ImGui::SetNextItemWidth(0.125f * m_lDesktopWidth);
+	ImGui::Checkbox(U8STR("켜기/끄기(Skeleton)##skeletonmoansound"), &pSkeletonMoanComponent->GetEnable());
+
+	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
+	ImGui::Combo(U8STR("소리(스켈레톤)##skeletonmoansound"), (int*)&pSkeletonMoanComponent->GetSoundNumber(), items.data() + GOBLIN_MOAN_SOUND_NUM + ORC_MOAN_SOUND_NUM, SKELETON_MOAN_SOUND_NUM);
+
+	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
+	if (ImGui::DragFloat(U8STR("지연시간(스켈레톤)##skeletonmoansound"), &pSkeletonMoanComponent->GetDelay(), DRAG_FLOAT_UNIT, MOAN_SOUND_DELAY_MIN, MOAN_SOUND_DELAY_MAX, "%.2f", 0))
+		pSkeletonMoanComponent->GetDelay() = std::clamp(pSkeletonMoanComponent->GetDelay(), MOAN_SOUND_DELAY_MIN, MOAN_SOUND_DELAY_MAX);
+
+	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
+	if (ImGui::DragFloat(U8STR("음량(스켈레톤)##skeletonmoansound"), &pSkeletonMoanComponent->GetVolume(), DRAG_FLOAT_UNIT, MOAN_SOUND_VOLUME_MIN, MOAN_SOUND_VOLUME_MAX, "%.2f", 0))
+		pSkeletonMoanComponent->GetVolume() = std::clamp(pSkeletonMoanComponent->GetVolume(), MOAN_SOUND_VOLUME_MIN, MOAN_SOUND_VOLUME_MAX);
+	
+	ImGui::End();
 }
 void CImGuiManager::OnPrepareRender(ID3D12GraphicsCommandList* pd3dCommandList, D3D12_CPU_DESCRIPTOR_HANDLE* d3dDsvDescriptorCPUHandle, float fTimeElapsed, float fCurrentTime, CCamera* pCamera)
 {
@@ -1366,6 +1531,5 @@ void CImGuiManager::OnPostRender()
 }
 void CImGuiManager::OnDestroy()
 {
-	m_pDataLoader->SaveComponentSets();
 }
 

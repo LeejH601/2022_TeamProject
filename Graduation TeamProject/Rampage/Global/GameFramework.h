@@ -57,12 +57,14 @@ private:
 	UINT64 m_nFenceValues[m_nSwapChainBuffers];
 	HANDLE m_hFenceEvent;
 
+	//사용자 화면 해상도를 가져옵니다.
+	RECT m_DeskTopCoordinatesRect;
+
 	std::unique_ptr<CGameObject> m_pPlayer = NULL;
 	std::unique_ptr<CSceneManager> m_pSceneManager = NULL;
 
 	CGameTimer					m_GameTimer;
 
-	POINT						m_ptOldCursorPos;
 	_TCHAR						m_pszFrameRate[50];
 
 	DWORD dwDirection;

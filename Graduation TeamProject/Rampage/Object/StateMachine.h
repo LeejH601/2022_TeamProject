@@ -33,6 +33,12 @@ public:
 		if (m_pCurrentState) m_pCurrentState->Execute(m_pOwner, fElapsedTime);
 	}
 
+	void Animate(float fElapsedTime) const
+	{
+		if (m_pGlobalState)   m_pGlobalState->Animate(m_pOwner, fElapsedTime);
+		if (m_pCurrentState) m_pCurrentState->Animate(m_pOwner, fElapsedTime);
+	}
+
 	//change to a new state
 	void  ChangeState(CState<entity_type>* pNewState)
 	{

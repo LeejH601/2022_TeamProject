@@ -399,6 +399,9 @@
     <ClInclude Include="Object\SwordTrailObject.h">
       <Filter>Object</Filter>
     </ClInclude>
+    <ClInclude Include="ImGui\ImGuiConstants.h">
+      <Filter>ImGui</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shader\PlayerPixelShader.hlsl" />

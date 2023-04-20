@@ -73,6 +73,9 @@ void CPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity, CCa
 		if (m_pStateMachine->GetCurrentState() == Idle_Player::GetInst())
 			m_pStateMachine->ChangeState(Run_Player::GetInst());
 
+		if (m_pStateMachine->GetCurrentState() != Run_Player::GetInst())
+			return;
+
 		XMFLOAT3 xmf3Shift = XMFLOAT3{};
 
 		if (dwDirection & DIR_FORWARD)xmf3Shift = Vector3::Add(xmf3Shift, Vector3::Normalize(XMFLOAT3(pCamera->GetLookVector().x, 0.0f, pCamera->GetLookVector().z)));
@@ -103,10 +106,14 @@ bool CPlayer::CheckCollision(CGameObject* pTargetObject)
 
 			if (m_pCamera)
 			{
-				m_pCamera->m_bCameraShaking = true;
-				m_pCamera->m_bCameraZooming = true;
-				m_pCamera->m_bCameraMoving = true;
+				if (m_pStateMachine->GetCurrentState()->GetCameraShakeComponent()->GetEnable())
+					m_pCamera->m_bCameraShaking = true;
+				if (m_pStateMachine->GetCurrentState()->GetCameraZoomerComponent()->GetEnable())
+					m_pCamera->m_bCameraZooming = true;
+				if (m_pStateMachine->GetCurrentState()->GetCameraMoveComponent()->GetEnable())
+					m_pCamera->m_bCameraMoving = true;
 			}
+
 			m_xmf3TargetPosition = pTargetObject->GetPosition();
 			pTargetObject->SetHit(this);
 
@@ -124,36 +131,17 @@ void CPlayer::Update(float fTimeElapsed)
 {
 	m_pStateMachine->Update(fTimeElapsed);
 
-	// Idle 상태로 복귀하는 코드
-	if (!Vector3::Length(m_xmf3Velocity) && m_pStateMachine->GetCurrentState() == Run_Player::GetInst())
-		m_pStateMachine->ChangeState(Idle_Player::GetInst());
-
-	// Run 상태일때 플레이어를 이동시키고 방향전환 시켜주는 코드
-	if (m_pStateMachine->GetCurrentState() == Run_Player::GetInst())
-	{
-		CPhysicsObject::Apply_Gravity(fTimeElapsed);
-
-		if (m_xmf3Velocity.x + m_xmf3Velocity.z)
-			SetLookAt(Vector3::Add(GetPosition(), Vector3::Normalize(XMFLOAT3{ m_xmf3Velocity.x, 0.0f, m_xmf3Velocity.z })));
-		
-		// 임시로 속도 조절함
-		CPhysicsObject::Move(m_xmf3Velocity, false);
-		TCHAR pstrDebug[256] = { 0 };
-		_stprintf_s(pstrDebug, 256, L"%f, %f, %f  --- \n", m_xmf3Position.x, m_xmf3Position.y, m_xmf3Position.z);
-		OutputDebugString(pstrDebug);
-	}
-	// Run 상태가 아닐때 플레이어에게 중력만 작용하는 코드
-	else
-	{
-		m_xmf3Velocity = XMFLOAT3{};
-		CPhysicsObject::Apply_Gravity(fTimeElapsed);
-		CPhysicsObject::Move(m_xmf3Velocity, false);
-	}
+	CPhysicsObject::Apply_Gravity(fTimeElapsed);
+	CPhysicsObject::Move(m_xmf3Velocity, false);
 
 	// 플레이어가 터레인보다 아래에 있지 않도록 하는 코드
 	if (m_pUpdatedContext) CPhysicsObject::OnUpdateCallback(fTimeElapsed);
 
-	Animate(fTimeElapsed);
+	// 플레이어가 속도를 가진다면 해당 방향을 바라보게 하는 코드
+	if (m_xmf3Velocity.x + m_xmf3Velocity.z)
+		SetLookAt(Vector3::Add(GetPosition(), Vector3::Normalize(XMFLOAT3{ m_xmf3Velocity.x, 0.0f, m_xmf3Velocity.z })));
+
+	m_pStateMachine->Animate(fTimeElapsed);
 
 	CPhysicsObject::Apply_Friction(fTimeElapsed);
 }
@@ -176,8 +164,8 @@ void CPlayer::ProcessInput(DWORD dwDirection, float cxDelta, float cyDelta, floa
 			if (dwDirection & DIR_BACKWARD)xmf3Shift = Vector3::Add(xmf3Shift, Vector3::Normalize(XMFLOAT3(pCamera->GetLookVector().x, 0.0f, pCamera->GetLookVector().z)), -1.0f);
 			if (dwDirection & DIR_RIGHT)xmf3Shift = Vector3::Add(xmf3Shift, Vector3::Normalize(XMFLOAT3(pCamera->GetRightVector().x, 0.0f, pCamera->GetRightVector().z)));
 			if (dwDirection & DIR_LEFT)xmf3Shift = Vector3::Add(xmf3Shift, Vector3::Normalize(XMFLOAT3(pCamera->GetRightVector().x, 0.0f, pCamera->GetRightVector().z)), -1.0f);
+			
 			m_xmfDirection = xmf3Shift;
-
 		}
 	}
 }

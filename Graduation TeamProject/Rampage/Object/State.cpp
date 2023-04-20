@@ -34,6 +34,11 @@ void Idle_Player::Execute(CPlayer* player, float fElapsedTime)
 		player->m_pStateMachine->ChangeState(Atk1_Player::GetInst());
 }
 
+void Idle_Player::Animate(CPlayer* player, float fElapsedTime)
+{
+	player->Animate(fElapsedTime);
+}
+
 void Idle_Player::Exit(CPlayer* player)
 {
 
@@ -176,6 +181,9 @@ void Atk1_Player::Enter(CPlayer* player)
 	player->m_iAttack_Limit = 1;
 	player->m_fCMDConstant = 1.0f;
 
+	if (m_HitlagComponent.GetEnable())
+		m_HitlagComponent.SetCurLagTime(0.0f);
+
 	SoundPlayParams SoundPlayParam;
 	SoundPlayParam.sound_category = SOUND_CATEGORY::SOUND_SHOOT;
 	CMessageDispatcher::GetInst()->Dispatch_Message<SoundPlayParams>(MessageType::PLAY_SOUND, &SoundPlayParam, this);
@@ -190,8 +198,8 @@ void Atk1_Player::Execute(CPlayer* player, float fElapsedTime)
 	CAnimationSet* pAnimationSet = player->m_pChild->m_pSkinnedAnimationController->m_pAnimationSets->m_pAnimationSets[player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_nAnimationSet];
 
 	// 충돌 판정 메세지 전달
-	if (0.3f < player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition &&
-		0.7f > player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition)
+	if (0.365f < player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition && 
+		0.5f > player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition)
 	{
 		PlayerParams PlayerParam;
 		PlayerParam.pPlayer = player;
@@ -215,8 +223,32 @@ void Atk1_Player::Execute(CPlayer* player, float fElapsedTime)
 	}
 }
 
+void Atk1_Player::Animate(CPlayer* player, float fElapsedTime)
+{
+	if (m_HitlagComponent.GetEnable() && player->m_bAttacked)
+	{
+		if (m_HitlagComponent.GetCurLagTime() < m_HitlagComponent.GetMaxLagTime())
+			player->Animate(fElapsedTime * 0.01f);
+		else
+			player->Animate(fElapsedTime);
+
+		m_HitlagComponent.SetCurLagTime(m_HitlagComponent.GetCurLagTime() + fElapsedTime);
+	}
+	else
+		player->Animate(fElapsedTime);
+}
+
 void Atk1_Player::Exit(CPlayer* player)
 {
+	if (player->m_pCamera)
+	{
+		player->m_pCamera->m_bCameraShaking = false;
+		GetShakeAnimationComponent()->Reset();
+		player->m_pCamera->m_bCameraZooming = false;
+		GetCameraZoomerComponent()->Reset();
+		player->m_pCamera->m_bCameraMoving = false;
+		GetCameraMoveComponent()->Reset();
+	}
 	if (player->m_pSwordTrailReference)
 		dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[0].get())->m_bIsUpdateTrailVariables = false;
 }
@@ -358,6 +390,9 @@ void Atk2_Player::Enter(CPlayer* player)
 	player->m_iAttack_Limit = 1;
 	player->m_fCMDConstant = 1.0f;
 
+	if (m_HitlagComponent.GetEnable())
+		m_HitlagComponent.SetCurLagTime(0.0f);
+
 	SoundPlayParams SoundPlayParam;
 	SoundPlayParam.sound_category = SOUND_CATEGORY::SOUND_SHOOT;
 	CMessageDispatcher::GetInst()->Dispatch_Message<SoundPlayParams>(MessageType::PLAY_SOUND, &SoundPlayParam, this);
@@ -372,8 +407,8 @@ void Atk2_Player::Execute(CPlayer* player, float fElapsedTime)
 	CAnimationSet* pAnimationSet = player->m_pChild->m_pSkinnedAnimationController->m_pAnimationSets->m_pAnimationSets[player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_nAnimationSet];
 
 	// 충돌 판정 메세지 전달
-	if (0.3 < player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition &&
-		0.4 > player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition)
+	if (0.35f < player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition &&
+		0.4f > player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition)
 	{
 		PlayerParams PlayerParam;
 		PlayerParam.pPlayer = player;
@@ -395,8 +430,33 @@ void Atk2_Player::Execute(CPlayer* player, float fElapsedTime)
 	}
 }
 
+void Atk2_Player::Animate(CPlayer* player, float fElapsedTime)
+{
+	if (m_HitlagComponent.GetEnable() && player->m_bAttacked)
+	{
+		if (m_HitlagComponent.GetCurLagTime() < m_HitlagComponent.GetMaxLagTime())
+			player->Animate(fElapsedTime * 0.01f);
+		else
+			player->Animate(fElapsedTime);
+
+		m_HitlagComponent.SetCurLagTime(m_HitlagComponent.GetCurLagTime() + fElapsedTime);
+	}
+	else
+		player->Animate(fElapsedTime);
+}
+
 void Atk2_Player::Exit(CPlayer* player)
 {
+	if (player->m_pCamera)
+	{
+		player->m_pCamera->m_bCameraShaking = false;
+		GetShakeAnimationComponent()->Reset();
+		player->m_pCamera->m_bCameraZooming = false;
+		GetCameraZoomerComponent()->Reset();
+		player->m_pCamera->m_bCameraMoving = false;
+		GetCameraMoveComponent()->Reset();
+	}
+
 	if (player->m_pSwordTrailReference)
 		dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[1].get())->m_bIsUpdateTrailVariables = false;
 }
@@ -539,6 +599,9 @@ void Atk3_Player::Enter(CPlayer* player)
 	player->m_bAttack = false; // 사용자가 좌클릭시 true가 되는 변수
 	player->m_iAttack_Limit = 1;
 
+	if (m_HitlagComponent.GetEnable())
+		m_HitlagComponent.SetCurLagTime(0.0f);
+
 	SoundPlayParams SoundPlayParam;
 	SoundPlayParam.sound_category = SOUND_CATEGORY::SOUND_SHOOT;
 	CMessageDispatcher::GetInst()->Dispatch_Message<SoundPlayParams>(MessageType::PLAY_SOUND, &SoundPlayParam, this);
@@ -549,10 +612,9 @@ void Atk3_Player::Enter(CPlayer* player)
 
 void Atk3_Player::Execute(CPlayer* player, float fElapsedTime)
 {
-
 	// 충돌 판정 메세지 전달
-	if (0.3 < player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition &&
-		0.5 > player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition)
+	if (0.375f < player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition &&
+		0.475f > player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition)
 	{
 		PlayerParams PlayerParam;
 		PlayerParam.pPlayer = player;
@@ -583,8 +645,33 @@ void Atk3_Player::Execute(CPlayer* player, float fElapsedTime)
 	}
 }
 
+void Atk3_Player::Animate(CPlayer* player, float fElapsedTime)
+{
+	if (m_HitlagComponent.GetEnable() && player->m_bAttacked)
+	{
+		if (m_HitlagComponent.GetCurLagTime() < m_HitlagComponent.GetMaxLagTime())
+			player->Animate(fElapsedTime * 0.01f);
+		else
+			player->Animate(fElapsedTime);
+
+		m_HitlagComponent.SetCurLagTime(m_HitlagComponent.GetCurLagTime() + fElapsedTime);
+	}
+	else
+		player->Animate(fElapsedTime);
+}
+
 void Atk3_Player::Exit(CPlayer* player)
 {
+	if (player->m_pCamera)
+	{
+		player->m_pCamera->m_bCameraShaking = false;
+		GetShakeAnimationComponent()->Reset();
+		player->m_pCamera->m_bCameraZooming = false;
+		GetCameraZoomerComponent()->Reset();
+		player->m_pCamera->m_bCameraMoving = false;
+		GetCameraMoveComponent()->Reset();
+	}
+
 	if (player->m_pSwordTrailReference)
 		dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[2].get())->m_bIsUpdateTrailVariables = false;
 }
@@ -613,10 +700,16 @@ void Run_Player::Enter(CPlayer* player)
 
 void Run_Player::Execute(CPlayer* player, float fElapsedTime)
 {
+	XMFLOAT3 xmf3PlayerVel = player->GetVelocity();
+
 	if (player->m_bAttack)
 		player->m_pStateMachine->ChangeState(Atk1_Player::GetInst());
-	// 발바닥 뼈에
 
+	// Idle 상태로 복귀하는 코드
+	if (Vector3::Length(xmf3PlayerVel) == 0)
+		player->m_pStateMachine->ChangeState(Idle_Player::GetInst());
+
+	// 발바닥 뼈에
 	static int iIndex = 0;
 	float fTime = player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition;
 	XMFLOAT3 xmf3Position;
@@ -649,7 +742,11 @@ void Run_Player::Execute(CPlayer* player, float fElapsedTime)
 
 		CMessageDispatcher::GetInst()->Dispatch_Message<ParticleSmokeParams>(MessageType::UPDATE_PARTICLE, &Particlesmoke_comp_params, player->m_pStateMachine->GetCurrentState());
 	}
+}
 
+void Run_Player::Animate(CPlayer* player, float fElapsedTime)
+{
+	player->Animate(fElapsedTime);
 
 }
 

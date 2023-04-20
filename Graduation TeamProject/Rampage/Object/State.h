@@ -4,13 +4,31 @@
 #include "Object.h"
 class CPlayer;
 
+
+// Define Stun Animation component
+class HitLagComponent{
+    bool m_bEnable = false;
+    float m_fMaxLagTime = 0.5f;
+    float m_fCurLagTime = 0.0f;
+public:
+    bool& GetEnable() { return m_bEnable; }
+    float& GetMaxLagTime() { return m_fMaxLagTime; }
+    float GetCurLagTime() { return m_fCurLagTime; }
+
+    void SetEnable(bool bEnable) { m_bEnable = bEnable; }
+    void SetMaxLagTime(float maxlagtime) { m_fMaxLagTime = maxlagtime; }
+    void SetCurLagTime(float lagtime) { m_fCurLagTime =  lagtime; }
+};
+
 template <class entity_type>
 class CState
 {
 protected:
     std::vector<std::unique_ptr<IMessageListener>> m_pListeners;
+    HitLagComponent m_HitlagComponent;
 public:
 	virtual ~CState() {}
+    HitLagComponent* GetHitLagComponent() { return &m_HitlagComponent; }
     virtual IMessageListener* GetShockSoundComponent();
     virtual IMessageListener* GetShootSoundComponent();
     virtual IMessageListener* GetEffectSoundComponent();
@@ -29,6 +47,7 @@ public:
 
 	virtual void Enter(entity_type*) = 0;
 	virtual void Execute(entity_type*, float) = 0;
+    virtual void Animate(entity_type*, float) = 0;
 	virtual void Exit(entity_type*) = 0;
 };
 
@@ -41,6 +60,7 @@ public:
     
     virtual void Enter(CPlayer* player);
     virtual void Execute(CPlayer* player, float fElapsedTime);
+    virtual void Animate(CPlayer* player, float fElapsedTime);
     virtual void Exit(CPlayer* player);
 };
 
@@ -53,6 +73,7 @@ public:
 
     virtual void Enter(CPlayer* player);
     virtual void Execute(CPlayer* player, float fElapsedTime);
+    virtual void Animate(CPlayer* player, float fElapsedTime);
     virtual void Exit(CPlayer* player);
 };
 
@@ -65,6 +86,7 @@ public:
 
     virtual void Enter(CPlayer* player);
     virtual void Execute(CPlayer* player, float fElapsedTime);
+    virtual void Animate(CPlayer* player, float fElapsedTime);
     virtual void Exit(CPlayer* player);
 };
 
@@ -77,6 +99,7 @@ public:
 
     virtual void Enter(CPlayer* player);
     virtual void Execute(CPlayer* player, float fElapsedTime);
+    virtual void Animate(CPlayer* player, float fElapsedTime);
     virtual void Exit(CPlayer* player);
 };
 
@@ -116,6 +139,7 @@ public:
 
     virtual void Enter(CPlayer* player);
     virtual void Execute(CPlayer* player, float fElapsedTime);
+    virtual void Animate(CPlayer* player, float fElapsedTime);
     virtual void Exit(CPlayer* player);
 
     void SetSmokeObjects(std::vector<std::unique_ptr<CGameObject>>* pSmokeObjects);
