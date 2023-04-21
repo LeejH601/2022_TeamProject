@@ -48,65 +48,94 @@ public:
     virtual void Exit(CPlayer* player);
 };
 
-class Atk1_Player : public CState<CPlayer>
+class Atk_Player : public CState<CPlayer>
+{
+public:
+    virtual void InitAtkPlayer();
+    virtual void CheckHitLag(CPlayer* player);
+
+    virtual void CheckComboAttack(CPlayer* player) = 0;
+    virtual void SendCollisionMessage(CPlayer* player) = 0;
+
+    virtual void Enter(CPlayer* player) = 0;
+    virtual void Execute(CPlayer* player, float fElapsedTime) = 0;
+    virtual void Animate(CPlayer* player, float fElapsedTime) = 0;
+    virtual void Exit(CPlayer* player) = 0;
+};
+
+class Atk1_Player : public Atk_Player
 {
 public:
     DECLARE_SINGLE(Atk1_Player);
     Atk1_Player();
     ~Atk1_Player();
 
+    virtual void CheckComboAttack(CPlayer* player);
+    virtual void SendCollisionMessage(CPlayer* player);
+
     virtual void Enter(CPlayer* player);
     virtual void Execute(CPlayer* player, float fElapsedTime);
     virtual void Animate(CPlayer* player, float fElapsedTime);
     virtual void Exit(CPlayer* player);
-
 };
 
-class Atk2_Player : public CState<CPlayer>
+class Atk2_Player : public Atk_Player
 {
 public:
     DECLARE_SINGLE(Atk2_Player);
     Atk2_Player();
     ~Atk2_Player();
 
+    virtual void CheckComboAttack(CPlayer* player);
+    virtual void SendCollisionMessage(CPlayer* player);
+
     virtual void Enter(CPlayer* player);
     virtual void Execute(CPlayer* player, float fElapsedTime);
     virtual void Animate(CPlayer* player, float fElapsedTime);
     virtual void Exit(CPlayer* player);
 };
 
-class Atk3_Player : public CState<CPlayer>
+class Atk3_Player : public Atk_Player
 {
 public:
     DECLARE_SINGLE(Atk3_Player);
     Atk3_Player();
     ~Atk3_Player();
 
+    virtual void CheckComboAttack(CPlayer* player);
+    virtual void SendCollisionMessage(CPlayer* player);
+
     virtual void Enter(CPlayer* player);
     virtual void Execute(CPlayer* player, float fElapsedTime);
     virtual void Animate(CPlayer* player, float fElapsedTime);
     virtual void Exit(CPlayer* player);
 };
 
-class Atk4_Player : public CState<CPlayer>
+class Atk4_Player : public Atk_Player
 {
 public:
     DECLARE_SINGLE(Atk4_Player);
     Atk4_Player();
     ~Atk4_Player();
 
+    virtual void CheckComboAttack(CPlayer* player);
+    virtual void SendCollisionMessage(CPlayer* player);
+
     virtual void Enter(CPlayer* player);
     virtual void Execute(CPlayer* player, float fElapsedTime);
     virtual void Animate(CPlayer* player, float fElapsedTime);
     virtual void Exit(CPlayer* player);
 };
 
-class Atk5_Player : public CState<CPlayer>
+class Atk5_Player : public Atk_Player
 {
 public:
     DECLARE_SINGLE(Atk5_Player);
     Atk5_Player();
     ~Atk5_Player();
+
+    virtual void CheckComboAttack(CPlayer* player);
+    virtual void SendCollisionMessage(CPlayer* player);
 
     virtual void Enter(CPlayer* player);
     virtual void Execute(CPlayer* player, float fElapsedTime);
