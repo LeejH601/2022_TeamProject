@@ -405,7 +405,7 @@ bool CMainTMPScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM 
 		::SetCapture(hWnd);
 		::GetCursorPos(&m_ptOldCursorPos);
 
-		if(m_pPlayer)
+		if (m_pPlayer)
 			((CPlayer*)m_pPlayer)->m_bAttack2 = true;
 		break;
 	case WM_LBUTTONUP:
@@ -434,40 +434,40 @@ SCENE_RETURN_TYPE CMainTMPScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMe
 		case VK_BACK:
 			return SCENE_RETURN_TYPE::RETURN_PREVIOUS_SCENE;
 		case '1':
+		{
+			RECT screenRect;
+			GetWindowRect(hWnd, &screenRect);
+			m_ScreendRect = screenRect;
+
+			m_pCurrentCamera = m_pFloatingCamera.get();
+			Locator.SetMouseCursorMode(MOUSE_CUROSR_MODE::FLOATING_MODE);
+			PostMessage(hWnd, WM_ACTIVATE, 0, 0);
+
+			while (CursorHideCount > 0)
 			{
-				RECT screenRect;
-				GetWindowRect(hWnd, &screenRect);
-				m_ScreendRect = screenRect;
-
-				m_pCurrentCamera = m_pFloatingCamera.get();
-				Locator.SetMouseCursorMode(MOUSE_CUROSR_MODE::FLOATING_MODE);
-				PostMessage(hWnd, WM_ACTIVATE, 0, 0);
-
-				while (CursorHideCount > 0)
-				{
-					CursorHideCount--;
-					ShowCursor(true);
-				}
-				ClipCursor(NULL);
-			}	
-			break;
-		case '2':
-			{
-				RECT screenRect;
-				GetWindowRect(hWnd, &screenRect);
-				m_ScreendRect = screenRect;
-
-				m_pCurrentCamera = m_pMainSceneCamera.get();
-				Locator.SetMouseCursorMode(MOUSE_CUROSR_MODE::THIRD_FERSON_MODE);
-				PostMessage(hWnd, WM_ACTIVATE, 0, 0);
-
-				if (CursorHideCount < 1) {
-					CursorHideCount++;
-					ShowCursor(false);
-					ClipCursor(&screenRect);
-				}
+				CursorHideCount--;
+				ShowCursor(true);
 			}
-			break;
+			ClipCursor(NULL);
+		}
+		break;
+		case '2':
+		{
+			RECT screenRect;
+			GetWindowRect(hWnd, &screenRect);
+			m_ScreendRect = screenRect;
+
+			m_pCurrentCamera = m_pMainSceneCamera.get();
+			Locator.SetMouseCursorMode(MOUSE_CUROSR_MODE::THIRD_FERSON_MODE);
+			PostMessage(hWnd, WM_ACTIVATE, 0, 0);
+
+			if (CursorHideCount < 1) {
+				CursorHideCount++;
+				ShowCursor(false);
+				ClipCursor(&screenRect);
+			}
+		}
+		break;
 		case 'f':
 		case 'F':
 			((CPlayer*)m_pPlayer)->Tmp();
@@ -614,10 +614,10 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pOrc->Rotate(0.0f, 0.0f, 0.0f);
 	m_pOrc->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
 	m_pOrc->CreateArticulation(1.0f);
-	
+
 	m_pOrc->m_pArticulationLinks[15]->addForce(physx::PxVec3(0.0f, -10000.0f, 0.0f), physx::PxForceMode::eIMPULSE);
-	
-	
+
+
 	//m_pOrc->m_pArticulation->applyCache(*m_pOrc->m_pArticulationCache, physx::PxArticulationCacheFlag::e);
 
 	m_pObjects.push_back(std::move(m_pOrc));
@@ -722,7 +722,7 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 		std::unique_ptr<CGameObject> m_pBillBoardObject = std::make_unique<CMultiSpriteObject>(m_pTextureManager->LoadBillBoardTexture(L"Image/Fire_Effect.dds"), pd3dDevice, pd3dCommandList, m_pBillBoardObjectShader.get(), 5, 6, 8.f, 5.f);
 		m_pBillBoardObjects.push_back(std::move(m_pBillBoardObject));
 	}
-	
+
 	m_pParticleShader = std::make_unique<CParticleShader>();
 	m_pParticleShader->CreateCbvSrvUavDescriptorHeaps(pd3dDevice, 0, 40);
 	m_pParticleShader->CreateGraphicsPipelineState(pd3dDevice, GetGraphicsRootSignature(), 0);
@@ -772,7 +772,7 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	CPlayerParticleObject::GetInst()->SetTrailParticleObjects(m_pTrailParticleObjects.get());
 
 	// COLLIDE LISTENER
-	std::unique_ptr<SceneCollideListener> pCollideListener = std::make_unique<SceneCollideListener>();																																																																																																																				
+	std::unique_ptr<SceneCollideListener> pCollideListener = std::make_unique<SceneCollideListener>();
 	pCollideListener->SetScene(this);
 	m_pListeners.push_back(std::move(pCollideListener));
 	CMessageDispatcher::GetInst()->RegisterListener(MessageType::COLLISION, m_pListeners.back().get(), nullptr);
@@ -837,7 +837,7 @@ bool CMainTMPScene::ProcessInput(HWND hWnd, DWORD dwDirection, float fTimeElapse
 void CMainTMPScene::UpdateObjects(float fTimeElapsed)
 {
 	if (m_pPlayer) {
-		if(!dynamic_cast<CPlayer*>(m_pPlayer)->m_pSwordTrailReference)
+		if (!dynamic_cast<CPlayer*>(m_pPlayer)->m_pSwordTrailReference)
 			dynamic_cast<CPlayer*>(m_pPlayer)->m_pSwordTrailReference = m_pSwordTrailObjects.data();
 	}
 
@@ -935,13 +935,13 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 		m_pTerrainSpriteObject[i]->Render(pd3dCommandList, true);
 	}
 
-	
+
 
 
 	((CParticleObject*)m_pSmokeObject.get())->Update(fTimeElapsed);
 	((CParticleObject*)m_pSmokeObject.get())->UpdateShaderVariables(pd3dCommandList, fCurrentTime, fTimeElapsed);
 	((CParticleObject*)m_pSmokeObject.get())->Render(pd3dCommandList, nullptr, m_pParticleShader.get());
-	
+
 
 	for (int i = 0; i < m_pUpDownParticleObjects.size(); ++i)
 	{
@@ -949,8 +949,8 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 		((CParticleObject*)m_pUpDownParticleObjects[i].get())->UpdateShaderVariables(pd3dCommandList, fCurrentTime, fTimeElapsed);
 		((CParticleObject*)m_pUpDownParticleObjects[i].get())->Render(pd3dCommandList, nullptr, m_pParticleShader.get());
 	}
-	
-	
+
+
 	CModelShader::GetInst()->Render(pd3dCommandList, 0);
 
 	if (m_pPlayer)
@@ -969,8 +969,7 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 			else
 				trailObj->SetNextControllPoint(nullptr, nullptr);
 		}
-		
-		trailUpdateT = 0.0f;
+		//trailUpdateT = 0.0f;
 	}
 
 	//m_pSwordTrailShader->Render(pd3dCommandList, pCamera, 1);
@@ -1003,7 +1002,7 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 	{
 		(static_cast<CBillBoardObject*>(m_pBillBoardObjects[i].get()))->UpdateShaderVariables(pd3dCommandList, fCurrentTime, fTimeElapsed);
 		m_pBillBoardObjects[i]->Render(pd3dCommandList, true);
-}
+	}
 
 	for (int i = 0; i < m_pParticleObjects.size(); ++i)
 	{
@@ -1064,7 +1063,7 @@ void CMainTMPScene::OnPostRender()
 	}
 
 	((CParticleObject*)m_pSmokeObject.get())->OnPostRender();
-	
+
 	for (int i = 0; i < m_pUpDownParticleObjects.size(); ++i)
 	{
 		((CParticleObject*)m_pUpDownParticleObjects[i].get())->OnPostRender();
@@ -1100,7 +1099,7 @@ void CMainTMPScene::LoadSceneFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 			std::string objPath{ "Object/Scene/" };
 			objPath += static_cast<std::string>(pstrToken) + ".bin";
 
-		
+
 
 			FILE* objFile = NULL;
 			::fopen_s(&objFile, objPath.data(), "rb");
@@ -1126,7 +1125,7 @@ void CMainTMPScene::LoadSceneFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 			{
 				physx::PxTolerancesScale scale = Locator.GetPxPhysics()->getTolerancesScale();
 				physx::PxCookingParams params(scale);
-				
+
 				params.meshPreprocessParams |= physx::PxMeshPreprocessingFlag::eDISABLE_CLEAN_MESH;
 
 				physx::PxTriangleMeshDesc meshDesc;
@@ -1192,7 +1191,7 @@ void CMainTMPScene::HandleCollision(const CollideParams& params)
 		if (((CParticleObject*)pParticleObject.get())->CheckCapacity())
 			return true;
 		return false;
-	});
+		});
 
 	if (it != m_pParticleObjects.end())
 	{
