@@ -1,6 +1,7 @@
 #include "SwordTrailObject.h"
 #include "Texture.h"
 #include "..\Shader\Shader.h"
+#include "..\Shader\SwordTrailShader.h"
 
 CSwordTrailObject::CSwordTrailObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CShader* pTrailShader)
 {
@@ -12,15 +13,21 @@ CSwordTrailObject::CSwordTrailObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 	m_xmf4TrailBasePoints2.resize(14);
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
-	pTrailShader->CreateCbvSrvUavDescriptorHeaps(pd3dDevice, 0, 6, 0);
+
+	std::shared_ptr<CSwordTrailShader> pSwordTrailShader = std::make_shared<CSwordTrailShader>();
+	pSwordTrailShader->CreateGraphicsPipelineState(pd3dDevice, pd3dGraphicsRootSignature, 0);
+	pSwordTrailShader->BuildObjects(pd3dDevice, pd3dCommandList);
+
+	pSwordTrailShader->CreateCbvSrvUavDescriptorHeaps(pd3dDevice, 0, 6, 0);
 
 	std::shared_ptr<CTexture> pTexture = std::make_shared<CTexture>(2, RESOURCE_TEXTURE2D, 0, 1);
-	pTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/T_Sword_Slash_21.dds", RESOURCE_TEXTURE2D, 0);
-	pTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/VAP1_Noise_14.dds", RESOURCE_TEXTURE2D, 1);
+	pTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/T_Sword_Slash_11.dds", RESOURCE_TEXTURE2D, 0);
+	pTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/VAP1_Noise_4.dds", RESOURCE_TEXTURE2D, 1);
 
-	pTrailShader->CreateShaderResourceViews(pd3dDevice, pTexture.get(), 0, 2);
+	pSwordTrailShader->CreateShaderResourceViews(pd3dDevice, pTexture.get(), 0, 2);
 
-	SetTexture(pTexture);
+	SetShader(pSwordTrailShader, pTexture);
+
 	m_nTrailBasePoints = 0;
 }
 
@@ -70,7 +77,7 @@ void CSwordTrailObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, bool 
 	if (m_ppMaterials[0])
 	{
 		if (m_ppMaterials[0]->m_pShader)
-			m_ppMaterials[0]->m_pShader->Render(pd3dCommandList, 0);
+			m_ppMaterials[0]->m_pShader->Render(pd3dCommandList, nullptr, 0);
 		m_ppMaterials[0]->UpdateShaderVariables(pd3dCommandList);
 	}
 	UpdateShaderVariables(pd3dCommandList);

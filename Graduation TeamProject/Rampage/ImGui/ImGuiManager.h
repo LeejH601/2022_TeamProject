@@ -81,6 +81,7 @@ public:
 
 	void ShowImpactManager(CState<CPlayer>* pCurrentAnimation);
 	void ShowParticleManager(CState<CPlayer>* pCurrentAnimation);
+	void ShowTrailManager(CState<CPlayer>* pCurrentAnimation);
 	void ShowDamageAnimationManager(CState<CPlayer>* pCurrentAnimation);
 	void ShowShakeAnimationManager(CState<CPlayer>* pCurrentAnimation);
 	void ShowStunAnimationManager(CState<CPlayer>* pCurrentAnimation);

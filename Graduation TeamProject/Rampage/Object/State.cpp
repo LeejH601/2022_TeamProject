@@ -170,6 +170,11 @@ Atk1_Player::Atk1_Player()
 	std::unique_ptr<TrailParticleComponent> pTrailParticlenComponent = std::make_unique<TrailParticleComponent>();
 	m_pListeners.push_back(std::move(pTrailParticlenComponent));
 	CMessageDispatcher::GetInst()->RegisterListener(MessageType::UPDATE_TRAILPARTICLE, m_pListeners.back().get(), this);
+
+	// TRAIL Swipe
+	std::unique_ptr<TrailComponent> pTrailComponent = std::make_unique<TrailComponent>();
+	m_pListeners.push_back(std::move(pTrailComponent));
+	CMessageDispatcher::GetInst()->RegisterListener(MessageType::UPDATE_SWORDTRAIL, m_pListeners.back().get(), this);
 }
 
 Atk1_Player::~Atk1_Player()
@@ -385,6 +390,11 @@ Atk2_Player::Atk2_Player()
 	std::unique_ptr<TrailParticleComponent> pTrailParticlenComponent = std::make_unique<TrailParticleComponent>();
 	m_pListeners.push_back(std::move(pTrailParticlenComponent));
 	CMessageDispatcher::GetInst()->RegisterListener(MessageType::UPDATE_TRAILPARTICLE, m_pListeners.back().get(), this);
+
+	// TRAIL Swipe
+	std::unique_ptr<TrailComponent> pTrailComponent = std::make_unique<TrailComponent>();
+	m_pListeners.push_back(std::move(pTrailComponent));
+	CMessageDispatcher::GetInst()->RegisterListener(MessageType::UPDATE_SWORDTRAIL, m_pListeners.back().get(), this);
 }
 
 Atk2_Player::~Atk2_Player()
@@ -599,6 +609,11 @@ Atk3_Player::Atk3_Player()
 	std::unique_ptr<TrailParticleComponent> pTrailParticlenComponent = std::make_unique<TrailParticleComponent>();
 	m_pListeners.push_back(std::move(pTrailParticlenComponent));
 	CMessageDispatcher::GetInst()->RegisterListener(MessageType::UPDATE_TRAILPARTICLE, m_pListeners.back().get(), this);
+
+	// TRAIL Swipe
+	std::unique_ptr<TrailComponent> pTrailComponent = std::make_unique<TrailComponent>();
+	m_pListeners.push_back(std::move(pTrailComponent));
+	CMessageDispatcher::GetInst()->RegisterListener(MessageType::UPDATE_SWORDTRAIL, m_pListeners.back().get(), this);
 }
 
 Atk3_Player::~Atk3_Player()

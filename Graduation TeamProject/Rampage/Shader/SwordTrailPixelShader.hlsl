@@ -30,7 +30,7 @@ PS_MULTIPLE_RENDER_TARGETS_OUTPUT SwordTrail_PS(GS_OUT input)
 	float2 uv = input.uv.xy;
 	//uv.y /= 2.0f;
 	float4 BaseColor = gtxMappedTexture[0].Sample(gSamplerState, uv * float2(1.0f, 0.25f));
-	float4 NoiseColor = gtxMappedTexture[1].Sample(gSamplerState, uv * float2(1.0f, 4.0f));
+	float4 NoiseColor = gtxMappedTexture[1].Sample(gSamplerState, uv * float2(8.0f, 4.0f));
 	//float4 fColor = float4(input.uv.x, input.uv.y, 0.0f, 1.0f);
 
 	//float EmissiveFactor = 1.5f;

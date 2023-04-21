@@ -42,6 +42,7 @@ public:
     virtual IMessageListener* GetShakeAnimationComponent();
     virtual IMessageListener* GetStunAnimationComponent();
     virtual IMessageListener* GetParticleComponent();
+    virtual IMessageListener* GetTrailComponent();
     virtual IMessageListener* GetUpDownParticleComponent();
     virtual IMessageListener* GetImpactComponent();
 
@@ -365,6 +366,25 @@ inline IMessageListener* CState<entity_type>::GetParticleComponent()
 
     return nullptr;
 }
+
+
+template<class entity_type>
+inline IMessageListener* CState<entity_type>::GetTrailComponent()
+{
+    std::vector<std::unique_ptr<IMessageListener>>::iterator p = std::find_if(m_pListeners.begin(), m_pListeners.end(), [](const std::unique_ptr<IMessageListener>& listener) {
+        TrailComponent* pTrailComponent = dynamic_cast<TrailComponent*>(listener.get());
+        if (pTrailComponent) {
+            return true;
+        }
+        return false;
+        });
+
+    if (p != m_pListeners.end())
+        return (*p).get();
+
+    return nullptr;
+}
+
 
 template<class entity_type>
 inline IMessageListener* CState<entity_type>::GetUpDownParticleComponent()

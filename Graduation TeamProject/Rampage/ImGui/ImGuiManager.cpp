@@ -1068,6 +1068,7 @@ void CImGuiManager::SetUI()
 			}
 			if (ImGui::TreeNode(U8STR("잔상 이펙트")))
 			{
+				ShowTrailManager(pCurrentAnimation);
 				ImGui::TreePop();
 			}
 		}
@@ -1239,6 +1240,71 @@ void CImGuiManager::ShowParticleManager(CState<CPlayer>* pCurrentAnimation)
 
 	ImGui::End();
 }
+void CImGuiManager::ShowTrailManager(CState<CPlayer>* pCurrentAnimation)
+{
+	ImGuiWindowFlags my_window_flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize;
+	bool* b_open = nullptr;
+
+	ImGui::Begin(U8STR("잔상 이펙트 관리자"), b_open, my_window_flags);
+
+	TrailComponent* pTrailComponent = dynamic_cast<TrailComponent*>(pCurrentAnimation->GetTrailComponent());
+
+	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
+	ImGui::Checkbox(U8STR("켜기/끄기##TrailEffect"), &pTrailComponent->GetEnable());
+
+	std::vector<std::string> mainTextureNames = TrailComponent::GetMainTextureNames();
+	std::vector<const char*> mainItems;
+	for (int i = 0; i < mainTextureNames.size(); i++)
+	{
+		mainItems.emplace_back(mainTextureNames[i].c_str());
+	}
+
+	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
+	int mainTextureIndexCache = pTrailComponent->GetMainTextureIndex();
+	if (ImGui::Combo(U8STR("메인 텍스쳐##TrailEffect"), (int*)(&pTrailComponent->GetMainTextureIndex()), mainItems.data(), mainItems.size()))
+	{
+		/*std::shared_ptr pTexture = vTexture[pParticleComponent->GetParticleIndex()];
+		pParticleComponent->SetParticleTexture(pTexture);*/
+		// 메인 텍스쳐 로드
+		/*TrailTextureUpdateParams param;
+		param.pShader = */
+	}
+
+	std::vector<std::string> noiseTextureNames = TrailComponent::GetNoiseTexturNames();
+	std::vector<const char*> noiseItems;
+	for (int i = 0; i < noiseTextureNames.size(); i++)
+	{
+		noiseItems.emplace_back(noiseTextureNames[i].c_str());
+	}
+
+	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
+	int noiseTextureIndexCache = pTrailComponent->GetNoiseTextureIndex();
+	if (ImGui::Combo(U8STR("노이즈 텍스쳐##TrailEffect"), (int*)(&pTrailComponent->GetNoiseTextureIndex()), noiseItems.data(), noiseItems.size()))
+	{
+		/*std::shared_ptr pTexture = vTexture[pParticleComponent->GetParticleIndex()];
+		pParticleComponent->SetParticleTexture(pTexture);*/
+		// 노이즈 텍스쳐 로드
+	}
+
+	/*ImGui::SetNextItemWidth(190.f);
+	if (ImGui::DragFloat("XSize##TrailEffect", &pParticleComponent->GetXSize(), DRAG_FLOAT_UNIT, PARTICLE_SIZE_MIN, PARTICLE_SIZE_MAX, "%.2f", 0))
+		pParticleComponent->GetXSize() = std::clamp(pParticleComponent->GetXSize(), PARTICLE_SIZE_MIN, PARTICLE_SIZE_MAX);
+
+	ImGui::SetNextItemWidth(190.f);
+	if (ImGui::DragFloat("YSize##TrailEffect", &pParticleComponent->GetYSize(), DRAG_FLOAT_UNIT, PARTICLE_SIZE_MIN, PARTICLE_SIZE_MAX, "%.2f", 0))
+		pParticleComponent->GetYSize() = std::clamp(pParticleComponent->GetYSize(), PARTICLE_SIZE_MIN, PARTICLE_SIZE_MAX);*/
+
+	//ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
+	//if (ImGui::DragFloat(U8STR("투명도##TrailEffect"), &pParticleComponent->GetAlpha(), DRAG_FLOAT_UNIT, PARTICLE_ALPHA_MIN, PARTICLE_ALPHA_MAX, "%.2f", 0))
+	//	pParticleComponent->GetAlpha() = std::clamp(pParticleComponent->GetAlpha(), PARTICLE_ALPHA_MIN, PARTICLE_ALPHA_MAX);
+
+	//ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
+	//ImGui::ColorEdit3(U8STR("색상"), (float*)&pParticleComponent->GetColor()); // Edit 3 floats representing a color
+
+	ImGui::End();
+}
+
+
 void CImGuiManager::ShowDamageAnimationManager(CState<CPlayer>* pCurrentAnimation)
 {
 	ImGuiWindowFlags my_window_flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize;

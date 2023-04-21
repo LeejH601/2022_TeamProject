@@ -788,9 +788,9 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pLensFlareShader->CreateShader(pd3dDevice, GetGraphicsRootSignature(), 7, pdxgiObjectRtvFormats, 0);
 	m_pLensFlareShader->BuildObjects(pd3dDevice, pd3dCommandList);
 
-	m_pSwordTrailShader = std::make_unique<CSwordTrailShader>();
+	/*m_pSwordTrailShader = std::make_unique<CSwordTrailShader>();
 	m_pSwordTrailShader->CreateGraphicsPipelineState(pd3dDevice, GetGraphicsRootSignature(), 0);
-	m_pSwordTrailShader->BuildObjects(pd3dDevice, pd3dCommandList);
+	m_pSwordTrailShader->BuildObjects(pd3dDevice, pd3dCommandList);*/
 
 	for (int i = 0; i < 5; ++i) {
 		std::unique_ptr<CSwordTrailObject> pSwordtrail = std::make_unique<CSwordTrailObject>(pd3dDevice, pd3dCommandList, GetGraphicsRootSignature(), m_pSwordTrailShader.get());
@@ -935,18 +935,7 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 		m_pTerrainSpriteObject[i]->Render(pd3dCommandList, true);
 	}
 
-	for (int i = 0; i < m_pBillBoardObjects.size(); ++i)
-	{
-		(static_cast<CBillBoardObject*>(m_pBillBoardObjects[i].get()))->UpdateShaderVariables(pd3dCommandList, fCurrentTime, fTimeElapsed);
-		m_pBillBoardObjects[i]->Render(pd3dCommandList, true);
-	}
-
-	for (int i = 0; i < m_pParticleObjects.size(); ++i)
-	{
-		((CParticleObject*)m_pParticleObjects[i].get())->Update(fTimeElapsed);
-		((CParticleObject*)m_pParticleObjects[i].get())->UpdateShaderVariables(pd3dCommandList, fCurrentTime, fTimeElapsed);
-		((CParticleObject*)m_pParticleObjects[i].get())->Render(pd3dCommandList, nullptr, m_pParticleShader.get());
-	}
+	
 
 
 	((CParticleObject*)m_pSmokeObject.get())->Update(fTimeElapsed);
@@ -961,9 +950,6 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 		((CParticleObject*)m_pUpDownParticleObjects[i].get())->Render(pd3dCommandList, nullptr, m_pParticleShader.get());
 	}
 	
-	((CParticleObject*)m_pTrailParticleObjects.get())->Update(fTimeElapsed);
-	((CParticleObject*)m_pTrailParticleObjects.get())->UpdateShaderVariables(pd3dCommandList, fCurrentTime, fTimeElapsed);
-	((CParticleObject*)m_pTrailParticleObjects.get())->Render(pd3dCommandList, nullptr, m_pParticleShader.get());
 	
 	CModelShader::GetInst()->Render(pd3dCommandList, 0);
 
@@ -1013,7 +999,24 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 	m_pPostProcessShader->Render(pd3dCommandList, pCamera);
 #endif // PostProcessing
 
-	m_pSwordTrailShader->Render(pd3dCommandList, pCamera, 0);
+	for (int i = 0; i < m_pBillBoardObjects.size(); ++i)
+	{
+		(static_cast<CBillBoardObject*>(m_pBillBoardObjects[i].get()))->UpdateShaderVariables(pd3dCommandList, fCurrentTime, fTimeElapsed);
+		m_pBillBoardObjects[i]->Render(pd3dCommandList, true);
+}
+
+	for (int i = 0; i < m_pParticleObjects.size(); ++i)
+	{
+		((CParticleObject*)m_pParticleObjects[i].get())->Update(fTimeElapsed);
+		((CParticleObject*)m_pParticleObjects[i].get())->UpdateShaderVariables(pd3dCommandList, fCurrentTime, fTimeElapsed);
+		((CParticleObject*)m_pParticleObjects[i].get())->Render(pd3dCommandList, nullptr, m_pParticleShader.get());
+	}
+
+	((CParticleObject*)m_pTrailParticleObjects.get())->Update(fTimeElapsed);
+	((CParticleObject*)m_pTrailParticleObjects.get())->UpdateShaderVariables(pd3dCommandList, fCurrentTime, fTimeElapsed);
+	((CParticleObject*)m_pTrailParticleObjects.get())->Render(pd3dCommandList, nullptr, m_pParticleShader.get());
+
+	/*m_pSwordTrailShader->Render(pd3dCommandList, pCamera, 0);*/
 	for (std::unique_ptr<CGameObject>& obj : m_pSwordTrailObjects) {
 		obj->Render(pd3dCommandList, true);
 	}
