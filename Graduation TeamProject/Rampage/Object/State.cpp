@@ -19,10 +19,10 @@ Idle_Player::~Idle_Player()
 
 void Idle_Player::Enter(CPlayer* player)
 {
-	player->m_pChild->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 4);
-	player->m_pChild->m_pSkinnedAnimationController->m_fTime = 0.0f;
-	player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition = 0.0f;
-	player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_nType = ANIMATION_TYPE_LOOP;
+	player->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 4);
+	player->m_pSkinnedAnimationController->m_fTime = 0.0f;
+	player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition = 0.0f;
+	player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_nType = ANIMATION_TYPE_LOOP;
 	player->m_bAttack = false; // 사용자가 좌클릭시 true가 되는 변수
 
 	player->m_fAnimationPlayWeight = 1.0f;
@@ -135,6 +135,12 @@ void Atk_Player::InitAtkPlayer()
 	m_pListeners.push_back(std::move(pShakeAnimationComponent));
 	CMessageDispatcher::GetInst()->RegisterListener(MessageType::UPDATE_OBJECT, m_pListeners.back().get(), this);
 
+	// STUN ANIMATION
+	std::unique_ptr<StunAnimationComponent> pStunAnimationComponent = std::make_unique<StunAnimationComponent>();
+	pStunAnimationComponent->SetStunTime(0.5f);
+	m_pListeners.push_back(std::move(pStunAnimationComponent));
+	CMessageDispatcher::GetInst()->RegisterListener(MessageType::UPDATE_OBJECT, m_pListeners.back().get(), this);
+
 	// HitLag ANIMATION
 	std::unique_ptr<HitLagComponent> pHitLagComponent = std::make_unique<HitLagComponent>();
 	pHitLagComponent->SetMaxLagTime(0.5f);
@@ -195,7 +201,7 @@ Atk1_Player::~Atk1_Player()
 void Atk1_Player::CheckComboAttack(CPlayer* player)
 {
 	// 사용자가 좌클릭을 했으면 애니메이션을 0.7초 진행 후 Atk2_Player로 상태 변경
-	if (0.7 < player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition) {
+	if (0.7 < player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition) {
 		if (player->m_pSwordTrailReference)
 			dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[0].get())->m_bIsUpdateTrailVariables = false;
 		if (player->m_bAttack) {
@@ -207,8 +213,8 @@ void Atk1_Player::CheckComboAttack(CPlayer* player)
 void Atk1_Player::SendCollisionMessage(CPlayer* player)
 {
 	// 충돌 판정 메세지 전달
-	if (0.365f < player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition &&
-		0.5f > player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition)
+	if (0.365f < player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition &&
+		0.5f > player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition)
 	{
 		PlayerParams PlayerParam;
 		PlayerParam.pPlayer = player;
@@ -217,12 +223,49 @@ void Atk1_Player::SendCollisionMessage(CPlayer* player)
 	}
 }
 
+void Atk1_Player::SpawnTrailParticle(CPlayer* player)
+{
+	if (player->m_fTime > player->m_fMaxTime)
+	{
+		player->m_fMaxTime = 0.005f;
+		// 0.35 시작
+		if (0.35f < player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition &&
+			0.45f > player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition)
+		{
+			ParticleTrailParams ParticleTrail_comp_params;
+			CGameObject* pWeapon = player->FindFrame("Weapon_r");
+			pWeapon->FindFrame("Weapon_r");
+
+			XMFLOAT3 xmf3Position;
+			XMFLOAT3 xmf3Direction;
+			memcpy(&xmf3Position, &(pWeapon->m_xmf4x4World._41), sizeof(XMFLOAT3));
+			memcpy(&xmf3Direction, &(pWeapon->m_xmf4x4World._31), sizeof(XMFLOAT3));
+
+			XMFLOAT4X4 xmf4x4World = pWeapon->GetWorld();
+
+			xmf3Position = XMFLOAT3{ xmf4x4World._41, xmf4x4World._42, xmf4x4World._43 };
+			xmf3Direction = player->GetATKDirection();
+
+			xmf3Position = ((CKnightPlayer*)player)->GetWeaponMeshBoundingBox().Center;
+			xmf3Position = Vector3::Add(xmf3Position, Vector3::Normalize(xmf3Direction), 4.5f);
+
+			ParticleTrail_comp_params.pObject = CPlayerParticleObject::GetInst()->GetTrailParticleObjects();
+			ParticleTrail_comp_params.xmf3Position = xmf3Position;
+			ParticleTrail_comp_params.iPlayerAttack = 0;
+			ParticleTrail_comp_params.m_fTime = player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition;
+			CMessageDispatcher::GetInst()->Dispatch_Message<ParticleTrailParams>(MessageType::UPDATE_TRAILPARTICLE, &ParticleTrail_comp_params, player->m_pStateMachine->GetCurrentState());
+		}
+
+		player->m_fTime = 0.f;
+	}
+}
+
 void Atk1_Player::Enter(CPlayer* player)
 {
-	player->m_pChild->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
-	player->m_pChild->m_pSkinnedAnimationController->m_fTime = 0.0f;
-	player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition = 0.0f;
-	player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_nType = ANIMATION_TYPE_ONCE;
+	player->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
+	player->m_pSkinnedAnimationController->m_fTime = 0.0f;
+	player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition = 0.0f;
+	player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_nType = ANIMATION_TYPE_ONCE;
 	player->m_bAttacked = false;
 	player->m_bAttack = false; // 사용자가 좌클릭시 true가 되는 변수
 	player->m_fCMDConstant = 1.0f;
@@ -240,16 +283,18 @@ void Atk1_Player::Enter(CPlayer* player)
 
 void Atk1_Player::Execute(CPlayer* player, float fElapsedTime)
 {
-	CAnimationSet* pAnimationSet = player->m_pChild->m_pSkinnedAnimationController->m_pAnimationSets->m_pAnimationSets[player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_nAnimationSet];
+	CAnimationSet* pAnimationSet = player->m_pSkinnedAnimationController->m_pAnimationSets->m_pAnimationSets[player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_nAnimationSet];
 
 	SendCollisionMessage(player);
 	CheckComboAttack(player);
 	CheckHitLag(player);
 
-	if (player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition == pAnimationSet->m_fLength)
+	if (player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition == pAnimationSet->m_fLength)
 	{
 		player->m_pStateMachine->ChangeState(Idle_Player::GetInst());
 	}
+
+	SpawnTrailParticle(player);
 }
 
 void Atk1_Player::Animate(CPlayer* player, float fElapsedTime)
@@ -284,7 +329,7 @@ Atk2_Player::~Atk2_Player()
 void Atk2_Player::CheckComboAttack(CPlayer* player)
 {
 	// 사용자가 좌클릭을 했으면 애니메이션을 0.7초 진행 후 Atk2_Player로 상태 변경
-	if (0.7 < player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition) {
+	if (0.7 < player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition) {
 		if (player->m_pSwordTrailReference)
 			dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[1].get())->m_bIsUpdateTrailVariables = false;
 		if (player->m_bAttack)
@@ -295,8 +340,8 @@ void Atk2_Player::CheckComboAttack(CPlayer* player)
 void Atk2_Player::SendCollisionMessage(CPlayer* player)
 {
 	// 충돌 판정 메세지 전달
-	if (0.35f < player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition &&
-		0.4f > player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition)
+	if (0.35f < player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition &&
+		0.4f > player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition)
 	{
 		PlayerParams PlayerParam;
 		PlayerParam.pPlayer = player;
@@ -306,10 +351,10 @@ void Atk2_Player::SendCollisionMessage(CPlayer* player)
 
 void Atk2_Player::Enter(CPlayer* player)
 {
-	player->m_pChild->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 1);
-	player->m_pChild->m_pSkinnedAnimationController->m_fTime = 0.0f;
-	player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition = 0.2f;
-	player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_nType = ANIMATION_TYPE_ONCE;
+	player->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 1);
+	player->m_pSkinnedAnimationController->m_fTime = 0.0f;
+	player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition = 0.2f;
+	player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_nType = ANIMATION_TYPE_ONCE;
 	player->m_bAttacked = false;
 	player->m_bAttack = false; // 사용자가 좌클릭시 true가 되는 변수
 	player->m_fCMDConstant = 1.0f;
@@ -327,16 +372,18 @@ void Atk2_Player::Enter(CPlayer* player)
 
 void Atk2_Player::Execute(CPlayer* player, float fElapsedTime)
 {
-	CAnimationSet* pAnimationSet = player->m_pChild->m_pSkinnedAnimationController->m_pAnimationSets->m_pAnimationSets[player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_nAnimationSet];
+	CAnimationSet* pAnimationSet = player->m_pSkinnedAnimationController->m_pAnimationSets->m_pAnimationSets[player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_nAnimationSet];
 
 	SendCollisionMessage(player);
 	CheckComboAttack(player);
 	CheckHitLag(player);
 
-	if (player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition == pAnimationSet->m_fLength)
+	if (player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition == pAnimationSet->m_fLength)
 	{
 		player->m_pStateMachine->ChangeState(Idle_Player::GetInst());
 	}
+
+	SpawnTrailParticle(player);
 }
 
 void Atk2_Player::Animate(CPlayer* player, float fElapsedTime)
@@ -360,6 +407,37 @@ void Atk2_Player::Exit(CPlayer* player)
 		dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[1].get())->m_bIsUpdateTrailVariables = false;
 }
 
+void Atk2_Player::SpawnTrailParticle(CPlayer* player)
+{
+	if (player->m_fTime > player->m_fMaxTime)
+	{
+		player->m_fMaxTime = 0.05f; // 0.05
+		if (0.3f < player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition &&
+			0.45f > player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition)
+		{
+			//0.3~0.6, 065
+			ParticleTrailParams ParticleTrail_comp_params;
+			CGameObject* pWeapon = player->FindFrame("Weapon_r");
+			pWeapon->FindFrame("Weapon_r");
+			XMFLOAT3 xmf3Position;
+			XMFLOAT3 xmf3Direction;
+			XMFLOAT4X4 xmf4x4World = pWeapon->GetWorld();
+			xmf3Position = ((CKnightPlayer*)player)->GetWeaponMeshBoundingBox().Center;
+
+			xmf3Direction = player->GetATKDirection();
+			xmf3Position = Vector3::Add(xmf3Position, Vector3::Normalize(xmf3Direction), 4.2f);
+
+			ParticleTrail_comp_params.pObject = CPlayerParticleObject::GetInst()->GetTrailParticleObjects();
+			ParticleTrail_comp_params.xmf3Position = xmf3Position;
+			ParticleTrail_comp_params.iPlayerAttack = 1;
+			ParticleTrail_comp_params.m_fTime = player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition;
+			CMessageDispatcher::GetInst()->Dispatch_Message<ParticleTrailParams>(MessageType::UPDATE_TRAILPARTICLE, &ParticleTrail_comp_params, player->m_pStateMachine->GetCurrentState());
+		}
+
+		player->m_fTime = 0.f;
+	}
+}
+
 Atk3_Player::Atk3_Player()
 {
 	InitAtkPlayer();
@@ -372,7 +450,7 @@ Atk3_Player::~Atk3_Player()
 void Atk3_Player::CheckComboAttack(CPlayer* player)
 {
 	// 사용자가 좌클릭을 했으면 애니메이션을 0.7초 진행 후 Atk2_Player로 상태 변경
-	/*if (0.7 < player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition) {
+	/*if (0.7 < player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition) {
 		if (player->m_pSwordTrailReference)
 			dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[2].get())->m_bIsUpdateTrailVariables = false;
 		if (player->m_bAttack)
@@ -383,8 +461,8 @@ void Atk3_Player::CheckComboAttack(CPlayer* player)
 void Atk3_Player::SendCollisionMessage(CPlayer* player)
 {
 	// 충돌 판정 메세지 전달
-	if (0.375f < player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition &&
-		0.475f > player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition)
+	if (0.375f < player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition &&
+		0.475f > player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition)
 	{
 		PlayerParams PlayerParam;
 		PlayerParam.pPlayer = player;
@@ -396,10 +474,10 @@ void Atk3_Player::Enter(CPlayer* player)
 {
 	player->m_fCMDConstant = 1.0f;
 
-	player->m_pChild->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 2);
-	player->m_pChild->m_pSkinnedAnimationController->m_fTime = 0.0f;
-	player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition = 0.0f;
-	player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_nType = ANIMATION_TYPE_ONCE;
+	player->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 2);
+	player->m_pSkinnedAnimationController->m_fTime = 0.0f;
+	player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition = 0.0f;
+	player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_nType = ANIMATION_TYPE_ONCE;
 	player->m_bAttacked = false;
 	player->m_bAttack = false; // 사용자가 좌클릭시 true가 되는 변수
 
@@ -420,15 +498,14 @@ void Atk3_Player::Execute(CPlayer* player, float fElapsedTime)
 	CheckComboAttack(player);
 	CheckHitLag(player);
 
-	CAnimationSet* pAnimationSet = player->m_pChild->m_pSkinnedAnimationController->m_pAnimationSets->m_pAnimationSets[player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_nAnimationSet];
-	if (player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition == pAnimationSet->m_fLength)
+	CAnimationSet* pAnimationSet = player->m_pSkinnedAnimationController->m_pAnimationSets->m_pAnimationSets[player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_nAnimationSet];
+	if (player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition == pAnimationSet->m_fLength)
 	{
 		player->m_pStateMachine->ChangeState(Idle_Player::GetInst());
 	}
 
-	else if (player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition == pAnimationSet->m_fLength)
+	else if (player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition == pAnimationSet->m_fLength)
 	{
-
 	}
 }
 
@@ -453,6 +530,10 @@ void Atk3_Player::Exit(CPlayer* player)
 		dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[2].get())->m_bIsUpdateTrailVariables = false;
 }
 
+void Atk3_Player::SpawnTrailParticle(CPlayer* player)
+{
+}
+
 Run_Player::Run_Player()
 {
 	// SMOKEPARTICLE ANIMATION
@@ -467,11 +548,11 @@ Run_Player::~Run_Player()
 
 void Run_Player::Enter(CPlayer* player)
 {
-	//player->m_pChild->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 19);
-	player->m_pChild->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 16);
-	player->m_pChild->m_pSkinnedAnimationController->m_fTime = 0.0f;
-	player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition = 0.0f;
-	player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_nType = ANIMATION_TYPE_LOOP;
+	//player->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 19);
+	player->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 16);
+	player->m_pSkinnedAnimationController->m_fTime = 0.0f;
+	player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition = 0.0f;
+	player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_nType = ANIMATION_TYPE_LOOP;
 	player->m_bAttack = false; // 사용자가 좌클릭시 true가 되는 변수
 	player->m_fAnimationPlayWeight = 1.0f;
 }
@@ -489,7 +570,7 @@ void Run_Player::Execute(CPlayer* player, float fElapsedTime)
 
 	// 발바닥 뼈에
 
-	float fTime = player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition;
+	float fTime = player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition;
 	XMFLOAT3 xmf3Position;
 	ParticleSmokeParams Particlesmoke_comp_params;
 	Particlesmoke_comp_params.pObject = CPlayerParticleObject::GetInst()->GetSmokeObjects();
@@ -536,10 +617,10 @@ void Atk4_Player::Enter(CPlayer* player)
 {
 	player->m_fCMDConstant = 1.0f;
 
-	player->m_pChild->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 3);
-	player->m_pChild->m_pSkinnedAnimationController->m_fTime = 0.0f;
-	player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition = 0.0f;
-	player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_nType = ANIMATION_TYPE_ONCE;
+	player->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 3);
+	player->m_pSkinnedAnimationController->m_fTime = 0.0f;
+	player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition = 0.0f;
+	player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_nType = ANIMATION_TYPE_ONCE;
 	player->m_bAttacked = false;
 	player->m_bAttack = false; // 사용자가 좌클릭시 true가 되는 변수
 
@@ -561,28 +642,28 @@ void Atk4_Player::CheckComboAttack(CPlayer* player)
 void Atk4_Player::Execute(CPlayer* player, float fElapsedTime)
 {
 	// 충돌 판정 메세지 전달
-	if (0.3 < player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition &&
-		0.5 > player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition)
+	if (0.3 < player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition &&
+		0.5 > player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition)
 	{
 		PlayerParams PlayerParam;
 		PlayerParam.pPlayer = player;
 		CMessageDispatcher::GetInst()->Dispatch_Message<PlayerParams>(MessageType::PLAYER_ATTACK, &PlayerParam, player);
 	}
 
-	if (0.7 < player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition) {
+	if (0.7 < player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition) {
 		if (player->m_pSwordTrailReference)
 			dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[3].get())->m_bIsUpdateTrailVariables = false;
 		if (player->m_bAttack)
 			player->m_pStateMachine->ChangeState(Atk5_Player::GetInst());
 	}
 
-	CAnimationSet* pAnimationSet = player->m_pChild->m_pSkinnedAnimationController->m_pAnimationSets->m_pAnimationSets[player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_nAnimationSet];
-	if (player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition == pAnimationSet->m_fLength)
+	CAnimationSet* pAnimationSet = player->m_pSkinnedAnimationController->m_pAnimationSets->m_pAnimationSets[player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_nAnimationSet];
+	if (player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition == pAnimationSet->m_fLength)
 	{
 		player->m_pStateMachine->ChangeState(Idle_Player::GetInst());
 	}
 
-	else if (player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition == pAnimationSet->m_fLength)
+	else if (player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition == pAnimationSet->m_fLength)
 	{
 
 	}
@@ -603,6 +684,10 @@ void Atk4_Player::Exit(CPlayer* player)
 		dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[3].get())->m_bIsUpdateTrailVariables = false;
 }
 
+void Atk4_Player::SpawnTrailParticle(CPlayer* player)
+{
+}
+
 Atk5_Player::Atk5_Player()
 {
 }
@@ -615,10 +700,10 @@ void Atk5_Player::Enter(CPlayer* player)
 {
 	player->m_fCMDConstant = 1.0f;
 
-	player->m_pChild->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 7);
-	player->m_pChild->m_pSkinnedAnimationController->m_fTime = 0.0f;
-	player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition = 0.0f;
-	player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_nType = ANIMATION_TYPE_ONCE;
+	player->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 7);
+	player->m_pSkinnedAnimationController->m_fTime = 0.0f;
+	player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition = 0.0f;
+	player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_nType = ANIMATION_TYPE_ONCE;
 	player->m_bAttacked = false;
 	player->m_bAttack = false; // 사용자가 좌클릭시 true가 되는 변수
 
@@ -633,24 +718,28 @@ void Atk5_Player::Enter(CPlayer* player)
 	CMessageDispatcher::GetInst()->Dispatch_Message<SoundPlayParams>(MessageType::PLAY_SOUND, &SoundPlayParam, this);*/
 }
 
+void Atk5_Player::SpawnTrailParticle(CPlayer* player)
+{
+}
+
 void Atk5_Player::Execute(CPlayer* player, float fElapsedTime)
 {
 	// 충돌 판정 메세지 전달
-	if (0.3 < player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition &&
-		0.5 > player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition)
+	if (0.3 < player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition &&
+		0.5 > player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition)
 	{
 		PlayerParams PlayerParam;
 		PlayerParam.pPlayer = player;
 		CMessageDispatcher::GetInst()->Dispatch_Message<PlayerParams>(MessageType::PLAYER_ATTACK, &PlayerParam, player);
 	}
 
-	CAnimationSet* pAnimationSet = player->m_pChild->m_pSkinnedAnimationController->m_pAnimationSets->m_pAnimationSets[player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_nAnimationSet];
-	if (player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition == pAnimationSet->m_fLength)
+	CAnimationSet* pAnimationSet = player->m_pSkinnedAnimationController->m_pAnimationSets->m_pAnimationSets[player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_nAnimationSet];
+	if (player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition == pAnimationSet->m_fLength)
 	{
 		player->m_pStateMachine->ChangeState(Idle_Player::GetInst());
 	}
 
-	else if (player->m_pChild->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition == pAnimationSet->m_fLength)
+	else if (player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition == pAnimationSet->m_fLength)
 	{
 
 	}

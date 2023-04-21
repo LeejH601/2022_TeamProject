@@ -56,6 +56,7 @@ public:
 
     virtual void CheckComboAttack(CPlayer* player) = 0;
     virtual void SendCollisionMessage(CPlayer* player) = 0;
+    virtual void SpawnTrailParticle(CPlayer* player) = 0;
 
     virtual void Enter(CPlayer* player) = 0;
     virtual void Execute(CPlayer* player, float fElapsedTime) = 0;
@@ -72,6 +73,7 @@ public:
 
     virtual void CheckComboAttack(CPlayer* player);
     virtual void SendCollisionMessage(CPlayer* player);
+    virtual void SpawnTrailParticle(CPlayer* player);
 
     virtual void Enter(CPlayer* player);
     virtual void Execute(CPlayer* player, float fElapsedTime);
@@ -88,6 +90,7 @@ public:
 
     virtual void CheckComboAttack(CPlayer* player);
     virtual void SendCollisionMessage(CPlayer* player);
+    virtual void SpawnTrailParticle(CPlayer* player);
 
     virtual void Enter(CPlayer* player);
     virtual void Execute(CPlayer* player, float fElapsedTime);
@@ -104,6 +107,7 @@ public:
 
     virtual void CheckComboAttack(CPlayer* player);
     virtual void SendCollisionMessage(CPlayer* player);
+    virtual void SpawnTrailParticle(CPlayer* player);
 
     virtual void Enter(CPlayer* player);
     virtual void Execute(CPlayer* player, float fElapsedTime);
@@ -120,6 +124,7 @@ public:
 
     virtual void CheckComboAttack(CPlayer* player);
     virtual void SendCollisionMessage(CPlayer* player);
+    virtual void SpawnTrailParticle(CPlayer* player);
 
     virtual void Enter(CPlayer* player);
     virtual void Execute(CPlayer* player, float fElapsedTime);
@@ -136,6 +141,7 @@ public:
 
     virtual void CheckComboAttack(CPlayer* player);
     virtual void SendCollisionMessage(CPlayer* player);
+    virtual void SpawnTrailParticle(CPlayer* player);
 
     virtual void Enter(CPlayer* player);
     virtual void Execute(CPlayer* player, float fElapsedTime);

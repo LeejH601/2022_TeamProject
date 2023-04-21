@@ -52,5 +52,36 @@ public:
 	void Tmp();
 
 	virtual void Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity, CCamera* pCamera);
-	XMFLOAT4& GetTrailControllPoint(int n);
+	virtual XMFLOAT4& GetTrailControllPoint(int n) { return XMFLOAT4{}; }
+};
+
+class CKnightPlayer : public CPlayer
+{
+private:
+	CGameObject* pWeapon;
+	BoundingBox m_BodyBoundingBox;
+	BoundingBox m_WeaponBoundingBox;
+	BoundingBox m_TransformedBodyBoundingBox;
+	BoundingBox m_TransformedWeaponBoundingBox;
+	CGameObject* pBodyBoundingBoxMesh;
+	CGameObject* pWeaponBoundingBoxMesh;
+	XMFLOAT4 m_xmf4TrailControllPoints[2];
+
+public:
+	CKnightPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks);
+	virtual ~CKnightPlayer();
+
+	virtual void SetRigidDynamic();
+
+
+	virtual BoundingBox GetBoundingBox() { return m_TransformedBodyBoundingBox; }
+	virtual BoundingBox GetWeaponMeshBoundingBox() { return m_TransformedWeaponBoundingBox; }
+
+	virtual bool CheckCollision(CGameObject* pTargetObject);
+
+	virtual void Animate(float fTimeElapsed);
+	virtual void UpdateTransform(XMFLOAT4X4* pxmf4x4Parent = NULL);
+	virtual void PrepareBoundingBox(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+
+	virtual XMFLOAT4& GetTrailControllPoint(int n) { return m_xmf4TrailControllPoints[n]; };
 };

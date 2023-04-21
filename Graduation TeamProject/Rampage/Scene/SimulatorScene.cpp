@@ -383,9 +383,12 @@ void CSimulatorScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 
 	// 3->IDLE
 	// 28->Attack
-	m_pMainCharacter = std::make_unique<CPlayer>(pd3dDevice, pd3dCommandList, 1);
+	m_pMainCharacter = std::make_unique<CKnightPlayer>(pd3dDevice, pd3dCommandList, 1);
 	m_pMainCharacter->SetCamera(m_pSimulaterCamera.get());
 	m_pMainCharacter->SetPosition(XMFLOAT3(45 + offset.x, 100, 50 + offset.z));
+	m_pMainCharacter->SetScale(4.0f, 4.0f, 4.0f);
+	m_pMainCharacter->Rotate(0.0f, 90.0f, 0.0f);
+	m_pMainCharacter->m_pStateMachine->ChangeState(Idle_Player::GetInst());
 
 	((CDepthRenderShader*)m_pDepthRenderShader.get())->SetLight(m_pLight->GetLights());
 	((CDepthRenderShader*)m_pDepthRenderShader.get())->SetTerrain(m_pTerrain.get());
@@ -572,7 +575,7 @@ void CSimulatorScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float f
 		for (int i = 0; i < m_pSwordTrailObjects.size(); ++i) {
 			CSwordTrailObject* trailObj = dynamic_cast<CSwordTrailObject*>(m_pSwordTrailObjects[i].get());
 			if (trailObj->m_bIsUpdateTrailVariables)
-				trailObj->SetNextControllPoint(&((CPlayer*)m_pMainCharacter.get())->GetTrailControllPoint(0), &((CPlayer*)m_pMainCharacter.get())->GetTrailControllPoint(1));
+				trailObj->SetNextControllPoint(&(m_pMainCharacter->GetTrailControllPoint(0)), &((CPlayer*)m_pMainCharacter.get())->GetTrailControllPoint(1));
 			else
 				trailObj->SetNextControllPoint(nullptr, nullptr);
 		}
