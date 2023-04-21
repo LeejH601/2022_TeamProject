@@ -961,7 +961,7 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 
 	static float trailUpdateT = 0.0f;
 	trailUpdateT += fTimeElapsed;
-	if (trailUpdateT > 0.016f) {
+	if (trailUpdateT > 0.008f) {
 		for (int i = 0; i < m_pSwordTrailObjects.size(); ++i) {
 			CSwordTrailObject* trailObj = dynamic_cast<CSwordTrailObject*>(m_pSwordTrailObjects[i].get());
 			if (trailObj->m_bIsUpdateTrailVariables)

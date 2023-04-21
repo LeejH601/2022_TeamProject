@@ -125,8 +125,68 @@ void CSwordTrailObject::SetNextControllPoint(XMFLOAT4* point1, XMFLOAT4* point2)
 		}
 	}
 
+	{
+		float nTrailTotalLength1 = 0;
+		std::vector<float> fSectorLengths1; fSectorLengths1.resize(10);
+		float nTrailTotalLength2 = 0;
+		std::vector<float> fSectorLengths2; fSectorLengths2.resize(10);
+		for (int i = 1; i < m_nTrailBasePoints + 1; ++i) {
+			fSectorLengths1[i-1] = XMVector4Length(XMVectorSubtract(XMLoadFloat4(&m_xmf4TrailBasePoints1[i + 1]), XMLoadFloat4(&m_xmf4TrailBasePoints1[i]))).m128_f32[0];
+			nTrailTotalLength1 += fSectorLengths1[i-1];
+			fSectorLengths2[i-1] = XMVector4Length(XMVectorSubtract(XMLoadFloat4(&m_xmf4TrailBasePoints2[i + 1]), XMLoadFloat4(&m_xmf4TrailBasePoints2[i]))).m128_f32[0];
+			nTrailTotalLength2 += fSectorLengths2[i-1];
+		}
+		float gapOne = nTrailTotalLength1 / (10 * m_nTrailBasePoints);
+		float gapTwo = nTrailTotalLength2 / (10 * m_nTrailBasePoints);
 
-	int index = 0;
+		int index = 0;
+		float gapT1 = 0, gapT2 = 0;
+		for (int i = 0; i < m_nTrailBasePoints * 10; ++i) {
+			int SampleIndex1 = 0;
+			float gapAcculater = gapT1;
+			int SampleIndex2 = 0;
+			for (int j = 0; j < m_nTrailBasePoints; ++j) {
+				if (gapAcculater - fSectorLengths1[j] < 0) {
+					SampleIndex1 = j;
+					break;
+				}
+				gapAcculater -= fSectorLengths1[j];
+			}
+
+			float t = gapAcculater / fSectorLengths1[SampleIndex1];
+			XMVECTOR points[4];
+			points[0] = XMLoadFloat4(&m_xmf4TrailBasePoints1[SampleIndex1]);
+			points[1] = XMLoadFloat4(&m_xmf4TrailBasePoints1[SampleIndex1 + 1]);
+			points[2] = XMLoadFloat4(&m_xmf4TrailBasePoints1[SampleIndex1 + 2]);
+			points[3] = XMLoadFloat4(&m_xmf4TrailBasePoints1[SampleIndex1 + 3]);
+			XMStoreFloat4(&m_xmf4TrailControllPoints1[index], XMVectorCatmullRom(points[0], points[1], points[2], points[3], t));
+
+			gapAcculater = gapT2;
+			for (int j = 0; j < m_nTrailBasePoints; ++j) {
+				if (gapAcculater - fSectorLengths2[j] < 0) {
+					SampleIndex2 = j;
+					break;
+				}
+				gapAcculater -= fSectorLengths2[j];
+			}
+
+			t = gapAcculater / fSectorLengths2[SampleIndex2];
+			points[0] = XMLoadFloat4(&m_xmf4TrailBasePoints2[SampleIndex2]);
+			points[1] = XMLoadFloat4(&m_xmf4TrailBasePoints2[SampleIndex2 + 1]);
+			points[2] = XMLoadFloat4(&m_xmf4TrailBasePoints2[SampleIndex2 + 2]);
+			points[3] = XMLoadFloat4(&m_xmf4TrailBasePoints2[SampleIndex2 + 3]);
+
+			XMStoreFloat4(&m_xmf4TrailControllPoints2[index], XMVectorCatmullRom(points[0], points[1], points[2], points[3], t));
+
+			gapT1 += gapOne;
+			gapT2 += gapTwo;
+			index++;
+		}
+		m_nDrawedControllPoints = index;
+	}
+
+
+	/*int index = 0;
 	for (int i = 0; i < m_nTrailBasePoints; ++i) {
 		m_xmf4TrailControllPoints1[index] = m_xmf4TrailBasePoints1[i + 1];
 		m_xmf4TrailControllPoints2[index++] = m_xmf4TrailBasePoints2[i + 1];
@@ -147,7 +207,7 @@ void CSwordTrailObject::SetNextControllPoint(XMFLOAT4* point1, XMFLOAT4* point2)
 
 			XMStoreFloat4(&m_xmf4TrailControllPoints2[index++], XMVectorCatmullRom(points[0], points[1], points[2], points[3], t));
 		}
-	}
+	}*/
 
-	m_nDrawedControllPoints = index;
+	//m_nDrawedControllPoints = index;
 }
