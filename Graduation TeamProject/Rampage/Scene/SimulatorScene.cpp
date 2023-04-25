@@ -537,20 +537,15 @@ void CSimulatorScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float f
 	m_pTerrainShader->Render(pd3dCommandList, 0);
 	m_pTerrain->Render(pd3dCommandList, true);
 
-	m_pBillBoardObjectShader->Render(pd3dCommandList, 0);
+	//m_pBillBoardObjectShader->Render(pd3dCommandList, 0);
 
-	for (int i = 0; i < m_pTerrainSpriteObject.size(); ++i)
-	{
-		(static_cast<CTerrainSpriteObject*>(m_pTerrainSpriteObject[i].get()))->UpdateShaderVariables(pd3dCommandList, fCurrentTime, fTimeElapsed);
-		(static_cast<CTerrainSpriteObject*>(m_pTerrainSpriteObject[i].get()))->Animate(m_pTerrain.get(), fTimeElapsed);
-		m_pTerrainSpriteObject[i]->Render(pd3dCommandList, true);
-	}
 
-	for (int i = 0; i < m_pBillBoardObjects.size(); ++i)
-	{
-		(static_cast<CBillBoardObject*>(m_pBillBoardObjects[i].get()))->UpdateShaderVariables(pd3dCommandList, fCurrentTime, fTimeElapsed);
-		m_pBillBoardObjects[i]->Render(pd3dCommandList, true);
-	}
+
+	//for (int i = 0; i < m_pBillBoardObjects.size(); ++i)
+	//{
+	//	(static_cast<CBillBoardObject*>(m_pBillBoardObjects[i].get()))->UpdateShaderVariables(pd3dCommandList, fCurrentTime, fTimeElapsed);
+	//	m_pBillBoardObjects[i]->Render(pd3dCommandList, true);
+	//}
 
 	CModelShader::GetInst()->Render(pd3dCommandList, 1);
 
@@ -575,6 +570,21 @@ void CSimulatorScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float f
 	{
 		m_pEnemys[i]->Animate(0.0f);
 		m_pEnemys[i]->Render(pd3dCommandList, true);
+	}
+
+	m_pBillBoardObjectShader->Render(pd3dCommandList, 0);
+
+	for (int i = 0; i < m_pTerrainSpriteObject.size(); ++i)
+	{
+		(static_cast<CTerrainSpriteObject*>(m_pTerrainSpriteObject[i].get()))->UpdateShaderVariables(pd3dCommandList, fCurrentTime, fTimeElapsed);
+		(static_cast<CTerrainSpriteObject*>(m_pTerrainSpriteObject[i].get()))->Animate(m_pTerrain.get(), fTimeElapsed);
+		m_pTerrainSpriteObject[i]->Render(pd3dCommandList, true);
+	}
+
+	for (int i = 0; i < m_pBillBoardObjects.size(); ++i)
+	{
+		(static_cast<CBillBoardObject*>(m_pBillBoardObjects[i].get()))->UpdateShaderVariables(pd3dCommandList, fCurrentTime, fTimeElapsed);
+		m_pBillBoardObjects[i]->Render(pd3dCommandList, true);
 	}
 
 	for (int i = 0; i < m_pParticleObjects.size(); ++i)
@@ -736,7 +746,7 @@ void CSimulatorScene::HandleCollision(const CollideParams& params)
 		TerrainSpriteCompParams AttackSprite_comp_params;
 		AttackSprite_comp_params.pObject = (*TerrainSpriteit).get();
 		AttackSprite_comp_params.xmf3Position = params.xmf3CollidePosition;
-		CMessageDispatcher::GetInst()->Dispatch_Message<TerrainSpriteCompParams>(MessageType::UPDATE_SPRITE, &AttackSprite_comp_params, m_pMainCharacter->m_pStateMachine->GetCurrentState());
+		CMessageDispatcher::GetInst()->Dispatch_Message<TerrainSpriteCompParams>(MessageType::UPDATE_SPRITE, &AttackSprite_comp_params, nullptr);
 	}
 }
 

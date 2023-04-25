@@ -191,6 +191,19 @@ void CTerrainSpriteObject::Animate(CHeightMapTerrain* pTerrain, float fTimeElaps
 	if (m_fTime < 0.f)
 		SetEnable(false);
 
+	if (pTerrain)
+	{
+		XMFLOAT3 xmf3Scale = pTerrain->GetScale();
+		XMFLOAT3 xmf3TerrainSpritePosition = GetPosition();
+		int z = (int)(xmf3TerrainSpritePosition.z / xmf3Scale.z);
+		bool bReverseQuad = ((z % 2) != 0);
+		// 86.4804, -46.8876 - 46.8876 * 0.38819 + 6.5f, -183.7856
+
+		float fHeight = pTerrain->GetHeight(xmf3TerrainSpritePosition.x - 86.4804f, xmf3TerrainSpritePosition.z + 183.7856f, bReverseQuad);
+		XMFLOAT3 Pos = GetPosition();
+		Pos.y = fHeight - 46.8876 - 46.8876 * 0.38819 + 6.5f;
+		SetPosition(Pos);
+	}
 	switch (m_eTerrainSpriteType)
 	{
 	case TERRAINSPRITE_CROSS_FADE:
@@ -202,16 +215,6 @@ void CTerrainSpriteObject::Animate(CHeightMapTerrain* pTerrain, float fTimeElaps
 			}
 			Rotate(0.f, 0.f, 7.f);
 		}
-		//if (m_fTime < m_fLifeTime * 0.5f)
-		//{
-		//	if (m_fDeltaSize >= 0.f)
-		//	{
-		//		m_fDeltaSize -= fTimeElapsed * 2.f;
-		//	}
-		//	Rotate(0.f, 0.f, 7.f);
-		//}
-		
-		
 		break;
 	case TERRAINSPRITE_FADE_IN:
 		break;
@@ -222,18 +225,7 @@ void CTerrainSpriteObject::Animate(CHeightMapTerrain* pTerrain, float fTimeElaps
 	default:
 		break;
 	}
-	//if (pTerrain)
-	//{
-	//	XMFLOAT3 xmf3Scale = pTerrain->GetScale();
-	//	XMFLOAT3 xmf3BillBoardPosition = GetPosition();
-	//	int z = (int)(xmf3BillBoardPosition.z / xmf3Scale.z);
-	//	bool bReverseQuad = ((z % 2) != 0);
-	//	// 86.4804, -46.8876 - 46.8876 * 0.38819 + 6.5f, -183.7856
-	//	float fHeight = pTerrain->GetHeight(xmf3BillBoardPosition.x - 86.4804f, xmf3BillBoardPosition.z + 183.7856f, bReverseQuad);
-	//	XMFLOAT3 Pos = GetPosition();
-	//	Pos.y = fHeight - 46.8876 - 46.8876 * 0.38819 + 6.5f;
-	//	SetPosition(Pos);
-	//}
+
 }
 
 void CTerrainSpriteObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList, float fCurrentTime, float fElapsedTime)

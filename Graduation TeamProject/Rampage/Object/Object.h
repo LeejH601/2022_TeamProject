@@ -72,6 +72,7 @@ public:
 	std::vector<physx::PxArticulationLink*> m_pArticulationLinks;
 	std::vector<XMFLOAT4X4> m_AritculatCacheMatrixs;
 
+	bool m_bEnable = true;
 	bool m_bSimulateArticulate = false;
 	bool m_bArticulationOnPxScene = false;
 	bool m_bDissolved = false;
@@ -104,6 +105,7 @@ public:
 	bool GetHit() { return bHit; }
 	virtual BoundingBox GetBoundingBox() { return BoundingBox{}; }
 
+	void SetEnable(bool bEnable);
 	void SetChild(std::shared_ptr<CGameObject> pChild, bool bReferenceUpdate = false);
 	void SetShader(std::shared_ptr<CShader> pShader, std::shared_ptr<CTexture> pTexture = NULL);
 	void SetMaterial(int nMaterial, std::shared_ptr<CMaterial> pMaterial);

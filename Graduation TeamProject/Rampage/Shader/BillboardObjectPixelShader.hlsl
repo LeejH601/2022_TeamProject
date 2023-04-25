@@ -53,12 +53,12 @@ PS_MULTIPLE_RENDER_TARGETS_OUTPUT Billboard_PS(GS_OUT input)
 	float3 uvw = float3(input.uv, input.primID % 4); // 수정 float3 uvw = float3(input.uv, input.primID ); 
 	float4 cTexture = gtxtTexture.Sample(gClampState, uvw);
 	float4 cColor = cTexture; //  // cIllumination * cTexture;
-	cColor.rgb *= gfColor;
+	cColor.rgb *= gfColor * 3.5f;
 	cColor.a *= gnTexturesMask * 0.01f; // 0~100으로 받아 0.00 ~1.00으로 변경
 	float4 cIllumination = Lighting(input.posW, input.normalW, cColor);
 
-	output.f4Scene = cIllumination;
-	output.f4Color = cIllumination;
+	output.f4Scene = cColor;
+	output.f4Color = cColor;
 
 	return(output);
 }

@@ -15,6 +15,7 @@ CParticleObject::CParticleObject(std::shared_ptr<CTexture> pSpriteTexture, ID3D1
 	m_iParticleType = iParticleType;
 	
 	SetTexture(pSpriteTexture);
+
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
 

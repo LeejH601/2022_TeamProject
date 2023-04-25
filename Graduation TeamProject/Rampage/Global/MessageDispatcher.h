@@ -21,6 +21,10 @@ struct PlayerParams {
     CGameObject* pPlayer;
 };
 
+struct MonsterParams {
+    CGameObject* pMonster;
+};
+
 struct SoundPlayParams {
     MONSTER_TYPE monster_type = MONSTER_TYPE::NONE;
     SOUND_CATEGORY sound_category = SOUND_CATEGORY::SOUND_SHOCK;
@@ -71,6 +75,10 @@ struct CollideParams {
     XMFLOAT3 xmf3CollidePosition;
 };
 
+struct OnGroundParams {
+    XMFLOAT3 xmf3OnGroundPosition;
+};
+
 struct AttackSpriteCompParams {
     CGameObject* pObject;
     XMFLOAT3 xmf3Position;
@@ -96,6 +104,7 @@ public:
     virtual void Reset() { }
 
     virtual void HandleMessage(const Message& message, const CollideParams& params) {}
+    virtual void HandleMessage(const Message& message, const OnGroundParams& params) {}
     virtual void HandleMessage(const Message& message, const PlayerParams& params) {}
     virtual void HandleMessage(const Message& message, const SoundPlayParams& params) {}
     virtual void HandleMessage(const Message& message, const CameraUpdateParams& params) {}
@@ -142,6 +151,14 @@ class SceneCollideListener : public IMessageListener {
 public:
     void SetScene(CScene* pScene) { m_pScene = pScene; }
     virtual void HandleMessage(const Message& message, const CollideParams& params);
+};
+
+// Define OnGroundListener
+class SceneOnGroundListener : public IMessageListener {
+    CScene* m_pScene;
+public:
+    void SetScene(CScene* pScene) { m_pScene = pScene; }
+    virtual void HandleMessage(const Message& message, const OnGroundParams& params);
 };
 
 // Define Sound Play component
@@ -296,6 +313,7 @@ enum ParticleType {
 
 #define MAX_PARTICLES				10000
 class ParticleComponent : public IMessageListener {
+
     int m_nParticleNumber = MAX_PARTICLES;
     int m_nEmitParticleNumber = 500;
     int m_iParticleType = ParticleType::SPHERE_PARTICLE;
@@ -307,7 +325,11 @@ class ParticleComponent : public IMessageListener {
     XMFLOAT3 m_xmf3Color = XMFLOAT3(1.f, 1.f, 1.f);
     std::shared_ptr<CTexture> m_pTexture;
 public:
-    int& GetParticleNumber() { return m_nParticleNumber; }
+    ParticleComponent();
+
+public:
+    //int& GetParticleNumber() { return m_nParticleNumber; }
+    int& GetEmitParticleNumber() { return m_nEmitParticleNumber; }
     int& GetParticleIndex() { return m_nParticleIndex; }
     XMFLOAT2& GetSize() { return m_fSize; }
     float& GetXSize() { return m_fSize.x; }
@@ -318,6 +340,7 @@ public:
     XMFLOAT3& GetColor() { return m_xmf3Color; }
     std::shared_ptr<CTexture>& GetTexture() { return m_pTexture; }
 
+    void SetEmitParticleNumber(int iEmitParticleNumber) { m_nEmitParticleNumber = iEmitParticleNumber; }
     void SetParticleNumber(int nParticleNumber) { m_nParticleNumber = nParticleNumber; }
     void SetParticleIndex(int nParticleIndex) { m_nParticleIndex = nParticleIndex; }
     void SetParticleType(int iParticleType) { m_iParticleType = iParticleType; }
@@ -345,7 +368,7 @@ class SmokeParticleComponent : public IMessageListener {
     float m_fLifeTime = 1.f;
     float m_fSpeed = 10.f;
     int m_iIndex = 0;
-    XMFLOAT3 m_xmf3Color = XMFLOAT3(0.191f * 1.5f, 0.167f * 1.5f, 0.096f * 1.5f);
+    XMFLOAT3 m_xmf3Color = XMFLOAT3(0.191f * 2.f, 0.167f * 2.f, 0.096f * 2.f);
     //XMFLOAT3 m_xmf3Color = XMFLOAT3(1.f, 1.f, 1.f);
 public:
     int& GetParticleNumber() { return m_nParticleNumber; }

@@ -21,7 +21,9 @@ public:
 	bool m_bCanChase;
 	
 	float m_fIdleTime;
+	float m_fSpawnTime;
 	float m_fWanderTime;
+	float m_fDeadTime;
 	float m_fToPlayerLength;
 	
 	float m_fStunTime;
@@ -137,4 +139,18 @@ public:
 	virtual ~CMonsterRootAnimationController();
 
 	virtual void OnRootMotion(CGameObject* pRootGameObject);
+};
+
+class CMonsterPool
+{
+	DECLARE_SINGLE(CMonsterPool);
+
+public:
+	void SpawnMonster(int MonsterN, XMFLOAT3* xmfPositions);
+
+	bool SetNonActiveMonster(CMonster* pMonster);
+	bool SetActiveMonster(XMFLOAT3 xmfPosition);
+
+private:
+	std::vector<CGameObject*> m_pNonActiveMonsters; // 사용 가능한 몬스터
 };

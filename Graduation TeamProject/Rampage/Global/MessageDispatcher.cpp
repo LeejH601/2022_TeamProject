@@ -8,6 +8,7 @@
 #include "..\Object\BillBoardObject.h"
 #include "..\Sound\SoundManager.h"
 #include "..\Scene\MainScene.h"
+#include "..\Scene\SimulatorScene.h"
 
 void CMessageDispatcher::RegisterListener(MessageType messageType, IMessageListener* listener, void* filterObject)
 {
@@ -286,6 +287,11 @@ void StunAnimationComponent::HandleMessage(const Message& message, const Animati
 		}
 	}
 }
+ParticleComponent::ParticleComponent()
+{
+	m_pTexture = CSimulatorScene::GetInst()->GetTextureManager()->GetParticleTextureList()[GetParticleIndex()];  // 미리 텍스쳐 셋팅(index: 0)
+}
+
 void ParticleComponent::HandleMessage(const Message& message, const ParticleCompParams& params)
 {
 	if (!m_bEnable)
@@ -301,7 +307,7 @@ void ParticleComponent::HandleMessage(const Message& message, const ParticleComp
 		pParticle->SetColor(m_xmf3Color);
 		pParticle->SetSpeed(m_fSpeed);
 		pParticle->SetLifeTime(m_fLifeTime);
-		pParticle->SetMaxParticleN(m_nParticleNumber);
+		//pParticle->SetMaxParticleN(m_nParticleNumber);
 		pParticle->SetEmitParticleN(m_nEmitParticleNumber);
 		pParticle->SetPosition(params.xmf3Position);
 		pParticle->SetParticleType(m_iParticleType);
@@ -329,6 +335,7 @@ void SceneCollideListener::HandleMessage(const Message& message, const CollidePa
 {
 	m_pScene->HandleCollision(params);
 }
+
 void TerrainSpriteComponent::SetTexture(LPCTSTR pszFileName)
 {
 }
@@ -354,7 +361,9 @@ void SmokeParticleComponent::HandleMessage(const Message& message, const Particl
 	
 	if (pParticleObject)
 	{
+		pParticleObject->SetParticleType(m_iParticleType);
 		pParticleObject->SetEmit(true);
+		pParticleObject->SetDirection(params.xmfDirection);
 		pParticleObject->SetSize(m_fSize);
 		pParticleObject->SetStartAlpha(m_fAlpha);
 		pParticleObject->SetColor(m_xmf3Color);
@@ -362,7 +371,6 @@ void SmokeParticleComponent::HandleMessage(const Message& message, const Particl
 		pParticleObject->SetLifeTime(m_fLifeTime);
 		pParticleObject->SetMaxParticleN(m_nParticleNumber);
 		pParticleObject->SetPosition(params.xmf3Position);
-		pParticleObject->SetParticleType(m_iParticleType);
 	}
 }
 
@@ -370,24 +378,28 @@ void UpDownParticleComponent::HandleMessage(const Message& message, const Partic
 {
 	CParticleObject* pParticleObject = dynamic_cast<CParticleObject*>(params.pObject);
 
-	pParticleObject->SetEmit(true);
-	pParticleObject->SetPosition(params.xmf3Position);
-	pParticleObject->SetParticleType(m_iParticleType);
-
-	pParticleObject->SetSize(m_fSize);
-	pParticleObject->SetStartAlpha(m_fAlpha);
-	pParticleObject->SetColor(m_xmf3Color);
-	pParticleObject->SetLifeTime(m_fLifeTime);
-	pParticleObject->SetSpeed(m_fSpeed);
-	pParticleObject->SetDirection(XMFLOAT3(0.f, 1.f, 0.f));
+	if (pParticleObject)
+	{
+		pParticleObject->SetParticleType(m_iParticleType);
+		pParticleObject->SetEmit(true);
+		pParticleObject->SetPosition(params.xmf3Position);
+		pParticleObject->SetSize(m_fSize);
+		pParticleObject->SetStartAlpha(m_fAlpha);
+		pParticleObject->SetColor(m_xmf3Color);
+		pParticleObject->SetLifeTime(m_fLifeTime);
+		pParticleObject->SetSpeed(m_fSpeed);
+		pParticleObject->SetDirection(XMFLOAT3(0.f, 1.f, 0.f));
+	}
 }
 
 
 void TrailParticleComponent::HandleMessage(const Message& message, const ParticleTrailParams& params)
 {
 	CParticleObject* pParticleObject = dynamic_cast<CParticleObject*>(params.pObject);
+
 	if (pParticleObject)
 	{
+		pParticleObject->SetParticleType(m_iParticleType);
 		pParticleObject->SetEmit(true);
 		pParticleObject->SetSize(m_fSize);
 		pParticleObject->SetStartAlpha(m_fAlpha);
@@ -397,7 +409,6 @@ void TrailParticleComponent::HandleMessage(const Message& message, const Particl
 		pParticleObject->SetMaxParticleN(m_nParticleNumber);
 		pParticleObject->SetEmitParticleN(m_nEmitMinParticleNumber + rand() % (m_nEmitMaxParticleNumber - m_nEmitMinParticleNumber));
 		pParticleObject->SetPosition(params.xmf3Position);
-		pParticleObject->SetParticleType(m_iParticleType);
 		//pParticleObject->ChangeTexture(m_pTexture);
 	}
 }
@@ -416,3 +427,7 @@ void PlayerLocationListener::HandleMessage(const Message& message, const PlayerP
 	}
 }
 
+void SceneOnGroundListener::HandleMessage(const Message& message, const OnGroundParams& params)
+{
+	m_pScene->HandleOnGround(params);
+}

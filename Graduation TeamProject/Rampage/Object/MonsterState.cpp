@@ -2,6 +2,56 @@
 #include "Monster.h"
 #include "..\Global\Locator.h"
 
+
+Spawn_Monster::Spawn_Monster()
+{
+	// TERRAIN SPRITE  ANIMATION
+	std::unique_ptr<TerrainSpriteComponent> pTerrainSpriteComponent = std::make_unique<TerrainSpriteComponent>();
+	m_pListeners.push_back(std::move(pTerrainSpriteComponent));
+	CMessageDispatcher::GetInst()->RegisterListener(MessageType::UPDATE_SPRITE, m_pListeners.back().get(), NULL);
+}
+
+Spawn_Monster::~Spawn_Monster()
+{
+}
+
+void Spawn_Monster::Enter(CMonster* monster)
+{
+	monster->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 5);
+	monster->m_pSkinnedAnimationController->m_fTime = 0.0f;
+	monster->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition = 0.0f;
+	monster->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_nType = ANIMATION_TYPE_LOOP;
+	monster->m_bCanChase = true;
+	monster->m_fSpawnTime = 0.0f;
+	monster->m_bDissolved = false;
+	monster->m_fDissolveTime = 0.f;
+	monster->m_fHP = 100.0f;
+	monster->m_fDissolveThrethHold = 0.f;
+
+	OnGroundParams OnGround_params;
+	OnGround_params.xmf3OnGroundPosition = monster->GetPosition();
+	CMessageDispatcher::GetInst()->Dispatch_Message<OnGroundParams>(MessageType::ONGROUND, &OnGround_params, nullptr);
+}
+
+void Spawn_Monster::Execute(CMonster* monster, float fElapsedTime)
+{
+	monster->m_fSpawnTime += fElapsedTime;
+
+	if (m_fMaxSpawnTime < monster->m_fSpawnTime)
+	{
+		monster->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
+	}
+}
+
+void Spawn_Monster::Animate(CMonster* monster, float fElapsedTime)
+{
+	monster->Animate(fElapsedTime);
+}
+
+void Spawn_Monster::Exit(CMonster* monster)
+{
+}
+
 Idle_Monster::Idle_Monster()
 {
 }
@@ -88,8 +138,6 @@ void Damaged_Monster::Animate(CMonster* monster, float fElapsedTime)
 void Damaged_Monster::Exit(CMonster* monster)
 {
 }
-
-
 
 void Stun_Monster::Enter(CMonster* monster)
 {
@@ -230,6 +278,7 @@ void Attack_Monster::Exit(CMonster* monster)
 
 void Dead_Monster::Enter(CMonster* monster)
 {
+	monster->m_fDeadTime = 0.0f;
 	monster->Animate(0.f);
 	monster->m_bSimulateArticulate = true;
 	int index = 0;
@@ -264,7 +313,17 @@ void Dead_Monster::Enter(CMonster* monster)
 
 void Dead_Monster::Execute(CMonster* monster, float fElapsedTime)
 {
+	monster->m_fDeadTime += fElapsedTime;
 
+	if (m_fMaxDeadTime < monster->m_fDeadTime)
+	{
+		if (monster->m_pStateMachine->GetCurrentState() != Spawn_Monster::GetInst())
+		{
+			CMonsterPool::GetInst()->SetNonActiveMonster(monster);
+
+		}
+
+	}
 }
 
 void Dead_Monster::Animate(CMonster* monster, float fElapsedTime)

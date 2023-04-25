@@ -22,6 +22,7 @@ void CPhysicsObject::OnPrepareRender()
 
 void CPhysicsObject::OnUpdateCallback(float fTimeElapsed)
 {
+	m_bOnGround = false;
 	if (m_pUpdatedContext)
 	{
 		CSplatTerrain* pTerrain = (CSplatTerrain*)m_pUpdatedContext;
@@ -30,7 +31,10 @@ void CPhysicsObject::OnUpdateCallback(float fTimeElapsed)
 		float fTerrainY = pTerrain->GetHeight(GetPosition().x - (xmf3TerrainPos.x), GetPosition().z - (xmf3TerrainPos.z));
 
 		if (GetPosition().y < fTerrainY + xmf3TerrainPos.y)
+		{
 			SetPosition(XMFLOAT3(GetPosition().x, fTerrainY + xmf3TerrainPos.y, GetPosition().z));
+			m_bOnGround = true;
+		}
 	}
 }
 
@@ -151,6 +155,11 @@ XMFLOAT3 CPhysicsObject::GetRight()
 XMFLOAT3 CPhysicsObject::GetVelocity()
 {
 	return m_xmf3Velocity;
+}
+
+bool CPhysicsObject::GetOnGround()
+{
+	return m_bOnGround;
 }
 
 void CPhysicsObject::Animate(float fTimeElapsed)

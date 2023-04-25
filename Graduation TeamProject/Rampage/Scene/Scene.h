@@ -55,4 +55,5 @@ public:
 	virtual void OnPostRender() {}
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed) {}
 	virtual void HandleCollision(const CollideParams& params) {}
+	virtual void HandleOnGround(const OnGroundParams& params) {}
 };

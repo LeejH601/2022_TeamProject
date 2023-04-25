@@ -777,6 +777,12 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pListeners.push_back(std::move(pCollideListener));
 	CMessageDispatcher::GetInst()->RegisterListener(MessageType::COLLISION, m_pListeners.back().get(), nullptr);
 
+	// ONGROUND LISTENER
+	std::unique_ptr<SceneOnGroundListener> pOnGroundListener = std::make_unique<SceneOnGroundListener>();
+	pOnGroundListener->SetScene(this);
+	m_pListeners.push_back(std::move(pOnGroundListener));
+	CMessageDispatcher::GetInst()->RegisterListener(MessageType::ONGROUND, m_pListeners.back().get(), nullptr);
+
 	m_pHDRComputeShader = std::make_unique<CHDRComputeShader>();
 	m_pHDRComputeShader->CreateShader(pd3dDevice, pd3dCommandList, GetComputeRootSignature());
 
@@ -925,22 +931,6 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 	m_pTerrainShader->Render(pd3dCommandList, 0);
 	m_pTerrain->Render(pd3dCommandList, true);
 
-	m_pBillBoardObjectShader->Render(pd3dCommandList, 0);
-
-	for (int i = 0; i < m_pTerrainSpriteObject.size(); ++i)
-	{
-		(static_cast<CTerrainSpriteObject*>(m_pTerrainSpriteObject[i].get()))->UpdateShaderVariables(pd3dCommandList, fCurrentTime, fTimeElapsed);
-		(static_cast<CTerrainSpriteObject*>(m_pTerrainSpriteObject[i].get()))->Animate(m_pTerrain.get(), fTimeElapsed);
-		//m_pTerrainSpriteObject[i].get()->Rotate(0.f, 0.f, 20.f);
-		m_pTerrainSpriteObject[i]->Render(pd3dCommandList, true);
-	}
-
-	for (int i = 0; i < m_pBillBoardObjects.size(); ++i)
-	{
-		(static_cast<CBillBoardObject*>(m_pBillBoardObjects[i].get()))->UpdateShaderVariables(pd3dCommandList, fCurrentTime, fTimeElapsed);
-		m_pBillBoardObjects[i]->Render(pd3dCommandList, true);
-	}
-
 	for (int i = 0; i < m_pParticleObjects.size(); ++i)
 	{
 		((CParticleObject*)m_pParticleObjects[i].get())->Update(fTimeElapsed);
@@ -987,6 +977,8 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 		trailUpdateT = 0.0f;
 	}
 
+
+
 	//m_pSwordTrailShader->Render(pd3dCommandList, pCamera, 1);
 
 	//CModelShader::GetInst()->Render(pd3dCommandList, 0);
@@ -1002,6 +994,20 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 		m_pObjects[i]->Render(pd3dCommandList, true);
 	}
 
+	m_pBillBoardObjectShader->Render(pd3dCommandList, 0);
+
+	for (int i = 0; i < m_pTerrainSpriteObject.size(); ++i)
+	{
+		(static_cast<CTerrainSpriteObject*>(m_pTerrainSpriteObject[i].get()))->UpdateShaderVariables(pd3dCommandList, fCurrentTime, fTimeElapsed);
+		(static_cast<CTerrainSpriteObject*>(m_pTerrainSpriteObject[i].get()))->Animate(m_pTerrain.get(), fTimeElapsed);
+		m_pTerrainSpriteObject[i]->Render(pd3dCommandList, true);
+	}
+
+	for (int i = 0; i < m_pBillBoardObjects.size(); ++i)
+	{
+		(static_cast<CBillBoardObject*>(m_pBillBoardObjects[i].get()))->UpdateShaderVariables(pd3dCommandList, fCurrentTime, fTimeElapsed);
+		m_pBillBoardObjects[i]->Render(pd3dCommandList, true);
+	}
 
 #ifdef RENDER_BOUNDING_BOX
 	CBoundingBoxShader::GetInst()->Render(pd3dCommandList, 0);
@@ -1213,21 +1219,25 @@ void CMainTMPScene::HandleCollision(const CollideParams& params)
 		CMessageDispatcher::GetInst()->Dispatch_Message<ImpactCompParams>(MessageType::UPDATE_BILLBOARD, &impact_comp_params, ((CPlayer*)m_pPlayer)->m_pStateMachine->GetCurrentState());
 	}
 
-	it = std::find_if(m_pUpDownParticleObjects.begin(), m_pUpDownParticleObjects.end(), [](const std::unique_ptr<CGameObject>& pBillBoardObject) {
-		if (((CParticleObject*)pBillBoardObject.get())->CheckCapacity())
-			return true;
-		return false;
-		});
+	// Demo 사용x
+	//it = std::find_if(m_pUpDownParticleObjects.begin(), m_pUpDownParticleObjects.end(), [](const std::unique_ptr<CGameObject>& pBillBoardObject) {
+	//	if (((CParticleObject*)pBillBoardObject.get())->CheckCapacity())
+	//		return true;
+	//	return false;
+	//	});
 
-	if (it != m_pUpDownParticleObjects.end())
-	{
-		ParticleUpDownParams particleUpdown_comp_params;
-		particleUpdown_comp_params.pObject = (*it).get();
-		particleUpdown_comp_params.xmf3Position = params.xmf3CollidePosition;
-		CMessageDispatcher::GetInst()->Dispatch_Message<ParticleUpDownParams>(MessageType::UPDATE_UPDOWNPARTICLE, &particleUpdown_comp_params, Damaged_Monster::GetInst());
-	}
+	//if (it != m_pUpDownParticleObjects.end())
+	//{
+	//	ParticleUpDownParams particleUpdown_comp_params;
+	//	particleUpdown_comp_params.pObject = (*it).get();
+	//	particleUpdown_comp_params.xmf3Position = params.xmf3CollidePosition;
+	//	CMessageDispatcher::GetInst()->Dispatch_Message<ParticleUpDownParams>(MessageType::UPDATE_UPDOWNPARTICLE, &particleUpdown_comp_params, Damaged_Monster::GetInst());
+	//}
 
+}
 
+void CMainTMPScene::HandleOnGround(const OnGroundParams& params)
+{
 	std::vector<std::unique_ptr<CGameObject>>::iterator TerrainSpriteit = std::find_if(m_pTerrainSpriteObject.begin(), m_pTerrainSpriteObject.end(), [](const std::unique_ptr<CGameObject>& pTerrainSpriteObject) {
 		if (!((CMultiSpriteObject*)pTerrainSpriteObject.get())->GetEnable())
 			return true;
@@ -1238,7 +1248,19 @@ void CMainTMPScene::HandleCollision(const CollideParams& params)
 	{
 		TerrainSpriteCompParams AttackSprite_comp_params;
 		AttackSprite_comp_params.pObject = (*TerrainSpriteit).get();
-		AttackSprite_comp_params.xmf3Position = params.xmf3CollidePosition;
-		CMessageDispatcher::GetInst()->Dispatch_Message<TerrainSpriteCompParams>(MessageType::UPDATE_SPRITE, &AttackSprite_comp_params, ((CPlayer*)m_pPlayer)->m_pStateMachine->GetCurrentState());
+		AttackSprite_comp_params.xmf3Position = params.xmf3OnGroundPosition;
+		CMessageDispatcher::GetInst()->Dispatch_Message<TerrainSpriteCompParams>(MessageType::UPDATE_SPRITE, &AttackSprite_comp_params, Spawn_Monster::GetInst());
+		TCHAR pstrDebug[256] = { 0 };
+		_stprintf_s(pstrDebug, 256, _T("바닥 충격 출력 %f, %f, %f\n"), params.xmf3OnGroundPosition.x, params.xmf3OnGroundPosition.y, params.xmf3OnGroundPosition.z);
+		OutputDebugString(pstrDebug);
 	}
+	else
+	{
+		TCHAR pstrDebug[256] = { 0 };
+		_stprintf_s(pstrDebug, 256, _T("No바닥 충격 출력 %f, %f, %f\n"), params.xmf3OnGroundPosition.x, params.xmf3OnGroundPosition.y, params.xmf3OnGroundPosition.z);
+		OutputDebugString(pstrDebug);
+	}
+
+
+
 }

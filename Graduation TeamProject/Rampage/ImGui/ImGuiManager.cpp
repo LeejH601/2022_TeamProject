@@ -251,8 +251,8 @@ void DataLoader::SaveComponentSet(FILE* pInFile, CState<CPlayer>* pState)
 	WriteStringFromFile(pInFile, std::string("<ParticleComponent>:"));
 	WriteStringFromFile(pInFile, std::string("<Enable>:"));
 	WriteIntegerFromFile(pInFile, pParticleComponent->GetEnable());
-	WriteStringFromFile(pInFile, std::string("<ParticleNumber>:"));
-	WriteIntegerFromFile(pInFile, pParticleComponent->GetParticleNumber());
+	WriteStringFromFile(pInFile, std::string("<ParticleEmitNumber>:"));
+	WriteIntegerFromFile(pInFile, pParticleComponent->GetEmitParticleNumber());
 	WriteStringFromFile(pInFile, std::string("<ParticleIndex>:"));
 	WriteIntegerFromFile(pInFile, pParticleComponent->GetParticleIndex());
 	WriteStringFromFile(pInFile, std::string("<Alpha>:"));
@@ -631,9 +631,9 @@ void DataLoader::LoadComponentSet(FILE* pInFile, CState<CPlayer>* pState)
 				{
 					pParticleComponent->SetEnable(ReadIntegerFromFile(pInFile));
 				}
-				else if (!strcmp(buf, "<ParticleNumber>:"))
+				else if (!strcmp(buf, "<ParticleEmitNumber>:"))
 				{
-					pParticleComponent->SetParticleNumber(ReadIntegerFromFile(pInFile));
+					pParticleComponent->SetEmitParticleNumber(ReadIntegerFromFile(pInFile));
 				}
 				else if (!strcmp(buf, "<ParticleIndex>:"))
 				{
@@ -1227,8 +1227,8 @@ void CImGuiManager::ShowParticleManager(CState<CPlayer>* pCurrentAnimation)
 		pParticleComponent->GetLifeTime() = std::clamp(pParticleComponent->GetLifeTime(), PARTICLE_LIFETIME_MIN, PARTICLE_LIFETIME_MAX);
 
 	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
-	if (ImGui::DragInt(U8STR("파티클 개수##ParticleEffect"), &pParticleComponent->GetParticleNumber(), DRAG_FLOAT_UNIT, PARTICLE_COUNT_MIN, PARTICLE_COUNT_MAX, "%d", 0))
-		pParticleComponent->GetParticleNumber() = std::clamp(pParticleComponent->GetParticleNumber(), PARTICLE_COUNT_MIN, PARTICLE_COUNT_MAX);
+	if (ImGui::DragInt(U8STR("파티클 방출 개수##ParticleEffect"), &pParticleComponent->GetEmitParticleNumber(), DRAG_FLOAT_UNIT, PARTICLE_COUNT_MIN, PARTICLE_COUNT_MAX, "%d", 0))
+		pParticleComponent->GetEmitParticleNumber() = std::clamp(pParticleComponent->GetEmitParticleNumber(), PARTICLE_COUNT_MIN, PARTICLE_COUNT_MAX);
 
 	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
 	if (ImGui::DragFloat(U8STR("속도##ParticleEffect"), &pParticleComponent->GetSpeed(), DRAG_FLOAT_UNIT, PARTICLE_SPEED_MIN, PARTICLE_SPEED_MAX, "%.1f", 0))
