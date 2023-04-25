@@ -707,7 +707,16 @@ bool ImGui::ButtonEx(const char* label, const ImVec2& size_arg, ImGuiButtonFlags
         flags |= ImGuiButtonFlags_Repeat;
 
     bool hovered, held;
+    static ImGuiID LastPlayedHoveredSoundID = 0;
     bool pressed = ButtonBehavior(bb, id, &hovered, &held, flags);
+    if (hovered && LastPlayedHoveredSoundID != id) {
+        // 호버링 사운드 재생 메시지 전송
+        LastPlayedHoveredSoundID = id;
+        SoundPlayParams param;
+        param.monster_type = MONSTER_TYPE::NONE;
+        param.sound_category = SOUND_CATEGORY::SOUND_UI_BUTTON;
+        CMessageDispatcher::GetInst()->Dispatch_Message(MessageType::PLAY_SOUND, &param, nullptr);
+    }
 
     // Render
     const ImU32 col = GetColorU32((held && hovered) ? ImGuiCol_ButtonActive : hovered ? ImGuiCol_ButtonHovered : ImGuiCol_Button);
