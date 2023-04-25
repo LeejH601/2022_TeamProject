@@ -47,6 +47,8 @@ Index of this file:
 #include <stdint.h>     // intptr_t
 #endif
 
+#include "..\Global\MessageDispatcher.h"
+
 //-------------------------------------------------------------------------
 // Warnings
 //-------------------------------------------------------------------------
@@ -6036,7 +6038,16 @@ bool ImGui::TreeNodeBehavior(ImGuiID id, ImGuiTreeNodeFlags flags, const char* l
     const bool was_selected = selected;
 
     bool hovered, held;
+    static ImGuiID LastPlayedHoveredSoundID = 0;
     bool pressed = ButtonBehavior(interact_bb, id, &hovered, &held, button_flags);
+    if (hovered && LastPlayedHoveredSoundID != id) {
+        // 호버링 사운드 재생 메시지 전송
+        LastPlayedHoveredSoundID = id;
+        SoundPlayParams param;
+        param.monster_type = MONSTER_TYPE::NONE;
+        param.sound_category = SOUND_CATEGORY::SOUND_UI_BUTTON;
+        CMessageDispatcher::GetInst()->Dispatch_Message(MessageType::PLAY_SOUND, &param, nullptr);
+    }
     bool toggled = false;
     if (!is_leaf)
     {
@@ -6069,6 +6080,7 @@ bool ImGui::TreeNodeBehavior(ImGuiID id, ImGuiTreeNodeFlags flags, const char* l
 
         if (toggled)
         {
+            // 클릭 사운드 재생 메시지 전송
             is_open = !is_open;
             window->DC.StateStorage->SetInt(id, is_open);
             g.LastItemData.StatusFlags |= ImGuiItemStatusFlags_ToggledOpen;
@@ -6121,8 +6133,10 @@ bool ImGui::TreeNodeBehavior(ImGuiID id, ImGuiTreeNodeFlags flags, const char* l
         RenderText(text_pos, label, label_end, false);
     }
 
-    if (is_open && !(flags & ImGuiTreeNodeFlags_NoTreePushOnOpen))
-        TreePushOverrideID(id);
+    if (is_open && !(flags & ImGuiTreeNodeFlags_NoTreePushOnOpen)) {
+        TreePushOverrideID(id); // 트리 노드가 클릭될 때 호출
+        // 클릭 사운드 메시지 전송
+    }
     IMGUI_TEST_ENGINE_ITEM_INFO(id, label, g.LastItemData.StatusFlags | (is_leaf ? 0 : ImGuiItemStatusFlags_Openable) | (is_open ? ImGuiItemStatusFlags_Opened : 0));
     return is_open;
 }

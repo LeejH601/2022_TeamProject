@@ -110,6 +110,19 @@ void CGameFramework::InitSound()
 
 	CSoundManager::GetInst()->RegisterSound("Sound/Voice/Skeleton/SkeletonMoan01.mp3", false, SOUND_CATEGORY::SOUND_VOICE);
 
+	CSoundManager::GetInst()->RegisterSound("Sound/UI/Menu Selection Click by NenadSimic Id-171697.wav", false, SOUND_CATEGORY::SOUND_UI_BUTTON);
+
+	std::unique_ptr<SoundPlayComponent> listener = std::make_unique<SoundPlayComponent>();
+	listener->SetDelay(0.0f);
+	listener->SetEnable(true);
+	listener->SetSC(SOUND_CATEGORY::SOUND_UI_BUTTON);
+	listener->SetMT(MONSTER_TYPE::NONE);
+	listener->SetSoundNumber(0);
+	listener->SetVolume(1.0f);
+	m_pListeners.push_back(std::move(listener));
+
+	CMessageDispatcher::GetInst()->RegisterListener(MessageType::PLAY_SOUND, m_pListeners.back().get(), nullptr);
+
 	//CSoundManager::GetInst()->PlaySound("Sound/Background/Action 2 (Loop).wav", 0.25f, 0.0f);
 }
 void CGameFramework::InitLocator()

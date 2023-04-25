@@ -32,6 +32,7 @@ enum class MESSAGE_TYPE
 	Msg_PlaySoundEffect,
 	Msg_PlaySoundDamage,
 	Msg_PlaySoundShoot,
+	Msg_PlaySoundUIButton,
 	Msg_MonsterAttackSprite,
 	END_ENUM
 };
@@ -43,6 +44,7 @@ enum class SOUND_CATEGORY
 	SOUND_VOICE,
 	SOUND_SHOOT,
 	SOUND_EFFECT,
+	SOUND_UI_BUTTON,
 };
 
 enum class SCENE_TYPE

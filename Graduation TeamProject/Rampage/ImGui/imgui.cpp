@@ -3782,7 +3782,7 @@ void ImGui::ClearActiveID()
 
 void ImGui::SetHoveredID(ImGuiID id)
 {
-    ImGuiContext& g = *GImGui;
+    ImGuiContext& g = *GImGui; //
     g.HoveredId = id;
     g.HoveredIdAllowOverlap = false;
     if (id != 0 && g.HoveredIdPreviousFrame != id)
