@@ -6081,6 +6081,11 @@ bool ImGui::TreeNodeBehavior(ImGuiID id, ImGuiTreeNodeFlags flags, const char* l
         if (toggled)
         {
             // 클릭 사운드 재생 메시지 전송
+            SoundPlayParams param;
+            param.monster_type = MONSTER_TYPE::NONE;
+            param.sound_category = SOUND_CATEGORY::SOUND_UI_BUTTON_CLICK;
+            CMessageDispatcher::GetInst()->Dispatch_Message(MessageType::PLAY_SOUND, &param, nullptr);
+
             is_open = !is_open;
             window->DC.StateStorage->SetInt(id, is_open);
             g.LastItemData.StatusFlags |= ImGuiItemStatusFlags_ToggledOpen;
@@ -6135,7 +6140,6 @@ bool ImGui::TreeNodeBehavior(ImGuiID id, ImGuiTreeNodeFlags flags, const char* l
 
     if (is_open && !(flags & ImGuiTreeNodeFlags_NoTreePushOnOpen)) {
         TreePushOverrideID(id); // 트리 노드가 클릭될 때 호출
-        // 클릭 사운드 메시지 전송
     }
     IMGUI_TEST_ENGINE_ITEM_INFO(id, label, g.LastItemData.StatusFlags | (is_leaf ? 0 : ImGuiItemStatusFlags_Openable) | (is_open ? ImGuiItemStatusFlags_Opened : 0));
     return is_open;
