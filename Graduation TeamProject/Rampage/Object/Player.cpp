@@ -364,7 +364,20 @@ void CKightRootMoveAnimationController::OnRootMotion(CGameObject* pRootGameObjec
 {
 	if (m_bRootMotion)
 	{
-		
+		CPlayer* player = (CPlayer*)pRootGameObject;
+
+		if (player->m_pStateMachine->GetCurrentState() == Atk1_Player::GetInst() ||
+			player->m_pStateMachine->GetCurrentState() == Atk2_Player::GetInst() ||
+			player->m_pStateMachine->GetCurrentState() == Atk3_Player::GetInst())
+		{
+
+		}
+		else
+		{
+			m_pRootMotionObject->m_xmf4x4Transform._41 = 0.f;
+			m_pRootMotionObject->m_xmf4x4Transform._42 = 0.f;
+			m_pRootMotionObject->m_xmf4x4Transform._43 = 0.f;
+		}
 	}
 }
 
