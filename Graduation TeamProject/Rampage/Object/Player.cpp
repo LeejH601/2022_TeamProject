@@ -158,7 +158,8 @@ CKnightPlayer::CKnightPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 	CGameObject* obj = pKnightModel->m_pModelRootObject->FindFrame("SK_FKnightB_05");
 
 	SetChild(pKnightModel->m_pModelRootObject, true);
-	m_pSkinnedAnimationController = std::make_unique<CKightNoMoveRootAnimationController>(pd3dDevice, pd3dCommandList, nAnimationTracks, pKnightModel);
+	//m_pSkinnedAnimationController = std::make_unique<CKightNoMoveRootAnimationController>(pd3dDevice, pd3dCommandList, nAnimationTracks, pKnightModel);
+	m_pSkinnedAnimationController = std::make_unique<CKightRootMoveAnimationController>(pd3dDevice, pd3dCommandList, nAnimationTracks, pKnightModel);
 
 	auto Find_Frame_Index = [](std::string& target, std::vector<std::string>& source) {
 		int cnt = 0;
@@ -351,6 +352,19 @@ void CKightNoMoveRootAnimationController::OnRootMotion(CGameObject* pRootGameObj
 		m_pRootMotionObject->m_xmf4x4Transform._41 = 0.f;
 		m_pRootMotionObject->m_xmf4x4Transform._42 = 0.f;
 		m_pRootMotionObject->m_xmf4x4Transform._43 = 0.f;
+	}
+}
+CKightRootMoveAnimationController::CKightRootMoveAnimationController(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks, CLoadedModelInfo* pModel) : CAnimationController(pd3dDevice, pd3dCommandList, nAnimationTracks, pModel)
+{
+}
+CKightRootMoveAnimationController::~CKightRootMoveAnimationController()
+{
+}
+void CKightRootMoveAnimationController::OnRootMotion(CGameObject* pRootGameObject)
+{
+	if (m_bRootMotion)
+	{
+		
 	}
 }
 
