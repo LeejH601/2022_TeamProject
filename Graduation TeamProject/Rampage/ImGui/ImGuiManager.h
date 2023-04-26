@@ -21,6 +21,11 @@ class CCamera;
 class CImGuiManager
 {
 private:
+	static enum class PREVIEW_TEXTURE_TYPE
+	{
+		TYPE_IMPACT,
+		TYPE_PARTICLE,
+	};
 	// Component Sets
 	std::unique_ptr<DataLoader> m_pDataLoader = NULL;
 
@@ -61,6 +66,10 @@ private:
 
 	D3D12_CPU_DESCRIPTOR_HANDLE	m_d3dSrvCPUDescriptorNextHandle;
 	D3D12_GPU_DESCRIPTOR_HANDLE	m_d3dSrvGPUDescriptorNextHandle;
+
+	D3D12_GPU_DESCRIPTOR_HANDLE m_d3dSrvGPUDescriptorHandle_ImpactTexture;
+	D3D12_GPU_DESCRIPTOR_HANDLE m_d3dSrvGPUDescriptorHandle_ParticleTexture;
+
 public:
 	DECLARE_SINGLE(CImGuiManager);
 
@@ -68,6 +77,8 @@ public:
 	~CImGuiManager();
 	void CreateSrvDescriptorHeaps(ID3D12Device* pd3dDevice);
 	void CreateShaderResourceViews(ID3D12Device* pd3dDevice, CTexture* pTexture, UINT nDescriptorHeapIndex);
+	void SetPreviewTexture(ID3D12Device* pd3dDevice, CTexture* pTexture, UINT index, PREVIEW_TEXTURE_TYPE type);
+	void SetShaderResourceViews(CTexture* pTexture, UINT index);
 
 	D3D12_CPU_DESCRIPTOR_HANDLE GetRtvCPUDescriptorHandle() {
 		return m_pd3dRtvCPUDescriptorHandles;

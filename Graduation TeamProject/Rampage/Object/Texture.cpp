@@ -20,6 +20,8 @@ CTexture::CTexture(int nTextures, UINT nTextureType, int nSamplers, int nRootPar
 
 		m_pd3dSrvGpuDescriptorHandles.resize(m_nTextures); // 
 		for (int i = 0; i < m_nTextures; i++) m_pd3dSrvGpuDescriptorHandles[i].ptr = NULL;
+		m_pd3dSrvCpuDescriptorHandles.resize(m_nTextures); // 
+		for (int i = 0; i < m_nTextures; i++) m_pd3dSrvCpuDescriptorHandles[i].ptr = NULL;
 
 		m_pnResourceTypes.resize(m_nTextures);
 		m_pdxgiBufferFormats.resize(m_nTextures);
@@ -51,6 +53,8 @@ CTexture::CTexture(int nTextures, UINT nTextureType, int nSamplers, int nRootPar
 
 		m_pd3dSrvGpuDescriptorHandles.resize(nGraphicsSrvGpuHandles); // 
 		for (int i = 0; i < nGraphicsSrvGpuHandles; i++) m_pd3dSrvGpuDescriptorHandles[i].ptr = NULL;
+		m_pd3dSrvCpuDescriptorHandles.resize(m_nTextures); // 
+		for (int i = 0; i < m_nTextures; i++) m_pd3dSrvCpuDescriptorHandles[i].ptr = NULL;
 
 		m_pd3dComputeUavGpuDescriptorHandles.resize(nComputeUavGpuHandles);
 		for (int i = 0; i < nComputeUavGpuHandles; i++) m_pd3dComputeUavGpuDescriptorHandles[i].ptr = NULL;

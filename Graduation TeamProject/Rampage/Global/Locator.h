@@ -16,6 +16,7 @@ enum class MOUSE_CUROSR_MODE {
 
 class CLocator
 {
+	ID3D12Device* m_pd3dDevice;
 	physx::PxFoundation* m_pFoundation;
 	physx::PxPhysics* m_pPhysics;
 	physx::PxScene* m_pPxScene;
@@ -37,6 +38,9 @@ public:
 	physx::PxFoundation* GetPxFoundation() { return m_pFoundation; };
 	physx::PxPhysics* GetPxPhysics() { return m_pPhysics; };
 	physx::PxScene* GetPxScene() { return m_pPxScene; };
+
+	void SetDevice(ID3D12Device* device) { m_pd3dDevice = device; };
+	ID3D12Device* GetDevice() { return m_pd3dDevice; };
 
 	void SetMouseCursorMode(MOUSE_CUROSR_MODE mode) { m_eMouseCursorMode = mode; };
 	MOUSE_CUROSR_MODE GetMouseCursorMode() { return m_eMouseCursorMode; };

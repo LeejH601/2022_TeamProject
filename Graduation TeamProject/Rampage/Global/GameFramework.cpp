@@ -218,6 +218,7 @@ void CGameFramework::CreateDirect3DDevice()
 	::gnRtvDescriptorIncrementSize = m_pd3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
 	::gnCbvSrvDescriptorIncrementSize = m_pd3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 
+	Locator.SetDevice(m_pd3dDevice.Get());
 }
 void CGameFramework::CreateCommandQueueAndList()
 {
