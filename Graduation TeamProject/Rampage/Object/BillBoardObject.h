@@ -58,8 +58,6 @@ public:
 	virtual void AnimateRowColumn(float fTimeElapsed);
 	virtual void SetEnable(bool bEnable);
 
-
-
 	void SetSize(XMFLOAT2 fSize);
 	void SetSpeed(float fSpeed);
 	void SetStartAlpha(float fAlpha);

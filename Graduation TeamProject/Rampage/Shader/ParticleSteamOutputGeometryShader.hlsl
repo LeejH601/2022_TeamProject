@@ -5,6 +5,7 @@ Buffer<float4> gRandomSphereBuffer : register(t33);
 #define RECOVERY_PARTILCE 1
 #define SMOKE_PARTILCE 2
 #define TRAIL_PARTILCE 3
+#define ATTACK_PARTICLE 4
 
 //#define TYPE_DEFAULT -1
 #define TYPE_EMITTER 0
@@ -133,8 +134,6 @@ void SphereParticles(VS_PARTICLE_INPUT input, inout PointStream<VS_PARTICLE_INPU
 			output.Append(particle);
 		}
 	}
-	else
-		output.Append(particle);
 	
 }
 
@@ -157,13 +156,40 @@ void SmokeParticles(VS_PARTICLE_INPUT input, inout PointStream<VS_PARTICLE_INPUT
 			particle.velocity = Smokevelocity * gfSpeed;
 			output.Append(particle);
 		}
-		
-
 	}
 	else if (particle.type == TYPE_SIMULATOR)
 	{
 		if (particle.lifetime > 0.f)
 			OutputRandomParticleToStream(particle, output);
+	}
+
+}
+
+void AttackParticles(VS_PARTICLE_INPUT input, inout PointStream<VS_PARTICLE_INPUT> output)
+{
+	VS_PARTICLE_INPUT particle = input;
+
+	if (particle.type == TYPE_EMITTER)
+	{
+		output.Append(particle);
+		if (bEmit)
+		{
+			particle.type = TYPE_SIMULATOR;
+			particle.position = gmtxGameObject._41_42_43;
+			//particle.alpha = particle.lifetime / gfLifeTime;
+
+			particle.lifetime = gfLifeTime;
+			particle.velocity = float3(0.f, 0.f, 0.f);
+			output.Append(particle);
+		}
+	}
+	else if (particle.type == TYPE_SIMULATOR)
+	{
+		if (particle.lifetime > 0.f)
+		{
+			input.lifetime -= gfElapsedTime;
+			output.Append(input);
+		}
 	}
 
 }
@@ -251,6 +277,9 @@ void GSParticleStreamOutput(point VS_PARTICLE_INPUT input[1], inout PointStream<
 		RecoveryParticles(particle, output);
 	else if (gnParticleType == SMOKE_PARTILCE)
 		SmokeParticles(particle, output);
+	else if (gnParticleType == ATTACK_PARTICLE)
+		AttackParticles(particle, output);
+
 	//else if (gnParticleType == TRAIL_PARTILCE)
 	//	TrailParticles(particle, output);
 }

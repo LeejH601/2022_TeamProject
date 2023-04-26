@@ -359,7 +359,7 @@ public:
 	XMFLOAT3						m_xmf3Velocity = XMFLOAT3(0.0f, 0.0f, 0.0f);
 	float							m_fLifetime = 0.0f;
 	UINT							m_iType = 0;
-
+	bool							m_bTerrain = false;
 public:
 	CParticleVertex() { }
 	~CParticleVertex() { }

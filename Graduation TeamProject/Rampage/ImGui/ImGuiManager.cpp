@@ -696,7 +696,7 @@ void DataLoader::LoadComponentSet(FILE* pInFile, CState<CPlayer>* pState)
 				{
 					pImpactComponent->SetTextureIndex(ReadIntegerFromFile(pInFile));
 
-					std::vector<std::shared_ptr<CTexture>> vTexture = CSimulatorScene::GetInst()->GetTextureManager()->GetBillBoardTextureList();
+					std::vector<std::shared_ptr<CTexture>> vTexture = CSimulatorScene::GetInst()->GetTextureManager()->GetParticleTextureList();
 
 					std::shared_ptr<CTexture> pTexture = vTexture[pImpactComponent->GetTextureIndex()];
 					pImpactComponent->SetImpactTexture(pTexture);
@@ -1146,7 +1146,7 @@ void CImGuiManager::ShowImpactManager(CState<CPlayer>* pCurrentAnimation)
 	ImpactEffectComponent* pImpactEffectComponent = dynamic_cast<ImpactEffectComponent*>(pCurrentAnimation->GetImpactComponent());
 	ImGui::Checkbox(U8STR("ÄÑ±â/²ô±â##ImpactEffect"), &pImpactEffectComponent->GetEnable());
 
-	std::vector<std::shared_ptr<CTexture>> vTexture = CSimulatorScene::GetInst()->GetTextureManager()->GetBillBoardTextureList();
+	std::vector<std::shared_ptr<CTexture>> vTexture = CSimulatorScene::GetInst()->GetTextureManager()->GetParticleTextureList();
 	std::vector<const char*> items;
 	std::vector <std::string> str(100);
 	for (int i = 0; i < vTexture.size(); i++)

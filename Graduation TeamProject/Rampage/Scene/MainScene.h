@@ -47,9 +47,6 @@ private:
 	
 	std::unique_ptr<CGameObject> m_pSmokeObject;
 
-	std::unique_ptr<CBillBoardObjectShader> m_pBillBoardObjectShader;
-	std::vector<std::unique_ptr<CGameObject>> m_pBillBoardObjects;
-
 	std::unique_ptr<CSunLightShader> m_pSunLightShader;
 
 	std::unique_ptr<CLensFlareShader> m_pLensFlareShader;

@@ -319,15 +319,20 @@ void ImpactEffectComponent::HandleMessage(const Message& message, const ImpactCo
 	if (!m_bEnable)
 		return;
 
-	CMultiSpriteObject* pMultiSprite = dynamic_cast<CMultiSpriteObject*>(params.pObject);
+	CParticleObject* pMultiSprite = dynamic_cast<CParticleObject*>(params.pObject);
 
 	if (pMultiSprite)
 	{
-		pMultiSprite->SetEnable(true);
+		pMultiSprite->SetEmit(true);
 		pMultiSprite->SetSize(m_fSize);
-		pMultiSprite->SetSpeed(m_fSpeed);
 		pMultiSprite->SetStartAlpha(m_fAlpha);
+		pMultiSprite->SetColor(m_xmf3Color);
+		pMultiSprite->SetSpeed(m_fSpeed);
+		pMultiSprite->SetLifeTime(m_fLifeTime);
+		//pParticle->SetMaxParticleN(m_nParticleNumber);
+		pMultiSprite->SetEmitParticleN(m_nEmitParticleNumber);
 		pMultiSprite->SetPosition(params.xmf3Position);
+		pMultiSprite->SetParticleType(m_iParticleType);
 		pMultiSprite->ChangeTexture(m_pTexture);
 	}
 }
@@ -342,17 +347,35 @@ void TerrainSpriteComponent::SetTexture(LPCTSTR pszFileName)
 
 void TerrainSpriteComponent::HandleMessage(const Message& message, const TerrainSpriteCompParams& params)
 {
-	CTerrainSpriteObject* pSpriteObject = dynamic_cast<CTerrainSpriteObject*>(params.pObject);
+	//CTerrainSpriteObject* pSpriteObject = dynamic_cast<CTerrainSpriteObject*>(params.pObject);
+	//if (!m_bEnable)
+	//	return;
 
-	if (pSpriteObject)
+	CParticleObject* pMultiSprite = dynamic_cast<CParticleObject*>(params.pObject);
+
+	if (pMultiSprite)
 	{
-		pSpriteObject->SetType(TerrainSpriteType::TERRAINSPRITE_CROSS_FADE);
-		pSpriteObject->SetEnable(true);
-		pSpriteObject->SetPosition(params.xmf3Position);
-		pSpriteObject->SetLifeTime(m_fLifeTime);
-		pSpriteObject->SetStart(true);
-		pSpriteObject->SetStartAlpha(1.f);
+		pMultiSprite->SetEmit(true);
+		pMultiSprite->SetSize(m_fSize);
+		pMultiSprite->SetStartAlpha(m_fAlpha);
+		pMultiSprite->SetColor(m_xmf3Color);
+		pMultiSprite->SetSpeed(m_fSpeed);
+		pMultiSprite->SetLifeTime(m_fLifeTime);
+		//pParticle->SetMaxParticleN(m_nParticleNumber);
+		pMultiSprite->SetEmitParticleN(m_nEmitParticleNumber);
+		pMultiSprite->SetPosition(params.xmf3Position);
+		pMultiSprite->SetParticleType(m_iParticleType);
 	}
+
+	//if (pSpriteObject)
+	//{
+	//	pSpriteObject->SetType(TerrainSpriteType::TERRAINSPRITE_CROSS_FADE);
+	//	pSpriteObject->SetEnable(true);
+	//	pSpriteObject->SetPosition(params.xmf3Position);
+	//	pSpriteObject->SetLifeTime(m_fLifeTime);
+	//	pSpriteObject->SetStart(true);
+	//	pSpriteObject->SetStartAlpha(1.f);
+	//}
 }
 
 void SmokeParticleComponent::HandleMessage(const Message& message, const ParticleSmokeParams& params)

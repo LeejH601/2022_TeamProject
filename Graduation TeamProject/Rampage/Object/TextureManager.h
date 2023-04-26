@@ -15,7 +15,7 @@ public:
 	std::vector<std::shared_ptr<CTexture>>& GetBillBoardTextureList();
 
 	// ParticleTextures
-	std::shared_ptr<CTexture> LoadParticleTexture(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, LPCTSTR pszFileName, class CParticleShader* pShader, int iRow, int Column);
+	std::shared_ptr<CTexture> LoadParticleTexture(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, LPCTSTR pszFileName, class CParticleShader* pShader, int iRow = 1, int Column = 1);
 	std::shared_ptr<CTexture> LoadParticleTexture(LPCTSTR pszFileName);
 
 	std::vector<std::shared_ptr<CTexture>>& GetParticleTextureList();

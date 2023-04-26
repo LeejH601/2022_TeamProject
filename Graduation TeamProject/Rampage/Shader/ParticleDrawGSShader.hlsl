@@ -5,6 +5,7 @@ struct VS_PARTICLE_DRAW_OUTPUT
 	float4 color : COLOR;
 	float2 size : SCALE;
 	float alpha : ALPHA;
+	int  bTerrain : TERRAIN;
 };
 
 struct GS_PARTICLE_DRAW_OUTPUT
@@ -33,8 +34,9 @@ cbuffer cbCameraInfo : register(b1)
 };
 
 static float3 gf3Positions[4] = { float3(-1.0f, +1.0f, 0.0f), float3(+1.0f, +1.0f, 0.0f), float3(-1.0f, -1.0f, 0.0f), float3(+1.0f, -1.0f, 0.0f) };
+static float3 gf3PositionsTerrain[4] = { float3(-1.0f, 0.0f, +1.0f), float3(+1.0f, 0.0f, +1.0f), float3(-1.0f, 0.0f, -1.0f), float3(+1.0f, 0.0f, -1.0f) };
+//static float2 gf2QuadUVs[4] = { float2(0.0f, 0.0f), float2(1.0f, 0.0f), float2(0.0f, 1.0f), float2(1.0f, 1.0f) };
 static float2 gf2QuadUVs[4] = { float2(0.0f, 0.0f), float2(1.0f, 0.0f), float2(0.0f, 1.0f), float2(1.0f, 1.0f) };
-
 [maxvertexcount(4)]
 void GSParticleDraw(point VS_PARTICLE_DRAW_OUTPUT input[1], inout TriangleStream<GS_PARTICLE_DRAW_OUTPUT> outputStream)
 {
@@ -57,6 +59,10 @@ void GSParticleDraw(point VS_PARTICLE_DRAW_OUTPUT input[1], inout TriangleStream
 	output.color = input[0].color;
 	for (int i = 0; i < 4; i++)
 	{
+		if (input[0].bTerrain)
+		{
+			gf3Positions[i] = gf3PositionsTerrain[i];
+		}
 		gf3Positions[i].x = gf3Positions[i].x * input[0].size.x * 0.5f;
 		gf3Positions[i].y = gf3Positions[i].y * input[0].size.y * 0.5f;
 
@@ -67,8 +73,7 @@ void GSParticleDraw(point VS_PARTICLE_DRAW_OUTPUT input[1], inout TriangleStream
 		
 
 		output.position = mul(mul(float4(positionW, 1.0f), gmtxView), gmtxProjection);
-		output.uv = gf2QuadUVs[i];
-
+		output.uv = mul(float3(gf2QuadUVs[i], 1.0f), (float3x3)(gmtxGameObject)).xy;
 		outputStream.Append(output);
 	}
 	outputStream.RestartStrip();

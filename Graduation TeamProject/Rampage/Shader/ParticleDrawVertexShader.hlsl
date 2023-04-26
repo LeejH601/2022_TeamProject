@@ -4,6 +4,7 @@ struct VS_PARTICLE_INPUT
 	float3 velocity : VELOCITY;
 	float lifetime : LIFETIME;
 	int type : TYPE;
+	int  bTerrain : TERRAIN;
 };
 
 struct VS_PARTICLE_DRAW_OUTPUT
@@ -13,6 +14,7 @@ struct VS_PARTICLE_DRAW_OUTPUT
 	float4 color : COLOR;
 	float2 size : SCALE;
 	float alpha : ALPHA;
+	int  bTerrain : TERRAIN;
 };
 
 cbuffer cbFrameworkInfo : register(b7)
@@ -45,7 +47,7 @@ VS_PARTICLE_DRAW_OUTPUT VSParticleDraw(VS_PARTICLE_INPUT input)
 	output.velocity = input.velocity;
 	output.size = gfSize;
 	output.alpha = 1.f;
-
+	output.bTerrain = input.bTerrain;
 	return(output);
 }
 

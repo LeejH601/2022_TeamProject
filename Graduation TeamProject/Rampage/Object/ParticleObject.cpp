@@ -91,7 +91,13 @@ void CParticleObject::DrawRender(ID3D12GraphicsCommandList* pd3dCommandList, CCa
 
 void CParticleObject::Update(float fTimeElapsed)
 {
+	//if (m_bEnable) {
+		m_fTime -= fTimeElapsed * m_fSpeed;
+		AnimateRowColumn(m_fTime);
 
+		if (m_fTime <= 0.f)
+			m_fTime = 0.5f;
+	//}
 }
 
 void CParticleObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, CShader* pShader)
@@ -179,4 +185,36 @@ bool CParticleObject::CheckCapacity()
 	if ((MaxParticle - Vertices) > 1000)
 		return true;
 	return false;
+}
+
+void CParticleObject::AnimateRowColumn(float fTimeElapsed)
+{
+	if (!m_ppMaterials.empty() && m_ppMaterials[0]->GetTexture())
+	{
+		int m_nRows = m_ppMaterials[0]->GetTexture()->GetRow();
+		int m_nCols = m_ppMaterials[0]->GetTexture()->GetColumn();
+		m_xmf4x4World._11 = 1.0f / float(m_nRows);
+		m_xmf4x4World._22 = 1.0f / float(m_nCols);
+		m_xmf4x4World._31 = float(m_nRow) / float(m_nRows);
+		m_xmf4x4World._32 = float(m_nCol) / float(m_nCols);
+		if (fTimeElapsed <= 0.0f)
+		{
+			if ((m_nRow + 1) == m_nRows && (m_nCol + 1) == m_nCols)
+			{
+				m_nRow = 0;
+				m_nCol = 0;
+				m_bEnable = false;
+			}
+			else
+			{
+				if (++m_nCol == m_nCols) {
+					m_nRow++;
+					m_nCol = 0;
+				}
+				if (m_nRow == m_nRows)
+					m_nRow = 0;
+			}
+		}
+	}
+
 }

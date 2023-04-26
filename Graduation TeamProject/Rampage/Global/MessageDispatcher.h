@@ -308,7 +308,8 @@ enum ParticleType {
     SPHERE_PARTICLE,
     RECOVERY_PARTICLE,
     SMOKE_PARTICLE,
-    TRAIL_PARTICLE
+    TRAIL_PARTICLE,
+    ATTACK_PARTICLE
 };
 
 #define MAX_PARTICLES				10000
@@ -469,10 +470,15 @@ enum TerrainSpriteType {
 
 class TerrainSpriteComponent : public IMessageListener
 {
-private:
+    int m_nParticleNumber = MAX_PARTICLES;
+    int m_nEmitParticleNumber = 500;
+    int m_iParticleType = ParticleType::ATTACK_PARTICLE;
+    int m_nParticleIndex = 0;
+    XMFLOAT3 m_xmf3Color = XMFLOAT3(1.f, 1.f, 1.f);
+
     float   m_fSpeed = 5.f;
     float   m_fAlpha = 1.f;
-    XMFLOAT2   m_fSize = XMFLOAT2(0.5f, 0.5f);
+    XMFLOAT2   m_fSize = XMFLOAT2(10.f, 10.f);
     float   m_fLifeTime = 6.f;
     int m_iTerrainSpriteType = TerrainSpriteType::TERRAINSPRITE_CROSS_FADE;
 public:
@@ -484,6 +490,13 @@ public:
 
 // Define Impact Effect component
 class ImpactEffectComponent : public IMessageListener {
+    int m_nParticleNumber = MAX_PARTICLES;
+    int m_nEmitParticleNumber = 500;
+    int m_iParticleType = ParticleType::ATTACK_PARTICLE;
+    int m_nParticleIndex = 0;
+    float m_fLifeTime = 20.f;
+    XMFLOAT3 m_xmf3Color = XMFLOAT3(1.f, 1.f, 1.f);
+
     int m_nTextureIndex = 0;
     float m_fSpeed = 5.f;
     float m_fAlpha = 1.f;

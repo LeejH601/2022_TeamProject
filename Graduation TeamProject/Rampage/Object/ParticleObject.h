@@ -50,6 +50,7 @@ public:
 	void SetDirection(XMFLOAT3 xmf3Direction);
 	XMFLOAT3 GetDirection();
 
+	void AnimateRowColumn(float fTimeElapsed);
 	bool CheckCapacity();
 private:
 	XMFLOAT2	m_fSize = XMFLOAT2(15.f, 15.f);
@@ -65,6 +66,10 @@ private:
 	XMFLOAT3	m_xmf3Direction = XMFLOAT3(1.f, 1.f, 1.f);
 
 	int			m_nVertices = 0;
+
+	int 		m_nRow = 0;
+	int 		m_nCol = 0;
+
 protected:
 	ComPtr<ID3D12Resource>	m_pd3dcbFrameworkInfo = NULL;
 	CB_FRAMEWORK_INFO* m_pcbMappedFrameworkInfo = NULL;
