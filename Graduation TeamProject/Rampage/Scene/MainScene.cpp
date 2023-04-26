@@ -371,7 +371,7 @@ void CMainTMPScene::RegisterArticulations()
 
 		obj->m_bSimulateArticulate = false;
 		obj->Animate(0.0f);
-		((CPhysicsObject*)obj)->OnPrepareRender();
+		((CPhysicsObject*)obj)->UpdateTransform(NULL);
 		XMFLOAT4X4 rootWorld = obj->FindFrame("root")->GetWorld();
 		float _rootWorld[16] = {
 			rootWorld._11,rootWorld._12,rootWorld._13,rootWorld._14,

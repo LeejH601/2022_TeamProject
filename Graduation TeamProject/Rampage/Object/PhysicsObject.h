@@ -21,7 +21,8 @@ protected:
 	float m_fSpeedUperS;
 	LPVOID m_pUpdatedContext = NULL;
 public:
-	virtual void OnPrepareRender();
+	virtual void UpdateMatrix();
+	virtual void UpdateTransform(XMFLOAT4X4* pxmf4x4Parent = NULL);
 
 	void OnUpdateCallback(float fTimeElapsed);
 	void SetUpdatedContext(LPVOID pContext) { m_pUpdatedContext = pContext; }

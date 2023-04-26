@@ -135,7 +135,6 @@ public:
 	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList);
 	virtual void ReleaseUploadBuffers();
 
-	virtual void PrepareAnimate() {}
 	virtual void PrepareBoundingBox(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList) {}
 	virtual void Update(float fTimeElapsed);
 	virtual void Animate(float fTimeElapsed);
