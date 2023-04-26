@@ -85,3 +85,27 @@ public:
 
 	virtual XMFLOAT4& GetTrailControllPoint(int n) { return m_xmf4TrailControllPoints[n]; };
 };
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+class CKightRootRollBackAnimationController : public CAnimationController
+{
+public:
+	CKightRootRollBackAnimationController(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks, CLoadedModelInfo* pModel);
+	virtual ~CKightRootRollBackAnimationController();
+
+	virtual void OnRootMotion(CGameObject* pRootGameObject);
+};
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+class CKightNoMoveRootAnimationController : public CAnimationController
+{
+public:
+	CKightNoMoveRootAnimationController(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks, CLoadedModelInfo* pModel);
+	virtual ~CKightNoMoveRootAnimationController();
+
+	virtual void OnRootMotion(CGameObject* pRootGameObject);
+};
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
