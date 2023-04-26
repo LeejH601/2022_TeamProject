@@ -400,8 +400,11 @@ bool CMainTMPScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM 
 		// 좌클릭시 사용자가 좌클릭 했음을 표현하는 변수를 true로 바꿔줌
 		if (m_pPlayer)
 		{
-			((CPlayer*)m_pPlayer)->m_bAttack = true;
-			((CPlayer*)m_pPlayer)->m_iAttackId += 1;
+			if (!((CPlayer*)m_pPlayer)->m_bAttack)
+			{
+				((CPlayer*)m_pPlayer)->m_bAttack = true;
+				((CPlayer*)m_pPlayer)->m_iAttackId += 1;
+			}
 		}
 		break;
 	case WM_RBUTTONDOWN:
