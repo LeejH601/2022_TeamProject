@@ -2,11 +2,18 @@
 #include "Object.h"
 
 #define MAX_TRAILCONTROLLPOINTS 100
+#define MAX_COLORCURVES 8
 
 struct VS_CB_SWTRAIL_INFO
 {
 	XMFLOAT4 m_xmf4TrailControllPoints1[MAX_TRAILCONTROLLPOINTS];
 	XMFLOAT4 m_xmf4TrailControllPoints2[MAX_TRAILCONTROLLPOINTS];
+	float m_fR_CurvePoints[MAX_COLORCURVES];
+	float m_fG_CurvePoints[MAX_COLORCURVES];
+	float m_fB_CurvePoints[MAX_COLORCURVES];
+	float m_fColorCurveTimes[MAX_COLORCURVES];
+	UINT m_nCurves;
+	float m_fNoiseConstants;
 	UINT m_nDrawedControllPoints;
 	float m_faccumulateTime;
 };
@@ -25,11 +32,19 @@ class CSwordTrailObject : public CGameObject
 	ComPtr<ID3D12Resource> m_pd3dcbTrail = NULL;
 	VS_CB_SWTRAIL_INFO* m_pcbMappedTrail = NULL;
 
+	float m_fR_CurvePoints[MAX_COLORCURVES];
+	float m_fG_CurvePoints[MAX_COLORCURVES];
+	float m_fB_CurvePoints[MAX_COLORCURVES];
+	float m_fColorCurveTimes[MAX_COLORCURVES];
+	UINT m_nCurves;
+	float m_fNoiseConstants;
+
 	std::unique_ptr<CTexture> m_pTexture;
 
 public:
 	float m_faccumulateTime;
 	bool m_bIsUpdateTrailVariables = false;
+
 
 public:
 	CSwordTrailObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CShader* pTrailShader);

@@ -21,11 +21,17 @@ cbuffer cbCameraInfo : register(b1)
 };
 
 #define MAX_TRAILCONTROLLPOINT 100
-
+#define MAX_COLORCURVES 8
 cbuffer cbTrailControllPoints : register(b5)
 {
 	float4 gControllpoints1[MAX_TRAILCONTROLLPOINT];
 	float4 gControllpoints2[MAX_TRAILCONTROLLPOINT];
+	float4 gfR_CurvePoints[MAX_COLORCURVES / 4];
+	float4 gfG_CurvePoints[MAX_COLORCURVES / 4];
+	float4 gfB_CurvePoints[MAX_COLORCURVES / 4];
+	float4 gfColorCurveTimes[MAX_COLORCURVES / 4];
+	uint gnCurves;
+	float gfNoiseConstants;
 	uint gnPoints;
 	float gnOffsetTime;
 }
@@ -60,10 +66,10 @@ void SwordTrail_GS(
 	pVertices[3] = gControllpoints2[index + 1];
 
 	float2 uvs[4];
-	uvs[0] = saturate(float2(float(index) / gnPoints, 1.0f)); //prev1
-	uvs[1] = saturate(float2(float(index + 1) / gnPoints, 1.0f)); //next1
-	uvs[2] = saturate(float2(float(index) / gnPoints, 0.0f)); //prev2
-	uvs[3] = saturate(float2(float(index + 1) / gnPoints, 0.0f)); //next2
+	uvs[0] = saturate(float2(float(index) / float(gnPoints), 1.0f)); //prev1
+	uvs[1] = saturate(float2(float(index + 1) / float(gnPoints), 1.0f)); //next1
+	uvs[2] = saturate(float2(float(index) / float(gnPoints), 0.0f)); //prev2
+	uvs[3] = saturate(float2(float(index + 1) / float(gnPoints), 0.0f)); //next2
 
 	//pVertices[0] = gPrevPosition1;
 	//pVertices[1] = gNextPosition1;

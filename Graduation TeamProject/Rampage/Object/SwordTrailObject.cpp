@@ -28,6 +28,13 @@ CSwordTrailObject::CSwordTrailObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 
 	SetShader(pSwordTrailShader, pTexture);
 
+	m_fR_CurvePoints[0] =  0.0f; m_fR_CurvePoints[1] = 0.14; m_fR_CurvePoints[2] = 0.459;  m_fR_CurvePoints[3] = 1.892; 
+	m_fG_CurvePoints[0] = 0.0f; m_fG_CurvePoints[1] = 0.005; m_fG_CurvePoints[2] = 0.067;  m_fG_CurvePoints[3] = 0.595; 
+	m_fB_CurvePoints[0] =  0.0f; m_fB_CurvePoints[1] = 0.257; m_fB_CurvePoints[2] = 0.26;  m_fB_CurvePoints[3] = 0.0f; 
+	m_fColorCurveTimes[0] =  0.0f; m_fColorCurveTimes[1] = 0.3; m_fColorCurveTimes[2] = 0.6;  m_fColorCurveTimes[3] = 1.0;
+	m_nCurves = 4;
+	m_fNoiseConstants = 1.4f;
+
 	m_nTrailBasePoints = 0;
 }
 
@@ -53,6 +60,13 @@ void CSwordTrailObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCom
 	memcpy(m_pcbMappedTrail->m_xmf4TrailControllPoints2, m_xmf4TrailControllPoints2.data(), sizeof(m_pcbMappedTrail->m_xmf4TrailControllPoints2));
 	m_pcbMappedTrail->m_nDrawedControllPoints = m_nDrawedControllPoints;
 	m_pcbMappedTrail->m_faccumulateTime = m_faccumulateTime;
+
+	memcpy(m_pcbMappedTrail->m_fColorCurveTimes, m_fColorCurveTimes, sizeof(m_fColorCurveTimes));
+	memcpy(m_pcbMappedTrail->m_fR_CurvePoints, m_fR_CurvePoints, sizeof(m_fR_CurvePoints));
+	memcpy(m_pcbMappedTrail->m_fG_CurvePoints, m_fG_CurvePoints, sizeof(m_fG_CurvePoints));
+	memcpy(m_pcbMappedTrail->m_fB_CurvePoints, m_fB_CurvePoints, sizeof(m_fB_CurvePoints));
+	m_pcbMappedTrail->m_nCurves = m_nCurves;
+	m_pcbMappedTrail->m_fNoiseConstants = m_fNoiseConstants;
 
 	D3D12_GPU_VIRTUAL_ADDRESS d3dGpuVirtualAddress = m_pd3dcbTrail->GetGPUVirtualAddress();
 	pd3dCommandList->SetGraphicsRootConstantBufferView(7, d3dGpuVirtualAddress);

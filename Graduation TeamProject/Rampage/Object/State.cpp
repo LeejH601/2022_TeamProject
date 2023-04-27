@@ -199,8 +199,10 @@ void Atk1_Player::Enter(CPlayer* player)
 	SoundPlayParam.sound_category = SOUND_CATEGORY::SOUND_SHOOT;
 	CMessageDispatcher::GetInst()->Dispatch_Message<SoundPlayParams>(MessageType::PLAY_SOUND, &SoundPlayParam, this);
 
-	if (player->m_pSwordTrailReference)
+	if (player->m_pSwordTrailReference) {
 		dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[0].get())->m_bIsUpdateTrailVariables = true;
+		dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[0].get())->m_faccumulateTime = 0.0f;
+	}
 }
 
 void Atk1_Player::Execute(CPlayer* player, float fElapsedTime)
@@ -419,8 +421,10 @@ void Atk2_Player::Enter(CPlayer* player)
 	SoundPlayParam.sound_category = SOUND_CATEGORY::SOUND_SHOOT;
 	CMessageDispatcher::GetInst()->Dispatch_Message<SoundPlayParams>(MessageType::PLAY_SOUND, &SoundPlayParam, this);
 
-	if (player->m_pSwordTrailReference)
+	if (player->m_pSwordTrailReference) {
 		dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[1].get())->m_bIsUpdateTrailVariables = true;
+		dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[1].get())->m_faccumulateTime = 0.0f;
+	}
 }
 
 void Atk2_Player::Execute(CPlayer* player, float fElapsedTime)
@@ -639,8 +643,10 @@ void Atk3_Player::Enter(CPlayer* player)
 	SoundPlayParam.sound_category = SOUND_CATEGORY::SOUND_SHOOT;
 	CMessageDispatcher::GetInst()->Dispatch_Message<SoundPlayParams>(MessageType::PLAY_SOUND, &SoundPlayParam, this);
 
-	if (player->m_pSwordTrailReference)
+	if (player->m_pSwordTrailReference) {
 		dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[2].get())->m_bIsUpdateTrailVariables = true;
+		dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[2].get())->m_faccumulateTime = 0.0f;
+	}
 }
 
 void Atk3_Player::Execute(CPlayer* player, float fElapsedTime)
@@ -800,8 +806,10 @@ void Atk4_Player::Enter(CPlayer* player)
 	player->m_bAttack = false; // 사용자가 좌클릭시 true가 되는 변수
 	player->m_iAttack_Limit = 1;
 
-	if (player->m_pSwordTrailReference)
+	if (player->m_pSwordTrailReference) {
 		dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[3].get())->m_bIsUpdateTrailVariables = true;
+		dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[3].get())->m_faccumulateTime = 0.0f;
+	}
 
 	/*SoundPlayParams SoundPlayParam;
 	SoundPlayParam.sound_category = SOUND_CATEGORY::SOUND_SHOOT;
@@ -871,8 +879,10 @@ void Atk5_Player::Enter(CPlayer* player)
 	player->m_bAttack = false; // 사용자가 좌클릭시 true가 되는 변수
 	player->m_iAttack_Limit = 1;
 
-	if (player->m_pSwordTrailReference)
+	if (player->m_pSwordTrailReference) {
 		dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[4].get())->m_bIsUpdateTrailVariables = true;
+		dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[4].get())->m_faccumulateTime = 0.0f;
+	}
 
 	/*SoundPlayParams SoundPlayParam;
 	SoundPlayParam.sound_category = SOUND_CATEGORY::SOUND_SHOOT;
