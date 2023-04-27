@@ -1,4 +1,5 @@
 #include "State.h"
+#include "Animation.h"
 #include "Player.h"
 #include "..\Global\Locator.h"
 #include "..\Global\Global.h"
@@ -38,6 +39,15 @@ void Idle_Player::Execute(CPlayer* player, float fElapsedTime)
 void Idle_Player::Animate(CPlayer* player, float fElapsedTime)
 {
 	player->Animate(fElapsedTime * player->GetAnimationPlayWeight());
+}
+
+void Idle_Player::OnRootMotion(CPlayer* player, float fTimeElapsed)
+{
+	CAnimationController* pPlayerController = player->m_pSkinnedAnimationController.get();
+
+	pPlayerController->m_pRootMotionObject->m_xmf4x4Transform._41 = 0.f;
+	pPlayerController->m_pRootMotionObject->m_xmf4x4Transform._42 = 0.f;
+	pPlayerController->m_pRootMotionObject->m_xmf4x4Transform._43 = 0.f;
 }
 
 void Idle_Player::Exit(CPlayer* player)
@@ -179,6 +189,23 @@ void Atk_Player::InitAtkPlayer()
 	CMessageDispatcher::GetInst()->RegisterListener(MessageType::UPDATE_TRAILPARTICLE, m_pListeners.back().get(), this);
 }
 
+void Atk_Player::SetPlayerRootPos(CPlayer* player)
+{
+	CAnimationController* pPlayerController = player->m_pSkinnedAnimationController.get();
+
+	player->UpdateTransform(NULL);
+
+	XMFLOAT3 xmf3Position = XMFLOAT3{ pPlayerController->m_pRootMotionObject->GetWorld()._41,
+		pPlayerController->m_pRootMotionObject->GetWorld()._42,
+		pPlayerController->m_pRootMotionObject->GetWorld()._43 };
+
+	player->SetPosition(xmf3Position);
+
+	pPlayerController->m_pRootMotionObject->m_xmf4x4Transform._41 = 0.f;
+	pPlayerController->m_pRootMotionObject->m_xmf4x4Transform._42 = 0.f;
+	pPlayerController->m_pRootMotionObject->m_xmf4x4Transform._43 = 0.f;
+}
+
 void Atk_Player::CheckHitLag(CPlayer* player)
 {
 	HitLagComponent* pHitLagComponent = dynamic_cast<HitLagComponent*>(GetHitLagComponent());
@@ -186,6 +213,25 @@ void Atk_Player::CheckHitLag(CPlayer* player)
 	{
 		PlayerParams PlayerParam{ player };
 		CMessageDispatcher::GetInst()->Dispatch_Message<PlayerParams>(MessageType::UPDATE_HITLAG, &PlayerParam, this);
+	}
+}
+
+void Atk_Player::OnRootMotion(CPlayer* player, float fTimeElapsed)
+{
+	CAnimationController* pPlayerController = player->m_pSkinnedAnimationController.get();
+
+	CAnimationSet* pAnimationSet = pPlayerController->m_pAnimationSets->m_pAnimationSets[pPlayerController->m_pAnimationTracks[0].m_nAnimationSet];
+
+	if (pPlayerController->m_pAnimationTracks[0].m_fPosition == pAnimationSet->m_fLength)
+	{
+		if (fTimeElapsed > 0.0f)
+			SetPlayerRootPos(player);
+		else
+		{
+			pPlayerController->m_pRootMotionObject->m_xmf4x4Transform._41 = 0.f;
+			pPlayerController->m_pRootMotionObject->m_xmf4x4Transform._42 = 0.f;
+			pPlayerController->m_pRootMotionObject->m_xmf4x4Transform._43 = 0.f;
+		}
 	}
 }
 
@@ -205,6 +251,9 @@ void Atk1_Player::CheckComboAttack(CPlayer* player)
 		if (player->m_pSwordTrailReference)
 			dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[0].get())->m_bIsUpdateTrailVariables = false;
 		if (player->m_bAttack) {
+			CAnimationController* pPlayerController = player->m_pSkinnedAnimationController.get();
+			if (pPlayerController->m_bRootMotion)
+				SetPlayerRootPos(player);
 			player->m_pStateMachine->ChangeState(Atk2_Player::GetInst());
 		}
 	}
@@ -333,7 +382,12 @@ void Atk2_Player::CheckComboAttack(CPlayer* player)
 		if (player->m_pSwordTrailReference)
 			dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[1].get())->m_bIsUpdateTrailVariables = false;
 		if (player->m_bAttack)
+		{
+			CAnimationController* pPlayerController = player->m_pSkinnedAnimationController.get();
+			if (pPlayerController->m_bRootMotion)
+				SetPlayerRootPos(player);
 			player->m_pStateMachine->ChangeState(Atk3_Player::GetInst());
+		}
 	}
 }
 
@@ -602,6 +656,15 @@ void Run_Player::Animate(CPlayer* player, float fTimeElapsed)
 
 void Run_Player::Exit(CPlayer* player)
 {
+}
+
+void Run_Player::OnRootMotion(CPlayer* player, float fTimeElapsed)
+{
+	CAnimationController* pPlayerController = player->m_pSkinnedAnimationController.get();
+
+	pPlayerController->m_pRootMotionObject->m_xmf4x4Transform._41 = 0.f;
+	pPlayerController->m_pRootMotionObject->m_xmf4x4Transform._42 = 0.f;
+	pPlayerController->m_pRootMotionObject->m_xmf4x4Transform._43 = 0.f;
 }
 
 Atk4_Player::Atk4_Player()

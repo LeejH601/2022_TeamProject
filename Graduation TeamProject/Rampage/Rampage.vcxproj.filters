@@ -312,9 +312,6 @@
     <ClInclude Include="Object\MonsterState.h">
       <Filter>Object</Filter>
     </ClInclude>
-    <ClInclude Include="Object\MonsterState.h">
-      <Filter>Object</Filter>
-    </ClInclude>
     <ClInclude Include="Object\Monster.h">
       <Filter>Object</Filter>
     </ClInclude>
@@ -410,6 +407,9 @@
     </ClInclude>
     <ClInclude Include="ImGui\ImGuiConstants.h">
       <Filter>ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="Object\MonsterState.h">
+      <Filter>Object\State</Filter>
     </ClInclude>
     <ClInclude Include="Object\MonsterState.h">
       <Filter>Object\State</Filter>

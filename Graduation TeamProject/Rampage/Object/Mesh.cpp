@@ -1475,10 +1475,6 @@ int CParticleMesh::OnPostRender(int nPipelineState)
 #endif
 		//if ((m_nVertices == 0) || (m_nVertices >= MAX_PARTICLES)) 
 		//	m_bEmit = true;
-
-		TCHAR pstrDebug[256] = { 0 };
-		_stprintf_s(pstrDebug, 256, _T("Stream Output Vertices = %d\n"), m_nVertices);
-		OutputDebugString(pstrDebug);
 	}
 
 	return m_nVertices;

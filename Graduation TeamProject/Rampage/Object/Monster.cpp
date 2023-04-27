@@ -295,6 +295,6 @@ CMonsterRootAnimationController::~CMonsterRootAnimationController()
 {
 }
 
-void CMonsterRootAnimationController::OnRootMotion(CGameObject* pRootGameObject)
+void CMonsterRootAnimationController::OnRootMotion(CGameObject* pRootGameObject, float fTimeElapsed)
 {
 }

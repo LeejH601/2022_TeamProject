@@ -32,6 +32,7 @@ public:
 	virtual void Enter(entity_type*) = 0;
 	virtual void Execute(entity_type*, float) = 0;
     virtual void Animate(entity_type*, float) = 0;
+    virtual void OnRootMotion(entity_type*, float) = 0;
 	virtual void Exit(entity_type*) = 0;
 };
 
@@ -45,6 +46,7 @@ public:
     virtual void Enter(CPlayer* player);
     virtual void Execute(CPlayer* player, float fElapsedTime);
     virtual void Animate(CPlayer* player, float fElapsedTime);
+    virtual void OnRootMotion(CPlayer* player, float fTimeElapsed);
     virtual void Exit(CPlayer* player);
 };
 
@@ -52,6 +54,7 @@ class Atk_Player : public CState<CPlayer>
 {
 public:
     virtual void InitAtkPlayer();
+    virtual void SetPlayerRootPos(CPlayer* player);
     virtual void CheckHitLag(CPlayer* player);
 
     virtual void CheckComboAttack(CPlayer* player) = 0;
@@ -61,6 +64,7 @@ public:
     virtual void Enter(CPlayer* player) = 0;
     virtual void Execute(CPlayer* player, float fElapsedTime) = 0;
     virtual void Animate(CPlayer* player, float fElapsedTime) = 0;
+    virtual void OnRootMotion(CPlayer* player, float fTimeElapsed);
     virtual void Exit(CPlayer* player) = 0;
 };
 
@@ -160,6 +164,7 @@ public:
     virtual void Enter(CPlayer* player);
     virtual void Execute(CPlayer* player, float fElapsedTime);
     virtual void Animate(CPlayer* player, float fElapsedTime);
+    virtual void OnRootMotion(CPlayer* player, float fTimeElapsed);
     virtual void Exit(CPlayer* player);
 
 };

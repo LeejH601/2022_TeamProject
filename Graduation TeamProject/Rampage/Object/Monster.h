@@ -119,5 +119,5 @@ public:
 	CMonsterRootAnimationController(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks, CLoadedModelInfo* pModel);
 	virtual ~CMonsterRootAnimationController();
 
-	virtual void OnRootMotion(CGameObject* pRootGameObject);
+	virtual void OnRootMotion(CGameObject* pRootGameObject, float fTimeElapsed);
 };

@@ -152,6 +152,6 @@ public:
 
 	void SetRootMotion(bool bRootMotion) { m_bRootMotion = bRootMotion; }
 
-	virtual void OnRootMotion(CGameObject* pRootGameObject) { }
+	virtual void OnRootMotion(CGameObject* pRootGameObject, float fTimeElapsed) { }
 	virtual void OnAnimationIK(CGameObject* pRootGameObject) { }
 };

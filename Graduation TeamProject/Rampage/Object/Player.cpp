@@ -101,14 +101,14 @@ void CPlayer::Update(float fTimeElapsed)
 	CPhysicsObject::Apply_Gravity(fTimeElapsed);
 	CPhysicsObject::Move(m_xmf3Velocity, false);
 
-	// 플레이어가 터레인보다 아래에 있지 않도록 하는 코드
-	if (m_pUpdatedContext) CPhysicsObject::OnUpdateCallback(fTimeElapsed);
-
 	// 플레이어가 속도를 가진다면 해당 방향을 바라보게 하는 코드
 	if (m_xmf3Velocity.x + m_xmf3Velocity.z)
 		SetLookAt(Vector3::Add(GetPosition(), Vector3::Normalize(XMFLOAT3{ m_xmf3Velocity.x, 0.0f, m_xmf3Velocity.z })));
 
 	m_pStateMachine->Animate(fTimeElapsed);
+
+	// 플레이어가 터레인보다 아래에 있지 않도록 하는 코드
+	if (m_pUpdatedContext) OnUpdateCallback(fTimeElapsed);
 
 	CPhysicsObject::Apply_Friction(fTimeElapsed);
 }
@@ -240,6 +240,27 @@ void CKnightPlayer::Animate(float fTimeElapsed)
 		SetPosition(XMFLOAT3(transform.p.x, transform.p.y, transform.p.z));
 	}
 }
+void CKnightPlayer::OnUpdateCallback(float fTimeElapsed)
+{
+	if (m_pUpdatedContext)
+	{
+		CSplatTerrain* pTerrain = (CSplatTerrain*)m_pUpdatedContext;
+		XMFLOAT3 xmf3TerrainPos = pTerrain->GetPosition();
+		XMFLOAT3 xmf3Pos = XMFLOAT3{
+			m_pSkinnedAnimationController->m_pRootMotionObject->GetWorld()._41,
+			m_pSkinnedAnimationController->m_pRootMotionObject->GetWorld()._42,
+			m_pSkinnedAnimationController->m_pRootMotionObject->GetWorld()._43
+		};
+
+		float fTerrainY = pTerrain->GetHeight(xmf3Pos.x - (xmf3TerrainPos.x), xmf3Pos.z - (xmf3TerrainPos.z));
+
+		if (GetPosition().y < fTerrainY + xmf3TerrainPos.y)
+		{
+			SetPosition(XMFLOAT3(GetPosition().x, fTerrainY + xmf3TerrainPos.y, GetPosition().z));
+			UpdateTransform(NULL);
+		}
+	}
+}
 void CKnightPlayer::UpdateTransform(XMFLOAT4X4* pxmf4x4Parent)
 {
 	CPhysicsObject::UpdateTransform(NULL);
@@ -296,7 +317,7 @@ CKightRootRollBackAnimationController::~CKightRootRollBackAnimationController()
 {
 }
 #define _WITH_DEBUG_ROOT_MOTION
-void CKightRootRollBackAnimationController::OnRootMotion(CGameObject* pRootGameObject)
+void CKightRootRollBackAnimationController::OnRootMotion(CGameObject* pRootGameObject, float fTimeElapsed)
 {
 	if (m_bRootMotion)
 	{
@@ -344,7 +365,7 @@ CKightNoMoveRootAnimationController::CKightNoMoveRootAnimationController(ID3D12D
 CKightNoMoveRootAnimationController::~CKightNoMoveRootAnimationController()
 {
 }
-void CKightNoMoveRootAnimationController::OnRootMotion(CGameObject* pRootGameObject)
+void CKightNoMoveRootAnimationController::OnRootMotion(CGameObject* pRootGameObject, float fTimeElapsed)
 {
 	if (m_bRootMotion)
 	{
@@ -360,24 +381,14 @@ CKightRootMoveAnimationController::CKightRootMoveAnimationController(ID3D12Devic
 CKightRootMoveAnimationController::~CKightRootMoveAnimationController()
 {
 }
-void CKightRootMoveAnimationController::OnRootMotion(CGameObject* pRootGameObject)
+void CKightRootMoveAnimationController::OnRootMotion(CGameObject* pRootGameObject, float fTimeElapsed)
 {
+	CAnimationSet* pAnimationSet = m_pAnimationSets->m_pAnimationSets[m_pAnimationTracks[0].m_nAnimationSet];
+
 	if (m_bRootMotion)
 	{
 		CPlayer* player = (CPlayer*)pRootGameObject;
-
-		if (player->m_pStateMachine->GetCurrentState() == Atk1_Player::GetInst() ||
-			player->m_pStateMachine->GetCurrentState() == Atk2_Player::GetInst() ||
-			player->m_pStateMachine->GetCurrentState() == Atk3_Player::GetInst())
-		{
-
-		}
-		else
-		{
-			m_pRootMotionObject->m_xmf4x4Transform._41 = 0.f;
-			m_pRootMotionObject->m_xmf4x4Transform._42 = 0.f;
-			m_pRootMotionObject->m_xmf4x4Transform._43 = 0.f;
-		}
+		player->m_pStateMachine->GetCurrentState()->OnRootMotion(player, fTimeElapsed);
 	}
 }
 

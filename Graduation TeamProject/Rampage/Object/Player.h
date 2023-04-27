@@ -80,6 +80,7 @@ public:
 	virtual bool CheckCollision(CGameObject* pTargetObject);
 
 	virtual void Animate(float fTimeElapsed);
+	virtual void OnUpdateCallback(float fTimeElapsed);
 	virtual void UpdateTransform(XMFLOAT4X4* pxmf4x4Parent = NULL);
 	virtual void PrepareBoundingBox(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 
@@ -94,7 +95,7 @@ public:
 	CKightRootRollBackAnimationController(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks, CLoadedModelInfo* pModel);
 	virtual ~CKightRootRollBackAnimationController();
 
-	virtual void OnRootMotion(CGameObject* pRootGameObject);
+	virtual void OnRootMotion(CGameObject* pRootGameObject, float fTimeElapsed);
 };
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -105,7 +106,7 @@ public:
 	CKightNoMoveRootAnimationController(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks, CLoadedModelInfo* pModel);
 	virtual ~CKightNoMoveRootAnimationController();
 
-	virtual void OnRootMotion(CGameObject* pRootGameObject);
+	virtual void OnRootMotion(CGameObject* pRootGameObject, float fTimeElapsed);
 };
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -115,7 +116,7 @@ public:
 	CKightRootMoveAnimationController(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks, CLoadedModelInfo* pModel);
 	virtual ~CKightRootMoveAnimationController();
 
-	virtual void OnRootMotion(CGameObject* pRootGameObject);
+	virtual void OnRootMotion(CGameObject* pRootGameObject, float fTimeElapsed);
 };
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
