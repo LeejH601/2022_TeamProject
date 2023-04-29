@@ -342,14 +342,26 @@ public:
 	virtual void HandleMessage(const Message& message, const ParticleCompParams& params);
 };
 
+#define MAX_COLORCURVES 8
 class TrailComponent : public IMessageListener
 {
 	static std::vector<std::string> s_MainTextureNames;
 	static std::vector<std::string> s_NoiseTextureNames;
 
+
+
 	std::shared_ptr<CTexture> m_pTexture;
 	int m_nMainTextureIndex = 0;
 	int m_nNoiseTextureIndex = 0;
+
+public:
+	double m_fR_CurvePoints[MAX_COLORCURVES];
+	double m_fG_CurvePoints[MAX_COLORCURVES];
+	double m_fB_CurvePoints[MAX_COLORCURVES];
+	double m_fColorCurveTimes_R[MAX_COLORCURVES];
+	double m_fColorCurveTimes_G[MAX_COLORCURVES];
+	double m_fColorCurveTimes_B[MAX_COLORCURVES];
+	int m_nCurves;
 
 public:
 	static std::vector<std::string>& GetMainTextureNames() { return s_MainTextureNames; };
