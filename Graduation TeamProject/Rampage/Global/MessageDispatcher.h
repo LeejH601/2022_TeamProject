@@ -68,7 +68,8 @@ struct ParticleTrailParams {
 	float m_fTime = 0.f;
 };
 
-struct TrailTextureUpdateParams {
+struct TrailUpdateParams {
+	CGameObject* pObject;
 	CShader* pShader;
 	std::shared_ptr<CTexture> pTexture;
 };
@@ -114,6 +115,7 @@ public:
 
 	virtual void HandleMessage(const Message& message, const ParticleUpDownParams& params) {}
 	virtual void HandleMessage(const Message& message, const ParticleTrailParams& params) {}
+	virtual void HandleMessage(const Message& message, const TrailUpdateParams& params){}
 };
 
 // Define RegisterAriticulationListner
@@ -348,7 +350,7 @@ class TrailComponent : public IMessageListener
 	static std::vector<std::string> s_MainTextureNames;
 	static std::vector<std::string> s_NoiseTextureNames;
 
-
+	
 
 	std::shared_ptr<CTexture> m_pTexture;
 	int m_nMainTextureIndex = 0;
@@ -364,11 +366,13 @@ public:
 	int m_nCurves;
 
 public:
+	TrailComponent();
 	static std::vector<std::string>& GetMainTextureNames() { return s_MainTextureNames; };
 	static std::vector<std::string>& GetNoiseTexturNames() { return s_NoiseTextureNames; };
 
 	int& GetMainTextureIndex() { return m_nMainTextureIndex; };
 	int& GetNoiseTextureIndex() { return m_nNoiseTextureIndex; };
+	virtual void HandleMessage(const Message& message, const TrailUpdateParams& params);
 };
 
 inline std::vector<std::string> TrailComponent::s_MainTextureNames = { "Image/T_Sword_Slash_11", "Image/T_Sword_Slash_21" };

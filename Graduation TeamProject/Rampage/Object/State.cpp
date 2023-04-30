@@ -173,13 +173,7 @@ Atk1_Player::Atk1_Player()
 
 	// TRAIL Swipe
 	std::unique_ptr<TrailComponent> pTrailComponent = std::make_unique<TrailComponent>();
-	pTrailComponent->m_fR_CurvePoints[0] = 0.0f; pTrailComponent->m_fR_CurvePoints[1] = 0.14; pTrailComponent->m_fR_CurvePoints[2] = 0.459;  pTrailComponent->m_fR_CurvePoints[3] = 1.892;
-	pTrailComponent->m_fG_CurvePoints[0] = 0.0f; pTrailComponent->m_fG_CurvePoints[1] = 0.005; pTrailComponent->m_fG_CurvePoints[2] = 0.067;  pTrailComponent->m_fG_CurvePoints[3] = 0.595;
-	pTrailComponent->m_fB_CurvePoints[0] = 0.0f; pTrailComponent->m_fB_CurvePoints[1] = 0.257; pTrailComponent->m_fB_CurvePoints[2] = 0.26;  pTrailComponent->m_fB_CurvePoints[3] = 0.0f;
-	pTrailComponent->m_fColorCurveTimes_R[0] = 0.0f; pTrailComponent->m_fColorCurveTimes_R[1] = 0.3; pTrailComponent->m_fColorCurveTimes_R[2] = 0.6;  pTrailComponent->m_fColorCurveTimes_R[3] = 1.0;
-	pTrailComponent->m_fColorCurveTimes_G[0] = 0.0f; pTrailComponent->m_fColorCurveTimes_G[1] = 0.3; pTrailComponent->m_fColorCurveTimes_G[2] = 0.6;  pTrailComponent->m_fColorCurveTimes_G[3] = 1.0;
-	pTrailComponent->m_fColorCurveTimes_B[0] = 0.0f; pTrailComponent->m_fColorCurveTimes_B[1] = 0.3; pTrailComponent->m_fColorCurveTimes_B[2] = 0.6;  pTrailComponent->m_fColorCurveTimes_B[3] = 1.0;
-	pTrailComponent->m_nCurves = 4;
+	
 	//pTrailComponent->m_fNoiseConstants = 1.4f;
 	m_pListeners.push_back(std::move(pTrailComponent));
 	CMessageDispatcher::GetInst()->RegisterListener(MessageType::UPDATE_SWORDTRAIL, m_pListeners.back().get(), this);
@@ -206,6 +200,10 @@ void Atk1_Player::Enter(CPlayer* player)
 	SoundPlayParams SoundPlayParam;
 	SoundPlayParam.sound_category = SOUND_CATEGORY::SOUND_SHOOT;
 	CMessageDispatcher::GetInst()->Dispatch_Message<SoundPlayParams>(MessageType::PLAY_SOUND, &SoundPlayParam, this);
+
+	TrailUpdateParams trailParam;
+	trailParam.pObject = player->m_pSwordTrailReference[0].get();
+	CMessageDispatcher::GetInst()->Dispatch_Message<TrailUpdateParams>(MessageType::UPDATE_SWORDTRAIL, &trailParam, this);
 
 	if (player->m_pSwordTrailReference) {
 		dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[0].get())->m_bIsUpdateTrailVariables = true;
@@ -429,6 +427,10 @@ void Atk2_Player::Enter(CPlayer* player)
 	SoundPlayParam.sound_category = SOUND_CATEGORY::SOUND_SHOOT;
 	CMessageDispatcher::GetInst()->Dispatch_Message<SoundPlayParams>(MessageType::PLAY_SOUND, &SoundPlayParam, this);
 
+	TrailUpdateParams trailParam;
+	trailParam.pObject = player->m_pSwordTrailReference[1].get();
+	CMessageDispatcher::GetInst()->Dispatch_Message<TrailUpdateParams>(MessageType::UPDATE_SWORDTRAIL, &trailParam, this);
+
 	if (player->m_pSwordTrailReference) {
 		dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[1].get())->m_bIsUpdateTrailVariables = true;
 		dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[1].get())->m_faccumulateTime = 0.0f;
@@ -650,6 +652,10 @@ void Atk3_Player::Enter(CPlayer* player)
 	SoundPlayParams SoundPlayParam;
 	SoundPlayParam.sound_category = SOUND_CATEGORY::SOUND_SHOOT;
 	CMessageDispatcher::GetInst()->Dispatch_Message<SoundPlayParams>(MessageType::PLAY_SOUND, &SoundPlayParam, this);
+
+	TrailUpdateParams trailParam;
+	trailParam.pObject = player->m_pSwordTrailReference[2].get();
+	CMessageDispatcher::GetInst()->Dispatch_Message<TrailUpdateParams>(MessageType::UPDATE_SWORDTRAIL, &trailParam, this);
 
 	if (player->m_pSwordTrailReference) {
 		dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[2].get())->m_bIsUpdateTrailVariables = true;

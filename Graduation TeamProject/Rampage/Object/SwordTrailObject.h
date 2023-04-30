@@ -18,8 +18,10 @@ struct VS_CB_SWTRAIL_INFO
 	float m_faccumulateTime;
 };
 
+class TrailComponent;
 class CSwordTrailObject : public CGameObject
 {
+	friend class TrailComponent;
 	XMFLOAT4X4 m_xmf4x4SwordTrailControllPointers;
 	std::vector<XMFLOAT4> m_xmf4TrailControllPoints1;
 	std::vector<XMFLOAT4> m_xmf4TrailControllPoints2;

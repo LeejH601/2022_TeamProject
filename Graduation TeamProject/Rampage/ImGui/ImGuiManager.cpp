@@ -1458,7 +1458,6 @@ void CImGuiManager::ShowTrailManager(CState<CPlayer>* pCurrentAnimation)
 			ImPlot::PlotLine("##bez", &line[0].x, &line[0].y, 100 * (nCurveIndexs - 1), 0, 0, sizeof(ImPlotPoint));
 		}
 
-
 		/*ImPlot::SetNextLineStyle(ImVec4(1, 0.5f, 1, 1));
 		ImPlot::PlotLine("##t1", &P[1].x, &P[1].y, 1, 0, 0, sizeof(ImPlotPoint));
 		ImPlot::SetNextLineStyle(ImVec4(0, 0.5f, 1, 1));
@@ -1468,6 +1467,16 @@ void CImGuiManager::ShowTrailManager(CState<CPlayer>* pCurrentAnimation)
 
 		ImPlot::EndPlot();
 	}
+	//ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
+	//ImVec2 testPos = ImGui::GetCursorScreenPos();
+	//for (int i = 0; i < pTrailComponent->m_nCurves - 1; ++i) {
+	//	ImU32 color1; ImU32 color2;
+	//	//HIWORD()
+	//	char rgba1[4] = { (char)(max(pTrailComponent->m_fR_CurvePoints[i], 1.0f)*255), (char)pTrailComponent->m_fG_CurvePoints[i],  (char)pTrailComponent->m_fB_CurvePoints[i], (char)1.0f * 255 };
+	//	char rgba2[4] = { (char)pTrailComponent->m_fR_CurvePoints[i],   (char)pTrailComponent->m_fG_CurvePoints[i],  (char)pTrailComponent->m_fB_CurvePoints[i], (char)1.0f };
+	//	ImGui::GetWindowDrawList()->AddRectFilledMultiColor(ImVec2(testPos.x + (200 * pTrailComponent->m_fColorCurveTimes_R[i]), testPos.y),
+	//		ImVec2(testPos.x + (200 * pTrailComponent->m_fColorCurveTimes_R[i + 1]), testPos.y + 10), color1, color2, color2, color1);
+	//}
 
 	std::vector<std::string> noiseTextureNames = TrailComponent::GetNoiseTexturNames();
 	std::vector<const char*> noiseItems;
