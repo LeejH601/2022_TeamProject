@@ -196,7 +196,7 @@ void Atk_Player::SetPlayerRootPos(CPlayer* player)
 	player->UpdateTransform(NULL);
 
 	XMFLOAT3 xmf3Position = XMFLOAT3{ pPlayerController->m_pRootMotionObject->GetWorld()._41,
-		pPlayerController->m_pRootMotionObject->GetWorld()._42,
+		player->GetPosition().y,
 		pPlayerController->m_pRootMotionObject->GetWorld()._43 };
 
 	player->SetPosition(xmf3Position);

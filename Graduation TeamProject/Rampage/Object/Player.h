@@ -10,6 +10,8 @@ class CPlayer : public CPhysicsObject
 public:
 	CCamera* m_pCamera = nullptr;
 	CGameObject* m_pChildObject = nullptr;
+	CGameObject* m_pPelvisObject = nullptr;
+
 	std::unique_ptr<CStateMachine<CPlayer>> m_pStateMachine;
 
 	int m_nAnimationNum = 0;

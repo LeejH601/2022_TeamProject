@@ -156,7 +156,7 @@ CKnightPlayer::CKnightPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 	if (!pKnightModel) pKnightModel = CModelManager::GetInst()->LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, "Object/SK_FKnightB_long_sword_2.bin");
 
 	CGameObject* obj = pKnightModel->m_pModelRootObject->FindFrame("SK_FKnightB_05");
-
+	m_pPelvisObject = pKnightModel->m_pModelRootObject->FindFrame("pelvis");
 	SetChild(pKnightModel->m_pModelRootObject, true);
 	//m_pSkinnedAnimationController = std::make_unique<CKightNoMoveRootAnimationController>(pd3dDevice, pd3dCommandList, nAnimationTracks, pKnightModel);
 	m_pSkinnedAnimationController = std::make_unique<CKightRootMoveAnimationController>(pd3dDevice, pd3dCommandList, nAnimationTracks, pKnightModel);
@@ -239,6 +239,7 @@ void CKnightPlayer::Animate(float fTimeElapsed)
 		
 		SetPosition(XMFLOAT3(transform.p.x, transform.p.y, transform.p.z));
 	}
+	OnUpdateCallback(fTimeElapsed);
 }
 void CKnightPlayer::OnUpdateCallback(float fTimeElapsed)
 {
@@ -369,7 +370,9 @@ void CKightNoMoveRootAnimationController::OnRootMotion(CGameObject* pRootGameObj
 {
 	if (m_bRootMotion)
 	{
+		CPlayer* player = (CPlayer*)pRootGameObject;
 		m_xmf3FirstRootMotionPosition = pRootGameObject->GetPosition();
+	
 		m_pRootMotionObject->m_xmf4x4Transform._41 = 0.f;
 		m_pRootMotionObject->m_xmf4x4Transform._42 = 0.f;
 		m_pRootMotionObject->m_xmf4x4Transform._43 = 0.f;
