@@ -14,6 +14,7 @@ class CParticleShader;
 class CParticleObject : public CGameObject
 {
 public:
+	CParticleObject();
 	CParticleObject(std::shared_ptr<CTexture> pSpriteTexture, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, XMFLOAT3 xmf3Position, XMFLOAT3 xmf3Velocity, float fLifetime, XMFLOAT3 xmf3Acceleration, XMFLOAT3 xmf3Color, XMFLOAT2 xmf2Size, UINT nMaxParticles, CParticleShader* pShader, int iParticleType);
 	virtual ~CParticleObject();
 
@@ -51,7 +52,7 @@ public:
 	XMFLOAT3 GetDirection();
 
 	bool CheckCapacity();
-private:
+protected:
 	XMFLOAT2	m_fSize = XMFLOAT2(15.f, 15.f);
 	float		m_fAlpha = 1.f;
 	float		m_fLifeTime = 1.f;
@@ -68,4 +69,11 @@ private:
 protected:
 	ComPtr<ID3D12Resource>	m_pd3dcbFrameworkInfo = NULL;
 	CB_FRAMEWORK_INFO* m_pcbMappedFrameworkInfo = NULL;
+};
+
+class CSmokeParticleObject : public CParticleObject
+{
+public:
+	CSmokeParticleObject(LPCTSTR pszFileName, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, XMFLOAT3 xmf3Position, XMFLOAT3 xmf3Velocity, float fLifetime, XMFLOAT3 xmf3Acceleration, XMFLOAT3 xmf3Color, XMFLOAT2 xmf2Size, UINT nMaxParticles, CParticleShader* pShader, int iParticleType);
+	virtual ~CSmokeParticleObject();
 };
