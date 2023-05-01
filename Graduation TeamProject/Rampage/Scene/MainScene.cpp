@@ -371,7 +371,7 @@ void CMainTMPScene::RegisterArticulations()
 
 		obj->m_bSimulateArticulate = false;
 		obj->Animate(0.0f);
-		((CPhysicsObject*)obj)->OnPrepareRender();
+		((CPhysicsObject*)obj)->UpdateTransform(NULL);
 		XMFLOAT4X4 rootWorld = obj->FindFrame("root")->GetWorld();
 		float _rootWorld[16] = {
 			rootWorld._11,rootWorld._12,rootWorld._13,rootWorld._14,
@@ -399,13 +399,19 @@ bool CMainTMPScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM 
 	case WM_LBUTTONDOWN:
 		// 좌클릭시 사용자가 좌클릭 했음을 표현하는 변수를 true로 바꿔줌
 		if (m_pPlayer)
-			((CPlayer*)m_pPlayer)->m_bAttack = true;
+		{
+			if (!((CPlayer*)m_pPlayer)->m_bAttack)
+			{
+				((CPlayer*)m_pPlayer)->m_bAttack = true;
+				((CPlayer*)m_pPlayer)->m_iAttackId += 1;
+			}
+		}
 		break;
 	case WM_RBUTTONDOWN:
 		::SetCapture(hWnd);
 		::GetCursorPos(&m_ptOldCursorPos);
 
-		if (m_pPlayer)
+		if(m_pPlayer)
 			((CPlayer*)m_pPlayer)->m_bAttack2 = true;
 		break;
 	case WM_LBUTTONUP:
@@ -865,8 +871,21 @@ void CMainTMPScene::UpdateObjects(float fTimeElapsed)
 	m_pPlayer->Update(fTimeElapsed);
 
 	// Update Camera
-	XMFLOAT3 xmf3PlayerPos = m_pPlayer->GetPosition();
+	/*XMFLOAT3 xmf3PlayerPos = m_pPlayer->GetPosition();
+	xmf3PlayerPos.y += 12.5f;*/
+
+
+	// Update Camera
+	XMFLOAT3 xmf3PlayerPos = XMFLOAT3{
+		((CKnightPlayer*)m_pPlayer)->m_pSkinnedAnimationController->m_pRootMotionObject->GetWorld()._41,
+		/*((CKnightPlayer*)m_pPlayer)->m_pSkinnedAnimationController->m_pRootMotionObject->GetWorld()._42,*/
+	 m_pPlayer->GetPosition().y,
+	((CKnightPlayer*)m_pPlayer)->m_pSkinnedAnimationController->m_pRootMotionObject->GetWorld()._43 };
 	xmf3PlayerPos.y += 12.5f;
+
+	TCHAR pstrDebug[256] = { 0 };
+	_stprintf_s(pstrDebug, 256, _T("Position = %f, %f, %f\n"), xmf3PlayerPos.x, xmf3PlayerPos.y, xmf3PlayerPos.z);
+	OutputDebugString(pstrDebug);
 
 	m_pMainSceneCamera->Update(xmf3PlayerPos, fTimeElapsed);
 
@@ -957,6 +976,13 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 	{
 		m_pPlayer->Animate(0.0f);
 		m_pPlayer->Render(pd3dCommandList, true);
+		TCHAR pstrDebug[256] = { 0 };
+		XMFLOAT3 xmf3PlayerPos = XMFLOAT3{
+		((CKnightPlayer*)m_pPlayer)->m_pSkinnedAnimationController->m_pRootMotionObject->GetWorld()._41,
+		((CKnightPlayer*)m_pPlayer)->m_pSkinnedAnimationController->m_pRootMotionObject->GetWorld()._42,
+		((CKnightPlayer*)m_pPlayer)->m_pSkinnedAnimationController->m_pRootMotionObject->GetWorld()._43 };
+		_stprintf_s(pstrDebug, 256, _T("xmf3PlayerPos: (%.2f, %.2f, %.2f)\n"), xmf3PlayerPos.x, xmf3PlayerPos.y, xmf3PlayerPos.z);
+		OutputDebugString(pstrDebug);
 	}
 
 	static float trailUpdateT = 0.0f;

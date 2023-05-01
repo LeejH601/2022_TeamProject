@@ -35,6 +35,10 @@ void Idle_Monster::Animate(CMonster* monster, float fElapsedTime)
 	monster->Animate(fElapsedTime);
 }
 
+void Idle_Monster::OnRootMotion(CMonster* monster, float fTimeElapsed)
+{
+}
+
 void Idle_Monster::Exit(CMonster* monster)
 {
 
@@ -85,6 +89,10 @@ void Damaged_Monster::Animate(CMonster* monster, float fElapsedTime)
 	monster->Animate(fElapsedTime);
 }
 
+void Damaged_Monster::OnRootMotion(CMonster* monster, float fTimeElapsed)
+{
+}
+
 void Damaged_Monster::Exit(CMonster* monster)
 {
 }
@@ -105,6 +113,10 @@ void Stun_Monster::Execute(CMonster* monster, float fElapsedTime)
 void Stun_Monster::Animate(CMonster* monster, float fElapsedTime)
 {
 	monster->Animate(0.0f);
+}
+
+void Stun_Monster::OnRootMotion(CMonster* monster, float fTimeElapsed)
+{
 }
 
 void Stun_Monster::Exit(CMonster* monster)
@@ -143,6 +155,10 @@ void Wander_Monster::Execute(CMonster* monster, float fElapsedTime)
 void Wander_Monster::Animate(CMonster* monster, float fElapsedTime)
 {
 	monster->Animate(fElapsedTime);
+}
+
+void Wander_Monster::OnRootMotion(CMonster* monster, float fTimeElapsed)
+{
 }
 
 void Wander_Monster::Exit(CMonster* monster)
@@ -188,6 +204,10 @@ void Chasing_Monster::Animate(CMonster* monster, float fElapsedTime)
 	monster->Animate(fElapsedTime);
 }
 
+void Chasing_Monster::OnRootMotion(CMonster* monster, float fTimeElapsed)
+{
+}
+
 void Chasing_Monster::Exit(CMonster* monster)
 {
 }
@@ -222,6 +242,10 @@ void Attack_Monster::Execute(CMonster* monster, float fElapsedTime)
 void Attack_Monster::Animate(CMonster* monster, float fElapsedTime)
 {
 	monster->Animate(fElapsedTime);
+}
+
+void Attack_Monster::OnRootMotion(CMonster* monster, float fTimeElapsed)
+{
 }
 
 void Attack_Monster::Exit(CMonster* monster)
@@ -272,6 +296,10 @@ void Dead_Monster::Animate(CMonster* monster, float fElapsedTime)
 	monster->Animate(fElapsedTime);
 }
 
+void Dead_Monster::OnRootMotion(CMonster* monster, float fTimeElapsed)
+{
+}
+
 void Dead_Monster::Exit(CMonster* monster)
 {
 	monster->m_bSimulateArticulate = false;
@@ -298,6 +326,10 @@ void Global_Monster::Execute(CMonster* monster, float fElapsedTime)
 }
 
 void Global_Monster::Animate(CMonster* monster, float fElapsedTime)
+{
+}
+
+void Global_Monster::OnRootMotion(CMonster* monster, float fTimeElapsed)
 {
 }
 

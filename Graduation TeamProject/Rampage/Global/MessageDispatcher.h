@@ -293,8 +293,21 @@ public:
 	virtual void HandleMessage(const Message& message, const AnimationCompParams& params);
 };
 
-// Define Particle Animation component
+// Define HitLag Animation component
+class HitLagComponent : public IMessageListener {
+    float m_fLagScale = 0.5f;
+    float m_fMaxLagTime = 0.5f;
+public:
+    float& GetMaxLagTime() { return m_fMaxLagTime; }
+    float& GetLagScale() { return m_fLagScale; }
 
+    void SetMaxLagTime(float maxlagtime) { m_fMaxLagTime = maxlagtime; }
+    void SetLagScale(float lagScale) { m_fLagScale = lagScale; }
+
+    virtual void HandleMessage(const Message& message, const PlayerParams& params);
+};
+
+// Define Particle Animation component
 enum ParticleType {
 	SPHERE_PARTICLE,
 	RECOVERY_PARTICLE,

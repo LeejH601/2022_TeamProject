@@ -2,33 +2,16 @@
 #include "..\Global\stdafx.h"
 #include "..\Global\MessageDispatcher.h"
 #include "Object.h"
+
 class CPlayer;
-
-
-// Define Stun Animation component
-class HitLagComponent{
-    bool m_bEnable = false;
-    float m_fMaxLagTime = 0.5f;
-    float m_fCurLagTime = 0.0f;
-public:
-    bool& GetEnable() { return m_bEnable; }
-    float& GetMaxLagTime() { return m_fMaxLagTime; }
-    float GetCurLagTime() { return m_fCurLagTime; }
-
-    void SetEnable(bool bEnable) { m_bEnable = bEnable; }
-    void SetMaxLagTime(float maxlagtime) { m_fMaxLagTime = maxlagtime; }
-    void SetCurLagTime(float lagtime) { m_fCurLagTime =  lagtime; }
-};
 
 template <class entity_type>
 class CState
 {
 protected:
     std::vector<std::unique_ptr<IMessageListener>> m_pListeners;
-    HitLagComponent m_HitlagComponent;
 public:
 	virtual ~CState() {}
-    HitLagComponent* GetHitLagComponent() { return &m_HitlagComponent; }
     virtual IMessageListener* GetShockSoundComponent();
     virtual IMessageListener* GetShootSoundComponent();
     virtual IMessageListener* GetEffectSoundComponent();
@@ -41,6 +24,7 @@ public:
     virtual IMessageListener* GetDamageAnimationComponent();
     virtual IMessageListener* GetShakeAnimationComponent();
     virtual IMessageListener* GetStunAnimationComponent();
+    virtual IMessageListener* GetHitLagComponent();
     virtual IMessageListener* GetParticleComponent();
     virtual IMessageListener* GetTrailComponent();
     virtual IMessageListener* GetUpDownParticleComponent();
@@ -49,6 +33,7 @@ public:
 	virtual void Enter(entity_type*) = 0;
 	virtual void Execute(entity_type*, float) = 0;
     virtual void Animate(entity_type*, float) = 0;
+    virtual void OnRootMotion(entity_type*, float) = 0;
 	virtual void Exit(entity_type*) = 0;
 };
 
@@ -62,68 +47,106 @@ public:
     virtual void Enter(CPlayer* player);
     virtual void Execute(CPlayer* player, float fElapsedTime);
     virtual void Animate(CPlayer* player, float fElapsedTime);
+    virtual void OnRootMotion(CPlayer* player, float fTimeElapsed);
     virtual void Exit(CPlayer* player);
 };
 
-class Atk1_Player : public CState<CPlayer>
+class Atk_Player : public CState<CPlayer>
+{
+public:
+    virtual void InitAtkPlayer();
+    virtual void SetPlayerRootPos(CPlayer* player);
+    virtual void CheckHitLag(CPlayer* player);
+
+    virtual void CheckComboAttack(CPlayer* player) = 0;
+    virtual void SendCollisionMessage(CPlayer* player) = 0;
+    virtual void SpawnTrailParticle(CPlayer* player) = 0;
+
+    virtual void Enter(CPlayer* player) = 0;
+    virtual void Execute(CPlayer* player, float fElapsedTime) = 0;
+    virtual void Animate(CPlayer* player, float fElapsedTime) = 0;
+    virtual void OnRootMotion(CPlayer* player, float fTimeElapsed);
+    virtual void Exit(CPlayer* player) = 0;
+};
+
+class Atk1_Player : public Atk_Player
 {
 public:
     DECLARE_SINGLE(Atk1_Player);
     Atk1_Player();
     ~Atk1_Player();
 
+    virtual void CheckComboAttack(CPlayer* player);
+    virtual void SendCollisionMessage(CPlayer* player);
+    virtual void SpawnTrailParticle(CPlayer* player);
+
     virtual void Enter(CPlayer* player);
     virtual void Execute(CPlayer* player, float fElapsedTime);
     virtual void Animate(CPlayer* player, float fElapsedTime);
     virtual void Exit(CPlayer* player);
-
 };
 
-class Atk2_Player : public CState<CPlayer>
+class Atk2_Player : public Atk_Player
 {
 public:
     DECLARE_SINGLE(Atk2_Player);
     Atk2_Player();
     ~Atk2_Player();
 
+    virtual void CheckComboAttack(CPlayer* player);
+    virtual void SendCollisionMessage(CPlayer* player);
+    virtual void SpawnTrailParticle(CPlayer* player);
+
     virtual void Enter(CPlayer* player);
     virtual void Execute(CPlayer* player, float fElapsedTime);
     virtual void Animate(CPlayer* player, float fElapsedTime);
     virtual void Exit(CPlayer* player);
 };
 
-class Atk3_Player : public CState<CPlayer>
+class Atk3_Player : public Atk_Player
 {
 public:
     DECLARE_SINGLE(Atk3_Player);
     Atk3_Player();
     ~Atk3_Player();
 
+    virtual void CheckComboAttack(CPlayer* player);
+    virtual void SendCollisionMessage(CPlayer* player);
+    virtual void SpawnTrailParticle(CPlayer* player);
+
     virtual void Enter(CPlayer* player);
     virtual void Execute(CPlayer* player, float fElapsedTime);
     virtual void Animate(CPlayer* player, float fElapsedTime);
     virtual void Exit(CPlayer* player);
 };
 
-class Atk4_Player : public CState<CPlayer>
+class Atk4_Player : public Atk_Player
 {
 public:
     DECLARE_SINGLE(Atk4_Player);
     Atk4_Player();
     ~Atk4_Player();
 
+    virtual void CheckComboAttack(CPlayer* player);
+    virtual void SendCollisionMessage(CPlayer* player);
+    virtual void SpawnTrailParticle(CPlayer* player);
+
     virtual void Enter(CPlayer* player);
     virtual void Execute(CPlayer* player, float fElapsedTime);
     virtual void Animate(CPlayer* player, float fElapsedTime);
     virtual void Exit(CPlayer* player);
 };
 
-class Atk5_Player : public CState<CPlayer>
+class Atk5_Player : public Atk_Player
 {
 public:
     DECLARE_SINGLE(Atk5_Player);
     Atk5_Player();
     ~Atk5_Player();
+
+    virtual void CheckComboAttack(CPlayer* player);
+    virtual void SendCollisionMessage(CPlayer* player);
+    virtual void SpawnTrailParticle(CPlayer* player);
 
     virtual void Enter(CPlayer* player);
     virtual void Execute(CPlayer* player, float fElapsedTime);
@@ -142,6 +165,7 @@ public:
     virtual void Enter(CPlayer* player);
     virtual void Execute(CPlayer* player, float fElapsedTime);
     virtual void Animate(CPlayer* player, float fElapsedTime);
+    virtual void OnRootMotion(CPlayer* player, float fTimeElapsed);
     virtual void Exit(CPlayer* player);
 
 };
@@ -343,6 +367,23 @@ inline IMessageListener* CState<entity_type>::GetStunAnimationComponent()
         }
         return false;
     });
+
+    if (p != m_pListeners.end())
+        return (*p).get();
+
+    return nullptr;
+}
+
+template<class entity_type>
+inline IMessageListener* CState<entity_type>::GetHitLagComponent()
+{
+    std::vector<std::unique_ptr<IMessageListener>>::iterator p = std::find_if(m_pListeners.begin(), m_pListeners.end(), [](const std::unique_ptr<IMessageListener>& listener) {
+        HitLagComponent* pHitLagComponent = dynamic_cast<HitLagComponent*>(listener.get());
+        if (pHitLagComponent) {
+            return true;
+        }
+        return false;
+        });
 
     if (p != m_pListeners.end())
         return (*p).get();

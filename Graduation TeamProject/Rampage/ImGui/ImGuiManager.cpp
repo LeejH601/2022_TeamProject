@@ -1582,7 +1582,7 @@ void CImGuiManager::ShowHitLagManager(CState<CPlayer>* pCurrentAnimation)
 	ImGuiWindowFlags my_window_flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize;
 	bool* b_open = nullptr;
 	ImGui::Begin(U8STR("역경직 관리자"), b_open, my_window_flags);
-	HitLagComponent* pHitLagComponent = pCurrentAnimation->GetHitLagComponent();
+	HitLagComponent* pHitLagComponent = dynamic_cast<HitLagComponent*>(pCurrentAnimation->GetHitLagComponent());
 
 	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
 	ImGui::Checkbox(U8STR("켜기/끄기##HitLag"), &pHitLagComponent->GetEnable());
@@ -1591,6 +1591,9 @@ void CImGuiManager::ShowHitLagManager(CState<CPlayer>* pCurrentAnimation)
 	if (ImGui::DragFloat(U8STR("지속시간##Move"), &pHitLagComponent->GetMaxLagTime(), DRAG_FLOAT_UNIT, HIT_LAG_MAXTIME_MIN, HIT_LAG_MAXTIME_MAX, "%.2f", 0))
 		pHitLagComponent->GetMaxLagTime() = std::clamp(pHitLagComponent->GetMaxLagTime(), HIT_LAG_MAXTIME_MIN, HIT_LAG_MAXTIME_MAX);
 
+	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
+	if (ImGui::DragFloat(U8STR("애니메이션 배율##Move"), &pHitLagComponent->GetLagScale(), DRAG_FLOAT_UNIT, HIT_LAG_SCALEWEIGHT_MIN, HIT_LAG_SCALEWEIGHT_MAX, "%.2f", 0))
+		pHitLagComponent->GetLagScale() = std::clamp(pHitLagComponent->GetLagScale(), HIT_LAG_SCALEWEIGHT_MIN, HIT_LAG_SCALEWEIGHT_MAX);
 	ImGui::End();
 }
 void CImGuiManager::ShowCameraMoveManager(CState<CPlayer>* pCurrentAnimation)
