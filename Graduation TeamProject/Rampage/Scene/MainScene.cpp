@@ -759,11 +759,11 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 
 	m_pSmokeObject = std::make_unique<CParticleObject>(m_pTextureManager->LoadParticleTexture(L"ParticleImage/Smoke2.dds"), pd3dDevice, pd3dCommandList, GetGraphicsRootSignature(), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), 2.0f, XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT2(2.0f, 2.0f), MAX_PARTICLES, m_pParticleShader.get(), SMOKE_PARTICLE);
 
-	for (int i = 0; i < MAX_UPDOWN_PARTICLE_OBJECT; i++)
-	{
-		std::unique_ptr<CParticleObject> m_pMeterorObject = std::make_unique<CParticleObject>(m_pTextureManager->LoadParticleTexture(L"ParticleImage/Meteor.dds"), pd3dDevice, pd3dCommandList, GetGraphicsRootSignature(), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), 2.0f, XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT2(2.0f, 2.0f), MAX_PARTICLES, m_pParticleShader.get(), RECOVERY_PARTICLE);
-		m_pUpDownParticleObjects.push_back(std::move(m_pMeterorObject));
-	}
+	//for (int i = 0; i < MAX_UPDOWN_PARTICLE_OBJECT; i++)
+	//{
+	//	std::unique_ptr<CParticleObject> m_pMeterorObject = std::make_unique<CParticleObject>(m_pTextureManager->LoadParticleTexture(L"ParticleImage/Meteor.dds"), pd3dDevice, pd3dCommandList, GetGraphicsRootSignature(), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), 2.0f, XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT2(2.0f, 2.0f), MAX_PARTICLES, m_pParticleShader.get(), RECOVERY_PARTICLE);
+	//	m_pUpDownParticleObjects.push_back(std::move(m_pMeterorObject));
+	//}
 
 
 	m_pTrailParticleObjects = std::make_unique<CParticleObject>(m_pTextureManager->LoadParticleTexture(L"Image/Effect3.dds"), pd3dDevice, pd3dCommandList, GetGraphicsRootSignature(), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), 2.0f, XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT2(2.0f, 2.0f), MAX_PARTICLES, m_pParticleShader.get(), SPHERE_PARTICLE);
@@ -944,12 +944,12 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 	((CParticleObject*)m_pSmokeObject.get())->Render(pd3dCommandList, nullptr, m_pParticleShader.get());
 	
 
-	for (int i = 0; i < m_pUpDownParticleObjects.size(); ++i)
-	{
-		((CParticleObject*)m_pUpDownParticleObjects[i].get())->Update(fTimeElapsed);
-		((CParticleObject*)m_pUpDownParticleObjects[i].get())->UpdateShaderVariables(pd3dCommandList, fCurrentTime, fTimeElapsed);
-		((CParticleObject*)m_pUpDownParticleObjects[i].get())->Render(pd3dCommandList, nullptr, m_pParticleShader.get());
-	}
+	//for (int i = 0; i < m_pUpDownParticleObjects.size(); ++i)
+	//{
+	//	((CParticleObject*)m_pUpDownParticleObjects[i].get())->Update(fTimeElapsed);
+	//	((CParticleObject*)m_pUpDownParticleObjects[i].get())->UpdateShaderVariables(pd3dCommandList, fCurrentTime, fTimeElapsed);
+	//	((CParticleObject*)m_pUpDownParticleObjects[i].get())->Render(pd3dCommandList, nullptr, m_pParticleShader.get());
+	//}
 	
 	((CParticleObject*)m_pTrailParticleObjects.get())->Update(fTimeElapsed);
 	((CParticleObject*)m_pTrailParticleObjects.get())->UpdateShaderVariables(pd3dCommandList, fCurrentTime, fTimeElapsed);
@@ -1068,10 +1068,10 @@ void CMainTMPScene::OnPostRender()
 
 	((CParticleObject*)m_pSmokeObject.get())->OnPostRender();
 	
-	for (int i = 0; i < m_pUpDownParticleObjects.size(); ++i)
-	{
-		((CParticleObject*)m_pUpDownParticleObjects[i].get())->OnPostRender();
-	}
+	//for (int i = 0; i < m_pUpDownParticleObjects.size(); ++i)
+	//{
+	//	((CParticleObject*)m_pUpDownParticleObjects[i].get())->OnPostRender();
+	//}
 
 	((CParticleObject*)m_pTrailParticleObjects.get())->OnPostRender();
 }

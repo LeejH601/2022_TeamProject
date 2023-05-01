@@ -440,11 +440,11 @@ void CSimulatorScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 		m_pParticleObjects.push_back(std::move(m_pParticleObject));
 	}
 
-	for (int i = 0; i < MAX_RECOVERYPARTICLE_OBJECT; ++i)
-	{
-		std::unique_ptr<CGameObject> m_pParticleObject = std::make_unique<CParticleObject>(m_pTextureManager->LoadParticleTexture(L"ParticleImage/Meteor.dds"), pd3dDevice, pd3dCommandList, GetGraphicsRootSignature(), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), 2.0f, XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT2(2.0f, 2.0f), MAX_PARTICLES, m_pParticleShader.get(), RECOVERY_PARTICLE);
-		m_pUpDownParticleObjects.push_back(std::move(m_pParticleObject));
-	}
+	//for (int i = 0; i < MAX_RECOVERYPARTICLE_OBJECT; ++i)
+	//{
+	//	std::unique_ptr<CGameObject> m_pParticleObject = std::make_unique<CParticleObject>(m_pTextureManager->LoadParticleTexture(L"ParticleImage/Meteor.dds"), pd3dDevice, pd3dCommandList, GetGraphicsRootSignature(), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), 2.0f, XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT2(2.0f, 2.0f), MAX_PARTICLES, m_pParticleShader.get(), RECOVERY_PARTICLE);
+	//	m_pUpDownParticleObjects.push_back(std::move(m_pParticleObject));
+	//}
 	
 	for (int i = 0; i < MAX_ATTACKSPRITE_OBJECT; ++i)
 	{
@@ -594,12 +594,12 @@ void CSimulatorScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float f
 		((CParticleObject*)m_pParticleObjects[i].get())->Render(pd3dCommandList, nullptr, m_pParticleShader.get());
 	}
 
-	for (int i = 0; i < m_pUpDownParticleObjects.size(); ++i)
-	{
-		((CParticleObject*)m_pUpDownParticleObjects[i].get())->Update(fTimeElapsed);
-		((CParticleObject*)m_pUpDownParticleObjects[i].get())->UpdateShaderVariables(pd3dCommandList, fCurrentTime, fTimeElapsed);
-		((CParticleObject*)m_pUpDownParticleObjects[i].get())->Render(pd3dCommandList, nullptr, m_pParticleShader.get());
-	}
+	//for (int i = 0; i < m_pUpDownParticleObjects.size(); ++i)
+	//{
+	//	((CParticleObject*)m_pUpDownParticleObjects[i].get())->Update(fTimeElapsed);
+	//	((CParticleObject*)m_pUpDownParticleObjects[i].get())->UpdateShaderVariables(pd3dCommandList, fCurrentTime, fTimeElapsed);
+	//	((CParticleObject*)m_pUpDownParticleObjects[i].get())->Render(pd3dCommandList, nullptr, m_pParticleShader.get());
+	//}
 
 #define PostProcessing
 #ifdef PostProcessing
@@ -649,10 +649,10 @@ void CSimulatorScene::OnPostRender()
 		((CParticleObject*)m_pParticleObjects[i].get())->OnPostRender();
 	}
 
-	for (int i = 0; i < m_pUpDownParticleObjects.size(); i++)
-	{
-		((CParticleObject*)m_pUpDownParticleObjects[i].get())->OnPostRender();
-	}
+	//for (int i = 0; i < m_pUpDownParticleObjects.size(); i++)
+	//{
+	//	((CParticleObject*)m_pUpDownParticleObjects[i].get())->OnPostRender();
+	//}
 }
 
 void CSimulatorScene::ResetMonster()
@@ -706,20 +706,20 @@ void CSimulatorScene::HandleCollision(const CollideParams& params)
 		CMessageDispatcher::GetInst()->Dispatch_Message<ParticleCompParams>(MessageType::UPDATE_PARTICLE, &particle_comp_params, m_pMainCharacter->m_pStateMachine->GetCurrentState());
 	}
 
-	it = std::find_if(m_pUpDownParticleObjects.begin(), m_pUpDownParticleObjects.end(), [](const std::unique_ptr<CGameObject>& pBillBoardObject) {
-		if (((CParticleObject*)pBillBoardObject.get())->CheckCapacity())
-			return true;
-		return false;
-		});
+	//it = std::find_if(m_pUpDownParticleObjects.begin(), m_pUpDownParticleObjects.end(), [](const std::unique_ptr<CGameObject>& pBillBoardObject) {
+	//	if (((CParticleObject*)pBillBoardObject.get())->CheckCapacity())
+	//		return true;
+	//	return false;
+	//	});
 
 
-	if (it != m_pUpDownParticleObjects.end())
-	{
-		ParticleUpDownParams particleUpdown_comp_params;
-		particleUpdown_comp_params.pObject = (*it).get();
-		particleUpdown_comp_params.xmf3Position = params.xmf3CollidePosition;
-		CMessageDispatcher::GetInst()->Dispatch_Message<ParticleUpDownParams>(MessageType::UPDATE_UPDOWNPARTICLE, &particleUpdown_comp_params, Damaged_Monster::GetInst());
-	}
+	//if (it != m_pUpDownParticleObjects.end())
+	//{
+	//	ParticleUpDownParams particleUpdown_comp_params;
+	//	particleUpdown_comp_params.pObject = (*it).get();
+	//	particleUpdown_comp_params.xmf3Position = params.xmf3CollidePosition;
+	//	CMessageDispatcher::GetInst()->Dispatch_Message<ParticleUpDownParams>(MessageType::UPDATE_UPDOWNPARTICLE, &particleUpdown_comp_params, Damaged_Monster::GetInst());
+	//}
 	
 	it = std::find_if(m_pBillBoardObjects.begin(), m_pBillBoardObjects.end(), [](const std::unique_ptr<CGameObject>& pBillBoardObject) {
 		if (!((CMultiSpriteObject*)pBillBoardObject.get())->GetEnable())
