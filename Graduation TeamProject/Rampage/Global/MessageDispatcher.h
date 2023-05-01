@@ -22,6 +22,10 @@ struct PlayerParams {
 	CGameObject* pPlayer;
 };
 
+struct MonsterParams {
+    CGameObject* pMonster;
+};
+
 struct SoundPlayParams {
 	MONSTER_TYPE monster_type = MONSTER_TYPE::NONE;
 	SOUND_CATEGORY sound_category = SOUND_CATEGORY::SOUND_SHOCK;
@@ -78,6 +82,10 @@ struct CollideParams {
 	XMFLOAT3 xmf3CollidePosition;
 };
 
+struct OnGroundParams {
+    XMFLOAT3 xmf3OnGroundPosition;
+};
+
 struct AttackSpriteCompParams {
 	CGameObject* pObject;
 	XMFLOAT3 xmf3Position;
@@ -102,16 +110,17 @@ public:
 	void SetEnable(bool bEnable) { m_bEnable = bEnable; }
 	virtual void Reset() { }
 
-	virtual void HandleMessage(const Message& message, const CollideParams& params) {}
-	virtual void HandleMessage(const Message& message, const PlayerParams& params) {}
-	virtual void HandleMessage(const Message& message, const SoundPlayParams& params) {}
-	virtual void HandleMessage(const Message& message, const CameraUpdateParams& params) {}
-	virtual void HandleMessage(const Message& message, const AnimationCompParams& params) {}
-	virtual void HandleMessage(const Message& message, const ParticleCompParams& params) {}
-	virtual void HandleMessage(const Message& message, const ImpactCompParams& params) {}
-	virtual void HandleMessage(const Message& message, const ParticleSmokeParams& params) {}
-	virtual void HandleMessage(const Message& message, const TerrainSpriteCompParams& params) {}
-	virtual void HandleMessage(const Message& message, const RegisterArticulationParams& params) {}
+    virtual void HandleMessage(const Message& message, const CollideParams& params) {}
+    virtual void HandleMessage(const Message& message, const OnGroundParams& params) {}
+    virtual void HandleMessage(const Message& message, const PlayerParams& params) {}
+    virtual void HandleMessage(const Message& message, const SoundPlayParams& params) {}
+    virtual void HandleMessage(const Message& message, const CameraUpdateParams& params) {}
+    virtual void HandleMessage(const Message& message, const AnimationCompParams& params) {}
+    virtual void HandleMessage(const Message& message, const ParticleCompParams& params) {}
+    virtual void HandleMessage(const Message& message, const ImpactCompParams& params) {}
+    virtual void HandleMessage(const Message& message, const ParticleSmokeParams& params) {}
+    virtual void HandleMessage(const Message& message, const TerrainSpriteCompParams& params) {}
+    virtual void HandleMessage(const Message& message, const RegisterArticulationParams& params) {}
 
 	virtual void HandleMessage(const Message& message, const ParticleUpDownParams& params) {}
 	virtual void HandleMessage(const Message& message, const ParticleTrailParams& params) {}
@@ -150,6 +159,14 @@ class SceneCollideListener : public IMessageListener {
 public:
 	void SetScene(CScene* pScene) { m_pScene = pScene; }
 	virtual void HandleMessage(const Message& message, const CollideParams& params);
+};
+
+// Define OnGroundListener
+class SceneOnGroundListener : public IMessageListener {
+    CScene* m_pScene;
+public:
+    void SetScene(CScene* pScene) { m_pScene = pScene; }
+    virtual void HandleMessage(const Message& message, const OnGroundParams& params);
 };
 
 // Define Sound Play component
@@ -317,42 +334,48 @@ enum ParticleType {
 
 #define MAX_PARTICLES				10000
 class ParticleComponent : public IMessageListener {
-	int m_nParticleNumber = MAX_PARTICLES;
-	int m_nEmitParticleNumber = 500;
-	int m_iParticleType = ParticleType::SPHERE_PARTICLE;
-	int m_nParticleIndex = 0;
-	XMFLOAT2 m_fSize = XMFLOAT2(3.f, 3.f);
-	float m_fAlpha = 1.f;
-	float m_fLifeTime = 0.2f;
-	float m_fSpeed = 20.f;
-	XMFLOAT3 m_xmf3Color = XMFLOAT3(1.f, 1.f, 1.f);
-	std::shared_ptr<CTexture> m_pTexture;
-public:
-	int& GetParticleNumber() { return m_nParticleNumber; }
-	int& GetParticleIndex() { return m_nParticleIndex; }
-	XMFLOAT2& GetSize() { return m_fSize; }
-	float& GetXSize() { return m_fSize.x; }
-	float& GetYSize() { return m_fSize.y; }
-	float& GetAlpha() { return m_fAlpha; }
-	float& GetLifeTime() { return m_fLifeTime; }
-	float& GetSpeed() { return m_fSpeed; }
-	XMFLOAT3& GetColor() { return m_xmf3Color; }
-	std::shared_ptr<CTexture>& GetTexture() { return m_pTexture; }
 
-	void SetParticleNumber(int nParticleNumber) { m_nParticleNumber = nParticleNumber; }
-	void SetParticleIndex(int nParticleIndex) { m_nParticleIndex = nParticleIndex; }
-	void SetParticleType(int iParticleType) { m_iParticleType = iParticleType; }
-	void SetSize(XMFLOAT2 fSize) { m_fSize = fSize; }
-	void SetSizeX(float fSize) { m_fSize.x = fSize; }
-	void SetSizeY(float fSize) { m_fSize.y = fSize; }
-	void SetAlpha(float fAlpha) { m_fAlpha = fAlpha; }
-	void SetLifeTime(float fLifeTime) { m_fLifeTime = fLifeTime; }
-	void SetSpeed(float fSpeed) { m_fSpeed = fSpeed; }
-	void SetColor(XMFLOAT3 xmf3Color) { m_xmf3Color = xmf3Color; }
-	void SetColorR(float r) { m_xmf3Color.x = r; }
-	void SetColorG(float g) { m_xmf3Color.y = g; }
-	void SetColorB(float b) { m_xmf3Color.z = b; }
-	void SetParticleTexture(std::shared_ptr<CTexture> pTexture) { m_pTexture = pTexture; }
+    int m_nParticleNumber = MAX_PARTICLES;
+    int m_nEmitParticleNumber = 500;
+    int m_iParticleType = ParticleType::SPHERE_PARTICLE;
+    int m_nParticleIndex = 0;
+    XMFLOAT2 m_fSize = XMFLOAT2(3.f, 3.f);
+    float m_fAlpha = 1.f;
+    float m_fLifeTime = 0.2f;
+    float m_fSpeed = 20.f;
+    XMFLOAT3 m_xmf3Color = XMFLOAT3(1.f, 1.f, 1.f);
+    std::shared_ptr<CTexture> m_pTexture;
+public:
+    ParticleComponent();
+
+public:
+    //int& GetParticleNumber() { return m_nParticleNumber; }
+    int& GetEmitParticleNumber() { return m_nEmitParticleNumber; }
+    int& GetParticleIndex() { return m_nParticleIndex; }
+    XMFLOAT2& GetSize() { return m_fSize; }
+    float& GetXSize() { return m_fSize.x; }
+    float& GetYSize() { return m_fSize.y; }
+    float& GetAlpha() { return m_fAlpha; }
+    float& GetLifeTime() { return m_fLifeTime; }
+    float& GetSpeed() { return m_fSpeed; }
+    XMFLOAT3& GetColor() { return m_xmf3Color; }
+    std::shared_ptr<CTexture>& GetTexture() { return m_pTexture; }
+
+    void SetEmitParticleNumber(int iEmitParticleNumber) { m_nEmitParticleNumber = iEmitParticleNumber; }
+    void SetParticleNumber(int nParticleNumber) { m_nParticleNumber = nParticleNumber; }
+    void SetParticleIndex(int nParticleIndex) { m_nParticleIndex = nParticleIndex; }
+    void SetParticleType(int iParticleType) { m_iParticleType = iParticleType; }
+    void SetSize(XMFLOAT2 fSize) { m_fSize = fSize; }
+    void SetSizeX(float fSize) { m_fSize.x = fSize; }
+    void SetSizeY(float fSize) { m_fSize.y = fSize; }
+    void SetAlpha(float fAlpha) { m_fAlpha = fAlpha; }
+    void SetLifeTime(float fLifeTime) { m_fLifeTime = fLifeTime; }
+    void SetSpeed(float fSpeed) { m_fSpeed = fSpeed; }
+    void SetColor(XMFLOAT3 xmf3Color) { m_xmf3Color = xmf3Color; }
+    void SetColorR(float r) { m_xmf3Color.x = r; }
+    void SetColorG(float g) { m_xmf3Color.y = g; }
+    void SetColorB(float b) { m_xmf3Color.z = b; }
+    void SetParticleTexture(std::shared_ptr<CTexture> pTexture) { m_pTexture = pTexture; }
 
 	virtual void HandleMessage(const Message& message, const ParticleCompParams& params);
 };
@@ -392,16 +415,16 @@ inline std::vector<std::string> TrailComponent::s_MainTextureNames = { "Image/T_
 inline std::vector<std::string> TrailComponent::s_NoiseTextureNames = { "Image/VAP1_Noise_4", "Image/VAP1_Noise_14" };
 
 class SmokeParticleComponent : public IMessageListener {
-	int m_nParticleNumber = 20;
-	int m_iParticleType = ParticleType::SMOKE_PARTICLE;
-	int m_nParticleIndex = 0;
-	XMFLOAT2 m_fSize = XMFLOAT2(3.f, 3.f);
-	float m_fAlpha = 1.5f;
-	float m_fLifeTime = 1.f;
-	float m_fSpeed = 10.f;
-	int m_iIndex = 0;
-	XMFLOAT3 m_xmf3Color = XMFLOAT3(0.191f * 1.5f, 0.167f * 1.5f, 0.096f * 1.5f);
-	//XMFLOAT3 m_xmf3Color = XMFLOAT3(1.f, 1.f, 1.f);
+    int m_nParticleNumber = 20;
+    int m_iParticleType = ParticleType::SMOKE_PARTICLE;
+    int m_nParticleIndex = 0;
+    XMFLOAT2 m_fSize = XMFLOAT2(3.f, 3.f);
+    float m_fAlpha = 1.5f;
+    float m_fLifeTime = 1.f;
+    float m_fSpeed = 10.f;
+    int m_iIndex = 0;
+    XMFLOAT3 m_xmf3Color = XMFLOAT3(0.191f * 2.f, 0.167f * 2.f, 0.096f * 2.f);
+    //XMFLOAT3 m_xmf3Color = XMFLOAT3(1.f, 1.f, 1.f);
 public:
 	int& GetParticleNumber() { return m_nParticleNumber; }
 	int& GetParticleIndex() { return m_nParticleIndex; }

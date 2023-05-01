@@ -40,7 +40,7 @@ private:
 
 	std::unique_ptr<CParticleShader> m_pParticleShader;
 	std::vector<std::unique_ptr<CGameObject>> m_pParticleObjects;
-	std::vector<std::unique_ptr<CGameObject>> m_pUpDownParticleObjects;
+	//std::vector<std::unique_ptr<CGameObject>> m_pUpDownParticleObjects;
 	std::vector<std::unique_ptr<CGameObject>> m_pSpriteAttackObjects;
 	std::vector<std::unique_ptr<CGameObject>> m_pTerrainSpriteObject;
 	std::unique_ptr<CGameObject> m_pTrailParticleObjects;
@@ -105,4 +105,22 @@ public:
 
 	void LoadSceneFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, char* pstrFileName);
 	virtual void HandleCollision(const CollideParams& params);
+	virtual void HandleOnGround(const OnGroundParams& params);
+
+
+	//std::vector<std::unique_ptr<CGameObject>>::iterator TerrainSpriteit = std::find_if(m_pTerrainSpriteObject.begin(), m_pTerrainSpriteObject.end(), [](const std::unique_ptr<CGameObject>& pTerrainSpriteObject) {
+	//	if (!((CMultiSpriteObject*)pTerrainSpriteObject.get())->GetEnable())
+	//		return true;
+	//	return false;
+	//	});
+
+	//if (TerrainSpriteit != m_pTerrainSpriteObject.end())
+	//{
+	//	TerrainSpriteCompParams AttackSprite_comp_params;
+	//	AttackSprite_comp_params.pObject = (*TerrainSpriteit).get();
+	//	AttackSprite_comp_params.xmf3Position = params.xmf3CollidePosition;
+	//	CMessageDispatcher::GetInst()->Dispatch_Message<TerrainSpriteCompParams>(MessageType::UPDATE_SPRITE, &AttackSprite_comp_params, ((CPlayer*)m_pPlayer)->m_pStateMachine->GetCurrentState());
+	//}
+
+
 };

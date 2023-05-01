@@ -65,7 +65,7 @@ void CMonster::CheckIsPlayerInFrontOfThis(XMFLOAT3 xmf3PlayerPosition)
 		m_xmf3ChasingVec = Vector3::Normalize(xmf3ToPlayerVec);
 
 		// 플레이어가 몬스터의 앞에 있음
-		if (m_pStateMachine->GetCurrentState() != Chasing_Monster::GetInst())
+		if (m_pStateMachine->GetCurrentState() != Chasing_Monster::GetInst() && m_pStateMachine->GetCurrentState() != Spawn_Monster::GetInst())
 			m_pStateMachine->ChangeState(Chasing_Monster::GetInst());
 	}
 }
@@ -297,4 +297,38 @@ CMonsterRootAnimationController::~CMonsterRootAnimationController()
 
 void CMonsterRootAnimationController::OnRootMotion(CGameObject* pRootGameObject, float fTimeElapsed)
 {
+}
+
+bool CMonsterPool::SetNonActiveMonster(CMonster* pMonster) // Active 여부 반환
+{
+	// NonActiveMonster 있는 몬스터를 Enable true 변경 및 
+	auto it = std::find(m_pNonActiveMonsters.begin(), m_pNonActiveMonsters.end(), pMonster);
+	if ((it == m_pNonActiveMonsters.end())) {
+		pMonster->SetEnable(false);
+		m_pNonActiveMonsters.push_back(pMonster);
+		return true;
+	}
+	return false;
+}
+
+bool CMonsterPool::SetActiveMonster(XMFLOAT3 xmfPosition)
+{
+	// NonActiveMonster 있는 몬스터를 Enable true 변경 및 
+	if (m_pNonActiveMonsters.size() > 0) {
+		CMonster* pMonster = dynamic_cast<CMonster*>(m_pNonActiveMonsters.back());
+		m_pNonActiveMonsters.pop_back();
+		pMonster->SetEnable(true);
+		pMonster->SetPosition(xmfPosition);
+		pMonster->m_pStateMachine->ChangeState(Spawn_Monster::GetInst());
+		return true;
+	}
+	return false;
+}
+
+void CMonsterPool::SpawnMonster(int MonsterN, XMFLOAT3* xmfPositions)
+{
+	// 개수, 위치배열, 방향
+	// 플레이어 위치 근처
+	for (int i = 0; i < MonsterN; i++)
+		SetActiveMonster(XMFLOAT3(xmfPositions[i]));
 }

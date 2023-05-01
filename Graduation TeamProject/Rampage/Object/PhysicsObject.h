@@ -20,6 +20,8 @@ protected:
 	float m_fSpeedMperS;
 	float m_fSpeedUperS;
 	LPVOID m_pUpdatedContext = NULL;
+	bool m_bOnGround = false; // ¶¥¿¡ ´êÀºÁö ¿©ºÎ
+
 public:
 	virtual void UpdateMatrix();
 	virtual void UpdateTransform(XMFLOAT4X4* pxmf4x4Parent = NULL);
@@ -44,6 +46,8 @@ public:
 	virtual XMFLOAT3 GetRight();
 	virtual XMFLOAT3 GetScale() { return m_xmf3Scale; };
 	virtual XMFLOAT3 GetVelocity();
+
+	bool GetOnGround();
 
 	float& GetPitch() { return(m_fPitch); }
 	float& GetRoll() { return(m_fRoll); }

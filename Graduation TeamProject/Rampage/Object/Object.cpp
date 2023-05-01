@@ -43,6 +43,10 @@ void CGameObject::ReleaseUploadBuffers()
 	if (m_pMesh)
 		m_pMesh->ReleaseUploadBuffers();
 }
+void CGameObject::SetEnable(bool bEnable)
+{
+	m_bEnable = bEnable;
+}
 void CGameObject::SetChild(std::shared_ptr<CGameObject> pChild, bool bReferenceUpdate)
 {
 	if (m_pChild)
@@ -97,10 +101,14 @@ void CGameObject::ChangeTexture(std::shared_ptr<CTexture> pTexture)
 
 void CGameObject::Update(float fTimeElapsed)
 {
+	if (!m_bEnable)
+		return;
 	Animate(fTimeElapsed);
 }
 void CGameObject::Animate(float fTimeElapsed)
 {
+	if (!m_bEnable)
+		return;
 	if (m_pSkinnedAnimationController) m_pSkinnedAnimationController->AdvanceTime(fTimeElapsed, this);
 
 	if (m_pSibling) m_pSibling->Animate(fTimeElapsed);
@@ -108,6 +116,8 @@ void CGameObject::Animate(float fTimeElapsed)
 }
 void CGameObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, bool b_UseTexture, CCamera* pCamera)
 {
+	if (!m_bEnable)
+		return;
 	if (m_pSkinnedAnimationController) m_pSkinnedAnimationController->UpdateShaderVariables(pd3dCommandList);
 
 	if (m_pMesh)

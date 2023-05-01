@@ -16,6 +16,20 @@ public:
     virtual void Exit(CMonster* monster);
 };
 
+class Spawn_Monster : public CState<CMonster>
+{
+private:
+    float m_fMaxSpawnTime = 5.0f;
+public:
+    DECLARE_SINGLE(Spawn_Monster);
+    Spawn_Monster();
+    ~Spawn_Monster();
+    virtual void Enter(CMonster* monster);
+    virtual void Execute(CMonster* monster, float fElapsedTime);
+    virtual void Animate(CMonster* monster, float fElapsedTime);
+    virtual void Exit(CMonster* monster);
+};
+
 class Idle_Monster : public CState<CMonster>
 {
 private:
@@ -92,6 +106,8 @@ public:
 
 class Dead_Monster : public CState<CMonster>
 {
+private:
+    float m_fMaxDeadTime = 23.f;
 public:
     DECLARE_SINGLE(Dead_Monster);
     virtual void Enter(CMonster* monster);
