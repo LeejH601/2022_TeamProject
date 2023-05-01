@@ -48,6 +48,10 @@ void Spawn_Monster::Animate(CMonster* monster, float fElapsedTime)
 	monster->Animate(fElapsedTime);
 }
 
+void Spawn_Monster::OnRootMotion(CMonster* monster, float fTimeElapsed)
+{
+}
+
 void Spawn_Monster::Exit(CMonster* monster)
 {
 }
