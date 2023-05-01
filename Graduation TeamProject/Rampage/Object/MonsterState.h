@@ -34,7 +34,7 @@ public:
 class Idle_Monster : public CState<CMonster>
 {
 private:
-    float m_fMaxIdleTime = 1.0f;
+    float m_fMaxIdleTime = 1.5f;
 public:
     DECLARE_SINGLE(Idle_Monster);
     Idle_Monster();

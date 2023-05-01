@@ -1,6 +1,7 @@
 #pragma once
 #include <list>
 #include "Scene.h"
+#include "..\Global\Locator.h"
 #include "..\Object\Object.h"
 #include "..\Object\Light.h"
 #include "..\Object\Terrain.h"
@@ -65,6 +66,8 @@ private:
 	CCamera* m_pCurrentCamera = NULL;
 
 	POINT m_ptOldCursorPos;
+
+	MOUSE_CUROSR_MODE m_CurrentMouseCursorMode = MOUSE_CUROSR_MODE::FLOATING_MODE;
 
 	DissolveParams* m_pcbMappedDisolveParams = nullptr;
 	ComPtr<ID3D12Resource> m_pd3dcbDisolveParams = nullptr;

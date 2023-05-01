@@ -20,9 +20,12 @@ CMonster::CMonster()
 
 	m_fHP = 100.0f;
 
-	m_fSpeedKperH = 2.0f;
+	m_fSpeedKperH = 1.0f;
 	m_fSpeedMperS = m_fSpeedKperH * 1000.0f / 3600.0f;
-	m_fSpeedUperS = m_fSpeedMperS * 8.0f / 1.0f;
+	m_fSpeedUperS = m_fSpeedMperS * 100.0f / 4.0f;
+
+	m_fAttackRange = 5.f;
+	m_fSensingRange = 40.f;
 
 	std::unique_ptr<PlayerAttackListener> pCollisionComponent = std::make_unique<PlayerAttackListener>();
 	pCollisionComponent->SetObject(this);
@@ -199,6 +202,13 @@ COrcObject::COrcObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3d
 {
 	m_MonsterType = MONSTER_TYPE::ORC;
 
+	m_fSpeedKperH = 1.0f;
+	m_fSpeedMperS = m_fSpeedKperH * 1000.0f / 3600.0f;
+	m_fSpeedUperS = m_fSpeedMperS * 100.0f / 4.0f;
+
+	m_fAttackRange = 8.f;
+	m_fSensingRange = 30.f;
+
 	CLoadedModelInfo* pOrcModel = CModelManager::GetInst()->GetModelInfo("Object/Orc.bin");;
 	if (!pOrcModel) pOrcModel = CModelManager::GetInst()->LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, "Object/Orc.bin");
 
@@ -232,6 +242,10 @@ CGoblinObject::CGoblinObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 
 	m_fStunTime = 0.0f;
 	m_fStunStartTime = 0.2f;
+
+	m_fSpeedKperH = 1.5f;
+	m_fSpeedMperS = m_fSpeedKperH * 1000.0f / 3600.0f;
+	m_fSpeedUperS = m_fSpeedMperS * 100.0f / 4.0f;
 
 	CLoadedModelInfo* pGoblinModel = CModelManager::GetInst()->GetModelInfo("Object/Goblin.bin");;
 	if (!pGoblinModel) pGoblinModel = CModelManager::GetInst()->LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, "Object/Goblin.bin");

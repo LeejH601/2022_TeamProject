@@ -236,13 +236,13 @@ void Chasing_Monster::Execute(CMonster* monster, float fElapsedTime)
 	XMFLOAT3 xmf3LookVec = Vector3::Add(monster->GetPosition(), monster->GetChasingVec());
 	monster->SetLookAt(xmf3LookVec);
 
-	if (monster->m_fToPlayerLength < 5.0f)
+	if (monster->m_fToPlayerLength < monster->m_fAttackRange)
 	{
 		// 공격
 		monster->m_pStateMachine->ChangeState(Attack_Monster::GetInst());
 	}
 
-	if (monster->m_fToPlayerLength > 35.0f)
+	if (monster->m_fToPlayerLength > monster->m_fSensingRange)
 	{
 		// 놓침
 		monster->m_pStateMachine->ChangeState(Idle_Monster::GetInst());

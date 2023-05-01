@@ -12,7 +12,6 @@
 #include "..\Shader\DepthRenderShader.h"
 #include "..\Object\Monster.h"
 #include "..\Object\TextureManager.h"
-#include "..\Global\Locator.h"
 #include "..\Object\PlayerParticleObject.h"
 
 #include <PxForceMode.h>
@@ -441,6 +440,21 @@ SCENE_RETURN_TYPE CMainTMPScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMe
 		switch (wParam)
 		{
 		case VK_BACK:
+			if (m_CurrentMouseCursorMode == MOUSE_CUROSR_MODE::THIRD_FERSON_MODE)
+			{
+				m_pCurrentCamera = m_pFloatingCamera.get();
+				Locator.SetMouseCursorMode(MOUSE_CUROSR_MODE::FLOATING_MODE);
+				m_CurrentMouseCursorMode = MOUSE_CUROSR_MODE::FLOATING_MODE;
+				PostMessage(hWnd, WM_ACTIVATE, 0, 0);
+
+				while (CursorHideCount > 0)
+				{
+					CursorHideCount--;
+					ShowCursor(true);
+				}
+				ClipCursor(NULL);
+			}
+
 			return SCENE_RETURN_TYPE::RETURN_PREVIOUS_SCENE;
 		case '1':
 		{
@@ -450,6 +464,7 @@ SCENE_RETURN_TYPE CMainTMPScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMe
 
 			m_pCurrentCamera = m_pFloatingCamera.get();
 			Locator.SetMouseCursorMode(MOUSE_CUROSR_MODE::FLOATING_MODE);
+			m_CurrentMouseCursorMode = MOUSE_CUROSR_MODE::FLOATING_MODE;
 			PostMessage(hWnd, WM_ACTIVATE, 0, 0);
 
 			while (CursorHideCount > 0)
@@ -462,12 +477,14 @@ SCENE_RETURN_TYPE CMainTMPScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMe
 		break;
 		case '2':
 		{
+
 			RECT screenRect;
 			GetWindowRect(hWnd, &screenRect);
 			m_ScreendRect = screenRect;
 
 			m_pCurrentCamera = m_pMainSceneCamera.get();
 			Locator.SetMouseCursorMode(MOUSE_CUROSR_MODE::THIRD_FERSON_MODE);
+			m_CurrentMouseCursorMode = MOUSE_CUROSR_MODE::THIRD_FERSON_MODE;
 			PostMessage(hWnd, WM_ACTIVATE, 0, 0);
 
 			if (CursorHideCount < 1) {
