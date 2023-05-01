@@ -13,11 +13,6 @@
 #include "..\Object\MonsterState.h"
 #include "..\Object\SwordTrailObject.h"
 
-#define MAX_PARTICLE_OBJECT 1
-#define MAX_RECOVERYPARTICLE_OBJECT 50
-#define MAX_ATTACKSPRITE_OBJECT 50
-#define MAX_TERRAINSPRITE_OBJECT 1
-
 void CSimulatorScene::OnPreRender(ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed)
 {
 	if (m_pDepthRenderShader)
@@ -364,16 +359,7 @@ void CSimulatorScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 	// 4->HIT
 	// 5->IDLE
 	std::unique_ptr<CMonster> m_pDummyEnemy = std::make_unique<CGoblinObject>(pd3dDevice, pd3dCommandList, 1);
-	m_pDummyEnemy->SetPosition(XMFLOAT3(50 + offset.x, 100, 51 + offset.z));
-	m_pDummyEnemy->SetScale(4.0f, 4.0f, 4.0f);
-	m_pDummyEnemy->Rotate(0.0f, -90.0f, 0.0f);
-	m_pDummyEnemy->m_fHP = FLT_MAX;
-	m_pDummyEnemy->m_bIsDummy = true;
-	m_pDummyEnemy->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
-	m_pEnemys.push_back(std::move(m_pDummyEnemy));
-
-	m_pDummyEnemy = std::make_unique<CGoblinObject>(pd3dDevice, pd3dCommandList, 1);
-	m_pDummyEnemy->SetPosition(XMFLOAT3(50 + offset.x, 100, 49 + offset.z));
+	m_pDummyEnemy->SetPosition(XMFLOAT3(50 + offset.x, 100, 50 + offset.z));
 	m_pDummyEnemy->SetScale(4.0f, 4.0f, 4.0f);
 	m_pDummyEnemy->Rotate(0.0f, -90.0f, 0.0f);
 	m_pDummyEnemy->m_fHP = FLT_MAX;
@@ -388,6 +374,7 @@ void CSimulatorScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 	m_pMainCharacter->SetPosition(XMFLOAT3(45 + offset.x, 100, 50 + offset.z));
 	m_pMainCharacter->SetScale(4.0f, 4.0f, 4.0f);
 	m_pMainCharacter->Rotate(0.0f, 90.0f, 0.0f);
+	m_pMainCharacter->m_pSkinnedAnimationController->m_bRootMotion = false;
 	m_pMainCharacter->m_pStateMachine->ChangeState(Idle_Player::GetInst());
 
 	((CDepthRenderShader*)m_pDepthRenderShader.get())->SetLight(m_pLight->GetLights());

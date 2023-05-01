@@ -1362,7 +1362,7 @@ void CImGuiManager::ShowTrailManager(CState<CPlayer>* pCurrentAnimation)
 
 
 	int nCurveCache = pTrailComponent->m_nCurves;
-	if (ImGui::InputInt("색상 커브 개수##TrailEffect", &pTrailComponent->m_nCurves, 1)) {
+	if (ImGui::InputInt(U8STR("색상 커브 개수##TrailEffect"), &pTrailComponent->m_nCurves, 1)) {
 		if (pTrailComponent->m_nCurves <= 8 && pTrailComponent->m_nCurves >= 2) {
 			if (pTrailComponent->m_nCurves > nCurveCache) {
 				float size = 1.0f / nCurveCache;

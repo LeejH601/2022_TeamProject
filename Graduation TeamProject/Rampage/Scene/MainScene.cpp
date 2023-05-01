@@ -410,9 +410,6 @@ bool CMainTMPScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM 
 	case WM_RBUTTONDOWN:
 		::SetCapture(hWnd);
 		::GetCursorPos(&m_ptOldCursorPos);
-
-		if(m_pPlayer)
-			((CPlayer*)m_pPlayer)->m_bAttack2 = true;
 		break;
 	case WM_LBUTTONUP:
 	case WM_RBUTTONUP:
