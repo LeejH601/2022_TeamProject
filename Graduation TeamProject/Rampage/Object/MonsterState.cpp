@@ -326,7 +326,13 @@ void Dead_Monster::Enter(CMonster* monster)
 		index++;
 	}
 	if (monster->m_bArticulationOnPxScene) {
-
+		RegisterArticulationParams Request_params;
+		Request_params.pObject = monster;
+		XMFLOAT3 force = monster->GetHitterVec();
+		force = Vector3::ScalarProduct(force, 300.0f, false);
+		Request_params.m_force = force;
+		CMessageDispatcher::GetInst()->Dispatch_Message<RegisterArticulationParams>(MessageType::REQUEST_REGISTERARTI, &Request_params, nullptr);
+		monster->m_bArticulationOnPxScene = true;
 	}
 	else {
 		RegisterArticulationParams Request_params;
@@ -348,7 +354,7 @@ void Dead_Monster::Execute(CMonster* monster, float fElapsedTime)
 		if (monster->m_pStateMachine->GetCurrentState() != Spawn_Monster::GetInst())
 		{
 			CMonsterPool::GetInst()->SetNonActiveMonster(monster);
-
+			monster->TestDissolvetime = 0.0f;
 		}
 
 	}

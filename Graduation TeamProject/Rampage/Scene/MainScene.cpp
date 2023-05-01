@@ -355,7 +355,8 @@ void CMainTMPScene::RegisterArticulations()
 {
 	for (RegisterArticulationParams& param : m_lRequestObjects) {
 		CGameObject* obj = param.pObject;
-		Locator.GetPxScene()->addArticulation(*obj->m_pArticulation);
+		bool flag = false;
+		flag = Locator.GetPxScene()->addArticulation(*obj->m_pArticulation);
 
 		int index = 0;
 		for (XMFLOAT4X4& world : obj->m_AritculatCacheMatrixs) {
@@ -366,8 +367,13 @@ void CMainTMPScene::RegisterArticulations()
 			world = Matrix4x4::Multiply(XMMatrixScaling(scale.x, scale.y, scale.z), world);
 		}
 
-		obj->m_pArticulationCache = obj->m_pArticulation->createCache();
-		obj->m_nArtiCache = obj->m_pArticulation->getCacheDataSize();
+		if (flag) {
+			obj->m_pArticulationCache = obj->m_pArticulation->createCache();
+			obj->m_nArtiCache = obj->m_pArticulation->getCacheDataSize();
+		}
+		else {
+
+		}
 
 		obj->m_bSimulateArticulate = false;
 		obj->Animate(0.0f);
@@ -966,11 +972,11 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 	//	((CParticleObject*)m_pUpDownParticleObjects[i].get())->UpdateShaderVariables(pd3dCommandList, fCurrentTime, fTimeElapsed);
 	//	((CParticleObject*)m_pUpDownParticleObjects[i].get())->Render(pd3dCommandList, nullptr, m_pParticleShader.get());
 	//}
-	
+
 	((CParticleObject*)m_pTrailParticleObjects.get())->Update(fTimeElapsed);
 	((CParticleObject*)m_pTrailParticleObjects.get())->UpdateShaderVariables(pd3dCommandList, fCurrentTime, fTimeElapsed);
 	((CParticleObject*)m_pTrailParticleObjects.get())->Render(pd3dCommandList, nullptr, m_pParticleShader.get());
-	
+
 	CModelShader::GetInst()->Render(pd3dCommandList, 0);
 
 	if (m_pPlayer)
@@ -1106,7 +1112,7 @@ void CMainTMPScene::OnPostRender()
 	}
 
 	((CParticleObject*)m_pSmokeObject.get())->OnPostRender();
-	
+
 	//for (int i = 0; i < m_pUpDownParticleObjects.size(); ++i)
 	//{
 	//	((CParticleObject*)m_pUpDownParticleObjects[i].get())->OnPostRender();

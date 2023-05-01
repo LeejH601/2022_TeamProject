@@ -469,6 +469,7 @@ void TrailComponent::HandleMessage(const Message& message, const TrailUpdatePara
 			pTrail->m_fG_CurvePoints[i] = this->m_fG_CurvePoints[i];
 			pTrail->m_fColorCurveTimes[i] = this->m_fColorCurveTimes_R[i];
 		}
+		pTrail->m_bIsUpdateTrailVariables = GetEnable();
 	}
 }
 void SceneOnGroundListener::HandleMessage(const Message& message, const OnGroundParams& params)

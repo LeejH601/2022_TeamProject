@@ -331,15 +331,12 @@ void Atk1_Player::Enter(CPlayer* player)
 	SoundPlayParam.sound_category = SOUND_CATEGORY::SOUND_SHOOT;
 	CMessageDispatcher::GetInst()->Dispatch_Message<SoundPlayParams>(MessageType::PLAY_SOUND, &SoundPlayParam, this);
 
-	if (player->m_pSwordTrailReference)
-		dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[0].get())->m_bIsUpdateTrailVariables = true;
 
 	TrailUpdateParams trailParam;
 	trailParam.pObject = player->m_pSwordTrailReference[0].get();
 	CMessageDispatcher::GetInst()->Dispatch_Message<TrailUpdateParams>(MessageType::UPDATE_SWORDTRAIL, &trailParam, this);
 
 	if (player->m_pSwordTrailReference) {
-		dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[0].get())->m_bIsUpdateTrailVariables = true;
 		dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[0].get())->m_faccumulateTime = 0.0f;
 	}
 }
@@ -439,7 +436,6 @@ void Atk2_Player::Enter(CPlayer* player)
 	CMessageDispatcher::GetInst()->Dispatch_Message<TrailUpdateParams>(MessageType::UPDATE_SWORDTRAIL, &trailParam, this);
 
 	if (player->m_pSwordTrailReference) {
-		dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[1].get())->m_bIsUpdateTrailVariables = true;
 		dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[1].get())->m_faccumulateTime = 0.0f;
 	}
 }
@@ -567,7 +563,6 @@ void Atk3_Player::Enter(CPlayer* player)
 	CMessageDispatcher::GetInst()->Dispatch_Message<TrailUpdateParams>(MessageType::UPDATE_SWORDTRAIL, &trailParam, this);
 
 	if (player->m_pSwordTrailReference) {
-		dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[2].get())->m_bIsUpdateTrailVariables = true;
 		dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[2].get())->m_faccumulateTime = 0.0f;
 	}
 }

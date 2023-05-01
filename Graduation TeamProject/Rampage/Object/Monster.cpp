@@ -111,7 +111,7 @@ void CMonster::Update(float fTimeElapsed)
 	if (!m_bDissolved) {
 		if (m_bSimulateArticulate) {
 			TestDissolvetime += fTimeElapsed;
-			if (TestDissolvetime > 20.0f)
+			if (TestDissolvetime > 5.0f)
 				m_bDissolved = true;
 		}
 	}
