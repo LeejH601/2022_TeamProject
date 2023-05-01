@@ -26,6 +26,9 @@ public:
 	float m_fWanderTime;
 	float m_fDeadTime;
 	float m_fToPlayerLength;
+
+	float m_fAttackRange;
+	float m_fSensingRange;
 	
 	float m_fStunTime;
 	float m_fStunStartTime;

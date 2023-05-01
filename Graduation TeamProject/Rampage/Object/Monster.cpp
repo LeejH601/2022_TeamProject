@@ -24,6 +24,9 @@ CMonster::CMonster()
 	m_fSpeedMperS = m_fSpeedKperH * 1000.0f / 3600.0f;
 	m_fSpeedUperS = m_fSpeedMperS * 100.0f / 4.0f;
 
+	m_fAttackRange = 5.f;
+	m_fSensingRange = 40.f;
+
 	std::unique_ptr<PlayerAttackListener> pCollisionComponent = std::make_unique<PlayerAttackListener>();
 	pCollisionComponent->SetObject(this);
 	m_pListeners.push_back(std::move(pCollisionComponent));
@@ -202,6 +205,9 @@ COrcObject::COrcObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3d
 	m_fSpeedKperH = 1.0f;
 	m_fSpeedMperS = m_fSpeedKperH * 1000.0f / 3600.0f;
 	m_fSpeedUperS = m_fSpeedMperS * 100.0f / 4.0f;
+
+	m_fAttackRange = 8.f;
+	m_fSensingRange = 30.f;
 
 	CLoadedModelInfo* pOrcModel = CModelManager::GetInst()->GetModelInfo("Object/Orc.bin");;
 	if (!pOrcModel) pOrcModel = CModelManager::GetInst()->LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, "Object/Orc.bin");
