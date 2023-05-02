@@ -1,7 +1,9 @@
+#include <math.h>
 #include "../Object/Texture.h"
 #include "BillBoardObject.h"
 #include "../Object/Mesh.h"
 #include "../Global/Camera.h"
+
 
 CBillBoardObject::CBillBoardObject(std::shared_ptr<CTexture> pSpriteTexture, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CShader* pShader, float fSize, bool bBillBoard)
 {
@@ -13,8 +15,6 @@ CBillBoardObject::CBillBoardObject(std::shared_ptr<CTexture> pSpriteTexture, ID3
 
 	SetTexture(pSpriteTexture);
 	SetMesh(std::make_shared<CSpriteMesh>(pd3dDevice, pd3dCommandList, fSize, bBillBoard));
-
-
 }
 
 CBillBoardObject::~CBillBoardObject()
@@ -92,28 +92,25 @@ void CMultiSpriteObject::AnimateRowColumn(float fTimeElapsed)
 	{
 		int m_nRows = m_ppMaterials[0]->GetTexture()->GetRow();
 		int m_nCols = m_ppMaterials[0]->GetTexture()->GetColumn();
+		
+		if (fTimeElapsed >= 0.0f)
+		{
+			m_fAccumulatedTime += fTimeElapsed;
+
+			float fraction = std::fmodf(m_fAccumulatedTime/ m_fLifeTime, 1.0f);
+			interval = 1.0f / (m_nRows * m_nCols);
+
+			m_nCol = (int)(fraction / (interval * m_nRows));
+			float remainvalue = (fraction / (interval * m_nRows)) - m_nCol;
+			m_nRow = (int)(remainvalue * m_nRows);
+
+			if(m_fAccumulatedTime > m_fLifeTime)
+				m_bEnable = false;
+		}
 		m_xmf4x4World._11 = 1.0f / float(m_nRows);
 		m_xmf4x4World._22 = 1.0f / float(m_nCols);
 		m_xmf4x4World._31 = float(m_nRow) / float(m_nRows);
 		m_xmf4x4World._32 = float(m_nCol) / float(m_nCols);
-		if (fTimeElapsed <= 0.0f)
-		{
-			if ((m_nRow + 1) == m_nRows && (m_nCol + 1) == m_nCols) 
-			{
-				m_nRow = 0;
-				m_nCol = 0;
-				m_bEnable = false;
-			}
-			else
-			{
-				if (++m_nCol == m_nCols) {
-					m_nRow++;
-					m_nCol = 0;
-				}
-				if (m_nRow == m_nRows)
-					m_nRow = 0;
-			}
-		}
 	}
 	
 }
@@ -123,6 +120,7 @@ void CMultiSpriteObject::SetEnable(bool bEnable)
 	CBillBoardObject::SetEnable(bEnable);
 	m_nRow = 0;
 	m_nCol = 0;
+	m_fAccumulatedTime = 0.0f;
 }
 
 
@@ -166,7 +164,8 @@ void CMultiSpriteObject::Animate(float fTimeElapsed)
 		CBillBoardObject::Animate(fTimeElapsed);
 
 		m_fTime -= fTimeElapsed * m_fSpeed;
-		AnimateRowColumn(m_fTime);
+		//AnimateRowColumn(m_fTime);
+		AnimateRowColumn(fTimeElapsed);
 
 		if (m_fTime <= 0.f)
 			m_fTime = 0.5f;

@@ -72,6 +72,8 @@ protected:
 	int 							m_nCol = 0;
 	//int								m_nMaxCol = 1; // 최대 출력 열 지정
 
+	float m_fAccumulatedTime = 0.0f;
+	float interval;
 };
 
 class CTerrainSpriteObject : public CMultiSpriteObject
