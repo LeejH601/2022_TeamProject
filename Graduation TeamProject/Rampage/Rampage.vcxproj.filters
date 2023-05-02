@@ -420,8 +420,12 @@
     <ClInclude Include="Object\MonsterState.h">
       <Filter>Object\State</Filter>
     </ClInclude>
-    <ClInclude Include="ImGui\implot.h" />
-    <ClInclude Include="ImGui\implot_internal.h" />
+    <ClInclude Include="ImGui\implot.h">
+      <Filter>ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="ImGui\implot_internal.h">
+      <Filter>ImGui</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shader\PlayerPixelShader.hlsl" />
