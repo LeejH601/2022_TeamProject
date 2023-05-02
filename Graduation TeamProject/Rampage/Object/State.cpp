@@ -280,10 +280,10 @@ void Atk1_Player::SpawnTrailParticle(CPlayer* player)
 {
 	if (player->m_fTime > player->m_fMaxTime)
 	{
-		player->m_fMaxTime = 0.005f;
+		player->m_fMaxTime = 0.01f;
 		// 0.35 Ω√¿€
 		if (0.35f < player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition &&
-			0.45f > player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition)
+			0.5f > player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition)
 		{
 			ParticleTrailParams ParticleTrail_comp_params;
 			CGameObject* pWeapon = player->FindFrame("Weapon_r");
@@ -300,7 +300,7 @@ void Atk1_Player::SpawnTrailParticle(CPlayer* player)
 			xmf3Direction = player->GetATKDirection();
 
 			xmf3Position = ((CKnightPlayer*)player)->GetWeaponMeshBoundingBox().Center;
-			xmf3Position = Vector3::Add(xmf3Position, Vector3::Normalize(xmf3Direction), 4.5f);
+			xmf3Position = Vector3::Add(xmf3Position, Vector3::Normalize(xmf3Direction), -4.f);
 
 			ParticleTrail_comp_params.pObject = CPlayerParticleObject::GetInst()->GetTrailParticleObjects();
 			ParticleTrail_comp_params.xmf3Position = xmf3Position;
@@ -353,7 +353,7 @@ void Atk1_Player::Execute(CPlayer* player, float fElapsedTime)
 		player->m_pStateMachine->ChangeState(Idle_Player::GetInst());
 	}
 
-	SpawnTrailParticle(player);
+	//SpawnTrailParticle(player);
 }
 
 void Atk1_Player::Animate(CPlayer* player, float fElapsedTime)
@@ -452,7 +452,7 @@ void Atk2_Player::Execute(CPlayer* player, float fElapsedTime)
 		player->m_pStateMachine->ChangeState(Idle_Player::GetInst());
 	}
 
-	SpawnTrailParticle(player);
+	//SpawnTrailParticle(player);
 }
 
 void Atk2_Player::Animate(CPlayer* player, float fElapsedTime)
