@@ -241,6 +241,7 @@ void CKnightPlayer::Animate(float fTimeElapsed)
 	}
 	OnUpdateCallback(fTimeElapsed);
 }
+
 void CKnightPlayer::OnUpdateCallback(float fTimeElapsed)
 {
 	if (m_pUpdatedContext)
@@ -252,14 +253,18 @@ void CKnightPlayer::OnUpdateCallback(float fTimeElapsed)
 			m_pSkinnedAnimationController->m_pRootMotionObject->GetWorld()._42,
 			m_pSkinnedAnimationController->m_pRootMotionObject->GetWorld()._43
 		};
+		XMFLOAT3 xmf3ResultPlayerPos = GetPosition();
+
+		xmf3ResultPlayerPos.x = std::clamp(xmf3ResultPlayerPos.x, xmf3TerrainPos.x + TERRAIN_SPAN, xmf3TerrainPos.x + pTerrain->GetWidth() - TERRAIN_SPAN);
+		xmf3ResultPlayerPos.z = std::clamp(xmf3ResultPlayerPos.z, xmf3TerrainPos.z + TERRAIN_SPAN, xmf3TerrainPos.z + pTerrain->GetLength() - TERRAIN_SPAN);
 
 		float fTerrainY = pTerrain->GetHeight(xmf3Pos.x - (xmf3TerrainPos.x), xmf3Pos.z - (xmf3TerrainPos.z));
 
-		if (GetPosition().y < fTerrainY + xmf3TerrainPos.y)
-		{
-			SetPosition(XMFLOAT3(GetPosition().x, fTerrainY + xmf3TerrainPos.y, GetPosition().z));
-			UpdateTransform(NULL);
-		}
+		if (xmf3ResultPlayerPos.y < fTerrainY + xmf3TerrainPos.y)
+			xmf3ResultPlayerPos.y = fTerrainY + xmf3TerrainPos.y;
+			
+		SetPosition(xmf3ResultPlayerPos);
+		UpdateTransform(NULL);
 	}
 }
 void CKnightPlayer::UpdateTransform(XMFLOAT4X4* pxmf4x4Parent)

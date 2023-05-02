@@ -3,6 +3,8 @@
 #include "..\Object\Object.h"
 #include "..\Object\Mesh.h"
 
+#define TERRAIN_SPAN 5.0f
+
 class CHeightMapTerrain : public CGameObject
 {
 public:

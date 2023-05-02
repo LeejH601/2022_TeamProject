@@ -32,13 +32,20 @@ void CPhysicsObject::OnUpdateCallback(float fTimeElapsed)
 		CSplatTerrain* pTerrain = (CSplatTerrain*)m_pUpdatedContext;
 		XMFLOAT3 xmf3TerrainPos = pTerrain->GetPosition();
 
-		float fTerrainY = pTerrain->GetHeight(GetPosition().x - (xmf3TerrainPos.x), GetPosition().z - (xmf3TerrainPos.z));
+		XMFLOAT3 xmf3ResultPos = GetPosition();
 
-		if (GetPosition().y < fTerrainY + xmf3TerrainPos.y)
+		xmf3ResultPos.x = std::clamp(xmf3ResultPos.x, xmf3TerrainPos.x + TERRAIN_SPAN, xmf3TerrainPos.x + pTerrain->GetWidth() - TERRAIN_SPAN);
+		xmf3ResultPos.z = std::clamp(xmf3ResultPos.z, xmf3TerrainPos.z + TERRAIN_SPAN, xmf3TerrainPos.z + pTerrain->GetLength() - TERRAIN_SPAN);
+
+		float fTerrainY = pTerrain->GetHeight(xmf3ResultPos.x - (xmf3TerrainPos.x), xmf3ResultPos.z - (xmf3TerrainPos.z));
+
+		if (xmf3ResultPos.y < fTerrainY + xmf3TerrainPos.y)
 		{
-			SetPosition(XMFLOAT3(GetPosition().x, fTerrainY + xmf3TerrainPos.y, GetPosition().z));
+			xmf3ResultPos.y = fTerrainY + xmf3TerrainPos.y;
 			m_bOnGround = true;
 		}
+
+		SetPosition(xmf3ResultPos);
 	}
 }
 

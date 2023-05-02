@@ -895,21 +895,11 @@ void CMainTMPScene::UpdateObjects(float fTimeElapsed)
 	m_pPlayer->Update(fTimeElapsed);
 
 	// Update Camera
-	/*XMFLOAT3 xmf3PlayerPos = m_pPlayer->GetPosition();
-	xmf3PlayerPos.y += 12.5f;*/
-
-
-	// Update Camera
 	XMFLOAT3 xmf3PlayerPos = XMFLOAT3{
 		((CKnightPlayer*)m_pPlayer)->m_pSkinnedAnimationController->m_pRootMotionObject->GetWorld()._41,
-		/*((CKnightPlayer*)m_pPlayer)->m_pSkinnedAnimationController->m_pRootMotionObject->GetWorld()._42,*/
-	 m_pPlayer->GetPosition().y,
-	((CKnightPlayer*)m_pPlayer)->m_pSkinnedAnimationController->m_pRootMotionObject->GetWorld()._43 };
+		 m_pPlayer->GetPosition().y,
+		((CKnightPlayer*)m_pPlayer)->m_pSkinnedAnimationController->m_pRootMotionObject->GetWorld()._43 };
 	xmf3PlayerPos.y += 12.5f;
-
-	TCHAR pstrDebug[256] = { 0 };
-	_stprintf_s(pstrDebug, 256, _T("Position = %f, %f, %f\n"), xmf3PlayerPos.x, xmf3PlayerPos.y, xmf3PlayerPos.z);
-	OutputDebugString(pstrDebug);
 
 	m_pMainSceneCamera->Update(xmf3PlayerPos, fTimeElapsed);
 
@@ -998,13 +988,6 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 	{
 		m_pPlayer->Animate(0.0f);
 		m_pPlayer->Render(pd3dCommandList, true);
-		TCHAR pstrDebug[256] = { 0 };
-		XMFLOAT3 xmf3PlayerPos = XMFLOAT3{
-		((CKnightPlayer*)m_pPlayer)->m_pSkinnedAnimationController->m_pRootMotionObject->GetWorld()._41,
-		((CKnightPlayer*)m_pPlayer)->m_pSkinnedAnimationController->m_pRootMotionObject->GetWorld()._42,
-		((CKnightPlayer*)m_pPlayer)->m_pSkinnedAnimationController->m_pRootMotionObject->GetWorld()._43 };
-		_stprintf_s(pstrDebug, 256, _T("xmf3PlayerPos: (%.2f, %.2f, %.2f)\n"), xmf3PlayerPos.x, xmf3PlayerPos.y, xmf3PlayerPos.z);
-		OutputDebugString(pstrDebug);
 	}
 
 	static float trailUpdateT = 0.0f;
@@ -1017,14 +1000,7 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 			else
 				trailObj->SetNextControllPoint(nullptr, nullptr);
 		}
-		//trailUpdateT = 0.0f;
 	}
-
-
-
-	//m_pSwordTrailShader->Render(pd3dCommandList, pCamera, 1);
-
-	//CModelShader::GetInst()->Render(pd3dCommandList, 0);
 
 	D3D12_GPU_VIRTUAL_ADDRESS d3dGpuVirtualAddress = m_pd3dcbDisolveParams->GetGPUVirtualAddress();
 	pd3dCommandList->SetGraphicsRootConstantBufferView(7, d3dGpuVirtualAddress);
