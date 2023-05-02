@@ -504,16 +504,17 @@ void CSimulatorScene::UpdateObjects(float fTimeElapsed)
 	for (int i = 0; i < m_pEnemys.size(); ++i)
 		m_pEnemys[i]->Update(fTimeElapsed);
 
-	for (int i = 0; i < m_pBillBoardObjects.size(); ++i)
-	{
-		m_pBillBoardObjects[i]->Animate(fTimeElapsed);
-	}
-
+	
 	for (std::unique_ptr<CGameObject>& obj : m_pSwordTrailObjects) {
 		obj->Update(fTimeElapsed);
 	}
 
 	m_pMainCharacter->Update(fTimeElapsed);
+
+	for (int i = 0; i < m_pBillBoardObjects.size(); ++i)
+	{
+		m_pBillBoardObjects[i]->Animate(fTimeElapsed);
+	}
 
 	m_pSimulaterCamera->Update(XMFLOAT3{ 0.0f, 0.0f, 0.0f }, fTimeElapsed);
 

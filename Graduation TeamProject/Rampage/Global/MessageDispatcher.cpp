@@ -326,7 +326,7 @@ void ImpactEffectComponent::HandleMessage(const Message& message, const ImpactCo
 	{
 		pMultiSprite->SetEnable(true);
 		pMultiSprite->SetSize(m_fSize);
-		pMultiSprite->SetSpeed(m_fSpeed);
+		pMultiSprite->SetLifeTime(m_fSpeed);
 		pMultiSprite->SetStartAlpha(m_fAlpha);
 		pMultiSprite->SetPosition(params.xmf3Position);
 		pMultiSprite->ChangeTexture(m_pTexture);
