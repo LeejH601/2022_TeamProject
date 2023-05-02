@@ -387,6 +387,7 @@ CKightRootMoveAnimationController::~CKightRootMoveAnimationController()
 void CKightRootMoveAnimationController::OnRootMotion(CGameObject* pRootGameObject, float fTimeElapsed)
 {
 	CAnimationSet* pAnimationSet = m_pAnimationSets->m_pAnimationSets[m_pAnimationTracks[0].m_nAnimationSet];
+	CPlayer* player = (CPlayer*)pRootGameObject;
 
 	if (m_bRootMotion)
 	{
@@ -395,9 +396,6 @@ void CKightRootMoveAnimationController::OnRootMotion(CGameObject* pRootGameObjec
 	}
 	else
 	{
-		CPlayer* player = (CPlayer*)pRootGameObject;
-		m_xmf3FirstRootMotionPosition = pRootGameObject->GetPosition();
-
 		m_pRootMotionObject->m_xmf4x4Transform._41 = 0.f;
 		m_pRootMotionObject->m_xmf4x4Transform._42 = 0.f;
 		m_pRootMotionObject->m_xmf4x4Transform._43 = 0.f;

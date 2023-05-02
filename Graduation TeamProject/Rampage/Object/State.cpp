@@ -234,7 +234,6 @@ void Atk_Player::OnRootMotion(CPlayer* player, float fTimeElapsed)
 		else
 		{
 			pPlayerController->m_pRootMotionObject->m_xmf4x4Transform._41 = 0.f;
-			pPlayerController->m_pRootMotionObject->m_xmf4x4Transform._42 = 0.f;
 			pPlayerController->m_pRootMotionObject->m_xmf4x4Transform._43 = 0.f;
 		}
 	}
