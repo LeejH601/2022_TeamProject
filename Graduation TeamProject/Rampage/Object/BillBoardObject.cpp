@@ -107,7 +107,8 @@ void CMultiSpriteObject::AnimateRowColumn(float fTimeElapsed)
 			else
 			{
 				if (++m_nCol == m_nCols) {
-					m_nRow++;
+					SetEnable(false);
+					//m_nRow++;
 					m_nCol = 0;
 				}
 				if (m_nRow == m_nRows)

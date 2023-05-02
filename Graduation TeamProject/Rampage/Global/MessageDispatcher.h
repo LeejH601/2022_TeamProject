@@ -483,7 +483,7 @@ public:
 class TrailParticleComponent : public IMessageListener {
 	int m_nParticleNumber = MAX_PARTICLES;
 	int m_nEmitMinParticleNumber = 2;
-	int m_nEmitMaxParticleNumber = 6;
+	int m_nEmitMaxParticleNumber = 3;
 	int m_iParticleType = ParticleType::SPHERE_PARTICLE;
 	XMFLOAT2   m_fSize = XMFLOAT2(1.f, 1.f);
 	float m_fAlpha = 1.f;

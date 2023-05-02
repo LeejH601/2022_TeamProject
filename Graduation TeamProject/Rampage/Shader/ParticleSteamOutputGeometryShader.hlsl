@@ -133,8 +133,6 @@ void SphereParticles(VS_PARTICLE_INPUT input, inout PointStream<VS_PARTICLE_INPU
 			output.Append(particle);
 		}
 	}
-	else
-		output.Append(particle);
 	
 }
 
