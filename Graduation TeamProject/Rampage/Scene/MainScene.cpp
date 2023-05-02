@@ -605,76 +605,14 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	CModelShader::GetInst()->CreateCbvSrvUavDescriptorHeaps(pd3dDevice, 0, 200);
 
 	std::unique_ptr<CGoblinObject> m_pGoblinObject = std::make_unique<CGoblinObject>(pd3dDevice, pd3dCommandList, 1);
-	m_pGoblinObject->SetPosition(XMFLOAT3(200, 300, -120));
+	m_pGoblinObject->SetPosition(XMFLOAT3(190, 50, -70));
 	m_pGoblinObject->SetScale(4.0f, 4.0f, 4.0f);
 	m_pGoblinObject->Rotate(0.0f, 180.0f, 0.0f);
+	m_pGoblinObject->m_fHP = 1000.f;
 	m_pGoblinObject->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
 	m_pGoblinObject->m_pSkinnedAnimationController->m_xmf3RootObjectScale = XMFLOAT3(10.0f, 10.0f, 10.0f);
 	m_pGoblinObject->CreateArticulation(1.0f);
 	m_pObjects.push_back(std::move(m_pGoblinObject));
-
-	m_pGoblinObject = std::make_unique<CGoblinObject>(pd3dDevice, pd3dCommandList, 1);
-	m_pGoblinObject->SetPosition(XMFLOAT3(200, 300, -60));
-	m_pGoblinObject->SetScale(4.0f, 4.0f, 4.0f);
-	m_pGoblinObject->Rotate(0.0f, 180.0f, 0.0f);
-	m_pGoblinObject->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
-	m_pGoblinObject->CreateArticulation(1.0f);
-	m_pObjects.push_back(std::move(m_pGoblinObject));
-
-	std::unique_ptr<CGoblinObject> m_pGoblin = std::make_unique<CGoblinObject>(pd3dDevice, pd3dCommandList, 1);
-
-	{
-		m_pGoblin->SetPosition(XMFLOAT3(150, 300, -120));
-		m_pGoblin->SetScale(4.0f, 4.0f, 4.0f);
-		m_pGoblin->Rotate(0.0f, 0.0f, 0.0f);
-		m_pGoblin->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
-		m_pGoblin->CreateArticulation(1.0f);
-
-		m_pObjects.push_back(std::move(m_pGoblin));
-	}
-
-
-	std::unique_ptr<COrcObject> m_pOrc = std::make_unique<COrcObject>(pd3dDevice, pd3dCommandList, 1);
-	m_pOrc->SetPosition(XMFLOAT3(150, 300, -90));
-	m_pOrc->SetScale(4.0f, 4.0f, 4.0f);
-	m_pOrc->Rotate(0.0f, 0.0f, 0.0f);
-	m_pOrc->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
-	m_pOrc->CreateArticulation(1.0f);
-
-	m_pOrc->m_pArticulationLinks[15]->addForce(physx::PxVec3(0.0f, -10000.0f, 0.0f), physx::PxForceMode::eIMPULSE);
-
-
-	//m_pOrc->m_pArticulation->applyCache(*m_pOrc->m_pArticulationCache, physx::PxArticulationCacheFlag::e);
-
-	m_pObjects.push_back(std::move(m_pOrc));
-
-	m_pGoblin = std::make_unique<CGoblinObject>(pd3dDevice, pd3dCommandList, 1);
-	m_pGoblin->SetPosition(XMFLOAT3(150, 300, -150));
-	m_pGoblin->SetScale(4.0f, 4.0f, 4.0f);
-	m_pGoblin->Rotate(0.0f, 0.0f, 0.0f);
-	m_pGoblin->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
-	m_pGoblin->CreateArticulation(1.0f);
-	m_pObjects.push_back(std::move(m_pGoblin));
-
-	m_pGoblin = std::make_unique<CGoblinObject>(pd3dDevice, pd3dCommandList, 1);
-	m_pGoblin->SetPosition(XMFLOAT3(150, 300, -180));
-	m_pGoblin->SetScale(4.0f, 4.0f, 4.0f);
-	m_pGoblin->Rotate(0.0f, 0.0f, 0.0f);
-	m_pGoblin->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
-	m_pGoblin->CreateArticulation(1.0f);
-	m_pObjects.push_back(std::move(m_pGoblin));
-
-	XMFLOAT3 testpos = XMFLOAT3(300.0f, 600.0f, 0.0f);
-	for (int i = 0; i < 0; ++i) {
-		testpos.x -= 25.0f;
-		m_pGoblin = std::make_unique<CGoblinObject>(pd3dDevice, pd3dCommandList, 1);
-		m_pGoblin->SetPosition(testpos);
-		m_pGoblin->SetScale(14.0f, 14.0f, 14.0f);
-		m_pGoblin->Rotate(0.0f, 0.0f, 0.0f);
-		m_pGoblin->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
-		m_pGoblin->CreateArticulation(1.0f);
-		m_pObjects.push_back(std::move(m_pGoblin));
-	}
 
 	// Light 持失
 	m_pLight = std::make_unique<CLight>();
@@ -684,7 +622,6 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pTerrainShader->CreateShader(pd3dDevice, GetGraphicsRootSignature(), 7, pdxgiObjectRtvFormats, DXGI_FORMAT_D32_FLOAT, 0);
 	m_pTerrainShader->CreateCbvSrvUavDescriptorHeaps(pd3dDevice, 0, 13);
 	m_pTerrainShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
-
 
 	// Terrain 持失
 	XMFLOAT3 xmf3Scale(1.0f, 1.0f, 1.0f);
@@ -912,9 +849,6 @@ void CMainTMPScene::UpdateObjects(float fTimeElapsed)
 	PlayerParams player_params;
 	player_params.pPlayer = m_pPlayer;
 	CMessageDispatcher::GetInst()->Dispatch_Message<PlayerParams>(MessageType::CHECK_IS_PLAYER_IN_FRONT_OF_MONSTER, &player_params, nullptr);
-
-
-
 }
 
 #define WITH_LAG_DOLL_SIMULATION

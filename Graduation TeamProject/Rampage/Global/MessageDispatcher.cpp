@@ -424,7 +424,12 @@ void PlayerLocationListener::HandleMessage(const Message& message, const PlayerP
 	if (message.getType() == MessageType::CHECK_IS_PLAYER_IN_FRONT_OF_MONSTER) {
 		CMonster* pMonster = dynamic_cast<CMonster*>(m_pObject);
 
-		pMonster->CheckIsPlayerInFrontOfThis(params.pPlayer->GetPosition());
+		XMFLOAT3 xmf3PlayerPos = XMFLOAT3{
+			params.pPlayer->m_pSkinnedAnimationController->m_pRootMotionObject->GetWorld()._41,
+			params.pPlayer->GetPosition().y,
+			params.pPlayer->m_pSkinnedAnimationController->m_pRootMotionObject->GetWorld()._43 };
+
+		pMonster->CheckIsPlayerInFrontOfThis(xmf3PlayerPos);
 	}
 }
 

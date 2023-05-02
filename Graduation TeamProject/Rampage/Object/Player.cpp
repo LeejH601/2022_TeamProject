@@ -265,6 +265,10 @@ void CKnightPlayer::OnUpdateCallback(float fTimeElapsed)
 			
 		SetPosition(xmf3ResultPlayerPos);
 		UpdateTransform(NULL);
+
+		TCHAR pstrDebug[256] = { 0 };
+		_stprintf_s(pstrDebug, 256, _T("xmf3PlayerPos: (%.2f, %.2f, %.2f)\n"), xmf3ResultPlayerPos.x, xmf3ResultPlayerPos.y, xmf3ResultPlayerPos.z);
+		OutputDebugString(pstrDebug);
 	}
 }
 void CKnightPlayer::UpdateTransform(XMFLOAT4X4* pxmf4x4Parent)
