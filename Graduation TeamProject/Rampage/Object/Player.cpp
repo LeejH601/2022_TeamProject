@@ -397,7 +397,6 @@ void CKightRootMoveAnimationController::OnRootMotion(CGameObject* pRootGameObjec
 	else
 	{
 		m_pRootMotionObject->m_xmf4x4Transform._41 = 0.f;
-		m_pRootMotionObject->m_xmf4x4Transform._42 = 0.f;
 		m_pRootMotionObject->m_xmf4x4Transform._43 = 0.f;
 	}
 }
