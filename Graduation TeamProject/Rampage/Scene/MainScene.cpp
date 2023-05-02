@@ -679,6 +679,11 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pTextureManager->LoadBillBoardTexture(pd3dDevice, pd3dCommandList, L"Image/Explode_8x8.dds", m_pBillBoardObjectShader.get(), 8, 8);
 	m_pTextureManager->LoadBillBoardTexture(pd3dDevice, pd3dCommandList, L"Image/Fire_Effect.dds", m_pBillBoardObjectShader.get(), 5, 6);
 	m_pTextureManager->LoadBillBoardTexture(pd3dDevice, pd3dCommandList, L"Image/Circle1.dds", m_pBillBoardObjectShader.get(), 0, 0);
+	m_pTextureManager->LoadBillBoardTexture(pd3dDevice, pd3dCommandList, L"ParticleImage/T_Glow_Impact_1.dds", m_pBillBoardObjectShader.get(), 1, 1);
+	m_pTextureManager->LoadBillBoardTexture(pd3dDevice, pd3dCommandList, L"ParticleImage/T_Glow_Impact_2.dds", m_pBillBoardObjectShader.get(), 1, 1);
+	m_pTextureManager->LoadBillBoardTexture(pd3dDevice, pd3dCommandList, L"ParticleImage/T_Glow_Smoky.dds", m_pBillBoardObjectShader.get(), 1, 1);
+	m_pTextureManager->LoadBillBoardTexture(pd3dDevice, pd3dCommandList, L"ParticleImage/T_Glow_Soft.dds", m_pBillBoardObjectShader.get(), 1, 1);
+	m_pTextureManager->LoadBillBoardTexture(pd3dDevice, pd3dCommandList, L"ParticleImage/T_Impact_33.dds", m_pBillBoardObjectShader.get(), 1, 1);
 
 	for (int i = 0; i < 50; ++i)
 	{
@@ -687,16 +692,11 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	}
 
 	m_pParticleShader = std::make_unique<CParticleShader>();
-	m_pParticleShader->CreateCbvSrvUavDescriptorHeaps(pd3dDevice, 0, 40);
+	m_pParticleShader->CreateCbvSrvUavDescriptorHeaps(pd3dDevice, 0, 80);
 	m_pParticleShader->CreateGraphicsPipelineState(pd3dDevice, GetGraphicsRootSignature(), 0);
 
 	m_pTextureManager->LoadParticleTexture(pd3dDevice, pd3dCommandList, L"ParticleImage/RoundSoftParticle.dds", m_pParticleShader.get(), 0, 0);
 	m_pTextureManager->LoadParticleTexture(pd3dDevice, pd3dCommandList, L"ParticleImage/Meteor.dds", m_pParticleShader.get(), 0, 0);
-	m_pTextureManager->LoadParticleTexture(pd3dDevice, pd3dCommandList, L"ParticleImage/T_Glow_Impact_1.dds", m_pParticleShader.get(), 0, 0);
-	m_pTextureManager->LoadParticleTexture(pd3dDevice, pd3dCommandList, L"ParticleImage/T_Glow_Impact_2.dds", m_pParticleShader.get(), 0, 0);
-	m_pTextureManager->LoadParticleTexture(pd3dDevice, pd3dCommandList, L"ParticleImage/T_Glow_Smoky.dds", m_pParticleShader.get(), 0, 0);
-	m_pTextureManager->LoadParticleTexture(pd3dDevice, pd3dCommandList, L"ParticleImage/T_Glow_Soft.dds", m_pParticleShader.get(), 0, 0);
-	m_pTextureManager->LoadParticleTexture(pd3dDevice, pd3dCommandList, L"ParticleImage/T_Glow_Impact_33.dds", m_pParticleShader.get(), 0, 0);
 	m_pTextureManager->LoadParticleTexture(pd3dDevice, pd3dCommandList, L"Image/Effect0.dds", m_pParticleShader.get(), 0, 0);
 	m_pTextureManager->LoadParticleTexture(pd3dDevice, pd3dCommandList, L"Image/Effect1.dds", m_pParticleShader.get(), 0, 0);
 	m_pTextureManager->LoadParticleTexture(pd3dDevice, pd3dCommandList, L"Image/Effect2.dds", m_pParticleShader.get(), 0, 0);
@@ -944,18 +944,24 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 
 	m_pBillBoardObjectShader->Render(pd3dCommandList, 0);
 
+	for (int i = 0; i < m_pBillBoardObjects.size(); ++i)
+	{
+		(static_cast<CBillBoardObject*>(m_pBillBoardObjects[i].get()))->UpdateShaderVariables(pd3dCommandList, fCurrentTime, fTimeElapsed);
+		m_pBillBoardObjects[i]->Render(pd3dCommandList, true);
+	}
+
 	for (int i = 0; i < m_pTerrainSpriteObject.size(); ++i)
 	{
 		(static_cast<CTerrainSpriteObject*>(m_pTerrainSpriteObject[i].get()))->UpdateShaderVariables(pd3dCommandList, fCurrentTime, fTimeElapsed);
 		(static_cast<CTerrainSpriteObject*>(m_pTerrainSpriteObject[i].get()))->Animate(m_pTerrain.get(), fTimeElapsed);
 		m_pTerrainSpriteObject[i]->Render(pd3dCommandList, true);
 	}
-
-	for (int i = 0; i < m_pBillBoardObjects.size(); ++i)
+	
+	/*for (int i = 0; i < m_pBillBoardObjects.size(); ++i)
 	{
 		(static_cast<CBillBoardObject*>(m_pBillBoardObjects[i].get()))->UpdateShaderVariables(pd3dCommandList, fCurrentTime, fTimeElapsed);
 		m_pBillBoardObjects[i]->Render(pd3dCommandList, true);
-	}
+	}*/
 
 	for (int i = 0; i < m_pParticleObjects.size(); ++i)
 	{
