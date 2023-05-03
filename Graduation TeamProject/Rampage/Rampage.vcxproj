@@ -165,6 +165,7 @@
     <ClCompile Include="Global\DDSTextureLoader12.cpp" />
     <ClCompile Include="Global\GameFramework.cpp" />
     <ClCompile Include="Global\Locator.cpp" />
+    <ClCompile Include="Global\Logger.cpp" />
     <ClCompile Include="Global\MessageDispatcher.cpp" />
     <ClCompile Include="Global\stdafx.cpp" />
     <ClCompile Include="Global\Timer.cpp" />
@@ -229,6 +230,7 @@
     <ClInclude Include="Global\GameFramework.h" />
     <ClInclude Include="Global\Global.h" />
     <ClInclude Include="Global\Locator.h" />
+    <ClInclude Include="Global\Logger.h" />
     <ClInclude Include="Global\MessageDispatcher.h" />
     <ClInclude Include="Global\stdafx.h" />
     <ClInclude Include="Global\Timer.h" />

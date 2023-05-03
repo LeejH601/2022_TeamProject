@@ -10,6 +10,7 @@
 #include "..\Object\PlayerParticleObject.h"
 #include "..\Object\ModelManager.h"
 #include "..\Shader\BoundingBoxShader.h"
+#include "..\Global\Logger.h"
 #include <stdio.h>
 
 CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks)
@@ -219,6 +220,7 @@ bool CKnightPlayer::CheckCollision(CGameObject* pTargetObject)
 
 		m_xmf3TargetPosition = pTargetObject->GetPosition();
 		pTargetObject->SetHit(this);
+		CLogger::GetInst()->LogCollision(this, pTargetObject, std::string("Atk player->monster"));
 
 		return true;
 	}
@@ -266,9 +268,9 @@ void CKnightPlayer::OnUpdateCallback(float fTimeElapsed)
 		SetPosition(xmf3ResultPlayerPos);
 		UpdateTransform(NULL);
 
-		TCHAR pstrDebug[256] = { 0 };
+		/*TCHAR pstrDebug[256] = { 0 };
 		_stprintf_s(pstrDebug, 256, _T("xmf3PlayerPos: (%.2f, %.2f, %.2f)\n"), xmf3ResultPlayerPos.x, xmf3ResultPlayerPos.y, xmf3ResultPlayerPos.z);
-		OutputDebugString(pstrDebug);
+		OutputDebugString(pstrDebug);*/
 	}
 }
 void CKnightPlayer::UpdateTransform(XMFLOAT4X4* pxmf4x4Parent)
