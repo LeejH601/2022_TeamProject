@@ -665,15 +665,12 @@ void CSimulatorScene::SetPlayerAnimationSet(int nSet)
 	{
 	case 0:
 		m_pMainCharacter->m_pStateMachine->ChangeState(Atk1_Player::GetInst());
-		m_pMainCharacter->m_iAttackId += 1;
 		break;
 	case 1:
 		m_pMainCharacter->m_pStateMachine->ChangeState(Atk2_Player::GetInst());
-		m_pMainCharacter->m_iAttackId += 1;
 		break;
 	case 2:
 		m_pMainCharacter->m_pStateMachine->ChangeState(Atk3_Player::GetInst());
-		m_pMainCharacter->m_iAttackId += 1;
 		break;
 	default:
 		break;

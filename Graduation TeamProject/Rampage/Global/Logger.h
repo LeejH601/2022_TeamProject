@@ -7,6 +7,8 @@ enum class LOG_LEVEL {
 	COUNT
 };
 
+#define LOGGING
+
 class CGameObject;
 class CLogger
 {
@@ -22,5 +24,7 @@ public:
 	bool ClearLogs();
 	void Log(std::string& message, LOG_LEVEL = LOG_LEVEL::LOG_DEBUG);
 	void LogCollision(CGameObject* Actor, CGameObject* Target, std::string& message, LOG_LEVEL = LOG_LEVEL::LOG_DEBUG);
+
+	std::string GetNowTimeToStr();
 };
 
