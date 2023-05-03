@@ -203,7 +203,7 @@ bool CKnightPlayer::CheckCollision(CGameObject* pTargetObject)
 		return false;
 
 	BoundingBox TargetBoundingBox = pTargetObject->GetBoundingBox();
-	if (pTargetObject->m_bEnable && m_TransformedWeaponBoundingBox.Intersects(TargetBoundingBox)) {
+	if (pTargetObject->m_bEnable && ((CMonster*)pTargetObject)->m_fHP > 0 && m_TransformedWeaponBoundingBox.Intersects(TargetBoundingBox)) {
 		SoundPlayParams SoundPlayParam;
 		SoundPlayParam.sound_category = SOUND_CATEGORY::SOUND_SHOCK;
 		CMessageDispatcher::GetInst()->Dispatch_Message<SoundPlayParams>(MessageType::PLAY_SOUND, &SoundPlayParam, m_pStateMachine->GetCurrentState());

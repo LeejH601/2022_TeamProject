@@ -68,9 +68,6 @@ public:
 	virtual void UpdateTransform(XMFLOAT4X4* pxmf4x4Parent = NULL);
 	virtual void SetHit(CGameObject* pHitter);
 	virtual bool CheckCollision(CGameObject* pTargetObject) {
-		if (m_fHP < 0)
-			return false;
-
 		if (pTargetObject)
 		{
 			BoundingBox TargetBoundingBox = pTargetObject->GetBoundingBox();
