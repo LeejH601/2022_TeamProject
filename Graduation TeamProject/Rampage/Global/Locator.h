@@ -3,6 +3,7 @@
 #include "Global.h"
 #include "Camera.h"
 #include "..\Object\State.h"
+#include "Logger.h"
 
 class CCamera;
 class CGameObject;

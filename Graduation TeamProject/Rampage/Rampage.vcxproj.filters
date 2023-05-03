@@ -217,6 +217,9 @@
     <ClCompile Include="ImGui\implot_items.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="Global\Logger.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Global\stdafx.h">
@@ -426,6 +429,7 @@
     <ClInclude Include="ImGui\implot_internal.h">
       <Filter>ImGui</Filter>
     </ClInclude>
+    <ClInclude Include="Global\Logger.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shader\PlayerPixelShader.hlsl" />

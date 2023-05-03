@@ -9,6 +9,7 @@
 #include "..\ImGui\ImGuiManager.h"
 #include "..\Object\PlayerParticleObject.h"
 #include "SwordTrailObject.h"
+#include "..\Global\Logger.h"
 
 Idle_Player::Idle_Player()
 {
@@ -315,6 +316,8 @@ void Atk1_Player::SpawnTrailParticle(CPlayer* player)
 
 void Atk1_Player::Enter(CPlayer* player)
 {
+	CLogger::GetInst()->Log(std::string("Player Enter Atk1\n"));
+
 	player->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
 	player->m_pSkinnedAnimationController->m_fTime = 0.0f;
 	player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition = 0.0f;
