@@ -78,8 +78,12 @@ bool CSceneManager::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPAR
 	case SCENE_RETURN_TYPE::NONE:
 		break;
 	case SCENE_RETURN_TYPE::POP_SCENE:
-		if (m_pCurrentScene == m_pLobbyScene.get())
+		if (m_pCurrentScene == m_pLobbyScene.get()) {
 			m_pCurrentScene = m_pMainScene.get();
+			Atk1_Player::GetInst()->GetTrailComponent()->SetEnable(true);
+			Atk2_Player::GetInst()->GetTrailComponent()->SetEnable(true);
+			Atk3_Player::GetInst()->GetTrailComponent()->SetEnable(true);
+		}
 		break;
 	case SCENE_RETURN_TYPE::RETURN_PREVIOUS_SCENE:
 		if (m_pCurrentScene == m_pMainScene.get())

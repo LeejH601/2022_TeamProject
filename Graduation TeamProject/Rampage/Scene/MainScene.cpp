@@ -408,7 +408,6 @@ bool CMainTMPScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM 
 			if (!((CPlayer*)m_pPlayer)->m_bAttack)
 			{
 				((CPlayer*)m_pPlayer)->m_bAttack = true;
-				((CPlayer*)m_pPlayer)->m_iAttackId += 1;
 			}
 		}
 		break;
@@ -1172,6 +1171,7 @@ void CMainTMPScene::HandleCollision(const CollideParams& params)
 		impact_comp_params.pObject = (*it).get();
 		impact_comp_params.xmf3Position = params.xmf3CollidePosition;
 		CMessageDispatcher::GetInst()->Dispatch_Message<ImpactCompParams>(MessageType::UPDATE_BILLBOARD, &impact_comp_params, ((CPlayer*)m_pPlayer)->m_pStateMachine->GetCurrentState());
+		CLogger::GetInst()->Log(std::string("Display Impact!!!!!!!!!!!!!"));
 	}
 
 	// Demo »ç¿ëx

@@ -10,6 +10,7 @@
 #include "..\Scene\MainScene.h"
 #include "..\Scene\SimulatorScene.h"
 #include "..\Object\SwordTrailObject.h"
+#include "Logger.h"
 
 void CMessageDispatcher::RegisterListener(MessageType messageType, IMessageListener* listener, void* filterObject)
 {
@@ -331,6 +332,7 @@ void ImpactEffectComponent::HandleMessage(const Message& message, const ImpactCo
 		pMultiSprite->SetPosition(params.xmf3Position);
 		pMultiSprite->ChangeTexture(m_pTexture);
 	}
+	CLogger::GetInst()->Log(std::string("MultiSprite HandleMessge Called"));
 }
 void SceneCollideListener::HandleMessage(const Message& message, const CollideParams& params)
 {

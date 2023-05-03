@@ -316,7 +316,8 @@ void Atk1_Player::SpawnTrailParticle(CPlayer* player)
 
 void Atk1_Player::Enter(CPlayer* player)
 {
-	CLogger::GetInst()->Log(std::string("Player Enter Atk1\n"));
+	CLogger::GetInst()->Log(std::string("Player Enter Atk1"));
+	player->m_iAttackId += 1;
 
 	player->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
 	player->m_pSkinnedAnimationController->m_fTime = 0.0f;
@@ -418,6 +419,8 @@ void Atk2_Player::SendCollisionMessage(CPlayer* player)
 
 void Atk2_Player::Enter(CPlayer* player)
 {
+	CLogger::GetInst()->Log(std::string("Player Enter Atk2"));
+	player->m_iAttackId += 1;
 	player->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 1);
 	player->m_pSkinnedAnimationController->m_fTime = 0.0f;
 	player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition = 0.2f;
@@ -544,6 +547,8 @@ void Atk3_Player::SendCollisionMessage(CPlayer* player)
 
 void Atk3_Player::Enter(CPlayer* player)
 {
+	CLogger::GetInst()->Log(std::string("Player Enter Atk3"));
+	player->m_iAttackId += 1;
 	player->m_fCMDConstant = 1.0f;
 
 	player->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 2);

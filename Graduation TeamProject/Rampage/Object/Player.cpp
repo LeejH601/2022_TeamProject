@@ -199,7 +199,7 @@ void CKnightPlayer::SetRigidDynamic()
 }
 bool CKnightPlayer::CheckCollision(CGameObject* pTargetObject)
 {
-	if (m_iAttackId == ((CMonster*)pTargetObject)->GetPlayerAtkId())
+	if (m_iAttackId == ((CMonster*)pTargetObject)->GetPlayerAtkId() || ((CMonster*)pTargetObject)->m_fHP <= 0.0f)
 		return false;
 
 	BoundingBox TargetBoundingBox = pTargetObject->GetBoundingBox();
@@ -224,7 +224,8 @@ bool CKnightPlayer::CheckCollision(CGameObject* pTargetObject)
 
 		m_xmf3TargetPosition = pTargetObject->GetPosition();
 		pTargetObject->SetHit(this);
-		CLogger::GetInst()->LogCollision(this, pTargetObject, std::string("Atk player->monster"));
+		std::string logMessage = "Atk player->monster"; logMessage = logMessage + " ID == { " + std::to_string(m_iAttackId) + " }";
+		CLogger::GetInst()->LogCollision(this, pTargetObject, logMessage);
 
 		return true;
 	}

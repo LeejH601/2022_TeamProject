@@ -36,7 +36,8 @@ bool CLogger::ClearLogs()
 void CLogger::Log(std::string& message, LOG_LEVEL)
 {
 #ifdef LOGGING
-	out.write(message.c_str(), message.length());
+	std::string LogMessage = message + "\n";
+	out.write(LogMessage.c_str(), LogMessage.length());
 #endif // LOGGING
 }
 
