@@ -128,10 +128,6 @@ void CMonster::Update(float fTimeElapsed)
 	m_pStateMachine->Animate(fTimeElapsed);
 
 	CPhysicsObject::Apply_Friction(fTimeElapsed);
-
-	TCHAR pstrDebug[256] = { 0 };
-	_stprintf_s(pstrDebug, 256, _T("x : %f, y : %f, z : %f \n"), m_xmf3CalPos.x, m_xmf3CalPos.y, m_xmf3CalPos.z);
-	OutputDebugString(pstrDebug);
 }
 void CMonster::UpdateTransform(XMFLOAT4X4* pxmf4x4Parent)
 {
