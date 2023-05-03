@@ -59,7 +59,7 @@ public:
 	virtual void SetEnable(bool bEnable);
 
 
-
+	void SetColor(XMFLOAT3 fColor);
 	void SetSize(XMFLOAT2 fSize);
 	void SetSpeed(float fSpeed);
 	void SetStartAlpha(float fAlpha);

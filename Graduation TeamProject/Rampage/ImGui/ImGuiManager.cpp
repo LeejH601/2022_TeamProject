@@ -287,6 +287,12 @@ void DataLoader::SaveComponentSet(FILE* pInFile, CState<CPlayer>* pState)
 	WriteFloatFromFile(pInFile, pImpactComponent->GetSpeed());
 	WriteStringFromFile(pInFile, std::string("<Alpha>:"));
 	WriteFloatFromFile(pInFile, pImpactComponent->GetAlpha());
+	WriteStringFromFile(pInFile, std::string("<Color_R>:"));
+	WriteFloatFromFile(pInFile, pImpactComponent->GetColor().x);
+	WriteStringFromFile(pInFile, std::string("<Color_G>:"));
+	WriteFloatFromFile(pInFile, pImpactComponent->GetColor().y);
+	WriteStringFromFile(pInFile, std::string("<Color_B>:"));
+	WriteFloatFromFile(pInFile, pImpactComponent->GetColor().z);
 	WriteStringFromFile(pInFile, std::string("</ImpactComponent>:"));
 
 	str = "</Components>:";
@@ -1227,6 +1233,8 @@ void CImGuiManager::ShowImpactManager(CState<CPlayer>* pCurrentAnimation)
 	if (ImGui::DragFloat(U8STR("Y 크기##ImpactEffect"), &pImpactEffectComponent->GetYSize(), DRAG_FLOAT_UNIT, IMPACT_SIZE_MIN, IMPACT_SIZE_MAX, "%.2f", 0))
 		pImpactEffectComponent->GetYSize() = std::clamp(pImpactEffectComponent->GetYSize(), IMPACT_SIZE_MIN, IMPACT_SIZE_MAX);
 
+	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
+	ImGui::ColorEdit3(U8STR("색상##ImpactEffect"), (float*)&pImpactEffectComponent->GetColor()); // Edit 3 floats representing a color
 	ImGui::End();
 }
 void CImGuiManager::ShowParticleManager(CState<CPlayer>* pCurrentAnimation)

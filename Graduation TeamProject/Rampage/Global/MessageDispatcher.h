@@ -543,12 +543,14 @@ class ImpactEffectComponent : public IMessageListener {
 	float m_fSpeed = 5.f;
 	float m_fAlpha = 1.f;
 	XMFLOAT2 m_fSize = XMFLOAT2(3.f, 3.f);
+	XMFLOAT3 m_xmf3Color = XMFLOAT3(1.f, 1.f, 1.f);
 	std::shared_ptr<CTexture> m_pTexture;
 public:
 	int& GetTextureIndex() { return m_nTextureIndex; }
 	float& GetSpeed() { return m_fSpeed; }
 	float& GetAlpha() { return m_fAlpha; }
 	XMFLOAT2& GetSize() { return m_fSize; }
+	XMFLOAT3& GetColor() { return m_xmf3Color; }
 
 	float& GetXSize() { return m_fSize.x; }
 	float& GetYSize() { return m_fSize.y; }

@@ -124,6 +124,11 @@ void CMultiSpriteObject::SetEnable(bool bEnable)
 }
 
 
+void CMultiSpriteObject::SetColor(XMFLOAT3 fColor)
+{
+	m_xmf3Color = fColor;
+}
+
 void CMultiSpriteObject::SetSize(XMFLOAT2 fSize)
 {
 	m_fSize = fSize;
@@ -240,6 +245,7 @@ void CTerrainSpriteObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3d
 	m_pcbMappedFrameworkInfo->m_xmf3Color = XMFLOAT3(1.f, 1.f, 1.f);
 	m_pcbMappedFrameworkInfo->m_nParticleType = 0;
 	m_pcbMappedFrameworkInfo->m_fLifeTime = m_fLifeTime;
+	m_pcbMappedFrameworkInfo->m_xmf3Color = m_xmf3Color;
 	m_pcbMappedFrameworkInfo->m_fSize = Vector2::ScalarProduct(m_fSize, m_fDeltaSize, false);
 	// 중간 정도 일때
 	if (m_bStart)

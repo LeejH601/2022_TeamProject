@@ -330,6 +330,7 @@ void ImpactEffectComponent::HandleMessage(const Message& message, const ImpactCo
 		pMultiSprite->SetStartAlpha(m_fAlpha);
 		pMultiSprite->SetPosition(params.xmf3Position);
 		pMultiSprite->ChangeTexture(m_pTexture);
+		pMultiSprite->SetColor(m_xmf3Color);
 	}
 }
 void SceneCollideListener::HandleMessage(const Message& message, const CollideParams& params)
