@@ -206,6 +206,10 @@ bool CKnightPlayer::CheckCollision(CGameObject* pTargetObject)
 		SoundPlayParams SoundPlayParam;
 		SoundPlayParam.sound_category = SOUND_CATEGORY::SOUND_SHOCK;
 		CMessageDispatcher::GetInst()->Dispatch_Message<SoundPlayParams>(MessageType::PLAY_SOUND, &SoundPlayParam, m_pStateMachine->GetCurrentState());
+		
+		TCHAR pstrDebug[256] = { 0 };
+		_stprintf_s(pstrDebug, 256, _T("CheckCollision\n"));
+		OutputDebugString(pstrDebug);
 
 		if (m_pCamera)
 		{
@@ -265,10 +269,6 @@ void CKnightPlayer::OnUpdateCallback(float fTimeElapsed)
 			
 		SetPosition(xmf3ResultPlayerPos);
 		UpdateTransform(NULL);
-
-		TCHAR pstrDebug[256] = { 0 };
-		_stprintf_s(pstrDebug, 256, _T("xmf3PlayerPos: (%.2f, %.2f, %.2f)\n"), xmf3ResultPlayerPos.x, xmf3ResultPlayerPos.y, xmf3ResultPlayerPos.z);
-		OutputDebugString(pstrDebug);
 	}
 }
 void CKnightPlayer::UpdateTransform(XMFLOAT4X4* pxmf4x4Parent)

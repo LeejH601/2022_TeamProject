@@ -75,27 +75,20 @@ void CMonster::CheckIsPlayerInFrontOfThis(XMFLOAT3 xmf3PlayerPosition)
 
 void CMonster::CalculateResultPosition()
 {
-	XMFLOAT3 xmf3ShakeVec = Vector3::ScalarProduct(GetRight(), m_fShakeDistance, false);
+	XMFLOAT3 xmf3ShakeVec = Vector3::ScalarProduct(Vector3::Normalize(GetRight()), m_fShakeDistance, false);
 
 	m_xmf3CalPos = Vector3::Add(m_xmf3Position, xmf3ShakeVec);
 }
 
-void CMonster::OnPrepareRender()
+void CMonster::UpdateMatrix()
 {
-	if (m_bSimulateArticulate) {
-		UpdateTransformFromArticulation(NULL, m_pArtiLinkNames, m_AritculatCacheMatrixs, m_xmf3Scale.x);
-	}
-	else {
-		m_xmf4x4Transform._11 = m_xmf3Right.x; m_xmf4x4Transform._12 = m_xmf3Right.y; m_xmf4x4Transform._13 = m_xmf3Right.z;
-		m_xmf4x4Transform._21 = m_xmf3Up.x; m_xmf4x4Transform._22 = m_xmf3Up.y; m_xmf4x4Transform._23 = m_xmf3Up.z;
-		m_xmf4x4Transform._31 = m_xmf3Look.x; m_xmf4x4Transform._32 = m_xmf3Look.y; m_xmf4x4Transform._33 = m_xmf3Look.z;
-		m_xmf4x4Transform._41 = m_xmf3CalPos.x; m_xmf4x4Transform._42 = m_xmf3CalPos.y; m_xmf4x4Transform._43 = m_xmf3CalPos.z;
+	m_xmf4x4Transform._11 = m_xmf3Right.x; m_xmf4x4Transform._12 = m_xmf3Right.y; m_xmf4x4Transform._13 = m_xmf3Right.z;
+	m_xmf4x4Transform._21 = m_xmf3Up.x; m_xmf4x4Transform._22 = m_xmf3Up.y; m_xmf4x4Transform._23 = m_xmf3Up.z;
+	m_xmf4x4Transform._31 = m_xmf3Look.x; m_xmf4x4Transform._32 = m_xmf3Look.y; m_xmf4x4Transform._33 = m_xmf3Look.z;
+	m_xmf4x4Transform._41 = m_xmf3CalPos.x; m_xmf4x4Transform._42 = m_xmf3CalPos.y; m_xmf4x4Transform._43 = m_xmf3CalPos.z;
 
-		XMMATRIX mtxScale = XMMatrixScaling(m_xmf3Scale.x, m_xmf3Scale.y, m_xmf3Scale.z);
-		m_xmf4x4Transform = Matrix4x4::Multiply(mtxScale, m_xmf4x4Transform);
-
-		UpdateTransform(NULL);
-	}
+	XMMATRIX mtxScale = XMMatrixScaling(m_xmf3Scale.x, m_xmf3Scale.y, m_xmf3Scale.z);
+	m_xmf4x4Transform = Matrix4x4::Multiply(mtxScale, m_xmf4x4Transform);
 }
 
 void CMonster::SetScale(float x, float y, float z)
@@ -128,7 +121,9 @@ void CMonster::Update(float fTimeElapsed)
 	// 플레이어가 터레인보다 아래에 있지 않도록 하는 코드
 	if (m_pUpdatedContext) CPhysicsObject::OnUpdateCallback(fTimeElapsed);
 
-	CalculateResultPosition();
+	XMFLOAT3 xmf3ShakeVec = Vector3::ScalarProduct(Vector3::Normalize(GetRight()), m_fShakeDistance, false);
+
+	m_xmf3CalPos = Vector3::Add(m_xmf3Position, xmf3ShakeVec);
 
 	m_pStateMachine->Animate(fTimeElapsed);
 
