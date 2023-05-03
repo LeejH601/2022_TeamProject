@@ -342,7 +342,7 @@ class ParticleComponent : public IMessageListener {
     XMFLOAT2 m_fSize = XMFLOAT2(3.f, 3.f);
     float m_fAlpha = 1.f;
     float m_fLifeTime = 0.2f;
-    float m_fSpeed = 20.f;
+    float m_fSpeed = 150.f;
     XMFLOAT3 m_xmf3Color = XMFLOAT3(1.f, 1.f, 1.f);
     std::shared_ptr<CTexture> m_pTexture;
 public:

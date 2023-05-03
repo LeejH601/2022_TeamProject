@@ -63,7 +63,7 @@ void CMonster::CheckIsPlayerInFrontOfThis(XMFLOAT3 xmf3PlayerPosition)
 	if (!m_bCanChase)
 		return;
 
-	if (fDotProduct > 0.0f && m_fToPlayerLength < 40.0f)
+	if (/*fDotProduct > 0.0f && */m_fToPlayerLength < 20.0f)
 	{
 		m_xmf3ChasingVec = Vector3::Normalize(xmf3ToPlayerVec);
 

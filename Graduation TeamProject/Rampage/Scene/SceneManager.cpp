@@ -73,6 +73,8 @@ bool CSceneManager::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPAR
 {
 	SCENE_RETURN_TYPE scene_return_type = m_pCurrentScene->OnProcessingKeyboardMessage(hWnd, nMessageID, wParam, lParam, dwDirection);
 
+	static bool atk1 = false, atk2 = false, atk3 = false;
+
 	switch (scene_return_type)
 	{
 	case SCENE_RETURN_TYPE::NONE:
@@ -80,6 +82,10 @@ bool CSceneManager::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPAR
 	case SCENE_RETURN_TYPE::POP_SCENE:
 		if (m_pCurrentScene == m_pLobbyScene.get()) {
 			m_pCurrentScene = m_pMainScene.get();
+			atk1 = Atk1_Player::GetInst()->GetTrailComponent()->GetEnable();
+			atk2 = Atk2_Player::GetInst()->GetTrailComponent()->GetEnable();
+			atk3 = Atk3_Player::GetInst()->GetTrailComponent()->GetEnable();
+
 			Atk1_Player::GetInst()->GetTrailComponent()->SetEnable(true);
 			Atk2_Player::GetInst()->GetTrailComponent()->SetEnable(true);
 			Atk3_Player::GetInst()->GetTrailComponent()->SetEnable(true);
@@ -88,6 +94,9 @@ bool CSceneManager::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPAR
 	case SCENE_RETURN_TYPE::RETURN_PREVIOUS_SCENE:
 		if (m_pCurrentScene == m_pMainScene.get())
 		{
+			Atk1_Player::GetInst()->GetTrailComponent()->SetEnable(atk1);
+			Atk2_Player::GetInst()->GetTrailComponent()->SetEnable(atk2);
+			Atk3_Player::GetInst()->GetTrailComponent()->SetEnable(atk3);
 			m_pCurrentScene = m_pLobbyScene.get();
 			Locator.SetMouseCursorMode(MOUSE_CUROSR_MODE::FLOATING_MODE);
 			PostMessage(hWnd, WM_ACTIVATE, 0, 0);
