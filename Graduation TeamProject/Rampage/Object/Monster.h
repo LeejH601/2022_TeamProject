@@ -45,8 +45,39 @@ public:
 	BoundingBox m_WeaponBoundingBox;
 	BoundingBox m_TransformedBodyBoudningBox;
 	BoundingBox m_TransformedWeaponBoundingBox;
+
 	CGameObject* pBodyBoundingBoxMesh;
 	CGameObject* pWeaponBoundingBoxMesh;
+
+	CGameObject* pHead;
+	CGameObject* pHeadBoundingBoxMesh;
+
+	CGameObject* pLowerArmRight;
+	CGameObject* pLowerArmRightBoundingBoxMesh;
+
+	CGameObject* pUpperArmRight;
+	CGameObject* pUpperArmRightBoundingBoxMesh;
+
+	CGameObject* pLowerArmLeft;
+	CGameObject* pLowerArmLeftBoundingBoxMesh;
+
+	CGameObject* pUpperArmLeft;
+	CGameObject* pUpperArmLeftBoundingBoxMesh;
+
+	CGameObject* pSpine;
+	CGameObject* pSpineBoundingBoxMesh;
+
+	CGameObject* pThighRight;
+	CGameObject* pThighRightBoundingBoxMesh;
+
+	CGameObject* pThighLeft;
+	CGameObject* pThighLeftBoundingBoxMesh;
+
+	CGameObject* pCalfRight;
+	CGameObject* pCalfRightBoundingBoxMesh;
+
+	CGameObject* pCalfLeft;
+	CGameObject* pCalfLeftBoundingBoxMesh;
 public:
 	CMonster();
 	virtual ~CMonster();

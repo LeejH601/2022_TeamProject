@@ -63,7 +63,7 @@ void CMonster::CheckIsPlayerInFrontOfThis(XMFLOAT3 xmf3PlayerPosition)
 	if (!m_bCanChase)
 		return;
 
-	if (/*fDotProduct > 0.0f && */m_fToPlayerLength < 20.0f)
+	if (/*fDotProduct > 0.0f && */m_fToPlayerLength < 22.5f)
 	{
 		m_xmf3ChasingVec = Vector3::Normalize(xmf3ToPlayerVec);
 
@@ -100,7 +100,7 @@ void CMonster::SetScale(float x, float y, float z)
 void CMonster::Update(float fTimeElapsed)
 {
 	// 현재 행동을 선택함
-	m_pStateMachine->Update(fTimeElapsed);
+	//m_pStateMachine->Update(fTimeElapsed);
 
 	CPhysicsObject::Apply_Gravity(fTimeElapsed);
 
@@ -125,7 +125,7 @@ void CMonster::Update(float fTimeElapsed)
 
 	m_xmf3CalPos = Vector3::Add(m_xmf3Position, xmf3ShakeVec);
 
-	m_pStateMachine->Animate(fTimeElapsed);
+	//m_pStateMachine->Animate(fTimeElapsed);
 
 	CPhysicsObject::Apply_Friction(fTimeElapsed);
 }
@@ -135,12 +135,34 @@ void CMonster::UpdateTransform(XMFLOAT4X4* pxmf4x4Parent)
 
 	m_BodyBoundingBox.Transform(m_TransformedBodyBoudningBox, XMLoadFloat4x4(&m_xmf4x4Transform));
 #ifdef RENDER_BOUNDING_BOX
-	pBodyBoundingBoxMesh->SetWorld(m_xmf4x4Transform);
+	if (pBodyBoundingBoxMesh)
+		pBodyBoundingBoxMesh->SetWorld(m_xmf4x4Transform);
+	if (pHeadBoundingBoxMesh)
+		pHeadBoundingBoxMesh->SetWorld(pHead->GetWorld());
+	if (pLowerArmRightBoundingBoxMesh)
+		pLowerArmRightBoundingBoxMesh->SetWorld(pLowerArmRight->GetWorld());
+	if (pUpperArmRightBoundingBoxMesh)
+		pUpperArmRightBoundingBoxMesh->SetWorld(pUpperArmRight->GetWorld());
+	if (pLowerArmLeftBoundingBoxMesh)
+		pLowerArmLeftBoundingBoxMesh->SetWorld(pLowerArmLeft->GetWorld());
+	if (pUpperArmLeftBoundingBoxMesh)
+		pUpperArmLeftBoundingBoxMesh->SetWorld(pUpperArmLeft->GetWorld());
+	if (pSpineBoundingBoxMesh)
+		pSpineBoundingBoxMesh->SetWorld(pSpine->GetWorld());
+	if (pThighRightBoundingBoxMesh)
+		pThighRightBoundingBoxMesh->SetWorld(pThighRight->GetWorld());
+	if (pThighLeftBoundingBoxMesh)
+		pThighLeftBoundingBoxMesh->SetWorld(pThighLeft->GetWorld());
+	if (pCalfRightBoundingBoxMesh)
+		pCalfRightBoundingBoxMesh->SetWorld(pCalfLeft->GetWorld());
+	if (pCalfLeftBoundingBoxMesh)
+		pCalfLeftBoundingBoxMesh->SetWorld(pCalfRight->GetWorld());
 #endif // RENDER_BOUNDING_BOX
 
 	if (pWeapon)
 	{
 #ifdef RENDER_BOUNDING_BOX
+	if (pWeaponBoundingBoxMesh)
 		pWeaponBoundingBoxMesh->SetWorld(pWeapon->GetWorld());
 #endif 
 		m_WeaponBoundingBox.Transform(m_TransformedWeaponBoundingBox, XMLoadFloat4x4(&pWeapon->GetWorld()));
@@ -183,7 +205,9 @@ void CMonster::UpdateTransformFromArticulation(XMFLOAT4X4* pxmf4x4Parent, std::v
 	
 	m_BodyBoundingBox.Transform(m_TransformedBodyBoudningBox, XMLoadFloat4x4(&Matrix4x4::Multiply(XMMatrixRotationAxis(XMLoadFloat3(&xAxis), XMConvertToRadians(90.0f)), AritculatCacheMatrixs[0])));
 #ifdef RENDER_BOUNDING_BOX
-	pBodyBoundingBoxMesh->SetWorld(Matrix4x4::Multiply(XMMatrixRotationAxis(XMLoadFloat3(&xAxis), XMConvertToRadians(90.0f)), AritculatCacheMatrixs[0]));
+	if(pBodyBoundingBoxMesh)
+		pBodyBoundingBoxMesh->SetWorld(Matrix4x4::Multiply(XMMatrixRotationAxis(XMLoadFloat3(&xAxis), XMConvertToRadians(90.0f)), AritculatCacheMatrixs[0]));
+
 #endif // RENDER_BOUNDING_BOX
 	if (m_pSibling) m_pSibling->UpdateTransformFromArticulation(pxmf4x4Parent, pArtiLinkNames, AritculatCacheMatrixs, scale);
 	if (m_pChild) m_pChild->UpdateTransformFromArticulation(&m_xmf4x4World, pArtiLinkNames, AritculatCacheMatrixs, scale);
@@ -257,9 +281,39 @@ void CGoblinObject::PrepareBoundingBox(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 	pWeapon = CGameObject::FindFrame("SM_Weapon");
 	m_BodyBoundingBox = BoundingBox{ XMFLOAT3(0.0f, 0.75f, 0.0f), XMFLOAT3(0.6f, 1.1f, 0.6f) };
 	m_WeaponBoundingBox = BoundingBox{ XMFLOAT3(0.0f, 0.0f, 0.22f), XMFLOAT3(0.14f, 0.14f, 0.83f) };
+
+	pHead = CGameObject::FindFrame("head");
+	pHeadBoundingBoxMesh = CBoundingBoxShader::GetInst()->AddBoundingObject(pd3dDevice, pd3dCommandList, this, XMFLOAT3(-0.1f, 0.0f, 0.0f), XMFLOAT3(0.3f, 0.3f, 0.3f));
+
+	pLowerArmRight = CGameObject::FindFrame("lowerarm_r");
+	pLowerArmRightBoundingBoxMesh = CBoundingBoxShader::GetInst()->AddBoundingObject(pd3dDevice, pd3dCommandList, this, XMFLOAT3(0.1f, 0.0f, 0.0f), XMFLOAT3(0.2f, 0.1f, 0.1f));
+
+	pUpperArmRight = CGameObject::FindFrame("upperarm_r");
+	pUpperArmRightBoundingBoxMesh = CBoundingBoxShader::GetInst()->AddBoundingObject(pd3dDevice, pd3dCommandList, this, XMFLOAT3(0.1f, 0.0f, 0.0f), XMFLOAT3(0.3f, 0.1f, 0.1f));
+
+	pLowerArmLeft = CGameObject::FindFrame("lowerarm_l");
+	pLowerArmLeftBoundingBoxMesh = CBoundingBoxShader::GetInst()->AddBoundingObject(pd3dDevice, pd3dCommandList, this, XMFLOAT3(-0.15f, 0.0f, 0.0f), XMFLOAT3(0.2f, 0.1f, 0.1f));
+
+	pUpperArmLeft = CGameObject::FindFrame("upperarm_l");
+	pUpperArmLeftBoundingBoxMesh = CBoundingBoxShader::GetInst()->AddBoundingObject(pd3dDevice, pd3dCommandList, this, XMFLOAT3(-0.1f, 0.0f, 0.0f), XMFLOAT3(0.3f, 0.1f, 0.1f));
+
+	pSpine = CGameObject::FindFrame("spine_02");
+	pSpineBoundingBoxMesh = CBoundingBoxShader::GetInst()->AddBoundingObject(pd3dDevice, pd3dCommandList, this, XMFLOAT3(-0.1f, 0.0f, 0.0f), XMFLOAT3(0.4f, 0.25f, 0.25f));
+
+	pThighRight = CGameObject::FindFrame("thigh_r");
+	pThighRightBoundingBoxMesh = CBoundingBoxShader::GetInst()->AddBoundingObject(pd3dDevice, pd3dCommandList, this, XMFLOAT3(-0.1f, 0.0f, 0.0f), XMFLOAT3(0.3f, 0.15f, 0.15f));
+
+	pThighLeft = CGameObject::FindFrame("thigh_l");
+	pThighLeftBoundingBoxMesh = CBoundingBoxShader::GetInst()->AddBoundingObject(pd3dDevice, pd3dCommandList, this, XMFLOAT3(0.1f, 0.0f, 0.0f), XMFLOAT3(0.3f, 0.15f, 0.15f));
+
+	pCalfLeft = CGameObject::FindFrame("calf_l");
+	pCalfLeftBoundingBoxMesh = CBoundingBoxShader::GetInst()->AddBoundingObject(pd3dDevice, pd3dCommandList, this, XMFLOAT3(-0.2f, 0.0f, 0.0f), XMFLOAT3(0.4f, 0.15f, 0.15f));
+	
+	pCalfRight = CGameObject::FindFrame("calf_r");
+	pCalfRightBoundingBoxMesh = CBoundingBoxShader::GetInst()->AddBoundingObject(pd3dDevice, pd3dCommandList, this, XMFLOAT3(0.2f, 0.0f, 0.0f), XMFLOAT3(0.4f, 0.15f, 0.15f));
 #ifdef RENDER_BOUNDING_BOX
-	pBodyBoundingBoxMesh = CBoundingBoxShader::GetInst()->AddBoundingObject(pd3dDevice, pd3dCommandList, this, XMFLOAT3(0.0f, 0.75f, 0.0f), XMFLOAT3(0.6f, 1.1f, 0.6f));
-	pWeaponBoundingBoxMesh = CBoundingBoxShader::GetInst()->AddBoundingObject(pd3dDevice, pd3dCommandList, pWeapon, XMFLOAT3(0.0f, 0.0f, 0.22f), XMFLOAT3(0.14f, 0.14f, 0.83f));
+	//pBodyBoundingBoxMesh = CBoundingBoxShader::GetInst()->AddBoundingObject(pd3dDevice, pd3dCommandList, this, XMFLOAT3(0.0f, 0.75f, 0.0f), XMFLOAT3(0.6f, 1.1f, 0.6f));
+	//pWeaponBoundingBoxMesh = CBoundingBoxShader::GetInst()->AddBoundingObject(pd3dDevice, pd3dCommandList, pWeapon, XMFLOAT3(0.0f, 0.0f, 0.22f), XMFLOAT3(0.14f, 0.14f, 0.83f));
 #endif
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////

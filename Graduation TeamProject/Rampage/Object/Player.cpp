@@ -278,7 +278,9 @@ void CKnightPlayer::UpdateTransform(XMFLOAT4X4* pxmf4x4Parent)
 {
 	CPhysicsObject::UpdateTransform(NULL);
 
-	pBodyBoundingBoxMesh->SetWorld(m_xmf4x4Transform);
+	if (pBodyBoundingBoxMesh)
+		pBodyBoundingBoxMesh->SetWorld(m_xmf4x4Transform);
+
 	m_BodyBoundingBox.Transform(m_TransformedBodyBoundingBox, XMLoadFloat4x4(&m_xmf4x4Transform));
 
 	if (pWeapon)
@@ -303,7 +305,8 @@ void CKnightPlayer::UpdateTransform(XMFLOAT4X4* pxmf4x4Parent)
 		xmf4x4World._42 = xmf3Position.y;
 		xmf4x4World._43 = xmf3Position.z;
 
-		pWeaponBoundingBoxMesh->SetWorld(xmf4x4World);
+		if (pWeaponBoundingBoxMesh)
+			pWeaponBoundingBoxMesh->SetWorld(xmf4x4World);
 
 		m_WeaponBoundingBox.Transform(m_TransformedWeaponBoundingBox, XMLoadFloat4x4(&xmf4x4World));
 
