@@ -3,7 +3,7 @@
 Texture2D gtxMappedTexture[8] : register(t0);
 SamplerState gSamplerState : register(s0);
 
-#define MAX_TRAILCONTROLLPOINT 100
+#define MAX_TRAILCONTROLLPOINT 200
 #define MAX_COLORCURVES 8
 cbuffer cbTrailControllPoints : register(b5)
 {
@@ -37,7 +37,7 @@ PS_MULTIPLE_RENDER_TARGETS_OUTPUT SwordTrail_PS(GS_OUT input)
 	float2 uv = input.uv.xy;
 	//uv.y /= 2.0f;
 	float4 BaseColor = gtxMappedTexture[0].Sample(gSamplerState, uv * float2(1.0f, 1.0f));
-	float4 NoiseColor = gtxMappedTexture[1].Sample(gSamplerState, uv * float2(1.0f, 1.0f) + gnOffsetTime);
+	float4 NoiseColor = gtxMappedTexture[1].Sample(gSamplerState, uv * float2(1.0f, 1.0f) - gnOffsetTime);
 
 	float EmissiveFactor = 1.5f;
 	//float EmissiveFactor = min(2.0f, uv.x * 4.0f);

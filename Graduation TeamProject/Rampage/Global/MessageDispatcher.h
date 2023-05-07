@@ -70,6 +70,7 @@ struct ParticleTrailParams {
 	XMFLOAT3 xmf3Position;
 	int iPlayerAttack; // 플레이어 공격 종류
 	float m_fTime = 0.f;
+	XMFLOAT3 xmf3Velocity;
 };
 
 struct TrailUpdateParams {
@@ -421,7 +422,7 @@ class SmokeParticleComponent : public IMessageListener {
     XMFLOAT2 m_fSize = XMFLOAT2(3.f, 3.f);
     float m_fAlpha = 1.5f;
     float m_fLifeTime = 1.f;
-    float m_fSpeed = 10.f;
+    float m_fSpeed = 100.f;
     int m_iIndex = 0;
     XMFLOAT3 m_xmf3Color = XMFLOAT3(0.191f * 2.f, 0.167f * 2.f, 0.096f * 2.f);
     //XMFLOAT3 m_xmf3Color = XMFLOAT3(1.f, 1.f, 1.f);

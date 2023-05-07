@@ -1,7 +1,7 @@
 #pragma once
 #include "Object.h"
 
-#define MAX_TRAILCONTROLLPOINTS 100
+#define MAX_TRAILCONTROLLPOINTS 200
 #define MAX_COLORCURVES 8
 
 struct VS_CB_SWTRAIL_INFO

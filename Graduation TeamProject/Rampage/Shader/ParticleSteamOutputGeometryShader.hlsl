@@ -61,7 +61,7 @@ VS_PARTICLE_INPUT OutputParticleToStream(VS_PARTICLE_INPUT input, inout PointStr
 {
 	input.position += gf3Gravity * input.velocity * gfElapsedTime;
 	//input.velocity += gf3Gravity * gfElapsedTime;
-	input.velocity += float3(0.0f, -9.8f*60, 0.0f) * gfElapsedTime;
+	//input.velocity += float3(0.0f, -9.8f*60, 0.0f) * gfElapsedTime;
 	input.lifetime -= gfElapsedTime;
 	return input;
 }

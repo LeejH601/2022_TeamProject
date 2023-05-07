@@ -28,10 +28,10 @@ CSwordTrailObject::CSwordTrailObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 
 	SetShader(pSwordTrailShader, pTexture);
 
-	m_fR_CurvePoints[0] =  0.0f; m_fR_CurvePoints[1] = 0.14; m_fR_CurvePoints[2] = 0.459;  m_fR_CurvePoints[3] = 1.892; 
-	m_fG_CurvePoints[0] = 0.0f; m_fG_CurvePoints[1] = 0.005; m_fG_CurvePoints[2] = 0.067;  m_fG_CurvePoints[3] = 0.595; 
-	m_fB_CurvePoints[0] =  0.0f; m_fB_CurvePoints[1] = 0.257; m_fB_CurvePoints[2] = 0.26;  m_fB_CurvePoints[3] = 0.0f; 
-	m_fColorCurveTimes[0] =  0.0f; m_fColorCurveTimes[1] = 0.3; m_fColorCurveTimes[2] = 0.6;  m_fColorCurveTimes[3] = 1.0;
+	m_fR_CurvePoints[0] = 0.0f; m_fR_CurvePoints[1] = 0.14; m_fR_CurvePoints[2] = 0.459;  m_fR_CurvePoints[3] = 1.892;
+	m_fG_CurvePoints[0] = 0.0f; m_fG_CurvePoints[1] = 0.005; m_fG_CurvePoints[2] = 0.067;  m_fG_CurvePoints[3] = 0.595;
+	m_fB_CurvePoints[0] = 0.0f; m_fB_CurvePoints[1] = 0.257; m_fB_CurvePoints[2] = 0.26;  m_fB_CurvePoints[3] = 0.0f;
+	m_fColorCurveTimes[0] = 0.0f; m_fColorCurveTimes[1] = 0.3; m_fColorCurveTimes[2] = 0.6;  m_fColorCurveTimes[3] = 1.0;
 	m_nCurves = 4;
 	m_fNoiseConstants = 1.4f;
 
@@ -97,7 +97,7 @@ void CSwordTrailObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, bool 
 	UpdateShaderVariables(pd3dCommandList);
 
 	pd3dCommandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_POINTLIST);
-	pd3dCommandList->DrawInstanced(m_nDrawedControllPoints-1, 1, 0, 0);
+	pd3dCommandList->DrawInstanced(m_nDrawedControllPoints - 1, 1, 0, 0);
 }
 
 void CSwordTrailObject::SetNextControllPoint(XMFLOAT4* point1, XMFLOAT4* point2)
@@ -141,21 +141,21 @@ void CSwordTrailObject::SetNextControllPoint(XMFLOAT4* point1, XMFLOAT4* point2)
 
 	{
 		float nTrailTotalLength1 = 0;
-		std::vector<float> fSectorLengths1; fSectorLengths1.resize(10);
+		std::vector<float> fSectorLengths1; fSectorLengths1.resize(MAX_TRAILCONTROLLPOINTS / 10);
 		float nTrailTotalLength2 = 0;
-		std::vector<float> fSectorLengths2; fSectorLengths2.resize(10);
+		std::vector<float> fSectorLengths2; fSectorLengths2.resize(MAX_TRAILCONTROLLPOINTS / 10);
 		for (int i = 1; i < m_nTrailBasePoints + 1; ++i) {
-			fSectorLengths1[i-1] = XMVector4Length(XMVectorSubtract(XMLoadFloat4(&m_xmf4TrailBasePoints1[i + 1]), XMLoadFloat4(&m_xmf4TrailBasePoints1[i]))).m128_f32[0];
-			nTrailTotalLength1 += fSectorLengths1[i-1];
-			fSectorLengths2[i-1] = XMVector4Length(XMVectorSubtract(XMLoadFloat4(&m_xmf4TrailBasePoints2[i + 1]), XMLoadFloat4(&m_xmf4TrailBasePoints2[i]))).m128_f32[0];
-			nTrailTotalLength2 += fSectorLengths2[i-1];
+			fSectorLengths1[i - 1] = XMVector4Length(XMVectorSubtract(XMLoadFloat4(&m_xmf4TrailBasePoints1[i + 1]), XMLoadFloat4(&m_xmf4TrailBasePoints1[i]))).m128_f32[0];
+			nTrailTotalLength1 += fSectorLengths1[i - 1];
+			fSectorLengths2[i - 1] = XMVector4Length(XMVectorSubtract(XMLoadFloat4(&m_xmf4TrailBasePoints2[i + 1]), XMLoadFloat4(&m_xmf4TrailBasePoints2[i]))).m128_f32[0];
+			nTrailTotalLength2 += fSectorLengths2[i - 1];
 		}
-		float gapOne = nTrailTotalLength1 / (10 * m_nTrailBasePoints);
-		float gapTwo = nTrailTotalLength2 / (10 * m_nTrailBasePoints);
+		float gapOne = nTrailTotalLength1 / (MAX_TRAILCONTROLLPOINTS / 10 * m_nTrailBasePoints);
+		float gapTwo = nTrailTotalLength2 / (MAX_TRAILCONTROLLPOINTS / 10 * m_nTrailBasePoints);
 
 		int index = 0;
 		float gapT1 = 0, gapT2 = 0;
-		for (int i = 0; i < m_nTrailBasePoints * 10; ++i) {
+		for (int i = 0; i < m_nTrailBasePoints * MAX_TRAILCONTROLLPOINTS / 10; ++i) {
 			int SampleIndex1 = 0;
 			float gapAcculater = gapT1;
 			int SampleIndex2 = 0;

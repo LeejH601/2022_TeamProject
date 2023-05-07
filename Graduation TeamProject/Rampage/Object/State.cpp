@@ -307,6 +307,7 @@ void Atk1_Player::SpawnTrailParticle(CPlayer* player)
 			ParticleTrail_comp_params.xmf3Position = xmf3Position;
 			ParticleTrail_comp_params.iPlayerAttack = 0;
 			ParticleTrail_comp_params.m_fTime = player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition;
+			ParticleTrail_comp_params.xmf3Velocity =Vector3::Normalize(Vector3::Subtract(xmf3Position, player->GetPosition()));
 			CMessageDispatcher::GetInst()->Dispatch_Message<ParticleTrailParams>(MessageType::UPDATE_TRAILPARTICLE, &ParticleTrail_comp_params, player->m_pStateMachine->GetCurrentState());
 		}
 
@@ -357,7 +358,7 @@ void Atk1_Player::Execute(CPlayer* player, float fElapsedTime)
 		player->m_pStateMachine->ChangeState(Idle_Player::GetInst());
 	}
 
-	//SpawnTrailParticle(player);
+	SpawnTrailParticle(player);
 }
 
 void Atk1_Player::Animate(CPlayer* player, float fElapsedTime)
@@ -458,7 +459,7 @@ void Atk2_Player::Execute(CPlayer* player, float fElapsedTime)
 		player->m_pStateMachine->ChangeState(Idle_Player::GetInst());
 	}
 
-	//SpawnTrailParticle(player);
+	SpawnTrailParticle(player);
 }
 
 void Atk2_Player::Animate(CPlayer* player, float fElapsedTime)
@@ -581,6 +582,12 @@ void Atk3_Player::Execute(CPlayer* player, float fElapsedTime)
 	CheckHitLag(player);
 
 	CAnimationSet* pAnimationSet = player->m_pSkinnedAnimationController->m_pAnimationSets->m_pAnimationSets[player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_nAnimationSet];
+
+	if (player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition > 0.65f)
+		if (player->m_pSwordTrailReference) {
+			dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[2].get())->m_bIsUpdateTrailVariables = false;
+		}
+
 	if (player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition == pAnimationSet->m_fLength)
 	{
 		player->m_pStateMachine->ChangeState(Idle_Player::GetInst());
@@ -662,7 +669,7 @@ void Run_Player::Execute(CPlayer* player, float fElapsedTime)
 		memcpy(&xmf3Position, &(pFoot_Left->m_xmf4x4World._41), sizeof(XMFLOAT3));
 		Particlesmoke_comp_params.xmf3Position = xmf3Position;
 		Particlesmoke_comp_params.xmfDirection = player->m_xmfDirection;
-		
+
 		CMessageDispatcher::GetInst()->Dispatch_Message<ParticleSmokeParams>(MessageType::UPDATE_SMOKEPARTICLE, &Particlesmoke_comp_params, player->m_pStateMachine->GetCurrentState());
 	}
 

@@ -407,11 +407,12 @@ void TrailParticleComponent::HandleMessage(const Message& message, const Particl
 		pParticleObject->SetSize(m_fSize);
 		pParticleObject->SetStartAlpha(m_fAlpha);
 		pParticleObject->SetColor(m_xmf3Color);
-		pParticleObject->SetSpeed(m_fSpeed);
-		pParticleObject->SetLifeTime(m_fLifeTime);
+		pParticleObject->SetSpeed(m_fSpeed * 300.0f);
+		pParticleObject->SetLifeTime(0.05f);
 		pParticleObject->SetMaxParticleN(m_nParticleNumber);
 		pParticleObject->SetEmitParticleN(m_nEmitMinParticleNumber + rand() % (m_nEmitMaxParticleNumber - m_nEmitMinParticleNumber));
 		pParticleObject->SetPosition(params.xmf3Position);
+		pParticleObject->SetDirection(params.xmf3Velocity);
 		//pParticleObject->ChangeTexture(m_pTexture);
 	}
 }
