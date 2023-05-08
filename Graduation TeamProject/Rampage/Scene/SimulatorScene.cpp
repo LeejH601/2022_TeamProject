@@ -540,16 +540,6 @@ void CSimulatorScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float f
 	m_pTerrainShader->Render(pd3dCommandList, 0);
 	m_pTerrain->Render(pd3dCommandList, true);
 
-	//m_pBillBoardObjectShader->Render(pd3dCommandList, 0);
-
-
-
-	//for (int i = 0; i < m_pBillBoardObjects.size(); ++i)
-	//{
-	//	(static_cast<CBillBoardObject*>(m_pBillBoardObjects[i].get()))->UpdateShaderVariables(pd3dCommandList, fCurrentTime, fTimeElapsed);
-	//	m_pBillBoardObjects[i]->Render(pd3dCommandList, true);
-	//}
-
 	CModelShader::GetInst()->Render(pd3dCommandList, 1);
 
 	m_pMainCharacter->Animate(0.0f);
@@ -575,14 +565,12 @@ void CSimulatorScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float f
 		m_pEnemys[i]->Render(pd3dCommandList, true);
 	}
 
+#define PostProcessing
+#ifdef PostProcessing
+	m_pPostProcessShader->Render(pd3dCommandList, pCamera);
+#endif // PostProcessing
+	
 	m_pBillBoardObjectShader->Render(pd3dCommandList, 0);
-
-	for (int i = 0; i < m_pTerrainSpriteObject.size(); ++i)
-	{
-		(static_cast<CTerrainSpriteObject*>(m_pTerrainSpriteObject[i].get()))->UpdateShaderVariables(pd3dCommandList, fCurrentTime, fTimeElapsed);
-		(static_cast<CTerrainSpriteObject*>(m_pTerrainSpriteObject[i].get()))->Animate(m_pTerrain.get(), fTimeElapsed);
-		m_pTerrainSpriteObject[i]->Render(pd3dCommandList, true);
-	}
 
 	for (int i = 0; i < m_pBillBoardObjects.size(); ++i)
 	{
@@ -590,12 +578,12 @@ void CSimulatorScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float f
 		m_pBillBoardObjects[i]->Render(pd3dCommandList, true);
 	}
 
-	for (int i = 0; i < m_pParticleObjects.size(); ++i)
+	/*for (int i = 0; i < m_pTerrainSpriteObject.size(); ++i)
 	{
-		((CParticleObject*)m_pParticleObjects[i].get())->Update(fTimeElapsed);
-		((CParticleObject*)m_pParticleObjects[i].get())->UpdateShaderVariables(pd3dCommandList, fCurrentTime, fTimeElapsed);
-		((CParticleObject*)m_pParticleObjects[i].get())->Render(pd3dCommandList, nullptr, m_pParticleShader.get());
-	}
+		(static_cast<CTerrainSpriteObject*>(m_pTerrainSpriteObject[i].get()))->UpdateShaderVariables(pd3dCommandList, fCurrentTime, fTimeElapsed);
+		(static_cast<CTerrainSpriteObject*>(m_pTerrainSpriteObject[i].get()))->Animate(m_pTerrain.get(), fTimeElapsed);
+		m_pTerrainSpriteObject[i]->Render(pd3dCommandList, true);
+	}*/
 
 	//for (int i = 0; i < m_pUpDownParticleObjects.size(); ++i)
 	//{
@@ -604,11 +592,13 @@ void CSimulatorScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float f
 	//	((CParticleObject*)m_pUpDownParticleObjects[i].get())->Render(pd3dCommandList, nullptr, m_pParticleShader.get());
 	//}
 
-#define PostProcessing
-#ifdef PostProcessing
-	m_pPostProcessShader->Render(pd3dCommandList, pCamera);
-#endif // PostProcessing
-	
+	for (int i = 0; i < m_pParticleObjects.size(); ++i)
+	{
+		((CParticleObject*)m_pParticleObjects[i].get())->Update(fTimeElapsed);
+		((CParticleObject*)m_pParticleObjects[i].get())->UpdateShaderVariables(pd3dCommandList, fCurrentTime, fTimeElapsed);
+		((CParticleObject*)m_pParticleObjects[i].get())->Render(pd3dCommandList, nullptr, m_pParticleShader.get());
+	}
+
 	m_pSwordTrailShader->Render(pd3dCommandList, pCamera, 0);
 	for (std::unique_ptr<CGameObject>& obj : m_pSwordTrailObjects) {
 		obj->Render(pd3dCommandList, true);

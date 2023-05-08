@@ -111,7 +111,7 @@ void Atk_Player::InitAtkPlayer()
 	// CAMERA SHAKE
 	std::unique_ptr<CameraShakeComponent> pShakeComponent = std::make_unique<CameraShakeComponent>();
 	pShakeComponent->SetDuration(1.0f);
-	pShakeComponent->SetMagnitude(1.5f);
+	pShakeComponent->SetMagnitude(0.5f);
 	m_pListeners.push_back(std::move(pShakeComponent));
 	CMessageDispatcher::GetInst()->RegisterListener(MessageType::UPDATE_CAMERA, m_pListeners.back().get(), this);
 

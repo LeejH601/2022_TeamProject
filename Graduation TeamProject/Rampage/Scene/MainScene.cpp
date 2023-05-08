@@ -438,6 +438,20 @@ SCENE_RETURN_TYPE CMainTMPScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMe
 	case WM_KEYDOWN:
 		switch (wParam)
 		{
+		case VK_F5:
+		{
+			XMFLOAT3 xmf3MonsterPos[5];
+			XMFLOAT3 xmf3PlayerPos = m_pPlayer->GetPosition();
+			XMFLOAT3 xmf3PlayerLook = m_pPlayer->GetLook();
+			XMFLOAT3 xmf3PlayerRight = m_pPlayer->GetRight();
+			xmf3PlayerLook = Vector3::ScalarProduct(xmf3PlayerLook, 20.f, false);
+
+			for (int i = 0; i < 5; i++)
+				xmf3MonsterPos[i] = Vector3::Add(Vector3::Add(Vector3::ScalarProduct(xmf3PlayerRight, -20 + i * 10, false), xmf3PlayerLook), xmf3PlayerPos);
+
+			CMonsterPool::GetInst()->SpawnMonster(7, xmf3MonsterPos);
+			break;
+		}
 		case VK_BACK:
 			if (m_CurrentMouseCursorMode == MOUSE_CUROSR_MODE::THIRD_FERSON_MODE)
 			{
@@ -603,15 +617,70 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	CModelShader::GetInst()->CreateShaderVariables(pd3dDevice, pd3dCommandList);
 	CModelShader::GetInst()->CreateCbvSrvUavDescriptorHeaps(pd3dDevice, 0, 200);
 
-	std::unique_ptr<CGoblinObject> m_pGoblinObject = std::make_unique<CGoblinObject>(pd3dDevice, pd3dCommandList, 1);
-	m_pGoblinObject->SetPosition(XMFLOAT3(190, 50, -70));
-	m_pGoblinObject->SetScale(4.0f, 4.0f, 4.0f);
-	m_pGoblinObject->Rotate(0.0f, 180.0f, 0.0f);
-	m_pGoblinObject->m_fHP = 1000.f;
-	m_pGoblinObject->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
-	m_pGoblinObject->m_pSkinnedAnimationController->m_xmf3RootObjectScale = XMFLOAT3(10.0f, 10.0f, 10.0f);
-	m_pGoblinObject->CreateArticulation(1.0f);
-	m_pObjects.push_back(std::move(m_pGoblinObject));
+	std::unique_ptr<CMonster> m_pMonsterObject = std::make_unique<CGoblinObject>(pd3dDevice, pd3dCommandList, 1);
+	m_pMonsterObject->SetPosition(XMFLOAT3(190, 50, -70));
+	m_pMonsterObject->SetScale(4.0f, 4.0f, 4.0f);
+	m_pMonsterObject->Rotate(0.0f, 180.0f, 0.0f);
+	m_pMonsterObject->m_fHP = 1000.f;
+	m_pMonsterObject->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
+	m_pMonsterObject->m_pSkinnedAnimationController->m_xmf3RootObjectScale = XMFLOAT3(10.0f, 10.0f, 10.0f);
+	m_pMonsterObject->CreateArticulation(1.0f);
+	m_pObjects.push_back(std::move(m_pMonsterObject));
+
+	m_pMonsterObject = std::make_unique<CGoblinObject>(pd3dDevice, pd3dCommandList, 1);
+	m_pMonsterObject->SetPosition(XMFLOAT3(190, 50, -70));
+	m_pMonsterObject->SetScale(4.0f, 4.0f, 4.0f);
+	m_pMonsterObject->Rotate(0.0f, 180.0f, 0.0f);
+	m_pMonsterObject->m_fHP = 100.f;
+	m_pMonsterObject->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
+	m_pMonsterObject->m_pSkinnedAnimationController->m_xmf3RootObjectScale = XMFLOAT3(10.0f, 10.0f, 10.0f);
+	m_pMonsterObject->CreateArticulation(1.0f);
+	CMonsterPool::GetInst()->SetNonActiveMonster(m_pMonsterObject.get());
+	m_pObjects.push_back(std::move(m_pMonsterObject));
+
+	m_pMonsterObject = std::make_unique<CGoblinObject>(pd3dDevice, pd3dCommandList, 1);
+	m_pMonsterObject->SetPosition(XMFLOAT3(190, 50, -70));
+	m_pMonsterObject->SetScale(4.0f, 4.0f, 4.0f);
+	m_pMonsterObject->Rotate(0.0f, 180.0f, 0.0f);
+	m_pMonsterObject->m_fHP = 100.f;
+	m_pMonsterObject->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
+	m_pMonsterObject->m_pSkinnedAnimationController->m_xmf3RootObjectScale = XMFLOAT3(10.0f, 10.0f, 10.0f);
+	m_pMonsterObject->CreateArticulation(1.0f);
+	CMonsterPool::GetInst()->SetNonActiveMonster(m_pMonsterObject.get());
+	m_pObjects.push_back(std::move(m_pMonsterObject));
+
+	m_pMonsterObject = std::make_unique<CGoblinObject>(pd3dDevice, pd3dCommandList, 1);
+	m_pMonsterObject->SetPosition(XMFLOAT3(190, 50, -70));
+	m_pMonsterObject->SetScale(4.0f, 4.0f, 4.0f);
+	m_pMonsterObject->Rotate(0.0f, 180.0f, 0.0f);
+	m_pMonsterObject->m_fHP = 100.f;
+	m_pMonsterObject->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
+	m_pMonsterObject->m_pSkinnedAnimationController->m_xmf3RootObjectScale = XMFLOAT3(10.0f, 10.0f, 10.0f);
+	m_pMonsterObject->CreateArticulation(1.0f);
+	CMonsterPool::GetInst()->SetNonActiveMonster(m_pMonsterObject.get());
+	m_pObjects.push_back(std::move(m_pMonsterObject));
+
+	m_pMonsterObject = std::make_unique<CGoblinObject>(pd3dDevice, pd3dCommandList, 1);
+	m_pMonsterObject->SetPosition(XMFLOAT3(190, 50, -70));
+	m_pMonsterObject->SetScale(4.0f, 4.0f, 4.0f);
+	m_pMonsterObject->Rotate(0.0f, 180.0f, 0.0f);
+	m_pMonsterObject->m_fHP = 100.f;
+	m_pMonsterObject->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
+	m_pMonsterObject->m_pSkinnedAnimationController->m_xmf3RootObjectScale = XMFLOAT3(10.0f, 10.0f, 10.0f);
+	m_pMonsterObject->CreateArticulation(1.0f);
+	CMonsterPool::GetInst()->SetNonActiveMonster(m_pMonsterObject.get());
+	m_pObjects.push_back(std::move(m_pMonsterObject));
+
+	m_pMonsterObject = std::make_unique<CGoblinObject>(pd3dDevice, pd3dCommandList, 1);
+	m_pMonsterObject->SetPosition(XMFLOAT3(190, 50, -70));
+	m_pMonsterObject->SetScale(4.0f, 4.0f, 4.0f);
+	m_pMonsterObject->Rotate(0.0f, 180.0f, 0.0f);
+	m_pMonsterObject->m_fHP = 100.f;
+	m_pMonsterObject->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
+	m_pMonsterObject->m_pSkinnedAnimationController->m_xmf3RootObjectScale = XMFLOAT3(10.0f, 10.0f, 10.0f);
+	m_pMonsterObject->CreateArticulation(1.0f);
+	CMonsterPool::GetInst()->SetNonActiveMonster(m_pMonsterObject.get());
+	m_pObjects.push_back(std::move(m_pMonsterObject));
 
 	// Light »ý¼º
 	m_pLight = std::make_unique<CLight>();
