@@ -80,7 +80,7 @@ void CSwordTrailObject::ReleaseShaderVariables()
 
 void CSwordTrailObject::Update(float fTimeElapsed)
 {
-	m_faccumulateTime += fTimeElapsed * 3.0f;
+	m_faccumulateTime += fTimeElapsed * 1.0f;
 }
 
 void CSwordTrailObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, bool b_UseTexture, CCamera* pCamera)

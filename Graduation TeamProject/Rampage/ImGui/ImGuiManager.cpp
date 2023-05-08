@@ -129,6 +129,8 @@ void DataLoader::SaveComponentSet(FILE* pInFile, CState<CPlayer>* pState)
 	ParticleComponent* pParticleComponent = dynamic_cast<ParticleComponent*>(pState->GetParticleComponent());
 	ImpactEffectComponent* pImpactComponent = dynamic_cast<ImpactEffectComponent*>(pState->GetImpactComponent());
 
+	TrailComponent* pTrailComponent = dynamic_cast<TrailComponent*>(pState->GetTrailComponent());
+
 	std::string str = "<Components>:";
 	WriteStringFromFile(pInFile, str);
 
@@ -289,6 +291,11 @@ void DataLoader::SaveComponentSet(FILE* pInFile, CState<CPlayer>* pState)
 	WriteFloatFromFile(pInFile, pImpactComponent->GetAlpha());
 	WriteStringFromFile(pInFile, std::string("</ImpactComponent>:"));
 
+	WriteStringFromFile(pInFile, std::string("<TrailComponent>:"));
+	WriteStringFromFile(pInFile, std::string("<Enable>:"));
+	WriteIntegerFromFile(pInFile, pTrailComponent->GetEnable());
+	WriteStringFromFile(pInFile, std::string("</TrailComponent>:"));
+
 	str = "</Components>:";
 	WriteStringFromFile(pInFile, str);
 }
@@ -312,6 +319,8 @@ void DataLoader::LoadComponentSet(FILE* pInFile, CState<CPlayer>* pState)
 
 	ParticleComponent* pParticleComponent = dynamic_cast<ParticleComponent*>(pState->GetParticleComponent());
 	ImpactEffectComponent* pImpactComponent = dynamic_cast<ImpactEffectComponent*>(pState->GetImpactComponent());
+
+	TrailComponent* pTrailComponent = dynamic_cast<TrailComponent*>(pState->GetTrailComponent());
 
 	char buf[256];
 	std::string str;
@@ -719,6 +728,22 @@ void DataLoader::LoadComponentSet(FILE* pInFile, CState<CPlayer>* pState)
 					pImpactComponent->SetAlpha(ReadFloatFromFile(pInFile));
 				}
 				else if (!strcmp(buf, "</ImpactComponent>:"))
+				{
+					break;
+				}
+			}
+		}
+		else if (!strcmp(buf, "<TrailComponent>:"))
+		{
+			for (; ; )
+			{
+				ReadStringFromFile(pInFile, buf);
+
+				if (!strcmp(buf, "<Enable>:"))
+				{
+					pTrailComponent->SetEnable(ReadIntegerFromFile(pInFile));
+				}
+				else if (!strcmp(buf, "</TrailComponent>:"))
 				{
 					break;
 				}
