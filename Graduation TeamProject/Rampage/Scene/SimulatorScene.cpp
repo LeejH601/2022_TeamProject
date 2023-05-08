@@ -496,6 +496,11 @@ void CSimulatorScene::Update(float fTimeElapsed)
 
 void CSimulatorScene::UpdateObjects(float fTimeElapsed)
 {
+	if (m_pMainCharacter) {
+		if (!dynamic_cast<CPlayer*>(m_pMainCharacter.get())->m_pSwordTrailReference)
+			dynamic_cast<CPlayer*>(m_pMainCharacter.get())->m_pSwordTrailReference = m_pSwordTrailObjects.data();
+	}
+
 	AnimationCompParams animation_comp_params;
 	animation_comp_params.pObjects = &m_pEnemys;
 	animation_comp_params.fElapsedTime = fTimeElapsed;
@@ -553,7 +558,7 @@ void CSimulatorScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float f
 			switch (trailObj->m_eTrailUpdateMethod)
 			{
 			case TRAIL_UPDATE_METHOD::UPDATE_NEW_CONTROL_POINT:
-				trailObj->SetNextControllPoint(&((CPlayer*)m_pPlayer)->GetTrailControllPoint(0), &((CPlayer*)m_pPlayer)->GetTrailControllPoint(1));
+				trailObj->SetNextControllPoint(&((CPlayer*)m_pMainCharacter.get())->GetTrailControllPoint(0), &((CPlayer*)m_pMainCharacter.get())->GetTrailControllPoint(1));
 				break;
 			case TRAIL_UPDATE_METHOD::NON_UPDATE_NEW_CONTROL_POINT:
 				break;
