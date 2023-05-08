@@ -292,7 +292,7 @@ void CKnightPlayer::UpdateTransform(XMFLOAT4X4* pxmf4x4Parent)
 
 		XMFLOAT3 controllBasePos = XMFLOAT3(0.0f, 0.2f, 0.0f);
 		controllBasePos = Vector3::TransformCoord(controllBasePos, xmf4x4World);
-		XMFLOAT3 offsetPosition = XMFLOAT3(0.0f, 1.5f, 0.0f);
+		XMFLOAT3 offsetPosition = XMFLOAT3(0.0f, 2.0f, 0.0f);
 		offsetPosition = Vector3::TransformCoord(offsetPosition, xmf4x4World);
 		//offsetPosition = Vector3::Add(controllBasePos, m_TransformedWeaponBoundingBox.Extents);
 

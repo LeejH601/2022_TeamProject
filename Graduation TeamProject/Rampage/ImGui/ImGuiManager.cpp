@@ -971,7 +971,7 @@ void CImGuiManager::SetUI()
 		ImGuiWindowFlags my_window_flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize;
 		ImGui::Begin(U8STR("타격감 프리셋 메뉴"), &show_preset_menu, my_window_flags);
 
-		std::string path = "..\\Rampage\\Data";
+		std::string path = "Data";
 		std::vector<std::u8string> v;
 		for (const auto& entry : std::filesystem::directory_iterator(path))
 		{

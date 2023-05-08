@@ -252,9 +252,13 @@ Atk1_Player::~Atk1_Player()
 void Atk1_Player::CheckComboAttack(CPlayer* player)
 {
 	// 사용자가 좌클릭을 했으면 애니메이션을 0.7초 진행 후 Atk2_Player로 상태 변경
+	if (0.55 < player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition) {
+		if (player->m_pSwordTrailReference)
+			dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[0].get())->m_eTrailUpdateMethod = TRAIL_UPDATE_METHOD::NON_UPDATE_NEW_CONTROL_POINT;
+	}
 	if (0.7 < player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition) {
 		if (player->m_pSwordTrailReference)
-			dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[0].get())->m_bIsUpdateTrailVariables = false;
+			dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[0].get())->m_eTrailUpdateMethod = TRAIL_UPDATE_METHOD::DELETE_CONTROL_POINT;
 		if (player->m_bAttack) {
 			CAnimationController* pPlayerController = player->m_pSkinnedAnimationController.get();
 			if (pPlayerController->m_bRootMotion)
@@ -378,7 +382,7 @@ void Atk1_Player::Exit(CPlayer* player)
 		GetCameraMoveComponent()->Reset();
 	}
 	if (player->m_pSwordTrailReference)
-		dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[0].get())->m_bIsUpdateTrailVariables = false;
+		dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[0].get())->m_eTrailUpdateMethod = TRAIL_UPDATE_METHOD::DELETE_CONTROL_POINT;
 }
 
 Atk2_Player::Atk2_Player()
@@ -392,10 +396,14 @@ Atk2_Player::~Atk2_Player()
 
 void Atk2_Player::CheckComboAttack(CPlayer* player)
 {
+	if (0.45 < player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition) {
+		if (player->m_pSwordTrailReference)
+			dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[1].get())->m_eTrailUpdateMethod = TRAIL_UPDATE_METHOD::NON_UPDATE_NEW_CONTROL_POINT;
+	}
 	// 사용자가 좌클릭을 했으면 애니메이션을 0.7초 진행 후 Atk2_Player로 상태 변경
 	if (0.7 < player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition) {
 		if (player->m_pSwordTrailReference)
-			dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[1].get())->m_bIsUpdateTrailVariables = false;
+			dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[1].get())->m_eTrailUpdateMethod = TRAIL_UPDATE_METHOD::DELETE_CONTROL_POINT;
 		if (player->m_bAttack)
 		{
 			CAnimationController* pPlayerController = player->m_pSkinnedAnimationController.get();
@@ -480,7 +488,7 @@ void Atk2_Player::Exit(CPlayer* player)
 	}
 
 	if (player->m_pSwordTrailReference)
-		dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[1].get())->m_bIsUpdateTrailVariables = false;
+		dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[1].get())->m_eTrailUpdateMethod = TRAIL_UPDATE_METHOD::DELETE_CONTROL_POINT;
 }
 
 void Atk2_Player::SpawnTrailParticle(CPlayer* player)
@@ -583,9 +591,13 @@ void Atk3_Player::Execute(CPlayer* player, float fElapsedTime)
 
 	CAnimationSet* pAnimationSet = player->m_pSkinnedAnimationController->m_pAnimationSets->m_pAnimationSets[player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_nAnimationSet];
 
+	if (0.45 < player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition) {
+		if (player->m_pSwordTrailReference)
+			dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[2].get())->m_eTrailUpdateMethod = TRAIL_UPDATE_METHOD::NON_UPDATE_NEW_CONTROL_POINT;
+	}
 	if (player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition > 0.65f)
 		if (player->m_pSwordTrailReference) {
-			dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[2].get())->m_bIsUpdateTrailVariables = false;
+			dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[2].get())->m_eTrailUpdateMethod = TRAIL_UPDATE_METHOD::DELETE_CONTROL_POINT;
 		}
 
 	if (player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition == pAnimationSet->m_fLength)
@@ -616,7 +628,7 @@ void Atk3_Player::Exit(CPlayer* player)
 	}
 
 	if (player->m_pSwordTrailReference)
-		dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[2].get())->m_bIsUpdateTrailVariables = false;
+		dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[2].get())->m_eTrailUpdateMethod = TRAIL_UPDATE_METHOD::DELETE_CONTROL_POINT;
 }
 
 void Atk3_Player::SpawnTrailParticle(CPlayer* player)
@@ -726,7 +738,7 @@ void Atk4_Player::Enter(CPlayer* player)
 	player->m_fAnimationPlayWeight = 1.0f;
 
 	if (player->m_pSwordTrailReference) {
-		dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[3].get())->m_bIsUpdateTrailVariables = true;
+		//dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[3].get())->m_bIsUpdateTrailVariables = true;
 		dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[3].get())->m_faccumulateTime = 0.0f;
 	}
 
@@ -751,8 +763,8 @@ void Atk4_Player::Execute(CPlayer* player, float fElapsedTime)
 	}
 
 	if (0.7 < player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition) {
-		if (player->m_pSwordTrailReference)
-			dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[3].get())->m_bIsUpdateTrailVariables = false;
+		/*if (player->m_pSwordTrailReference)
+			dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[3].get())->m_bIsUpdateTrailVariables = false;*/
 		if (player->m_bAttack)
 			player->m_pStateMachine->ChangeState(Atk5_Player::GetInst());
 	}
@@ -780,8 +792,8 @@ void Atk4_Player::Animate(CPlayer* player, float fElapsedTime)
 
 void Atk4_Player::Exit(CPlayer* player)
 {
-	if (player->m_pSwordTrailReference)
-		dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[3].get())->m_bIsUpdateTrailVariables = false;
+	/*if (player->m_pSwordTrailReference)
+		dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[3].get())->m_bIsUpdateTrailVariables = false;*/
 }
 
 void Atk4_Player::SpawnTrailParticle(CPlayer* player)
@@ -811,7 +823,7 @@ void Atk5_Player::Enter(CPlayer* player)
 	player->m_fAnimationPlayWeight = 1.0f;
 
 	if (player->m_pSwordTrailReference) {
-		dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[4].get())->m_bIsUpdateTrailVariables = true;
+		//dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[4].get())->m_bIsUpdateTrailVariables = true;
 		dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[4].get())->m_faccumulateTime = 0.0f;
 	}
 
@@ -854,8 +866,8 @@ void Atk5_Player::Animate(CPlayer* player, float fElapsedTime)
 
 void Atk5_Player::Exit(CPlayer* player)
 {
-	if (player->m_pSwordTrailReference)
-		dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[4].get())->m_bIsUpdateTrailVariables = false;
+	/*if (player->m_pSwordTrailReference)
+		dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[4].get())->m_bIsUpdateTrailVariables = false;*/
 }
 
 void Atk5_Player::CheckComboAttack(CPlayer* player)

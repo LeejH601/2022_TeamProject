@@ -477,7 +477,7 @@ void TrailComponent::HandleMessage(const Message& message, const TrailUpdatePara
 			pTrail->m_fG_CurvePoints[i] = this->m_fG_CurvePoints[i];
 			pTrail->m_fColorCurveTimes[i] = this->m_fColorCurveTimes_R[i];
 		}
-		pTrail->m_bIsUpdateTrailVariables = GetEnable();
+		pTrail->m_eTrailUpdateMethod = GetEnable() ? TRAIL_UPDATE_METHOD::UPDATE_NEW_CONTROL_POINT : TRAIL_UPDATE_METHOD::NON_UPDATE_NEW_CONTROL_POINT;
 	}
 }
 void SceneOnGroundListener::HandleMessage(const Message& message, const OnGroundParams& params)

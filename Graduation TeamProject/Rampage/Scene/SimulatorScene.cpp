@@ -550,10 +550,20 @@ void CSimulatorScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float f
 	if (trailUpdateT > 0.008f) {
 		for (int i = 0; i < m_pSwordTrailObjects.size(); ++i) {
 			CSwordTrailObject* trailObj = dynamic_cast<CSwordTrailObject*>(m_pSwordTrailObjects[i].get());
-			if (trailObj->m_bIsUpdateTrailVariables)
-				trailObj->SetNextControllPoint(&(m_pMainCharacter->GetTrailControllPoint(0)), &((CPlayer*)m_pMainCharacter.get())->GetTrailControllPoint(1));
-			else
+			switch (trailObj->m_eTrailUpdateMethod)
+			{
+			case TRAIL_UPDATE_METHOD::UPDATE_NEW_CONTROL_POINT:
+				trailObj->SetNextControllPoint(&((CPlayer*)m_pPlayer)->GetTrailControllPoint(0), &((CPlayer*)m_pPlayer)->GetTrailControllPoint(1));
+				break;
+			case TRAIL_UPDATE_METHOD::NON_UPDATE_NEW_CONTROL_POINT:
+				break;
+			case TRAIL_UPDATE_METHOD::DELETE_CONTROL_POINT:
 				trailObj->SetNextControllPoint(nullptr, nullptr);
+
+				break;
+			default:
+				break;
+			}
 		}
 
 		trailUpdateT = 0.0f;
