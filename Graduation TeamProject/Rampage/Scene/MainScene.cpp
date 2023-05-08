@@ -840,7 +840,7 @@ void CMainTMPScene::UpdateObjects(float fTimeElapsed)
 		((CKnightPlayer*)m_pPlayer)->m_pSkinnedAnimationController->m_pRootMotionObject->GetWorld()._41,
 		 m_pPlayer->GetPosition().y,
 		((CKnightPlayer*)m_pPlayer)->m_pSkinnedAnimationController->m_pRootMotionObject->GetWorld()._43 };
-	xmf3PlayerPos.y += 7.5f;
+	xmf3PlayerPos.y += 8.0f;
 
 	m_pMainSceneCamera->Update(xmf3PlayerPos, fTimeElapsed);
 

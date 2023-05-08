@@ -138,7 +138,7 @@ CThirdPersonCamera::CThirdPersonCamera() : CCamera()
 {
 	m_pPlayer = nullptr;
 	SetOffset(XMFLOAT3(0.0f, 0.0f,0.0f));
-	m_xmf3Offset = XMFLOAT3(0.0f, 0.0f, -10.0f);
+	m_xmf3Offset = XMFLOAT3(0.0f, 0.0f, -11.0f);
 }
 
 CThirdPersonCamera::~CThirdPersonCamera()
