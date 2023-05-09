@@ -30,7 +30,9 @@ class CMainTMPScene : public CScene
 private:
 	RECT m_ScreendRect;
 
-	std::vector<std::unique_ptr<CGameObject>> m_pObjects;
+	std::vector<std::unique_ptr<CGameObject>> m_pEnemys;
+	std::vector<std::unique_ptr<CGameObject>> m_pMapObjects;
+
 	std::vector<UINT> m_IObjectIndexs;
 	std::unique_ptr<CLight> m_pLight;
 	std::unique_ptr<CSplatTerrain> m_pTerrain;
@@ -86,8 +88,11 @@ public:
 	virtual void CreateComputeRootSignature(ID3D12Device* pd3dDevice);
 
 	virtual void UpdateObjectArticulation() {
-		for (int i = 0; i < m_pObjects.size(); ++i) {
-			m_pObjects[i]->updateArticulationMatrix();
+		for (int i = 0; i < m_pEnemys.size(); ++i) {
+			m_pEnemys[i]->updateArticulationMatrix();
+		}
+		for (int i = 0; i < m_pMapObjects.size(); ++i) {
+			m_pMapObjects[i]->updateArticulationMatrix();
 		}
 	}
 	virtual void RequestRegisterArticulation(RegisterArticulationParams param);

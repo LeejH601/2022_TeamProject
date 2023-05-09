@@ -625,7 +625,7 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pMonsterObject->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
 	m_pMonsterObject->m_pSkinnedAnimationController->m_xmf3RootObjectScale = XMFLOAT3(10.0f, 10.0f, 10.0f);
 	m_pMonsterObject->CreateArticulation(1.0f);
-	m_pObjects.push_back(std::move(m_pMonsterObject));
+	m_pEnemys.push_back(std::move(m_pMonsterObject));
 
 	/*m_pMonsterObject = std::make_unique<CGoblinObject>(pd3dDevice, pd3dCommandList, 1);
 	m_pMonsterObject->SetPosition(XMFLOAT3(190, 50, -70));
@@ -706,15 +706,22 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pTerrain->SetPosition(XMFLOAT3(86.4804, -46.8876 - 46.8876 * 0.38819 + 6.5f, -183.7856));
 	m_pTerrain->SetRigidStatic();
 	LoadSceneFromFile(pd3dDevice, pd3dCommandList, "Object/Scene/Scene.bin");
-	m_IObjectIndexs.resize(m_pObjects.size());
-	for (int i = 0; i < m_pObjects.size(); ++i) {
-		((CDepthRenderShader*)m_pDepthRenderShader.get())->RegisterObject(m_pObjects[i].get());
 
-		if (dynamic_cast<CPhysicsObject*>(m_pObjects[i].get()))
-			((CPhysicsObject*)m_pObjects[i].get())->SetUpdatedContext(m_pTerrain.get());
+	int index = 0;
 
-		m_IObjectIndexs[i] = i;
+	m_IObjectIndexs.resize(m_pEnemys.size() + m_pMapObjects.size());
+
+	for (int i = 0; i < m_pEnemys.size(); ++i) {
+		((CDepthRenderShader*)m_pDepthRenderShader.get())->RegisterObject(m_pEnemys[i].get());
+		((CPhysicsObject*)m_pEnemys[i].get())->SetUpdatedContext(m_pTerrain.get());
+		m_IObjectIndexs[i] = index++;
 	}
+
+	for (int i = 0; i < m_pMapObjects.size(); ++i) {
+		((CDepthRenderShader*)m_pDepthRenderShader.get())->RegisterObject(m_pMapObjects[i].get());
+		m_IObjectIndexs[i] = index++;
+	}
+
 	((CDepthRenderShader*)m_pDepthRenderShader.get())->SetLight(m_pLight->GetLights());
 	((CDepthRenderShader*)m_pDepthRenderShader.get())->SetTerrain(m_pTerrain.get());
 
@@ -882,15 +889,19 @@ void CMainTMPScene::UpdateObjects(float fTimeElapsed)
 	}
 
 	AnimationCompParams animation_comp_params;
-	animation_comp_params.pObjects = &m_pObjects;
+	animation_comp_params.pObjects = &m_pEnemys;
 	animation_comp_params.fElapsedTime = fTimeElapsed;
 	CMessageDispatcher::GetInst()->Dispatch_Message<AnimationCompParams>(MessageType::UPDATE_OBJECT, &animation_comp_params, ((CPlayer*)m_pPlayer)->m_pStateMachine->GetCurrentState());
 
 	m_pLight->Update((CPlayer*)m_pPlayer);
 
-	for (int i = 0; i < m_pObjects.size(); ++i) {
-		m_pObjects[i]->Update(fTimeElapsed);
-		m_pcbMappedDisolveParams->dissolveThreshold[i] = m_pObjects[i]->m_fDissolveThrethHold;
+	for (int i = 0; i < m_pEnemys.size(); ++i) {
+		m_pEnemys[i]->Update(fTimeElapsed);
+		m_pcbMappedDisolveParams->dissolveThreshold[i] = m_pEnemys[i]->m_fDissolveThrethHold;
+	}
+
+	for (int i = 0; i < m_pMapObjects.size(); ++i) {
+		m_pMapObjects[i]->Update(fTimeElapsed);
 	}
 
 	for (int i = 0; i < m_pBillBoardObjects.size(); ++i)
@@ -993,11 +1004,16 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 	pd3dCommandList->SetGraphicsRootConstantBufferView(7, d3dGpuVirtualAddress);
 
 	UINT index = 0;
-	for (int i = 0; i < m_pObjects.size(); ++i)
+	for (int i = 0; i < m_pEnemys.size(); ++i)
 	{
 		pd3dCommandList->SetGraphicsRoot32BitConstants(0, 1, &i, 33);
-		m_pObjects[i]->Animate(0.0f);
-		m_pObjects[i]->Render(pd3dCommandList, true);
+		m_pEnemys[i]->Animate(0.0f);
+		m_pEnemys[i]->Render(pd3dCommandList, true);
+	}
+
+	for (int i = 0; i < m_pMapObjects.size(); ++i) {
+		m_pMapObjects[i]->Animate(0.0f);
+		m_pMapObjects[i]->Render(pd3dCommandList, true);
 	}
 
 #ifdef RENDER_BOUNDING_BOX
@@ -1205,7 +1221,7 @@ void CMainTMPScene::LoadSceneFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 			pObject->UpdateTransform(NULL);
 
 			//if (!objPath.contains("Rock"))
-			m_pObjects.push_back(std::move(pObject));
+			m_pMapObjects.push_back(std::move(pObject));
 
 			fclose(objFile);
 		}
