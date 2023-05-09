@@ -220,6 +220,9 @@
     <ClCompile Include="Global\Logger.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="Object\Map.cpp">
+      <Filter>Object</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Global\stdafx.h">
@@ -430,6 +433,9 @@
       <Filter>ImGui</Filter>
     </ClInclude>
     <ClInclude Include="Global\Logger.h" />
+    <ClInclude Include="Object\Map.h">
+      <Filter>Object</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shader\PlayerPixelShader.hlsl" />
