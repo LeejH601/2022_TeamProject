@@ -79,6 +79,7 @@ public:
 	virtual BoundingBox GetBoundingBox() { return m_TransformedBodyBoundingBox; }
 	virtual BoundingBox GetWeaponMeshBoundingBox() { return m_TransformedWeaponBoundingBox; }
 
+	void SetTargetPosition(const BoundingBox& targetBoundingBox);
 	virtual bool CheckCollision(CGameObject* pTargetObject);
 
 	virtual void Animate(float fTimeElapsed);

@@ -20,17 +20,7 @@ void CMessageDispatcher::RegisterListener(MessageType messageType, IMessageListe
 void PlayerAttackListener::HandleMessage(const Message& message, const PlayerParams& params)
 {
     if (message.getType() == MessageType::PLAYER_ATTACK) {
-		if (params.pPlayer->CheckCollision(m_pObject))
-		{
-			CollideParams collide_params;
-			collide_params.xmf3CollidePosition = m_pObject->GetPosition();
-			CMessageDispatcher::GetInst()->Dispatch_Message<CollideParams>(MessageType::COLLISION, &collide_params, nullptr);
-
-			SoundPlayParams sound_play_params;
-			sound_play_params.monster_type = ((CMonster*)m_pObject)->GetMonsterType();
-			sound_play_params.sound_category = SOUND_CATEGORY::SOUND_VOICE;
-			CMessageDispatcher::GetInst()->Dispatch_Message<SoundPlayParams>(MessageType::PLAY_SOUND, &sound_play_params, ((CPlayer*)(params.pPlayer))->m_pStateMachine->GetCurrentState());
-		}
+		params.pPlayer->CheckCollision(m_pObject);
     }
 }
 void SoundPlayComponent::HandleMessage(const Message& message, const SoundPlayParams& params)

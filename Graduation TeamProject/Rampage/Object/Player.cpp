@@ -197,6 +197,28 @@ void CKnightPlayer::SetRigidDynamic()
 
 	Rigid = actor;
 }
+void CKnightPlayer::SetTargetPosition(const BoundingBox& targetBoundingBox)
+{
+	// 두 바운딩 박스의 중심점을 구함
+	XMFLOAT3 playerWeaponBoxCenter = m_TransformedWeaponBoundingBox.Center;
+	XMFLOAT3 monsterBodyBoxCenter = targetBoundingBox.Center;
+
+	// 두 바운딩 박스가 겹치는 영역을 구함
+	BoundingBox intersectionBox;
+	BoundingBox::CreateMerged(intersectionBox, m_TransformedWeaponBoundingBox, targetBoundingBox);
+
+	// 플레이어 무기의 바운딩 박스의 중심에서 몬스터 몸체의 바운딩 박스의 중심을 향한 선분
+	XMVECTOR direction = XMLoadFloat3(&monsterBodyBoxCenter) - XMLoadFloat3(&playerWeaponBoxCenter);
+
+	// 몬스터 몸체의 바운딩 박스의 면과 교차하는 점을 구함
+	float distance;
+	XMVECTOR intersectionPoint;
+	if (intersectionBox.Intersects(XMLoadFloat3(&playerWeaponBoxCenter), direction, distance))
+	{
+		intersectionPoint = XMLoadFloat3(&playerWeaponBoxCenter) + distance * direction;
+		XMStoreFloat3(&m_xmf3TargetPosition, intersectionPoint);
+	}
+}
 bool CKnightPlayer::CheckCollision(CGameObject* pTargetObject)
 {
 	if (m_iAttackId == ((CMonster*)pTargetObject)->GetPlayerAtkId() || ((CMonster*)pTargetObject)->m_fHP <= 0.0f)
@@ -204,6 +226,13 @@ bool CKnightPlayer::CheckCollision(CGameObject* pTargetObject)
 
 	BoundingBox TargetBoundingBox = pTargetObject->GetBoundingBox();
 	if (pTargetObject->m_bEnable && ((CMonster*)pTargetObject)->m_fHP > 0 && m_TransformedWeaponBoundingBox.Intersects(TargetBoundingBox)) {
+		
+		SetTargetPosition(TargetBoundingBox);
+
+		CollideParams collide_params;
+		collide_params.xmf3CollidePosition = m_xmf3TargetPosition;
+		CMessageDispatcher::GetInst()->Dispatch_Message<CollideParams>(MessageType::COLLISION, &collide_params, nullptr);
+
 		SoundPlayParams SoundPlayParam;
 		SoundPlayParam.sound_category = SOUND_CATEGORY::SOUND_SHOCK;
 		CMessageDispatcher::GetInst()->Dispatch_Message<SoundPlayParams>(MessageType::PLAY_SOUND, &SoundPlayParam, m_pStateMachine->GetCurrentState());
@@ -222,7 +251,6 @@ bool CKnightPlayer::CheckCollision(CGameObject* pTargetObject)
 				m_pCamera->m_bCameraMoving = true;
 		}
 
-		m_xmf3TargetPosition = pTargetObject->GetPosition();
 		pTargetObject->SetHit(this);
 		std::string logMessage = "Atk player->monster"; logMessage = logMessage + " ID == { " + std::to_string(m_iAttackId) + " }";
 		CLogger::GetInst()->LogCollision(this, pTargetObject, logMessage);
@@ -300,7 +328,7 @@ void CKnightPlayer::UpdateTransform(XMFLOAT4X4* pxmf4x4Parent)
 
 
 		XMFLOAT3 xmf3Direction = XMFLOAT3{ xmf4x4World._31, xmf4x4World._32, xmf4x4World._33 };
-		xmf3Position = Vector3::Add(xmf3Position, xmf3Direction, -0.8f);
+		xmf3Position = Vector3::Add(xmf3Position, xmf3Direction, -0.4f);
 		xmf4x4World._41 = xmf3Position.x;
 		xmf4x4World._42 = xmf3Position.y;
 		xmf4x4World._43 = xmf3Position.z;
@@ -317,10 +345,10 @@ void CKnightPlayer::UpdateTransform(XMFLOAT4X4* pxmf4x4Parent)
 void CKnightPlayer::PrepareBoundingBox(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	pWeapon = CGameObject::FindFrame("Weapon_r");
-	pBodyBoundingBoxMesh = CBoundingBoxShader::GetInst()->AddBoundingObject(pd3dDevice, pd3dCommandList, this, XMFLOAT3(0.0f, 1.0f, 0.0f), XMFLOAT3(0.7f, 2.0f, 0.7f));
-	pWeaponBoundingBoxMesh = CBoundingBoxShader::GetInst()->AddBoundingObject(pd3dDevice, pd3dCommandList, this, XMFLOAT3(0.0f, 0.6f, 0.8f), XMFLOAT3(0.025f, 1.05f, 0.125f));
-	m_BodyBoundingBox = BoundingBox{ XMFLOAT3(0.0f, 1.0f, 0.0f), XMFLOAT3(0.7f, 2.0f, 0.7f) };
-	m_WeaponBoundingBox = BoundingBox{ XMFLOAT3(0.0f, 0.4f, 0.8f), XMFLOAT3(0.025f, 0.55f, 0.125f) };
+	pBodyBoundingBoxMesh = CBoundingBoxShader::GetInst()->AddBoundingObject(pd3dDevice, pd3dCommandList, this, XMFLOAT3(0.0f, 0.75f, 0.0f), XMFLOAT3(0.35f, 1.0f, 0.35f));
+	pWeaponBoundingBoxMesh = CBoundingBoxShader::GetInst()->AddBoundingObject(pd3dDevice, pd3dCommandList, this, XMFLOAT3(0.0f, 0.6f, 0.4f), XMFLOAT3(0.0125f, 0.525f, 0.0625f));
+	m_BodyBoundingBox = BoundingBox{ XMFLOAT3(0.0f, 0.5f, 0.0f), XMFLOAT3(0.35f, 1.0f, 0.35f) };
+	m_WeaponBoundingBox = BoundingBox{ XMFLOAT3(0.0f, 0.6f, 0.4f), XMFLOAT3(0.0125f, 0.525f, 0.0625f) };
 }
 
 

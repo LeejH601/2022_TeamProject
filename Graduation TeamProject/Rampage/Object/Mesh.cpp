@@ -1077,7 +1077,7 @@ CBoundingBoxMesh::CBoundingBoxMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 	m_nOffset = 0;
 	m_nSlot = 0;
 	m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
-	float fx = xmf3AABBExtents.x * 0.5f, fy = xmf3AABBExtents.y * 0.5f, fz = xmf3AABBExtents.z * 0.5f;
+	float fx = xmf3AABBExtents.x, fy = xmf3AABBExtents.y, fz = xmf3AABBExtents.z;
 
 	//정점 버퍼는 직육면체의 꼭지점 8개에 대한 정점 데이터를 가진다.
 	m_pxmf3Positions.push_back(Vector3::Add(xmf3AABBCenter, XMFLOAT3(-fx, +fy, -fz)));
