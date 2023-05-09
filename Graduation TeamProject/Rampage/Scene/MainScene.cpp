@@ -697,6 +697,9 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	
 	m_pMap = std::make_unique<CMap>();
 	m_pMap->Init(pd3dDevice, pd3dCommandList, GetGraphicsRootSignature());
+	m_pMap->GetTerrain()->SetPosition(XMFLOAT3(86.4804, -46.8876 - 46.8876 * 0.38819 + 6.5f, -183.7856));
+	m_pMap->GetTerrain()->SetRigidStatic();
+	m_pMap->LoadSceneFromFile(pd3dDevice, pd3dCommandList, "Object/Scene/Scene.bin");
 
 	int index = 0;
 

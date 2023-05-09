@@ -377,27 +377,19 @@ void CSimulatorScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 	m_pMainCharacter->m_pSkinnedAnimationController->m_bRootMotion = false;
 	m_pMainCharacter->m_pStateMachine->ChangeState(Idle_Player::GetInst());
 
-	((CDepthRenderShader*)m_pDepthRenderShader.get())->SetLight(m_pLight->GetLights());
-	((CDepthRenderShader*)m_pDepthRenderShader.get())->SetTerrain(m_pTerrain.get());
-
-	m_pTerrainShader = std::make_unique<CSplatTerrainShader>();
-	m_pTerrainShader->CreateShader(pd3dDevice, GetGraphicsRootSignature(), 7, pdxgiObjectRtvFormats, DXGI_FORMAT_D32_FLOAT, 0);
-	m_pTerrainShader->CreateCbvSrvUavDescriptorHeaps(pd3dDevice, 0, 13);
-	m_pTerrainShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
-
-	// Terrain »ý¼º
-	XMFLOAT3 xmf3Scale(1.0f, 1.0f, 1.0f);
-	XMFLOAT4 xmf4Color(0.0f, 0.5f, 0.0f, 0.0f);
-	m_pTerrain = std::make_unique<CSplatTerrain>(pd3dDevice, pd3dCommandList, GetGraphicsRootSignature(), _T("Terrain/terrainHeightMap_5.raw"), 513, 513, 513, 513, xmf3Scale, xmf4Color, m_pTerrainShader.get());
-	m_pTerrain->SetPosition(XMFLOAT3(offset.x, 0, offset.z));
+	m_pMap = std::make_unique<CMap>();
+	m_pMap->Init(pd3dDevice, pd3dCommandList, GetGraphicsRootSignature());
+	m_pMap->GetTerrain()->SetPosition(XMFLOAT3(offset.x, 0, offset.z));
 
 	((CDepthRenderShader*)m_pDepthRenderShader.get())->RegisterObject(m_pMainCharacter.get());
-	m_pMainCharacter->SetUpdatedContext(m_pTerrain.get());
+	((CDepthRenderShader*)m_pDepthRenderShader.get())->SetLight(m_pLight->GetLights());
+	((CDepthRenderShader*)m_pDepthRenderShader.get())->SetTerrain(m_pMap->GetTerrain().get());
+	m_pMainCharacter->SetUpdatedContext(m_pMap->GetTerrain().get());
 
 	for (int i = 0; i < m_pEnemys.size(); ++i)
 	{
 		((CDepthRenderShader*)m_pDepthRenderShader.get())->RegisterObject(m_pEnemys[i].get());
-		((CMonster*)m_pEnemys[i].get())->SetUpdatedContext(m_pTerrain.get());
+		((CMonster*)m_pEnemys[i].get())->SetUpdatedContext(m_pMap->GetTerrain().get());
 	}
 
 	m_pTextureManager = std::make_unique<CTextureManager>();
@@ -537,9 +529,8 @@ void CSimulatorScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float f
 
 	m_pLight->Render(pd3dCommandList);
 
-	m_pTerrainShader->Render(pd3dCommandList, 0);
-	m_pTerrain->Render(pd3dCommandList, true);
-
+	m_pMap->RenderTerrain(pd3dCommandList);
+	
 	CModelShader::GetInst()->Render(pd3dCommandList, 1);
 
 	m_pMainCharacter->Animate(0.0f);
