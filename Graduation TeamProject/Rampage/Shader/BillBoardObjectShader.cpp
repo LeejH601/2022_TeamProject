@@ -89,6 +89,14 @@ D3D12_RASTERIZER_DESC CBillBoardObjectShader::CreateRasterizerState(int nPipelin
 
 	return(d3dRasterizerDesc);
 }
+
+void CBillBoardObjectShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, int nPipelineState)
+{
+	if (m_ppd3dPipelineStates.data() && m_ppd3dPipelineStates[nPipelineState]) pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[nPipelineState].Get());
+
+	UpdateShaderVariables(pd3dCommandList);
+}
+
 D3D12_SHADER_BYTECODE CBillBoardObjectShader::CreateVertexShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
 {
 	return(CShader::ReadCompiledShaderFile(L"BillboardObjectVertexShader.cso", ppd3dShaderBlob));

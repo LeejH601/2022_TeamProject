@@ -56,6 +56,7 @@ public:
 
 	virtual void Animate(float fTimeElapsed);
 	virtual void AnimateRowColumn(float fTimeElapsed);
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, bool b_UseTexture, CCamera* pCamera);
 	virtual void SetEnable(bool bEnable);
 
 

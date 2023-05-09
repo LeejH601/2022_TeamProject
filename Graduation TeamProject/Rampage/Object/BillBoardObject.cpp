@@ -88,30 +88,30 @@ CMultiSpriteObject::~CMultiSpriteObject()
 
 void CMultiSpriteObject::AnimateRowColumn(float fTimeElapsed)
 {
-	if (!m_ppMaterials.empty() && m_ppMaterials[0]->GetTexture())
-	{
-		int m_nRows = m_ppMaterials[0]->GetTexture()->GetRow();
-		int m_nCols = m_ppMaterials[0]->GetTexture()->GetColumn();
-		
-		if (fTimeElapsed >= 0.0f)
-		{
-			m_fAccumulatedTime += fTimeElapsed;
+	//if (!m_ppMaterials.empty() && m_ppMaterials[0]->GetTexture())
+	//{
+	//	int m_nRows = m_ppMaterials[0]->GetTexture()->GetRow();
+	//	int m_nCols = m_ppMaterials[0]->GetTexture()->GetColumn();
+	//	
+	//	if (fTimeElapsed >= 0.0f)
+	//	{
+	//		m_fAccumulatedTime += fTimeElapsed;
 
-			float fraction = std::fmodf(m_fAccumulatedTime/ m_fLifeTime, 1.0f);
-			interval = 1.0f / (m_nRows * m_nCols);
+	//		float fraction = std::fmodf(m_fAccumulatedTime/ m_fLifeTime, 1.0f);
+	//		interval = 1.0f / (m_nRows * m_nCols);
 
-			m_nCol = (int)(fraction / (interval * m_nRows));
-			float remainvalue = (fraction / (interval * m_nRows)) - m_nCol;
-			m_nRow = (int)(remainvalue * m_nRows);
+	//		m_nCol = (int)(fraction / (interval * m_nRows));
+	//		float remainvalue = (fraction / (interval * m_nRows)) - m_nCol;
+	//		m_nRow = (int)(remainvalue * m_nRows);
 
-			if(m_fAccumulatedTime > m_fLifeTime)
-				m_bEnable = false;
-		}
-		m_xmf4x4World._11 = 1.0f / float(m_nRows);
-		m_xmf4x4World._22 = 1.0f / float(m_nCols);
-		m_xmf4x4World._31 = float(m_nRow) / float(m_nRows);
-		m_xmf4x4World._32 = float(m_nCol) / float(m_nCols);
-	}
+	//		if(m_fAccumulatedTime > m_fLifeTime)
+	//			m_bEnable = false;
+	//	}
+	//	m_xmf4x4World._11 = 1.0f / float(m_nRows);
+	//	m_xmf4x4World._22 = 1.0f / float(m_nCols);
+	//	m_xmf4x4World._31 = float(m_nRow) / float(m_nRows);
+	//	m_xmf4x4World._32 = float(m_nCol) / float(m_nCols);
+	//}
 	
 }
 
@@ -175,6 +175,38 @@ void CMultiSpriteObject::Animate(float fTimeElapsed)
 		if (m_fTime <= 0.f)
 			m_fTime = 0.5f;
 	}
+}
+
+
+void CMultiSpriteObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, bool b_UseTexture, CCamera* pCamera)
+{
+	if (!m_bEnable)
+		return;
+	if (m_pSkinnedAnimationController) m_pSkinnedAnimationController->UpdateShaderVariables(pd3dCommandList);
+
+	if (m_pMesh)
+	{
+		// CGameObject의 정보를 넘길 버퍼가 있고, 해당 버퍼에 대한 CPU 포인터가 있으면 UpdateShaderVariables 함수를 호출한다.
+		CGameObject::UpdateShaderVariables(pd3dCommandList);
+		for (int i = 0; i < m_nMaterials; ++i)
+		{
+			if (m_ppMaterials[i])
+			{
+				if (m_ppMaterials[i]->m_pShader)
+					m_ppMaterials[0]->m_pShader->Render(pd3dCommandList, 0);
+				int m_nType = 0;
+				pd3dCommandList->SetGraphicsRoot32BitConstants(0, 1, &m_nType, 32);
+				if (b_UseTexture)
+					m_ppMaterials[i]->UpdateShaderVariables(pd3dCommandList);
+			}
+			// 여기서 메쉬의 렌더를 한다.
+			m_pMesh->OnPreRender(pd3dCommandList);
+			m_pMesh->Render(pd3dCommandList, i);
+		}
+	}
+
+	if (m_pChild) m_pChild->Render(pd3dCommandList, b_UseTexture, pCamera);
+	if (m_pSibling) m_pSibling->Render(pd3dCommandList, b_UseTexture, pCamera);
 }
 
 CTerrainSpriteObject::CTerrainSpriteObject(std::shared_ptr<CTexture> pSpriteTexture, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CShader* pShader, int nRows, int nCols, float fSize, float fSpeed) : CMultiSpriteObject(pSpriteTexture, pd3dDevice, pd3dCommandList, pShader, nRows, nCols, fSize, false, fSpeed)

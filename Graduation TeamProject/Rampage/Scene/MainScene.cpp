@@ -669,6 +669,14 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pSkyBoxObject = std::make_unique<CSkyBox>(pd3dDevice, pd3dCommandList, GetGraphicsRootSignature(), pSkyBoxTexture);
 
 	m_pTextureManager = std::make_unique<CTextureManager>();
+	m_pTextureManager->CreateCbvSrvUavDescriptorHeaps(pd3dDevice, 0, 200);
+	m_pTextureManager->LoadBillBoardTexture(pd3dDevice, pd3dCommandList, L"Image/Explode_8x8.dds", 8, 8);
+	m_pTextureManager->LoadBillBoardTexture(pd3dDevice, pd3dCommandList, L"Image/Fire_Effect.dds", 5, 6);
+	m_pTextureManager->LoadBillBoardTexture(pd3dDevice, pd3dCommandList, L"Image/Explode_8x8.dds", 8, 8);
+	m_pTextureManager->LoadParticleTexture(pd3dDevice, pd3dCommandList, L"ParticleImage/RoundSoftParticle.dds", 0, 0);
+	m_pTextureManager->LoadParticleTexture(pd3dDevice, pd3dCommandList, L"ParticleImage/Meteor.dds", 0, 0);
+	m_pTextureManager->LoadParticleTexture(pd3dDevice, pd3dCommandList, L"Image/Effect0.dds", 0, 0);
+	m_pTextureManager->CreateResourceView(pd3dDevice, 0, 10, 12);
 
 	m_pBillBoardObjectShader = std::make_unique<CBillBoardObjectShader>();
 	m_pBillBoardObjectShader->CreateShader(pd3dDevice, GetGraphicsRootSignature(), 7, pdxgiObjectRtvFormats, 0);
@@ -694,6 +702,8 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pParticleShader = std::make_unique<CParticleShader>();
 	m_pParticleShader->CreateCbvSrvUavDescriptorHeaps(pd3dDevice, 0, 80);
 	m_pParticleShader->CreateGraphicsPipelineState(pd3dDevice, GetGraphicsRootSignature(), 0);
+
+
 
 	m_pTextureManager->LoadParticleTexture(pd3dDevice, pd3dCommandList, L"ParticleImage/RoundSoftParticle.dds", m_pParticleShader.get(), 0, 0);
 	m_pTextureManager->LoadParticleTexture(pd3dDevice, pd3dCommandList, L"ParticleImage/Meteor.dds", m_pParticleShader.get(), 0, 0);

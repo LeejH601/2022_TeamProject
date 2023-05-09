@@ -47,8 +47,8 @@ void CSimulatorScene::CreateGraphicsRootSignature(ID3D12Device* pd3dDevice)
 	pd3dDescriptorRanges[2].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
 	pd3dDescriptorRanges[3].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
-	pd3dDescriptorRanges[3].NumDescriptors = 1;
-	pd3dDescriptorRanges[3].BaseShaderRegister = 30; //t30: gtxtTexture
+	pd3dDescriptorRanges[3].NumDescriptors = 30;
+	pd3dDescriptorRanges[3].BaseShaderRegister = 50; //t50: gtxtTexture
 	pd3dDescriptorRanges[3].RegisterSpace = 0;
 	pd3dDescriptorRanges[3].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
@@ -401,6 +401,13 @@ void CSimulatorScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 	}
 
 	m_pTextureManager = std::make_unique<CTextureManager>();
+	m_pTextureManager->CreateCbvSrvUavDescriptorHeaps(pd3dDevice, 0, 200);
+	m_pTextureManager->LoadBillBoardTexture(pd3dDevice, pd3dCommandList, L"Image/Explode_8x8.dds", 8, 8);
+	m_pTextureManager->LoadBillBoardTexture(pd3dDevice, pd3dCommandList, L"Image/Fire_Effect.dds", 5, 6);
+	m_pTextureManager->LoadBillBoardTexture(pd3dDevice, pd3dCommandList, L"Image/Explode_8x8.dds", 8, 8);
+	m_pTextureManager->LoadParticleTexture(pd3dDevice, pd3dCommandList, L"ParticleImage/RoundSoftParticle.dds", 0, 0);
+	m_pTextureManager->LoadParticleTexture(pd3dDevice, pd3dCommandList, L"ParticleImage/Meteor.dds", 0, 0);
+	m_pTextureManager->LoadParticleTexture(pd3dDevice, pd3dCommandList, L"Image/Effect0.dds", 0, 0);
 
 	m_pBillBoardObjectShader = std::make_unique<CBillBoardObjectShader>();
 	m_pBillBoardObjectShader->CreateShader(pd3dDevice, GetGraphicsRootSignature(), 7, pdxgiObjectRtvFormats, 0);
@@ -532,6 +539,8 @@ void CSimulatorScene::OnPrepareRenderTarget(ID3D12GraphicsCommandList* pd3dComma
 }
 void CSimulatorScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed, float fCurrentTime, CCamera* pCamera)
 {     
+
+
 	m_pSimulaterCamera->RegenerateViewMatrix();
 	m_pSimulaterCamera->OnPrepareRender(pd3dCommandList);
 
@@ -571,11 +580,12 @@ void CSimulatorScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float f
 #endif // PostProcessing
 	
 	m_pBillBoardObjectShader->Render(pd3dCommandList, 0);
-
+	m_pTextureManager->SetTextureDescriptorHeap(pd3dCommandList);
+	m_pTextureManager->UpdateShaderVariables(pd3dCommandList);
 	for (int i = 0; i < m_pBillBoardObjects.size(); ++i)
 	{
 		(static_cast<CBillBoardObject*>(m_pBillBoardObjects[i].get()))->UpdateShaderVariables(pd3dCommandList, fCurrentTime, fTimeElapsed);
-		m_pBillBoardObjects[i]->Render(pd3dCommandList, true);
+		m_pBillBoardObjects[i]->Render(pd3dCommandList, false);
 	}
 
 	/*for (int i = 0; i < m_pTerrainSpriteObject.size(); ++i)
