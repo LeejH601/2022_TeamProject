@@ -19,7 +19,7 @@
 void CMainTMPScene::SetPlayer(CGameObject* pPlayer)
 {
 	m_pPlayer = pPlayer;
-	((CPlayer*)m_pPlayer)->SetUpdatedContext(m_pMap->GetTerrain().get());
+	((CPlayer*)m_pPlayer)->SetUpdatedContext(m_pMap.get());
 	((CPlayer*)m_pPlayer)->SetCamera(m_pMainSceneCamera.get());
 	((CThirdPersonCamera*)m_pMainSceneCamera.get())->SetPlayer((CPlayer*)m_pPlayer);
 
@@ -707,7 +707,7 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 
 	for (int i = 0; i < m_pEnemys.size(); ++i) {
 		((CDepthRenderShader*)m_pDepthRenderShader.get())->RegisterObject(m_pEnemys[i].get());
-		((CPhysicsObject*)m_pEnemys[i].get())->SetUpdatedContext(m_pMap->GetTerrain().get());
+		((CPhysicsObject*)m_pEnemys[i].get())->SetUpdatedContext(m_pMap.get());
 		m_IObjectIndexs[i] = index++;
 	}
 

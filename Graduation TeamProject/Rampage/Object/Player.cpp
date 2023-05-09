@@ -1,6 +1,7 @@
 #include "Player.h"
 #include "Monster.h"
 #include "Object.h"
+#include "Map.h"
 #include "..\Global\Camera.h"
 #include "..\Global\Locator.h"
 #include "..\Global\Global.h"
@@ -279,7 +280,8 @@ void CKnightPlayer::OnUpdateCallback(float fTimeElapsed)
 {
 	if (m_pUpdatedContext)
 	{
-		CSplatTerrain* pTerrain = (CSplatTerrain*)m_pUpdatedContext;
+		CMap* pMap = (CMap*)m_pUpdatedContext;
+		CSplatTerrain* pTerrain = (CSplatTerrain*)(pMap->GetTerrain().get());
 		XMFLOAT3 xmf3TerrainPos = pTerrain->GetPosition();
 		XMFLOAT3 xmf3Pos = XMFLOAT3{
 			m_pSkinnedAnimationController->m_pRootMotionObject->GetWorld()._41,

@@ -384,12 +384,12 @@ void CSimulatorScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 	((CDepthRenderShader*)m_pDepthRenderShader.get())->RegisterObject(m_pMainCharacter.get());
 	((CDepthRenderShader*)m_pDepthRenderShader.get())->SetLight(m_pLight->GetLights());
 	((CDepthRenderShader*)m_pDepthRenderShader.get())->SetTerrain(m_pMap->GetTerrain().get());
-	m_pMainCharacter->SetUpdatedContext(m_pMap->GetTerrain().get());
+	m_pMainCharacter->SetUpdatedContext(m_pMap.get());
 
 	for (int i = 0; i < m_pEnemys.size(); ++i)
 	{
 		((CDepthRenderShader*)m_pDepthRenderShader.get())->RegisterObject(m_pEnemys[i].get());
-		((CMonster*)m_pEnemys[i].get())->SetUpdatedContext(m_pMap->GetTerrain().get());
+		((CMonster*)m_pEnemys[i].get())->SetUpdatedContext(m_pMap.get());
 	}
 
 	m_pTextureManager = std::make_unique<CTextureManager>();
