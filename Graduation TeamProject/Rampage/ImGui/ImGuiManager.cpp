@@ -1352,7 +1352,7 @@ void CImGuiManager::ShowTrailManager(CState<CPlayer>* pCurrentAnimation)
 	static ImPlotDragToolFlags G_flags;
 	static ImPlotDragToolFlags B_flags;
 	ImPlotAxisFlags ax_flags = ImPlotAxisFlags_NoTickLabels | ImPlotAxisFlags_NoTickMarks;
-	static bool VerticalInputFlag = true;
+	static bool VerticalInputFlag = false;
 
 	static int colorSelectFlag = 3;
 	ImGui::RadioButton("R##TrailEffect", &colorSelectFlag, 0); ImGui::SameLine();
@@ -1412,7 +1412,6 @@ void CImGuiManager::ShowTrailManager(CState<CPlayer>* pCurrentAnimation)
 	pTrailComponent->m_nCurves = std::clamp(pTrailComponent->m_nCurves, 2, MAX_COLORCURVES);
 
 	if (ImPlot::BeginPlot("##Bezier", ImVec2(-1, 0), ImPlotFlags_CanvasOnly)) {
-
 		int nCurveIndexs = pTrailComponent->m_nCurves;
 
 		//ImPlot::SetupAxesLimits(0, 1, 0, 1);
@@ -1420,18 +1419,26 @@ void CImGuiManager::ShowTrailManager(CState<CPlayer>* pCurrentAnimation)
 		static ImPlotPoint P[] = { ImPlotPoint(.05f,.05f), ImPlotPoint(0.2,0.4),  ImPlotPoint(0.8,0.6),  ImPlotPoint(.95f,.95f) };
 
 		for (int i = 0; i < nCurveIndexs; ++i) {
-			int id = i * 3;
+			int id = i * 4;
 			double yPointCache[3];
+			double TimeControllPoint = -0.2f;
 
 			yPointCache[0] = pTrailComponent->m_fColorCurveTimes_R[i]; yPointCache[1] = pTrailComponent->m_fColorCurveTimes_R[i]; yPointCache[2] = pTrailComponent->m_fColorCurveTimes_R[i];
 			ImPlot::DragPoint(id, &yPointCache[0], &pTrailComponent->m_fR_CurvePoints[i], ImVec4(1, 0, 0, 1), 4, R_flags);
-			ImPlot::DragPoint(id + 1, &yPointCache[1], &pTrailComponent->m_fG_CurvePoints[i], ImVec4(0, 1, 0, 1), 4, G_flags);
-			ImPlot::DragPoint(id + 2, &yPointCache[2], &pTrailComponent->m_fB_CurvePoints[i], ImVec4(0, 0, 1, 1), 4, B_flags);
+			ImPlot::DragPoint(id + 1, &yPointCache[0], &pTrailComponent->m_fG_CurvePoints[i], ImVec4(0, 1, 0, 1), 4, G_flags);
+			ImPlot::DragPoint(id + 2, &yPointCache[0], &pTrailComponent->m_fB_CurvePoints[i], ImVec4(0, 0, 1, 1), 4, B_flags);
 			if (VerticalInputFlag) {
 				yPointCache[0] = std::clamp(yPointCache[0], (double)0.0f, (double)1.0f);
 				if (i == 0 || i == nCurveIndexs - 1)
 					yPointCache[0] = i == 0 ? 0.0f : 1.0f;
 				pTrailComponent->m_fColorCurveTimes_R[i] = yPointCache[0];
+			}
+			ImPlot::DragPoint(id + 3, &pTrailComponent->m_fColorCurveTimes_R[i], &TimeControllPoint, ImVec4(1, 1, 1, 1), 4, B_flags);
+			TimeControllPoint = -0.2f;
+			{
+				pTrailComponent->m_fColorCurveTimes_R[i] = std::clamp(pTrailComponent->m_fColorCurveTimes_R[i], (double)0.0f, (double)1.0f);
+				if (i == 0 || i == nCurveIndexs - 1)
+					pTrailComponent->m_fColorCurveTimes_R[i] = i == 0 ? 0.0f : 1.0f;
 			}
 		}
 
@@ -1482,6 +1489,46 @@ void CImGuiManager::ShowTrailManager(CState<CPlayer>* pCurrentAnimation)
 			ImPlot::SetNextLineStyle(LineColor, 2);
 			ImPlot::PlotLine("##bez", &line[0].x, &line[0].y, 100 * (nCurveIndexs - 1), 0, 0, sizeof(ImPlotPoint));
 		}
+
+		float testColors = { 0.0 };
+		static int cmap = ImPlotColormap_RdBu;
+		static ImVec4 abc = { 1.0,0.0,0.0,1.0f };
+		ImU32 colors[MAX_COLORCURVES];
+
+		auto uncharted2_tonemap_partial = [](XMFLOAT3 x)
+		{
+			float A = 0.15f;
+			float B = 0.50f;
+			float C = 0.10f;
+			float D = 0.20f;
+			float E = 0.02f;
+			float F = 0.30f;
+			return ((XMVectorMultiply(XMLoadFloat3(&Vector3::Add(Vector3::ScalarProduct(x,A,false), XMFLOAT3(B*C, B * C, B * C))), XMLoadFloat3(&x)) + XMLoadFloat3(&XMFLOAT3(D * E, D * E, D * E))) 
+				/ (XMVectorMultiply(XMLoadFloat3(&(Vector3::Add(Vector3::ScalarProduct(x, A, false), XMFLOAT3(B,B,B)))), XMLoadFloat3(&x)) + XMVECTOR(D) * XMVECTOR(F))) - XMVECTOR(E) / XMVECTOR(F);
+		};
+
+		auto uncharted2_filmic = [&](XMFLOAT3 v)
+		{
+			float exposure_bias = 2.0f;
+			XMVECTOR curr = uncharted2_tonemap_partial(Vector3::ScalarProduct(v, exposure_bias, false));
+
+			XMFLOAT3 W = XMFLOAT3(11.2f, 11.2f, 11.2f);
+			XMVECTOR white_scale = XMVECTOR(1.0f) / uncharted2_tonemap_partial(W);
+			XMFLOAT3 result;
+			XMStoreFloat3(&result, XMVectorMultiply(curr, white_scale));
+			return result;
+		};
+
+		for (int i = 0; i < pTrailComponent->m_nCurves; ++i) {
+			XMFLOAT3 RGB = uncharted2_filmic(XMFLOAT3(pTrailComponent->m_fR_CurvePoints[i], pTrailComponent->m_fG_CurvePoints[i], pTrailComponent->m_fB_CurvePoints[i]));
+			BYTE byte_r = RGB.x * 255;
+			BYTE byte_g = RGB.y * 255;
+			BYTE byte_b = RGB.z * 255;
+
+			ImU32 color = 
+		}
+		ImPlot::AddColormap("testColorMap", colors, pTrailComponent->m_nCurves);
+		ImPlot::ColormapSlider("testColorSlider", &testColors, &abc, "", cmap);
 
 		/*ImPlot::SetNextLineStyle(ImVec4(1, 0.5f, 1, 1));
 		ImPlot::PlotLine("##t1", &P[1].x, &P[1].y, 1, 0, 0, sizeof(ImPlotPoint));
