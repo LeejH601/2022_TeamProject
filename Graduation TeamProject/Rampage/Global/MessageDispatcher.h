@@ -52,6 +52,11 @@ struct ImpactCompParams {
 	XMFLOAT3 xmf3Position;
 };
 
+struct SwordCompParams {
+	CGameObject* pObject;
+	XMFLOAT3 xmf3Position;
+};
+
 struct ParticleSmokeParams {
 	CGameObject* pObject;
 	XMFLOAT3 xmf3Position;
@@ -118,6 +123,8 @@ public:
     virtual void HandleMessage(const Message& message, const AnimationCompParams& params) {}
     virtual void HandleMessage(const Message& message, const ParticleCompParams& params) {}
     virtual void HandleMessage(const Message& message, const ImpactCompParams& params) {}
+	virtual void HandleMessage(const Message& message, const SwordCompParams& params) {}
+
     virtual void HandleMessage(const Message& message, const ParticleSmokeParams& params) {}
     virtual void HandleMessage(const Message& message, const TerrainSpriteCompParams& params) {}
     virtual void HandleMessage(const Message& message, const RegisterArticulationParams& params) {}
@@ -482,13 +489,13 @@ public:
 
 class TrailParticleComponent : public IMessageListener {
 	int m_nParticleNumber = MAX_PARTICLES;
-	int m_nEmitMinParticleNumber = 2;
-	int m_nEmitMaxParticleNumber = 3;
+	int m_nEmitMinParticleNumber = 6;
+	int m_nEmitMaxParticleNumber = 7;
 	int m_iParticleType = ParticleType::SPHERE_PARTICLE;
-	XMFLOAT2   m_fSize = XMFLOAT2(1.f, 1.f);
+	XMFLOAT2   m_fSize = XMFLOAT2(0.3f, 0.3f);
 	float m_fAlpha = 1.f;
-	float m_fLifeTime = 1.f;
-	float m_fSpeed = 2.f;
+	float m_fLifeTime = 0.1f;
+	float m_fSpeed = 30.f;
 	XMFLOAT3 m_xmf3Color = XMFLOAT3(10.f, 10.f, 10.f);
 	int m_iPlayerAttack = 0;
 	XMFLOAT3 m_xm3Position = XMFLOAT3(0.f, 0.f, 0.f);
@@ -565,6 +572,32 @@ public:
 	void SetImpactTexture(std::shared_ptr<CTexture> pTexture) { m_pTexture = pTexture; }
 
 	virtual void HandleMessage(const Message& message, const ImpactCompParams& params);
+};
+
+// Define Sword Effect component
+class SwordEffectComponent : public IMessageListener {
+	int m_nTextureIndex = 0;
+	float m_fSpeed = 5.f;
+	float m_fAlpha = 1.f;
+	XMFLOAT2 m_fSize = XMFLOAT2(3.f, 3.f);
+	XMFLOAT3 m_xmf3Color = XMFLOAT3(1.f, 1.f, 1.f);
+public:
+	int& GetTextureIndex() { return m_nTextureIndex; }
+	float& GetSpeed() { return m_fSpeed; }
+	float& GetAlpha() { return m_fAlpha; }
+	XMFLOAT2& GetSize() { return m_fSize; }
+	XMFLOAT3& GetColor() { return m_xmf3Color; }
+
+	float& GetXSize() { return m_fSize.x; }
+	float& GetYSize() { return m_fSize.y; }
+
+	void SetSize(XMFLOAT2 fSize) { m_fSize = fSize; }
+	void SetSizeX(float fSize) { m_fSize.x = fSize; }
+	void SetSizeY(float fSize) { m_fSize.y = fSize; }
+	void SetAlpha(float fAlpha) { m_fAlpha = fAlpha; }
+	void SetSpeed(float fSpeed) { m_fSpeed = fSpeed; }
+
+	virtual void HandleMessage(const Message& message, const SwordCompParams& params);
 };
 
 struct ListenerInfo {

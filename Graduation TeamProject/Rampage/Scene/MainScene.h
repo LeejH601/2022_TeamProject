@@ -47,6 +47,7 @@ private:
 	std::unique_ptr<CGameObject> m_pTrailParticleObjects;
 	
 	std::unique_ptr<CGameObject> m_pSmokeObject;
+	std::unique_ptr<CGameObject> m_pSwordSpriteObject;
 
 	std::unique_ptr<CBillBoardObjectShader> m_pBillBoardObjectShader;
 	std::vector<std::unique_ptr<CGameObject>> m_pBillBoardObjects;
@@ -109,7 +110,6 @@ public:
 	void LoadSceneFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, char* pstrFileName);
 	virtual void HandleCollision(const CollideParams& params);
 	virtual void HandleOnGround(const OnGroundParams& params);
-
 
 	//std::vector<std::unique_ptr<CGameObject>>::iterator TerrainSpriteit = std::find_if(m_pTerrainSpriteObject.begin(), m_pTerrainSpriteObject.end(), [](const std::unique_ptr<CGameObject>& pTerrainSpriteObject) {
 	//	if (!((CMultiSpriteObject*)pTerrainSpriteObject.get())->GetEnable())

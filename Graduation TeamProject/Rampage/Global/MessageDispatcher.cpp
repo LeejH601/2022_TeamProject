@@ -482,3 +482,21 @@ void SceneOnGroundListener::HandleMessage(const Message& message, const OnGround
 {
 	m_pScene->HandleOnGround(params);
 }
+
+void SwordEffectComponent::HandleMessage(const Message& message, const SwordCompParams& params)
+{
+	if (!m_bEnable)
+		return;
+
+	CMultiSpriteObject* pMultiSprite = dynamic_cast<CMultiSpriteObject*>(params.pObject);
+
+	if (pMultiSprite)
+	{
+		pMultiSprite->SetEnable(true);
+		pMultiSprite->SetSize(m_fSize);
+		pMultiSprite->SetLifeTime(m_fSpeed);
+		pMultiSprite->SetStartAlpha(m_fAlpha);
+		pMultiSprite->SetPosition(params.xmf3Position);
+		pMultiSprite->SetColor(m_xmf3Color);
+	}
+}

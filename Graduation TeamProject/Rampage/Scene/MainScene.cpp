@@ -684,7 +684,7 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pTextureManager->LoadBillBoardTexture(pd3dDevice, pd3dCommandList, L"ParticleImage/T_Glow_Smoky.dds", m_pBillBoardObjectShader.get(), 1, 1);
 	m_pTextureManager->LoadBillBoardTexture(pd3dDevice, pd3dCommandList, L"ParticleImage/T_Glow_Soft.dds", m_pBillBoardObjectShader.get(), 1, 1);
 	m_pTextureManager->LoadBillBoardTexture(pd3dDevice, pd3dCommandList, L"ParticleImage/T_Impact_33.dds", m_pBillBoardObjectShader.get(), 1, 1);
-
+	m_pTextureManager->LoadBillBoardTexture(pd3dDevice, pd3dCommandList, L"Image/Effect3.dds", m_pBillBoardObjectShader.get(), 1, 1);
 	for (int i = 0; i < 50; ++i)
 	{
 		std::unique_ptr<CGameObject> m_pBillBoardObject = std::make_unique<CMultiSpriteObject>(m_pTextureManager->LoadBillBoardTexture(L"Image/Fire_Effect.dds"), pd3dDevice, pd3dCommandList, m_pBillBoardObjectShader.get(), 5, 6, 8.f, 5.f);
@@ -731,11 +731,12 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	//	m_pUpDownParticleObjects.push_back(std::move(m_pMeterorObject));
 	//}
 
-
+	m_pSwordSpriteObject = std::make_unique<CMultiSpriteObject>(m_pTextureManager->LoadBillBoardTexture(L"Image/Effect3.dds"), pd3dDevice, pd3dCommandList, m_pBillBoardObjectShader.get(), 5, 6, 8.f, true, 5.f);
 	m_pTrailParticleObjects = std::make_unique<CParticleObject>(m_pTextureManager->LoadParticleTexture(L"Image/Effect3.dds"), pd3dDevice, pd3dCommandList, GetGraphicsRootSignature(), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), 2.0f, XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT2(2.0f, 2.0f), MAX_PARTICLES, m_pParticleShader.get(), SPHERE_PARTICLE);
 
 	CPlayerParticleObject::GetInst()->SetSmokeObjects(m_pSmokeObject.get());
 	CPlayerParticleObject::GetInst()->SetTrailParticleObjects(m_pTrailParticleObjects.get());
+	CPlayerParticleObject::GetInst()->SetSpriteObjects(m_pSwordSpriteObject.get());
 
 	// COLLIDE LISTENER
 	std::unique_ptr<SceneCollideListener> pCollideListener = std::make_unique<SceneCollideListener>();
@@ -829,6 +830,7 @@ void CMainTMPScene::UpdateObjects(float fTimeElapsed)
 	{
 		m_pBillBoardObjects[i]->Animate(fTimeElapsed);
 	}
+	m_pSwordSpriteObject->Animate(fTimeElapsed);
 
 	for (std::unique_ptr<CGameObject>& obj : m_pSwordTrailObjects) {
 		obj->Update(fTimeElapsed);
@@ -950,6 +952,9 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 		m_pBillBoardObjects[i]->Render(pd3dCommandList, true);
 	}
 
+	(static_cast<CBillBoardObject*>(m_pSwordSpriteObject.get()))->UpdateShaderVariables(pd3dCommandList, fCurrentTime, fTimeElapsed);
+	m_pSwordSpriteObject->Render(pd3dCommandList, true);
+	
 	for (int i = 0; i < m_pTerrainSpriteObject.size(); ++i)
 	{
 		(static_cast<CTerrainSpriteObject*>(m_pTerrainSpriteObject[i].get()))->UpdateShaderVariables(pd3dCommandList, fCurrentTime, fTimeElapsed);

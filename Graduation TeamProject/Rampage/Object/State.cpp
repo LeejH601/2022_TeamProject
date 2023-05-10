@@ -192,6 +192,11 @@ void Atk_Player::InitAtkPlayer()
 	std::unique_ptr<TrailComponent> pTrailComponent = std::make_unique<TrailComponent>();
 	m_pListeners.push_back(std::move(pTrailComponent));
 	CMessageDispatcher::GetInst()->RegisterListener(MessageType::UPDATE_SWORDTRAIL, m_pListeners.back().get(), this);
+
+	// Sword Sprite
+	std::unique_ptr<SwordEffectComponent> pSwordEffectSprite = std::make_unique<SwordEffectComponent>();
+	m_pListeners.push_back(std::move(pSwordEffectSprite));
+	CMessageDispatcher::GetInst()->RegisterListener(MessageType::UPDATE_BILLBOARD, m_pListeners.back().get(), this);
 }
 
 void Atk_Player::SetPlayerRootPos(CPlayer* player)
@@ -280,10 +285,10 @@ void Atk1_Player::SpawnTrailParticle(CPlayer* player)
 {
 	if (player->m_fTime > player->m_fMaxTime)
 	{
-		player->m_fMaxTime = 0.01f;
+		player->m_fMaxTime = 0.05f;
 		// 0.35 Ω√¿€
 		if (0.35f < player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition &&
-			0.5f > player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition)
+			0.6f > player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition)
 		{
 			ParticleTrailParams ParticleTrail_comp_params;
 			CGameObject* pWeapon = player->FindFrame("Weapon_r");
@@ -307,6 +312,15 @@ void Atk1_Player::SpawnTrailParticle(CPlayer* player)
 			ParticleTrail_comp_params.iPlayerAttack = 0;
 			ParticleTrail_comp_params.m_fTime = player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition;
 			CMessageDispatcher::GetInst()->Dispatch_Message<ParticleTrailParams>(MessageType::UPDATE_TRAILPARTICLE, &ParticleTrail_comp_params, player->m_pStateMachine->GetCurrentState());
+
+			if (0.45f < player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition &&
+				0.5f > player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition)
+			{
+				ImpactCompParams impact_comp_params;
+				impact_comp_params.pObject = impact_comp_params.pObject = CPlayerParticleObject::GetInst()->GetSpriteObjects();;
+				impact_comp_params.xmf3Position = xmf3Position;
+				CMessageDispatcher::GetInst()->Dispatch_Message<ImpactCompParams>(MessageType::UPDATE_BILLBOARD, &impact_comp_params, player->m_pStateMachine->GetCurrentState());
+			}
 		}
 
 		player->m_fTime = 0.f;
@@ -353,7 +367,7 @@ void Atk1_Player::Execute(CPlayer* player, float fElapsedTime)
 		player->m_pStateMachine->ChangeState(Idle_Player::GetInst());
 	}
 
-	//SpawnTrailParticle(player);
+	SpawnTrailParticle(player);
 }
 
 void Atk1_Player::Animate(CPlayer* player, float fElapsedTime)
@@ -452,7 +466,7 @@ void Atk2_Player::Execute(CPlayer* player, float fElapsedTime)
 		player->m_pStateMachine->ChangeState(Idle_Player::GetInst());
 	}
 
-	//SpawnTrailParticle(player);
+	SpawnTrailParticle(player);
 }
 
 void Atk2_Player::Animate(CPlayer* player, float fElapsedTime)
@@ -481,27 +495,35 @@ void Atk2_Player::SpawnTrailParticle(CPlayer* player)
 	if (player->m_fTime > player->m_fMaxTime)
 	{
 		player->m_fMaxTime = 0.05f; // 0.05
-		if (0.3f < player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition &&
-			0.45f > player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition)
+		if (0.2f < player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition &&
+			0.65f > player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition)
 		{
-			//0.3~0.6, 065
 			ParticleTrailParams ParticleTrail_comp_params;
 			CGameObject* pWeapon = player->FindFrame("Weapon_r");
-			pWeapon->FindFrame("Weapon_r");
+
 			XMFLOAT3 xmf3Position;
 			XMFLOAT3 xmf3Direction;
-			XMFLOAT4X4 xmf4x4World = pWeapon->GetWorld();
-			xmf3Position = ((CKnightPlayer*)player)->GetWeaponMeshBoundingBox().Center;
-
 			xmf3Direction = player->GetATKDirection();
-			xmf3Position = Vector3::Add(xmf3Position, Vector3::Normalize(xmf3Direction), 4.2f);
+
+			xmf3Position = ((CKnightPlayer*)player)->GetWeaponMeshBoundingBox().Center;
+			xmf3Position = Vector3::Add(xmf3Position, Vector3::Normalize(xmf3Direction), 4.f);
 
 			ParticleTrail_comp_params.pObject = CPlayerParticleObject::GetInst()->GetTrailParticleObjects();
 			ParticleTrail_comp_params.xmf3Position = xmf3Position;
-			ParticleTrail_comp_params.iPlayerAttack = 1;
+			ParticleTrail_comp_params.iPlayerAttack = 0;
 			ParticleTrail_comp_params.m_fTime = player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition;
 			CMessageDispatcher::GetInst()->Dispatch_Message<ParticleTrailParams>(MessageType::UPDATE_TRAILPARTICLE, &ParticleTrail_comp_params, player->m_pStateMachine->GetCurrentState());
+
+			if (0.4f < player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition &&
+				0.45f > player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition)
+			{
+				ImpactCompParams impact_comp_params;
+				impact_comp_params.pObject = CPlayerParticleObject::GetInst()->GetSpriteObjects();
+				impact_comp_params.xmf3Position = xmf3Position;
+				CMessageDispatcher::GetInst()->Dispatch_Message<ImpactCompParams>(MessageType::UPDATE_BILLBOARD, &impact_comp_params, player->m_pStateMachine->GetCurrentState());
+			}
 		}
+
 
 		player->m_fTime = 0.f;
 	}
@@ -581,6 +603,8 @@ void Atk3_Player::Execute(CPlayer* player, float fElapsedTime)
 	else if (player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition == pAnimationSet->m_fLength)
 	{
 	}
+
+	SpawnTrailParticle(player);
 }
 
 void Atk3_Player::Animate(CPlayer* player, float fElapsedTime)
@@ -606,6 +630,42 @@ void Atk3_Player::Exit(CPlayer* player)
 
 void Atk3_Player::SpawnTrailParticle(CPlayer* player)
 {
+
+	if (player->m_fTime > player->m_fMaxTime)
+	{
+		player->m_fMaxTime = 0.05f; // 0.05
+		if (0.25f < player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition &&
+			0.47f > player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition)
+		{
+			ParticleTrailParams ParticleTrail_comp_params;
+			CGameObject* pWeapon = player->FindFrame("Weapon_r");
+
+			XMFLOAT3 xmf3Position;
+			XMFLOAT3 xmf3Direction;
+			xmf3Direction = player->GetATKDirection();
+
+			xmf3Position = ((CKnightPlayer*)player)->GetWeaponMeshBoundingBox().Center;
+			xmf3Position = Vector3::Add(xmf3Position, Vector3::Normalize(xmf3Direction), 4.f);
+
+			ParticleTrail_comp_params.pObject = CPlayerParticleObject::GetInst()->GetTrailParticleObjects();
+			ParticleTrail_comp_params.xmf3Position = xmf3Position;
+			ParticleTrail_comp_params.iPlayerAttack = 0;
+			ParticleTrail_comp_params.m_fTime = player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition;
+			CMessageDispatcher::GetInst()->Dispatch_Message<ParticleTrailParams>(MessageType::UPDATE_TRAILPARTICLE, &ParticleTrail_comp_params, player->m_pStateMachine->GetCurrentState());
+
+			if (0.3f < player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition &&
+				0.4f > player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition)
+			{
+				ImpactCompParams impact_comp_params;
+				impact_comp_params.pObject = impact_comp_params.pObject = CPlayerParticleObject::GetInst()->GetSpriteObjects();
+				impact_comp_params.xmf3Position = xmf3Position;
+				CMessageDispatcher::GetInst()->Dispatch_Message<ImpactCompParams>(MessageType::UPDATE_BILLBOARD, &impact_comp_params, player->m_pStateMachine->GetCurrentState());
+			}
+		}
+
+
+		player->m_fTime = 0.f;
+	}
 }
 
 Run_Player::Run_Player()

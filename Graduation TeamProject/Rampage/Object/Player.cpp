@@ -111,6 +111,8 @@ void CPlayer::Update(float fTimeElapsed)
 	if (m_pUpdatedContext) OnUpdateCallback(fTimeElapsed);
 
 	CPhysicsObject::Apply_Friction(fTimeElapsed);
+
+	
 }
 
 void CPlayer::ProcessInput(DWORD dwDirection, float cxDelta, float cyDelta, float fTimeElapsed, CCamera* pCamera)
