@@ -33,7 +33,8 @@ CSwordTrailObject::CSwordTrailObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 	m_fB_CurvePoints[0] = 0.0f; m_fB_CurvePoints[1] = 0.257; m_fB_CurvePoints[2] = 0.26;  m_fB_CurvePoints[3] = 0.0f;
 	m_fColorCurveTimes[0] = 0.0f; m_fColorCurveTimes[1] = 0.3; m_fColorCurveTimes[2] = 0.6;  m_fColorCurveTimes[3] = 1.0;
 	m_nCurves = 4;
-	m_fNoiseConstants = 1.4f;
+	m_fNoiseConstants = 1.0f;
+	m_fEmissiveFactor = 10.0f;
 
 	m_nTrailBasePoints = 0;
 }
@@ -67,6 +68,7 @@ void CSwordTrailObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCom
 	memcpy(m_pcbMappedTrail->m_fB_CurvePoints, m_fB_CurvePoints, sizeof(m_fB_CurvePoints));
 	m_pcbMappedTrail->m_nCurves = m_nCurves;
 	m_pcbMappedTrail->m_fNoiseConstants = m_fNoiseConstants;
+	m_pcbMappedTrail->m_fEmissiveFactor = m_fEmissiveFactor;
 
 	D3D12_GPU_VIRTUAL_ADDRESS d3dGpuVirtualAddress = m_pd3dcbTrail->GetGPUVirtualAddress();
 	pd3dCommandList->SetGraphicsRootConstantBufferView(7, d3dGpuVirtualAddress);

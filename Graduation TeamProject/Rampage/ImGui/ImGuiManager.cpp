@@ -9,6 +9,7 @@
 #include "..\Sound\SoundManager.h"
 #include "..\Object\TextureManager.h"
 #include "implot.h"
+#include "implot_internal.h"
 
 #define NUM_FRAMES_IN_FLIGHT 3
 #define MAX_FILENAME_SIZE 100
@@ -1346,6 +1347,7 @@ void CImGuiManager::ShowTrailManager(CState<CPlayer>* pCurrentAnimation)
 		param.pShader = */
 	}
 
+	ImGui::DragFloat("Emissve##TrailEffect", &pTrailComponent->m_fEmissiveFactor);
 
 	ImGui::BulletText("Click and drag each point.");
 	static ImPlotDragToolFlags R_flags;
@@ -1493,7 +1495,8 @@ void CImGuiManager::ShowTrailManager(CState<CPlayer>* pCurrentAnimation)
 		float testColors = { 0.0 };
 		static int cmap = ImPlotColormap_RdBu;
 		static ImVec4 abc = { 1.0,0.0,0.0,1.0f };
-		ImU32 colors[MAX_COLORCURVES];
+		static int interpolationCount = 30;
+		std::vector<ImU32> colors; colors.resize((MAX_COLORCURVES-1)* interpolationCount);
 
 		auto uncharted2_tonemap_partial = [](XMFLOAT3 x)
 		{
@@ -1503,8 +1506,13 @@ void CImGuiManager::ShowTrailManager(CState<CPlayer>* pCurrentAnimation)
 			float D = 0.20f;
 			float E = 0.02f;
 			float F = 0.30f;
-			return ((XMVectorMultiply(XMLoadFloat3(&Vector3::Add(Vector3::ScalarProduct(x,A,false), XMFLOAT3(B*C, B * C, B * C))), XMLoadFloat3(&x)) + XMLoadFloat3(&XMFLOAT3(D * E, D * E, D * E))) 
-				/ (XMVectorMultiply(XMLoadFloat3(&(Vector3::Add(Vector3::ScalarProduct(x, A, false), XMFLOAT3(B,B,B)))), XMLoadFloat3(&x)) + XMVECTOR(D) * XMVECTOR(F))) - XMVECTOR(E) / XMVECTOR(F);
+			XMVECTOR a1 = (XMVectorMultiply(XMLoadFloat3(&Vector3::Add(Vector3::ScalarProduct(x, A, false), XMFLOAT3(B * C, B * C, B * C))), XMLoadFloat3(&x)) + XMLoadFloat3(&XMFLOAT3(D * E, D * E, D * E)));
+			XMVECTOR a2 = (XMVectorMultiply(XMLoadFloat3(&(Vector3::Add(Vector3::ScalarProduct(x, A, false), XMFLOAT3(B, B, B)))), XMLoadFloat3(&x)) + XMVectorMultiply(XMLoadFloat3(&XMFLOAT3(D, D, D)), XMLoadFloat3(&XMFLOAT3(F, F, F))));
+			XMVECTOR a3 = -XMVECTOR({ E,E,E }) / XMVECTOR({ F,F,F });
+			XMVECTOR b1 = a1 / a2;
+			XMVECTOR c1 = b1 + a3;
+
+			return c1;
 		};
 
 		auto uncharted2_filmic = [&](XMFLOAT3 v)
@@ -1513,22 +1521,76 @@ void CImGuiManager::ShowTrailManager(CState<CPlayer>* pCurrentAnimation)
 			XMVECTOR curr = uncharted2_tonemap_partial(Vector3::ScalarProduct(v, exposure_bias, false));
 
 			XMFLOAT3 W = XMFLOAT3(11.2f, 11.2f, 11.2f);
-			XMVECTOR white_scale = XMVECTOR(1.0f) / uncharted2_tonemap_partial(W);
+			XMVECTOR white_scale = XMVECTOR({ 1.0f,1.0f,1.0f }) / uncharted2_tonemap_partial(W);
 			XMFLOAT3 result;
 			XMStoreFloat3(&result, XMVectorMultiply(curr, white_scale));
 			return result;
 		};
 
+		XMFLOAT3 basecolors[MAX_COLORCURVES];
 		for (int i = 0; i < pTrailComponent->m_nCurves; ++i) {
 			XMFLOAT3 RGB = uncharted2_filmic(XMFLOAT3(pTrailComponent->m_fR_CurvePoints[i], pTrailComponent->m_fG_CurvePoints[i], pTrailComponent->m_fB_CurvePoints[i]));
-			BYTE byte_r = RGB.x * 255;
-			BYTE byte_g = RGB.y * 255;
-			BYTE byte_b = RGB.z * 255;
-
-			ImU32 color = 
+			basecolors[i] = RGB;
 		}
-		ImPlot::AddColormap("testColorMap", colors, pTrailComponent->m_nCurves);
-		ImPlot::ColormapSlider("testColorSlider", &testColors, &abc, "", cmap);
+
+		int colorIndex = 0;
+
+		for (int t = 0; t < colors.size(); ++t) {
+			float newT = (float)t / colors.size();
+			int index = 0;
+			for (int i = 0; i < pTrailComponent->m_nCurves; ++i) {
+				if (pTrailComponent->m_fColorCurveTimes_R[i] >= newT) {
+					index = max(0, i - 1);
+					break;
+				}
+			}
+
+			float delta = newT - pTrailComponent->m_fColorCurveTimes_R[index];
+			delta *= 1.0f / ((float)pTrailComponent->m_fColorCurveTimes_R[index + 1] - (float)pTrailComponent->m_fColorCurveTimes_R[index]);
+			
+			XMFLOAT3 newColor; XMStoreFloat3(&newColor, XMVectorLerp(XMLoadFloat3(&basecolors[index]), XMLoadFloat3(&basecolors[index + 1]), delta));
+
+			BYTE byte_r = newColor.x * 255;
+			BYTE byte_g = newColor.y * 255;
+			BYTE byte_b = newColor.z * 255;
+
+			BYTE abgr[4] = { (BYTE)(255), byte_b, byte_g, byte_r };
+			BYTE rgba[4] = { byte_r, byte_g, byte_b, (BYTE)(255) };
+			memcpy(&colors[colorIndex++], rgba, sizeof(ImU32));
+		}
+		
+
+
+		/*for (int i = 0; i < pTrailComponent->m_nCurves - 1; ++i) {
+			for (int j = 0; j < interpolationCount; ++j) {
+				XMFLOAT3 newColor; XMStoreFloat3(&newColor, XMVectorLerp(XMLoadFloat3(&basecolors[i]), XMLoadFloat3(&basecolors[i + 1]), (float)j / interpolationCount));
+
+				BYTE byte_r = newColor.x * 255;
+				BYTE byte_g = newColor.y * 255;
+				BYTE byte_b = newColor.z * 255;
+
+				BYTE abgr[4] = { (BYTE)(255), byte_b, byte_g, byte_r };
+				BYTE rgba[4] = { byte_r, byte_g, byte_b, (BYTE)(255) };
+				memcpy(&colors[colorIndex++], rgba, sizeof(ImU32));
+			}
+		}*/
+
+		//ImGui::ColorConvertFloat4ToU32
+
+		static ImPlotColormap sampleColorMap = -1;
+		if(sampleColorMap == -1) 
+			sampleColorMap = ImPlot::AddColormap("testColorMap", colors.data(), colors.size(), false);
+		else {
+			ImPlotContext& gp = *GImPlot;
+			ImU32* sampleColorTable = const_cast<ImU32*>(gp.ColormapData.GetKeys(sampleColorMap));
+			ImU32 test[240]; memcpy(test, sampleColorTable, sizeof(ImU32) * 240);
+			int TableSize = gp.ColormapData.GetTableSize(sampleColorMap);
+			memcpy(sampleColorTable, colors.data(), colors.size() * sizeof(ImU32));
+		}
+		//ImVec2 cursorPos = ImGui::GetCurrentWindow()->DC.CursorPos;
+		//ImPlot::RenderColorBar(colors.data(), colors.size(), *ImGui::GetWindowDrawList(), ImRect(cursorPos.x, cursorPos.y, cursorPos.x + 200, cursorPos.y + 10), false, false, false);
+		ImPlot::ColormapSlider("testColorSlider", &testColors, &abc, "", sampleColorMap);
+		//ImPlot::PopColormap();
 
 		/*ImPlot::SetNextLineStyle(ImVec4(1, 0.5f, 1, 1));
 		ImPlot::PlotLine("##t1", &P[1].x, &P[1].y, 1, 0, 0, sizeof(ImPlotPoint));

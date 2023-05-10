@@ -16,6 +16,7 @@ struct VS_CB_SWTRAIL_INFO
 	float m_fNoiseConstants;
 	UINT m_nDrawedControllPoints;
 	float m_faccumulateTime;
+	float m_fEmissiveFactor;
 };
 enum class TRAIL_UPDATE_METHOD {
 	UPDATE_NEW_CONTROL_POINT,
@@ -45,6 +46,7 @@ class CSwordTrailObject : public CGameObject
 	float m_fColorCurveTimes[MAX_COLORCURVES];
 	UINT m_nCurves;
 	float m_fNoiseConstants;
+	float m_fEmissiveFactor;
 
 	std::unique_ptr<CTexture> m_pTexture;
 

@@ -401,6 +401,7 @@ public:
 	double m_fColorCurveTimes_G[MAX_COLORCURVES];
 	double m_fColorCurveTimes_B[MAX_COLORCURVES];
 	int m_nCurves;
+	float m_fEmissiveFactor = 10.0f;
 
 public:
 	TrailComponent();

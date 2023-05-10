@@ -470,13 +470,14 @@ void TrailComponent::HandleMessage(const Message& message, const TrailUpdatePara
 	if (message.getType() == MessageType::UPDATE_SWORDTRAIL) {
 		CSwordTrailObject* pTrail = dynamic_cast<CSwordTrailObject*>(params.pObject);
 
-		pTrail->m_nCurves = 4;
+		pTrail->m_nCurves = this->m_nCurves;
 		for (int i = 0; i < this->m_nCurves; ++i) {
 			pTrail->m_fR_CurvePoints[i] = this->m_fR_CurvePoints[i];
 			pTrail->m_fG_CurvePoints[i] = this->m_fG_CurvePoints[i];
-			pTrail->m_fG_CurvePoints[i] = this->m_fG_CurvePoints[i];
+			pTrail->m_fB_CurvePoints[i] = this->m_fB_CurvePoints[i];
 			pTrail->m_fColorCurveTimes[i] = this->m_fColorCurveTimes_R[i];
 		}
+		pTrail->m_fEmissiveFactor = this->m_fEmissiveFactor;
 		pTrail->m_eTrailUpdateMethod = GetEnable() ? TRAIL_UPDATE_METHOD::UPDATE_NEW_CONTROL_POINT : TRAIL_UPDATE_METHOD::NON_UPDATE_NEW_CONTROL_POINT;
 	}
 }

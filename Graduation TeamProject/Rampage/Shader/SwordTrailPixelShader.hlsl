@@ -17,6 +17,7 @@ cbuffer cbTrailControllPoints : register(b5)
 	float gfNoiseConstants;
 	uint gnPoints;
 	float gnOffsetTime;
+	float gnEmissiveFactor;
 }
 
 struct GS_OUT
@@ -39,7 +40,7 @@ PS_MULTIPLE_RENDER_TARGETS_OUTPUT SwordTrail_PS(GS_OUT input)
 	float4 BaseColor = gtxMappedTexture[0].Sample(gSamplerState, uv * float2(1.0f, 1.0f));
 	float4 NoiseColor = gtxMappedTexture[1].Sample(gSamplerState, uv * float2(1.0f, 1.0f) - gnOffsetTime);
 
-	float EmissiveFactor = 1.5f;
+	float EmissiveFactor = gnEmissiveFactor;
 	//float EmissiveFactor = min(2.0f, uv.x * 4.0f);
 	float4 EmissiveColor;
 	int index = 0;
@@ -80,7 +81,7 @@ PS_MULTIPLE_RENDER_TARGETS_OUTPUT SwordTrail_PS(GS_OUT input)
 	EmissiveColor.a = uv.x;
 	//EmissiveColor.rgb = float3(t, 0.0f, 0.0f);
 
-	EmissiveColor.rgb *= EmissiveFactor * 20.0f * NoiseColor.r;
+	EmissiveColor.rgb *= EmissiveFactor * 2.0f * NoiseColor.r;
 
 	float4 fColor;
 	fColor = BaseColor * EmissiveColor;
