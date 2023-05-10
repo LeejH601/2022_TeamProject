@@ -295,6 +295,22 @@ void DataLoader::SaveComponentSet(FILE* pInFile, CState<CPlayer>* pState)
 	WriteStringFromFile(pInFile, std::string("<TrailComponent>:"));
 	WriteStringFromFile(pInFile, std::string("<Enable>:"));
 	WriteIntegerFromFile(pInFile, pTrailComponent->GetEnable());
+	WriteStringFromFile(pInFile, std::string("<EmissiveFactor>:"));
+	WriteFloatFromFile(pInFile, pTrailComponent->m_fEmissiveFactor);
+	WriteStringFromFile(pInFile, std::string("<nCurves>:"));
+	WriteIntegerFromFile(pInFile, pTrailComponent->m_nCurves);
+	WriteStringFromFile(pInFile, std::string("<Rcurves>:"));
+	for (int i = 0; i < MAX_COLORCURVES; ++i)
+		WriteFloatFromFile(pInFile, pTrailComponent->m_fR_CurvePoints[i]);
+	WriteStringFromFile(pInFile, std::string("<Gcurves>:"));
+	for (int i = 0; i < MAX_COLORCURVES; ++i)
+		WriteFloatFromFile(pInFile, pTrailComponent->m_fG_CurvePoints[i]);
+	WriteStringFromFile(pInFile, std::string("<Bcurves>:"));
+	for (int i = 0; i < MAX_COLORCURVES; ++i)
+		WriteFloatFromFile(pInFile, pTrailComponent->m_fB_CurvePoints[i]);
+	WriteStringFromFile(pInFile, std::string("<Timecurves>:"));
+	for (int i = 0; i < MAX_COLORCURVES; ++i)
+		WriteFloatFromFile(pInFile, pTrailComponent->m_fColorCurveTimes_R[i]);
 	WriteStringFromFile(pInFile, std::string("</TrailComponent>:"));
 
 	str = "</Components>:";
@@ -743,6 +759,34 @@ void DataLoader::LoadComponentSet(FILE* pInFile, CState<CPlayer>* pState)
 				if (!strcmp(buf, "<Enable>:"))
 				{
 					pTrailComponent->SetEnable(ReadIntegerFromFile(pInFile));
+				}
+				else if (!strcmp(buf, "<EmissiveFactor>:"))
+				{
+					pTrailComponent->m_fEmissiveFactor = ReadFloatFromFile(pInFile);
+				}
+				else if (!strcmp(buf, "<nCurves>:"))
+				{
+					pTrailComponent->m_nCurves = ReadIntegerFromFile(pInFile);
+				}
+				else if (!strcmp(buf, "<Rcurves>:"))
+				{
+					for(int i = 0;i<MAX_COLORCURVES;++i)
+						pTrailComponent->m_fR_CurvePoints[i] = ReadFloatFromFile(pInFile);
+				}
+				else if (!strcmp(buf, "<Gcurves>:"))
+				{
+					for (int i = 0; i < MAX_COLORCURVES; ++i)
+						pTrailComponent->m_fG_CurvePoints[i] = ReadFloatFromFile(pInFile);
+				}
+				else if (!strcmp(buf, "<Bcurves>:"))
+				{
+					for (int i = 0; i < MAX_COLORCURVES; ++i)
+						pTrailComponent->m_fB_CurvePoints[i] = ReadFloatFromFile(pInFile);
+				}
+				else if (!strcmp(buf, "<Timecurves>:"))
+				{
+					for (int i = 0; i < MAX_COLORCURVES; ++i)
+						pTrailComponent->m_fColorCurveTimes_R[i] = ReadFloatFromFile(pInFile);
 				}
 				else if (!strcmp(buf, "</TrailComponent>:"))
 				{
