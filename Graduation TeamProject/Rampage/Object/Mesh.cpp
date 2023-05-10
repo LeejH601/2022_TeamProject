@@ -314,6 +314,13 @@ void CSkinnedMesh::LoadMeshFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 
 	::ReadStringFromFile(pInFile, m_pstrMeshName);
 
+	std::wstring wMeshName;
+	size_t tmp = 0;
+	wMeshName.resize(strlen(m_pstrMeshName) + 1);
+	mbstowcs_s(&tmp, wMeshName.data(), (size_t)wMeshName.size(), m_pstrMeshName, (size_t)wMeshName.size());
+	OutputDebugString(wMeshName.c_str());
+	OutputDebugString(L"\n");
+
 	for (; ; )
 	{
 		::ReadStringFromFile(pInFile, pstrToken);
@@ -321,6 +328,24 @@ void CSkinnedMesh::LoadMeshFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 		{
 			nReads = (UINT)::fread(&m_xmf3AABBCenter, sizeof(XMFLOAT3), 1, pInFile);
 			nReads = (UINT)::fread(&m_xmf3AABBExtents, sizeof(XMFLOAT3), 1, pInFile);
+
+			std::wstring wBounds = L"m_xmf3AABBCenter.x: ";
+			wBounds = wBounds.append(std::to_wstring(m_xmf3AABBCenter.x));
+			wBounds = wBounds.append(L" m_xmf3AABBCenter.y: ");
+			wBounds = wBounds.append(std::to_wstring(m_xmf3AABBCenter.y));
+			wBounds = wBounds.append(L" m_xmf3AABBCenter.z: ");
+			wBounds = wBounds.append(std::to_wstring(m_xmf3AABBCenter.z));
+			OutputDebugString(wBounds.c_str());
+			OutputDebugString(L"\n");
+
+			std::wstring wExtents = L"m_xmf3AABBExtents.x: ";
+			wExtents = wExtents.append(std::to_wstring(m_xmf3AABBExtents.x));
+			wExtents = wExtents.append(L" m_xmf3AABBExtents.y: ");
+			wExtents = wExtents.append(std::to_wstring(m_xmf3AABBExtents.y));
+			wExtents = wExtents.append(L" m_xmf3AABBExtents.z: ");
+			wExtents = wExtents.append(std::to_wstring(m_xmf3AABBExtents.z));
+			OutputDebugString(wExtents.c_str());
+			OutputDebugString(L"\n");
 		}
 		else if (!strcmp(pstrToken, "<Positions>:"))
 		{

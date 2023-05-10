@@ -63,6 +63,9 @@ void CMap::LoadSceneFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 
 	::ReadStringFromFile(pInFile, pstrToken);
 
+	std::wstring TextString = L"Loading Scene";
+	OutputDebugString(TextString.c_str());
+
 	if (!strcmp(pstrToken, "<GameObjects>:"))
 	{
 		int nObjects = ReadIntegerFromFile(pInFile);
@@ -73,8 +76,6 @@ void CMap::LoadSceneFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 			float buffer[16];
 			std::string objPath{ "Object/Scene/" };
 			objPath += static_cast<std::string>(pstrToken) + ".bin";
-
-
 
 			FILE* objFile = NULL;
 			::fopen_s(&objFile, objPath.data(), "rb");
@@ -144,12 +145,6 @@ void CMap::LoadSceneFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 			}
 
 			pObject->SetChild(rootObj->m_pModelRootObject, true);
-			XMFLOAT4X4 matrix_scale = {
-					10, 0, 0, 0,
-					0, 10, 0, 0,
-					0, 0, 10, 0,
-					0, 0, 0, 1,
-			};
 			pObject->UpdateTransform(NULL);
 
 			//if (!objPath.contains("Rock"))
