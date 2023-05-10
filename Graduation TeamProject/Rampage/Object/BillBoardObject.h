@@ -23,7 +23,7 @@ struct CB_FRAMEWORK_INFO
 class CBillBoardObject : public CGameObject
 {
 public:
-	CBillBoardObject(std::shared_ptr<CTexture> pSpriteTexture, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CShader* pShader, float fSize, bool bBillBoard); // 이미지 이름, 
+	CBillBoardObject(int iTextureIndex, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CShader* pShader, float fSize, bool bBillBoard); // 이미지 이름, 
 	virtual ~CBillBoardObject();
 	virtual void CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList, float fCurrentTime, float fElapsedTime);
@@ -51,7 +51,7 @@ protected:
 class CMultiSpriteObject : public CBillBoardObject
 {
 public:
-	CMultiSpriteObject(std::shared_ptr<CTexture> pSpriteTexture, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CShader* pShader, int nRows, int nCols, float fSize, bool bBillBoard, float fSpeed = 5.f);
+	CMultiSpriteObject(int iTextureIndex, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CShader* pShader, int nRows, int nCols, float fSize, bool bBillBoard, float fSpeed = 5.f);
 	virtual ~CMultiSpriteObject();
 
 	virtual void Animate(float fTimeElapsed);
@@ -80,7 +80,7 @@ protected:
 class CTerrainSpriteObject : public CMultiSpriteObject
 {
 public:
-	CTerrainSpriteObject(std::shared_ptr<CTexture> pSpriteTexture, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CShader* pShader, int nRows, int nCols, float fSize, float fSpeed = 5.f);
+	CTerrainSpriteObject(int iTextureIndex, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CShader* pShader, int nRows, int nCols, float fSize, float fSpeed = 5.f);
 	virtual ~CTerrainSpriteObject();
 	virtual void Animate(CHeightMapTerrain* pTerrain, float fTimeElapsed); // 해당 오브젝트를 터레인 위에 위치시키는 함수
 	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList, float fCurrentTime, float fElapsedTime);

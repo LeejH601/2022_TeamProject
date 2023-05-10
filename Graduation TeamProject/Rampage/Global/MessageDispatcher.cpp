@@ -290,7 +290,7 @@ void StunAnimationComponent::HandleMessage(const Message& message, const Animati
 }
 ParticleComponent::ParticleComponent()
 {
-	m_pTexture = CSimulatorScene::GetInst()->GetTextureManager()->GetParticleTextureList()[GetParticleIndex()];  // 미리 텍스쳐 셋팅(index: 0)
+	m_iTextureIndex = CSimulatorScene::GetInst()->GetTextureManager()->GetTextureListIndex(TextureType::ParticleTexture).first;  // 미리 텍스쳐 셋팅(파티클 텍스쳐의 첫번째 텍스쳐)
 }
 
 void ParticleComponent::HandleMessage(const Message& message, const ParticleCompParams& params)
@@ -308,11 +308,11 @@ void ParticleComponent::HandleMessage(const Message& message, const ParticleComp
 		pParticle->SetColor(m_xmf3Color);
 		pParticle->SetSpeed(m_fSpeed);
 		pParticle->SetLifeTime(m_fLifeTime);
-		//pParticle->SetMaxParticleN(m_nParticleNumber);
+		pParticle->SetMaxParticleN(m_nParticleNumber);
 		pParticle->SetEmitParticleN(m_nEmitParticleNumber);
 		pParticle->SetPosition(params.xmf3Position);
 		pParticle->SetParticleType(m_iParticleType);
-		pParticle->ChangeTexture(m_pTexture);
+		pParticle->SetTextureIndex(m_iTextureIndex);
 	}
 }
 void ImpactEffectComponent::HandleMessage(const Message& message, const ImpactCompParams& params)
@@ -329,8 +329,8 @@ void ImpactEffectComponent::HandleMessage(const Message& message, const ImpactCo
 		pMultiSprite->SetLifeTime(m_fSpeed);
 		pMultiSprite->SetStartAlpha(m_fAlpha);
 		pMultiSprite->SetPosition(params.xmf3Position);
-		pMultiSprite->ChangeTexture(m_pTexture);
 		pMultiSprite->SetColor(m_xmf3Color);
+		pMultiSprite->SetTextureIndex(m_iTextureIndex);
 	}
 }
 void SceneCollideListener::HandleMessage(const Message& message, const CollideParams& params)

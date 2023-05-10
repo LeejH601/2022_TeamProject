@@ -338,20 +338,18 @@ class ParticleComponent : public IMessageListener {
     int m_nParticleNumber = MAX_PARTICLES;
     int m_nEmitParticleNumber = 500;
     int m_iParticleType = ParticleType::SPHERE_PARTICLE;
-    int m_nParticleIndex = 0;
     XMFLOAT2 m_fSize = XMFLOAT2(3.f, 3.f);
     float m_fAlpha = 1.f;
     float m_fLifeTime = 0.2f;
     float m_fSpeed = 20.f;
     XMFLOAT3 m_xmf3Color = XMFLOAT3(1.f, 1.f, 1.f);
-    std::shared_ptr<CTexture> m_pTexture;
+	int m_iTextureIndex = 0;
 public:
     ParticleComponent();
 
 public:
     //int& GetParticleNumber() { return m_nParticleNumber; }
     int& GetEmitParticleNumber() { return m_nEmitParticleNumber; }
-    int& GetParticleIndex() { return m_nParticleIndex; }
     XMFLOAT2& GetSize() { return m_fSize; }
     float& GetXSize() { return m_fSize.x; }
     float& GetYSize() { return m_fSize.y; }
@@ -359,11 +357,10 @@ public:
     float& GetLifeTime() { return m_fLifeTime; }
     float& GetSpeed() { return m_fSpeed; }
     XMFLOAT3& GetColor() { return m_xmf3Color; }
-    std::shared_ptr<CTexture>& GetTexture() { return m_pTexture; }
+	int& GetTextureIndex() { return m_iTextureIndex; };
 
     void SetEmitParticleNumber(int iEmitParticleNumber) { m_nEmitParticleNumber = iEmitParticleNumber; }
     void SetParticleNumber(int nParticleNumber) { m_nParticleNumber = nParticleNumber; }
-    void SetParticleIndex(int nParticleIndex) { m_nParticleIndex = nParticleIndex; }
     void SetParticleType(int iParticleType) { m_iParticleType = iParticleType; }
     void SetSize(XMFLOAT2 fSize) { m_fSize = fSize; }
     void SetSizeX(float fSize) { m_fSize.x = fSize; }
@@ -375,7 +372,7 @@ public:
     void SetColorR(float r) { m_xmf3Color.x = r; }
     void SetColorG(float g) { m_xmf3Color.y = g; }
     void SetColorB(float b) { m_xmf3Color.z = b; }
-    void SetParticleTexture(std::shared_ptr<CTexture> pTexture) { m_pTexture = pTexture; }
+	void SetTextureIndex(int iIndex) { m_iTextureIndex = iIndex; };
 
 	virtual void HandleMessage(const Message& message, const ParticleCompParams& params);
 };
@@ -539,14 +536,13 @@ public:
 
 // Define Impact Effect component
 class ImpactEffectComponent : public IMessageListener {
-	int m_nTextureIndex = 0;
+	int m_iTextureIndex = 0;
 	float m_fSpeed = 5.f;
 	float m_fAlpha = 1.f;
 	XMFLOAT2 m_fSize = XMFLOAT2(3.f, 3.f);
 	XMFLOAT3 m_xmf3Color = XMFLOAT3(1.f, 1.f, 1.f);
-	std::shared_ptr<CTexture> m_pTexture;
 public:
-	int& GetTextureIndex() { return m_nTextureIndex; }
+	int& GetTextureIndex() { return m_iTextureIndex; }
 	float& GetSpeed() { return m_fSpeed; }
 	float& GetAlpha() { return m_fAlpha; }
 	XMFLOAT2& GetSize() { return m_fSize; }
@@ -554,15 +550,13 @@ public:
 
 	float& GetXSize() { return m_fSize.x; }
 	float& GetYSize() { return m_fSize.y; }
-	std::shared_ptr<CTexture>& GetTexture() { return m_pTexture; }
 
-	void SetTextureIndex(int nTextureIndex) { m_nTextureIndex = nTextureIndex; }
+	void SetTextureIndex(int nTextureIndex) { m_iTextureIndex = nTextureIndex; }
 	void SetSize(XMFLOAT2 fSize) { m_fSize = fSize; }
 	void SetSizeX(float fSize) { m_fSize.x = fSize; }
 	void SetSizeY(float fSize) { m_fSize.y = fSize; }
 	void SetAlpha(float fAlpha) { m_fAlpha = fAlpha; }
 	void SetSpeed(float fSpeed) { m_fSpeed = fSpeed; }
-	void SetImpactTexture(std::shared_ptr<CTexture> pTexture) { m_pTexture = pTexture; }
 
 	virtual void HandleMessage(const Message& message, const ImpactCompParams& params);
 };

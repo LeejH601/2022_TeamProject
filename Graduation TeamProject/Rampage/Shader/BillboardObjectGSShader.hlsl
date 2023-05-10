@@ -30,7 +30,6 @@ cbuffer cbFrameworkInfo : register(b7)
 	bool		bEmit : packoffset(c3.w);
 };
 
-Texture2D gtxtTexture : register(t0);
 SamplerState gSamplerState : register(s0);
 
 

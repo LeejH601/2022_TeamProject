@@ -255,7 +255,7 @@ void DataLoader::SaveComponentSet(FILE* pInFile, CState<CPlayer>* pState)
 	WriteStringFromFile(pInFile, std::string("<ParticleEmitNumber>:"));
 	WriteIntegerFromFile(pInFile, pParticleComponent->GetEmitParticleNumber());
 	WriteStringFromFile(pInFile, std::string("<ParticleIndex>:"));
-	WriteIntegerFromFile(pInFile, pParticleComponent->GetParticleIndex());
+	WriteIntegerFromFile(pInFile, pParticleComponent->GetTextureIndex());
 	WriteStringFromFile(pInFile, std::string("<Alpha>:"));
 	WriteFloatFromFile(pInFile, pParticleComponent->GetAlpha());
 	WriteStringFromFile(pInFile, std::string("<LifeTime>:"));
@@ -644,12 +644,7 @@ void DataLoader::LoadComponentSet(FILE* pInFile, CState<CPlayer>* pState)
 				}
 				else if (!strcmp(buf, "<ParticleIndex>:"))
 				{
-					pParticleComponent->SetParticleIndex(ReadIntegerFromFile(pInFile));
-
-					std::vector<std::shared_ptr<CTexture>> vTexture = CSimulatorScene::GetInst()->GetTextureManager()->GetParticleTextureList();
-
-					std::shared_ptr pTexture = vTexture[pParticleComponent->GetParticleIndex()];
-					pParticleComponent->SetParticleTexture(pTexture);
+					pParticleComponent->SetTextureIndex(ReadIntegerFromFile(pInFile));
 				}
 				else if (!strcmp(buf, "<Alpha>:"))
 				{
@@ -702,11 +697,6 @@ void DataLoader::LoadComponentSet(FILE* pInFile, CState<CPlayer>* pState)
 				else if (!strcmp(buf, "<TextureIndex>:"))
 				{
 					pImpactComponent->SetTextureIndex(ReadIntegerFromFile(pInFile));
-
-					std::vector<std::shared_ptr<CTexture>> vTexture = CSimulatorScene::GetInst()->GetTextureManager()->GetBillBoardTextureList();
-
-					std::shared_ptr<CTexture> pTexture = vTexture[pImpactComponent->GetTextureIndex()];
-					pImpactComponent->SetImpactTexture(pTexture);
 				}
 				else if (!strcmp(buf, "<Size_X>:"))
 				{
@@ -1196,12 +1186,13 @@ void CImGuiManager::ShowImpactManager(CState<CPlayer>* pCurrentAnimation)
 	ImpactEffectComponent* pImpactEffectComponent = dynamic_cast<ImpactEffectComponent*>(pCurrentAnimation->GetImpactComponent());
 	ImGui::Checkbox(U8STR("켜기/끄기##ImpactEffect"), &pImpactEffectComponent->GetEnable());
 
-	std::vector<std::shared_ptr<CTexture>> vTexture = CSimulatorScene::GetInst()->GetTextureManager()->GetBillBoardTextureList();
+	std::pair<int, int> iBillBoardIndex = CSimulatorScene::GetInst()->GetTextureManager()->GetTextureListIndex(TextureType::BillBoardTexture);
+	std::shared_ptr<CTexture> pTexture = CSimulatorScene::GetInst()->GetTextureManager()->GetTexture();
 	std::vector<const char*> items;
 	std::vector <std::string> str(100);
-	for (int i = 0; i < vTexture.size(); i++)
+	for (int i = iBillBoardIndex.first; i <= iBillBoardIndex.second; i++)
 	{
-		std::wstring wstr = vTexture[i]->GetTextureName(0);
+		std::wstring wstr = pTexture->GetTextureName(i);
 		str[i].assign(wstr.begin(), wstr.end());
 		items.emplace_back(str[i].c_str());
 	}
@@ -1209,8 +1200,6 @@ void CImGuiManager::ShowImpactManager(CState<CPlayer>* pCurrentAnimation)
 	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
 	if (ImGui::Combo(U8STR("텍스쳐##ImpactEffect"), (int*)(&pImpactEffectComponent->GetTextureIndex()), items.data(), items.size()));
 	{
-		std::shared_ptr<CTexture> pTexture = vTexture[pImpactEffectComponent->GetTextureIndex()];
-		pImpactEffectComponent->SetImpactTexture(pTexture);
 		int my_image_width = 0.2f * m_lDesktopHeight;
 		int my_image_height = 0.2f * m_lDesktopHeight;
 		SetPreviewTexture(Locator.GetDevice(), pTexture.get(), 2, PREVIEW_TEXTURE_TYPE::TYPE_IMPACT);
@@ -1249,26 +1238,24 @@ void CImGuiManager::ShowParticleManager(CState<CPlayer>* pCurrentAnimation)
 	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
 	ImGui::Checkbox(U8STR("켜기/끄기##ParticleEffect"), &pParticleComponent->GetEnable());
 
-	std::vector<std::shared_ptr<CTexture>> vTexture = CSimulatorScene::GetInst()->GetTextureManager()->GetParticleTextureList();
+	std::pair<int, int> iParticleIndex = CSimulatorScene::GetInst()->GetTextureManager()->GetTextureListIndex(TextureType::ParticleTexture);
+	std::shared_ptr<CTexture> pTexture = CSimulatorScene::GetInst()->GetTextureManager()->GetTexture();
 	std::vector<const char*> items;
 	std::vector <std::string> str(100);
-	for (int i = 0; i < vTexture.size(); i++)
+	for (int i = iParticleIndex.first; i <= iParticleIndex.second; i++)
 	{
-		std::wstring wstr = vTexture[i]->GetTextureName(0);
+		std::wstring wstr = pTexture->GetTextureName(i);
 		str[i].assign(wstr.begin(), wstr.end());
 		items.emplace_back(str[i].c_str());
 	}
 
 	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
-	if (ImGui::Combo(U8STR("텍스쳐##ParticleEffect"), (int*)(&pParticleComponent->GetParticleIndex()), items.data(), items.size()))
-	{
-		std::shared_ptr pTexture = vTexture[pParticleComponent->GetParticleIndex()];
-		pParticleComponent->SetParticleTexture(pTexture);
-	}
+	ImGui::Combo(U8STR("텍스쳐##ParticleEffect"), (int*)(&pParticleComponent->GetTextureIndex()), items.data(), items.size());
+
 	int my_image_width = 0.2f * m_lDesktopHeight;
 	int my_image_height = 0.2f * m_lDesktopHeight;
-	SetPreviewTexture(Locator.GetDevice(), vTexture[pParticleComponent->GetParticleIndex()].get(), 3, PREVIEW_TEXTURE_TYPE::TYPE_PARTICLE);
-	ImGui::Image((ImTextureID)(m_d3dSrvGPUDescriptorHandle_ParticleTexture.ptr), ImVec2((float)my_image_width, (float)my_image_height));
+	//SetPreviewTexture(Locator.GetDevice(), vTexture[pParticleComponent->GetParticleIndex()].get(), 3, PREVIEW_TEXTURE_TYPE::TYPE_PARTICLE);
+	//ImGui::Image((ImTextureID)(m_d3dSrvGPUDescriptorHandle_ParticleTexture.ptr), ImVec2((float)my_image_width, (float)my_image_height));
 
 	ImGui::SetNextItemWidth(190.f);
 	if (ImGui::DragFloat("XSize##ParticleEffect", &pParticleComponent->GetXSize(), DRAG_FLOAT_UNIT, PARTICLE_SIZE_MIN, PARTICLE_SIZE_MAX, "%.2f", 0))

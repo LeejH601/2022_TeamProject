@@ -68,8 +68,8 @@ void CMainTMPScene::CreateGraphicsRootSignature(ID3D12Device* pd3dDevice)
 	pd3dDescriptorRanges[3].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
 	pd3dDescriptorRanges[4].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
-	pd3dDescriptorRanges[4].NumDescriptors = 3;
-	pd3dDescriptorRanges[4].BaseShaderRegister = 31; //t31~33: gtxtParticleTexture
+	pd3dDescriptorRanges[4].NumDescriptors = 2;
+	pd3dDescriptorRanges[4].BaseShaderRegister = 31; //t31~32: gtxtParticleTexture
 	pd3dDescriptorRanges[4].RegisterSpace = 0;
 	pd3dDescriptorRanges[4].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
@@ -669,33 +669,34 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pSkyBoxObject = std::make_unique<CSkyBox>(pd3dDevice, pd3dCommandList, GetGraphicsRootSignature(), pSkyBoxTexture);
 
 	m_pTextureManager = std::make_unique<CTextureManager>();
-	m_pTextureManager->CreateCbvSrvUavDescriptorHeaps(pd3dDevice, 0, 200);
+	m_pTextureManager->CreateCbvSrvUavDescriptorHeaps(pd3dDevice, 0, 100);
+	m_pTextureManager->LoadSphereBuffer(pd3dDevice, pd3dCommandList);
 	m_pTextureManager->LoadBillBoardTexture(pd3dDevice, pd3dCommandList, L"Image/Explode_8x8.dds", 8, 8);
 	m_pTextureManager->LoadBillBoardTexture(pd3dDevice, pd3dCommandList, L"Image/Fire_Effect.dds", 5, 6);
 	m_pTextureManager->LoadBillBoardTexture(pd3dDevice, pd3dCommandList, L"Image/Explode_8x8.dds", 8, 8);
+	m_pTextureManager->LoadBillBoardTexture(pd3dDevice, pd3dCommandList, L"Image/Circle1.dds", 1, 1);
 	m_pTextureManager->LoadParticleTexture(pd3dDevice, pd3dCommandList, L"ParticleImage/RoundSoftParticle.dds", 0, 0);
 	m_pTextureManager->LoadParticleTexture(pd3dDevice, pd3dCommandList, L"ParticleImage/Meteor.dds", 0, 0);
 	m_pTextureManager->LoadParticleTexture(pd3dDevice, pd3dCommandList, L"Image/Effect0.dds", 0, 0);
-	m_pTextureManager->CreateResourceView(pd3dDevice, 0, 10, 12);
+	m_pTextureManager->CreateResourceView(pd3dDevice, 0);
 
 	m_pBillBoardObjectShader = std::make_unique<CBillBoardObjectShader>();
 	m_pBillBoardObjectShader->CreateShader(pd3dDevice, GetGraphicsRootSignature(), 7, pdxgiObjectRtvFormats, 0);
-	m_pBillBoardObjectShader->CreateCbvSrvUavDescriptorHeaps(pd3dDevice, 0, 10);
 
-	m_pTextureManager->LoadBillBoardTexture(pd3dDevice, pd3dCommandList, L"Image/Explode_8x8.dds", m_pBillBoardObjectShader.get(), 8, 8);
-	m_pTextureManager->LoadBillBoardTexture(pd3dDevice, pd3dCommandList, L"Image/Fire_Effect.dds", m_pBillBoardObjectShader.get(), 5, 6);
-	m_pTextureManager->LoadBillBoardTexture(pd3dDevice, pd3dCommandList, L"Image/Explode_8x8.dds", m_pBillBoardObjectShader.get(), 8, 8);
-	m_pTextureManager->LoadBillBoardTexture(pd3dDevice, pd3dCommandList, L"Image/Fire_Effect.dds", m_pBillBoardObjectShader.get(), 5, 6);
-	m_pTextureManager->LoadBillBoardTexture(pd3dDevice, pd3dCommandList, L"Image/Circle1.dds", m_pBillBoardObjectShader.get(), 0, 0);
-	m_pTextureManager->LoadBillBoardTexture(pd3dDevice, pd3dCommandList, L"ParticleImage/T_Glow_Impact_1.dds", m_pBillBoardObjectShader.get(), 1, 1);
-	m_pTextureManager->LoadBillBoardTexture(pd3dDevice, pd3dCommandList, L"ParticleImage/T_Glow_Impact_2.dds", m_pBillBoardObjectShader.get(), 1, 1);
-	m_pTextureManager->LoadBillBoardTexture(pd3dDevice, pd3dCommandList, L"ParticleImage/T_Glow_Smoky.dds", m_pBillBoardObjectShader.get(), 1, 1);
-	m_pTextureManager->LoadBillBoardTexture(pd3dDevice, pd3dCommandList, L"ParticleImage/T_Glow_Soft.dds", m_pBillBoardObjectShader.get(), 1, 1);
-	m_pTextureManager->LoadBillBoardTexture(pd3dDevice, pd3dCommandList, L"ParticleImage/T_Impact_33.dds", m_pBillBoardObjectShader.get(), 1, 1);
+	//m_pTextureManager->LoadBillBoardTexture(pd3dDevice, pd3dCommandList, L"Image/Explode_8x8.dds", m_pBillBoardObjectShader.get(), 8, 8);
+	//m_pTextureManager->LoadBillBoardTexture(pd3dDevice, pd3dCommandList, L"Image/Fire_Effect.dds", m_pBillBoardObjectShader.get(), 5, 6);
+	//m_pTextureManager->LoadBillBoardTexture(pd3dDevice, pd3dCommandList, L"Image/Explode_8x8.dds", m_pBillBoardObjectShader.get(), 8, 8);
+	//m_pTextureManager->LoadBillBoardTexture(pd3dDevice, pd3dCommandList, L"Image/Fire_Effect.dds", m_pBillBoardObjectShader.get(), 5, 6);
+	//m_pTextureManager->LoadBillBoardTexture(pd3dDevice, pd3dCommandList, L"Image/Circle1.dds", m_pBillBoardObjectShader.get(), 0, 0);
+	//m_pTextureManager->LoadBillBoardTexture(pd3dDevice, pd3dCommandList, L"ParticleImage/T_Glow_Impact_1.dds", m_pBillBoardObjectShader.get(), 1, 1);
+	//m_pTextureManager->LoadBillBoardTexture(pd3dDevice, pd3dCommandList, L"ParticleImage/T_Glow_Impact_2.dds", m_pBillBoardObjectShader.get(), 1, 1);
+	//m_pTextureManager->LoadBillBoardTexture(pd3dDevice, pd3dCommandList, L"ParticleImage/T_Glow_Smoky.dds", m_pBillBoardObjectShader.get(), 1, 1);
+	//m_pTextureManager->LoadBillBoardTexture(pd3dDevice, pd3dCommandList, L"ParticleImage/T_Glow_Soft.dds", m_pBillBoardObjectShader.get(), 1, 1);
+	//m_pTextureManager->LoadBillBoardTexture(pd3dDevice, pd3dCommandList, L"ParticleImage/T_Impact_33.dds", m_pBillBoardObjectShader.get(), 1, 1);
 
 	for (int i = 0; i < 50; ++i)
 	{
-		std::unique_ptr<CGameObject> m_pBillBoardObject = std::make_unique<CMultiSpriteObject>(m_pTextureManager->LoadBillBoardTexture(L"Image/Fire_Effect.dds"), pd3dDevice, pd3dCommandList, m_pBillBoardObjectShader.get(), 5, 6, 8.f, 5.f);
+		std::unique_ptr<CGameObject> m_pBillBoardObject = std::make_unique<CMultiSpriteObject>(m_pTextureManager->LoadTextureIndex(L"Image/Fire_Effect.dds"), pd3dDevice, pd3dCommandList, m_pBillBoardObjectShader.get(), 5, 6, 8.f, 5.f);
 		m_pBillBoardObjects.push_back(std::move(m_pBillBoardObject));
 	}
 
@@ -705,31 +706,31 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 
 
 
-	m_pTextureManager->LoadParticleTexture(pd3dDevice, pd3dCommandList, L"ParticleImage/RoundSoftParticle.dds", m_pParticleShader.get(), 0, 0);
-	m_pTextureManager->LoadParticleTexture(pd3dDevice, pd3dCommandList, L"ParticleImage/Meteor.dds", m_pParticleShader.get(), 0, 0);
-	m_pTextureManager->LoadParticleTexture(pd3dDevice, pd3dCommandList, L"Image/Effect0.dds", m_pParticleShader.get(), 0, 0);
-	m_pTextureManager->LoadParticleTexture(pd3dDevice, pd3dCommandList, L"Image/Effect1.dds", m_pParticleShader.get(), 0, 0);
-	m_pTextureManager->LoadParticleTexture(pd3dDevice, pd3dCommandList, L"Image/Effect2.dds", m_pParticleShader.get(), 0, 0);
-	m_pTextureManager->LoadParticleTexture(pd3dDevice, pd3dCommandList, L"Image/Effect3.dds", m_pParticleShader.get(), 0, 0);
-	m_pTextureManager->LoadParticleTexture(pd3dDevice, pd3dCommandList, L"Image/Effect4.dds", m_pParticleShader.get(), 0, 0);
-	m_pTextureManager->LoadParticleTexture(pd3dDevice, pd3dCommandList, L"Image/Effect6.dds", m_pParticleShader.get(), 0, 0);
-	m_pTextureManager->LoadParticleTexture(pd3dDevice, pd3dCommandList, L"ParticleImage/Fire1.dds", m_pParticleShader.get(), 0, 0);
+	//m_pTextureManager->LoadParticleTexture(pd3dDevice, pd3dCommandList, L"ParticleImage/RoundSoftParticle.dds", m_pParticleShader.get(), 0, 0);
+	//m_pTextureManager->LoadParticleTexture(pd3dDevice, pd3dCommandList, L"ParticleImage/Meteor.dds", m_pParticleShader.get(), 0, 0);
+	//m_pTextureManager->LoadParticleTexture(pd3dDevice, pd3dCommandList, L"Image/Effect0.dds", m_pParticleShader.get(), 0, 0);
+	//m_pTextureManager->LoadParticleTexture(pd3dDevice, pd3dCommandList, L"Image/Effect1.dds", m_pParticleShader.get(), 0, 0);
+	//m_pTextureManager->LoadParticleTexture(pd3dDevice, pd3dCommandList, L"Image/Effect2.dds", m_pParticleShader.get(), 0, 0);
+	//m_pTextureManager->LoadParticleTexture(pd3dDevice, pd3dCommandList, L"Image/Effect3.dds", m_pParticleShader.get(), 0, 0);
+	//m_pTextureManager->LoadParticleTexture(pd3dDevice, pd3dCommandList, L"Image/Effect4.dds", m_pParticleShader.get(), 0, 0);
+	//m_pTextureManager->LoadParticleTexture(pd3dDevice, pd3dCommandList, L"Image/Effect6.dds", m_pParticleShader.get(), 0, 0);
+	//m_pTextureManager->LoadParticleTexture(pd3dDevice, pd3dCommandList, L"ParticleImage/Fire1.dds", m_pParticleShader.get(), 0, 0);
 
 	for (int i = 0; i < MAX_ATTACKSPRITE_OBJECT; ++i)
 	{
-		std::unique_ptr<CGameObject> m_pSpriteObject = std::make_unique<CMultiSpriteObject>(m_pTextureManager->LoadBillBoardTexture(L"Image/Fire_Effect.dds"), pd3dDevice, pd3dCommandList, m_pBillBoardObjectShader.get(), 5, 6, 8.f, true, 5.f);
+		std::unique_ptr<CGameObject> m_pSpriteObject = std::make_unique<CMultiSpriteObject>(m_pTextureManager->LoadTextureIndex(L"Image/Fire_Effect.dds"), pd3dDevice, pd3dCommandList, m_pBillBoardObjectShader.get(), 5, 6, 8.f, true, 5.f);
 		m_pSpriteAttackObjects.push_back(std::move(m_pSpriteObject));
 	}
 
 	for (int i = 0; i < MAX_TERRAINSPRITE_OBJECT; ++i)
 	{
-		std::unique_ptr<CGameObject> m_pSpriteObject = std::make_unique<CTerrainSpriteObject>(m_pTextureManager->LoadBillBoardTexture(L"Image/Circle1.dds"), pd3dDevice, pd3dCommandList, m_pBillBoardObjectShader.get(), 0, 0, 15.f, 5.f);
+		std::unique_ptr<CGameObject> m_pSpriteObject = std::make_unique<CTerrainSpriteObject>(m_pTextureManager->LoadTextureIndex(L"Image/Circle1.dds"), pd3dDevice, pd3dCommandList, m_pBillBoardObjectShader.get(), 0, 0, 15.f, 5.f);
 		m_pTerrainSpriteObject.push_back(std::move(m_pSpriteObject));
 	}
 
 	for (int i = 0; i < MAX_PARTICLE_OBJECT; ++i)
 	{
-		std::unique_ptr<CGameObject> m_pParticleObject = std::make_unique<CParticleObject>(m_pTextureManager->LoadParticleTexture(L"ParticleImage/RoundSoftParticle.dds"), pd3dDevice, pd3dCommandList, GetGraphicsRootSignature(), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), 2.0f, XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT2(2.0f, 2.0f), MAX_PARTICLES, m_pParticleShader.get(), SPHERE_PARTICLE);
+		std::unique_ptr<CGameObject> m_pParticleObject = std::make_unique<CParticleObject>(m_pTextureManager->LoadTextureIndex(L"ParticleImage/RoundSoftParticle.dds"), pd3dDevice, pd3dCommandList, GetGraphicsRootSignature(), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), 2.0f, XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT2(2.0f, 2.0f), MAX_PARTICLES, m_pParticleShader.get(), SPHERE_PARTICLE);
 		m_pParticleObjects.push_back(std::move(m_pParticleObject));
 	}
 
@@ -742,7 +743,7 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	//}
 
 
-	m_pTrailParticleObjects = std::make_unique<CParticleObject>(m_pTextureManager->LoadParticleTexture(L"Image/Effect3.dds"), pd3dDevice, pd3dCommandList, GetGraphicsRootSignature(), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), 2.0f, XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT2(2.0f, 2.0f), MAX_PARTICLES, m_pParticleShader.get(), SPHERE_PARTICLE);
+	m_pTrailParticleObjects = std::make_unique<CParticleObject>(m_pTextureManager->LoadTextureIndex(L"Image/Effect3.dds"), pd3dDevice, pd3dCommandList, GetGraphicsRootSignature(), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), 2.0f, XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT2(2.0f, 2.0f), MAX_PARTICLES, m_pParticleShader.get(), SPHERE_PARTICLE);
 
 	CPlayerParticleObject::GetInst()->SetSmokeObjects(m_pSmokeObject.get());
 	CPlayerParticleObject::GetInst()->SetTrailParticleObjects(m_pTrailParticleObjects.get());

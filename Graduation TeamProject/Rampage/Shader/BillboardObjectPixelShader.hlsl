@@ -1,7 +1,8 @@
 #include "Header.hlsli"
 
 SamplerState gSamplerState : register(s0);
-Texture2D gtxtTexture[30] : register(t50);
+Buffer<float4> gRandomSphereBuffer : register(t50);
+Texture2D gtxtTexture[29] : register(t51);
 SamplerState gClampState : register(s4);
 
 cbuffer cbGameObjectInfo : register(b0)

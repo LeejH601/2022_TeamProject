@@ -7,7 +7,7 @@ CParticleObject::CParticleObject()
 {
 }
 
-CParticleObject::CParticleObject(std::shared_ptr<CTexture> pSpriteTexture, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, XMFLOAT3 xmf3Position, XMFLOAT3 xmf3Velocity, float fLifetime, XMFLOAT3 xmf3Acceleration, XMFLOAT3 xmf3Color, XMFLOAT2 xmf2Size, UINT nMaxParticles, CParticleShader* pShader, int iParticleType)
+CParticleObject::CParticleObject(int iTextureIndex, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, XMFLOAT3 xmf3Position, XMFLOAT3 xmf3Velocity, float fLifetime, XMFLOAT3 xmf3Acceleration, XMFLOAT3 xmf3Color, XMFLOAT2 xmf2Size, UINT nMaxParticles, CParticleShader* pShader, int iParticleType)
 {
 	m_xmf4x4World = Matrix4x4::Identity();
 	m_xmf4x4Transform = Matrix4x4::Identity();
@@ -18,7 +18,7 @@ CParticleObject::CParticleObject(std::shared_ptr<CTexture> pSpriteTexture, ID3D1
 
 	m_iParticleType = iParticleType;
 	
-	SetTexture(pSpriteTexture);
+	m_iTextureIndex = iTextureIndex;
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
@@ -76,6 +76,8 @@ void CParticleObject::PreRender(ID3D12GraphicsCommandList* pd3dCommandList, CSha
 			m_ppMaterials[i]->UpdateShaderVariables(pd3dCommandList);
 		}
 	}
+	int m_nType = 100;
+	pd3dCommandList->SetGraphicsRoot32BitConstants(0, 1, &m_nType, 32);
 }
 
 void CParticleObject::StreamOutRender(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, CShader* pShader)
