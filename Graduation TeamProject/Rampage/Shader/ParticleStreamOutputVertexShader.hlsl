@@ -1,3 +1,5 @@
+#include "CurlNoise.hlsl"
+
 cbuffer cbFrameworkInfo : register(b7)
 {
 	float		gfCurrentTime : packoffset(c0.x);
@@ -33,5 +35,6 @@ cbuffer cbGameObjectInfo : register(b0)
 
 VS_PARTICLE_INPUT VSParticleStreamOutput(VS_PARTICLE_INPUT input)
 {
+	input.velocity += CalculrateCulrNoise(input.position).xyz;
 	return(input);
 }

@@ -1,6 +1,8 @@
 #include "TextureManager.h"
 #include "..\Shader\BillBoardObjectShader.h"
 #include "..\Shader\ParticleShader.h"
+#include "..\Global\Utility.h"
+
 std::shared_ptr<CTexture> CTextureManager::LoadBillBoardTexture(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, LPCTSTR pszFileName, CBillBoardObjectShader* pShader, int iRow, int Column)
 {
 	for (const auto& texture : m_vBillBoardTextures)
@@ -18,6 +20,19 @@ std::shared_ptr<CTexture> CTextureManager::LoadBillBoardTexture(ID3D12Device* pd
 	m_vBillBoardTextures.emplace_back(pSpriteTexture);
 
 	return pSpriteTexture;
+}
+
+std::shared_ptr<CTexture> CTextureManager::SetPerlinNoiseTexture(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, LPCTSTR pszFileName, CShader* pShader)
+{
+	std::shared_ptr<CTexture> pNoiseTexture = std::make_shared<CTexture>(1, RESOURCE_TEXTURE2D, 0, 1);
+	std::vector<XMFLOAT4> data; GeneratePerlinNoise(128, 128, 1.0, 1, 1.0f, 1.0f, data);
+	pNoiseTexture->CreateTexture(pd3dDevice, pd3dCommandList, 128, 128,1,1, DXGI_FORMAT_R32G32B32A32_FLOAT, D3D12_RESOURCE_FLAG_NONE, D3D12_RESOURCE_STATE_COMMON, L"testNoise", RESOURCE_TEXTURE2D,0, (void*)(data.data()));
+
+	pShader->CreateShaderResourceViews(pd3dDevice, pNoiseTexture.get(), 0, 10);
+
+	m_vBillBoardTextures.emplace_back(pNoiseTexture);
+
+	return pNoiseTexture;
 }
 
 std::shared_ptr<CTexture> CTextureManager::LoadBillBoardTexture(LPCTSTR pszFileName)

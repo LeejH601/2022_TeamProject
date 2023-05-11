@@ -5,11 +5,12 @@
 class CTextureManager
 {
 public:
-	CTextureManager() {}
+	CTextureManager() {};
 	~CTextureManager() {}
 
 	// BillBoardTextures
 	std::shared_ptr<CTexture> LoadBillBoardTexture(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, LPCTSTR pszFileName, class CBillBoardObjectShader* pShader, int iRow, int Column);
+	std::shared_ptr<CTexture> SetPerlinNoiseTexture(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, LPCTSTR pszFileName, class CShader* pShader);
 	std::shared_ptr<CTexture> LoadBillBoardTexture(LPCTSTR pszFileName);
 
 	std::vector<std::shared_ptr<CTexture>>& GetBillBoardTextureList();

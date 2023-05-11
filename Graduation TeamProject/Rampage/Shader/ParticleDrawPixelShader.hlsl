@@ -1,4 +1,5 @@
 #include "Header.hlsli"
+#include "CurlNoise.hlsl"
 
 Texture2D<float4> gtxtParticleTexture : register(t31);
 

@@ -1,3 +1,5 @@
+#include "CurlNoise.hlsl"
+
 Buffer<float4> gRandomConeBuffer : register(t32);
 Buffer<float4> gRandomSphereBuffer : register(t33);
 
@@ -59,9 +61,11 @@ float RandomMinMax(float min, float max) // Min과 Max 사이의 값 반환
 /////////////////////////////////////////////////////////////////////////////////////////////////
 VS_PARTICLE_INPUT OutputParticleToStream(VS_PARTICLE_INPUT input, inout PointStream<VS_PARTICLE_INPUT> output)
 {
+	//input.velocity += CalculrateCulrNoise(input.position).xyz;
 	input.position += gf3Gravity * input.velocity * gfElapsedTime;
 	//input.velocity += gf3Gravity * gfElapsedTime;
 	//input.velocity += float3(0.0f, -9.8f*60, 0.0f) * gfElapsedTime;
+	//input.velocity += CalculrateCulrNoise(input.position).xyz;
 	input.lifetime -= gfElapsedTime;
 	return input;
 }

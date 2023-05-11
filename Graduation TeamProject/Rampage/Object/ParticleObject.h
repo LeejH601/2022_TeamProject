@@ -10,6 +10,18 @@
 
 class CParticleShader;
 
+struct CB_CURLNOISE_INFO
+{
+	float Dt;
+	float Time;
+	float FieldSpeed;
+	float NoiseStrength;
+	XMFLOAT3 FieldMainDirection;
+	float ProgressionRate;
+	XMFLOAT3 SpherePosition;
+	float LengthScale;
+	float SphereRadius;
+};
 
 class CParticleObject : public CGameObject
 {
@@ -69,6 +81,9 @@ protected:
 protected:
 	ComPtr<ID3D12Resource>	m_pd3dcbFrameworkInfo = NULL;
 	CB_FRAMEWORK_INFO* m_pcbMappedFrameworkInfo = NULL;
+
+	ComPtr<ID3D12Resource>	m_pd3dcbCurlNoiseInfo = NULL;
+	CB_CURLNOISE_INFO* m_pcbMappedCurlNoiseInfo = NULL;
 };
 
 class CSmokeParticleObject : public CParticleObject

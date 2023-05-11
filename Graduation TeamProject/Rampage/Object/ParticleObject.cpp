@@ -38,6 +38,11 @@ void CParticleObject::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12Grap
 
 	m_pd3dcbFrameworkInfo->Map(0, NULL, (void**)&m_pcbMappedFrameworkInfo);
 
+
+	ncbElementBytes = ((sizeof(CB_CURLNOISE_INFO) + 255) & ~255); //256의 배수
+	m_pd3dcbCurlNoiseInfo = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, ncbElementBytes, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER | D3D12_RESOURCE_STATE_GENERIC_READ, NULL);
+
+	m_pd3dcbCurlNoiseInfo->Map(0, NULL, (void**)&m_pcbMappedCurlNoiseInfo);
 }
 
 void CParticleObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList, float fCurrentTime, float fElapsedTime)
@@ -57,6 +62,20 @@ void CParticleObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dComma
 
 	D3D12_GPU_VIRTUAL_ADDRESS d3dGpuVirtualAddress = m_pd3dcbFrameworkInfo->GetGPUVirtualAddress();
 	pd3dCommandList->SetGraphicsRootConstantBufferView(11, d3dGpuVirtualAddress);
+
+
+	m_pcbMappedCurlNoiseInfo->Dt = fElapsedTime;
+	m_pcbMappedCurlNoiseInfo->Time = fCurrentTime;
+	m_pcbMappedCurlNoiseInfo->FieldSpeed = 10.0f;
+	m_pcbMappedCurlNoiseInfo->NoiseStrength = 1.0f;
+	m_pcbMappedCurlNoiseInfo->ProgressionRate = 10.0f;
+	m_pcbMappedCurlNoiseInfo->LengthScale = 1.0f;
+	m_pcbMappedCurlNoiseInfo->FieldMainDirection = XMFLOAT3(0.0f, 1.0f, 0.0f); // 해당 축 방향으로 전진성을 가지는 편. noiseStrength가 낮을 때 이 방향으로 파티클이 나아가는 것처럼 만들어짐.
+	m_pcbMappedCurlNoiseInfo->SpherePosition = XMFLOAT3(0.0f, 0.0f, 0.0f);
+	m_pcbMappedCurlNoiseInfo->SphereRadius = 5.0f;
+
+	d3dGpuVirtualAddress = m_pd3dcbCurlNoiseInfo->GetGPUVirtualAddress();
+	pd3dCommandList->SetGraphicsRootConstantBufferView(3, d3dGpuVirtualAddress);
 }
 
 void CParticleObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)

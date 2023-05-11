@@ -411,6 +411,7 @@ void CSimulatorScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 	m_pTextureManager->LoadBillBoardTexture(pd3dDevice, pd3dCommandList, L"Image/Explode_8x8.dds", m_pBillBoardObjectShader.get(), 8, 8);
 	m_pTextureManager->LoadBillBoardTexture(pd3dDevice, pd3dCommandList, L"Image/Fire_Effect.dds", m_pBillBoardObjectShader.get(), 5, 6);
 	m_pTextureManager->LoadBillBoardTexture(pd3dDevice, pd3dCommandList, L"Image/Circle1.dds", m_pBillBoardObjectShader.get(), 1, 1);
+	m_pTextureManager->SetPerlinNoiseTexture(pd3dDevice, pd3dCommandList, L"test", m_pBillBoardObjectShader.get());
 	m_pTextureManager->LoadBillBoardTexture(pd3dDevice, pd3dCommandList, L"ParticleImage/T_Glow_Impact_1.dds", m_pBillBoardObjectShader.get(), 1, 1);
 	m_pTextureManager->LoadBillBoardTexture(pd3dDevice, pd3dCommandList, L"ParticleImage/T_Glow_Impact_2.dds", m_pBillBoardObjectShader.get(), 1, 1);
 	m_pTextureManager->LoadBillBoardTexture(pd3dDevice, pd3dCommandList, L"ParticleImage/T_Glow_Smoky.dds", m_pBillBoardObjectShader.get(), 1, 1);

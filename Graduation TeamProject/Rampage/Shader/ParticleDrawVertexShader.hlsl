@@ -1,3 +1,5 @@
+#include "CurlNoise.hlsl"
+
 struct VS_PARTICLE_INPUT
 {
 	float3 position : POSITION;
@@ -43,6 +45,7 @@ VS_PARTICLE_DRAW_OUTPUT VSParticleDraw(VS_PARTICLE_INPUT input)
 
 	output.position = input.position;
 	output.velocity = input.velocity;
+	//output.velocity += CalculrateCulrNoise(input.position);
 	output.size = gfSize;
 	output.alpha = 1.f;
 
