@@ -345,6 +345,13 @@ class ParticleComponent : public IMessageListener {
     float m_fLifeTime = 0.2f;
     float m_fSpeed = 150.f;
     XMFLOAT3 m_xmf3Color = XMFLOAT3(1.f, 1.f, 1.f);
+
+	float m_fFieldSpeed;
+	float m_fNoiseStrength;
+	XMFLOAT3 m_xmf3FieldMainDirection;
+	float m_fProgressionRate;
+	float m_fLengthScale;
+
     std::shared_ptr<CTexture> m_pTexture;
 public:
     ParticleComponent();
@@ -360,6 +367,12 @@ public:
     float& GetLifeTime() { return m_fLifeTime; }
     float& GetSpeed() { return m_fSpeed; }
     XMFLOAT3& GetColor() { return m_xmf3Color; }
+	float& GetFieldSpeed() { return m_fFieldSpeed; };
+	float& GetNoiseStrength() { return m_fNoiseStrength; };
+	float& GetProgressionRate() { return m_fProgressionRate; };
+	float& GetLengthScale() { return m_fLengthScale; };
+	XMFLOAT3& GetFieldMainDirection() { return m_xmf3FieldMainDirection; };
+
     std::shared_ptr<CTexture>& GetTexture() { return m_pTexture; }
 
     void SetEmitParticleNumber(int iEmitParticleNumber) { m_nEmitParticleNumber = iEmitParticleNumber; }
@@ -377,6 +390,11 @@ public:
     void SetColorG(float g) { m_xmf3Color.y = g; }
     void SetColorB(float b) { m_xmf3Color.z = b; }
     void SetParticleTexture(std::shared_ptr<CTexture> pTexture) { m_pTexture = pTexture; }
+	void SetFieldSpeed(float fFieldSpeed) { m_fFieldSpeed = fFieldSpeed; };
+	void SetNoiseStrength(float fNoiseStrength) { m_fNoiseStrength = fNoiseStrength; };
+	void SetProgressionRate(float fProgressionRate) { m_fProgressionRate = fProgressionRate; };
+	void SetLengthScale(float fLengthScale) { m_fLengthScale = fLengthScale; };
+	void SetFieldMainDirection(XMFLOAT3 xmf3FieldMainDirection) { m_xmf3FieldMainDirection = xmf3FieldMainDirection; };
 
 	virtual void HandleMessage(const Message& message, const ParticleCompParams& params);
 };

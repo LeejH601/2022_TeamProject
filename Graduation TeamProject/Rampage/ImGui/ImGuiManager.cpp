@@ -1359,6 +1359,26 @@ void CImGuiManager::ShowParticleManager(CState<CPlayer>* pCurrentAnimation)
 	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
 	ImGui::ColorEdit3(U8STR("»ö»ó"), (float*)&pParticleComponent->GetColor()); // Edit 3 floats representing a color
 
+	ImGui::SetNextItemWidth(190.f);
+	if (ImGui::DragFloat("FieldSpeed##ParticleEffect", &pParticleComponent->GetFieldSpeed(), DRAG_FLOAT_UNIT, 0.0f, FLT_MAX, "%.2f", 0))
+		pParticleComponent->GetFieldSpeed() = std::clamp(pParticleComponent->GetFieldSpeed(), FLT_MIN, FLT_MAX);
+
+	ImGui::SetNextItemWidth(190.f);
+	if (ImGui::DragFloat("NoiseStrength##ParticleEffect", &pParticleComponent->GetNoiseStrength(), DRAG_FLOAT_UNIT, 0.0f, FLT_MAX, "%.2f", 0))
+		pParticleComponent->GetNoiseStrength() = std::clamp(pParticleComponent->GetNoiseStrength(), FLT_MIN, FLT_MAX);
+
+	ImGui::SetNextItemWidth(190.f);
+	if (ImGui::DragFloat("ProgressionRate##ParticleEffect", &pParticleComponent->GetProgressionRate(), DRAG_FLOAT_UNIT, 0.0f, FLT_MAX, "%.2f", 0))
+		pParticleComponent->GetProgressionRate() = std::clamp(pParticleComponent->GetProgressionRate(), FLT_MIN, FLT_MAX);
+
+	ImGui::SetNextItemWidth(190.f);
+	if (ImGui::DragFloat("LengthScale##ParticleEffect", &pParticleComponent->GetLengthScale(), DRAG_FLOAT_UNIT, 0.0f, FLT_MAX, "%.2f", 0))
+		pParticleComponent->GetLengthScale() = std::clamp(pParticleComponent->GetLengthScale(), FLT_MIN, FLT_MAX);
+
+	ImGui::SetNextItemWidth(190.f);
+	float* DirectionData = (float*)(&pParticleComponent->GetFieldMainDirection());
+	ImGui::InputFloat3("FieldMainDirection##ParticleEffect", DirectionData, "%.2f", 0);
+
 	ImGui::End();
 }
 void CImGuiManager::ShowTrailManager(CState<CPlayer>* pCurrentAnimation)

@@ -17,6 +17,12 @@ CParticleObject::CParticleObject(std::shared_ptr<CTexture> pSpriteTexture, ID3D1
 	SetMesh(pParticleMesh);
 
 	m_iParticleType = iParticleType;
+
+	m_fFieldSpeed = 10.0f;
+	m_fNoiseStrength = 1.0f;;
+	m_xmf3FieldMainDirection = XMFLOAT3(0.0f, 1.0f, 0.0f);
+	m_fProgressionRate = 10.0f;
+	m_fLengthScale = 1.0f;
 	
 	SetTexture(pSpriteTexture);
 
@@ -66,11 +72,11 @@ void CParticleObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dComma
 
 	m_pcbMappedCurlNoiseInfo->Dt = fElapsedTime;
 	m_pcbMappedCurlNoiseInfo->Time = fCurrentTime;
-	m_pcbMappedCurlNoiseInfo->FieldSpeed = 10.0f;
-	m_pcbMappedCurlNoiseInfo->NoiseStrength = 1.0f;
-	m_pcbMappedCurlNoiseInfo->ProgressionRate = 10.0f;
-	m_pcbMappedCurlNoiseInfo->LengthScale = 1.0f;
-	m_pcbMappedCurlNoiseInfo->FieldMainDirection = XMFLOAT3(0.0f, 1.0f, 0.0f); // 해당 축 방향으로 전진성을 가지는 편. noiseStrength가 낮을 때 이 방향으로 파티클이 나아가는 것처럼 만들어짐.
+	m_pcbMappedCurlNoiseInfo->FieldSpeed = m_fFieldSpeed;
+	m_pcbMappedCurlNoiseInfo->NoiseStrength = m_fNoiseStrength;
+	m_pcbMappedCurlNoiseInfo->ProgressionRate = m_fProgressionRate;
+	m_pcbMappedCurlNoiseInfo->LengthScale = m_fLengthScale;
+	m_pcbMappedCurlNoiseInfo->FieldMainDirection = m_xmf3FieldMainDirection; // 해당 축 방향으로 전진성을 가지는 편. noiseStrength가 낮을 때 이 방향으로 파티클이 나아가는 것처럼 만들어짐.
 	m_pcbMappedCurlNoiseInfo->SpherePosition = XMFLOAT3(0.0f, 0.0f, 0.0f);
 	m_pcbMappedCurlNoiseInfo->SphereRadius = 5.0f;
 

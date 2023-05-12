@@ -59,6 +59,11 @@ public:
 	void SetParticleType(int iParticleType);
 	int	 GetParticleType();
 	void SetEmit(bool bEmit);
+	void SetFieldSpeed(float fFieldSpeed) { m_fFieldSpeed = fFieldSpeed; };
+	void SetNoiseStrength(float fNoiseStrength) { m_fNoiseStrength = fNoiseStrength; };
+	void SetProgressionRate(float fProgressionRate) { m_fProgressionRate = fProgressionRate; };
+	void SetLengthScale(float fLengthScale) { m_fLengthScale = fLengthScale; };
+	void SetFieldMainDirection(XMFLOAT3 xmf3FieldMainDirection) { m_xmf3FieldMainDirection = xmf3FieldMainDirection; };
 
 	void SetDirection(XMFLOAT3 xmf3Direction);
 	XMFLOAT3 GetDirection();
@@ -78,6 +83,13 @@ protected:
 	XMFLOAT3	m_xmf3Direction = XMFLOAT3(1.f, 1.f, 1.f);
 
 	int			m_nVertices = 0;
+
+	float m_fFieldSpeed;
+	float m_fNoiseStrength;
+	XMFLOAT3 m_xmf3FieldMainDirection;
+	float m_fProgressionRate;
+	float m_fLengthScale;
+
 protected:
 	ComPtr<ID3D12Resource>	m_pd3dcbFrameworkInfo = NULL;
 	CB_FRAMEWORK_INFO* m_pcbMappedFrameworkInfo = NULL;
