@@ -581,6 +581,136 @@ void CBoundingBoxObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, bool
 		m_pMesh->Render(pd3dCommandList, 0);
 	}
 }
+
+void CMapObject::LoadObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, FILE* pInFile)
+{
+	char ModelpstrToken[64] = { '\0' };
+	int nSkinnedMeshes = 0;
+
+	for (; ; )
+	{
+		if (::ReadStringFromFile(pInFile, ModelpstrToken))
+		{
+			if (!strcmp(ModelpstrToken, "<Hierarchy>:"))
+			{
+				LoadFrameHierarchyFromFile(pd3dDevice, pd3dCommandList, NULL, pInFile, &nSkinnedMeshes);
+				::ReadStringFromFile(pInFile, ModelpstrToken); //"</Hierarchy>"
+			}
+		}
+		else
+		{
+			break;
+		}
+	}
+}
+
+void CMapObject::AddPhysicsScene(const XMFLOAT4X4& xmfWorld)
+{
+	physx::PxTolerancesScale scale = Locator.GetPxPhysics()->getTolerancesScale();
+	physx::PxCookingParams params(scale);
+
+	params.meshPreprocessParams |= physx::PxMeshPreprocessingFlag::eDISABLE_CLEAN_MESH;
+
+	physx::PxTriangleMeshDesc meshDesc;
+	std::vector<XMFLOAT3> vertexs = m_pMesh->GetVertexs();
+	std::vector<XMFLOAT3> world_vertexs; world_vertexs.resize(vertexs.size());
+	XMMATRIX trans = XMLoadFloat4x4(&m_xmf4x4Transform);
+
+	XMVECTOR scaling;
+	XMVECTOR rotation;
+	XMVECTOR translation;
+	XMMatrixDecompose(&scaling, &rotation, &translation, XMLoadFloat4x4(&m_xmf4x4Transform));
+	XMMATRIX rotationMatrix = XMMatrixRotationQuaternion(rotation);
+	XMMATRIX scalingMatrix = XMMatrixScalingFromVector(scaling);
+	XMMATRIX transformMatrix = scalingMatrix * rotationMatrix;
+
+	trans.r[3] = XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f);
+	int index = 0;
+	for (XMFLOAT3 pos : vertexs) {
+		XMFLOAT3 point = Vector3::TransformCoord(pos, transformMatrix);
+		world_vertexs[index++] = point;
+	}
+	meshDesc.points.count = vertexs.size();
+	meshDesc.points.stride = sizeof(physx::PxVec3);
+	meshDesc.points.data = world_vertexs.data();
+
+	std::vector<UINT> Indices = m_pMesh->GetIndices();
+	meshDesc.triangles.count = Indices.size() / 3;
+	meshDesc.triangles.stride = 3 * sizeof(physx::PxU32);
+	meshDesc.triangles.data = Indices.data();
+
+
+	physx::PxTriangleMesh* aTriangleMesh = PxCreateTriangleMesh(params, meshDesc, Locator.GetPxPhysics()->getPhysicsInsertionCallback());
+
+	physx::PxTransform transform = physx::PxTransform(xmfWorld._41, xmfWorld._42, xmfWorld._43);
+	transform.q.normalize();
+	physx::PxMaterial* material = Locator.GetPxPhysics()->createMaterial(0.5, 0.5, 0.5);
+
+	physx::PxRigidStatic* actor = physx::PxCreateStatic(*Locator.GetPxPhysics(), transform, physx::PxTriangleMeshGeometry(aTriangleMesh), *material);
+	Locator.GetPxScene()->addActor(*actor);
+}
+
+void CMapObject::UpdateTransform(XMFLOAT4X4* pxmf4x4Parent)
+{
+	CGameObject::UpdateTransform(pxmf4x4Parent);
+
+	if (pBoundingBoxMesh)
+		pBoundingBoxMesh->SetWorld(m_xmf4x4World);
+}
+
+void CMapObject::PrepareBoundingBox(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+{
+#ifdef RENDER_BOUNDING_BOX
+	BoundingBox aambb = CreateAAMBB(m_pMesh->GetVertexs());
+	pBoundingBoxMesh = CBoundingBoxShader::GetInst()->AddBoundingObject(pd3dDevice, pd3dCommandList, this, aambb.Center, aambb.Extents);
+#endif // RENDER_BOUNDING_BOX
+}
+
+BoundingBox CMapObject::CreateAAMBB(std::vector<XMFLOAT3> xmf3Positions)
+{
+	BoundingBox bbox;
+
+	switch (m_Objtype)
+	{
+	case MAP_OBJ_TYPE::ROCK:
+		bbox.Center = m_pMesh->GetBoundingCenter();
+		bbox.Extents = m_pMesh->GetBoundingExtent();
+		break;
+	case MAP_OBJ_TYPE::TREE:
+		{
+			BoundingBox tmpbox;
+			XMFLOAT3 minCoord = minCoord = { FLT_MAX, FLT_MAX, FLT_MAX };
+			XMFLOAT3 maxCoord = maxCoord = { FLT_MIN, FLT_MIN, FLT_MIN };
+
+			float centerY = m_pMesh->GetBoundingCenter().y;
+
+			for (auto& pos : xmf3Positions)
+			{
+				if (pos.y < centerY * 0.66f && pos.y > centerY * 0.11f)
+				{
+					minCoord.x = min(minCoord.x, pos.x);
+					minCoord.y = min(minCoord.y, pos.y);
+					minCoord.z = min(minCoord.z, pos.z);
+
+					maxCoord.x = max(maxCoord.x, pos.x);
+					maxCoord.y = max(maxCoord.y, pos.y);
+					maxCoord.z = max(maxCoord.z, pos.z);
+				}
+			}
+
+			tmpbox.Extents = XMFLOAT3{ (maxCoord.x - minCoord.x) * 0.5f, (maxCoord.y - minCoord.y) * 0.5f, (maxCoord.z - minCoord.z) * 0.5f };
+			tmpbox.Center = XMFLOAT3{ minCoord.x + tmpbox.Extents.x, minCoord.y + tmpbox.Extents.y, minCoord.z + tmpbox.Extents.z };
+
+			bbox.Center = XMFLOAT3{ tmpbox.Center.x, m_pMesh->GetBoundingCenter().y, tmpbox.Center.z };
+			bbox.Extents = XMFLOAT3{ tmpbox.Extents.x , m_pMesh->GetBoundingExtent().y, tmpbox.Extents.z };
+		}
+		break;
+	}
+
+	
+	return bbox;
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 CAngrybotObject::CAngrybotObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks)

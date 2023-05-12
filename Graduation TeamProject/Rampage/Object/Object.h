@@ -1,5 +1,6 @@
 #pragma once
 #include "..\Global\stdafx.h"
+#include "..\Global\Global.h"
 #include "..\Global\MessageDispatcher.h"
 #include "Animation.h"
 
@@ -162,8 +163,28 @@ public:
 
 	void PrepareRender();
 	void SetParent(CGameObject* pObject) { m_pParent = pObject; }
+
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, bool b_UseTexture, CCamera* pCamera = NULL);
 };
+
+class CMapObject : public CGameObject
+{
+private:
+	MAP_OBJ_TYPE m_Objtype;
+	CGameObject* pBoundingBoxMesh;
+public:
+	CMapObject() { }
+	virtual ~CMapObject() { }
+
+	void SetObjType(MAP_OBJ_TYPE objtype) { m_Objtype = objtype; }
+	void LoadObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, FILE* pInFile);
+	void AddPhysicsScene(const XMFLOAT4X4& xmfWorld);
+	BoundingBox CreateAAMBB(std::vector<XMFLOAT3> xmf3Positions);
+
+	virtual void UpdateTransform(XMFLOAT4X4* pxmf4x4Parent = NULL);
+	virtual void PrepareBoundingBox(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+};
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 class CAngrybotObject : public CGameObject

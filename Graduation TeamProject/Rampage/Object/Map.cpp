@@ -81,10 +81,7 @@ void CMap::LoadSceneFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 			::fopen_s(&objFile, objPath.data(), "rb");
 			::rewind(objFile);
 
-			std::unique_ptr<CGameObject> pObject = std::make_unique<CGameObject>();
-
 			nRead = (UINT)::fread(&buffer, sizeof(float), 16, pInFile);
-
 
 			XMFLOAT4X4 xmfWorld = {
 				buffer[0],buffer[1],buffer[2],buffer[3],
@@ -92,63 +89,30 @@ void CMap::LoadSceneFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 				buffer[8],buffer[9],buffer[10],buffer[11],
 				buffer[12],buffer[13],buffer[14],buffer[15]
 			};
+			
+			int nSkinnedMeshes;
+			std::unique_ptr<CMapObject> pMapObject = std::make_unique<CMapObject>();
 
-			CLoadedModelInfo* rootObj = CModelManager::GetInst()->LoadGeometryFromFileOfScene(pd3dDevice, pd3dCommandList, objFile);
-			rootObj->m_pModelRootObject->m_xmf4x4Transform = xmfWorld;
+			pMapObject->LoadObject(pd3dDevice, pd3dCommandList, objFile);
+
+			pMapObject->m_xmf4x4Transform = xmfWorld;
 
 			std::string name{ pstrToken };
 			if (name.find("Tree") != std::string::npos || name.find("Rock") != std::string::npos)
 			{
-				physx::PxTolerancesScale scale = Locator.GetPxPhysics()->getTolerancesScale();
-				physx::PxCookingParams params(scale);
-
-				params.meshPreprocessParams |= physx::PxMeshPreprocessingFlag::eDISABLE_CLEAN_MESH;
-
-				physx::PxTriangleMeshDesc meshDesc;
-				std::vector<XMFLOAT3> vertexs = rootObj->m_pModelRootObject->m_pMesh->GetVertexs();
-				std::vector<XMFLOAT3> world_vertexs; world_vertexs.resize(vertexs.size());
-				XMMATRIX trans = XMLoadFloat4x4(&rootObj->m_pModelRootObject->m_xmf4x4Transform);
-
-				XMVECTOR scaling;
-				XMVECTOR rotation;
-				XMVECTOR translation;
-				XMMatrixDecompose(&scaling, &rotation, &translation, XMLoadFloat4x4(&rootObj->m_pModelRootObject->m_xmf4x4Transform));
-				XMMATRIX rotationMatrix = XMMatrixRotationQuaternion(rotation);
-				XMMATRIX scalingMatrix = XMMatrixScalingFromVector(scaling);
-				XMMATRIX transformMatrix = scalingMatrix * rotationMatrix;
-
-				trans.r[3] = XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f);
-				int index = 0;
-				for (XMFLOAT3 pos : vertexs) {
-					XMFLOAT3 point = Vector3::TransformCoord(pos, transformMatrix);
-					world_vertexs[index++] = point;
+				if (name.find("Tree") != std::string::npos)
+				{
+					pMapObject->SetObjType(MAP_OBJ_TYPE::TREE);
+					pMapObject->PrepareBoundingBox(pd3dDevice, pd3dCommandList);
+					pMapObject->AddPhysicsScene(xmfWorld);
 				}
-				meshDesc.points.count = vertexs.size();
-				meshDesc.points.stride = sizeof(physx::PxVec3);
-				meshDesc.points.data = world_vertexs.data();
-
-				std::vector<UINT> Indices = rootObj->m_pModelRootObject->m_pMesh->GetIndices();
-				meshDesc.triangles.count = Indices.size() / 3;
-				meshDesc.triangles.stride = 3 * sizeof(physx::PxU32);
-				meshDesc.triangles.data = Indices.data();
-
-
-				physx::PxTriangleMesh* aTriangleMesh = PxCreateTriangleMesh(params, meshDesc, Locator.GetPxPhysics()->getPhysicsInsertionCallback());
-
-				physx::PxTransform transform = physx::PxTransform(buffer[12], buffer[13], buffer[14]);
-				transform.q.normalize();
-				physx::PxMaterial* material = Locator.GetPxPhysics()->createMaterial(0.5, 0.5, 0.5);
-
-				physx::PxRigidStatic* actor = physx::PxCreateStatic(*Locator.GetPxPhysics(), transform, physx::PxTriangleMeshGeometry(aTriangleMesh), *material);
-				Locator.GetPxScene()->addActor(*actor);
-
+				else
+					pMapObject->SetObjType(MAP_OBJ_TYPE::ROCK);
 			}
 
-			pObject->SetChild(rootObj->m_pModelRootObject, true);
-			pObject->UpdateTransform(NULL);
-
-			//if (!objPath.contains("Rock"))
-			m_pMapObjects.push_back(std::move(pObject));
+			pMapObject->UpdateTransform(NULL);
+			
+			m_pMapObjects.push_back(std::move(pMapObject));
 
 			fclose(objFile);
 		}
