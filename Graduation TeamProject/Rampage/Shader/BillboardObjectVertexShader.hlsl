@@ -20,7 +20,6 @@ cbuffer cbFrameworkInfo : register(b7)
 	bool		bEmit : packoffset(c3.w);
 };
 
-Texture2D gtxtTexture : register(t0);
 SamplerState gSamplerState : register(s0);
 
 struct VS_OUT
@@ -28,6 +27,7 @@ struct VS_OUT
 	float2 sizeW : SIZE;
 	float lifetime : LIFETIME;
 	uint  useBillBoard : USEBILLBOARD; // BILLBOARD 사용 유무
+	//int textureIndex : TEXTUREINDEX;
 };
 
 struct VS_IN
@@ -35,16 +35,16 @@ struct VS_IN
 	float2 sizeW : SIZE;
 	float lifetime : LIFETIME;
 	uint  useBillBoard : USEBILLBOARD; // BILLBOARD 사용 유무
+	//int textureIndex : TEXTUREINDEX;
 };
 
 VS_OUT Billboard_VS(VS_IN input)
 {
 	VS_OUT output;
-	//output.centerW = input.posW;
 	output.sizeW = gfSize;
 	output.useBillBoard = input.useBillBoard;
 	input.lifetime = gfLifeTime; // BillBoard가 아닐경우에도 사용
-	
+	//output.textureIndex = (uint)(gmtxTexture._11); // 0~100까지 쓰니까 
 	output.lifetime = input.lifetime;
 	return output;
 }

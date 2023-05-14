@@ -38,6 +38,7 @@ struct VS_OUT
 	float2 sizeW : SIZE;
 	float lifetime : LIFETIME;
 	uint  useBillBoard : USEBILLBOARD; // BILLBOARD 사용 유무
+	//int textureIndex : TEXTUREINDEX;
 };
 
 struct GS_OUT
@@ -47,7 +48,9 @@ struct GS_OUT
 	float3 normalW : NORMAL;
 	float2 uv : TEXCOORD;
 	uint primID : SV_PrimitiveID;
+	//int textureIndex : TEXTUREINDEX;
 };
+
 
 [maxvertexcount(4)]
 void GS(point VS_OUT input[1], uint primID : SV_PrimitiveID, inout TriangleStream<GS_OUT> outStream)
@@ -59,7 +62,7 @@ void GS(point VS_OUT input[1], uint primID : SV_PrimitiveID, inout TriangleStrea
 	float fHalfW = input[0].sizeW.x * 0.5f;
 	float fHalfH = input[0].sizeW.y * 0.5f;
 	float4 pVertices[4];
-
+	GS_OUT output;
 	if (!input[0].useBillBoard)
 	{
 		float2 pUVs[4] = { float2(-0.5f, 0.5f), float2(-0.5f, -0.5f), float2(0.5f, 0.5f) , float2(0.5f, -0.5f) };
@@ -68,8 +71,6 @@ void GS(point VS_OUT input[1], uint primID : SV_PrimitiveID, inout TriangleStrea
 		pVertices[1] = float4(centerW.x + fHalfW, centerW.y, centerW.z + fHalfH, 1.0f); 
 		pVertices[2] = float4(centerW.x - fHalfW, centerW.y, centerW.z - fHalfH, 1.0f);
 		pVertices[3] = float4(centerW.x - fHalfW, centerW.y, centerW.z + fHalfH, 1.0f);
-
-		GS_OUT output;
 		for (int i = 0; i < 4; i++)
 		{
 			output.posW = pVertices[i].xyz;
@@ -90,9 +91,6 @@ void GS(point VS_OUT input[1], uint primID : SV_PrimitiveID, inout TriangleStrea
 		pVertices[1] = float4(centerW + fHalfW * vRight + fHalfH * vUp, 1.0f);
 		pVertices[2] = float4(centerW - fHalfW * vRight - fHalfH * vUp, 1.0f);
 		pVertices[3] = float4(centerW - fHalfW * vRight + fHalfH * vUp, 1.0f);
-
-
-		GS_OUT output;
 		for (int i = 0; i < 4; i++)
 		{
 			output.posW = pVertices[i].xyz;
@@ -106,37 +104,3 @@ void GS(point VS_OUT input[1], uint primID : SV_PrimitiveID, inout TriangleStrea
 	}
 
 }
-
-//void GS(point VS_OUT input[1], uint primID : SV_PrimitiveID, inout TriangleStream<GS_OUT> outStream)
-//{
-//	float3 centerW = gmtxGameObject._41_42_43;
-//	float3 vUp = float3(0.f, 1.0f, 0.0f);
-//	float3 vLook = gf3CameraPosition.xyz - centerW;
-//	if (!input[0].useBillBoard)
-//	{
-//		vLook = float3(0.f, 0.f, 1.0f);
-//		vUp = float3(0.f, 0.f, 1.f);
-//	}
-//	vLook = normalize(vLook);
-//	float3 vRight = cross(float3(0.f, 1.0f, 0.0f), vLook);
-//
-//	float fHalfW = input[0].sizeW.x * 0.5f;
-//	float fHalfH = input[0].sizeW.y * 0.5f;
-//	float4 pVertices[4];
-//	pVertices[0] = float4(centerW + fHalfW * vRight - fHalfH * vUp, 1.0f);
-//	pVertices[1] = float4(centerW + fHalfW * vRight + fHalfH * vUp, 1.0f);
-//	pVertices[2] = float4(centerW - fHalfW * vRight - fHalfH * vUp, 1.0f);
-//	pVertices[3] = float4(centerW - fHalfW * vRight + fHalfH * vUp, 1.0f);
-//
-//	float2 pUVs[4] = { float2(0.f, 1.f), float2(0.f, 0.f), float2(1.f, 1.f), float2(1.f, 0.f) };
-//	GS_OUT output;
-//	for (int i = 0; i < 4; i++)
-//	{
-//		output.posW = pVertices[i].xyz;
-//		output.posH = mul(pVertices[i], mul(gmtxView, gmtxProjection));
-//		output.normalW = vLook;
-//		output.uv = mul(float3(pUVs[i], 1.0f), (float3x3)(gmtxGameObject)).xy;
-//		output.primID = primID;
-//		outStream.Append(output);
-//	}
-//}

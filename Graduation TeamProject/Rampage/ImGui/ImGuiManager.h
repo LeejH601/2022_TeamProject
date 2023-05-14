@@ -77,7 +77,7 @@ public:
 	~CImGuiManager();
 	void CreateSrvDescriptorHeaps(ID3D12Device* pd3dDevice);
 	void CreateShaderResourceViews(ID3D12Device* pd3dDevice, CTexture* pTexture, UINT nDescriptorHeapIndex);
-	void SetPreviewTexture(ID3D12Device* pd3dDevice, CTexture* pTexture, UINT index, PREVIEW_TEXTURE_TYPE type);
+	void SetPreviewTexture(ID3D12Device* pd3dDevice, CTexture* pTexture, UINT textureIndex, UINT index, PREVIEW_TEXTURE_TYPE type);
 	void SetShaderResourceViews(CTexture* pTexture, UINT index);
 
 	D3D12_CPU_DESCRIPTOR_HANDLE GetRtvCPUDescriptorHandle() {

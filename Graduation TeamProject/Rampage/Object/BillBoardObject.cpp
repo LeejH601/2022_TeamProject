@@ -73,6 +73,15 @@ void CBillBoardObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dComm
 
 	D3D12_GPU_VIRTUAL_ADDRESS d3dGpuVirtualAddress = m_pd3dcbFrameworkInfo->GetGPUVirtualAddress();
 	pd3dCommandList->SetGraphicsRootConstantBufferView(11, d3dGpuVirtualAddress);
+
+	int m_nType = 100;
+	pd3dCommandList->SetGraphicsRoot32BitConstants(0, 1, &m_nType, 32); // 16
+
+	m_xmf4x4Texture._11 = m_iTextureIndex;
+	XMFLOAT4X4 xmfTexture;
+	XMStoreFloat4x4(&xmfTexture, XMMatrixTranspose(XMLoadFloat4x4(&m_xmf4x4Texture)));
+	pd3dCommandList->SetGraphicsRoot32BitConstants(0, 16, &m_xmf4x4Texture, 16);
+
 }
 
 
@@ -87,41 +96,40 @@ CMultiSpriteObject::~CMultiSpriteObject()
 
 void CMultiSpriteObject::AnimateRowColumn(float fTimeElapsed)
 {
-	if (!m_ppMaterials.empty() && m_ppMaterials[0]->GetTexture())
+	if (fTimeElapsed >= 0.0f)
 	{
-		int m_nRows = m_ppMaterials[0]->GetTexture()->GetRow(0);
-		int m_nCols = m_ppMaterials[0]->GetTexture()->GetColumn(0);
-		
-		if (fTimeElapsed >= 0.0f)
-		{
-			m_fAccumulatedTime += fTimeElapsed;
+		m_fAccumulatedTime += fTimeElapsed;
 
-			float fraction = std::fmodf(m_fAccumulatedTime/ m_fLifeTime, 1.0f);
-			interval = 1.0f / (m_nRows * m_nCols);
+		float fraction = std::fmodf(m_fAccumulatedTime/ m_fLifeTime, 1.0f);
+		interval = 1.0f / (m_iTotalRow * m_iTotalCol);
 
-			m_nCol = (int)(fraction / (interval * m_nRows));
-			float remainvalue = (fraction / (interval * m_nRows)) - m_nCol;
-			m_nRow = (int)(remainvalue * m_nRows);
+		m_iCurrentCol = (int)(fraction / (interval * m_iTotalRow));
+		float remainvalue = (fraction / (interval * m_iTotalRow)) - m_iCurrentCol;
+		m_iCurrentRow = (int)(remainvalue * m_iTotalRow);
 
-			if(m_fAccumulatedTime > m_fLifeTime)
-				m_bEnable = false;
-		}
-		m_xmf4x4World._11 = 1.0f / float(m_nRows);
-		m_xmf4x4World._22 = 1.0f / float(m_nCols);
-		m_xmf4x4World._31 = float(m_nRow) / float(m_nRows);
-		m_xmf4x4World._32 = float(m_nCol) / float(m_nCols);
+		if(m_fAccumulatedTime > m_fLifeTime)
+			m_bEnable = false;
 	}
-	
+	m_xmf4x4World._11 = 1.0f / float(m_iTotalRow);
+	m_xmf4x4World._22 = 1.0f / float(m_iTotalCol);
+	m_xmf4x4World._31 = float(m_iCurrentRow) / float(m_iTotalRow);
+	m_xmf4x4World._32 = float(m_iCurrentCol) / float(m_iTotalCol);
 }
 
 void CMultiSpriteObject::SetEnable(bool bEnable)
 {
 	CBillBoardObject::SetEnable(bEnable);
-	m_nRow = 0;
-	m_nCol = 0;
+	m_iCurrentRow = 0;
+	m_iCurrentCol = 0;
 	m_fAccumulatedTime = 0.0f;
 }
 
+
+void CMultiSpriteObject::SetTotalRowColumn(int iTotalRow, int iTotalColumn)
+{
+	m_iTotalRow = iTotalRow;
+	m_iTotalCol = iTotalColumn;
+}
 
 void CMultiSpriteObject::SetColor(XMFLOAT3 fColor)
 {
@@ -199,8 +207,7 @@ void CMultiSpriteObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, bool
 				
 			}
 		}
-		int m_nType = 100;
-		pd3dCommandList->SetGraphicsRoot32BitConstants(0, 1, &m_nType, 32);
+		
 		// 여기서 메쉬의 렌더를 한다.
 		m_pMesh->OnPreRender(pd3dCommandList);
 		m_pMesh->Render(pd3dCommandList, 0);

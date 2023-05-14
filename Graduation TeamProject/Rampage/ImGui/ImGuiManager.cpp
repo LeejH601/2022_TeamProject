@@ -714,6 +714,18 @@ void DataLoader::LoadComponentSet(FILE* pInFile, CState<CPlayer>* pState)
 				{
 					pImpactComponent->SetAlpha(ReadFloatFromFile(pInFile));
 				}
+				else if (!strcmp(buf, "<Color_R>:"))
+				{
+					pImpactComponent->SetColorR(ReadFloatFromFile(pInFile));
+				}
+				else if (!strcmp(buf, "<Color_G>:"))
+				{
+					pImpactComponent->SetColorG(ReadFloatFromFile(pInFile));
+				}
+				else if (!strcmp(buf, "<Color_B>:"))
+				{
+					pImpactComponent->SetColorB(ReadFloatFromFile(pInFile));
+				}
 				else if (!strcmp(buf, "</ImpactComponent>:"))
 				{
 					break;
@@ -795,32 +807,31 @@ void CImGuiManager::CreateShaderResourceViews(ID3D12Device* pd3dDevice, CTexture
 		m_d3dSrvGPUDescriptorNextHandle.ptr += ::gnCbvSrvDescriptorIncrementSize;
 	}
 }
-void CImGuiManager::SetPreviewTexture(ID3D12Device* pd3dDevice, CTexture* pTexture, UINT index, PREVIEW_TEXTURE_TYPE type)
+void CImGuiManager::SetPreviewTexture(ID3D12Device* pd3dDevice, CTexture* pTexture, UINT textureIndex, UINT index, PREVIEW_TEXTURE_TYPE type)
 {
 	D3D12_CPU_DESCRIPTOR_HANDLE d3dSrvCPUDescriptorHandle; d3dSrvCPUDescriptorHandle.ptr = m_d3dSrvCPUDescriptorStartHandle.ptr + (::gnCbvSrvDescriptorIncrementSize * index);
 	D3D12_GPU_DESCRIPTOR_HANDLE d3dSrvGPUDescriptorHandle; d3dSrvGPUDescriptorHandle.ptr = m_d3dSrvGPUDescriptorStartHandle.ptr + (::gnCbvSrvDescriptorIncrementSize * index);
 
 	int nTextures = pTexture->GetTextures();
 	UINT nTextureType = pTexture->GetTextureType();
-	for (int i = 0; i < 1; i++)
+
+	ID3D12Resource* pShaderResource = pTexture->GetResource(textureIndex);
+	D3D12_SHADER_RESOURCE_VIEW_DESC d3dShaderResourceViewDesc = pTexture->GetShaderResourceViewDesc(textureIndex);
+	pd3dDevice->CreateShaderResourceView(pShaderResource, &d3dShaderResourceViewDesc, d3dSrvCPUDescriptorHandle);
+	d3dSrvCPUDescriptorHandle.ptr += ::gnCbvSrvDescriptorIncrementSize;
+	switch (type)
 	{
-		ID3D12Resource* pShaderResource = pTexture->GetResource(i);
-		D3D12_SHADER_RESOURCE_VIEW_DESC d3dShaderResourceViewDesc = pTexture->GetShaderResourceViewDesc(i);
-		pd3dDevice->CreateShaderResourceView(pShaderResource, &d3dShaderResourceViewDesc, d3dSrvCPUDescriptorHandle);
-		d3dSrvCPUDescriptorHandle.ptr += ::gnCbvSrvDescriptorIncrementSize;
-		switch (type)
-		{
-		case PREVIEW_TEXTURE_TYPE::TYPE_IMPACT: // impact
-			m_d3dSrvGPUDescriptorHandle_ImpactTexture = d3dSrvGPUDescriptorHandle;
-			break;
-		case PREVIEW_TEXTURE_TYPE::TYPE_PARTICLE: // particle
-			m_d3dSrvGPUDescriptorHandle_ParticleTexture = d3dSrvGPUDescriptorHandle;
-			break;
-		default:
-			break;
-		}
-		d3dSrvGPUDescriptorHandle.ptr += ::gnCbvSrvDescriptorIncrementSize;
+	case PREVIEW_TEXTURE_TYPE::TYPE_IMPACT: // impact
+		m_d3dSrvGPUDescriptorHandle_ImpactTexture = d3dSrvGPUDescriptorHandle;
+		break;
+	case PREVIEW_TEXTURE_TYPE::TYPE_PARTICLE: // particle
+		m_d3dSrvGPUDescriptorHandle_ParticleTexture = d3dSrvGPUDescriptorHandle;
+		break;
+	default:
+		break;
 	}
+	d3dSrvGPUDescriptorHandle.ptr += ::gnCbvSrvDescriptorIncrementSize;
+	
 }
 void CImGuiManager::SetShaderResourceViews(CTexture* pTexture, UINT index)
 {
@@ -1186,11 +1197,13 @@ void CImGuiManager::ShowImpactManager(CState<CPlayer>* pCurrentAnimation)
 	ImpactEffectComponent* pImpactEffectComponent = dynamic_cast<ImpactEffectComponent*>(pCurrentAnimation->GetImpactComponent());
 	ImGui::Checkbox(U8STR("켜기/끄기##ImpactEffect"), &pImpactEffectComponent->GetEnable());
 
-	std::pair<int, int> iBillBoardIndex = CSimulatorScene::GetInst()->GetTextureManager()->GetTextureListIndex(TextureType::BillBoardTexture);
-	std::shared_ptr<CTexture> pTexture = CSimulatorScene::GetInst()->GetTextureManager()->GetTexture();
+	pImpactEffectComponent->SetTextureOffset(CSimulatorScene::GetInst()->GetTextureManager()->GetTextureOffset(TextureType::BillBoardTexture));
+	UINT m_iBillboardTextureN = CSimulatorScene::GetInst()->GetTextureManager()->GetTextureListIndex(TextureType::BillBoardTexture);
+	
+	std::shared_ptr<CTexture> pTexture = CSimulatorScene::GetInst()->GetTextureManager()->GetTexture(TextureType::BillBoardTexture);
 	std::vector<const char*> items;
 	std::vector <std::string> str(100);
-	for (int i = iBillBoardIndex.first; i <= iBillBoardIndex.second; i++)
+	for (int i = 0; i < m_iBillboardTextureN; i++)
 	{
 		std::wstring wstr = pTexture->GetTextureName(i);
 		str[i].assign(wstr.begin(), wstr.end());
@@ -1200,9 +1213,12 @@ void CImGuiManager::ShowImpactManager(CState<CPlayer>* pCurrentAnimation)
 	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
 	if (ImGui::Combo(U8STR("텍스쳐##ImpactEffect"), (int*)(&pImpactEffectComponent->GetTextureIndex()), items.data(), items.size()));
 	{
+		int iTextureIndex = pImpactEffectComponent->GetTextureIndex();
+		pImpactEffectComponent->SetTotalRowColumn(pTexture->GetRow(iTextureIndex), pTexture->GetColumn(iTextureIndex));
+
 		int my_image_width = 0.2f * m_lDesktopHeight;
 		int my_image_height = 0.2f * m_lDesktopHeight;
-		SetPreviewTexture(Locator.GetDevice(), pTexture.get(), 2, PREVIEW_TEXTURE_TYPE::TYPE_IMPACT);
+		SetPreviewTexture(Locator.GetDevice(), pTexture.get(), pImpactEffectComponent->GetTextureIndex(), 2, PREVIEW_TEXTURE_TYPE::TYPE_IMPACT);
 		ImGui::Image((ImTextureID)(m_d3dSrvGPUDescriptorHandle_ImpactTexture.ptr), ImVec2((float)my_image_width, (float)my_image_height));
 	}
 
@@ -1238,11 +1254,12 @@ void CImGuiManager::ShowParticleManager(CState<CPlayer>* pCurrentAnimation)
 	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
 	ImGui::Checkbox(U8STR("켜기/끄기##ParticleEffect"), &pParticleComponent->GetEnable());
 
-	std::pair<int, int> iParticleIndex = CSimulatorScene::GetInst()->GetTextureManager()->GetTextureListIndex(TextureType::ParticleTexture);
-	std::shared_ptr<CTexture> pTexture = CSimulatorScene::GetInst()->GetTextureManager()->GetTexture();
+	UINT m_iParticleTextureN = CSimulatorScene::GetInst()->GetTextureManager()->GetTextureListIndex(TextureType::ParticleTexture);
+	pParticleComponent->SetTextureOffset(CSimulatorScene::GetInst()->GetTextureManager()->GetTextureOffset(TextureType::ParticleTexture));
+	std::shared_ptr<CTexture> pTexture = CSimulatorScene::GetInst()->GetTextureManager()->GetTexture(TextureType::ParticleTexture);
 	std::vector<const char*> items;
 	std::vector <std::string> str(100);
-	for (int i = iParticleIndex.first; i <= iParticleIndex.second; i++)
+	for (int i = 0; i < m_iParticleTextureN; i++)
 	{
 		std::wstring wstr = pTexture->GetTextureName(i);
 		str[i].assign(wstr.begin(), wstr.end());
@@ -1250,12 +1267,14 @@ void CImGuiManager::ShowParticleManager(CState<CPlayer>* pCurrentAnimation)
 	}
 
 	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
-	ImGui::Combo(U8STR("텍스쳐##ParticleEffect"), (int*)(&pParticleComponent->GetTextureIndex()), items.data(), items.size());
+	if(ImGui::Combo(U8STR("텍스쳐##ParticleEffect"), (int*)(&pParticleComponent->GetTextureIndex()), items.data(), items.size()))
 
 	int my_image_width = 0.2f * m_lDesktopHeight;
 	int my_image_height = 0.2f * m_lDesktopHeight;
-	//SetPreviewTexture(Locator.GetDevice(), vTexture[pParticleComponent->GetParticleIndex()].get(), 3, PREVIEW_TEXTURE_TYPE::TYPE_PARTICLE);
-	//ImGui::Image((ImTextureID)(m_d3dSrvGPUDescriptorHandle_ParticleTexture.ptr), ImVec2((float)my_image_width, (float)my_image_height));
+
+
+	SetPreviewTexture(Locator.GetDevice(), pTexture.get(), pParticleComponent->GetTextureIndex(), 3, PREVIEW_TEXTURE_TYPE::TYPE_PARTICLE);
+	ImGui::Image((ImTextureID)(m_d3dSrvGPUDescriptorHandle_ParticleTexture.ptr), ImVec2((float)my_image_height, (float)my_image_height));
 
 	ImGui::SetNextItemWidth(190.f);
 	if (ImGui::DragFloat("XSize##ParticleEffect", &pParticleComponent->GetXSize(), DRAG_FLOAT_UNIT, PARTICLE_SIZE_MIN, PARTICLE_SIZE_MAX, "%.2f", 0))

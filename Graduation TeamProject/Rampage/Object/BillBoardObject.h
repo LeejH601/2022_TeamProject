@@ -59,7 +59,7 @@ public:
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, bool b_UseTexture, CCamera* pCamera);
 	virtual void SetEnable(bool bEnable);
 
-
+	void SetTotalRowColumn(int iTotalRow, int iTotalColumn);
 	void SetColor(XMFLOAT3 fColor);
 	void SetSize(XMFLOAT2 fSize);
 	void SetSpeed(float fSpeed);
@@ -69,8 +69,11 @@ public:
 	bool& GetAnimation();
 	bool m_bAnimation = true;
 protected:
-	int 							m_nRow = 0;
-	int 							m_nCol = 0;
+	int								m_iTotalRow = 1;
+	int								m_iTotalCol = 1;
+
+	int 							m_iCurrentRow = 0;
+	int 							m_iCurrentCol = 0;
 	//int								m_nMaxCol = 1; // 최대 출력 열 지정
 
 	float m_fAccumulatedTime = 0.0f;

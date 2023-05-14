@@ -340,10 +340,11 @@ class ParticleComponent : public IMessageListener {
     int m_iParticleType = ParticleType::SPHERE_PARTICLE;
     XMFLOAT2 m_fSize = XMFLOAT2(3.f, 3.f);
     float m_fAlpha = 1.f;
-    float m_fLifeTime = 0.2f;
+    float m_fLifeTime = 2.f;
     float m_fSpeed = 20.f;
     XMFLOAT3 m_xmf3Color = XMFLOAT3(1.f, 1.f, 1.f);
 	int m_iTextureIndex = 0;
+	int m_iTextureOffset = 0;
 public:
     ParticleComponent();
 
@@ -357,7 +358,8 @@ public:
     float& GetLifeTime() { return m_fLifeTime; }
     float& GetSpeed() { return m_fSpeed; }
     XMFLOAT3& GetColor() { return m_xmf3Color; }
-	int& GetTextureIndex() { return m_iTextureIndex; };
+	int& GetTextureIndex() { return m_iTextureIndex; }
+	int& GetTextureOffset() { return m_iTextureOffset; }
 
     void SetEmitParticleNumber(int iEmitParticleNumber) { m_nEmitParticleNumber = iEmitParticleNumber; }
     void SetParticleNumber(int nParticleNumber) { m_nParticleNumber = nParticleNumber; }
@@ -373,7 +375,7 @@ public:
     void SetColorG(float g) { m_xmf3Color.y = g; }
     void SetColorB(float b) { m_xmf3Color.z = b; }
 	void SetTextureIndex(int iIndex) { m_iTextureIndex = iIndex; };
-
+	void SetTextureOffset(int iOffset) { m_iTextureOffset = iOffset; }
 	virtual void HandleMessage(const Message& message, const ParticleCompParams& params);
 };
 
@@ -536,13 +538,17 @@ public:
 
 // Define Impact Effect component
 class ImpactEffectComponent : public IMessageListener {
-	int m_iTextureIndex = 0;
-	float m_fSpeed = 5.f;
+	float m_fSpeed = 1.f;
 	float m_fAlpha = 1.f;
 	XMFLOAT2 m_fSize = XMFLOAT2(3.f, 3.f);
 	XMFLOAT3 m_xmf3Color = XMFLOAT3(1.f, 1.f, 1.f);
+	int m_iTextureIndex = 0;
+	int m_iTextureOffset = 0;
+	int m_iTotalRow, m_iTotalColumn;
+
 public:
 	int& GetTextureIndex() { return m_iTextureIndex; }
+	int GetTextureOffset() { return m_iTextureOffset; }
 	float& GetSpeed() { return m_fSpeed; }
 	float& GetAlpha() { return m_fAlpha; }
 	XMFLOAT2& GetSize() { return m_fSize; }
@@ -557,7 +563,11 @@ public:
 	void SetSizeY(float fSize) { m_fSize.y = fSize; }
 	void SetAlpha(float fAlpha) { m_fAlpha = fAlpha; }
 	void SetSpeed(float fSpeed) { m_fSpeed = fSpeed; }
-
+	void SetColorR(float r) { m_xmf3Color.x = r; }
+	void SetColorG(float g) { m_xmf3Color.y = g; }
+	void SetColorB(float b) { m_xmf3Color.z = b; }
+	void SetTextureOffset(int iOffset) { m_iTextureOffset = iOffset; }
+	void SetTotalRowColumn(int iTotalRow, int iTotalColumn);
 	virtual void HandleMessage(const Message& message, const ImpactCompParams& params);
 };
 

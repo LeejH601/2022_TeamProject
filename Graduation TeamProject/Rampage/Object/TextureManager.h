@@ -5,8 +5,10 @@
 enum class TextureType
 {
 	SphereTexture,
+	SmokeTexture,
 	BillBoardTexture,
-	ParticleTexture
+	ParticleTexture,
+	TextureType_End
 };
 class CTextureManager
 {
@@ -32,15 +34,8 @@ public:
 	std::vector<D3D12_GPU_DESCRIPTOR_HANDLE> m_pd3dSrvGpuDescriptorHandles;	// Srv 디스크립터 핸들
 
 private:
-	std::shared_ptr<CTexture> m_pTextures;
-	int m_iBillBoardTextureN = 1;
-	int m_iParticleTextureN = 0;
-	int m_iSphereTextureN = 0;
-	
-
-	std::pair<int, int> m_iBillBoardTexture;
-	std::pair<int, int> m_iParticleTexture;
-	std::pair<int, int> m_iSphereTexture;
+	std::shared_ptr<CTexture> m_pTextures[(UINT)TextureType::TextureType_End];
+	UINT m_iTextureN[(UINT)TextureType::TextureType_End] = { 0, };
 
 public:
 	virtual void CreateCbvSrvUavDescriptorHeaps(ID3D12Device* pd3dDevice, int nConstantBufferViews, int nShaderResourceViews, int nUnorderedAccessViews = 0);
@@ -50,21 +45,20 @@ public:
 
 public:
 	void LoadSphereBuffer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
-	void LoadBillBoardTexture(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, LPCTSTR pszFileName, int iRow, int Column);
-	void LoadParticleTexture(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, LPCTSTR pszFileName, int iRow, int Column);
+	void LoadTexture(TextureType eTextureType, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, LPCTSTR pszFileName, int iRow, int Column);
 	
-	int LoadTextureIndex(LPCTSTR pszFileName);
+	int LoadTextureIndex(TextureType eTextureType, LPCTSTR pszFileName);
 
-	std::shared_ptr<CTexture> GetTexture();
+	std::shared_ptr<CTexture> GetTexture(TextureType eTextureType);
 
-	std::pair<int, int> GetTextureListIndex(TextureType eTextureType);
+	UINT GetTextureListIndex(TextureType eTextureType);
+	UINT GetTextureOffset(TextureType eTextureType);
 public:
 	CTextureManager() {
-		m_pTextures = std::make_shared<CTexture>(100, RESOURCE_TEXTURE2D, 0, 1);
-
-		m_iBillBoardTexture = std::make_pair(0, 0);
-		m_iParticleTexture = std::make_pair(0, 0);
-		m_iSphereTexture = std::make_pair(0, 0);
+		m_pTextures[(UINT)TextureType::SphereTexture] = std::make_shared<CTexture>(1, RESOURCE_TEXTURE2D, 0, 1);
+		m_pTextures[(UINT)TextureType::SmokeTexture] = std::make_shared<CTexture>(1, RESOURCE_TEXTURE2D, 0, 1);
+		m_pTextures[(UINT)TextureType::BillBoardTexture] = std::make_shared<CTexture>(30, RESOURCE_TEXTURE2D, 0, 1);
+		m_pTextures[(UINT)TextureType::ParticleTexture] = std::make_shared<CTexture>(30, RESOURCE_TEXTURE2D, 0, 1);
 	}
 	~CTextureManager() {}
 

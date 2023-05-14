@@ -62,6 +62,10 @@ void CParticleObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dComma
 void CParticleObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	CGameObject::UpdateShaderVariables(pd3dCommandList);
+	m_xmf4x4Texture._11 = m_iTextureIndex;
+	XMFLOAT4X4 xmfTexture;
+	XMStoreFloat4x4(&xmfTexture, XMMatrixTranspose(XMLoadFloat4x4(&m_xmf4x4Texture)));
+	pd3dCommandList->SetGraphicsRoot32BitConstants(0, 16, &m_xmf4x4Texture, 16);
 }
 
 void CParticleObject::PreRender(ID3D12GraphicsCommandList* pd3dCommandList, CShader* pShader, int nPipelineState)
@@ -198,26 +202,8 @@ CSmokeParticleObject::CSmokeParticleObject(LPCTSTR pszFileName, ID3D12Device* pd
 
 	m_iParticleType = iParticleType;
 
-	std::shared_ptr<CTexture> pParticleTexture = std::make_shared<CTexture>(3, RESOURCE_TEXTURE1D, 0, 1);
-	pParticleTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, pszFileName, RESOURCE_TEXTURE2D, 0);
-
 	srand((unsigned)time(NULL));
 
-	XMFLOAT4* pxmf4RandomValues = new XMFLOAT4[1024];
-	for (int i = 0; i < 1024; i++)
-	{
-		pxmf4RandomValues[i].x = float((rand() % 10000) - 5000) / 5000.0f;
-		pxmf4RandomValues[i].y = float((rand() % 10000) - 5000) / 5000.0f;
-		pxmf4RandomValues[i].z = float((rand() % 10000) - 5000) / 5000.0f;
-		pxmf4RandomValues[i].w = float((rand() % 10000) - 5000) / 5000.0f;
-	}
-
-	pParticleTexture->CreateBuffer(pd3dDevice, pd3dCommandList, pxmf4RandomValues, 1024, sizeof(XMFLOAT4), DXGI_FORMAT_R32G32B32A32_FLOAT, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_GENERIC_READ, 1/*, RESOURCE_BUFFER*/);
-	pParticleTexture->CreateBuffer(pd3dDevice, pd3dCommandList, pxmf4RandomValues, 256, sizeof(XMFLOAT4), DXGI_FORMAT_R32G32B32A32_FLOAT, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_GENERIC_READ, 2/*, RESOURCE_TEXTURE1D*/);
-
-	pShader->CreateShaderResourceViews(pd3dDevice, pParticleTexture.get(), 0, 12);
-
-	SetTexture(pParticleTexture);
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }

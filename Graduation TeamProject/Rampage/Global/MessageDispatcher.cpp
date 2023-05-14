@@ -290,7 +290,6 @@ void StunAnimationComponent::HandleMessage(const Message& message, const Animati
 }
 ParticleComponent::ParticleComponent()
 {
-	m_iTextureIndex = CSimulatorScene::GetInst()->GetTextureManager()->GetTextureListIndex(TextureType::ParticleTexture).first;  // 미리 텍스쳐 셋팅(파티클 텍스쳐의 첫번째 텍스쳐)
 }
 
 void ParticleComponent::HandleMessage(const Message& message, const ParticleCompParams& params)
@@ -312,8 +311,13 @@ void ParticleComponent::HandleMessage(const Message& message, const ParticleComp
 		pParticle->SetEmitParticleN(m_nEmitParticleNumber);
 		pParticle->SetPosition(params.xmf3Position);
 		pParticle->SetParticleType(m_iParticleType);
-		pParticle->SetTextureIndex(m_iTextureIndex);
+		pParticle->SetTextureIndex(m_iTextureIndex + m_iTextureOffset);
 	}
+}
+void ImpactEffectComponent::SetTotalRowColumn(int iTotalRow, int iTotalColumn)
+{
+	m_iTotalRow = iTotalRow;
+	m_iTotalColumn = iTotalColumn;
 }
 void ImpactEffectComponent::HandleMessage(const Message& message, const ImpactCompParams& params)
 {
@@ -325,12 +329,14 @@ void ImpactEffectComponent::HandleMessage(const Message& message, const ImpactCo
 	if (pMultiSprite)
 	{
 		pMultiSprite->SetEnable(true);
+		pMultiSprite->SetTotalRowColumn(m_iTotalRow, m_iTotalColumn);
 		pMultiSprite->SetSize(m_fSize);
 		pMultiSprite->SetLifeTime(m_fSpeed);
 		pMultiSprite->SetStartAlpha(m_fAlpha);
 		pMultiSprite->SetPosition(params.xmf3Position);
 		pMultiSprite->SetColor(m_xmf3Color);
-		pMultiSprite->SetTextureIndex(m_iTextureIndex);
+		pMultiSprite->SetTextureIndex(m_iTextureIndex + m_iTextureOffset);
+
 	}
 }
 void SceneCollideListener::HandleMessage(const Message& message, const CollideParams& params)

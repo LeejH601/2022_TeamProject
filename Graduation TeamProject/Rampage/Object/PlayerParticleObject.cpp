@@ -7,6 +7,7 @@
 void CPlayerParticleObject::SetSmokeObjects(CGameObject* pSmokeObject)
 {
 	m_pSmokeObject = pSmokeObject;
+	m_pSmokeObject->SetTextureIndex(0);
 }
 
 void CPlayerParticleObject::SetTrailParticleObjects(CGameObject* pTrailObjects)
