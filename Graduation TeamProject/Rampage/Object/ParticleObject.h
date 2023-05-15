@@ -64,6 +64,7 @@ public:
 	void SetProgressionRate(float fProgressionRate) { m_fProgressionRate = fProgressionRate; };
 	void SetLengthScale(float fLengthScale) { m_fLengthScale = fLengthScale; };
 	void SetFieldMainDirection(XMFLOAT3 xmf3FieldMainDirection) { m_xmf3FieldMainDirection = xmf3FieldMainDirection; };
+	void EmitParticle(int emitType);
 
 	void SetDirection(XMFLOAT3 xmf3Direction);
 	XMFLOAT3 GetDirection();

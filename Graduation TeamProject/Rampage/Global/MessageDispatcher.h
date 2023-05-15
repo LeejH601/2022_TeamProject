@@ -333,7 +333,7 @@ enum ParticleType {
 	TRAIL_PARTICLE
 };
 
-#define MAX_PARTICLES				10000
+#define MAX_PARTICLES				100000
 class ParticleComponent : public IMessageListener {
 
     int m_nParticleNumber = MAX_PARTICLES;

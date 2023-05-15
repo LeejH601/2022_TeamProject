@@ -65,7 +65,7 @@ VS_PARTICLE_INPUT OutputParticleToStream(VS_PARTICLE_INPUT input, inout PointStr
 	//input.velocity += CalculrateCulrNoise(input.position).xyz;
 	input.position += gf3Gravity * input.velocity * gfElapsedTime;
 	//input.velocity += gf3Gravity * gfElapsedTime;
-	//input.velocity += float3(0.0f, -9.8f*60, 0.0f) * gfElapsedTime;
+	input.velocity += float3(0.0f, -9.8f*20.0f, 0.0f) * gfElapsedTime;
 	//input.velocity += CalculrateCulrNoise(input.position).xyz;
 	input.lifetime -= gfElapsedTime;
 	return input;
@@ -115,7 +115,7 @@ void SphereParticles(VS_PARTICLE_INPUT input, inout PointStream<VS_PARTICLE_INPU
 
 	if (particle.type == TYPE_EMITTER)
 	{
-		output.Append(particle);
+		//output.Append(particle);
 		if (bEmit)
 		{
 			particle.type = TYPE_SIMULATOR;
@@ -127,7 +127,7 @@ void SphereParticles(VS_PARTICLE_INPUT input, inout PointStream<VS_PARTICLE_INPU
 				particle.lifetime = gfLifeTime;
 				f4Random = RandomDirectionOnSphere(i + rand(gfCurrentTime));
 				particle.velocity = (f4Random.xyz * gfSpeed);
-				output.Append(particle);
+				//output.Append(particle);
 			}
 		}
 	}

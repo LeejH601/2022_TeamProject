@@ -191,6 +191,27 @@ void CParticleObject::SetEmit(bool bEmit)
 	dynamic_cast<CParticleMesh*>(m_pMesh.get())->m_bEmit = bEmit;
 }
 
+void CParticleObject::EmitParticle(int emitType)
+{
+	ParticleEmitDataParam param; 
+	switch (emitType)
+	{
+	case 0:
+		break;
+	case 1:
+		param.m_fLifeTime = m_fLifeTime;
+		param.m_nEmitNum = m_iEmitParticleN;
+		param.m_fEmitedSpeed = m_fSpeed;
+		param.m_xmf3EmitedPosition.x = m_xmf4x4Transform._41;
+		param.m_xmf3EmitedPosition.y = m_xmf4x4Transform._42 + 5.0f;
+		param.m_xmf3EmitedPosition.z = m_xmf4x4Transform._43;
+		break;
+	default:
+		break;
+	}
+	dynamic_cast<CParticleMesh*>(m_pMesh.get())->EmitParticle(emitType, param);
+}
+
 void CParticleObject::SetDirection(XMFLOAT3 xmf3Direction)
 {
 	m_xmf3Direction = xmf3Direction;

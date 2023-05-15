@@ -293,10 +293,10 @@ ParticleComponent::ParticleComponent()
 {
 	m_pTexture = CSimulatorScene::GetInst()->GetTextureManager()->GetParticleTextureList()[GetParticleIndex()];  // 미리 텍스쳐 셋팅(index: 0)
 
-	m_fFieldSpeed = 0.2f;
-	m_fNoiseStrength = 20.0f;;
+	m_fFieldSpeed = 1.0f;
+	m_fNoiseStrength = 1.0f;;
 	m_xmf3FieldMainDirection = XMFLOAT3(0.0f, 1.0f, 0.0f);
-	m_fProgressionRate = 20.0f;
+	m_fProgressionRate = 1.0f;
 	m_fLengthScale = 1.0f;
 }
 
@@ -325,6 +325,7 @@ void ParticleComponent::HandleMessage(const Message& message, const ParticleComp
 		pParticle->SetFieldMainDirection(m_xmf3FieldMainDirection);
 		pParticle->SetProgressionRate(m_fProgressionRate);
 		pParticle->SetLengthScale(m_fLengthScale);
+		pParticle->EmitParticle(1);
 	}
 }
 void ImpactEffectComponent::HandleMessage(const Message& message, const ImpactCompParams& params)

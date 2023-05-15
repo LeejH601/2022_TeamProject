@@ -240,3 +240,4 @@ inline float4 CalculrateCulrNoise(float3 p)
 	float3 vel = float3(dp3_dy - dp2_dz, dp1_dz - dp3_dx, dp2_dx - dp1_dy);
 	return float4(vel.x, vel.y, vel.z, 1);
 }
+
