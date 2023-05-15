@@ -650,51 +650,6 @@ void CMapObject::AddPhysicsScene(const XMFLOAT4X4& xmfWorld)
 	Locator.GetPxScene()->addActor(*actor);
 }
 
-bool CMapObject::CheckCollision(CGameObject* pTargetObject)
-{
-	bool bCollide = false;
-
-	//BoundingBox bb = pTargetObject->GetBoundingBox();
-	//std::vector<XMFLOAT3> xmf3Positions = m_pMesh->GetVertexs();
-	//std::vector<UINT> meshIndices = m_pMesh->GetIndices();
-	//int nTriangle = meshIndices.size() / 3;
-
-	//for (int i = 0; i < nTriangle; ++i)
-	//{
-	//	XMFLOAT3 xmf3TransformedPosition[3];
-	//	xmf3TransformedPosition[0] = Vector3::TransformCoord(xmf3Positions[meshIndices[3 * i]], m_xmf4x4World);
-	//	xmf3TransformedPosition[1] = Vector3::TransformCoord(xmf3Positions[meshIndices[3 * i + 1]], m_xmf4x4World);
-	//	xmf3TransformedPosition[2] = Vector3::TransformCoord(xmf3Positions[meshIndices[3 * i + 2]], m_xmf4x4World);
-
-	//	XMVECTOR xmf3MeshTriangle[3];
-	//	xmf3MeshTriangle[0] = XMLoadFloat3(&xmf3TransformedPosition[0]);
-	//	xmf3MeshTriangle[1] = XMLoadFloat3(&xmf3TransformedPosition[1]);
-	//	xmf3MeshTriangle[2] = XMLoadFloat3(&xmf3TransformedPosition[2]);
-
-	//	if (bb.Intersects(xmf3MeshTriangle[0], xmf3MeshTriangle[1], xmf3MeshTriangle[2]))
-	//	{
-	//		bCollide = true;
-	//		//OutputDebugString(L"Collide\n");
-	//		break;
-	//	}
-	//}
-
-	/*std::wstring debug{ std::to_wstring(xmf3Positions.size())};
-	std::wstring name{ &m_pstrFrameName[0], &m_pstrFrameName[64] };
-	std::wstring nIndices{ std::to_wstring(m_pMesh->GetIndices().size()) };
-
-
-
-	OutputDebugString(name.c_str());
-	OutputDebugString(L"- Indices: ");
-	OutputDebugString(nIndices.c_str());
-	OutputDebugString(L", VertexSize: ");
-	OutputDebugString(debug.c_str());
-	OutputDebugString(L"\n");*/
-
-	return bCollide;
-}
-
 void CMapObject::UpdateTransform(XMFLOAT4X4* pxmf4x4Parent)
 {
 	CGameObject::UpdateTransform(pxmf4x4Parent);
@@ -706,8 +661,8 @@ void CMapObject::UpdateTransform(XMFLOAT4X4* pxmf4x4Parent)
 void CMapObject::PrepareBoundingBox(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 #ifdef RENDER_BOUNDING_BOX
-	//BoundingBox aambb = CreateAAMBB(m_pMesh->GetVertexs());
-	//pBoundingBoxMesh = CBoundingBoxShader::GetInst()->AddBoundingObject(pd3dDevice, pd3dCommandList, this, aambb.Center, aambb.Extents);
+	BoundingBox aambb = CreateAAMBB(m_pMesh->GetVertexs());
+	pBoundingBoxMesh = CBoundingBoxShader::GetInst()->AddBoundingObject(pd3dDevice, pd3dCommandList, this, aambb.Center, aambb.Extents);
 #endif // RENDER_BOUNDING_BOX
 }
 
