@@ -654,6 +654,9 @@ bool CMapObject::CheckCollision(CGameObject* pTargetObject)
 {
 	BoundingBox playerBoundingBox = pTargetObject->GetBoundingBox();
 
+	if (!Vector3::Length(m_ObjectBoundingBox.Extents))
+		return false;
+
 	return m_TransformedObjectBoundingBox.Intersects(playerBoundingBox);
 }
 
