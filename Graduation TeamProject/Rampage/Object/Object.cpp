@@ -650,23 +650,33 @@ void CMapObject::AddPhysicsScene(const XMFLOAT4X4& xmfWorld)
 	Locator.GetPxScene()->addActor(*actor);
 }
 
+bool CMapObject::CheckCollision(CGameObject* pTargetObject)
+{
+	BoundingBox playerBoundingBox = pTargetObject->GetBoundingBox();
+
+	return m_TransformedObjectBoundingBox.Intersects(playerBoundingBox);
+}
+
 void CMapObject::UpdateTransform(XMFLOAT4X4* pxmf4x4Parent)
 {
 	CGameObject::UpdateTransform(pxmf4x4Parent);
 
 	if (pBoundingBoxMesh)
 		pBoundingBoxMesh->SetWorld(m_xmf4x4World);
+
+	m_ObjectBoundingBox.Transform(m_TransformedObjectBoundingBox, XMLoadFloat4x4(&m_xmf4x4World));
 }
 
 void CMapObject::PrepareBoundingBox(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 #ifdef RENDER_BOUNDING_BOX
-	BoundingBox aambb = CreateAAMBB(m_pMesh->GetVertexs());
+	BoundingBox aambb = CreateAAMBB();
 	pBoundingBoxMesh = CBoundingBoxShader::GetInst()->AddBoundingObject(pd3dDevice, pd3dCommandList, this, aambb.Center, aambb.Extents);
+	m_ObjectBoundingBox = BoundingBox{ aambb.Center, aambb.Extents };
 #endif // RENDER_BOUNDING_BOX
 }
 
-BoundingBox CMapObject::CreateAAMBB(std::vector<XMFLOAT3> xmf3Positions)
+BoundingBox CMapObject::CreateAAMBB()
 {
 	BoundingBox bbox;
 
@@ -684,9 +694,9 @@ BoundingBox CMapObject::CreateAAMBB(std::vector<XMFLOAT3> xmf3Positions)
 
 			float centerY = m_pMesh->GetBoundingCenter().y;
 
-			for (auto& pos : xmf3Positions)
+			for (auto& pos : m_pMesh->GetVertexs())
 			{
-				if (pos.y < centerY * 0.66f && pos.y > centerY * 0.11f)
+				if (pos.y < centerY * 0.7f)
 				{
 					minCoord.x = min(minCoord.x, pos.x);
 					minCoord.y = min(minCoord.y, pos.y);
