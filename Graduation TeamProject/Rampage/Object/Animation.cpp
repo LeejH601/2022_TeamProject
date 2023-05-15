@@ -203,7 +203,7 @@ void CAnimationController::AdvanceTime(float fTimeElapsed, CGameObject* pRootGam
 			}
 		}
 
-		OnRootMotion(pRootGameObject);
+		OnRootMotion(pRootGameObject, fTimeElapsed);
 		OnAnimationIK(pRootGameObject);
 
 		pRootGameObject->UpdateTransform(NULL);

@@ -3,7 +3,11 @@
 #include "ParticleObject.h"
 #include "../Shader/ParticleShader.h"
 
-CParticleObject::CParticleObject(std::shared_ptr<CTexture> pSpriteTexture, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, XMFLOAT3 xmf3Position, XMFLOAT3 xmf3Velocity, float fLifetime, XMFLOAT3 xmf3Acceleration, XMFLOAT3 xmf3Color, XMFLOAT2 xmf2Size, UINT nMaxParticles, CParticleShader* pShader, int iParticleType)
+CParticleObject::CParticleObject()
+{
+}
+
+CParticleObject::CParticleObject(int iTextureIndex, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, XMFLOAT3 xmf3Position, XMFLOAT3 xmf3Velocity, float fLifetime, XMFLOAT3 xmf3Acceleration, XMFLOAT3 xmf3Color, XMFLOAT2 xmf2Size, UINT nMaxParticles, CParticleShader* pShader, int iParticleType)
 {
 	m_xmf4x4World = Matrix4x4::Identity();
 	m_xmf4x4Transform = Matrix4x4::Identity();
@@ -14,7 +18,7 @@ CParticleObject::CParticleObject(std::shared_ptr<CTexture> pSpriteTexture, ID3D1
 
 	m_iParticleType = iParticleType;
 	
-	SetTexture(pSpriteTexture);
+	m_iTextureIndex = iTextureIndex;
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
@@ -58,6 +62,10 @@ void CParticleObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dComma
 void CParticleObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	CGameObject::UpdateShaderVariables(pd3dCommandList);
+	m_xmf4x4Texture._11 = m_iTextureIndex;
+	XMFLOAT4X4 xmfTexture;
+	XMStoreFloat4x4(&xmfTexture, XMMatrixTranspose(XMLoadFloat4x4(&m_xmf4x4Texture)));
+	pd3dCommandList->SetGraphicsRoot32BitConstants(0, 16, &m_xmf4x4Texture, 16);
 }
 
 void CParticleObject::PreRender(ID3D12GraphicsCommandList* pd3dCommandList, CShader* pShader, int nPipelineState)
@@ -72,6 +80,8 @@ void CParticleObject::PreRender(ID3D12GraphicsCommandList* pd3dCommandList, CSha
 			m_ppMaterials[i]->UpdateShaderVariables(pd3dCommandList);
 		}
 	}
+	int m_nType = 100;
+	pd3dCommandList->SetGraphicsRoot32BitConstants(0, 1, &m_nType, 32);
 }
 
 void CParticleObject::StreamOutRender(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, CShader* pShader)
@@ -91,13 +101,13 @@ void CParticleObject::DrawRender(ID3D12GraphicsCommandList* pd3dCommandList, CCa
 
 void CParticleObject::Update(float fTimeElapsed)
 {
-	//if (m_bEnable) {
+	if (m_bAnimation) {
 		m_fTime -= fTimeElapsed * m_fSpeed;
 		AnimateRowColumn(m_fTime);
 
 		if (m_fTime <= 0.f)
 			m_fTime = 0.5f;
-	//}
+	}
 }
 
 void CParticleObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, CShader* pShader)
@@ -112,6 +122,17 @@ void CParticleObject::OnPostRender()
 	{
 		m_nVertices = m_pMesh->OnPostRender(0); //Read Stream Output Buffer Filled Size
 	}
+}
+
+void CParticleObject::SetEnable(bool bEnable)
+{
+	m_bEnable = bEnable;
+}
+
+void CParticleObject::SetTotalRowColumn(int iTotalRow, int iTotalColumn)
+{
+	m_iTotalRow = iTotalRow;
+	m_iTotalCol = iTotalColumn;
 }
 
 void CParticleObject::SetSize(XMFLOAT2 fSize)
@@ -187,34 +208,56 @@ bool CParticleObject::CheckCapacity()
 	return false;
 }
 
+void CParticleObject::SetAnimation(bool bAnimation)
+{
+	m_bAnimation = bAnimation;
+}
+
 void CParticleObject::AnimateRowColumn(float fTimeElapsed)
 {
-	if (!m_ppMaterials.empty() && m_ppMaterials[0]->GetTexture())
+	if (fTimeElapsed >= 0.0f)
 	{
-		int m_nRows = m_ppMaterials[0]->GetTexture()->GetRow();
-		int m_nCols = m_ppMaterials[0]->GetTexture()->GetColumn();
-		m_xmf4x4World._11 = 1.0f / float(m_nRows);
-		m_xmf4x4World._22 = 1.0f / float(m_nCols);
-		m_xmf4x4World._31 = float(m_nRow) / float(m_nRows);
-		m_xmf4x4World._32 = float(m_nCol) / float(m_nCols);
-		if (fTimeElapsed <= 0.0f)
-		{
-			if ((m_nRow + 1) == m_nRows && (m_nCol + 1) == m_nCols)
-			{
-				m_nRow = 0;
-				m_nCol = 0;
-				m_bEnable = false;
-			}
-			else
-			{
-				if (++m_nCol == m_nCols) {
-					m_nRow++;
-					m_nCol = 0;
-				}
-				if (m_nRow == m_nRows)
-					m_nRow = 0;
-			}
-		}
-	}
+		m_fAccumulatedTime += fTimeElapsed;
 
+		float fraction = std::fmodf(m_fAccumulatedTime / m_fLifeTime, 1.0f);
+		interval = 1.0f / (m_iTotalRow * m_iTotalCol);
+
+		m_iCurrentCol = (int)(fraction / (interval * m_iTotalRow));
+		float remainvalue = (fraction / (interval * m_iTotalRow)) - m_iCurrentCol;
+		m_iCurrentRow = (int)(remainvalue * m_iTotalRow);
+
+		if (m_fAccumulatedTime > m_fLifeTime)
+		{
+			m_iCurrentRow = 0;
+			m_iCurrentCol = 0;
+			m_fAccumulatedTime = 0.0f;
+			m_bAnimation = false;
+		}
+		//	m_bEnable = false;
+	}
+	m_xmf4x4World._11 = 1.0f / float(m_iTotalRow);
+	m_xmf4x4World._22 = 1.0f / float(m_iTotalCol);
+	m_xmf4x4World._31 = float(m_iCurrentRow) / float(m_iTotalRow);
+	m_xmf4x4World._32 = float(m_iCurrentCol) / float(m_iTotalCol);
+}
+
+CSmokeParticleObject::CSmokeParticleObject(LPCTSTR pszFileName, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, XMFLOAT3 xmf3Position, XMFLOAT3 xmf3Velocity, float fLifetime, XMFLOAT3 xmf3Acceleration, XMFLOAT3 xmf3Color, XMFLOAT2 xmf2Size, UINT nMaxParticles, CParticleShader* pShader, int iParticleType) : CParticleObject()
+{
+	m_xmf4x4World = Matrix4x4::Identity();
+	m_xmf4x4Transform = Matrix4x4::Identity();
+	m_xmf4x4Texture = Matrix4x4::Identity();
+
+	std::shared_ptr<CParticleMesh> pParticleMesh = std::make_shared<CParticleMesh>(pd3dDevice, pd3dCommandList, xmf3Position, xmf3Velocity, fLifetime, xmf3Acceleration, xmf3Color, xmf2Size, nMaxParticles);
+	SetMesh(pParticleMesh);
+
+	m_iParticleType = iParticleType;
+
+	srand((unsigned)time(NULL));
+
+
+	CreateShaderVariables(pd3dDevice, pd3dCommandList);
+}
+
+CSmokeParticleObject::~CSmokeParticleObject()
+{
 }

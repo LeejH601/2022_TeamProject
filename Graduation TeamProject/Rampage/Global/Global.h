@@ -16,7 +16,9 @@ enum class MessageType {
 	UPDATE_SMOKEPARTICLE,
 	UPDATE_UPDOWNPARTICLE,
 	UPDATE_TRAILPARTICLE,
+	UPDATE_SWORDTRAIL,
 	UPDATE_SPRITE,
+	UPDATE_HITLAG,
 	REQUEST_REGISTERARTI,
 	MESSAGE_END,
 };
@@ -32,6 +34,7 @@ enum class MESSAGE_TYPE
 	Msg_PlaySoundEffect,
 	Msg_PlaySoundDamage,
 	Msg_PlaySoundShoot,
+	Msg_PlaySoundUIButton,
 	Msg_MonsterAttackSprite,
 	END_ENUM
 };
@@ -43,6 +46,8 @@ enum class SOUND_CATEGORY
 	SOUND_VOICE,
 	SOUND_SHOOT,
 	SOUND_EFFECT,
+	SOUND_UI_BUTTON,
+	SOUND_UI_BUTTON_CLICK,
 };
 
 enum class SCENE_TYPE

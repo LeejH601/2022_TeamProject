@@ -14,6 +14,7 @@ public:
 	XMFLOAT3 m_xmf3ChasingVec;
 
 	float m_fHP;
+	unsigned int m_iPlayerAtkId = 999;
 
 	bool m_bIsDummy = false;
 
@@ -25,6 +26,9 @@ public:
 	float m_fWanderTime;
 	float m_fDeadTime;
 	float m_fToPlayerLength;
+
+	float m_fAttackRange;
+	float m_fSensingRange;
 	
 	float m_fStunTime;
 	float m_fStunStartTime;
@@ -49,6 +53,7 @@ public:
 
 	MONSTER_TYPE GetMonsterType() { return m_MonsterType; }
 
+	unsigned int GetPlayerAtkId() { return m_iPlayerAtkId; }
 	XMFLOAT3 GetHitterVec() { return m_xmf3HitterVec; }
 	XMFLOAT3 GetWanderVec() { return m_xmf3WanderVec; }
 	XMFLOAT3 GetChasingVec() { return m_xmf3ChasingVec; }
@@ -57,32 +62,15 @@ public:
 	void CheckIsPlayerInFrontOfThis(XMFLOAT3 xmf3PlayerPosition);
 	void CalculateResultPosition();
 
-	virtual void OnPrepareRender();
-
+	virtual void UpdateMatrix();
 	virtual void SetScale(float x, float y, float z);
 	virtual void Update(float fTimeElapsed);
 	virtual void UpdateTransform(XMFLOAT4X4* pxmf4x4Parent = NULL);
-	virtual void SetHit(CGameObject* pHitter)
-	{
-		if (m_bSimulateArticulate == false) { // 변수 체크가 아닌 현재 상태 체크를 이용하는 것이 좋을듯
-			m_xmf3HitterVec = Vector3::Normalize(Vector3::Subtract(GetPosition(), pHitter->GetPosition()));
-
-			SetLookAt(Vector3::Add(GetPosition(), XMFLOAT3(-m_xmf3HitterVec.x, 0.0f, -m_xmf3HitterVec.z)));
-
-			SoundPlayParams SoundPlayParam{ MONSTER_TYPE::NONE, SOUND_CATEGORY::SOUND_SHOCK };
-			CMessageDispatcher::GetInst()->Dispatch_Message<SoundPlayParams>(MessageType::PLAY_SOUND, &SoundPlayParam, this);
-
-			m_pStateMachine->ChangeState(Idle_Monster::GetInst());
-			m_pStateMachine->ChangeState(Damaged_Monster::GetInst());
-			//m_pStateMachine->ChangeState(Dead_Monster::GetInst());
-		}
-		else {
-			TCHAR pstrDebug[256] = { 0 };
-			//_stprintf_s(pstrDebug, 256, "Already Dead \n");
-			OutputDebugString(L"Already Dead");
-		}
-	}
+	virtual void SetHit(CGameObject* pHitter);
 	virtual bool CheckCollision(CGameObject* pTargetObject) {
+		if (m_fHP < 0)
+			return false;
+
 		if (pTargetObject)
 		{
 			BoundingBox TargetBoundingBox = pTargetObject->GetBoundingBox();
@@ -138,7 +126,7 @@ public:
 	CMonsterRootAnimationController(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks, CLoadedModelInfo* pModel);
 	virtual ~CMonsterRootAnimationController();
 
-	virtual void OnRootMotion(CGameObject* pRootGameObject);
+	virtual void OnRootMotion(CGameObject* pRootGameObject, float fTimeElapsed);
 };
 
 class CMonsterPool

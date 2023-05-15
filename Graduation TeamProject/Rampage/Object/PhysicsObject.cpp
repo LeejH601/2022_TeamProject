@@ -2,21 +2,25 @@
 #include "Terrain.h"
 #include "..\Global\Locator.h"
 
-void CPhysicsObject::OnPrepareRender()
+void CPhysicsObject::UpdateMatrix()
+{
+	m_xmf4x4Transform._11 = m_xmf3Right.x; m_xmf4x4Transform._12 = m_xmf3Right.y; m_xmf4x4Transform._13 = m_xmf3Right.z;
+	m_xmf4x4Transform._21 = m_xmf3Up.x; m_xmf4x4Transform._22 = m_xmf3Up.y; m_xmf4x4Transform._23 = m_xmf3Up.z;
+	m_xmf4x4Transform._31 = m_xmf3Look.x; m_xmf4x4Transform._32 = m_xmf3Look.y; m_xmf4x4Transform._33 = m_xmf3Look.z;
+	m_xmf4x4Transform._41 = m_xmf3Position.x; m_xmf4x4Transform._42 = m_xmf3Position.y; m_xmf4x4Transform._43 = m_xmf3Position.z;
+
+	XMMATRIX mtxScale = XMMatrixScaling(m_xmf3Scale.x, m_xmf3Scale.y, m_xmf3Scale.z);
+	m_xmf4x4Transform = Matrix4x4::Multiply(mtxScale, m_xmf4x4Transform);
+}
+
+void CPhysicsObject::UpdateTransform(XMFLOAT4X4* pxmf4x4Parent)
 {
 	if (m_bSimulateArticulate) {
 		UpdateTransformFromArticulation(NULL, m_pArtiLinkNames, m_AritculatCacheMatrixs, m_xmf3Scale.x);
 	}
 	else {
-		m_xmf4x4Transform._11 = m_xmf3Right.x; m_xmf4x4Transform._12 = m_xmf3Right.y; m_xmf4x4Transform._13 = m_xmf3Right.z;
-		m_xmf4x4Transform._21 = m_xmf3Up.x; m_xmf4x4Transform._22 = m_xmf3Up.y; m_xmf4x4Transform._23 = m_xmf3Up.z;
-		m_xmf4x4Transform._31 = m_xmf3Look.x; m_xmf4x4Transform._32 = m_xmf3Look.y; m_xmf4x4Transform._33 = m_xmf3Look.z;
-		m_xmf4x4Transform._41 = m_xmf3Position.x; m_xmf4x4Transform._42 = m_xmf3Position.y; m_xmf4x4Transform._43 = m_xmf3Position.z;
-
-		XMMATRIX mtxScale = XMMatrixScaling(m_xmf3Scale.x, m_xmf3Scale.y, m_xmf3Scale.z);
-		m_xmf4x4Transform = Matrix4x4::Multiply(mtxScale, m_xmf4x4Transform);
-
-		UpdateTransform(NULL);
+		UpdateMatrix();
+		CGameObject::UpdateTransform(NULL);
 	}
 }
 
@@ -28,13 +32,20 @@ void CPhysicsObject::OnUpdateCallback(float fTimeElapsed)
 		CSplatTerrain* pTerrain = (CSplatTerrain*)m_pUpdatedContext;
 		XMFLOAT3 xmf3TerrainPos = pTerrain->GetPosition();
 
-		float fTerrainY = pTerrain->GetHeight(GetPosition().x - (xmf3TerrainPos.x), GetPosition().z - (xmf3TerrainPos.z));
+		XMFLOAT3 xmf3ResultPos = GetPosition();
 
-		if (GetPosition().y < fTerrainY + xmf3TerrainPos.y)
+		xmf3ResultPos.x = std::clamp(xmf3ResultPos.x, xmf3TerrainPos.x + TERRAIN_SPAN, xmf3TerrainPos.x + pTerrain->GetWidth() - TERRAIN_SPAN);
+		xmf3ResultPos.z = std::clamp(xmf3ResultPos.z, xmf3TerrainPos.z + TERRAIN_SPAN, xmf3TerrainPos.z + pTerrain->GetLength() - TERRAIN_SPAN);
+
+		float fTerrainY = pTerrain->GetHeight(xmf3ResultPos.x - (xmf3TerrainPos.x), xmf3ResultPos.z - (xmf3TerrainPos.z));
+
+		if (xmf3ResultPos.y < fTerrainY + xmf3TerrainPos.y)
 		{
-			SetPosition(XMFLOAT3(GetPosition().x, fTerrainY + xmf3TerrainPos.y, GetPosition().z));
+			xmf3ResultPos.y = fTerrainY + xmf3TerrainPos.y;
 			m_bOnGround = true;
 		}
+
+		SetPosition(xmf3ResultPos);
 	}
 }
 
@@ -174,7 +185,7 @@ void CPhysicsObject::Animate(float fTimeElapsed)
 
 void CPhysicsObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, bool b_UseTexture, CCamera* pCamera)
 {
-	OnPrepareRender();
+	UpdateTransform(NULL);
 	CGameObject::Render(pd3dCommandList, b_UseTexture, pCamera);
 }
 
@@ -352,7 +363,7 @@ void CPhysicsObject::CreateArticulation(float meshScale)
 	REVOLUTEDesc.eTDrive.maxForce = FLT_MAX;
 
 	CGameObject::Animate(0.0f);
-	CPhysicsObject::OnPrepareRender();
+	CPhysicsObject::UpdateTransform(NULL);
 
 	CGameObject* obj = FindFrame(m_pChild->m_pstrFrameName);
 	CGameObject* root = FindFrame("root");

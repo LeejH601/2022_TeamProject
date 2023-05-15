@@ -9,6 +9,7 @@
 #include "..\Sound\SoundManager.h"
 #include "..\Scene\MainScene.h"
 #include "..\Scene\SimulatorScene.h"
+#include "..\Object\SwordTrailObject.h"
 
 void CMessageDispatcher::RegisterListener(MessageType messageType, IMessageListener* listener, void* filterObject)
 {
@@ -289,7 +290,6 @@ void StunAnimationComponent::HandleMessage(const Message& message, const Animati
 }
 ParticleComponent::ParticleComponent()
 {
-	m_pTexture = CSimulatorScene::GetInst()->GetTextureManager()->GetParticleTextureList()[GetParticleIndex()];  // 미리 텍스쳐 셋팅(index: 0)
 }
 
 void ParticleComponent::HandleMessage(const Message& message, const ParticleCompParams& params)
@@ -307,42 +307,46 @@ void ParticleComponent::HandleMessage(const Message& message, const ParticleComp
 		pParticle->SetColor(m_xmf3Color);
 		pParticle->SetSpeed(m_fSpeed);
 		pParticle->SetLifeTime(m_fLifeTime);
-		//pParticle->SetMaxParticleN(m_nParticleNumber);
+		pParticle->SetMaxParticleN(m_nParticleNumber);
 		pParticle->SetEmitParticleN(m_nEmitParticleNumber);
 		pParticle->SetPosition(params.xmf3Position);
 		pParticle->SetParticleType(m_iParticleType);
-		pParticle->ChangeTexture(m_pTexture);
+		pParticle->SetTextureIndex(m_iTextureIndex + m_iTextureOffset);
 	}
+}
+void ImpactEffectComponent::SetTotalRowColumn(int iTotalRow, int iTotalColumn)
+{
+	m_iTotalRow = iTotalRow;
+	m_iTotalColumn = iTotalColumn;
 }
 void ImpactEffectComponent::HandleMessage(const Message& message, const ImpactCompParams& params)
 {
 	if (!m_bEnable)
 		return;
 
-	CParticleObject* pMultiSprite = dynamic_cast<CParticleObject*>(params.pObject);
+	CParticleObject* pMultiSpriteParticle = dynamic_cast<CParticleObject*>(params.pObject);
 
-	if (pMultiSprite)
+	if (pMultiSpriteParticle)
 	{
-		pMultiSprite->SetEmit(true);
-		pMultiSprite->SetSize(m_fSize);
-		pMultiSprite->SetStartAlpha(m_fAlpha);
-		pMultiSprite->SetColor(m_xmf3Color);
-		pMultiSprite->SetSpeed(m_fSpeed);
-		pMultiSprite->SetLifeTime(m_fLifeTime);
-		//pParticle->SetMaxParticleN(m_nParticleNumber);
-		pMultiSprite->SetEmitParticleN(m_nEmitParticleNumber);
-		pMultiSprite->SetPosition(params.xmf3Position);
-		pMultiSprite->SetParticleType(m_iParticleType);
-		pMultiSprite->ChangeTexture(m_pTexture);
+		pMultiSpriteParticle->SetParticleType(m_iParticleType);
+		pMultiSpriteParticle->SetEmit(true);
+		pMultiSpriteParticle->SetTotalRowColumn(m_iTotalRow, m_iTotalColumn);
+		pMultiSpriteParticle->SetSize(m_fSize);
+		pMultiSpriteParticle->SetDirection(XMFLOAT3(0.f, 0.f, 0.f));
+		pMultiSpriteParticle->SetStartAlpha(m_fAlpha);
+		pMultiSpriteParticle->SetColor(m_xmf3Color);
+		pMultiSpriteParticle->SetSpeed(m_fSpeed);
+		pMultiSpriteParticle->SetLifeTime(m_fLifeTime);
+		pMultiSpriteParticle->SetAnimation(true);
+		pMultiSpriteParticle->SetEmitParticleN(m_nEmitParticleNumber);
+		pMultiSpriteParticle->SetMaxParticleN(m_nParticleNumber);
+		pMultiSpriteParticle->SetPosition(Vector3::Add(params.xmf3Position, m_xmfPosOffset));
+		pMultiSpriteParticle->SetTextureIndex(m_iTextureIndex + m_iTextureOffset);
 	}
 }
 void SceneCollideListener::HandleMessage(const Message& message, const CollideParams& params)
 {
 	m_pScene->HandleCollision(params);
-}
-
-void TerrainSpriteComponent::SetTexture(LPCTSTR pszFileName)
-{
 }
 
 void TerrainSpriteComponent::HandleMessage(const Message& message, const TerrainSpriteCompParams& params)
@@ -446,10 +450,59 @@ void PlayerLocationListener::HandleMessage(const Message& message, const PlayerP
 	if (message.getType() == MessageType::CHECK_IS_PLAYER_IN_FRONT_OF_MONSTER) {
 		CMonster* pMonster = dynamic_cast<CMonster*>(m_pObject);
 
-		pMonster->CheckIsPlayerInFrontOfThis(params.pPlayer->GetPosition());
+		XMFLOAT3 xmf3PlayerPos = XMFLOAT3{
+			params.pPlayer->m_pSkinnedAnimationController->m_pRootMotionObject->GetWorld()._41,
+			params.pPlayer->GetPosition().y,
+			params.pPlayer->m_pSkinnedAnimationController->m_pRootMotionObject->GetWorld()._43 };
+
+		pMonster->CheckIsPlayerInFrontOfThis(xmf3PlayerPos);
 	}
 }
 
+void HitLagComponent::HandleMessage(const Message& message, const PlayerParams& params)
+{
+	if (!m_bEnable)
+		return;
+
+	if (message.getType() == MessageType::UPDATE_HITLAG) {
+		CPlayer* pPlayer = (CPlayer*)params.pPlayer;
+		if (pPlayer->m_fCurLagTime < m_fMaxLagTime)
+		{
+			pPlayer->m_fAnimationPlayWeight *= m_fLagScale;
+			if (pPlayer->m_fAnimationPlayWeight < pPlayer->m_fAnimationPlayerWeightMin)
+				pPlayer->m_fAnimationPlayWeight = pPlayer->m_fAnimationPlayerWeightMin;
+		}
+		else
+			pPlayer->m_fAnimationPlayWeight = 1.0f;
+	}
+}
+TrailComponent::TrailComponent()
+{
+	this->m_fR_CurvePoints[0] = 0.0f; this->m_fR_CurvePoints[1] = 0.14; this->m_fR_CurvePoints[2] = 0.459;  this->m_fR_CurvePoints[3] = 1.892;
+	this->m_fG_CurvePoints[0] = 0.0f; this->m_fG_CurvePoints[1] = 0.005; this->m_fG_CurvePoints[2] = 0.067;  this->m_fG_CurvePoints[3] = 0.595;
+	this->m_fB_CurvePoints[0] = 0.0f; this->m_fB_CurvePoints[1] = 0.257; this->m_fB_CurvePoints[2] = 0.26;  this->m_fB_CurvePoints[3] = 0.0f;
+	this->m_fColorCurveTimes_R[0] = 0.0f; this->m_fColorCurveTimes_R[1] = 0.3; this->m_fColorCurveTimes_R[2] = 0.6;  this->m_fColorCurveTimes_R[3] = 1.0;
+	this->m_fColorCurveTimes_G[0] = 0.0f; this->m_fColorCurveTimes_G[1] = 0.3; this->m_fColorCurveTimes_G[2] = 0.6;  this->m_fColorCurveTimes_G[3] = 1.0;
+	this->m_fColorCurveTimes_B[0] = 0.0f; this->m_fColorCurveTimes_B[1] = 0.3; this->m_fColorCurveTimes_B[2] = 0.6;  this->m_fColorCurveTimes_B[3] = 1.0;
+	this->m_nCurves = 4;
+}
+
+void TrailComponent::HandleMessage(const Message& message, const TrailUpdateParams& params)
+{
+	
+	if (message.getType() == MessageType::UPDATE_SWORDTRAIL) {
+		CSwordTrailObject* pTrail = dynamic_cast<CSwordTrailObject*>(params.pObject);
+
+		pTrail->m_nCurves = 4;
+		for (int i = 0; i < this->m_nCurves; ++i) {
+			pTrail->m_fR_CurvePoints[i] = this->m_fR_CurvePoints[i];
+			pTrail->m_fG_CurvePoints[i] = this->m_fG_CurvePoints[i];
+			pTrail->m_fG_CurvePoints[i] = this->m_fG_CurvePoints[i];
+			pTrail->m_fColorCurveTimes[i] = this->m_fColorCurveTimes_R[i];
+		}
+		pTrail->m_bIsUpdateTrailVariables = GetEnable();
+	}
+}
 void SceneOnGroundListener::HandleMessage(const Message& message, const OnGroundParams& params)
 {
 	m_pScene->HandleOnGround(params);

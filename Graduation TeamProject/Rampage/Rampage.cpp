@@ -4,6 +4,7 @@
 #include "Object/State.h"
 #include <filesystem>
 #include <shlobj.h>
+#include "ImGui/implot.h"
 
 static std::wstring GetLatestWinPixGpuCapturerPath_Cpp17()
 {
@@ -85,6 +86,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
 	MSG msg;
 
+	ImPlot::CreateContext();
 
 	// 메세지 루프 입니다.
 	while (1)

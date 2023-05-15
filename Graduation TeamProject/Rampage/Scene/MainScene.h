@@ -1,6 +1,7 @@
 #pragma once
 #include <list>
 #include "Scene.h"
+#include "..\Global\Locator.h"
 #include "..\Object\Object.h"
 #include "..\Object\Light.h"
 #include "..\Object\Terrain.h"
@@ -40,7 +41,7 @@ private:
 
 	std::unique_ptr<CParticleShader> m_pParticleShader;
 	std::vector<std::unique_ptr<CGameObject>> m_pParticleObjects;
-	std::vector<std::unique_ptr<CGameObject>> m_pUpDownParticleObjects;
+	//std::vector<std::unique_ptr<CGameObject>> m_pUpDownParticleObjects;
 	std::vector<std::unique_ptr<CGameObject>> m_pSpriteAttackObjects;
 	std::vector<std::unique_ptr<CGameObject>> m_pTerrainSpriteObject;
 	std::unique_ptr<CGameObject> m_pTrailParticleObjects;
@@ -62,6 +63,8 @@ private:
 	CCamera* m_pCurrentCamera = NULL;
 
 	POINT m_ptOldCursorPos;
+
+	MOUSE_CUROSR_MODE m_CurrentMouseCursorMode = MOUSE_CUROSR_MODE::FLOATING_MODE;
 
 	DissolveParams* m_pcbMappedDisolveParams = nullptr;
 	ComPtr<ID3D12Resource> m_pd3dcbDisolveParams = nullptr;

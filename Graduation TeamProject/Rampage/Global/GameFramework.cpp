@@ -85,17 +85,26 @@ void CGameFramework::InitSound()
 	CSoundManager::GetInst()->RegisterSound("Sound/Background/Light Ambient 5 (Loop).wav", true, SOUND_CATEGORY::SOUND_BACKGROUND);
 
 	CSoundManager::GetInst()->RegisterSound("Sound/David Bowie - Starman.mp3", false, SOUND_CATEGORY::SOUND_BACKGROUND);
-	CSoundManager::GetInst()->RegisterSound("Sound/Air Cut by Langerium Id-84616.wav", false, SOUND_CATEGORY::SOUND_SHOOT);
-	CSoundManager::GetInst()->RegisterSound("Sound/Bloody Blade 2 by Kreastricon62 Id-323526.wav", false, SOUND_CATEGORY::SOUND_SHOCK);
-	CSoundManager::GetInst()->RegisterSound("Sound/Swing by XxChr0nosxX Id-268227.wav", false, SOUND_CATEGORY::SOUND_SHOOT);
-	CSoundManager::GetInst()->RegisterSound("Sound/Sword by hello_flowers Id-37596.wav", false, SOUND_CATEGORY::SOUND_SHOOT);
-	CSoundManager::GetInst()->RegisterSound("Sound/Sword4 by Streety Id-30246.wav", false, SOUND_CATEGORY::SOUND_SHOOT);
-	CSoundManager::GetInst()->RegisterSound("Sound/Sword7 by Streety Id-30248.wav", false, SOUND_CATEGORY::SOUND_SHOOT);
+	CSoundManager::GetInst()->RegisterSound("Sound/shoot/Air Cut by Langerium Id-84616.wav", false, SOUND_CATEGORY::SOUND_SHOOT);
+	CSoundManager::GetInst()->RegisterSound("Sound/shoot/Bloody Blade 2 by Kreastricon62 Id-323526.wav", false, SOUND_CATEGORY::SOUND_SHOCK);
+	CSoundManager::GetInst()->RegisterSound("Sound/shoot/Swing by XxChr0nosxX Id-268227.wav", false, SOUND_CATEGORY::SOUND_SHOOT);
+	CSoundManager::GetInst()->RegisterSound("Sound/shoot/Sword by hello_flowers Id-37596.wav", false, SOUND_CATEGORY::SOUND_SHOOT);
+	CSoundManager::GetInst()->RegisterSound("Sound/shoot/Sword4 by Streety Id-30246.wav", false, SOUND_CATEGORY::SOUND_SHOOT);
+	CSoundManager::GetInst()->RegisterSound("Sound/shoot/Sword7 by Streety Id-30248.wav", false, SOUND_CATEGORY::SOUND_SHOOT);
+	CSoundManager::GetInst()->RegisterSound("Sound/shoot/ethanchase7744__sword-slash.wav", false, SOUND_CATEGORY::SOUND_SHOOT);
+	//CSoundManager::GetInst()->RegisterSound("Sound/shoot/sword-with-swipe.wav", false, SOUND_CATEGORY::SOUND_SHOOT);
+	CSoundManager::GetInst()->RegisterSound("Sound/shoot/thebuilder15__sword-impact.wav", false, SOUND_CATEGORY::SOUND_SHOOT);
+
 	CSoundManager::GetInst()->RegisterSound("Sound/effect/HammerFlesh1.wav", false, SOUND_CATEGORY::SOUND_SHOCK);
 	CSoundManager::GetInst()->RegisterSound("Sound/effect/HammerFlesh2.wav", false, SOUND_CATEGORY::SOUND_SHOCK);
 	CSoundManager::GetInst()->RegisterSound("Sound/effect/HammerFlesh3.wav", false, SOUND_CATEGORY::SOUND_SHOCK);
 	CSoundManager::GetInst()->RegisterSound("Sound/effect/HammerFlesh4.wav", false, SOUND_CATEGORY::SOUND_SHOCK);
 	CSoundManager::GetInst()->RegisterSound("Sound/effect/HammerFlesh5.wav", false, SOUND_CATEGORY::SOUND_SHOCK);
+	CSoundManager::GetInst()->RegisterSound("Sound/effect/EffectSound1.mp3", false, SOUND_CATEGORY::SOUND_SHOCK);
+	CSoundManager::GetInst()->RegisterSound("Sound/effect/herkules92__sword-attack.wav", false, SOUND_CATEGORY::SOUND_SHOCK);
+	CSoundManager::GetInst()->RegisterSound("Sound/effect/herkules92__sword-attack.wav", false, SOUND_CATEGORY::SOUND_SHOCK);
+	CSoundManager::GetInst()->RegisterSound("Sound/effect/hit-swing-sword.wav", false, SOUND_CATEGORY::SOUND_SHOCK);
+	CSoundManager::GetInst()->RegisterSound("Sound/effect/kneeling__cleaver.mp3", false, SOUND_CATEGORY::SOUND_SHOCK);
 
 	CSoundManager::GetInst()->RegisterSound("Sound/Voice/Goblin/GoblinMoan01.mp3", false, SOUND_CATEGORY::SOUND_VOICE);
 	CSoundManager::GetInst()->RegisterSound("Sound/Voice/Goblin/GoblinMoan02.mp3", false, SOUND_CATEGORY::SOUND_VOICE);
@@ -109,6 +118,34 @@ void CGameFramework::InitSound()
 	CSoundManager::GetInst()->RegisterSound("Sound/Voice/Orc/OrcMoan06.mp3", false, SOUND_CATEGORY::SOUND_VOICE);
 
 	CSoundManager::GetInst()->RegisterSound("Sound/Voice/Skeleton/SkeletonMoan01.mp3", false, SOUND_CATEGORY::SOUND_VOICE);
+
+	CSoundManager::GetInst()->RegisterSound("Sound/UI/Menu Selection Click by NenadSimic Id-171697.wav", false, SOUND_CATEGORY::SOUND_UI_BUTTON);
+	CSoundManager::GetInst()->RegisterSound("Sound/UI/Water Click by Mafon2 Id-371274.wav", false, SOUND_CATEGORY::SOUND_UI_BUTTON_CLICK);
+
+	// 호버링 사운드 리스너 등록
+	std::unique_ptr<SoundPlayComponent> listener = std::make_unique<SoundPlayComponent>();
+	listener->SetDelay(0.0f);
+	listener->SetEnable(true);
+	listener->SetSC(SOUND_CATEGORY::SOUND_UI_BUTTON);
+	listener->SetMT(MONSTER_TYPE::NONE);
+	listener->SetSoundNumber(0);
+	listener->SetVolume(1.0f);
+	m_pListeners.push_back(std::move(listener));
+
+	CMessageDispatcher::GetInst()->RegisterListener(MessageType::PLAY_SOUND, m_pListeners.back().get(), nullptr);
+
+	// 클릭 사운드 리스너 등록
+	listener = std::make_unique<SoundPlayComponent>();
+	listener->SetDelay(0.0f);
+	listener->SetEnable(true);
+	listener->SetSC(SOUND_CATEGORY::SOUND_UI_BUTTON_CLICK);
+	listener->SetMT(MONSTER_TYPE::NONE);
+	listener->SetSoundNumber(0);
+	listener->SetVolume(1.0f);
+	m_pListeners.push_back(std::move(listener));
+
+	CMessageDispatcher::GetInst()->RegisterListener(MessageType::PLAY_SOUND, m_pListeners.back().get(), nullptr);
+
 
 	//CSoundManager::GetInst()->PlaySound("Sound/Background/Action 2 (Loop).wav", 0.25f, 0.0f);
 }
@@ -190,6 +227,7 @@ void CGameFramework::CreateDirect3DDevice()
 	::gnRtvDescriptorIncrementSize = m_pd3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
 	::gnCbvSrvDescriptorIncrementSize = m_pd3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 
+	Locator.SetDevice(m_pd3dDevice.Get());
 }
 void CGameFramework::CreateCommandQueueAndList()
 {
@@ -331,7 +369,11 @@ void CGameFramework::BuildObjects()
 
 	CSimulatorScene::GetInst()->m_pHDRComputeShader->SetTextureSource(m_pd3dDevice.Get(), CSimulatorScene::GetInst()->m_pPostProcessShader->GetTextureShared());
 
-	m_pPlayer = std::make_unique<CPlayer>(m_pd3dDevice.Get(), m_pd3dCommandList.Get(), 1);
+	m_pPlayer = std::make_unique<CKnightPlayer>(m_pd3dDevice.Get(), m_pd3dCommandList.Get(), 1); 
+	m_pPlayer->SetPosition(XMFLOAT3(127.0f, 50.0f, -58.0f));
+	m_pPlayer->SetScale(4.0f, 4.0f, 4.0f);
+	m_pPlayer->Rotate(0.0f, 90.0f, 0.0f);
+	((CPlayer*)m_pPlayer.get())->m_pStateMachine->ChangeState(Idle_Player::GetInst());
 
 	m_pSceneManager->SetPlayer((CPlayer*)m_pPlayer.get());
 }

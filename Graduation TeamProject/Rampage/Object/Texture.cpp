@@ -11,7 +11,7 @@ CTexture::CTexture(int nTextures, UINT nTextureType, int nSamplers, int nRootPar
 	{
 		m_ppd3dTextureUploadBuffers.resize(m_nTextures); // 업로드 버퍼 생성
 		m_ppd3dTextures.resize(m_nTextures); // 텍스쳐 리소스 생성
-
+		m_nTextureCoords.resize(m_nTextures); // 텍스쳐 행, 열 생성
 		m_ppstrTextureNames.resize(m_nTextures); // 각 텍스쳐의 이름을 저장하는 배열 생성
 		for (int i = 0; i < m_nTextures; i++) {
 			m_ppstrTextureNames[i].resize(64);
@@ -20,6 +20,8 @@ CTexture::CTexture(int nTextures, UINT nTextureType, int nSamplers, int nRootPar
 
 		m_pd3dSrvGpuDescriptorHandles.resize(m_nTextures); // 
 		for (int i = 0; i < m_nTextures; i++) m_pd3dSrvGpuDescriptorHandles[i].ptr = NULL;
+		m_pd3dSrvCpuDescriptorHandles.resize(m_nTextures); // 
+		for (int i = 0; i < m_nTextures; i++) m_pd3dSrvCpuDescriptorHandles[i].ptr = NULL;
 
 		m_pnResourceTypes.resize(m_nTextures);
 		m_pdxgiBufferFormats.resize(m_nTextures);
@@ -28,6 +30,7 @@ CTexture::CTexture(int nTextures, UINT nTextureType, int nSamplers, int nRootPar
 		m_pnBufferStrides.resize(m_nTextures);
 		for (int i = 0; i < m_nTextures; i++) m_pnBufferStrides[i] = 0;
 	}
+
 	m_nRootParameters = nRootParameters;
 	if (nRootParameters > 0) m_pnRootParameterIndices.resize(nRootParameters);
 	for (int i = 0; i < m_nRootParameters; i++) m_pnRootParameterIndices[i] = -1;
@@ -51,6 +54,8 @@ CTexture::CTexture(int nTextures, UINT nTextureType, int nSamplers, int nRootPar
 
 		m_pd3dSrvGpuDescriptorHandles.resize(nGraphicsSrvGpuHandles); // 
 		for (int i = 0; i < nGraphicsSrvGpuHandles; i++) m_pd3dSrvGpuDescriptorHandles[i].ptr = NULL;
+		m_pd3dSrvCpuDescriptorHandles.resize(m_nTextures); // 
+		for (int i = 0; i < m_nTextures; i++) m_pd3dSrvCpuDescriptorHandles[i].ptr = NULL;
 
 		m_pd3dComputeUavGpuDescriptorHandles.resize(nComputeUavGpuHandles);
 		for (int i = 0; i < nComputeUavGpuHandles; i++) m_pd3dComputeUavGpuDescriptorHandles[i].ptr = NULL;
@@ -114,7 +119,6 @@ void CTexture::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
 	}
 	else
 	{
-
 		if (m_pd3dSrvGpuDescriptorHandles[0].ptr) pd3dCommandList->SetGraphicsRootDescriptorTable(m_pnRootParameterIndices[0], m_pd3dSrvGpuDescriptorHandles[0]);
 	}
 }
@@ -168,20 +172,25 @@ void CTexture::ReleaseUploadBuffers()
 	}
 }
 
-void CTexture::SetRowColumn(int iRow, int iColumn)
+void CTexture::SetRowColumn(int iIndex, int iRow, int iColumn)
 {
-	m_iRow = iRow;
-	m_iColumn = iColumn;
+	if ((iIndex >= m_nTextures) || (iIndex < 0))
+		return;
+	m_nTextureCoords[iIndex] = std::pair<int, int>(iRow, iColumn);
 }
 
-int CTexture::GetRow()
+int CTexture::GetRow(int iIndex)
 {
-	return m_iRow;
+	if ((iIndex >= m_nTextures) || (iIndex < 0))
+		return -1;
+	return m_nTextureCoords[iIndex].first;
 }
 
-int CTexture::GetColumn()
+int CTexture::GetColumn(int iIndex)
 {
-	return m_iColumn;
+	if ((iIndex >= m_nTextures) || (iIndex < 0))
+		return -1;
+	return m_nTextureCoords[iIndex].second;
 }
 
 

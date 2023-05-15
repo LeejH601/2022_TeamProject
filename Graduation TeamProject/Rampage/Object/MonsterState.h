@@ -12,6 +12,7 @@ public:
     virtual void Enter(CMonster* monster);
     virtual void Execute(CMonster* monster, float fElapsedTime);
     virtual void Animate(CMonster* monster, float fElapsedTime);
+    virtual void OnRootMotion(CMonster* monster, float fTimeElapsed);
     virtual void Exit(CMonster* monster);
 };
 
@@ -26,13 +27,14 @@ public:
     virtual void Enter(CMonster* monster);
     virtual void Execute(CMonster* monster, float fElapsedTime);
     virtual void Animate(CMonster* monster, float fElapsedTime);
+    virtual void OnRootMotion(CMonster* monster, float fTimeElapsed);
     virtual void Exit(CMonster* monster);
 };
 
 class Idle_Monster : public CState<CMonster>
 {
 private:
-    float m_fMaxIdleTime = 1.0f;
+    float m_fMaxIdleTime = 1.5f;
 public:
     DECLARE_SINGLE(Idle_Monster);
     Idle_Monster();
@@ -40,6 +42,7 @@ public:
     virtual void Enter(CMonster* monster);
     virtual void Execute(CMonster* monster, float fElapsedTime);
     virtual void Animate(CMonster* monster, float fElapsedTime);
+    virtual void OnRootMotion(CMonster* monster, float fTimeElapsed);
     virtual void Exit(CMonster* monster);
 };
 
@@ -52,6 +55,7 @@ public:
     virtual void Enter(CMonster* monster);
     virtual void Execute(CMonster* monster, float fElapsedTime);
     virtual void Animate(CMonster* monster, float fElapsedTime);
+    virtual void OnRootMotion(CMonster* monster, float fTimeElapsed);
     virtual void Exit(CMonster* monster);
 };
 
@@ -62,6 +66,7 @@ public:
     virtual void Enter(CMonster* monster);
     virtual void Execute(CMonster* monster, float fElapsedTime);
     virtual void Animate(CMonster* monster, float fElapsedTime);
+    virtual void OnRootMotion(CMonster* monster, float fTimeElapsed);
     virtual void Exit(CMonster* monster);
 };
 
@@ -72,6 +77,7 @@ public:
     virtual void Enter(CMonster* monster);
     virtual void Execute(CMonster* monster, float fElapsedTime);
     virtual void Animate(CMonster* monster, float fElapsedTime);
+    virtual void OnRootMotion(CMonster* monster, float fTimeElapsed);
     virtual void Exit(CMonster* monster);
 };
 
@@ -84,6 +90,7 @@ public:
     virtual void Enter(CMonster* monster);
     virtual void Execute(CMonster* monster, float fElapsedTime);
     virtual void Animate(CMonster* monster, float fElapsedTime);
+    virtual void OnRootMotion(CMonster* monster, float fTimeElapsed);
     virtual void Exit(CMonster* monster);
 };
 
@@ -94,6 +101,7 @@ public:
     virtual void Enter(CMonster* monster);
     virtual void Execute(CMonster* monster, float fElapsedTime);
     virtual void Animate(CMonster* monster, float fElapsedTime);
+    virtual void OnRootMotion(CMonster* monster, float fTimeElapsed);
     virtual void Exit(CMonster* monster);
 };
 
@@ -106,5 +114,6 @@ public:
     virtual void Enter(CMonster* monster);
     virtual void Execute(CMonster* monster, float fElapsedTime);
     virtual void Animate(CMonster* monster, float fElapsedTime);
+    virtual void OnRootMotion(CMonster* monster, float fTimeElapsed);
     virtual void Exit(CMonster* monster);
 };

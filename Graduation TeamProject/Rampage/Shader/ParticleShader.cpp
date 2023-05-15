@@ -175,3 +175,10 @@ void CParticleShader::CreateGraphicsPipelineState(ID3D12Device* pd3dDevice, ID3D
 	CParticleShader::CreateShader(pd3dDevice, pd3dGraphicsRootSignature, 0, &pdxgiRtvFormat, 0); //Stream Output Pipeline State // DXGI_FORMAT_UNKNOWN
 	CParticleShader::CreateShader(pd3dDevice, pd3dGraphicsRootSignature, 7, pdxgiRtvFormats, 1); //Draw Pipeline State // DXGI_FORMAT_R8G8B8A8_UNORM
 }
+
+void CParticleShader::OnPrepareRender(ID3D12GraphicsCommandList* pd3dCommandList, int nPipelineState)
+{
+	if (m_ppd3dPipelineStates.data() && m_ppd3dPipelineStates[nPipelineState]) pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[nPipelineState].Get());
+
+	UpdateShaderVariables(pd3dCommandList);
+}

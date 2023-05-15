@@ -89,6 +89,14 @@ D3D12_RASTERIZER_DESC CBillBoardObjectShader::CreateRasterizerState(int nPipelin
 
 	return(d3dRasterizerDesc);
 }
+
+void CBillBoardObjectShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, int nPipelineState)
+{
+	if (m_ppd3dPipelineStates.data() && m_ppd3dPipelineStates[nPipelineState]) pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[nPipelineState].Get());
+
+	UpdateShaderVariables(pd3dCommandList);
+}
+
 D3D12_SHADER_BYTECODE CBillBoardObjectShader::CreateVertexShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
 {
 	return(CShader::ReadCompiledShaderFile(L"BillboardObjectVertexShader.cso", ppd3dShaderBlob));
@@ -109,7 +117,7 @@ D3D12_INPUT_LAYOUT_DESC CBillBoardObjectShader::CreateInputLayout(int nPipelineS
 	pd3dInputElementDescs[0] = { "SIZE", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
 	pd3dInputElementDescs[1] = { "LIFETIME", 0, DXGI_FORMAT_R32_FLOAT, 0, 8, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
 	pd3dInputElementDescs[2] = { "USEBILLBOARD", 0, DXGI_FORMAT_R8_UINT, 0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
-	
+	//pd3dInputElementDescs[3] = { "TEXTUREINDEX", 0, DXGI_FORMAT_R8_SINT, 0, 16, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
 
 	D3D12_INPUT_LAYOUT_DESC d3dInputLayoutDesc;
 	d3dInputLayoutDesc.pInputElementDescs = pd3dInputElementDescs;

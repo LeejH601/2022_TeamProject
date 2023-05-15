@@ -23,9 +23,10 @@ protected:
 	bool m_bOnGround = false; // ¶¥¿¡ ´êÀºÁö ¿©ºÎ
 
 public:
-	virtual void OnPrepareRender();
+	virtual void UpdateMatrix();
+	virtual void UpdateTransform(XMFLOAT4X4* pxmf4x4Parent = NULL);
 
-	void OnUpdateCallback(float fTimeElapsed);
+	virtual void OnUpdateCallback(float fTimeElapsed);
 	void SetUpdatedContext(LPVOID pContext) { m_pUpdatedContext = pContext; }
 
 	virtual void Update(float fTimeElapsed);

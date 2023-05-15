@@ -1,4 +1,5 @@
 #include "Monster.h"
+#include "Player.h"
 #include "ModelManager.h"
 #include "..\Global\Locator.h"
 #include "..\Shader\BoundingBoxShader.h"
@@ -19,9 +20,12 @@ CMonster::CMonster()
 
 	m_fHP = 100.0f;
 
-	m_fSpeedKperH = 2.0f;
+	m_fSpeedKperH = 1.0f;
 	m_fSpeedMperS = m_fSpeedKperH * 1000.0f / 3600.0f;
-	m_fSpeedUperS = m_fSpeedMperS * 8.0f / 1.0f;
+	m_fSpeedUperS = m_fSpeedMperS * 100.0f / 4.0f;
+
+	m_fAttackRange = 5.f;
+	m_fSensingRange = 40.f;
 
 	std::unique_ptr<PlayerAttackListener> pCollisionComponent = std::make_unique<PlayerAttackListener>();
 	pCollisionComponent->SetObject(this);
@@ -71,27 +75,20 @@ void CMonster::CheckIsPlayerInFrontOfThis(XMFLOAT3 xmf3PlayerPosition)
 
 void CMonster::CalculateResultPosition()
 {
-	XMFLOAT3 xmf3ShakeVec = Vector3::ScalarProduct(GetRight(), m_fShakeDistance, false);
+	XMFLOAT3 xmf3ShakeVec = Vector3::ScalarProduct(Vector3::Normalize(GetRight()), m_fShakeDistance, false);
 
 	m_xmf3CalPos = Vector3::Add(m_xmf3Position, xmf3ShakeVec);
 }
 
-void CMonster::OnPrepareRender()
+void CMonster::UpdateMatrix()
 {
-	if (m_bSimulateArticulate) {
-		UpdateTransformFromArticulation(NULL, m_pArtiLinkNames, m_AritculatCacheMatrixs, m_xmf3Scale.x);
-	}
-	else {
-		m_xmf4x4Transform._11 = m_xmf3Right.x; m_xmf4x4Transform._12 = m_xmf3Right.y; m_xmf4x4Transform._13 = m_xmf3Right.z;
-		m_xmf4x4Transform._21 = m_xmf3Up.x; m_xmf4x4Transform._22 = m_xmf3Up.y; m_xmf4x4Transform._23 = m_xmf3Up.z;
-		m_xmf4x4Transform._31 = m_xmf3Look.x; m_xmf4x4Transform._32 = m_xmf3Look.y; m_xmf4x4Transform._33 = m_xmf3Look.z;
-		m_xmf4x4Transform._41 = m_xmf3CalPos.x; m_xmf4x4Transform._42 = m_xmf3CalPos.y; m_xmf4x4Transform._43 = m_xmf3CalPos.z;
+	m_xmf4x4Transform._11 = m_xmf3Right.x; m_xmf4x4Transform._12 = m_xmf3Right.y; m_xmf4x4Transform._13 = m_xmf3Right.z;
+	m_xmf4x4Transform._21 = m_xmf3Up.x; m_xmf4x4Transform._22 = m_xmf3Up.y; m_xmf4x4Transform._23 = m_xmf3Up.z;
+	m_xmf4x4Transform._31 = m_xmf3Look.x; m_xmf4x4Transform._32 = m_xmf3Look.y; m_xmf4x4Transform._33 = m_xmf3Look.z;
+	m_xmf4x4Transform._41 = m_xmf3CalPos.x; m_xmf4x4Transform._42 = m_xmf3CalPos.y; m_xmf4x4Transform._43 = m_xmf3CalPos.z;
 
-		XMMATRIX mtxScale = XMMatrixScaling(m_xmf3Scale.x, m_xmf3Scale.y, m_xmf3Scale.z);
-		m_xmf4x4Transform = Matrix4x4::Multiply(mtxScale, m_xmf4x4Transform);
-
-		UpdateTransform(NULL);
-	}
+	XMMATRIX mtxScale = XMMatrixScaling(m_xmf3Scale.x, m_xmf3Scale.y, m_xmf3Scale.z);
+	m_xmf4x4Transform = Matrix4x4::Multiply(mtxScale, m_xmf4x4Transform);
 }
 
 void CMonster::SetScale(float x, float y, float z)
@@ -110,7 +107,7 @@ void CMonster::Update(float fTimeElapsed)
 	if (!m_bDissolved) {
 		if (m_bSimulateArticulate) {
 			TestDissolvetime += fTimeElapsed;
-			if (TestDissolvetime > 20.0f)
+			if (TestDissolvetime > 5.0f)
 				m_bDissolved = true;
 		}
 	}
@@ -124,7 +121,9 @@ void CMonster::Update(float fTimeElapsed)
 	// 플레이어가 터레인보다 아래에 있지 않도록 하는 코드
 	if (m_pUpdatedContext) CPhysicsObject::OnUpdateCallback(fTimeElapsed);
 
-	CalculateResultPosition();
+	XMFLOAT3 xmf3ShakeVec = Vector3::ScalarProduct(Vector3::Normalize(GetRight()), m_fShakeDistance, false);
+
+	m_xmf3CalPos = Vector3::Add(m_xmf3Position, xmf3ShakeVec);
 
 	m_pStateMachine->Animate(fTimeElapsed);
 
@@ -132,10 +131,7 @@ void CMonster::Update(float fTimeElapsed)
 }
 void CMonster::UpdateTransform(XMFLOAT4X4* pxmf4x4Parent)
 {
-	m_xmf4x4World = (pxmf4x4Parent) ? Matrix4x4::Multiply(m_xmf4x4Transform, *pxmf4x4Parent) : m_xmf4x4Transform;
-
-	if (m_pSibling) m_pSibling->UpdateTransform(pxmf4x4Parent);
-	if (m_pChild) m_pChild->UpdateTransform(&m_xmf4x4World);
+	CPhysicsObject::UpdateTransform(NULL);
 
 	m_BodyBoundingBox.Transform(m_TransformedBodyBoudningBox, XMLoadFloat4x4(&m_xmf4x4Transform));
 #ifdef RENDER_BOUNDING_BOX
@@ -148,6 +144,27 @@ void CMonster::UpdateTransform(XMFLOAT4X4* pxmf4x4Parent)
 		pWeaponBoundingBoxMesh->SetWorld(pWeapon->GetWorld());
 #endif 
 		m_WeaponBoundingBox.Transform(m_TransformedWeaponBoundingBox, XMLoadFloat4x4(&pWeapon->GetWorld()));
+	}
+}
+void CMonster::SetHit(CGameObject* pHitter)
+{
+	if (m_bSimulateArticulate == false) { // 변수 체크가 아닌 현재 상태 체크를 이용하는 것이 좋을듯
+		m_xmf3HitterVec = Vector3::Normalize(Vector3::Subtract(GetPosition(), pHitter->GetPosition()));
+		((CPlayer*)pHitter)->m_fCurLagTime = 0.f;
+
+		SetLookAt(Vector3::Add(GetPosition(), XMFLOAT3(-m_xmf3HitterVec.x, 0.0f, -m_xmf3HitterVec.z)));
+
+		PlayerParams PlayerParam{ pHitter };
+		CMessageDispatcher::GetInst()->Dispatch_Message<PlayerParams>(MessageType::UPDATE_HITLAG, &PlayerParam, ((CPlayer*)pHitter)->m_pStateMachine->GetCurrentState());
+
+		m_pStateMachine->ChangeState(Idle_Monster::GetInst());
+		m_pStateMachine->ChangeState(Damaged_Monster::GetInst());
+		m_iPlayerAtkId = ((CPlayer*)pHitter)->GetAtkId();
+	}
+	else {
+		TCHAR pstrDebug[256] = { 0 };
+		//_stprintf_s(pstrDebug, 256, "Already Dead \n");
+		OutputDebugString(L"Already Dead");
 	}
 }
 void CMonster::UpdateTransformFromArticulation(XMFLOAT4X4* pxmf4x4Parent, std::vector<std::string> pArtiLinkNames, std::vector<XMFLOAT4X4>& AritculatCacheMatrixs, float scale)
@@ -176,6 +193,13 @@ void CMonster::UpdateTransformFromArticulation(XMFLOAT4X4* pxmf4x4Parent, std::v
 COrcObject::COrcObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks)
 {
 	m_MonsterType = MONSTER_TYPE::ORC;
+
+	m_fSpeedKperH = 1.0f;
+	m_fSpeedMperS = m_fSpeedKperH * 1000.0f / 3600.0f;
+	m_fSpeedUperS = m_fSpeedMperS * 100.0f / 4.0f;
+
+	m_fAttackRange = 8.f;
+	m_fSensingRange = 30.f;
 
 	CLoadedModelInfo* pOrcModel = CModelManager::GetInst()->GetModelInfo("Object/Orc.bin");;
 	if (!pOrcModel) pOrcModel = CModelManager::GetInst()->LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, "Object/Orc.bin");
@@ -210,6 +234,10 @@ CGoblinObject::CGoblinObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 
 	m_fStunTime = 0.0f;
 	m_fStunStartTime = 0.2f;
+
+	m_fSpeedKperH = 1.5f;
+	m_fSpeedMperS = m_fSpeedKperH * 1000.0f / 3600.0f;
+	m_fSpeedUperS = m_fSpeedMperS * 100.0f / 4.0f;
 
 	CLoadedModelInfo* pGoblinModel = CModelManager::GetInst()->GetModelInfo("Object/Goblin.bin");;
 	if (!pGoblinModel) pGoblinModel = CModelManager::GetInst()->LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, "Object/Goblin.bin");
@@ -273,7 +301,7 @@ CMonsterRootAnimationController::~CMonsterRootAnimationController()
 {
 }
 
-void CMonsterRootAnimationController::OnRootMotion(CGameObject* pRootGameObject)
+void CMonsterRootAnimationController::OnRootMotion(CGameObject* pRootGameObject, float fTimeElapsed)
 {
 }
 

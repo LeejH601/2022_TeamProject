@@ -80,6 +80,7 @@ public:
 	float m_fDissolveTime;
 	float m_fMaxDissolveTime;
 
+	int m_iTextureIndex = 0; // BillBoard, Particle »ç¿ëÁß
 	std::vector<std::unique_ptr<IMessageListener>> m_pListeners;
 public:
 	std::unique_ptr<CAnimationController> m_pSkinnedAnimationController;
@@ -110,9 +111,10 @@ public:
 	void SetShader(std::shared_ptr<CShader> pShader, std::shared_ptr<CTexture> pTexture = NULL);
 	void SetMaterial(int nMaterial, std::shared_ptr<CMaterial> pMaterial);
 	void SetTexture(std::shared_ptr<CTexture> pTexture);
+	void SetTextureIndex(int iIndex);
 	void ChangeTexture(std::shared_ptr<CTexture> pTexture);
 	void SetMesh(std::shared_ptr<CMesh> pMesh) { m_pMesh = pMesh; }
-
+	
 	virtual void SetScale(float x, float y, float z);
 	virtual void SetPosition(float x, float y, float z);
 	virtual void SetPosition(XMFLOAT3 xmf3Position);
@@ -137,7 +139,6 @@ public:
 	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList);
 	virtual void ReleaseUploadBuffers();
 
-	virtual void PrepareAnimate() {}
 	virtual void PrepareBoundingBox(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList) {}
 	virtual void Update(float fTimeElapsed);
 	virtual void Animate(float fTimeElapsed);
@@ -184,61 +185,6 @@ public:
 
 	virtual void Animate(float fTimeElapsed);
 };
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//
-class CKightRootRollBackAnimationController : public CAnimationController
-{
-public:
-	CKightRootRollBackAnimationController(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks, CLoadedModelInfo* pModel);
-	virtual ~CKightRootRollBackAnimationController();
-
-	virtual void OnRootMotion(CGameObject* pRootGameObject);
-};
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//
-class CKightNoMoveRootAnimationController : public CAnimationController
-{
-public:
-	CKightNoMoveRootAnimationController(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks, CLoadedModelInfo* pModel);
-	virtual ~CKightNoMoveRootAnimationController();
-
-	virtual void OnRootMotion(CGameObject* pRootGameObject);
-};
-class CKnightObject : public CGameObject
-{
-private:
-	CGameObject* pWeapon;
-	BoundingBox m_BodyBoundingBox;
-	BoundingBox m_WeaponBoundingBox;
-	BoundingBox m_TransformedBodyBoundingBox;
-	BoundingBox m_TransformedWeaponBoundingBox;
-	CGameObject* pBodyBoundingBoxMesh;
-	CGameObject* pWeaponBoundingBoxMesh;
-	XMFLOAT4 m_xmf4TrailControllPoints[2];
-
-public:
-	CKnightObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks);
-	virtual ~CKnightObject();
-
-	virtual void SetRigidDynamic();
-	
-
-	virtual BoundingBox GetBoundingBox() { return m_TransformedBodyBoundingBox; }
-	virtual BoundingBox GetWeaponMeshBoundingBox() { return m_TransformedWeaponBoundingBox; }
-
-	virtual bool CheckCollision(CGameObject* pTargetObject);
-
-	virtual void Animate(float fTimeElapsed);
-	virtual void UpdateTransform(XMFLOAT4X4* pxmf4x4Parent = NULL);
-	virtual void PrepareBoundingBox(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
-
-	XMFLOAT4& GetTrailControllPoint(int n) { return m_xmf4TrailControllPoints[n]; };
-};
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //

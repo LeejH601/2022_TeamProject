@@ -62,6 +62,8 @@ private:
 	std::unique_ptr<CGameObject> m_pPlayer = NULL;
 	std::unique_ptr<CSceneManager> m_pSceneManager = NULL;
 
+	std::vector<std::unique_ptr<IMessageListener>> m_pListeners;
+
 	CGameTimer					m_GameTimer;
 
 	_TCHAR						m_pszFrameRate[50];

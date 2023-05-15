@@ -1,5 +1,4 @@
-Buffer<float4> gRandomConeBuffer : register(t32);
-Buffer<float4> gRandomSphereBuffer : register(t33);
+Buffer<float4> gRandomSphereBuffer : register(t50);
 
 #define SPHERE_PARTILCE 0
 #define RECOVERY_PARTILCE 1
@@ -86,12 +85,6 @@ void OutputRandomAccelerationParticleToStream(VS_PARTICLE_INPUT input, inout Poi
 float4 RandomDirectionOnSphere(float fOffset)
 {
 	int u = uint(gfCurrentTime + fOffset /*+ frac(gfCurrentTime) * 1000.0f*/) % 256;
-	return(normalize(gRandomSphereBuffer.Load(u)));
-}
-
-float4 RandomDirectionOnCone(float fOffset)
-{
-	int u = uint(gfCurrentTime + fOffset + frac(gfCurrentTime) * 1000.0f) % 256;
 	return(normalize(gRandomSphereBuffer.Load(u)));
 }
 

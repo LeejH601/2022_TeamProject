@@ -307,6 +307,7 @@ public:
 	XMFLOAT2						m_xmf2Size;
 	float							m_fLifetime;
 	int								m_iBillBoard;
+	//int							m_iTextureIndex;
 public:
 	CSpriteVertex() { m_xmf2Size = XMFLOAT2(0.f, 0.f), m_iBillBoard = true; m_fLifetime = 0.f; }
 	CSpriteVertex(XMFLOAT2 xmf2Size, bool bBillBoard)

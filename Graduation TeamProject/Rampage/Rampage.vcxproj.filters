@@ -211,6 +211,12 @@
     <ClCompile Include="Object\SwordTrailObject.cpp">
       <Filter>Object</Filter>
     </ClCompile>
+    <ClCompile Include="ImGui\implot.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="ImGui\implot_items.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Global\stdafx.h">
@@ -308,12 +314,6 @@
     </ClInclude>
     <ClInclude Include="Global\Locator.h">
       <Filter>Global</Filter>
-    </ClInclude>
-    <ClInclude Include="Object\MonsterState.h">
-      <Filter>Object</Filter>
-    </ClInclude>
-    <ClInclude Include="Object\MonsterState.h">
-      <Filter>Object</Filter>
     </ClInclude>
     <ClInclude Include="Object\Monster.h">
       <Filter>Object</Filter>
@@ -413,6 +413,18 @@
     </ClInclude>
     <ClInclude Include="Object\MonsterState.h">
       <Filter>Object\State</Filter>
+    </ClInclude>
+    <ClInclude Include="Object\MonsterState.h">
+      <Filter>Object\State</Filter>
+    </ClInclude>
+    <ClInclude Include="Object\MonsterState.h">
+      <Filter>Object\State</Filter>
+    </ClInclude>
+    <ClInclude Include="ImGui\implot.h">
+      <Filter>ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="ImGui\implot_internal.h">
+      <Filter>ImGui</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

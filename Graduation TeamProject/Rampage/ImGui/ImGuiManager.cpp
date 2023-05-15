@@ -8,6 +8,7 @@
 #include "..\Global\Locator.h"
 #include "..\Sound\SoundManager.h"
 #include "..\Object\TextureManager.h"
+#include "implot.h"
 
 #define NUM_FRAMES_IN_FLIGHT 3
 #define MAX_FILENAME_SIZE 100
@@ -62,7 +63,7 @@ void DataLoader::SaveComponentSets(std::wstring wFolderName)
 		wFolderName.resize(wcslen(wFolderName.c_str()));
 
 		path = file_path + wFolderName + L"\\Component" + std::to_wstring(i) + file_ext;
-		
+
 		std::wstring fp = file_path + wFolderName;
 		if (!CreateDirectoryIfNotExists(fp)) {
 			return;
@@ -254,7 +255,7 @@ void DataLoader::SaveComponentSet(FILE* pInFile, CState<CPlayer>* pState)
 	WriteStringFromFile(pInFile, std::string("<ParticleEmitNumber>:"));
 	WriteIntegerFromFile(pInFile, pParticleComponent->GetEmitParticleNumber());
 	WriteStringFromFile(pInFile, std::string("<ParticleIndex>:"));
-	WriteIntegerFromFile(pInFile, pParticleComponent->GetParticleIndex());
+	WriteIntegerFromFile(pInFile, pParticleComponent->GetTextureIndex());
 	WriteStringFromFile(pInFile, std::string("<Alpha>:"));
 	WriteFloatFromFile(pInFile, pParticleComponent->GetAlpha());
 	WriteStringFromFile(pInFile, std::string("<LifeTime>:"));
@@ -286,6 +287,12 @@ void DataLoader::SaveComponentSet(FILE* pInFile, CState<CPlayer>* pState)
 	WriteFloatFromFile(pInFile, pImpactComponent->GetSpeed());
 	WriteStringFromFile(pInFile, std::string("<Alpha>:"));
 	WriteFloatFromFile(pInFile, pImpactComponent->GetAlpha());
+	WriteStringFromFile(pInFile, std::string("<Color_R>:"));
+	WriteFloatFromFile(pInFile, pImpactComponent->GetColor().x);
+	WriteStringFromFile(pInFile, std::string("<Color_G>:"));
+	WriteFloatFromFile(pInFile, pImpactComponent->GetColor().y);
+	WriteStringFromFile(pInFile, std::string("<Color_B>:"));
+	WriteFloatFromFile(pInFile, pImpactComponent->GetColor().z);
 	WriteStringFromFile(pInFile, std::string("</ImpactComponent>:"));
 
 	str = "</Components>:";
@@ -637,12 +644,7 @@ void DataLoader::LoadComponentSet(FILE* pInFile, CState<CPlayer>* pState)
 				}
 				else if (!strcmp(buf, "<ParticleIndex>:"))
 				{
-					pParticleComponent->SetParticleIndex(ReadIntegerFromFile(pInFile));
-
-					std::vector<std::shared_ptr<CTexture>> vTexture = CSimulatorScene::GetInst()->GetTextureManager()->GetParticleTextureList();
-
-					std::shared_ptr pTexture = vTexture[pParticleComponent->GetParticleIndex()];
-					pParticleComponent->SetParticleTexture(pTexture);
+					pParticleComponent->SetTextureIndex(ReadIntegerFromFile(pInFile));
 				}
 				else if (!strcmp(buf, "<Alpha>:"))
 				{
@@ -695,11 +697,6 @@ void DataLoader::LoadComponentSet(FILE* pInFile, CState<CPlayer>* pState)
 				else if (!strcmp(buf, "<TextureIndex>:"))
 				{
 					pImpactComponent->SetTextureIndex(ReadIntegerFromFile(pInFile));
-
-					std::vector<std::shared_ptr<CTexture>> vTexture = CSimulatorScene::GetInst()->GetTextureManager()->GetParticleTextureList();
-
-					std::shared_ptr<CTexture> pTexture = vTexture[pImpactComponent->GetTextureIndex()];
-					pImpactComponent->SetImpactTexture(pTexture);
 				}
 				else if (!strcmp(buf, "<Size_X>:"))
 				{
@@ -716,6 +713,18 @@ void DataLoader::LoadComponentSet(FILE* pInFile, CState<CPlayer>* pState)
 				else if (!strcmp(buf, "<Alpha>:"))
 				{
 					pImpactComponent->SetAlpha(ReadFloatFromFile(pInFile));
+				}
+				else if (!strcmp(buf, "<Color_R>:"))
+				{
+					pImpactComponent->SetColorR(ReadFloatFromFile(pInFile));
+				}
+				else if (!strcmp(buf, "<Color_G>:"))
+				{
+					pImpactComponent->SetColorG(ReadFloatFromFile(pInFile));
+				}
+				else if (!strcmp(buf, "<Color_B>:"))
+				{
+					pImpactComponent->SetColorB(ReadFloatFromFile(pInFile));
 				}
 				else if (!strcmp(buf, "</ImpactComponent>:"))
 				{
@@ -769,7 +778,7 @@ CImGuiManager::~CImGuiManager()
 void CImGuiManager::CreateSrvDescriptorHeaps(ID3D12Device* pd3dDevice)
 {
 	D3D12_DESCRIPTOR_HEAP_DESC d3dDescriptorHeapDesc;
-	d3dDescriptorHeapDesc.NumDescriptors = 3;
+	d3dDescriptorHeapDesc.NumDescriptors = 10;
 	d3dDescriptorHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
 	d3dDescriptorHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
 	d3dDescriptorHeapDesc.NodeMask = 0;
@@ -798,6 +807,47 @@ void CImGuiManager::CreateShaderResourceViews(ID3D12Device* pd3dDevice, CTexture
 		m_d3dSrvGPUDescriptorNextHandle.ptr += ::gnCbvSrvDescriptorIncrementSize;
 	}
 }
+void CImGuiManager::SetPreviewTexture(ID3D12Device* pd3dDevice, CTexture* pTexture, UINT textureIndex, UINT index, PREVIEW_TEXTURE_TYPE type)
+{
+	D3D12_CPU_DESCRIPTOR_HANDLE d3dSrvCPUDescriptorHandle; d3dSrvCPUDescriptorHandle.ptr = m_d3dSrvCPUDescriptorStartHandle.ptr + (::gnCbvSrvDescriptorIncrementSize * index);
+	D3D12_GPU_DESCRIPTOR_HANDLE d3dSrvGPUDescriptorHandle; d3dSrvGPUDescriptorHandle.ptr = m_d3dSrvGPUDescriptorStartHandle.ptr + (::gnCbvSrvDescriptorIncrementSize * index);
+
+	int nTextures = pTexture->GetTextures();
+	UINT nTextureType = pTexture->GetTextureType();
+
+	ID3D12Resource* pShaderResource = pTexture->GetResource(textureIndex);
+	D3D12_SHADER_RESOURCE_VIEW_DESC d3dShaderResourceViewDesc = pTexture->GetShaderResourceViewDesc(textureIndex);
+	pd3dDevice->CreateShaderResourceView(pShaderResource, &d3dShaderResourceViewDesc, d3dSrvCPUDescriptorHandle);
+	d3dSrvCPUDescriptorHandle.ptr += ::gnCbvSrvDescriptorIncrementSize;
+	switch (type)
+	{
+	case PREVIEW_TEXTURE_TYPE::TYPE_IMPACT: // impact
+		m_d3dSrvGPUDescriptorHandle_ImpactTexture = d3dSrvGPUDescriptorHandle;
+		break;
+	case PREVIEW_TEXTURE_TYPE::TYPE_PARTICLE: // particle
+		m_d3dSrvGPUDescriptorHandle_ParticleTexture = d3dSrvGPUDescriptorHandle;
+		break;
+	default:
+		break;
+	}
+	d3dSrvGPUDescriptorHandle.ptr += ::gnCbvSrvDescriptorIncrementSize;
+	
+}
+void CImGuiManager::SetShaderResourceViews(CTexture* pTexture, UINT index)
+{
+	D3D12_CPU_DESCRIPTOR_HANDLE d3dSrvCPUDescriptorHandle; d3dSrvCPUDescriptorHandle.ptr = m_d3dSrvCPUDescriptorStartHandle.ptr + (::gnCbvSrvDescriptorIncrementSize * index);
+	D3D12_GPU_DESCRIPTOR_HANDLE d3dSrvGPUDescriptorHandle; d3dSrvGPUDescriptorHandle.ptr = m_d3dSrvGPUDescriptorStartHandle.ptr + (::gnCbvSrvDescriptorIncrementSize * index);
+
+	int nTextures = pTexture->GetTextures();
+	UINT nTextureType = pTexture->GetTextureType();
+	for (int i = 0; i < nTextures; i++)
+	{
+		ID3D12Resource* pShaderResource = pTexture->GetResource(i);
+		d3dSrvCPUDescriptorHandle.ptr = pTexture->m_pd3dSrvCpuDescriptorHandles[i].ptr;
+		d3dSrvGPUDescriptorHandle.ptr = pTexture->m_pd3dSrvGpuDescriptorHandles[i].ptr;
+	}
+}
+
 ID3D12Resource* CImGuiManager::GetRTTextureResource() { return m_pRTTexture->GetResource(0); }
 void CImGuiManager::Init(HWND hWnd, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, D3D12_CPU_DESCRIPTOR_HANDLE d3dRtvCPUDescriptorHandle, const RECT& DeskTopCoordinatesRect)
 {
@@ -927,7 +977,7 @@ void CImGuiManager::SetUI()
 	{
 		ImGuiWindowFlags my_window_flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize;
 		ImGui::Begin(U8STR("타격감 프리셋 메뉴"), &show_preset_menu, my_window_flags);
-		
+
 		std::string path = "..\\Rampage\\Data";
 		std::vector<std::u8string> v;
 		for (const auto& entry : std::filesystem::directory_iterator(path))
@@ -1015,7 +1065,7 @@ void CImGuiManager::SetUI()
 					show_save_menu = true;
 				}
 				ImGui::Separator();
-				if(ImGui::MenuItem(U8STR("타격감 프리셋 메뉴"), NULL))
+				if (ImGui::MenuItem(U8STR("타격감 프리셋 메뉴"), NULL))
 				{
 					show_preset_menu = true;
 				}
@@ -1042,14 +1092,14 @@ void CImGuiManager::SetUI()
 		ImGui::SameLine();
 		if (ImGui::Button(U8STR("공격2")))
 		{
-			if(show_simulator_scene)
+			if (show_simulator_scene)
 				CSimulatorScene::GetInst()->SetPlayerAnimationSet(1);
 			Player_Animation_Number = 1;
 		}
 		ImGui::SameLine();
 		if (ImGui::Button(U8STR("공격3")))
 		{
-			if(show_simulator_scene)
+			if (show_simulator_scene)
 				CSimulatorScene::GetInst()->SetPlayerAnimationSet(2);
 			Player_Animation_Number = 2;
 		}
@@ -1068,6 +1118,7 @@ void CImGuiManager::SetUI()
 			}
 			if (ImGui::TreeNode(U8STR("잔상 이펙트")))
 			{
+				ShowTrailManager(pCurrentAnimation);
 				ImGui::TreePop();
 			}
 		}
@@ -1146,12 +1197,15 @@ void CImGuiManager::ShowImpactManager(CState<CPlayer>* pCurrentAnimation)
 	ImpactEffectComponent* pImpactEffectComponent = dynamic_cast<ImpactEffectComponent*>(pCurrentAnimation->GetImpactComponent());
 	ImGui::Checkbox(U8STR("켜기/끄기##ImpactEffect"), &pImpactEffectComponent->GetEnable());
 
-	std::vector<std::shared_ptr<CTexture>> vTexture = CSimulatorScene::GetInst()->GetTextureManager()->GetParticleTextureList();
+	pImpactEffectComponent->SetTextureOffset(CSimulatorScene::GetInst()->GetTextureManager()->GetTextureOffset(TextureType::BillBoardTexture));
+	UINT m_iBillboardTextureN = CSimulatorScene::GetInst()->GetTextureManager()->GetTextureListIndex(TextureType::BillBoardTexture);
+	
+	std::shared_ptr<CTexture> pTexture = CSimulatorScene::GetInst()->GetTextureManager()->GetTexture(TextureType::BillBoardTexture);
 	std::vector<const char*> items;
 	std::vector <std::string> str(100);
-	for (int i = 0; i < vTexture.size(); i++)
+	for (int i = 0; i < m_iBillboardTextureN; i++)
 	{
-		std::wstring wstr = vTexture[i]->GetTextureName(0);
+		std::wstring wstr = pTexture->GetTextureName(i);
 		str[i].assign(wstr.begin(), wstr.end());
 		items.emplace_back(str[i].c_str());
 	}
@@ -1159,8 +1213,13 @@ void CImGuiManager::ShowImpactManager(CState<CPlayer>* pCurrentAnimation)
 	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
 	if (ImGui::Combo(U8STR("텍스쳐##ImpactEffect"), (int*)(&pImpactEffectComponent->GetTextureIndex()), items.data(), items.size()));
 	{
-		std::shared_ptr<CTexture> pTexture = vTexture[pImpactEffectComponent->GetTextureIndex()];
-		pImpactEffectComponent->SetImpactTexture(pTexture);
+		int iTextureIndex = pImpactEffectComponent->GetTextureIndex();
+		pImpactEffectComponent->SetTotalRowColumn(pTexture->GetRow(iTextureIndex), pTexture->GetColumn(iTextureIndex));
+
+		int my_image_width = 0.2f * m_lDesktopHeight;
+		int my_image_height = 0.2f * m_lDesktopHeight;
+		SetPreviewTexture(Locator.GetDevice(), pTexture.get(), pImpactEffectComponent->GetTextureIndex(), 2, PREVIEW_TEXTURE_TYPE::TYPE_IMPACT);
+		ImGui::Image((ImTextureID)(m_d3dSrvGPUDescriptorHandle_ImpactTexture.ptr), ImVec2((float)my_image_width, (float)my_image_height));
 	}
 
 	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
@@ -1172,13 +1231,15 @@ void CImGuiManager::ShowImpactManager(CState<CPlayer>* pCurrentAnimation)
 		pImpactEffectComponent->GetAlpha() = std::clamp(pImpactEffectComponent->GetAlpha(), IMPACT_ALPHA_MIN, IMPACT_ALPHA_MAX);
 
 	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
-	if(ImGui::DragFloat(U8STR("X 크기##ImpactEffect"), &pImpactEffectComponent->GetXSize(), DRAG_FLOAT_UNIT, IMPACT_SIZE_MIN, IMPACT_SIZE_MAX, "%.2f", 0))
+	if (ImGui::DragFloat(U8STR("X 크기##ImpactEffect"), &pImpactEffectComponent->GetXSize(), DRAG_FLOAT_UNIT, IMPACT_SIZE_MIN, IMPACT_SIZE_MAX, "%.2f", 0))
 		pImpactEffectComponent->GetXSize() = std::clamp(pImpactEffectComponent->GetXSize(), IMPACT_SIZE_MIN, IMPACT_SIZE_MAX);
 
 	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
-	if(ImGui::DragFloat(U8STR("Y 크기##ImpactEffect"), &pImpactEffectComponent->GetYSize(), DRAG_FLOAT_UNIT, IMPACT_SIZE_MIN, IMPACT_SIZE_MAX, "%.2f", 0))
+	if (ImGui::DragFloat(U8STR("Y 크기##ImpactEffect"), &pImpactEffectComponent->GetYSize(), DRAG_FLOAT_UNIT, IMPACT_SIZE_MIN, IMPACT_SIZE_MAX, "%.2f", 0))
 		pImpactEffectComponent->GetYSize() = std::clamp(pImpactEffectComponent->GetYSize(), IMPACT_SIZE_MIN, IMPACT_SIZE_MAX);
-	
+
+	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
+	ImGui::ColorEdit3(U8STR("색상##ImpactEffect"), (float*)&pImpactEffectComponent->GetColor()); // Edit 3 floats representing a color
 	ImGui::End();
 }
 void CImGuiManager::ShowParticleManager(CState<CPlayer>* pCurrentAnimation)
@@ -1193,25 +1254,30 @@ void CImGuiManager::ShowParticleManager(CState<CPlayer>* pCurrentAnimation)
 	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
 	ImGui::Checkbox(U8STR("켜기/끄기##ParticleEffect"), &pParticleComponent->GetEnable());
 
-	std::vector<std::shared_ptr<CTexture>> vTexture = CSimulatorScene::GetInst()->GetTextureManager()->GetParticleTextureList();
+	UINT m_iParticleTextureN = CSimulatorScene::GetInst()->GetTextureManager()->GetTextureListIndex(TextureType::ParticleTexture);
+	pParticleComponent->SetTextureOffset(CSimulatorScene::GetInst()->GetTextureManager()->GetTextureOffset(TextureType::ParticleTexture));
+	std::shared_ptr<CTexture> pTexture = CSimulatorScene::GetInst()->GetTextureManager()->GetTexture(TextureType::ParticleTexture);
 	std::vector<const char*> items;
 	std::vector <std::string> str(100);
-	for (int i = 0; i < vTexture.size(); i++)
+	for (int i = 0; i < m_iParticleTextureN; i++)
 	{
-		std::wstring wstr = vTexture[i]->GetTextureName(0);
+		std::wstring wstr = pTexture->GetTextureName(i);
 		str[i].assign(wstr.begin(), wstr.end());
 		items.emplace_back(str[i].c_str());
 	}
 
 	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
-	if (ImGui::Combo(U8STR("텍스쳐##ParticleEffect"), (int*)(&pParticleComponent->GetParticleIndex()), items.data(), items.size()))
-	{
-		std::shared_ptr pTexture = vTexture[pParticleComponent->GetParticleIndex()];
-		pParticleComponent->SetParticleTexture(pTexture);
-	}
+	if(ImGui::Combo(U8STR("텍스쳐##ParticleEffect"), (int*)(&pParticleComponent->GetTextureIndex()), items.data(), items.size()))
+
+	int my_image_width = 0.2f * m_lDesktopHeight;
+	int my_image_height = 0.2f * m_lDesktopHeight;
+
+
+	SetPreviewTexture(Locator.GetDevice(), pTexture.get(), pParticleComponent->GetTextureIndex(), 3, PREVIEW_TEXTURE_TYPE::TYPE_PARTICLE);
+	ImGui::Image((ImTextureID)(m_d3dSrvGPUDescriptorHandle_ParticleTexture.ptr), ImVec2((float)my_image_height, (float)my_image_height));
 
 	ImGui::SetNextItemWidth(190.f);
-	if(ImGui::DragFloat("XSize##ParticleEffect", &pParticleComponent->GetXSize(), DRAG_FLOAT_UNIT, PARTICLE_SIZE_MIN, PARTICLE_SIZE_MAX, "%.2f", 0))
+	if (ImGui::DragFloat("XSize##ParticleEffect", &pParticleComponent->GetXSize(), DRAG_FLOAT_UNIT, PARTICLE_SIZE_MIN, PARTICLE_SIZE_MAX, "%.2f", 0))
 		pParticleComponent->GetXSize() = std::clamp(pParticleComponent->GetXSize(), PARTICLE_SIZE_MIN, PARTICLE_SIZE_MAX);
 
 	ImGui::SetNextItemWidth(190.f);
@@ -1239,6 +1305,228 @@ void CImGuiManager::ShowParticleManager(CState<CPlayer>* pCurrentAnimation)
 
 	ImGui::End();
 }
+void CImGuiManager::ShowTrailManager(CState<CPlayer>* pCurrentAnimation)
+{
+	ImGuiWindowFlags my_window_flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize;
+	bool* b_open = nullptr;
+
+	ImGui::Begin(U8STR("잔상 이펙트 관리자"), b_open, my_window_flags);
+
+	TrailComponent* pTrailComponent = dynamic_cast<TrailComponent*>(pCurrentAnimation->GetTrailComponent());
+
+	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
+	ImGui::Checkbox(U8STR("켜기/끄기##TrailEffect"), &pTrailComponent->GetEnable());
+
+	std::vector<std::string> mainTextureNames = TrailComponent::GetMainTextureNames();
+	std::vector<const char*> mainItems;
+	for (int i = 0; i < mainTextureNames.size(); i++)
+	{
+		mainItems.emplace_back(mainTextureNames[i].c_str());
+	}
+
+	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
+	int mainTextureIndexCache = pTrailComponent->GetMainTextureIndex();
+	if (ImGui::Combo(U8STR("메인 텍스쳐##TrailEffect"), (int*)(&pTrailComponent->GetMainTextureIndex()), mainItems.data(), mainItems.size()))
+	{
+		/*std::shared_ptr pTexture = vTexture[pParticleComponent->GetParticleIndex()];
+		pParticleComponent->SetParticleTexture(pTexture);*/
+		// 메인 텍스쳐 로드
+		/*TrailTextureUpdateParams param;
+		param.pShader = */
+	}
+
+
+	ImGui::BulletText("Click and drag each point.");
+	static ImPlotDragToolFlags R_flags;
+	static ImPlotDragToolFlags G_flags;
+	static ImPlotDragToolFlags B_flags;
+	ImPlotAxisFlags ax_flags = ImPlotAxisFlags_NoTickLabels | ImPlotAxisFlags_NoTickMarks;
+	static bool VerticalInputFlag = true;
+
+	static int colorSelectFlag = 3;
+	ImGui::RadioButton("R##TrailEffect", &colorSelectFlag, 0); ImGui::SameLine();
+	ImGui::RadioButton("G##TrailEffect", &colorSelectFlag, 1); ImGui::SameLine();
+	ImGui::RadioButton("B##TrailEffect", &colorSelectFlag, 2); ImGui::SameLine();
+	ImGui::RadioButton("ALL##TrailEffect", &colorSelectFlag, 3);
+	switch (colorSelectFlag)
+	{
+	case 0:
+		R_flags = ImPlotDragToolFlags_None;
+		G_flags = ImPlotDragToolFlags_NoInputs;
+		B_flags = ImPlotDragToolFlags_NoInputs;
+		break;
+	case 1:
+		R_flags = ImPlotDragToolFlags_NoInputs;
+		G_flags = ImPlotDragToolFlags_None;
+		B_flags = ImPlotDragToolFlags_NoInputs;
+		break;
+	case 2:
+		R_flags = ImPlotDragToolFlags_NoInputs;
+		G_flags = ImPlotDragToolFlags_NoInputs;
+		B_flags = ImPlotDragToolFlags_None;
+		break;
+	case 3:
+		R_flags = ImPlotDragToolFlags_None;
+		G_flags = ImPlotDragToolFlags_None;
+		B_flags = ImPlotDragToolFlags_None;
+		break;
+	default:
+		break;
+	}
+
+
+	int nCurveCache = pTrailComponent->m_nCurves;
+	if (ImGui::InputInt(U8STR("색상 커브 개수##TrailEffect"), &pTrailComponent->m_nCurves, 1)) {
+		if (pTrailComponent->m_nCurves <= 8 && pTrailComponent->m_nCurves >= 2) {
+			if (pTrailComponent->m_nCurves > nCurveCache) {
+				float size = 1.0f / nCurveCache;
+				float delta = 1.0f + (size * (pTrailComponent->m_nCurves - nCurveCache));
+				float correctionValue = 1.0f / delta;
+				for (int i = 0; i < nCurveCache; ++i) {
+					pTrailComponent->m_fColorCurveTimes_R[i] *= correctionValue;
+				}
+				for (int i = nCurveCache; i < pTrailComponent->m_nCurves; ++i) {
+					pTrailComponent->m_fColorCurveTimes_R[i] = (1.0f + (size * ((i - nCurveCache) + 1))) * correctionValue;
+				}
+			}
+			else if (pTrailComponent->m_nCurves < nCurveCache) {
+				float delta = 1.0f - 1.0f / nCurveCache;
+				float correctionValue = 1.0f / delta;
+				for (int i = 0; i < pTrailComponent->m_nCurves; ++i) {
+					pTrailComponent->m_fColorCurveTimes_R[i] *= correctionValue;
+				}
+			}
+		}
+	}
+	pTrailComponent->m_nCurves = std::clamp(pTrailComponent->m_nCurves, 2, MAX_COLORCURVES);
+
+	if (ImPlot::BeginPlot("##Bezier", ImVec2(-1, 0), ImPlotFlags_CanvasOnly)) {
+
+		int nCurveIndexs = pTrailComponent->m_nCurves;
+
+		//ImPlot::SetupAxesLimits(0, 1, 0, 1);
+
+		static ImPlotPoint P[] = { ImPlotPoint(.05f,.05f), ImPlotPoint(0.2,0.4),  ImPlotPoint(0.8,0.6),  ImPlotPoint(.95f,.95f) };
+
+		for (int i = 0; i < nCurveIndexs; ++i) {
+			int id = i * 3;
+			double yPointCache[3];
+
+			yPointCache[0] = pTrailComponent->m_fColorCurveTimes_R[i]; yPointCache[1] = pTrailComponent->m_fColorCurveTimes_R[i]; yPointCache[2] = pTrailComponent->m_fColorCurveTimes_R[i];
+			ImPlot::DragPoint(id, &yPointCache[0], &pTrailComponent->m_fR_CurvePoints[i], ImVec4(1, 0, 0, 1), 4, R_flags);
+			ImPlot::DragPoint(id + 1, &yPointCache[1], &pTrailComponent->m_fG_CurvePoints[i], ImVec4(0, 1, 0, 1), 4, G_flags);
+			ImPlot::DragPoint(id + 2, &yPointCache[2], &pTrailComponent->m_fB_CurvePoints[i], ImVec4(0, 0, 1, 1), 4, B_flags);
+			if (VerticalInputFlag) {
+				yPointCache[0] = std::clamp(yPointCache[0], (double)0.0f, (double)1.0f);
+				if (i == 0 || i == nCurveIndexs - 1)
+					yPointCache[0] = i == 0 ? 0.0f : 1.0f;
+				pTrailComponent->m_fColorCurveTimes_R[i] = yPointCache[0];
+			}
+		}
+
+		ImPlotPoint Lines[3][100 * MAX_COLORCURVES];
+		for (int i = 0; i < 3; ++i) {
+
+			double* colorCurve = nullptr;
+			double* timeCurve = nullptr;
+			if (i == 0) {
+				colorCurve = &pTrailComponent->m_fR_CurvePoints[0];
+				timeCurve = &pTrailComponent->m_fColorCurveTimes_R[0];
+			}
+			else if (i == 1) {
+				colorCurve = &pTrailComponent->m_fG_CurvePoints[0];
+				timeCurve = &pTrailComponent->m_fColorCurveTimes_R[0];
+			}
+			else if (i == 2) {
+				colorCurve = &pTrailComponent->m_fB_CurvePoints[0];
+				timeCurve = &pTrailComponent->m_fColorCurveTimes_R[0];
+			}
+			if (colorCurve != nullptr && timeCurve != nullptr) {
+				for (int j = 0; j < nCurveIndexs - 1; ++j) {
+					ImPlotPoint distanceVector = { timeCurve[j + 1] - timeCurve[j],colorCurve[j + 1] - colorCurve[j] };
+					float distance = sqrt(pow(distanceVector.x, 2) + pow(distanceVector.y, 2));
+					ImPlotPoint Direct = { distanceVector.x / distance, distanceVector.y / distance };
+					float dt = distance / 100.0f;
+
+					float dt_x = Direct.x / 100;
+					float dt_y = Direct.y / 100;
+					for (int n = 0; n < 100; ++n) {
+						Lines[i][n + 100 * j] = { timeCurve[j] + Direct.x * dt * n, colorCurve[j] + Direct.y * dt * n };
+						//B[i] = { P[1].x + dt_x * i, P[1].y + dt_y * i};
+					}
+				}
+			}
+
+			ImVec4 LineColor;
+			if (i == 0) {
+				LineColor = ImVec4(0.5, 0, 0, 1);
+			}
+			else if (i == 1) {
+				LineColor = ImVec4(0, 0.5, 0, 1);
+			}
+			else if (i == 2) {
+				LineColor = ImVec4(0, 0, 0.5, 1);
+			}
+			ImPlotPoint* line = Lines[i];
+			ImPlot::SetNextLineStyle(LineColor, 2);
+			ImPlot::PlotLine("##bez", &line[0].x, &line[0].y, 100 * (nCurveIndexs - 1), 0, 0, sizeof(ImPlotPoint));
+		}
+
+		/*ImPlot::SetNextLineStyle(ImVec4(1, 0.5f, 1, 1));
+		ImPlot::PlotLine("##t1", &P[1].x, &P[1].y, 1, 0, 0, sizeof(ImPlotPoint));
+		ImPlot::SetNextLineStyle(ImVec4(0, 0.5f, 1, 1));
+		ImPlot::PlotLine("##t2", &P[3].x, &P[3].y, 1, 0, 0, sizeof(ImPlotPoint));
+		ImPlot::SetNextLineStyle(ImVec4(0, 0.9f, 0, 1), 2);*/
+		//ImPlot::PlotLine("##bez", &B[0].x, &B[0].y, 100, 0, 0, sizeof(ImPlotPoint));
+
+		ImPlot::EndPlot();
+	}
+	//ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
+	//ImVec2 testPos = ImGui::GetCursorScreenPos();
+	//for (int i = 0; i < pTrailComponent->m_nCurves - 1; ++i) {
+	//	ImU32 color1; ImU32 color2;
+	//	//HIWORD()
+	//	char rgba1[4] = { (char)(max(pTrailComponent->m_fR_CurvePoints[i], 1.0f)*255), (char)pTrailComponent->m_fG_CurvePoints[i],  (char)pTrailComponent->m_fB_CurvePoints[i], (char)1.0f * 255 };
+	//	char rgba2[4] = { (char)pTrailComponent->m_fR_CurvePoints[i],   (char)pTrailComponent->m_fG_CurvePoints[i],  (char)pTrailComponent->m_fB_CurvePoints[i], (char)1.0f };
+	//	ImGui::GetWindowDrawList()->AddRectFilledMultiColor(ImVec2(testPos.x + (200 * pTrailComponent->m_fColorCurveTimes_R[i]), testPos.y),
+	//		ImVec2(testPos.x + (200 * pTrailComponent->m_fColorCurveTimes_R[i + 1]), testPos.y + 10), color1, color2, color2, color1);
+	//}
+
+	std::vector<std::string> noiseTextureNames = TrailComponent::GetNoiseTexturNames();
+	std::vector<const char*> noiseItems;
+	for (int i = 0; i < noiseTextureNames.size(); i++)
+	{
+		noiseItems.emplace_back(noiseTextureNames[i].c_str());
+	}
+
+	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
+	int noiseTextureIndexCache = pTrailComponent->GetNoiseTextureIndex();
+	if (ImGui::Combo(U8STR("노이즈 텍스쳐##TrailEffect"), (int*)(&pTrailComponent->GetNoiseTextureIndex()), noiseItems.data(), noiseItems.size()))
+	{
+		/*std::shared_ptr pTexture = vTexture[pParticleComponent->GetParticleIndex()];
+		pParticleComponent->SetParticleTexture(pTexture);*/
+		// 노이즈 텍스쳐 로드
+	}
+
+	/*ImGui::SetNextItemWidth(190.f);
+	if (ImGui::DragFloat("XSize##TrailEffect", &pParticleComponent->GetXSize(), DRAG_FLOAT_UNIT, PARTICLE_SIZE_MIN, PARTICLE_SIZE_MAX, "%.2f", 0))
+		pParticleComponent->GetXSize() = std::clamp(pParticleComponent->GetXSize(), PARTICLE_SIZE_MIN, PARTICLE_SIZE_MAX);
+
+	ImGui::SetNextItemWidth(190.f);
+	if (ImGui::DragFloat("YSize##TrailEffect", &pParticleComponent->GetYSize(), DRAG_FLOAT_UNIT, PARTICLE_SIZE_MIN, PARTICLE_SIZE_MAX, "%.2f", 0))
+		pParticleComponent->GetYSize() = std::clamp(pParticleComponent->GetYSize(), PARTICLE_SIZE_MIN, PARTICLE_SIZE_MAX);*/
+
+		//ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
+		//if (ImGui::DragFloat(U8STR("투명도##TrailEffect"), &pParticleComponent->GetAlpha(), DRAG_FLOAT_UNIT, PARTICLE_ALPHA_MIN, PARTICLE_ALPHA_MAX, "%.2f", 0))
+		//	pParticleComponent->GetAlpha() = std::clamp(pParticleComponent->GetAlpha(), PARTICLE_ALPHA_MIN, PARTICLE_ALPHA_MAX);
+
+		//ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
+		//ImGui::ColorEdit3(U8STR("색상"), (float*)&pParticleComponent->GetColor()); // Edit 3 floats representing a color
+
+	ImGui::End();
+}
+
+
 void CImGuiManager::ShowDamageAnimationManager(CState<CPlayer>* pCurrentAnimation)
 {
 	ImGuiWindowFlags my_window_flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize;
@@ -1257,7 +1545,7 @@ void CImGuiManager::ShowDamageAnimationManager(CState<CPlayer>* pCurrentAnimatio
 	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
 	if (ImGui::DragFloat(U8STR("속도##DamageAnimation"), &pDamageAnimationComponent->GetSpeed(), DRAG_FLOAT_UNIT, DAMAGE_ANIMATION_SPEED_MIN, DAMAGE_ANIMATION_SPEED_MAX, "%.2f", 0))
 		pDamageAnimationComponent->GetSpeed() = std::clamp(pDamageAnimationComponent->GetSpeed(), DAMAGE_ANIMATION_SPEED_MIN, DAMAGE_ANIMATION_SPEED_MAX);
-	
+
 	ImGui::End();
 }
 void CImGuiManager::ShowShakeAnimationManager(CState<CPlayer>* pCurrentAnimation)
@@ -1276,7 +1564,7 @@ void CImGuiManager::ShowShakeAnimationManager(CState<CPlayer>* pCurrentAnimation
 		pShakeAnimationComponent->GetDuration() = std::clamp(pShakeAnimationComponent->GetDuration(), SHAKE_ANIMATION_DURATION_MIN, SHAKE_ANIMATION_DURATION_MAX);
 
 	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
-	if(ImGui::DragFloat(U8STR("거리##ShakeAnimation"), &pShakeAnimationComponent->GetDistance(), DRAG_FLOAT_UNIT, SHAKE_ANIMATION_DISTANCE_MIN, SHAKE_ANIMATION_DISTANCE_MAX, "%.2f", 0))
+	if (ImGui::DragFloat(U8STR("거리##ShakeAnimation"), &pShakeAnimationComponent->GetDistance(), DRAG_FLOAT_UNIT, SHAKE_ANIMATION_DISTANCE_MIN, SHAKE_ANIMATION_DISTANCE_MAX, "%.2f", 0))
 		pShakeAnimationComponent->GetDistance() = std::clamp(pShakeAnimationComponent->GetDistance(), SHAKE_ANIMATION_DISTANCE_MIN, SHAKE_ANIMATION_DISTANCE_MAX);
 
 
@@ -1300,7 +1588,7 @@ void CImGuiManager::ShowStunAnimationManager(CState<CPlayer>* pCurrentAnimation)
 	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
 	if (ImGui::DragFloat(U8STR("경직시간##StunAnimation"), &pStunAnimationComponent->GetStunTime(), DRAG_FLOAT_UNIT, STUN_ANIMATION_STUNTIME_MIN, STUN_ANIMATION_STUNTIME_MAX, "%.2f", 0))
 		pStunAnimationComponent->GetStunTime() = std::clamp(pStunAnimationComponent->GetStunTime(), STUN_ANIMATION_STUNTIME_MIN, STUN_ANIMATION_STUNTIME_MAX);
-	
+
 	ImGui::End();
 }
 void CImGuiManager::ShowHitLagManager(CState<CPlayer>* pCurrentAnimation)
@@ -1308,7 +1596,7 @@ void CImGuiManager::ShowHitLagManager(CState<CPlayer>* pCurrentAnimation)
 	ImGuiWindowFlags my_window_flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize;
 	bool* b_open = nullptr;
 	ImGui::Begin(U8STR("역경직 관리자"), b_open, my_window_flags);
-	HitLagComponent* pHitLagComponent = pCurrentAnimation->GetHitLagComponent();
+	HitLagComponent* pHitLagComponent = dynamic_cast<HitLagComponent*>(pCurrentAnimation->GetHitLagComponent());
 
 	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
 	ImGui::Checkbox(U8STR("켜기/끄기##HitLag"), &pHitLagComponent->GetEnable());
@@ -1317,6 +1605,9 @@ void CImGuiManager::ShowHitLagManager(CState<CPlayer>* pCurrentAnimation)
 	if (ImGui::DragFloat(U8STR("지속시간##Move"), &pHitLagComponent->GetMaxLagTime(), DRAG_FLOAT_UNIT, HIT_LAG_MAXTIME_MIN, HIT_LAG_MAXTIME_MAX, "%.2f", 0))
 		pHitLagComponent->GetMaxLagTime() = std::clamp(pHitLagComponent->GetMaxLagTime(), HIT_LAG_MAXTIME_MIN, HIT_LAG_MAXTIME_MAX);
 
+	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
+	if (ImGui::DragFloat(U8STR("애니메이션 배율##Move"), &pHitLagComponent->GetLagScale(), DRAG_FLOAT_UNIT, HIT_LAG_SCALEWEIGHT_MIN, HIT_LAG_SCALEWEIGHT_MAX, "%.2f", 0))
+		pHitLagComponent->GetLagScale() = std::clamp(pHitLagComponent->GetLagScale(), HIT_LAG_SCALEWEIGHT_MIN, HIT_LAG_SCALEWEIGHT_MAX);
 	ImGui::End();
 }
 void CImGuiManager::ShowCameraMoveManager(CState<CPlayer>* pCurrentAnimation)
@@ -1341,7 +1632,7 @@ void CImGuiManager::ShowCameraMoveManager(CState<CPlayer>* pCurrentAnimation)
 	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
 	if (ImGui::DragFloat(U8STR("복귀시간##Move"), &pCameraMoveComponent->GetRollBackTime(), DRAG_FLOAT_UNIT, CAMERA_MOVE_ROLLBACKTIME_MIN, CAMERA_MOVE_ROLLBACKTIME_MAX, "%.2f", 0))
 		pCameraMoveComponent->GetRollBackTime() = std::clamp(pCameraMoveComponent->GetRollBackTime(), CAMERA_MOVE_ROLLBACKTIME_MIN, CAMERA_MOVE_ROLLBACKTIME_MAX);
-	
+
 	ImGui::End();
 }
 void CImGuiManager::ShowCameraShakeManager(CState<CPlayer>* pCurrentAnimation)
@@ -1366,7 +1657,7 @@ void CImGuiManager::ShowCameraShakeManager(CState<CPlayer>* pCurrentAnimation)
 	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
 	if (ImGui::DragFloat(U8STR("빈도##Shake"), &pCameraShakerComponent->GetFrequency(), DRAG_FLOAT_UNIT, CAMERA_SHAKE_FREQUENCY_MIN, CAMERA_SHAKE_FREQUENCY_MAX, "%.3f", 0))
 		pCameraShakerComponent->GetFrequency() = std::clamp(pCameraShakerComponent->GetFrequency(), CAMERA_SHAKE_FREQUENCY_MIN, CAMERA_SHAKE_FREQUENCY_MAX);
-	
+
 	ImGui::End();
 }
 void CImGuiManager::ShowCameraZoomManager(CState<CPlayer>* pCurrentAnimation)
@@ -1426,7 +1717,7 @@ void CImGuiManager::ShowShockSoundManager(CState<CPlayer>* pCurrentAnimation)
 	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
 	if (ImGui::DragFloat(U8STR("음량##effectsound"), &pShockSoundComponent->GetVolume(), DRAG_FLOAT_UNIT, SHOCK_SOUND_VOLUME_MIN, SHOCK_SOUND_VOLUME_MAX, "%.2f", 0))
 		pShockSoundComponent->GetVolume() = std::clamp(pShockSoundComponent->GetVolume(), SHOCK_SOUND_VOLUME_MIN, SHOCK_SOUND_VOLUME_MAX);
-	
+
 	ImGui::End();
 }
 void CImGuiManager::ShowShootSoundManager(CState<CPlayer>* pCurrentAnimation)
@@ -1457,7 +1748,7 @@ void CImGuiManager::ShowShootSoundManager(CState<CPlayer>* pCurrentAnimation)
 	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
 	if (ImGui::DragFloat(U8STR("음량##shootsound"), &pShootSoundComponent->GetVolume(), DRAG_FLOAT_UNIT, SHOOTING_SOUND_VOLUME_MIN, SHOOTING_SOUND_VOLUME_MAX, "%.2f", 0))
 		pShootSoundComponent->GetVolume() = std::clamp(pShootSoundComponent->GetVolume(), SHOOTING_SOUND_VOLUME_MIN, SHOOTING_SOUND_VOLUME_MAX);
-	
+
 	ImGui::End();
 }
 void CImGuiManager::ShowDamageMoanSoundManager(CState<CPlayer>* pCurrentAnimation)
@@ -1518,7 +1809,7 @@ void CImGuiManager::ShowDamageMoanSoundManager(CState<CPlayer>* pCurrentAnimatio
 	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
 	if (ImGui::DragFloat(U8STR("음량(스켈레톤)##skeletonmoansound"), &pSkeletonMoanComponent->GetVolume(), DRAG_FLOAT_UNIT, MOAN_SOUND_VOLUME_MIN, MOAN_SOUND_VOLUME_MAX, "%.2f", 0))
 		pSkeletonMoanComponent->GetVolume() = std::clamp(pSkeletonMoanComponent->GetVolume(), MOAN_SOUND_VOLUME_MIN, MOAN_SOUND_VOLUME_MAX);
-	
+
 	ImGui::End();
 }
 void CImGuiManager::OnPrepareRender(ID3D12GraphicsCommandList* pd3dCommandList, D3D12_CPU_DESCRIPTOR_HANDLE* d3dDsvDescriptorCPUHandle, float fTimeElapsed, float fCurrentTime, CCamera* pCamera)

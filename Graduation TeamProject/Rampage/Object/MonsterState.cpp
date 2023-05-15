@@ -48,6 +48,10 @@ void Spawn_Monster::Animate(CMonster* monster, float fElapsedTime)
 	monster->Animate(fElapsedTime);
 }
 
+void Spawn_Monster::OnRootMotion(CMonster* monster, float fTimeElapsed)
+{
+}
+
 void Spawn_Monster::Exit(CMonster* monster)
 {
 }
@@ -83,6 +87,10 @@ void Idle_Monster::Execute(CMonster* monster, float fElapsedTime)
 void Idle_Monster::Animate(CMonster* monster, float fElapsedTime)
 {
 	monster->Animate(fElapsedTime);
+}
+
+void Idle_Monster::OnRootMotion(CMonster* monster, float fTimeElapsed)
+{
 }
 
 void Idle_Monster::Exit(CMonster* monster)
@@ -135,6 +143,10 @@ void Damaged_Monster::Animate(CMonster* monster, float fElapsedTime)
 	monster->Animate(fElapsedTime);
 }
 
+void Damaged_Monster::OnRootMotion(CMonster* monster, float fTimeElapsed)
+{
+}
+
 void Damaged_Monster::Exit(CMonster* monster)
 {
 }
@@ -153,6 +165,10 @@ void Stun_Monster::Execute(CMonster* monster, float fElapsedTime)
 void Stun_Monster::Animate(CMonster* monster, float fElapsedTime)
 {
 	monster->Animate(0.0f);
+}
+
+void Stun_Monster::OnRootMotion(CMonster* monster, float fTimeElapsed)
+{
 }
 
 void Stun_Monster::Exit(CMonster* monster)
@@ -193,6 +209,10 @@ void Wander_Monster::Animate(CMonster* monster, float fElapsedTime)
 	monster->Animate(fElapsedTime);
 }
 
+void Wander_Monster::OnRootMotion(CMonster* monster, float fTimeElapsed)
+{
+}
+
 void Wander_Monster::Exit(CMonster* monster)
 {
 }
@@ -216,13 +236,13 @@ void Chasing_Monster::Execute(CMonster* monster, float fElapsedTime)
 	XMFLOAT3 xmf3LookVec = Vector3::Add(monster->GetPosition(), monster->GetChasingVec());
 	monster->SetLookAt(xmf3LookVec);
 
-	if (monster->m_fToPlayerLength < 5.0f)
+	if (monster->m_fToPlayerLength < monster->m_fAttackRange)
 	{
 		// 공격
 		monster->m_pStateMachine->ChangeState(Attack_Monster::GetInst());
 	}
 
-	if (monster->m_fToPlayerLength > 35.0f)
+	if (monster->m_fToPlayerLength > monster->m_fSensingRange)
 	{
 		// 놓침
 		monster->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
@@ -234,6 +254,10 @@ void Chasing_Monster::Execute(CMonster* monster, float fElapsedTime)
 void Chasing_Monster::Animate(CMonster* monster, float fElapsedTime)
 {
 	monster->Animate(fElapsedTime);
+}
+
+void Chasing_Monster::OnRootMotion(CMonster* monster, float fTimeElapsed)
+{
 }
 
 void Chasing_Monster::Exit(CMonster* monster)
@@ -272,6 +296,10 @@ void Attack_Monster::Animate(CMonster* monster, float fElapsedTime)
 	monster->Animate(fElapsedTime);
 }
 
+void Attack_Monster::OnRootMotion(CMonster* monster, float fTimeElapsed)
+{
+}
+
 void Attack_Monster::Exit(CMonster* monster)
 {
 }
@@ -298,7 +326,13 @@ void Dead_Monster::Enter(CMonster* monster)
 		index++;
 	}
 	if (monster->m_bArticulationOnPxScene) {
-
+		RegisterArticulationParams Request_params;
+		Request_params.pObject = monster;
+		XMFLOAT3 force = monster->GetHitterVec();
+		force = Vector3::ScalarProduct(force, 300.0f, false);
+		Request_params.m_force = force;
+		CMessageDispatcher::GetInst()->Dispatch_Message<RegisterArticulationParams>(MessageType::REQUEST_REGISTERARTI, &Request_params, nullptr);
+		monster->m_bArticulationOnPxScene = true;
 	}
 	else {
 		RegisterArticulationParams Request_params;
@@ -320,7 +354,7 @@ void Dead_Monster::Execute(CMonster* monster, float fElapsedTime)
 		if (monster->m_pStateMachine->GetCurrentState() != Spawn_Monster::GetInst())
 		{
 			CMonsterPool::GetInst()->SetNonActiveMonster(monster);
-
+			monster->TestDissolvetime = 0.0f;
 		}
 
 	}
@@ -329,6 +363,10 @@ void Dead_Monster::Execute(CMonster* monster, float fElapsedTime)
 void Dead_Monster::Animate(CMonster* monster, float fElapsedTime)
 {
 	monster->Animate(fElapsedTime);
+}
+
+void Dead_Monster::OnRootMotion(CMonster* monster, float fTimeElapsed)
+{
 }
 
 void Dead_Monster::Exit(CMonster* monster)
@@ -357,6 +395,10 @@ void Global_Monster::Execute(CMonster* monster, float fElapsedTime)
 }
 
 void Global_Monster::Animate(CMonster* monster, float fElapsedTime)
+{
+}
+
+void Global_Monster::OnRootMotion(CMonster* monster, float fTimeElapsed)
 {
 }
 
