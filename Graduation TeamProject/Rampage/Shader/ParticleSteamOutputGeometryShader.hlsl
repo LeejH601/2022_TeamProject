@@ -24,6 +24,7 @@ cbuffer cbFrameworkInfo : register(b7)
 	float		gfLifeTime : packoffset(c3.x);
 	float2		gfSize : packoffset(c3.y);
 	bool		bEmit : packoffset(c3.w);
+	float3		gnEmitiedPoistoin : packoffset(c4);
 };
 
 
@@ -135,10 +136,19 @@ void SphereParticles(VS_PARTICLE_INPUT input, inout PointStream<VS_PARTICLE_INPU
 		if (particle.lifetime > 0.f)
 		{
 			particle = OutputParticleToStream(particle, output);
+			//float3 resistanceDir = gmtxGameObject._41_42_43 - particle.position;
+			//float distance = length(resistanceDir) - (100.0f/2);
+			//distance = max(0.0f, distance);
+			//resistanceDir = normalize(resistanceDir) * length(particle.velocity);
+			//float resistanceValue = distance / 100.0f; // 최대 반경 20.0f
+			//particle.velocity += resistanceDir * resistanceValue; // 가속도 계산이 필요함
+			/*float distance = length(particle.velocity);
+			particle.velocity += CalculrateCulrNoise(particle.position).xyz;
+			particle.velocity = normalize(particle.velocity) * distance;*/
 			output.Append(particle);
 		}
 	}
-	
+
 }
 
 
@@ -160,7 +170,7 @@ void SmokeParticles(VS_PARTICLE_INPUT input, inout PointStream<VS_PARTICLE_INPUT
 			particle.velocity = Smokevelocity * gfSpeed;
 			output.Append(particle);
 		}
-		
+
 
 	}
 	else if (particle.type == TYPE_SIMULATOR)

@@ -175,7 +175,7 @@ cbuffer cbNoiseParameters : register(b2)
 };
 
 
-float3 potential(float3 p)
+inline float3 potential(float3 p)
 {
 	float L;      // Length scale as described by Bridson
 	float speed;  // field speed
@@ -220,7 +220,7 @@ float3 potential(float3 p)
 }
 
 
-float4 CalculrateCulrNoise(float3 p) 
+inline float4 CalculrateCulrNoise(float3 p) 
 {
 	// Step length for approximating derivatives
 	float epsilon = 0.0001;

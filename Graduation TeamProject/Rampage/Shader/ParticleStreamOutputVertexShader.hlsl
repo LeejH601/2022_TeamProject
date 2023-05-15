@@ -13,6 +13,7 @@ cbuffer cbFrameworkInfo : register(b7)
 	float		gfLifeTime : packoffset(c3.x);
 	float2		gfSize : packoffset(c3.y);
 	bool		bEmit : packoffset(c3.w);
+	float3		gnEmitiedPoistoin : packoffset(c4);
 };
 
 #define TYPE_EMITTER 0
@@ -35,6 +36,9 @@ cbuffer cbGameObjectInfo : register(b0)
 
 VS_PARTICLE_INPUT VSParticleStreamOutput(VS_PARTICLE_INPUT input)
 {
+	float distance = length(input.velocity);
 	input.velocity += CalculrateCulrNoise(input.position).xyz;
+	input.velocity = normalize(input.velocity) * distance;
+	
 	return(input);
 }
