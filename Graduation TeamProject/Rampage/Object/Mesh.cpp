@@ -329,7 +329,7 @@ void CSkinnedMesh::LoadMeshFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 			nReads = (UINT)::fread(&m_xmf3AABBCenter, sizeof(XMFLOAT3), 1, pInFile);
 			nReads = (UINT)::fread(&m_xmf3AABBExtents, sizeof(XMFLOAT3), 1, pInFile);
 
-			std::wstring wBounds = L"m_xmf3AABBCenter.x: ";
+			/*std::wstring wBounds = L"m_xmf3AABBCenter.x: ";
 			wBounds = wBounds.append(std::to_wstring(m_xmf3AABBCenter.x));
 			wBounds = wBounds.append(L" m_xmf3AABBCenter.y: ");
 			wBounds = wBounds.append(std::to_wstring(m_xmf3AABBCenter.y));
@@ -345,7 +345,7 @@ void CSkinnedMesh::LoadMeshFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 			wExtents = wExtents.append(L" m_xmf3AABBExtents.z: ");
 			wExtents = wExtents.append(std::to_wstring(m_xmf3AABBExtents.z));
 			OutputDebugString(wExtents.c_str());
-			OutputDebugString(L"\n");
+			OutputDebugString(L"\n");*/
 		}
 		else if (!strcmp(pstrToken, "<Positions>:"))
 		{

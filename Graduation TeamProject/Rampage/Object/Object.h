@@ -181,6 +181,8 @@ public:
 	void AddPhysicsScene(const XMFLOAT4X4& xmfWorld);
 	BoundingBox CreateAAMBB(std::vector<XMFLOAT3> xmf3Positions);
 
+
+	virtual bool CheckCollision(CGameObject* pTargetObject);
 	virtual void UpdateTransform(XMFLOAT4X4* pxmf4x4Parent = NULL);
 	virtual void PrepareBoundingBox(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 };

@@ -293,6 +293,14 @@ void CKnightPlayer::OnUpdateCallback(float fTimeElapsed)
 		xmf3ResultPlayerPos.x = std::clamp(xmf3ResultPlayerPos.x, xmf3TerrainPos.x + TERRAIN_SPAN, xmf3TerrainPos.x + pTerrain->GetWidth() - TERRAIN_SPAN);
 		xmf3ResultPlayerPos.z = std::clamp(xmf3ResultPlayerPos.z, xmf3TerrainPos.z + TERRAIN_SPAN, xmf3TerrainPos.z + pTerrain->GetLength() - TERRAIN_SPAN);
 
+		for (int i = 0; i < pMap->GetMapObjects().size(); ++i) {
+			if (pMap->GetMapObjects()[i]->CheckCollision(this))
+			{
+
+			}
+		}
+		//OutputDebugString(L"CollisionEnd\n");
+
 		float fTerrainY = pTerrain->GetHeight(xmf3Pos.x - (xmf3TerrainPos.x), xmf3Pos.z - (xmf3TerrainPos.z));
 
 		if (xmf3ResultPlayerPos.y < fTerrainY + xmf3TerrainPos.y)
