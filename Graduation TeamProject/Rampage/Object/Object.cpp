@@ -656,8 +656,15 @@ bool CMapObject::CheckCollision(CGameObject* pTargetObject)
 
 	if (!Vector3::Length(m_ObjectBoundingBox.Extents))
 		return false;
+	
+	bool bCollision = m_TransformedObjectBoundingBox.Intersects(playerBoundingBox);
 
-	return m_TransformedObjectBoundingBox.Intersects(playerBoundingBox);
+	if (bCollision)
+	{
+		m_Objtype = MAP_OBJ_TYPE::TREE;
+	}
+
+	return bCollision;
 }
 
 void CMapObject::UpdateTransform(XMFLOAT4X4* pxmf4x4Parent)

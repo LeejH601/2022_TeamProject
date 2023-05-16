@@ -210,12 +210,10 @@ void CKnightPlayer::SetTargetPosition(const BoundingBox& targetBoundingBox)
 	// 몬스터 몸체의 바운딩 박스의 면과 교차하는 점을 구함
 	float distance;
 
-	if (m_TransformedWeaponBoundingBox.Intersects(XMLoadFloat3(&playerWeaponBoxCenter), direction, distance))
+	if (targetBoundingBox.Intersects(XMLoadFloat3(&playerWeaponBoxCenter), direction, distance))
 	{
 		XMVECTOR intersectionPoint = XMLoadFloat3(&playerWeaponBoxCenter) + distance * direction;
 		XMStoreFloat3(&m_xmf3TargetPosition, intersectionPoint);
-
-		m_xmf3TargetPosition = Vector3::ScalarProduct(Vector3::Add(m_xmf3TargetPosition, monsterBodyBoxCenter), 0.5f, false);
 	}
 }
 bool CKnightPlayer::CheckCollision(CGameObject* pTargetObject)
@@ -290,17 +288,33 @@ void CKnightPlayer::OnUpdateCallback(float fTimeElapsed)
 		};
 		XMFLOAT3 xmf3ResultPlayerPos = GetPosition();
 
-		xmf3ResultPlayerPos.x = std::clamp(xmf3ResultPlayerPos.x, xmf3TerrainPos.x + TERRAIN_SPAN, xmf3TerrainPos.x + pTerrain->GetWidth() - TERRAIN_SPAN);
-		xmf3ResultPlayerPos.z = std::clamp(xmf3ResultPlayerPos.z, xmf3TerrainPos.z + TERRAIN_SPAN, xmf3TerrainPos.z + pTerrain->GetLength() - TERRAIN_SPAN);
-
-		bool bCollide = false;
+		CMapObject* pCollisionObject = NULL;
 		for (int i = 0; i < pMap->GetMapObjects().size(); ++i) {
 			if (pMap->GetMapObjects()[i]->CheckCollision(this))
 			{
-				bCollide = true;
+				pCollisionObject = static_cast<CMapObject*>(pMap->GetMapObjects()[i].get());
 				break;
 			}
 		}
+
+		if (pCollisionObject)
+		{
+			std::wstring name{ &pCollisionObject->m_pstrFrameName[0], &pCollisionObject->m_pstrFrameName[64] };
+			OutputDebugString(name.c_str());
+			OutputDebugString(L"\n");
+
+			/*BoundingBox overlap;
+			BoundingBox::CreateMerged(overlap, pCollisionObject->GetBoundingBox(), m_TransformedBodyBoundingBox);
+
+			XMFLOAT3 dir = Vector3::Normalize(Vector3::Subtract(m_TransformedBodyBoundingBox.Center, pCollisionObject->GetBoundingBox().Center));
+			float distance = 0.0f;
+
+			m_TransformedBodyBoundingBox.Intersects(XMLoadFloat3(&pCollisionObject->GetBoundingBox().Center), XMLoadFloat3(&dir), distance);
+			xmf3ResultPlayerPos = Vector3::Add(xmf3ResultPlayerPos, Vector3::ScalarProduct(dir, distance * 0.5f, false));*/
+		}
+		
+		xmf3ResultPlayerPos.x = std::clamp(xmf3ResultPlayerPos.x, xmf3TerrainPos.x + TERRAIN_SPAN, xmf3TerrainPos.x + pTerrain->GetWidth() - TERRAIN_SPAN);
+		xmf3ResultPlayerPos.z = std::clamp(xmf3ResultPlayerPos.z, xmf3TerrainPos.z + TERRAIN_SPAN, xmf3TerrainPos.z + pTerrain->GetLength() - TERRAIN_SPAN);
 
 		float fTerrainY = pTerrain->GetHeight(xmf3Pos.x - (xmf3TerrainPos.x), xmf3Pos.z - (xmf3TerrainPos.z));
 
@@ -356,8 +370,8 @@ void CKnightPlayer::PrepareBoundingBox(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 	pWeapon = CGameObject::FindFrame("Weapon_r");
 	pBodyBoundingBoxMesh = CBoundingBoxShader::GetInst()->AddBoundingObject(pd3dDevice, pd3dCommandList, this, XMFLOAT3(0.0f, 0.75f, 0.0f), XMFLOAT3(0.35f, 1.0f, 0.35f));
 	pWeaponBoundingBoxMesh = CBoundingBoxShader::GetInst()->AddBoundingObject(pd3dDevice, pd3dCommandList, this, XMFLOAT3(0.0f, 0.6f, 0.4f), XMFLOAT3(0.0125f, 0.525f, 0.0625f));
-	m_BodyBoundingBox = BoundingBox{ XMFLOAT3(0.0f, 0.5f, 0.0f), XMFLOAT3(0.35f, 1.0f, 0.35f) };
-	m_WeaponBoundingBox = BoundingBox{ XMFLOAT3(0.0f, 0.6f, 0.4f), XMFLOAT3(0.025f, 0.625f, 0.125f) };
+	m_BodyBoundingBox = BoundingBox{ XMFLOAT3(0.0f, 0.75f, 0.0f), XMFLOAT3(0.35f, 1.0f, 0.35f) };
+	m_WeaponBoundingBox = BoundingBox{ XMFLOAT3(0.0f, 0.6f, 0.4f), XMFLOAT3(0.0125f, 0.525f, 0.0625f) };
 }
 
 
