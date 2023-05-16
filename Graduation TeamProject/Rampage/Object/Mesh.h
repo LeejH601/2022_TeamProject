@@ -360,7 +360,9 @@ public:
 	XMFLOAT3						m_xmf3Velocity = XMFLOAT3(0.0f, 0.0f, 0.0f);
 	float							m_fLifetime = 0.0f;
 	UINT							m_iType = 0;
-	bool							m_bTerrain = false;
+	float							m_fEmitTime = 0.0f;
+	UINT							m_iTextureIndex = 0;
+	UINT							m_iTextureCoord[2];
 public:
 	CParticleVertex() { }
 	~CParticleVertex() { }

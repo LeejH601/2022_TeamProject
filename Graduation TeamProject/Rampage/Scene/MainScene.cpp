@@ -42,7 +42,7 @@ void CMainTMPScene::OnPrepareRender(ID3D12GraphicsCommandList* pd3dCommandList)
 }
 void CMainTMPScene::CreateGraphicsRootSignature(ID3D12Device* pd3dDevice)
 {
-	D3D12_DESCRIPTOR_RANGE pd3dDescriptorRanges[6];
+	D3D12_DESCRIPTOR_RANGE pd3dDescriptorRanges[5];
 	pd3dDescriptorRanges[0].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
 	pd3dDescriptorRanges[0].NumDescriptors = 8;
 	pd3dDescriptorRanges[0].BaseShaderRegister = 0; //t0 ~ t6: MappingTexture
@@ -68,16 +68,10 @@ void CMainTMPScene::CreateGraphicsRootSignature(ID3D12Device* pd3dDevice)
 	pd3dDescriptorRanges[3].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
 	pd3dDescriptorRanges[4].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
-	pd3dDescriptorRanges[4].NumDescriptors = 2;
-	pd3dDescriptorRanges[4].BaseShaderRegister = 31; //t31~32: gtxtParticleTexture
+	pd3dDescriptorRanges[4].NumDescriptors = 7;
+	pd3dDescriptorRanges[4].BaseShaderRegister = 35; //t35: gtxMultiRenderTargetTextures
 	pd3dDescriptorRanges[4].RegisterSpace = 0;
 	pd3dDescriptorRanges[4].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
-
-	pd3dDescriptorRanges[5].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
-	pd3dDescriptorRanges[5].NumDescriptors = 7;
-	pd3dDescriptorRanges[5].BaseShaderRegister = 35; //t35: gtxMultiRenderTargetTextures
-	pd3dDescriptorRanges[5].RegisterSpace = 0;
-	pd3dDescriptorRanges[5].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
 	D3D12_ROOT_PARAMETER pd3dRootParameters[15];
 
@@ -142,14 +136,14 @@ void CMainTMPScene::CreateGraphicsRootSignature(ID3D12Device* pd3dDevice)
 	pd3dRootParameters[11].Descriptor.RegisterSpace = 0;
 	pd3dRootParameters[11].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 
-	pd3dRootParameters[12].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
-	pd3dRootParameters[12].DescriptorTable.NumDescriptorRanges = 1;
-	pd3dRootParameters[12].DescriptorTable.pDescriptorRanges = &pd3dDescriptorRanges[4];
+	pd3dRootParameters[12].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
+	pd3dRootParameters[12].Descriptor.ShaderRegister = 9;
+	pd3dRootParameters[12].Descriptor.RegisterSpace = 0;
 	pd3dRootParameters[12].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 
 	pd3dRootParameters[13].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
 	pd3dRootParameters[13].DescriptorTable.NumDescriptorRanges = 1;
-	pd3dRootParameters[13].DescriptorTable.pDescriptorRanges = &pd3dDescriptorRanges[5];
+	pd3dRootParameters[13].DescriptorTable.pDescriptorRanges = &pd3dDescriptorRanges[4];
 	pd3dRootParameters[13].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 
 	pd3dRootParameters[14].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
@@ -804,11 +798,6 @@ void CMainTMPScene::UpdateObjects(float fTimeElapsed)
 		m_pcbMappedDisolveParams->dissolveThreshold[i] = m_pObjects[i]->m_fDissolveThrethHold;
 	}
 
-	for (int i = 0; i < m_pSpriteAttackObjects.size(); ++i)
-	{
-		m_pSpriteAttackObjects[i]->Animate(fTimeElapsed);
-	}
-
 	for (std::unique_ptr<CGameObject>& obj : m_pSwordTrailObjects) {
 		obj->Update(fTimeElapsed);
 	}
@@ -873,17 +862,15 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 	m_pSkyBoxShader->Render(pd3dCommandList, 0);
 	m_pSkyBoxObject->Render(pd3dCommandList, m_pCurrentCamera);
 
-	//m_pTerrainShader->Render(pd3dCommandList, 0);
-	//m_pTerrain->Render(pd3dCommandList, true);
+	m_pTerrainShader->Render(pd3dCommandList, 0);
+	m_pTerrain->Render(pd3dCommandList, true);
 
 	//((CParticleObject*)m_pSmokeObject.get())->Update(fTimeElapsed);
 	//((CParticleObject*)m_pSmokeObject.get())->UpdateShaderVariables(pd3dCommandList, fCurrentTime, fTimeElapsed);
 	//((CParticleObject*)m_pSmokeObject.get())->Render(pd3dCommandList, nullptr, m_pParticleShader.get());
 
 
-	((CParticleObject*)m_pSmokeObject.get())->Update(fTimeElapsed);
-	((CParticleObject*)m_pSmokeObject.get())->UpdateShaderVariables(pd3dCommandList, fCurrentTime, fTimeElapsed);
-	((CParticleObject*)m_pSmokeObject.get())->Render(pd3dCommandList, nullptr, m_pParticleShader.get());
+
 	
 
 	//for (int i = 0; i < m_pUpDownParticleObjects.size(); ++i)
@@ -908,16 +895,6 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 		((CParticleObject*)m_pTerrainSpriteObject[i].get())->Animate(fTimeElapsed);
 		((CParticleObject*)m_pTerrainSpriteObject[i].get())->UpdateShaderVariables(pd3dCommandList, fCurrentTime, fTimeElapsed);
 		((CParticleObject*)m_pTerrainSpriteObject[i].get())->Render(pd3dCommandList, nullptr, m_pParticleShader.get());
-	}
-
-	for (int i = 0; i < m_pSpriteAttackObjects.size(); ++i)
-	{
-		((CParticleObject*)m_pSpriteAttackObjects[i].get())->Update(fTimeElapsed);
-		((CParticleObject*)m_pSpriteAttackObjects[i].get())->Animate(fTimeElapsed);
-		((CParticleObject*)m_pSpriteAttackObjects[i].get())->UpdateShaderVariables(pd3dCommandList, fCurrentTime, fTimeElapsed);
-		((CParticleObject*)m_pSpriteAttackObjects[i].get())->Render(pd3dCommandList, nullptr, m_pParticleShader.get());
-		//(static_cast<CBillBoardObject*>(m_pBillBoardObjects[i].get()))->UpdateShaderVariables(pd3dCommandList, fCurrentTime, fTimeElapsed);
-		//m_pBillBoardObjects[i]->Render(pd3dCommandList, true);
 	}
 
 	CModelShader::GetInst()->Render(pd3dCommandList, 0);
@@ -977,10 +954,18 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 	for (int i = 0; i < m_pParticleObjects.size(); ++i)
 	{
 		((CParticleObject*)m_pParticleObjects[i].get())->Update(fTimeElapsed);
+		((CParticleObject*)m_pParticleObjects[i].get())->Animate(fTimeElapsed);
 		((CParticleObject*)m_pParticleObjects[i].get())->UpdateShaderVariables(pd3dCommandList, fCurrentTime, fTimeElapsed);
 		((CParticleObject*)m_pParticleObjects[i].get())->Render(pd3dCommandList, nullptr, m_pParticleShader.get());
 	}
 
+	for (int i = 0; i < m_pSpriteAttackObjects.size(); ++i)
+	{
+		((CParticleObject*)m_pSpriteAttackObjects[i].get())->Update(fTimeElapsed);
+		((CParticleObject*)m_pSpriteAttackObjects[i].get())->Animate(fTimeElapsed);
+		((CParticleObject*)m_pSpriteAttackObjects[i].get())->UpdateShaderVariables(pd3dCommandList, fCurrentTime, fTimeElapsed);
+		((CParticleObject*)m_pSpriteAttackObjects[i].get())->Render(pd3dCommandList, nullptr, m_pParticleShader.get());
+	}
 	//((CParticleObject*)m_pTrailParticleObjects.get())->Update(fTimeElapsed);
 	//((CParticleObject*)m_pTrailParticleObjects.get())->UpdateShaderVariables(pd3dCommandList, fCurrentTime, fTimeElapsed);
 	//((CParticleObject*)m_pTrailParticleObjects.get())->Render(pd3dCommandList, nullptr, m_pParticleShader.get());

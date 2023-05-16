@@ -5,7 +5,7 @@
 #include "../Global/Camera.h"
 
 
-CBillBoardObject::CBillBoardObject(int iTextureIndex, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CShader* pShader, float fSize, bool bBillBoard)
+CBillBoardObject::CBillBoardObject(int iTextureIndex, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fSize, bool bBillBoard)
 {
 	m_xmf4x4World = Matrix4x4::Identity();
 	m_xmf4x4Transform = Matrix4x4::Identity();
@@ -85,7 +85,7 @@ void CBillBoardObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dComm
 }
 
 
-CMultiSpriteObject::CMultiSpriteObject(int iTextureIndex, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CShader* pShader, int nRows, int nCols, float fSize, bool bBillBoard, float fSpeed) : CBillBoardObject(iTextureIndex, pd3dDevice, pd3dCommandList, pShader, fSize, bBillBoard)
+CMultiSpriteObject::CMultiSpriteObject(int iTextureIndex, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nRows, int nCols, float fSize, bool bBillBoard, float fSpeed) : CBillBoardObject(iTextureIndex, pd3dDevice, pd3dCommandList, fSize, bBillBoard)
 {
 	m_fSpeed = fSpeed;
 }
@@ -174,13 +174,6 @@ void CMultiSpriteObject::Animate(float fTimeElapsed)
 {
 	if (m_bEnable) {
 		CBillBoardObject::Animate(fTimeElapsed);
-
-		m_fTime -= fTimeElapsed * m_fSpeed;
-		//AnimateRowColumn(m_fTime);
-		AnimateRowColumn(fTimeElapsed);
-
-		if (m_fTime <= 0.f)
-			m_fTime = 0.5f;
 	}
 }
 
@@ -217,7 +210,7 @@ void CMultiSpriteObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, bool
 	if (m_pSibling) m_pSibling->Render(pd3dCommandList, b_UseTexture, pCamera);
 }
 
-CTerrainSpriteObject::CTerrainSpriteObject(int iTextureIndex, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CShader* pShader, int nRows, int nCols, float fSize, float fSpeed) : CMultiSpriteObject(iTextureIndex, pd3dDevice, pd3dCommandList, pShader, nRows, nCols, fSize, false, fSpeed)
+CTerrainSpriteObject::CTerrainSpriteObject(int iTextureIndex, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,  int nRows, int nCols, float fSize, float fSpeed) : CMultiSpriteObject(iTextureIndex, pd3dDevice, pd3dCommandList, nRows, nCols, fSize, false, fSpeed)
 {
 }
 
@@ -281,12 +274,12 @@ void CTerrainSpriteObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3d
 	m_pcbMappedFrameworkInfo->m_fSpeed = 10.f;
 	m_pcbMappedFrameworkInfo->m_nFlareParticlesToEmit = 100;
 	m_pcbMappedFrameworkInfo->m_xmf3Gravity = XMFLOAT3(0.0f, -9.8f, 0.0f);
-	m_pcbMappedFrameworkInfo->m_nMaxFlareType2Particles = 15 * 1.5f;
 	m_pcbMappedFrameworkInfo->m_xmf3Color = XMFLOAT3(1.f, 1.f, 1.f);
 	m_pcbMappedFrameworkInfo->m_nParticleType = 0;
 	m_pcbMappedFrameworkInfo->m_fLifeTime = m_fLifeTime;
 	m_pcbMappedFrameworkInfo->m_xmf3Color = m_xmf3Color;
 	m_pcbMappedFrameworkInfo->m_fSize = Vector2::ScalarProduct(m_fSize, m_fDeltaSize, false);
+	m_pcbMappedFrameworkInfo->m_iTextureCoord = XMUINT2(m_iTotalRow, m_iTotalCol);
 	// 중간 정도 일때
 	if (m_bStart)
 		m_bStart = !m_bStart;

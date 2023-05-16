@@ -4,6 +4,8 @@
 #include "../Object/BillBoardObject.h"
 #include "../Global/Camera.h"
 
+#define EMIT_PARTICLE
+
 #define SPHERE_PARTILCE 0
 #define RECOVERY_PARTILCE 1
 #define SMOKE_PARTILCE 2
@@ -36,7 +38,9 @@ public:
 	virtual void Update(float fTimeElapsed);
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, CShader* pShader);
 	virtual void OnPostRender();
+	virtual void SetEnable(bool bEnable);
 
+	void SetTotalRowColumn(int iTotalRow, int iTotalColumn);
 	void SetSize(XMFLOAT2 fSize);
 	void SetLifeTime(float fLifeTime);
 	void SetStartAlpha(float fAlpha);
@@ -51,6 +55,7 @@ public:
 	void SetDirection(XMFLOAT3 xmf3Direction);
 	XMFLOAT3 GetDirection();
 
+	void SetAnimation(bool bAnimation);
 	void AnimateRowColumn(float fTimeElapsed);
 	bool CheckCapacity();
 protected:
@@ -68,9 +73,15 @@ protected:
 
 	int			m_nVertices = 0;
 
-	int 		m_nRow = 0;
-	int 		m_nCol = 0;
+	int								m_iTotalRow = 1;
+	int								m_iTotalCol = 1;
 
+	int 							m_iCurrentRow = 0;
+	int 							m_iCurrentCol = 0;
+
+	float m_fAccumulatedTime = 0.0f;
+	float interval;
+	bool m_bAnimation = false;
 protected:
 	ComPtr<ID3D12Resource>	m_pd3dcbFrameworkInfo = NULL;
 	CB_FRAMEWORK_INFO* m_pcbMappedFrameworkInfo = NULL;

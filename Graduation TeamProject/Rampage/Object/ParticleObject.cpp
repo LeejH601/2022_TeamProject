@@ -50,10 +50,12 @@ void CParticleObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dComma
 	m_pcbMappedFrameworkInfo->m_nFlareParticlesToEmit = m_iEmitParticleN;
 	m_pcbMappedFrameworkInfo->m_xmf3Gravity = m_xmf3Direction; // 임시로 방향
 	m_pcbMappedFrameworkInfo->m_xmf3Color = m_f3Color;
+	m_pcbMappedFrameworkInfo->m_iTextureIndex = m_iTextureIndex;
 	m_pcbMappedFrameworkInfo->m_nParticleType = m_iParticleType;
 	m_pcbMappedFrameworkInfo->m_fLifeTime = m_fLifeTime;
 	m_pcbMappedFrameworkInfo->m_fSize = m_fSize;
 	m_pcbMappedFrameworkInfo->m_bEmitter = dynamic_cast<CParticleMesh*>(m_pMesh.get())->m_bEmit;
+	m_pcbMappedFrameworkInfo->m_iTextureCoord = XMUINT2(m_iTotalRow, m_iTotalCol);
 
 	D3D12_GPU_VIRTUAL_ADDRESS d3dGpuVirtualAddress = m_pd3dcbFrameworkInfo->GetGPUVirtualAddress();
 	pd3dCommandList->SetGraphicsRootConstantBufferView(11, d3dGpuVirtualAddress);
@@ -101,13 +103,6 @@ void CParticleObject::DrawRender(ID3D12GraphicsCommandList* pd3dCommandList, CCa
 
 void CParticleObject::Update(float fTimeElapsed)
 {
-	if (m_bAnimation) {
-		m_fTime -= fTimeElapsed * m_fSpeed;
-		AnimateRowColumn(m_fTime);
-
-		if (m_fTime <= 0.f)
-			m_fTime = 0.5f;
-	}
 }
 
 void CParticleObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, CShader* pShader)
@@ -201,9 +196,9 @@ XMFLOAT3 CParticleObject::GetDirection()
 
 bool CParticleObject::CheckCapacity()
 {
-	int MaxParticle = static_cast<CParticleMesh*>(m_pMesh.get())->m_nMaxParticle;
-	int Vertices = static_cast<CParticleMesh*>(m_pMesh.get())->GetVertices();
-	if ((MaxParticle - Vertices) > 1000)
+	int MaxParticle = static_cast<CParticleMesh*>(m_pMesh.get())->m_nMaxParticle; // 최대 출력 가능 파티클 
+	int Vertices = static_cast<CParticleMesh*>(m_pMesh.get())->GetVertices(); // 현재 출력 중인 파티클
+	if ((MaxParticle - Vertices) > m_iEmitParticleN) 
 		return true;
 	return false;
 }
@@ -233,7 +228,6 @@ void CParticleObject::AnimateRowColumn(float fTimeElapsed)
 			m_fAccumulatedTime = 0.0f;
 			m_bAnimation = false;
 		}
-		//	m_bEnable = false;
 	}
 	m_xmf4x4World._11 = 1.0f / float(m_iTotalRow);
 	m_xmf4x4World._22 = 1.0f / float(m_iTotalCol);

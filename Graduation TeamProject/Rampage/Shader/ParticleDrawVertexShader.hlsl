@@ -4,7 +4,9 @@ struct VS_PARTICLE_INPUT
 	float3 velocity : VELOCITY;
 	float lifetime : LIFETIME;
 	int type : TYPE;
-	int  bTerrain : TERRAIN;
+	float EmitTime : EMITTIME; // 방출 시작 시간 
+	uint TextureIndex :TEXTUREINDEX;
+	uint2 SpriteTotalCoord : TEXTURECOORD;
 };
 
 struct VS_PARTICLE_DRAW_OUTPUT
@@ -14,22 +16,30 @@ struct VS_PARTICLE_DRAW_OUTPUT
 	float4 color : COLOR;
 	float2 size : SCALE;
 	float alpha : ALPHA;
-	int  bTerrain : TERRAIN;
+	uint TextureIndex :TEXTUREINDEX;
+	uint2 SpriteTotalCoord : TEXTURECOORD;
+	uint2 SpriteCurrentCoord : TEXTURECOORD1;
 };
 
 cbuffer cbFrameworkInfo : register(b7)
 {
 	float		gfCurrentTime : packoffset(c0.x);
 	float		gfElapsedTime : packoffset(c0.y);
-	float		gfSpeed : packoffset(c0.z);
-	int			gnFlareParticlesToEmit : packoffset(c0.w);;
-	float3		gf3Gravity : packoffset(c1.x);
-	int			gnMaxFlareType2Particles : packoffset(c1.w);
-	float3		gfColor : packoffset(c2.x);
-	int			gnParticleType : packoffset(c2.w);
-	float		gfLifeTime : packoffset(c3.x);
-	float2		gfSize : packoffset(c3.y);
-	bool		bEmit : packoffset(c3.w);
+	float		gfLifeTime : packoffset(c0.z);
+	bool		bEmit : packoffset(c0.w);
+
+	uint2		iTextureCoord : packoffset(c1.x);
+	uint		iTextureIndex : packoffset(c1.z);
+	uint		gnParticleType : packoffset(c1.w);
+
+	float3		gf3Gravity : packoffset(c2.x);
+	float		gfSpeed : packoffset(c2.w);
+
+	float3		gfColor : packoffset(c3.x);
+	uint		gnFlareParticlesToEmit : packoffset(c3.w);
+
+	float2		gfSize : packoffset(c4.x);
+
 };
 
 cbuffer cbGameObjectInfo : register(b0)
@@ -37,6 +47,17 @@ cbuffer cbGameObjectInfo : register(b0)
 	matrix gmtxGameObject : packoffset(c0);
 	matrix gmtxTexture : packoffset(c4);
 	uint gnTexturesMask : packoffset(c8);
+}
+
+uint2 SpriteAnimtaion(VS_PARTICLE_INPUT input, float AccumulatedTime, float LifeTime, uint TotalRow, uint TotalCol)
+{
+	float fraction = AccumulatedTime / LifeTime;
+	float interval = 1.0f / (TotalRow * TotalCol);
+	uint m_iCurrentCol = (int)(fraction / (interval * TotalRow));
+	float remainvalue = (fraction / (interval * TotalRow)) - m_iCurrentCol;
+	uint m_iCurrentRow = (int)(remainvalue * TotalRow);
+
+	return uint2(m_iCurrentRow, m_iCurrentCol);
 }
 
 VS_PARTICLE_DRAW_OUTPUT VSParticleDraw(VS_PARTICLE_INPUT input)
@@ -47,34 +68,33 @@ VS_PARTICLE_DRAW_OUTPUT VSParticleDraw(VS_PARTICLE_INPUT input)
 	output.velocity = input.velocity;
 	output.size = gfSize;
 	output.alpha = 1.f;
-	output.bTerrain = input.bTerrain;
+	output.TextureIndex = input.TextureIndex;
+	output.SpriteTotalCoord = input.SpriteTotalCoord;
+	output.SpriteCurrentCoord = SpriteAnimtaion(input, gfCurrentTime - input.EmitTime, input.lifetime, input.SpriteTotalCoord.x, input.SpriteTotalCoord.y);
 	return(output);
 }
 
 
-//VertexOutput VertexShaderMain(VertexInput input, Particle particle)
+//if (fTimeElapsed >= 0.0f)
 //{
-//	VertexOutput output;
+//	m_fAccumulatedTime += fTimeElapsed;
 //
-//	// Get particle's direction vector
-//	float3 direction = normalize(particle.velocity);
+//	float fraction = std::fmodf(m_fAccumulatedTime / m_fLifeTime, 1.0f);
+//	interval = 1.0f / (m_iTotalRow * m_iTotalCol);
 //
-//	// Calculate the particle's right and up vectors
-//	float3 right = cross(float3(0, 1, 0), direction);
-//	float3 up = cross(direction, right);
+//	m_iCurrentCol = (int)(fraction / (interval * m_iTotalRow));
+//	float remainvalue = (fraction / (interval * m_iTotalRow)) - m_iCurrentCol;
+//	m_iCurrentRow = (int)(remainvalue * m_iTotalRow);
 //
-//	// Create the rotation matrix using the particle's direction, right, and up vectors
-//	float4x4 rotationMatrix;
-//	rotationMatrix[0] = float4(right, 0);
-//	rotationMatrix[1] = float4(up, 0);
-//	rotationMatrix[2] = float4(direction, 0);
-//	rotationMatrix[3] = float4(0, 0, 0, 1);
-//
-//	// Transform the particle's position by the rotation matrix and view-projection matrix
-//	float4 transformedPosition = mul(viewProjectionMatrix, mul(rotationMatrix, float4(particle.position, 1)));
-//
-//	// Output the transformed position and texture coordinate
-//	output.position = transformedPosition;
-//	output.texcoord = float2(0, 0);
-//	return output;
+//	if (m_fAccumulatedTime > m_fLifeTime)
+//	{
+//		m_iCurrentRow = 0;
+//		m_iCurrentCol = 0;
+//		m_fAccumulatedTime = 0.0f;
+//		m_bAnimation = false;
+//	}
 //}
+//m_xmf4x4World._11 = 1.0f / float(m_iTotalRow);
+//m_xmf4x4World._22 = 1.0f / float(m_iTotalCol);
+//m_xmf4x4World._31 = float(m_iCurrentRow) / float(m_iTotalRow);
+//m_xmf4x4World._32 = float(m_iCurrentCol) / float(m_iTotalCol);

@@ -1223,8 +1223,8 @@ void CImGuiManager::ShowImpactManager(CState<CPlayer>* pCurrentAnimation)
 	}
 
 	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
-	if (ImGui::DragFloat(U8STR("재생 속도##ImpactEffect"), &pImpactEffectComponent->GetSpeed(), DRAG_FLOAT_UNIT, IMPACT_SPEED_MIN, IMPACT_SPEED_MAX, "%.2f", 0))
-		pImpactEffectComponent->GetSpeed() = std::clamp(pImpactEffectComponent->GetSpeed(), IMPACT_SPEED_MIN, IMPACT_SPEED_MAX);
+	if (ImGui::DragFloat(U8STR("수명##ImpactEffect"), &pImpactEffectComponent->GetLifetime(), DRAG_FLOAT_UNIT, IMPACT_LIFETIME_MIN, IMPACT_LIFETIME_MAX, "%.2f", 0))
+		pImpactEffectComponent->GetLifetime() = std::clamp(pImpactEffectComponent->GetLifetime(), IMPACT_LIFETIME_MIN, IMPACT_LIFETIME_MAX);
 
 	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
 	if (ImGui::DragFloat(U8STR("투명도##ImpactEffect"), &pImpactEffectComponent->GetAlpha(), DRAG_FLOAT_UNIT, IMPACT_ALPHA_MIN, IMPACT_ALPHA_MAX, "%.2f", 0))

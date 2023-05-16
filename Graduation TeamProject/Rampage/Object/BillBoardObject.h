@@ -8,15 +8,20 @@ struct CB_FRAMEWORK_INFO
 {
 	float					m_fCurrentTime;
 	float					m_fElapsedTime;
-	float					m_fSpeed = 1.0f;
-	int						m_nFlareParticlesToEmit = 30;
-	XMFLOAT3				m_xmf3Gravity = XMFLOAT3(0.0f, -9.8f, 0.0f);
-	int						m_nMaxFlareType2Particles = 15;
-	XMFLOAT3				m_xmf3Color = XMFLOAT3(0.0f, 0.f, 1.0f);
-	int						m_nParticleType = 0;
 	float					m_fLifeTime = 0.f;
-	XMFLOAT2				m_fSize = XMFLOAT2(1.f, 1.f);
 	bool					m_bEmitter = false;
+
+	XMUINT2					m_iTextureCoord = XMUINT2(0, 0);
+	UINT					m_iTextureIndex = 0;
+	UINT					m_nParticleType = 0;
+
+	XMFLOAT3				m_xmf3Gravity = XMFLOAT3(0.0f, -9.8f, 0.0f);
+	float					m_fSpeed = 1.0f;
+
+	XMFLOAT3				m_xmf3Color = XMFLOAT3(0.0f, 0.f, 1.0f);
+	int						m_nFlareParticlesToEmit = 30;
+
+	XMFLOAT2				m_fSize = XMFLOAT2(1.f, 1.f);
 };
 
 

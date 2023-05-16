@@ -2,17 +2,22 @@ cbuffer cbFrameworkInfo : register(b7)
 {
 	float		gfCurrentTime : packoffset(c0.x);
 	float		gfElapsedTime : packoffset(c0.y);
-	float		gfSpeed : packoffset(c0.z);
-	int			gnFlareParticlesToEmit : packoffset(c0.w);;
-	float3		gf3Gravity : packoffset(c1.x);
-	int			gnMaxFlareType2Particles : packoffset(c1.w);
-	float3		gfColor : packoffset(c2.x);
-	int			gnParticleType : packoffset(c2.w);
-	float		gfLifeTime : packoffset(c3.x);
-	float2		gfSize : packoffset(c3.y);
-	bool		bEmit : packoffset(c3.w);
-};
+	float		gfLifeTime : packoffset(c0.z);
+	bool		bEmit : packoffset(c0.w);
 
+	uint2		iTextureCoord : packoffset(c1.x);
+	uint		iTextureIndex : packoffset(c1.z);
+	uint		gnParticleType : packoffset(c1.w);
+
+	float3		gf3Gravity : packoffset(c2.x);
+	float		gfSpeed : packoffset(c2.w);
+
+	float3		gfColor : packoffset(c3.x);
+	uint		gnFlareParticlesToEmit : packoffset(c3.w);
+
+	float2		gfSize : packoffset(c4.x);
+
+};
 #define TYPE_EMITTER 0
 #define TYPE_SIMULATOR 1
 
@@ -22,6 +27,9 @@ struct VS_PARTICLE_INPUT
 	float3 velocity : VELOCITY;
 	float lifetime : LIFETIME;
 	int type : TYPE;
+	float EmitTime : EMITTIME; // 방출 시작 시간 
+	uint TextureIndex :TEXTUREINDEX;
+	uint2 SpriteTotalCoord : TEXTURECOORD;
 };
 
 cbuffer cbGameObjectInfo : register(b0)

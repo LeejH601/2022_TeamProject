@@ -335,7 +335,6 @@ void ImpactEffectComponent::HandleMessage(const Message& message, const ImpactCo
 		pMultiSpriteParticle->SetDirection(XMFLOAT3(0.f, 0.f, 0.f));
 		pMultiSpriteParticle->SetStartAlpha(m_fAlpha);
 		pMultiSpriteParticle->SetColor(m_xmf3Color);
-		pMultiSpriteParticle->SetSpeed(m_fSpeed);
 		pMultiSpriteParticle->SetLifeTime(m_fLifeTime);
 		pMultiSpriteParticle->SetAnimation(true);
 		pMultiSpriteParticle->SetEmitParticleN(m_nEmitParticleNumber);

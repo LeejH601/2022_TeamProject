@@ -547,7 +547,7 @@ private:
     int m_nEmitParticleNumber = 1;
     int m_iParticleType = ParticleType::ATTACK_PARTICLE;
     int m_nParticleIndex = 0;
-    float m_fLifeTime = 20.f;
+    float m_fLifeTime = 3.f;
 	float m_fSpeed = 1.f;
 	float m_fAlpha = 1.f;
 	XMFLOAT2 m_fSize = XMFLOAT2(3.f, 3.f);
@@ -562,6 +562,7 @@ public:
 	int GetTextureOffset() { return m_iTextureOffset; }
 	float& GetSpeed() { return m_fSpeed; }
 	float& GetAlpha() { return m_fAlpha; }
+	float& GetLifetime() { return m_fLifeTime; }
 	XMFLOAT2& GetSize() { return m_fSize; }
 	XMFLOAT3& GetColor() { return m_xmf3Color; }
 

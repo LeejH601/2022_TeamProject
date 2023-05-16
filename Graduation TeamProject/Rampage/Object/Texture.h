@@ -15,9 +15,6 @@ public:
 private:
 	int	m_nTextures = 0;		// Texture 개수
 
-	int m_iRow = 1;				// 스프라이트 열 개수
-	int m_iColumn = 1;			// 스프라이트 행 개수
-
 	std::vector<std::pair<int, int>> m_nTextureCoords;
 
 	std::vector<ComPtr<ID3D12Resource>> m_ppd3dTextures;	// Texture 리소스
@@ -104,7 +101,6 @@ public:
 
 	void ReleaseUploadBuffers();
 
-	void AnimateRowColumn(float fTime = 0.0f);
 	void SetRowColumn(int iIndex, int iRow, int iColumn);
 	int GetRow(int iIndex);
 	int GetColumn(int iIndex);
