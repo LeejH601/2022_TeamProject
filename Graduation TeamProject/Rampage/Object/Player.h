@@ -21,6 +21,7 @@ public:
 	unsigned int m_iAttackId = 0;
 	bool m_bAttack = false;
 	bool m_bAttacked = false;
+	bool m_bEvasioned = false;
 
 	LPVOID m_pPlayerUpdatedContext = NULL;
 
@@ -34,6 +35,9 @@ public:
 	float m_fCurLagTime = 0.f;
 
 	std::unique_ptr<CGameObject>* m_pSwordTrailReference = nullptr;
+
+	DWORD m_dwDirectionCache;
+	XMFLOAT3 m_xmf3DirectionCache;
 
 public:
 	CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks);

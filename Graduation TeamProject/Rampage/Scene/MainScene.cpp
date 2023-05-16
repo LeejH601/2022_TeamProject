@@ -438,6 +438,15 @@ SCENE_RETURN_TYPE CMainTMPScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMe
 	case WM_KEYDOWN:
 		switch (wParam)
 		{
+		case VK_SHIFT:
+			if (m_pPlayer)
+			{
+				if (!((CPlayer*)m_pPlayer)->m_bEvasioned)
+				{
+					((CPlayer*)m_pPlayer)->m_bEvasioned = true;
+				}
+			}
+			break;
 		case VK_F5:
 		{
 			XMFLOAT3 xmf3MonsterPos[5];

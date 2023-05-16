@@ -35,6 +35,9 @@ void Idle_Player::Execute(CPlayer* player, float fElapsedTime)
 	// 사용자가 좌클릭을 했으면 Atk1_Player로 상태 변경
 	if (player->m_bAttack)
 		player->m_pStateMachine->ChangeState(Atk1_Player::GetInst());
+
+	if (player->m_bEvasioned)
+		player->m_pStateMachine->ChangeState(Evasion_Player::GetInst());
 }
 
 void Idle_Player::Animate(CPlayer* player, float fElapsedTime)
@@ -876,4 +879,139 @@ void Atk5_Player::CheckComboAttack(CPlayer* player)
 
 void Atk5_Player::SendCollisionMessage(CPlayer* player)
 {
+}
+
+Evasion_Player::Evasion_Player()
+{
+}
+
+Evasion_Player::~Evasion_Player()
+{
+}
+
+void Evasion_Player::Enter(CPlayer* player)
+{
+	player->m_fCMDConstant = 1.0f;
+
+	player->m_bEvasioned = false;
+
+	DWORD dwDirection = player->m_dwDirectionCache;
+	XMFLOAT3 xmf3Direction = player->m_xmf3DirectionCache; xmf3Direction = Vector3::Normalize(xmf3Direction);
+	XMFLOAT3 xmf3CameraDirection = player->m_pCamera->GetLookVector();
+	xmf3CameraDirection.y = 0.0f; xmf3CameraDirection = Vector3::Normalize(xmf3CameraDirection);
+	
+	float ceta_Player_and_Camera = Vector3::DotProduct(xmf3Direction, xmf3CameraDirection);
+	float ceta_Player_and_CameraCross = Vector3::DotProduct(xmf3Direction, Vector3::CrossProduct(player->GetUp(), xmf3CameraDirection));
+
+	float drgree_45 = 45.0f * XM_PI / 180.0f;
+	float drgree_135 = 135.0f * XM_PI / 180.0f;
+
+	if (ceta_Player_and_Camera > 0.000001f) {
+		if (ceta_Player_and_CameraCross > 0.000001f) {
+			// 왼쪽 위 사분면
+			float ceta = XMVector3AngleBetweenVectors(XMLoadFloat3(&xmf3Direction), XMLoadFloat3(&xmf3CameraDirection)).m128_f32[0];
+			if (ceta > drgree_45) { // 왼쪽 애니메이션
+				player->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 13);
+			}
+			else { // 전방 애니메이션
+				player->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 12);
+			}
+		}
+		else {
+			// 오른쪽 위 사분면
+			float ceta = XMVector3AngleBetweenVectors(XMLoadFloat3(&xmf3Direction), XMLoadFloat3(&xmf3CameraDirection)).m128_f32[0];
+			if (ceta > drgree_45) { // 오른쪽 애니메이션
+				player->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 14);
+			}
+			else { // 전방 애니메이션
+				player->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 12);
+			}
+		}
+	}
+	else if (ceta_Player_and_Camera < 0.000001f) {
+		if (ceta_Player_and_CameraCross > 0.000001f) {
+			// 왼쪽 뒤 사분면
+			float ceta = XMVector3AngleBetweenVectors(XMLoadFloat3(&xmf3Direction), XMLoadFloat3(&xmf3CameraDirection)).m128_f32[0];
+			if (ceta > drgree_135) { // 후방 애니메이션
+				player->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 11);
+			}
+			else { // 왼쪽 애니메이션
+				player->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 13);
+			}
+		}
+		else {
+			// 오른쪽 뒤 사분면
+			float ceta = XMVector3AngleBetweenVectors(XMLoadFloat3(&xmf3Direction), XMLoadFloat3(&xmf3CameraDirection)).m128_f32[0];
+			if (ceta > drgree_135) { // 후방 애니메이션
+				player->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 11);
+			}
+			else { // 오른쪽 애니메이션
+				player->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 14);
+			}
+		}
+	}
+	else {
+
+	}
+
+	player->m_pSkinnedAnimationController->m_fTime = 0.0f;
+	player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition = 0.0f;
+	player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_nType = ANIMATION_TYPE_ONCE;
+
+	player->m_fCurLagTime = 0.f;
+	player->m_fAnimationPlayWeight = 1.0f;
+}
+
+void Evasion_Player::Execute(CPlayer* player, float fElapsedTime)
+{
+	CAnimationSet* pAnimationSet = player->m_pSkinnedAnimationController->m_pAnimationSets->m_pAnimationSets[player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_nAnimationSet];
+	if (player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition == pAnimationSet->m_fLength)
+	{
+		player->m_pStateMachine->ChangeState(Idle_Player::GetInst());
+	}
+}
+
+void Evasion_Player::Exit(CPlayer* player)
+{
+
+}
+
+void Evasion_Player::Animate(CPlayer* player, float fElapsedTime)
+{
+	player->Animate(fElapsedTime * player->GetAnimationPlayWeight());
+}
+
+void Evasion_Player::OnRootMotion(CPlayer* player, float fTimeElapsed)
+{
+	CAnimationController* pPlayerController = player->m_pSkinnedAnimationController.get();
+
+	CAnimationSet* pAnimationSet = pPlayerController->m_pAnimationSets->m_pAnimationSets[pPlayerController->m_pAnimationTracks[0].m_nAnimationSet];
+
+	if (pPlayerController->m_pAnimationTracks[0].m_fPosition == pAnimationSet->m_fLength)
+	{
+		if (fTimeElapsed > 0.0f)
+			SetPlayerRootPos(player);
+		else
+		{
+			pPlayerController->m_pRootMotionObject->m_xmf4x4Transform._41 = 0.f;
+			pPlayerController->m_pRootMotionObject->m_xmf4x4Transform._43 = 0.f;
+		}
+	}
+}
+
+void Evasion_Player::SetPlayerRootPos(CPlayer* player)
+{
+	CAnimationController* pPlayerController = player->m_pSkinnedAnimationController.get();
+
+	player->UpdateTransform(NULL);
+
+	XMFLOAT3 xmf3Position = XMFLOAT3{ pPlayerController->m_pRootMotionObject->GetWorld()._41,
+		player->GetPosition().y,
+		pPlayerController->m_pRootMotionObject->GetWorld()._43 };
+
+	player->SetPosition(xmf3Position);
+
+	pPlayerController->m_pRootMotionObject->m_xmf4x4Transform._41 = 0.f;
+	pPlayerController->m_pRootMotionObject->m_xmf4x4Transform._42 = 0.f;
+	pPlayerController->m_pRootMotionObject->m_xmf4x4Transform._43 = 0.f;
 }

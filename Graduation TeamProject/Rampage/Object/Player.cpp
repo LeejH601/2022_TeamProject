@@ -134,6 +134,8 @@ void CPlayer::ProcessInput(DWORD dwDirection, float cxDelta, float cyDelta, floa
 			if (dwDirection & DIR_LEFT)xmf3Shift = Vector3::Add(xmf3Shift, Vector3::Normalize(XMFLOAT3(pCamera->GetRightVector().x, 0.0f, pCamera->GetRightVector().z)), -1.0f);
 			
 			m_xmfDirection = xmf3Shift;
+			m_dwDirectionCache = dwDirection;
+			m_xmf3DirectionCache = xmf3Shift;
 		}
 	}
 }

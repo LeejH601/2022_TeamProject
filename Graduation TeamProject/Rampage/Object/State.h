@@ -170,6 +170,22 @@ public:
 
 };
 
+class Evasion_Player : public CState<CPlayer>
+{
+public:
+    DECLARE_SINGLE(Evasion_Player);
+    Evasion_Player();
+    ~Evasion_Player();
+
+    virtual void Enter(CPlayer* player);
+    virtual void Execute(CPlayer* player, float fElapsedTime);
+    virtual void Animate(CPlayer* player, float fElapsedTime);
+    virtual void OnRootMotion(CPlayer* player, float fTimeElapsed);
+    virtual void Exit(CPlayer* player);
+
+    virtual void SetPlayerRootPos(CPlayer* player);
+};
+
 template<class entity_type>
 inline IMessageListener* CState<entity_type>::GetShockSoundComponent()
 {
