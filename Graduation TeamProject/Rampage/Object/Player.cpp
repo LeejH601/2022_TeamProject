@@ -286,33 +286,17 @@ void CKnightPlayer::OnUpdateCallback(float fTimeElapsed)
 			m_pSkinnedAnimationController->m_pRootMotionObject->GetWorld()._42,
 			m_pSkinnedAnimationController->m_pRootMotionObject->GetWorld()._43
 		};
-		XMFLOAT3 xmf3ResultPlayerPos = GetPosition();
 
-		CMapObject* pCollisionObject = NULL;
 		for (int i = 0; i < pMap->GetMapObjects().size(); ++i) {
 			if (pMap->GetMapObjects()[i]->CheckCollision(this))
 			{
-				pCollisionObject = static_cast<CMapObject*>(pMap->GetMapObjects()[i].get());
+				CPhysicsObject::Move(Vector3::ScalarProduct(m_xmf3Velocity, -1.0f, false), false);
 				break;
 			}
 		}
-
-		if (pCollisionObject)
-		{
-			std::wstring name{ &pCollisionObject->m_pstrFrameName[0], &pCollisionObject->m_pstrFrameName[64] };
-			OutputDebugString(name.c_str());
-			OutputDebugString(L"\n");
-
-			/*BoundingOrientedBox overlap;
-			BoundingOrientedBox::CreateMerged(overlap, pCollisionObject->GetBoundingBox(), m_TransformedBodyBoundingBox);
-
-			XMFLOAT3 dir = Vector3::Normalize(Vector3::Subtract(m_TransformedBodyBoundingBox.Center, pCollisionObject->GetBoundingBox().Center));
-			float distance = 0.0f;
-
-			m_TransformedBodyBoundingBox.Intersects(XMLoadFloat3(&pCollisionObject->GetBoundingBox().Center), XMLoadFloat3(&dir), distance);
-			xmf3ResultPlayerPos = Vector3::Add(xmf3ResultPlayerPos, Vector3::ScalarProduct(dir, distance * 0.5f, false));*/
-		}
 		
+		XMFLOAT3 xmf3ResultPlayerPos = GetPosition();
+
 		xmf3ResultPlayerPos.x = std::clamp(xmf3ResultPlayerPos.x, xmf3TerrainPos.x + TERRAIN_SPAN, xmf3TerrainPos.x + pTerrain->GetWidth() - TERRAIN_SPAN);
 		xmf3ResultPlayerPos.z = std::clamp(xmf3ResultPlayerPos.z, xmf3TerrainPos.z + TERRAIN_SPAN, xmf3TerrainPos.z + pTerrain->GetLength() - TERRAIN_SPAN);
 
