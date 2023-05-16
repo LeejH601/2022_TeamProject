@@ -652,7 +652,7 @@ void CMapObject::AddPhysicsScene(const XMFLOAT4X4& xmfWorld)
 
 bool CMapObject::CheckCollision(CGameObject* pTargetObject)
 {
-	BoundingBox playerBoundingBox = pTargetObject->GetBoundingBox();
+	BoundingOrientedBox playerBoundingBox = pTargetObject->GetBoundingBox();
 
 	if (!Vector3::Length(m_ObjectBoundingBox.Extents))
 		return false;
@@ -680,15 +680,15 @@ void CMapObject::UpdateTransform(XMFLOAT4X4* pxmf4x4Parent)
 void CMapObject::PrepareBoundingBox(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 #ifdef RENDER_BOUNDING_BOX
-	BoundingBox aambb = CreateAAMBB();
+	BoundingOrientedBox aambb = CreateAAMBB();
 	pBoundingBoxMesh = CBoundingBoxShader::GetInst()->AddBoundingObject(pd3dDevice, pd3dCommandList, this, aambb.Center, aambb.Extents);
-	m_ObjectBoundingBox = BoundingBox{ aambb.Center, aambb.Extents };
+	m_ObjectBoundingBox = BoundingOrientedBox{ aambb.Center, aambb.Extents, XMFLOAT4{0.0f, 0.0f, 0.0f, 1.0f} };
 #endif // RENDER_BOUNDING_BOX
 }
 
-BoundingBox CMapObject::CreateAAMBB()
+BoundingOrientedBox CMapObject::CreateAAMBB()
 {
-	BoundingBox bbox;
+	BoundingOrientedBox bbox;
 
 	switch (m_Objtype)
 	{
@@ -698,7 +698,7 @@ BoundingBox CMapObject::CreateAAMBB()
 		break;
 	case MAP_OBJ_TYPE::TREE:
 		{
-			BoundingBox tmpbox;
+			BoundingOrientedBox tmpbox;
 			XMFLOAT3 minCoord = minCoord = { FLT_MAX, FLT_MAX, FLT_MAX };
 			XMFLOAT3 maxCoord = maxCoord = { FLT_MIN, FLT_MIN, FLT_MIN };
 

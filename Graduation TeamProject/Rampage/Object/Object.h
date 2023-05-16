@@ -104,8 +104,8 @@ public:
 	CGameObject* GetParent() { return (m_pParent); }
 	UINT GetMeshType();
 	bool GetHit() { return bHit; }
-	virtual BoundingBox GetBoundingBox() { return BoundingBox{}; }
-
+	virtual BoundingOrientedBox GetBoundingBox() { return BoundingOrientedBox{}; }
+	
 	void SetEnable(bool bEnable);
 	void SetChild(std::shared_ptr<CGameObject> pChild, bool bReferenceUpdate = false);
 	void SetShader(std::shared_ptr<CShader> pShader, std::shared_ptr<CTexture> pTexture = NULL);
@@ -171,9 +171,9 @@ class CMapObject : public CGameObject
 {
 private:
 	MAP_OBJ_TYPE m_Objtype;
-	BoundingBox m_ObjectBoundingBox = BoundingBox{ XMFLOAT3{0.0f, 0.0f, 0.0f}, XMFLOAT3{0.0f, 0.0f, 0.0f} };
-	BoundingBox m_TransformedObjectBoundingBox = BoundingBox{ XMFLOAT3{0.0f, 0.0f, 0.0f}, XMFLOAT3{0.0f, 0.0f, 0.0f} };
-	BoundingOrientedBox m_TmpBoundingBox;
+	BoundingOrientedBox m_ObjectBoundingBox = BoundingOrientedBox{ XMFLOAT3{0.0f, 0.0f, 0.0f}, XMFLOAT3{0.0f, 0.0f, 0.0f}, XMFLOAT4{0.0f, 0.0f, 0.0f, 1.0f} };
+	BoundingOrientedBox m_TransformedObjectBoundingBox = BoundingOrientedBox{ XMFLOAT3{0.0f, 0.0f, 0.0f}, XMFLOAT3{0.0f, 0.0f, 0.0f}, XMFLOAT4{0.0f, 0.0f, 0.0f, 1.0f} };
+
 	CGameObject* pBoundingBoxMesh;
 public:
 	CMapObject() { }
@@ -182,9 +182,9 @@ public:
 	void SetObjType(MAP_OBJ_TYPE objtype) { m_Objtype = objtype; }
 	void LoadObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, FILE* pInFile);
 	void AddPhysicsScene(const XMFLOAT4X4& xmfWorld);
-	BoundingBox CreateAAMBB();
+	BoundingOrientedBox CreateAAMBB();
 
-	virtual BoundingBox GetBoundingBox() { return m_TransformedObjectBoundingBox; }
+	virtual BoundingOrientedBox GetBoundingBox() { return m_TransformedObjectBoundingBox; }
 
 	virtual bool CheckCollision(CGameObject* pTargetObject);
 	virtual void UpdateTransform(XMFLOAT4X4* pxmf4x4Parent = NULL);

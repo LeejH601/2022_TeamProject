@@ -1097,7 +1097,7 @@ CSplatGridMesh::~CSplatGridMesh()
 //-------------------------------------------------------------------
 CBoundingBoxMesh::CBoundingBoxMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, XMFLOAT3 xmf3AABBCenter, XMFLOAT3 xmf3AABBExtents)
 {
-	//BoundingBox는 직육면체이다. 
+	//BoundingOrientedBox는 직육면체이다. 
 	m_nVertices = 8;
 	m_nOffset = 0;
 	m_nSlot = 0;

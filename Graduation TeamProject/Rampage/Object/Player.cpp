@@ -198,7 +198,7 @@ void CKnightPlayer::SetRigidDynamic()
 
 	Rigid = actor;
 }
-void CKnightPlayer::SetTargetPosition(const BoundingBox& targetBoundingBox)
+void CKnightPlayer::SetTargetPosition(const BoundingOrientedBox& targetBoundingBox)
 {
 	// 두 바운딩 박스의 중심점을 구함
 	XMFLOAT3 playerWeaponBoxCenter = m_TransformedWeaponBoundingBox.Center;
@@ -221,7 +221,7 @@ bool CKnightPlayer::CheckCollision(CGameObject* pTargetObject)
 	if (m_iAttackId == ((CMonster*)pTargetObject)->GetPlayerAtkId() || ((CMonster*)pTargetObject)->m_fHP <= 0.0f)
 		return false;
 
-	BoundingBox TargetBoundingBox = pTargetObject->GetBoundingBox();
+	BoundingOrientedBox TargetBoundingBox = pTargetObject->GetBoundingBox();
 	if (pTargetObject->m_bEnable && ((CMonster*)pTargetObject)->m_fHP > 0 && m_TransformedWeaponBoundingBox.Intersects(TargetBoundingBox)) {
 		
 		SetTargetPosition(TargetBoundingBox);
@@ -303,8 +303,8 @@ void CKnightPlayer::OnUpdateCallback(float fTimeElapsed)
 			OutputDebugString(name.c_str());
 			OutputDebugString(L"\n");
 
-			/*BoundingBox overlap;
-			BoundingBox::CreateMerged(overlap, pCollisionObject->GetBoundingBox(), m_TransformedBodyBoundingBox);
+			/*BoundingOrientedBox overlap;
+			BoundingOrientedBox::CreateMerged(overlap, pCollisionObject->GetBoundingBox(), m_TransformedBodyBoundingBox);
 
 			XMFLOAT3 dir = Vector3::Normalize(Vector3::Subtract(m_TransformedBodyBoundingBox.Center, pCollisionObject->GetBoundingBox().Center));
 			float distance = 0.0f;
@@ -370,8 +370,8 @@ void CKnightPlayer::PrepareBoundingBox(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 	pWeapon = CGameObject::FindFrame("Weapon_r");
 	pBodyBoundingBoxMesh = CBoundingBoxShader::GetInst()->AddBoundingObject(pd3dDevice, pd3dCommandList, this, XMFLOAT3(0.0f, 0.75f, 0.0f), XMFLOAT3(0.35f, 1.0f, 0.35f));
 	pWeaponBoundingBoxMesh = CBoundingBoxShader::GetInst()->AddBoundingObject(pd3dDevice, pd3dCommandList, this, XMFLOAT3(0.0f, 0.6f, 0.4f), XMFLOAT3(0.0125f, 0.525f, 0.0625f));
-	m_BodyBoundingBox = BoundingBox{ XMFLOAT3(0.0f, 0.75f, 0.0f), XMFLOAT3(0.35f, 1.0f, 0.35f) };
-	m_WeaponBoundingBox = BoundingBox{ XMFLOAT3(0.0f, 0.6f, 0.4f), XMFLOAT3(0.0125f, 0.525f, 0.0625f) };
+	m_BodyBoundingBox = BoundingOrientedBox{ XMFLOAT3(0.0f, 0.75f, 0.0f), XMFLOAT3(0.35f, 1.0f, 0.35f), XMFLOAT4{0.0f, 0.0f, 0.0f, 1.0f} };
+	m_WeaponBoundingBox = BoundingOrientedBox{ XMFLOAT3(0.0f, 0.6f, 0.4f), XMFLOAT3(0.0125f, 0.525f, 0.0625f), XMFLOAT4{0.0f, 0.0f, 0.0f, 1.0f} };
 }
 
 

@@ -61,10 +61,10 @@ class CKnightPlayer : public CPlayer
 {
 private:
 	CGameObject* pWeapon;
-	BoundingBox m_BodyBoundingBox;
-	BoundingBox m_WeaponBoundingBox;
-	BoundingBox m_TransformedBodyBoundingBox;
-	BoundingBox m_TransformedWeaponBoundingBox;
+	BoundingOrientedBox m_BodyBoundingBox;
+	BoundingOrientedBox m_WeaponBoundingBox;
+	BoundingOrientedBox m_TransformedBodyBoundingBox;
+	BoundingOrientedBox m_TransformedWeaponBoundingBox;
 	CGameObject* pBodyBoundingBoxMesh;
 	CGameObject* pWeaponBoundingBoxMesh;
 	XMFLOAT4 m_xmf4TrailControllPoints[2];
@@ -76,10 +76,10 @@ public:
 	virtual void SetRigidDynamic();
 
 
-	virtual BoundingBox GetBoundingBox() { return m_TransformedBodyBoundingBox; }
-	virtual BoundingBox GetWeaponMeshBoundingBox() { return m_TransformedWeaponBoundingBox; }
+	virtual BoundingOrientedBox GetBoundingBox() { return m_TransformedBodyBoundingBox; }
+	virtual BoundingOrientedBox GetWeaponMeshBoundingBox() { return m_TransformedWeaponBoundingBox; }
 
-	void SetTargetPosition(const BoundingBox& targetBoundingBox);
+	void SetTargetPosition(const BoundingOrientedBox& targetBoundingBox);
 	virtual bool CheckCollision(CGameObject* pTargetObject);
 
 	virtual void Animate(float fTimeElapsed);
