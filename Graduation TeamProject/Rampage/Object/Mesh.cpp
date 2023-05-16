@@ -1396,6 +1396,10 @@ void CParticleMesh::PreRender(ID3D12GraphicsCommandList* pd3dCommandList, int nP
 			m_pd3dPositionBufferView.StrideInBytes = m_nStride;
 			m_pd3dPositionBufferView.SizeInBytes = m_nStride * m_nVertices;
 
+			TCHAR pstrDebug[256] = { 0 };
+			_stprintf_s(pstrDebug, 256, _T("emit particles ---- %d \n"), m_nVertices);
+			OutputDebugString(pstrDebug);
+
 			m_bEmit = false;
 		}
 		else
@@ -1506,14 +1510,14 @@ void CParticleMesh::EmitParticle(int emitType, ParticleEmitDataParam& param)
 	static std::default_random_engine dre(rd());
 	static std::uniform_real_distribution<float> urd(-1, 1);
 
-	m_ncreatedParticleNum = param.m_nEmitNum;
+	int nCreateParticleNum = m_ncreatedParticleNum + param.m_nEmitNum;
 	//static XMFLOAT3 offset{ 86.4804 , 0.0f, -183.7856 };;
 	switch (emitType)
 	{
 	case 0:
 		break;
 	case 1:
-		for (int i = 0; i < m_ncreatedParticleNum; ++i) {
+		for (int i = m_ncreatedParticleNum; i < nCreateParticleNum; ++i) {
 			createdParticleBuffer[i].m_xmf3Position = param.m_xmf3EmitedPosition; /*XMFLOAT3(45 + offset.x, 60, 50 + offset.z)*/
 			createdParticleBuffer[i].m_xmf3Velocity = XMFLOAT3(urd(dre), urd(dre), urd(dre));
 			createdParticleBuffer[i].m_xmf3Velocity = Vector3::ScalarProduct(Vector3::Normalize(createdParticleBuffer[i].m_xmf3Velocity), param.m_fEmitedSpeed, false);
@@ -1525,6 +1529,7 @@ void CParticleMesh::EmitParticle(int emitType, ParticleEmitDataParam& param)
 		break;
 	}
 
+	m_ncreatedParticleNum = nCreateParticleNum;
 	memcpy(m_pBufferDataBegin, createdParticleBuffer.data(), m_ncreatedParticleNum * m_nStride);
 }
 
