@@ -61,12 +61,14 @@ public:
     virtual void CheckComboAttack(CPlayer* player) = 0;
     virtual void SendCollisionMessage(CPlayer* player) = 0;
     virtual void SpawnTrailParticle(CPlayer* player) = 0;
+    virtual void CheckEvasion(CPlayer* player, float holdTime);
+    virtual void OnRootMotion(CPlayer* player);
 
     virtual void Enter(CPlayer* player) = 0;
     virtual void Execute(CPlayer* player, float fElapsedTime) = 0;
     virtual void Animate(CPlayer* player, float fElapsedTime) = 0;
     virtual void OnRootMotion(CPlayer* player, float fTimeElapsed);
-    virtual void Exit(CPlayer* player) = 0;
+    virtual void Exit(CPlayer* player);
 };
 
 class Atk1_Player : public Atk_Player

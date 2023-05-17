@@ -243,6 +243,13 @@ void Atk_Player::OnRootMotion(CPlayer* player, float fTimeElapsed)
 	}
 }
 
+void Atk_Player::Exit(CPlayer* player)
+{
+	OnRootMotion(player);
+}
+
+
+
 Atk1_Player::Atk1_Player()
 {
 	InitAtkPlayer();
@@ -314,7 +321,7 @@ void Atk1_Player::SpawnTrailParticle(CPlayer* player)
 			ParticleTrail_comp_params.xmf3Position = xmf3Position;
 			ParticleTrail_comp_params.iPlayerAttack = 0;
 			ParticleTrail_comp_params.m_fTime = player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition;
-			ParticleTrail_comp_params.xmf3Velocity =Vector3::Normalize(Vector3::Subtract(xmf3Position, player->GetPosition()));
+			ParticleTrail_comp_params.xmf3Velocity = Vector3::Normalize(Vector3::Subtract(xmf3Position, player->GetPosition()));
 			CMessageDispatcher::GetInst()->Dispatch_Message<ParticleTrailParams>(MessageType::UPDATE_TRAILPARTICLE, &ParticleTrail_comp_params, player->m_pStateMachine->GetCurrentState());
 		}
 
@@ -360,6 +367,8 @@ void Atk1_Player::Execute(CPlayer* player, float fElapsedTime)
 	CheckComboAttack(player);
 	CheckHitLag(player);
 
+	CheckEvasion(player, 0.7f);
+
 	if (player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition == pAnimationSet->m_fLength)
 	{
 		player->m_pStateMachine->ChangeState(Idle_Player::GetInst());
@@ -386,6 +395,8 @@ void Atk1_Player::Exit(CPlayer* player)
 	}
 	if (player->m_pSwordTrailReference)
 		dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[0].get())->m_eTrailUpdateMethod = TRAIL_UPDATE_METHOD::DELETE_CONTROL_POINT;
+
+	Atk_Player::Exit(player);
 }
 
 Atk2_Player::Atk2_Player()
@@ -465,6 +476,8 @@ void Atk2_Player::Execute(CPlayer* player, float fElapsedTime)
 	CheckComboAttack(player);
 	CheckHitLag(player);
 
+	CheckEvasion(player, 0.7f);
+
 	if (player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition == pAnimationSet->m_fLength)
 	{
 		player->m_pStateMachine->ChangeState(Idle_Player::GetInst());
@@ -492,6 +505,8 @@ void Atk2_Player::Exit(CPlayer* player)
 
 	if (player->m_pSwordTrailReference)
 		dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[1].get())->m_eTrailUpdateMethod = TRAIL_UPDATE_METHOD::DELETE_CONTROL_POINT;
+
+	Atk_Player::Exit(player);
 }
 
 void Atk2_Player::SpawnTrailParticle(CPlayer* player)
@@ -592,6 +607,8 @@ void Atk3_Player::Execute(CPlayer* player, float fElapsedTime)
 	CheckComboAttack(player);
 	CheckHitLag(player);
 
+	CheckEvasion(player, 0.7f);
+
 	CAnimationSet* pAnimationSet = player->m_pSkinnedAnimationController->m_pAnimationSets->m_pAnimationSets[player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_nAnimationSet];
 
 	if (0.45 < player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition) {
@@ -632,6 +649,8 @@ void Atk3_Player::Exit(CPlayer* player)
 
 	if (player->m_pSwordTrailReference)
 		dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[2].get())->m_eTrailUpdateMethod = TRAIL_UPDATE_METHOD::DELETE_CONTROL_POINT;
+
+	Atk_Player::Exit(player);
 }
 
 void Atk3_Player::SpawnTrailParticle(CPlayer* player)
@@ -667,6 +686,9 @@ void Run_Player::Execute(CPlayer* player, float fElapsedTime)
 
 	if (player->m_bAttack)
 		player->m_pStateMachine->ChangeState(Atk1_Player::GetInst());
+
+	if (player->m_bEvasioned)
+		player->m_pStateMachine->ChangeState(Evasion_Player::GetInst());
 
 	// Idle 상태로 복귀하는 코드
 	if (Vector3::Length(xmf3PlayerVel) == 0)
@@ -899,59 +921,68 @@ void Evasion_Player::Enter(CPlayer* player)
 	XMFLOAT3 xmf3Direction = player->m_xmf3DirectionCache; xmf3Direction = Vector3::Normalize(xmf3Direction);
 	XMFLOAT3 xmf3CameraDirection = player->m_pCamera->GetLookVector();
 	xmf3CameraDirection.y = 0.0f; xmf3CameraDirection = Vector3::Normalize(xmf3CameraDirection);
-	
+
 	float ceta_Player_and_Camera = Vector3::DotProduct(xmf3Direction, xmf3CameraDirection);
 	float ceta_Player_and_CameraCross = Vector3::DotProduct(xmf3Direction, Vector3::CrossProduct(player->GetUp(), xmf3CameraDirection));
 
 	float drgree_45 = 45.0f * XM_PI / 180.0f;
 	float drgree_135 = 135.0f * XM_PI / 180.0f;
 
-	if (ceta_Player_and_Camera > 0.000001f) {
-		if (ceta_Player_and_CameraCross > 0.000001f) {
-			// 왼쪽 위 사분면
-			float ceta = XMVector3AngleBetweenVectors(XMLoadFloat3(&xmf3Direction), XMLoadFloat3(&xmf3CameraDirection)).m128_f32[0];
-			if (ceta > drgree_45) { // 왼쪽 애니메이션
-				player->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 13);
-			}
-			else { // 전방 애니메이션
-				player->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 12);
-			}
-		}
-		else {
-			// 오른쪽 위 사분면
-			float ceta = XMVector3AngleBetweenVectors(XMLoadFloat3(&xmf3Direction), XMLoadFloat3(&xmf3CameraDirection)).m128_f32[0];
-			if (ceta > drgree_45) { // 오른쪽 애니메이션
-				player->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 14);
-			}
-			else { // 전방 애니메이션
-				player->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 12);
-			}
-		}
+	CState<CPlayer>& previousState = *player->m_pStateMachine->GetPreviousState();
+	if (dynamic_cast<Idle_Player*>(&previousState)) {
+		player->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 12);
 	}
-	else if (ceta_Player_and_Camera < 0.000001f) {
-		if (ceta_Player_and_CameraCross > 0.000001f) {
-			// 왼쪽 뒤 사분면
-			float ceta = XMVector3AngleBetweenVectors(XMLoadFloat3(&xmf3Direction), XMLoadFloat3(&xmf3CameraDirection)).m128_f32[0];
-			if (ceta > drgree_135) { // 후방 애니메이션
-				player->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 11);
-			}
-			else { // 왼쪽 애니메이션
-				player->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 13);
-			}
-		}
-		else {
-			// 오른쪽 뒤 사분면
-			float ceta = XMVector3AngleBetweenVectors(XMLoadFloat3(&xmf3Direction), XMLoadFloat3(&xmf3CameraDirection)).m128_f32[0];
-			if (ceta > drgree_135) { // 후방 애니메이션
-				player->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 11);
-			}
-			else { // 오른쪽 애니메이션
-				player->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 14);
-			}
-		}
+	else if (dynamic_cast<Run_Player*>(&previousState)) {
+		player->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 12);
 	}
 	else {
+		if (ceta_Player_and_Camera > 0.000001f) {
+			if (ceta_Player_and_CameraCross > 0.000001f) {
+				// 왼쪽 위 사분면
+				float ceta = XMVector3AngleBetweenVectors(XMLoadFloat3(&xmf3Direction), XMLoadFloat3(&xmf3CameraDirection)).m128_f32[0];
+				if (ceta > drgree_45) { // 왼쪽 애니메이션
+					player->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 14);
+				}
+				else { // 전방 애니메이션
+					player->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 12);
+				}
+			}
+			else {
+				// 오른쪽 위 사분면
+				float ceta = XMVector3AngleBetweenVectors(XMLoadFloat3(&xmf3Direction), XMLoadFloat3(&xmf3CameraDirection)).m128_f32[0];
+				if (ceta > drgree_45) { // 오른쪽 애니메이션
+					player->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 13);
+				}
+				else { // 전방 애니메이션
+					player->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 12);
+				}
+			}
+		}
+		else if (ceta_Player_and_Camera < 0.000001f) {
+			if (ceta_Player_and_CameraCross > 0.000001f) {
+				// 왼쪽 뒤 사분면
+				float ceta = XMVector3AngleBetweenVectors(XMLoadFloat3(&xmf3Direction), XMLoadFloat3(&xmf3CameraDirection)).m128_f32[0];
+				if (ceta > drgree_135) { // 후방 애니메이션
+					player->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 11);
+				}
+				else { // 왼쪽 애니메이션
+					player->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 14);
+				}
+			}
+			else {
+				// 오른쪽 뒤 사분면
+				float ceta = XMVector3AngleBetweenVectors(XMLoadFloat3(&xmf3Direction), XMLoadFloat3(&xmf3CameraDirection)).m128_f32[0];
+				if (ceta > drgree_135) { // 후방 애니메이션
+					player->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 11);
+				}
+				else { // 오른쪽 애니메이션
+					player->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 13);
+				}
+			}
+		}
+		else {
 
+		}
 	}
 
 	player->m_pSkinnedAnimationController->m_fTime = 0.0f;
@@ -967,7 +998,16 @@ void Evasion_Player::Execute(CPlayer* player, float fElapsedTime)
 	CAnimationSet* pAnimationSet = player->m_pSkinnedAnimationController->m_pAnimationSets->m_pAnimationSets[player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_nAnimationSet];
 	if (player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition == pAnimationSet->m_fLength)
 	{
-		player->m_pStateMachine->ChangeState(Idle_Player::GetInst());
+		CState<CPlayer>& previousState = *player->m_pStateMachine->GetPreviousState();
+		if (dynamic_cast<Idle_Player*>(&previousState)) {
+			player->m_pStateMachine->ChangeState(&previousState);
+		}
+		else if (dynamic_cast<Run_Player*>(&previousState)) {
+			player->m_pStateMachine->ChangeState(&previousState);
+		}
+		else {
+			player->m_pStateMachine->ChangeState(Idle_Player::GetInst());
+		}
 	}
 }
 
@@ -1014,4 +1054,22 @@ void Evasion_Player::SetPlayerRootPos(CPlayer* player)
 	pPlayerController->m_pRootMotionObject->m_xmf4x4Transform._41 = 0.f;
 	pPlayerController->m_pRootMotionObject->m_xmf4x4Transform._42 = 0.f;
 	pPlayerController->m_pRootMotionObject->m_xmf4x4Transform._43 = 0.f;
+}
+
+void Atk_Player::CheckEvasion(CPlayer* player, float holdTime)
+{
+	if (player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition > holdTime)
+	{
+		if (player->m_bEvasioned)
+			player->m_pStateMachine->ChangeState(Evasion_Player::GetInst());
+	}
+}
+
+void Atk_Player::OnRootMotion(CPlayer* player)
+{
+	CAnimationController* pPlayerController = player->m_pSkinnedAnimationController.get();
+
+	CAnimationSet* pAnimationSet = pPlayerController->m_pAnimationSets->m_pAnimationSets[pPlayerController->m_pAnimationTracks[0].m_nAnimationSet];
+
+	SetPlayerRootPos(player);
 }
