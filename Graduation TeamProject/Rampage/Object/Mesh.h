@@ -375,6 +375,9 @@ struct ParticleEmitDataParam
 	XMFLOAT3 m_xmf3EmitAxes;
 	int m_nEmitNum;
 	float m_fLifeTime;
+	float							m_fEmitTime = 0.0f;
+	UINT							m_iTextureIndex = 0;
+	UINT							m_iTextureCoord[2];
 };
 
 #define MAX_PARTICLES				100000

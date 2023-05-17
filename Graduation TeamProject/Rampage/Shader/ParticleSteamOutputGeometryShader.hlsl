@@ -67,7 +67,6 @@ VS_PARTICLE_INPUT OutputParticleToStream(VS_PARTICLE_INPUT input, inout PointStr
 	//input.velocity += gf3Gravity * gfElapsedTime;
 	//input.velocity += float3(0.0f, -9.8f*20.0f, 0.0f) * gfElapsedTime;
 	//input.velocity += CalculrateCulrNoise(input.position).xyz;
-	input.lifetime -= gfElapsedTime;
 	return input;
 }
 
@@ -75,7 +74,6 @@ void OutputRandomParticleToStream(VS_PARTICLE_INPUT input, inout PointStream<VS_
 {
 	input.position += gf3Gravity * input.velocity * gfElapsedTime;
 	//input.velocity += gf3Gravity * gfElapsedTime;
-	input.lifetime -= gfElapsedTime;
 
 	output.Append(input);
 }
@@ -83,7 +81,6 @@ void OutputRandomAccelerationParticleToStream(VS_PARTICLE_INPUT input, inout Poi
 {
 	input.position += gf3Gravity * input.velocity * gfElapsedTime;
 	input.velocity += gf3Gravity * gfElapsedTime;
-	input.lifetime -= gfElapsedTime;
 
 	output.Append(input);
 }
@@ -96,7 +93,7 @@ float4 RandomDirectionOnSphere(float fOffset)
 
 void OutputEmberParticles(VS_PARTICLE_INPUT input, inout PointStream<VS_PARTICLE_INPUT> output)
 {
-	if (input.lifetime > 0.0f)
+	if ((gfCurrentTime - input.EmitTime) <= input.lifetime)
 	{
 		output.Append(OutputParticleToStream(input, output));
 	}
@@ -107,21 +104,21 @@ void SphereParticles(VS_PARTICLE_INPUT input, inout PointStream<VS_PARTICLE_INPU
 {
 	VS_PARTICLE_INPUT particle = input;
 
-	
-		if (particle.lifetime > 0.f)
-		{
-			particle = OutputParticleToStream(particle, output);
-			//float3 resistanceDir = gmtxGameObject._41_42_43 - particle.position;
-			//float distance = length(resistanceDir) - (100.0f/2);
-			//distance = max(0.0f, distance);
-			//resistanceDir = normalize(resistanceDir) * length(particle.velocity);
-			//float resistanceValue = distance / 100.0f; // �ִ� �ݰ� 20.0f
-			//particle.velocity += resistanceDir * resistanceValue; // ���ӵ� ����� �ʿ���
-			/*float distance = length(particle.velocity);
-			particle.velocity += CalculrateCulrNoise(particle.position).xyz;
-			particle.velocity = normalize(particle.velocity) * distance;*/
-			output.Append(particle);
-		}
+
+	if ((gfCurrentTime - particle.EmitTime) < particle.lifetime)
+	{
+		particle = OutputParticleToStream(particle, output);
+		//float3 resistanceDir = gmtxGameObject._41_42_43 - particle.position;
+		//float distance = length(resistanceDir) - (100.0f/2);
+		//distance = max(0.0f, distance);
+		//resistanceDir = normalize(resistanceDir) * length(particle.velocity);
+		//float resistanceValue = distance / 100.0f; // �ִ� �ݰ� 20.0f
+		//particle.velocity += resistanceDir * resistanceValue; // ���ӵ� ����� �ʿ���
+		/*float distance = length(particle.velocity);
+		particle.velocity += CalculrateCulrNoise(particle.position).xyz;
+		particle.velocity = normalize(particle.velocity) * distance;*/
+		output.Append(particle);
+	}
 
 }
 
@@ -131,10 +128,10 @@ void SmokeParticles(VS_PARTICLE_INPUT input, inout PointStream<VS_PARTICLE_INPUT
 	float3 Smokevelocity = { -float3(rand(gfCurrentTime), 0.f, 0.5f) };
 	VS_PARTICLE_INPUT particle = input;
 
-	
-		if (particle.lifetime > 0.f)
-			OutputRandomParticleToStream(particle, output);
-	
+
+	if (particle.lifetime > 0.f)
+		OutputRandomParticleToStream(particle, output);
+
 
 }
 
@@ -142,11 +139,11 @@ void AttackParticles(VS_PARTICLE_INPUT input, inout PointStream<VS_PARTICLE_INPU
 {
 	VS_PARTICLE_INPUT particle = input;
 
-	
-		if ((gfCurrentTime - particle.EmitTime) <= particle.lifetime)
-		{
-			output.Append(input);
-		}
+
+	if ((gfCurrentTime - particle.EmitTime) <= particle.lifetime)
+	{
+		output.Append(input);
+	}
 }
 
 void RecoveryParticles(VS_PARTICLE_INPUT input, inout PointStream<VS_PARTICLE_INPUT> output)
@@ -177,20 +174,20 @@ void RecoveryParticles(VS_PARTICLE_INPUT input, inout PointStream<VS_PARTICLE_IN
 	//}
 	//else if (particle.type == TYPE_SIMULATOR)
 	//{
-		if (particle.lifetime > 0.f)
+	if ((gfCurrentTime - particle.EmitTime) <= particle.lifetime)
+	{
+		float3 position = gmtxGameObject._41_42_43;
+		float MoveValue = particle.position.y - position.y;
+		if (MoveValue > 7.f)
 		{
-			float3 position = gmtxGameObject._41_42_43;
-			float MoveValue = particle.position.y - position.y;
-			if (MoveValue > 7.f)
-			{
-				particle.position.y = position.y;
-			}
-			//else if (MoveValue > 3.5f)
-			//{
-			//	//particle.alpha = particle.lifetime / gfLifeTime;
-			//}
-			OutputRandomAccelerationParticleToStream(particle, output);
+			particle.position.y = position.y;
 		}
+		//else if (MoveValue > 3.5f)
+		//{
+		//	//particle.alpha = particle.lifetime / gfLifeTime;
+		//}
+		OutputRandomAccelerationParticleToStream(particle, output);
+	}
 
 	//}
 	//else

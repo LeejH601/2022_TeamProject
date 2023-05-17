@@ -47,8 +47,10 @@ struct GS_PARTICLE_DRAW_OUTPUT
 float4 PSParticleDraw(GS_PARTICLE_DRAW_OUTPUT input) : SV_TARGET1  // SphereTexture t50을 제외
 {
 	PS_MULTIPLE_RENDER_TARGETS_OUTPUT output;
+	//float4 cColor = gtxtTexture[0].Sample(gSamplerState, input.uv); // 2번이
 	float4 cColor = gtxtTexture[(uint)(input.TextureIndex - 1)].Sample(gSamplerState, input.uv); // 2번이
 	cColor *= float4(gfColor, 1.f);
+	//cColor = float4(input.uv.x, input.uv.y, 0.0f, 1.0f);
 	cColor.a *= gnTexturesMask * 0.01f; // 0~100으로 받아 0.00 ~1.00으로 변경
 	cColor.a *= input.alpha; // 사라지는 효과 구현 위해(위 아래로 내려가는 파티클을 위해)
 

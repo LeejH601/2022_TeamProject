@@ -53,7 +53,7 @@ cbuffer cbGameObjectInfo : register(b0)
 
 uint2 SpriteAnimtaion(VS_PARTICLE_INPUT input, float AccumulatedTime, float LifeTime, uint TotalRow, uint TotalCol)
 {
-	float fraction = AccumulatedTime / LifeTime;
+	float fraction = frac(AccumulatedTime / LifeTime); 
 	float interval = 1.0f / (TotalRow * TotalCol);
 	uint m_iCurrentCol = (int)(fraction / (interval * TotalRow));
 	float remainvalue = (fraction / (interval * TotalRow)) - m_iCurrentCol;

@@ -49,6 +49,8 @@ void GSParticleDraw(point VS_PARTICLE_DRAW_OUTPUT input[1], inout TriangleStream
 
 	matrix xmf4x4Coord = gmtxGameObject;
 
+
+
 	xmf4x4Coord._11 = 1.0f / float(input[0].TextureCoord.x);
 	xmf4x4Coord._22 = 1.0f / float(input[0].TextureCoord.y);
 	xmf4x4Coord._31 = float(input[0].CurrentCoord.x) / float(input[0].TextureCoord.x);
