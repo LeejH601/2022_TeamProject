@@ -24,8 +24,6 @@ public:
 
 	LPVOID m_pPlayerUpdatedContext = NULL;
 
-	XMFLOAT3 m_xmf3PreviousPosition = XMFLOAT3{ 0.0f, 0.0f , 0.0f };
-	XMFLOAT3 m_xmf3PreviousTransform = XMFLOAT3{ 0.0f, 0.0f , 0.0f };
 	XMFLOAT3 m_xmf3TargetPosition = XMFLOAT3(0.0f, 0.0f, 0.0f);
 	float m_fCMDConstant = 1.0f;
 
