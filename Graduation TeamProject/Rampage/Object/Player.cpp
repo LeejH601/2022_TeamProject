@@ -113,6 +113,8 @@ void CPlayer::Update(float fTimeElapsed)
 	if (m_pUpdatedContext) OnUpdateCallback(fTimeElapsed);
 
 	CPhysicsObject::Apply_Friction(fTimeElapsed);
+
+	m_xmf3PreviousPos = GetPosition();
 }
 
 void CPlayer::ProcessInput(DWORD dwDirection, float cxDelta, float cyDelta, float fTimeElapsed, CCamera* pCamera)
@@ -286,14 +288,6 @@ void CKnightPlayer::OnUpdateCallback(float fTimeElapsed)
 			m_pSkinnedAnimationController->m_pRootMotionObject->GetWorld()._43
 		};
 
-		for (int i = 0; i < pMap->GetMapObjects().size(); ++i) {
-			if (pMap->GetMapObjects()[i]->CheckCollision(this))
-			{
-				CPhysicsObject::Move(Vector3::ScalarProduct(m_xmf3Velocity, -1.0f, false), false);
-				break;
-			}
-		}
-		
 		XMFLOAT3 xmf3ResultPlayerPos = GetPosition();
 
 		xmf3ResultPlayerPos.x = std::clamp(xmf3ResultPlayerPos.x, xmf3TerrainPos.x + TERRAIN_SPAN, xmf3TerrainPos.x + pTerrain->GetWidth() - TERRAIN_SPAN);
@@ -303,8 +297,19 @@ void CKnightPlayer::OnUpdateCallback(float fTimeElapsed)
 
 		if (xmf3ResultPlayerPos.y < fTerrainY + xmf3TerrainPos.y)
 			xmf3ResultPlayerPos.y = fTerrainY + xmf3TerrainPos.y;
-			
-		SetPosition(xmf3ResultPlayerPos);
+
+		bool bUpdatePos = true;
+
+		for (int i = 0; i < pMap->GetMapObjects().size(); ++i) {
+			if (pMap->GetMapObjects()[i]->CheckCollision(this))
+			{
+				bUpdatePos = false;
+				break;
+			}
+		}
+		
+		bUpdatePos ? SetPosition(xmf3ResultPlayerPos) : SetPosition(m_xmf3PreviousPos);
+
 		UpdateTransform(NULL);
 	}
 }
@@ -400,7 +405,7 @@ void CKightRootRollBackAnimationController::OnRootMotion(CGameObject* pRootGameO
 
 			//			pRootGameObject->MoveForward(fabs(xmf3Offset.x));
 			//			pRootGameObject->SetPosition(xmf3Position);
-			//			m_xmf3PreviousPosition = xmf3Position;
+			//			m_xmf3RootTransfromPreviousPosition = xmf3Position;
 #ifdef _WITH_DEBUG_ROOT_MOTION
 			TCHAR pstrDebug[256] = { 0 };
 			_stprintf_s(pstrDebug, 256, _T("Offset: (%.2f, %.2f, %.2f) (%.2f, %.2f, %.2f)\n"), xmf3Offset.x, xmf3Offset.y, xmf3Offset.z, pRootGameObject->m_xmf4x4Transform._41, pRootGameObject->m_xmf4x4Transform._42, pRootGameObject->m_xmf4x4Transform._43);
