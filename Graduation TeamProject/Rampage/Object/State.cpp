@@ -25,6 +25,9 @@ void Idle_Player::Enter(CPlayer* player)
 	player->m_pSkinnedAnimationController->m_fTime = 0.0f;
 	player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition = 0.0f;
 	player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_nType = ANIMATION_TYPE_LOOP;
+
+
+	player->m_xmf3PreviousPos = XMFLOAT3{ 0.f, 0.f , 0.f };
 	player->m_bAttack = false; // 사용자가 좌클릭시 true가 되는 변수
 
 	player->m_fAnimationPlayWeight = 1.0f;
@@ -208,7 +211,6 @@ void Atk_Player::SetPlayerRootPos(CPlayer* player)
 	player->SetPosition(xmf3Position);
 
 	pPlayerController->m_pRootMotionObject->m_xmf4x4Transform._41 = 0.f;
-	pPlayerController->m_pRootMotionObject->m_xmf4x4Transform._42 = 0.f;
 	pPlayerController->m_pRootMotionObject->m_xmf4x4Transform._43 = 0.f;
 }
 
@@ -228,16 +230,17 @@ void Atk_Player::OnRootMotion(CPlayer* player, float fTimeElapsed)
 
 	CAnimationSet* pAnimationSet = pPlayerController->m_pAnimationSets->m_pAnimationSets[pPlayerController->m_pAnimationTracks[0].m_nAnimationSet];
 
-	if (pPlayerController->m_pAnimationTracks[0].m_fPosition == pAnimationSet->m_fLength)
-	{
-		if (fTimeElapsed > 0.0f)
-			SetPlayerRootPos(player);
-		else
-		{
-			pPlayerController->m_pRootMotionObject->m_xmf4x4Transform._41 = 0.f;
-			pPlayerController->m_pRootMotionObject->m_xmf4x4Transform._43 = 0.f;
-		}
-	}
+	XMFLOAT3 xmf3CurrentPos = XMFLOAT3{ player->m_pChild->m_xmf4x4Transform._41,
+	0.0f,
+	player->m_pChild->m_xmf4x4Transform._43 };
+
+	player->m_pChild->m_xmf4x4Transform._41 -= player->m_xmf3PreviousPos.x;
+	player->m_pChild->m_xmf4x4Transform._42 -= player->m_xmf3PreviousPos.y;
+	player->m_pChild->m_xmf4x4Transform._43 -= player->m_xmf3PreviousPos.z;
+
+	SetPlayerRootPos(player);
+
+	player->m_xmf3PreviousPos = xmf3CurrentPos;
 }
 
 Atk1_Player::Atk1_Player()
@@ -257,8 +260,8 @@ void Atk1_Player::CheckComboAttack(CPlayer* player)
 			dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[0].get())->m_bIsUpdateTrailVariables = false;
 		if (player->m_bAttack) {
 			CAnimationController* pPlayerController = player->m_pSkinnedAnimationController.get();
-			if (pPlayerController->m_bRootMotion)
-				SetPlayerRootPos(player);
+			/*if (pPlayerController->m_bRootMotion)
+				SetPlayerRootPos(player);*/
 			player->m_pStateMachine->ChangeState(Atk2_Player::GetInst());
 		}
 	}
@@ -326,6 +329,8 @@ void Atk1_Player::Enter(CPlayer* player)
 	player->m_bAttacked = false;
 	player->m_bAttack = false; // 사용자가 좌클릭시 true가 되는 변수
 	player->m_fCMDConstant = 1.0f;
+
+	player->m_xmf3PreviousPos = XMFLOAT3{ 0.f, 0.f , 0.f };
 
 	player->m_fCurLagTime = 0.f;
 	player->m_fAnimationPlayWeight = 1.0f;
@@ -398,8 +403,8 @@ void Atk2_Player::CheckComboAttack(CPlayer* player)
 		if (player->m_bAttack)
 		{
 			CAnimationController* pPlayerController = player->m_pSkinnedAnimationController.get();
-			if (pPlayerController->m_bRootMotion)
-				SetPlayerRootPos(player);
+			/*if (pPlayerController->m_bRootMotion)
+				SetPlayerRootPos(player);*/
 			player->m_pStateMachine->ChangeState(Atk3_Player::GetInst());
 		}
 	}
@@ -428,6 +433,8 @@ void Atk2_Player::Enter(CPlayer* player)
 	player->m_bAttacked = false;
 	player->m_bAttack = false; // 사용자가 좌클릭시 true가 되는 변수
 	player->m_fCMDConstant = 1.0f;
+
+	player->m_xmf3PreviousPos = XMFLOAT3{ 0.f, 0.f , 0.f };
 
 	player->m_fCurLagTime = 0.f;
 	player->m_fAnimationPlayWeight = 1.0f;
@@ -558,6 +565,8 @@ void Atk3_Player::Enter(CPlayer* player)
 	player->m_bAttacked = false;
 	player->m_bAttack = false; // 사용자가 좌클릭시 true가 되는 변수
 
+	player->m_xmf3PreviousPos = XMFLOAT3{ 0.f, 0.f , 0.f };
+
 	player->m_fCurLagTime = 0.f;
 	player->m_fAnimationPlayWeight = 1.0f;
 
@@ -637,6 +646,9 @@ void Run_Player::Enter(CPlayer* player)
 	player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_nType = ANIMATION_TYPE_LOOP;
 	player->m_bAttack = false; // 사용자가 좌클릭시 true가 되는 변수
 	player->m_fAnimationPlayWeight = 1.0f;
+
+	player->m_xmf3PreviousPos = XMFLOAT3{ 0.f, 0.f , 0.f };
+
 }
 
 void Run_Player::Execute(CPlayer* player, float fElapsedTime)
@@ -714,6 +726,8 @@ void Atk4_Player::Enter(CPlayer* player)
 	player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_nType = ANIMATION_TYPE_ONCE;
 	player->m_bAttacked = false;
 	player->m_bAttack = false; // 사용자가 좌클릭시 true가 되는 변수
+
+	player->m_xmf3PreviousPos = XMFLOAT3{ 0.f, 0.f , 0.f };
 
 	player->m_fCurLagTime = 0.f;
 	player->m_fAnimationPlayWeight = 1.0f;
@@ -799,6 +813,8 @@ void Atk5_Player::Enter(CPlayer* player)
 	player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_nType = ANIMATION_TYPE_ONCE;
 	player->m_bAttacked = false;
 	player->m_bAttack = false; // 사용자가 좌클릭시 true가 되는 변수
+
+	player->m_xmf3PreviousPos = XMFLOAT3{ 0.f, 0.f , 0.f };
 
 	player->m_fCurLagTime = 0.f;
 	player->m_fAnimationPlayWeight = 1.0f;

@@ -271,7 +271,6 @@ void CKnightPlayer::Animate(float fTimeElapsed)
 		
 		SetPosition(XMFLOAT3(transform.p.x, transform.p.y, transform.p.z));
 	}
-	OnUpdateCallback(fTimeElapsed);
 }
 
 void CKnightPlayer::OnUpdateCallback(float fTimeElapsed)

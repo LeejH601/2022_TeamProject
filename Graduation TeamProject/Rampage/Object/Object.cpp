@@ -109,6 +109,7 @@ void CGameObject::Animate(float fTimeElapsed)
 {
 	if (!m_bEnable)
 		return;
+
 	if (m_pSkinnedAnimationController) m_pSkinnedAnimationController->AdvanceTime(fTimeElapsed, this);
 
 	if (m_pSibling) m_pSibling->Animate(fTimeElapsed);
