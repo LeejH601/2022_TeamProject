@@ -47,7 +47,6 @@ void Idle_Player::OnRootMotion(CPlayer* player, float fTimeElapsed)
 	CAnimationController* pPlayerController = player->m_pSkinnedAnimationController.get();
 
 	pPlayerController->m_pRootMotionObject->m_xmf4x4Transform._41 = 0.f;
-	pPlayerController->m_pRootMotionObject->m_xmf4x4Transform._42 = 0.f;
 	pPlayerController->m_pRootMotionObject->m_xmf4x4Transform._43 = 0.f;
 }
 
@@ -691,7 +690,6 @@ void Run_Player::OnRootMotion(CPlayer* player, float fTimeElapsed)
 	CAnimationController* pPlayerController = player->m_pSkinnedAnimationController.get();
 
 	pPlayerController->m_pRootMotionObject->m_xmf4x4Transform._41 = 0.f;
-	pPlayerController->m_pRootMotionObject->m_xmf4x4Transform._42 = 0.f;
 	pPlayerController->m_pRootMotionObject->m_xmf4x4Transform._43 = 0.f;
 }
 

@@ -113,6 +113,9 @@ void CPlayer::Update(float fTimeElapsed)
 	if (m_pUpdatedContext) OnUpdateCallback(fTimeElapsed);
 
 	CPhysicsObject::Apply_Friction(fTimeElapsed);
+
+	m_xmf3PreviousPosition = GetPosition();
+	m_xmf3PreviousTransform = XMFLOAT3{ m_pChild->m_xmf4x4Transform._41, m_pChild->m_xmf4x4Transform._42, m_pChild->m_xmf4x4Transform._43 };
 }
 
 void CPlayer::ProcessInput(DWORD dwDirection, float cxDelta, float cyDelta, float fTimeElapsed, CCamera* pCamera)
@@ -278,6 +281,8 @@ void CKnightPlayer::OnUpdateCallback(float fTimeElapsed)
 {
 	if (m_pUpdatedContext)
 	{
+		bool bSetPreviousPos = false;
+
 		CMap* pMap = (CMap*)m_pUpdatedContext;
 		CSplatTerrain* pTerrain = (CSplatTerrain*)(pMap->GetTerrain().get());
 		XMFLOAT3 xmf3TerrainPos = pTerrain->GetPosition();
@@ -287,14 +292,6 @@ void CKnightPlayer::OnUpdateCallback(float fTimeElapsed)
 			m_pSkinnedAnimationController->m_pRootMotionObject->GetWorld()._43
 		};
 
-		for (int i = 0; i < pMap->GetMapObjects().size(); ++i) {
-			if (pMap->GetMapObjects()[i]->CheckCollision(this))
-			{
-				CPhysicsObject::Move(Vector3::ScalarProduct(m_xmf3Velocity, -1.0f, false), false);
-				break;
-			}
-		}
-		
 		XMFLOAT3 xmf3ResultPlayerPos = GetPosition();
 
 		xmf3ResultPlayerPos.x = std::clamp(xmf3ResultPlayerPos.x, xmf3TerrainPos.x + TERRAIN_SPAN, xmf3TerrainPos.x + pTerrain->GetWidth() - TERRAIN_SPAN);
@@ -304,8 +301,26 @@ void CKnightPlayer::OnUpdateCallback(float fTimeElapsed)
 
 		if (xmf3ResultPlayerPos.y < fTerrainY + xmf3TerrainPos.y)
 			xmf3ResultPlayerPos.y = fTerrainY + xmf3TerrainPos.y;
-			
-		SetPosition(xmf3ResultPlayerPos);
+
+		for (int i = 0; i < pMap->GetMapObjects().size(); ++i) {
+			if (pMap->GetMapObjects()[i]->CheckCollision(this))
+			{
+				bSetPreviousPos = true;
+				break;
+			}
+		}
+
+		if (bSetPreviousPos)
+		{
+			SetPosition(m_xmf3PreviousPosition);
+			m_pChild->m_xmf4x4Transform._41 = m_xmf3PreviousTransform.x;
+			m_pChild->m_xmf4x4Transform._43 = m_xmf3PreviousTransform.z;
+		}
+		else
+		{
+			SetPosition(xmf3ResultPlayerPos);
+		}
+
 		UpdateTransform(NULL);
 	}
 }
@@ -314,9 +329,9 @@ void CKnightPlayer::UpdateTransform(XMFLOAT4X4* pxmf4x4Parent)
 	CPhysicsObject::UpdateTransform(NULL);
 
 	if (pBodyBoundingBoxMesh)
-		pBodyBoundingBoxMesh->SetWorld(m_xmf4x4Transform);
+		pBodyBoundingBoxMesh->SetWorld(m_pChild->GetWorld());
 
-	m_BodyBoundingBox.Transform(m_TransformedBodyBoundingBox, XMLoadFloat4x4(&m_xmf4x4Transform));
+	m_BodyBoundingBox.Transform(m_TransformedBodyBoundingBox, XMLoadFloat4x4(&m_pChild->GetWorld()));
 
 	if (pWeapon)
 	{

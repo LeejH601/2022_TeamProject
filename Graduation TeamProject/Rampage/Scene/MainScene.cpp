@@ -965,7 +965,7 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 	m_pSkyBoxShader->Render(pd3dCommandList, 0);
 	m_pSkyBoxObject->Render(pd3dCommandList, m_pCurrentCamera);
 
-	//m_pMap->RenderTerrain(pd3dCommandList);
+	m_pMap->RenderTerrain(pd3dCommandList);
 	
 	((CParticleObject*)m_pSmokeObject.get())->Update(fTimeElapsed);
 	((CParticleObject*)m_pSmokeObject.get())->UpdateShaderVariables(pd3dCommandList, fCurrentTime, fTimeElapsed);
