@@ -8,22 +8,27 @@ struct CB_FRAMEWORK_INFO
 {
 	float					m_fCurrentTime;
 	float					m_fElapsedTime;
-	float					m_fSpeed = 1.0f;
-	int						m_nFlareParticlesToEmit = 30;
-	XMFLOAT3				m_xmf3Gravity = XMFLOAT3(0.0f, -9.8f, 0.0f);
-	int						m_nMaxFlareType2Particles = 15;
-	XMFLOAT3				m_xmf3Color = XMFLOAT3(0.0f, 0.f, 1.0f);
-	int						m_nParticleType = 0;
 	float					m_fLifeTime = 0.f;
-	XMFLOAT2				m_fSize = XMFLOAT2(1.f, 1.f);
 	bool					m_bEmitter = false;
+
+	XMUINT2					m_iTextureCoord = XMUINT2(0, 0);
+	UINT					m_iTextureIndex = 0;
+	UINT					m_nParticleType = 0;
+
+	XMFLOAT3				m_xmf3Gravity = XMFLOAT3(0.0f, -9.8f, 0.0f);
+	float					m_fSpeed = 1.0f;
+
+	XMFLOAT3				m_xmf3Color = XMFLOAT3(0.0f, 0.f, 1.0f);
+	int						m_nFlareParticlesToEmit = 30;
+
+	XMFLOAT2				m_fSize = XMFLOAT2(1.f, 1.f);
 };
 
 
 class CBillBoardObject : public CGameObject
 {
 public:
-	CBillBoardObject(std::shared_ptr<CTexture> pSpriteTexture, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CShader* pShader, float fSize, bool bBillBoard); // 이미지 이름, 
+	CBillBoardObject(int iTextureIndex, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fSize, bool bBillBoard); // 이미지 이름, 
 	virtual ~CBillBoardObject();
 	virtual void CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList, float fCurrentTime, float fElapsedTime);
@@ -51,15 +56,16 @@ protected:
 class CMultiSpriteObject : public CBillBoardObject
 {
 public:
-	CMultiSpriteObject(std::shared_ptr<CTexture> pSpriteTexture, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CShader* pShader, int nRows, int nCols, float fSize, bool bBillBoard, float fSpeed = 5.f);
+	CMultiSpriteObject(int iTextureIndex, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nRows, int nCols, float fSize, bool bBillBoard, float fSpeed = 5.f);
 	virtual ~CMultiSpriteObject();
 
 	virtual void Animate(float fTimeElapsed);
 	virtual void AnimateRowColumn(float fTimeElapsed);
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, bool b_UseTexture, CCamera* pCamera);
 	virtual void SetEnable(bool bEnable);
 
-
-
+	void SetTotalRowColumn(int iTotalRow, int iTotalColumn);
+	void SetColor(XMFLOAT3 fColor);
 	void SetSize(XMFLOAT2 fSize);
 	void SetSpeed(float fSpeed);
 	void SetStartAlpha(float fAlpha);
@@ -68,8 +74,11 @@ public:
 	bool& GetAnimation();
 	bool m_bAnimation = true;
 protected:
-	int 							m_nRow = 0;
-	int 							m_nCol = 0;
+	int								m_iTotalRow = 1;
+	int								m_iTotalCol = 1;
+
+	int 							m_iCurrentRow = 0;
+	int 							m_iCurrentCol = 0;
 	//int								m_nMaxCol = 1; // 최대 출력 열 지정
 
 	float m_fAccumulatedTime = 0.0f;
@@ -79,7 +88,7 @@ protected:
 class CTerrainSpriteObject : public CMultiSpriteObject
 {
 public:
-	CTerrainSpriteObject(std::shared_ptr<CTexture> pSpriteTexture, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CShader* pShader, int nRows, int nCols, float fSize, float fSpeed = 5.f);
+	CTerrainSpriteObject(int iTextureIndex, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nRows, int nCols, float fSize, float fSpeed = 5.f);
 	virtual ~CTerrainSpriteObject();
 	virtual void Animate(CHeightMapTerrain* pTerrain, float fTimeElapsed); // 해당 오브젝트를 터레인 위에 위치시키는 함수
 	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList, float fCurrentTime, float fElapsedTime);

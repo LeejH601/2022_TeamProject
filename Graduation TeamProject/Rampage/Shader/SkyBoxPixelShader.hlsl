@@ -13,7 +13,7 @@ cbuffer cbCameraInfo : register(b1)
 
 #include "Light.hlsl"
 
-TextureCube gtxtSkyCubeTexture : register(t30);
+TextureCube gtxtSkyCubeTexture : register(t50);
 SamplerState gssClamp : register(s4);
 SamplerState gSamplerState : register(s0);
 

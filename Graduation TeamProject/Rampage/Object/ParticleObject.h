@@ -4,6 +4,8 @@
 #include "../Object/BillBoardObject.h"
 #include "../Global/Camera.h"
 
+#define EMIT_PARTICLE
+
 #define SPHERE_PARTILCE 0
 #define RECOVERY_PARTILCE 1
 #define SMOKE_PARTILCE 2
@@ -27,7 +29,7 @@ class CParticleObject : public CGameObject
 {
 public:
 	CParticleObject();
-	CParticleObject(std::shared_ptr<CTexture> pSpriteTexture, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, XMFLOAT3 xmf3Position, XMFLOAT3 xmf3Velocity, float fLifetime, XMFLOAT3 xmf3Acceleration, XMFLOAT3 xmf3Color, XMFLOAT2 xmf2Size, UINT nMaxParticles, CParticleShader* pShader, int iParticleType);
+	CParticleObject(int iTextureIndex, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, XMFLOAT3 xmf3Position, XMFLOAT3 xmf3Velocity, float fLifetime, XMFLOAT3 xmf3Acceleration, XMFLOAT3 xmf3Color, XMFLOAT2 xmf2Size, UINT nMaxParticles, CParticleShader* pShader, int iParticleType);
 	virtual ~CParticleObject();
 
 
@@ -48,7 +50,9 @@ public:
 	virtual void Update(float fTimeElapsed);
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, CShader* pShader);
 	virtual void OnPostRender();
+	virtual void SetEnable(bool bEnable);
 
+	void SetTotalRowColumn(int iTotalRow, int iTotalColumn);
 	void SetSize(XMFLOAT2 fSize);
 	void SetLifeTime(float fLifeTime);
 	void SetStartAlpha(float fAlpha);
@@ -69,6 +73,8 @@ public:
 	void SetDirection(XMFLOAT3 xmf3Direction);
 	XMFLOAT3 GetDirection();
 
+	void SetAnimation(bool bAnimation);
+	void AnimateRowColumn(float fTimeElapsed);
 	bool CheckCapacity();
 protected:
 	XMFLOAT2	m_fSize = XMFLOAT2(15.f, 15.f);
@@ -91,6 +97,15 @@ protected:
 	float m_fProgressionRate;
 	float m_fLengthScale;
 
+	int								m_iTotalRow = 1;
+	int								m_iTotalCol = 1;
+
+	int 							m_iCurrentRow = 0;
+	int 							m_iCurrentCol = 0;
+
+	float m_fAccumulatedTime = 0.0f;
+	float interval;
+	bool m_bAnimation = false;
 protected:
 	ComPtr<ID3D12Resource>	m_pd3dcbFrameworkInfo = NULL;
 	CB_FRAMEWORK_INFO* m_pcbMappedFrameworkInfo = NULL;

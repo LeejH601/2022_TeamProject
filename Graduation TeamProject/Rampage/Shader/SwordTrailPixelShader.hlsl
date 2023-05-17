@@ -50,7 +50,8 @@ PS_MULTIPLE_RENDER_TARGETS_OUTPUT SwordTrail_PS(GS_OUT input)
 
 	//float ColorUV = lerp(uv1, uv2, frac(abs(fmod(gnOffsetTime * 0.25f + uv.x, 2.0f) - 1.0f)));
 	// 
-	// uv를 이용한 색상
+	// uv를 이용한 
+	// 
 	// float ColorUV = 1.0f - uv.y;
 	// Noise를 이용한 색상
 	float ColorUV = min(1.0f, NoiseColor.r * gfNoiseConstants);

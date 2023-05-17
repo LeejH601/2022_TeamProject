@@ -68,7 +68,7 @@ struct ParticleUpDownParams {
 struct ParticleTrailParams {
 	CGameObject* pObject;
 	XMFLOAT3 xmf3Position;
-	int iPlayerAttack; // ÇÃ·¹ÀÌ¾î °ø°Ý Á¾·ù
+	int iPlayerAttack; // ï¿½Ã·ï¿½ï¿½Ì¾ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 	float m_fTime = 0.f;
 	XMFLOAT3 xmf3Velocity;
 };
@@ -327,10 +327,11 @@ public:
 
 // Define Particle Animation component
 enum ParticleType {
-	SPHERE_PARTICLE,
-	RECOVERY_PARTICLE,
-	SMOKE_PARTICLE,
-	TRAIL_PARTICLE
+    SPHERE_PARTICLE,
+    RECOVERY_PARTICLE,
+    SMOKE_PARTICLE,
+    TRAIL_PARTICLE,
+    ATTACK_PARTICLE
 };
 
 #define MAX_PARTICLES				100000
@@ -339,12 +340,8 @@ class ParticleComponent : public IMessageListener {
     int m_nParticleNumber = MAX_PARTICLES;
     int m_nEmitParticleNumber = 500;
     int m_iParticleType = ParticleType::SPHERE_PARTICLE;
-    int m_nParticleIndex = 0;
     XMFLOAT2 m_fSize = XMFLOAT2(3.f, 3.f);
     float m_fAlpha = 1.f;
-    float m_fLifeTime = 0.2f;
-    float m_fSpeed = 150.f;
-    XMFLOAT3 m_xmf3Color = XMFLOAT3(1.f, 1.f, 1.f);
 
 	float m_fFieldSpeed;
 	float m_fNoiseStrength;
@@ -352,14 +349,17 @@ class ParticleComponent : public IMessageListener {
 	float m_fProgressionRate;
 	float m_fLengthScale;
 
-    std::shared_ptr<CTexture> m_pTexture;
+    float m_fLifeTime = 2.f;
+    float m_fSpeed = 20.f;
+    XMFLOAT3 m_xmf3Color = XMFLOAT3(1.f, 1.f, 1.f);
+	int m_iTextureIndex = 0;
+	int m_iTextureOffset = 0;
 public:
     ParticleComponent();
 
 public:
     //int& GetParticleNumber() { return m_nParticleNumber; }
     int& GetEmitParticleNumber() { return m_nEmitParticleNumber; }
-    int& GetParticleIndex() { return m_nParticleIndex; }
     XMFLOAT2& GetSize() { return m_fSize; }
     float& GetXSize() { return m_fSize.x; }
     float& GetYSize() { return m_fSize.y; }
@@ -373,11 +373,11 @@ public:
 	float& GetLengthScale() { return m_fLengthScale; };
 	XMFLOAT3& GetFieldMainDirection() { return m_xmf3FieldMainDirection; };
 
-    std::shared_ptr<CTexture>& GetTexture() { return m_pTexture; }
+	int& GetTextureIndex() { return m_iTextureIndex; }
+	int& GetTextureOffset() { return m_iTextureOffset; }
 
     void SetEmitParticleNumber(int iEmitParticleNumber) { m_nEmitParticleNumber = iEmitParticleNumber; }
     void SetParticleNumber(int nParticleNumber) { m_nParticleNumber = nParticleNumber; }
-    void SetParticleIndex(int nParticleIndex) { m_nParticleIndex = nParticleIndex; }
     void SetParticleType(int iParticleType) { m_iParticleType = iParticleType; }
     void SetSize(XMFLOAT2 fSize) { m_fSize = fSize; }
     void SetSizeX(float fSize) { m_fSize.x = fSize; }
@@ -389,13 +389,14 @@ public:
     void SetColorR(float r) { m_xmf3Color.x = r; }
     void SetColorG(float g) { m_xmf3Color.y = g; }
     void SetColorB(float b) { m_xmf3Color.z = b; }
-    void SetParticleTexture(std::shared_ptr<CTexture> pTexture) { m_pTexture = pTexture; }
 	void SetFieldSpeed(float fFieldSpeed) { m_fFieldSpeed = fFieldSpeed; };
 	void SetNoiseStrength(float fNoiseStrength) { m_fNoiseStrength = fNoiseStrength; };
 	void SetProgressionRate(float fProgressionRate) { m_fProgressionRate = fProgressionRate; };
 	void SetLengthScale(float fLengthScale) { m_fLengthScale = fLengthScale; };
 	void SetFieldMainDirection(XMFLOAT3 xmf3FieldMainDirection) { m_xmf3FieldMainDirection = xmf3FieldMainDirection; };
 
+	void SetTextureIndex(int iIndex) { m_iTextureIndex = iIndex; };
+	void SetTextureOffset(int iOffset) { m_iTextureOffset = iOffset; }
 	virtual void HandleMessage(const Message& message, const ParticleCompParams& params);
 };
 
@@ -545,13 +546,16 @@ enum TerrainSpriteType {
 class TerrainSpriteComponent : public IMessageListener
 {
 private:
+    int m_nParticleNumber = MAX_PARTICLES;
+    int m_nEmitParticleNumber = 500;
+    int m_iParticleType = ParticleType::ATTACK_PARTICLE;
+    int m_nParticleIndex = 0;
+    XMFLOAT3 m_xmf3Color = XMFLOAT3(1.f, 1.f, 1.f);
 	float   m_fSpeed = 5.f;
 	float   m_fAlpha = 1.f;
 	XMFLOAT2   m_fSize = XMFLOAT2(0.5f, 0.5f);
 	float   m_fLifeTime = 6.f;
 	int m_iTerrainSpriteType = TerrainSpriteType::TERRAINSPRITE_CROSS_FADE;
-public:
-	void SetTexture(LPCTSTR pszFileName);
 
 public:
 	virtual void HandleMessage(const Message& message, const TerrainSpriteCompParams& params);
@@ -559,29 +563,44 @@ public:
 
 // Define Impact Effect component
 class ImpactEffectComponent : public IMessageListener {
-	int m_nTextureIndex = 0;
-	float m_fSpeed = 5.f;
+private:
+    int m_nParticleNumber = MAX_PARTICLES;
+    int m_nEmitParticleNumber = 1;
+    int m_iParticleType = ParticleType::ATTACK_PARTICLE;
+    int m_nParticleIndex = 0;
+    float m_fLifeTime = 3.f;
+	float m_fSpeed = 1.f;
 	float m_fAlpha = 1.f;
 	XMFLOAT2 m_fSize = XMFLOAT2(3.f, 3.f);
-	std::shared_ptr<CTexture> m_pTexture;
+	XMFLOAT3 m_xmf3Color = XMFLOAT3(1.f, 1.f, 1.f);
+	XMFLOAT3 m_xmfPosOffset = XMFLOAT3(0.f, 2.f, 0.f);
+	int m_iTextureIndex = 0;
+	int m_iTextureOffset = 0;
+	int m_iTotalRow, m_iTotalColumn;
+
 public:
-	int& GetTextureIndex() { return m_nTextureIndex; }
+	int& GetTextureIndex() { return m_iTextureIndex; }
+	int GetTextureOffset() { return m_iTextureOffset; }
 	float& GetSpeed() { return m_fSpeed; }
 	float& GetAlpha() { return m_fAlpha; }
+	float& GetLifetime() { return m_fLifeTime; }
 	XMFLOAT2& GetSize() { return m_fSize; }
+	XMFLOAT3& GetColor() { return m_xmf3Color; }
 
 	float& GetXSize() { return m_fSize.x; }
 	float& GetYSize() { return m_fSize.y; }
-	std::shared_ptr<CTexture>& GetTexture() { return m_pTexture; }
 
-	void SetTextureIndex(int nTextureIndex) { m_nTextureIndex = nTextureIndex; }
+	void SetTextureIndex(int nTextureIndex) { m_iTextureIndex = nTextureIndex; }
 	void SetSize(XMFLOAT2 fSize) { m_fSize = fSize; }
 	void SetSizeX(float fSize) { m_fSize.x = fSize; }
 	void SetSizeY(float fSize) { m_fSize.y = fSize; }
 	void SetAlpha(float fAlpha) { m_fAlpha = fAlpha; }
 	void SetSpeed(float fSpeed) { m_fSpeed = fSpeed; }
-	void SetImpactTexture(std::shared_ptr<CTexture> pTexture) { m_pTexture = pTexture; }
-
+	void SetColorR(float r) { m_xmf3Color.x = r; }
+	void SetColorG(float g) { m_xmf3Color.y = g; }
+	void SetColorB(float b) { m_xmf3Color.z = b; }
+	void SetTextureOffset(int iOffset) { m_iTextureOffset = iOffset; }
+	void SetTotalRowColumn(int iTotalRow, int iTotalColumn);
 	virtual void HandleMessage(const Message& message, const ImpactCompParams& params);
 };
 

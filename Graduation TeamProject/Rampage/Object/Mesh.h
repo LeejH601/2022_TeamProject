@@ -307,6 +307,7 @@ public:
 	XMFLOAT2						m_xmf2Size;
 	float							m_fLifetime;
 	int								m_iBillBoard;
+	//int							m_iTextureIndex;
 public:
 	CSpriteVertex() { m_xmf2Size = XMFLOAT2(0.f, 0.f), m_iBillBoard = true; m_fLifetime = 0.f; }
 	CSpriteVertex(XMFLOAT2 xmf2Size, bool bBillBoard)
@@ -359,7 +360,9 @@ public:
 	XMFLOAT3						m_xmf3Velocity = XMFLOAT3(0.0f, 0.0f, 0.0f);
 	float							m_fLifetime = 0.0f;
 	UINT							m_iType = 0;
-
+	float							m_fEmitTime = 0.0f;
+	UINT							m_iTextureIndex = 0;
+	UINT							m_iTextureCoord[2];
 public:
 	CParticleVertex() { }
 	~CParticleVertex() { }

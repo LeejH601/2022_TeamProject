@@ -2,8 +2,8 @@
 
 #define DRAG_FLOAT_UNIT 0.01f
 
-#define IMPACT_SPEED_MIN 0.0f
-#define IMPACT_SPEED_MAX 10.0f
+#define IMPACT_LIFETIME_MIN 0.0f
+#define IMPACT_LIFETIME_MAX 50.0f
 
 #define IMPACT_SIZE_MIN 0.0f
 #define IMPACT_SIZE_MAX 10.0f

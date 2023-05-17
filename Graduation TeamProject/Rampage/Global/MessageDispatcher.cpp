@@ -291,7 +291,6 @@ void StunAnimationComponent::HandleMessage(const Message& message, const Animati
 }
 ParticleComponent::ParticleComponent()
 {
-	m_pTexture = CSimulatorScene::GetInst()->GetTextureManager()->GetParticleTextureList()[GetParticleIndex()];  // 미리 텍스쳐 셋팅(index: 0)
 
 	m_fFieldSpeed = 1.0f;
 	m_fNoiseStrength = 1.0f;;
@@ -315,34 +314,47 @@ void ParticleComponent::HandleMessage(const Message& message, const ParticleComp
 		pParticle->SetColor(m_xmf3Color);
 		pParticle->SetSpeed(m_fSpeed);
 		pParticle->SetLifeTime(m_fLifeTime);
-		//pParticle->SetMaxParticleN(m_nParticleNumber);
+		pParticle->SetMaxParticleN(m_nParticleNumber);
 		pParticle->SetEmitParticleN(m_nEmitParticleNumber);
 		pParticle->SetPosition(params.xmf3Position);
 		pParticle->SetParticleType(m_iParticleType);
-		pParticle->ChangeTexture(m_pTexture);
 		pParticle->SetFieldSpeed(m_fFieldSpeed);
 		pParticle->SetNoiseStrength(m_fNoiseStrength);
 		pParticle->SetFieldMainDirection(m_xmf3FieldMainDirection);
 		pParticle->SetProgressionRate(m_fProgressionRate);
 		pParticle->SetLengthScale(m_fLengthScale);
-		pParticle->EmitParticle(1);
+		pParticle->SetTextureIndex(m_iTextureIndex + m_iTextureOffset);
+		pParticle->EmitParticle(0);
 	}
+}
+void ImpactEffectComponent::SetTotalRowColumn(int iTotalRow, int iTotalColumn)
+{
+	m_iTotalRow = iTotalRow;
+	m_iTotalColumn = iTotalColumn;
 }
 void ImpactEffectComponent::HandleMessage(const Message& message, const ImpactCompParams& params)
 {
 	if (!m_bEnable)
 		return;
 
-	CMultiSpriteObject* pMultiSprite = dynamic_cast<CMultiSpriteObject*>(params.pObject);
+	CParticleObject* pMultiSpriteParticle = dynamic_cast<CParticleObject*>(params.pObject);
 
-	if (pMultiSprite)
+	if (pMultiSpriteParticle)
 	{
-		pMultiSprite->SetEnable(true);
-		pMultiSprite->SetSize(m_fSize);
-		pMultiSprite->SetLifeTime(m_fSpeed);
-		pMultiSprite->SetStartAlpha(m_fAlpha);
-		pMultiSprite->SetPosition(params.xmf3Position);
-		pMultiSprite->ChangeTexture(m_pTexture);
+		pMultiSpriteParticle->SetParticleType(m_iParticleType);
+		pMultiSpriteParticle->SetEmit(true);
+		pMultiSpriteParticle->SetTotalRowColumn(m_iTotalRow, m_iTotalColumn);
+		pMultiSpriteParticle->SetSize(m_fSize);
+		pMultiSpriteParticle->SetDirection(XMFLOAT3(0.f, 0.f, 0.f));
+		pMultiSpriteParticle->SetStartAlpha(m_fAlpha);
+		pMultiSpriteParticle->SetColor(m_xmf3Color);
+		pMultiSpriteParticle->SetLifeTime(m_fLifeTime);
+		pMultiSpriteParticle->SetAnimation(true);
+		pMultiSpriteParticle->SetEmitParticleN(m_nEmitParticleNumber);
+		pMultiSpriteParticle->SetMaxParticleN(m_nParticleNumber);
+		pMultiSpriteParticle->SetPosition(Vector3::Add(params.xmf3Position, m_xmfPosOffset));
+		pMultiSpriteParticle->SetTextureIndex(m_iTextureIndex + m_iTextureOffset);
+		pMultiSpriteParticle->EmitParticle(0);
 	}
 	CLogger::GetInst()->Log(std::string("MultiSprite HandleMessge Called"));
 }
@@ -351,23 +363,37 @@ void SceneCollideListener::HandleMessage(const Message& message, const CollidePa
 	m_pScene->HandleCollision(params);
 }
 
-void TerrainSpriteComponent::SetTexture(LPCTSTR pszFileName)
-{
-}
-
 void TerrainSpriteComponent::HandleMessage(const Message& message, const TerrainSpriteCompParams& params)
 {
-	CTerrainSpriteObject* pSpriteObject = dynamic_cast<CTerrainSpriteObject*>(params.pObject);
+	//CTerrainSpriteObject* pSpriteObject = dynamic_cast<CTerrainSpriteObject*>(params.pObject);
+	//if (!m_bEnable)
+	//	return;
 
-	if (pSpriteObject)
+	CParticleObject* pMultiSprite = dynamic_cast<CParticleObject*>(params.pObject);
+
+	if (pMultiSprite)
 	{
-		pSpriteObject->SetType(TerrainSpriteType::TERRAINSPRITE_CROSS_FADE);
-		pSpriteObject->SetEnable(true);
-		pSpriteObject->SetPosition(params.xmf3Position);
-		pSpriteObject->SetLifeTime(m_fLifeTime);
-		pSpriteObject->SetStart(true);
-		pSpriteObject->SetStartAlpha(1.f);
+		pMultiSprite->SetEmit(true);
+		pMultiSprite->SetSize(m_fSize);
+		pMultiSprite->SetStartAlpha(m_fAlpha);
+		pMultiSprite->SetColor(m_xmf3Color);
+		pMultiSprite->SetSpeed(m_fSpeed);
+		pMultiSprite->SetLifeTime(m_fLifeTime);
+		//pParticle->SetMaxParticleN(m_nParticleNumber);
+		pMultiSprite->SetEmitParticleN(m_nEmitParticleNumber);
+		pMultiSprite->SetPosition(params.xmf3Position);
+		pMultiSprite->SetParticleType(m_iParticleType);
 	}
+
+	//if (pSpriteObject)
+	//{
+	//	pSpriteObject->SetType(TerrainSpriteType::TERRAINSPRITE_CROSS_FADE);
+	//	pSpriteObject->SetEnable(true);
+	//	pSpriteObject->SetPosition(params.xmf3Position);
+	//	pSpriteObject->SetLifeTime(m_fLifeTime);
+	//	pSpriteObject->SetStart(true);
+	//	pSpriteObject->SetStartAlpha(1.f);
+	//}
 }
 
 void SmokeParticleComponent::HandleMessage(const Message& message, const ParticleSmokeParams& params)
