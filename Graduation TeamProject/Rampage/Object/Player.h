@@ -55,8 +55,6 @@ public:
 	virtual void SetScale(float x, float y, float z);
 	void Tmp();
 
-	void SlideLookVec(CGameObject* pObject);
-
 	virtual void Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity, CCamera* pCamera);
 	virtual XMFLOAT4& GetTrailControllPoint(int n) { return XMFLOAT4{}; }
 };

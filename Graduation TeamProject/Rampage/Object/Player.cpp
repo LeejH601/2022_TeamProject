@@ -106,8 +106,8 @@ void CPlayer::Update(float fTimeElapsed)
 	CPhysicsObject::Move(xmf3NewVelocity, false);
 
 	// 플레이어가 속도를 가진다면 해당 방향을 바라보게 하는 코드
-	if (m_xmf3Velocity.x + m_xmf3Velocity.z)
-		SetLookAt(Vector3::Add(GetPosition(), Vector3::Normalize(XMFLOAT3{ m_xmf3Velocity.x, 0.0f, m_xmf3Velocity.z })));
+	if (xmf3NewVelocity.x + xmf3NewVelocity.z)
+		SetLookAt(Vector3::Add(GetPosition(), Vector3::Normalize(XMFLOAT3{ xmf3NewVelocity.x, 0.0f, xmf3NewVelocity.z })));
 
 	m_pStateMachine->Animate(fTimeElapsed);
 
@@ -153,64 +153,6 @@ void CPlayer::SetScale(float x, float y, float z)
 void CPlayer::Tmp()
 {
 	m_pSkinnedAnimationController->SetTrackAnimationSet(0, m_nAnimationNum++);
-}
-
-void CPlayer::SlideLookVec(CGameObject* pObject)
-{
-	// 맵 오브젝트에서 플레이어를 향하는 방향을 바라보게 함
-	/*BoundingOrientedBox& bb_BoundingBox = pObject->GetBoundingBox();
-	XMFLOAT3 xmf3BBCenter = GetBoundingBox().Center;
-	XMFLOAT3 xmf3NewDir = Vector3::Subtract(xmf3BBCenter, bb_BoundingBox.Center);
-	xmf3NewDir.y = 0.0f;
-	xmf3NewDir = Vector3::Add(GetPosition(), xmf3NewDir);
-	SetLookAt(xmf3NewDir);*/
-
-	// 왜곡 방향 결정
-	/*BoundingOrientedBox& bb_BoundingBox = pObject->GetBoundingBox();
-	XMFLOAT3 xmf3BBCenter = GetBoundingBox().Center;
-	XMFLOAT3 xmf3ToObjectVec = Vector3::Subtract(bb_BoundingBox.Center, xmf3BBCenter);
-	XMFLOAT3 xmf3LookVec = GetLook();
-
-	XMFLOAT3 xmf3NewLookVec = Vector3::Subtract(xmf3LookVec, xmf3ToObjectVec);
-	xmf3NewLookVec.y = 0.0f;
-
-	SetLookAt(Vector3::Add(GetPosition(), xmf3NewLookVec));*/
-
-	//오브젝트로 향하는 벡터가 캐릭터 LookVec를 몇도 회전해야 향하게 되는지 구하기
-	BoundingOrientedBox& bb_BoundingBox = pObject->GetBoundingBox();
-	XMFLOAT3 xmf3BBCenter = GetBoundingBox().Center;
-
-	XMFLOAT3 xmf3ToObjectVec = Vector3::Subtract(bb_BoundingBox.Center, xmf3BBCenter);
-	xmf3ToObjectVec.y = 0.0f;
-
-	XMFLOAT3 xmf3Look = GetLook();
-	xmf3Look.y = 0.0f;
-
-	XMVECTOR toObjeVec = XMLoadFloat3(&xmf3ToObjectVec);
-	XMVECTOR lookVec = XMLoadFloat3(&xmf3Look);
-
-	toObjeVec = XMVector3Normalize(toObjeVec);
-	lookVec = XMVector3Normalize(lookVec);
-
-	float dot = XMVectorGetX(XMVector3Dot(toObjeVec, lookVec));
-	float angle = acosf(dot);
-	float degrees = XMConvertToDegrees(angle);
-
-	XMVECTOR cross = XMVector3Cross(toObjeVec, lookVec);
-
-	if (XMVectorGetY(cross) > 0.0f)
-		degrees = 360.0f - degrees;
-
-	if (degrees < 90.0f || degrees > 270.0f)
-	{
-		fDistortionDegree = 360.0f - degrees;
-	}
-	else
-	{
-		fDistortionDegree = degrees + 180.0f;
-		if (fDistortionDegree > 360.0f)
-			fDistortionDegree -= 360.0f;
-	}
 }
 
 #define KNIGHT_ROOT_MOTION
@@ -363,7 +305,7 @@ void CKnightPlayer::OnUpdateCallback(float fTimeElapsed)
 		for (int i = 0; i < pMap->GetMapObjects().size(); ++i) {
 			if (pMap->GetMapObjects()[i]->CheckCollision(this))
 			{
-				SlideLookVec(pMap->GetMapObjects()[i].get());
+				DistortLookVec(pMap->GetMapObjects()[i].get());
 				break;
 			}
 		}
@@ -371,11 +313,6 @@ void CKnightPlayer::OnUpdateCallback(float fTimeElapsed)
 		SetPosition(xmf3ResultPlayerPos);
 
 		UpdateTransform(NULL);
-
-		std::wstring wMessage = { L"DistortionDegree: " };
-		std::wstring wDegree = std::to_wstring(fDistortionDegree);
-		OutputDebugString((wMessage + wDegree).c_str());
-		OutputDebugString(L"\n");
 	}
 }
 void CKnightPlayer::UpdateTransform(XMFLOAT4X4* pxmf4x4Parent)

@@ -62,6 +62,7 @@ public:
 	virtual void Animate(float fTimeElapsed);
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, bool b_UseTexture, CCamera* pCamera = NULL);
 
+	virtual void DistortLookVec(CGameObject* pObject);
 	virtual void Move(const XMFLOAT3& xmf3Shift, bool bUpdateVelocity);
 
 	virtual void updateArticulationMatrix();

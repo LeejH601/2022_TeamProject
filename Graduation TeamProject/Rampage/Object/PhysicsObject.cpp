@@ -47,6 +47,16 @@ void CPhysicsObject::OnUpdateCallback(float fTimeElapsed)
 			xmf3ResultPos.y = fTerrainY + xmf3TerrainPos.y;
 			m_bOnGround = true;
 		}
+		
+		fDistortionDegree = 0.0f;
+		
+		for (int i = 0; i < pMap->GetMapObjects().size(); ++i) {
+			if (pMap->GetMapObjects()[i]->CheckCollision(this))
+			{
+				DistortLookVec(pMap->GetMapObjects()[i].get());
+				break;
+			}
+		}
 
 		SetPosition(xmf3ResultPos);
 	}
@@ -190,6 +200,45 @@ void CPhysicsObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, bool b_U
 {
 	UpdateTransform(NULL);
 	CGameObject::Render(pd3dCommandList, b_UseTexture, pCamera);
+}
+
+void CPhysicsObject::DistortLookVec(CGameObject* pObject)
+{
+	//오브젝트로 향하는 벡터가 캐릭터 LookVec를 몇도 회전해야 향하게 되는지 구하기
+	BoundingOrientedBox& bb_BoundingBox = pObject->GetBoundingBox();
+	XMFLOAT3 xmf3BBCenter = GetBoundingBox().Center;
+
+	XMFLOAT3 xmf3ToObjectVec = Vector3::Subtract(bb_BoundingBox.Center, xmf3BBCenter);
+	xmf3ToObjectVec.y = 0.0f;
+
+	XMFLOAT3 xmf3Look = GetLook();
+	xmf3Look.y = 0.0f;
+
+	XMVECTOR toObjeVec = XMLoadFloat3(&xmf3ToObjectVec);
+	XMVECTOR lookVec = XMLoadFloat3(&xmf3Look);
+
+	toObjeVec = XMVector3Normalize(toObjeVec);
+	lookVec = XMVector3Normalize(lookVec);
+
+	float dot = XMVectorGetX(XMVector3Dot(toObjeVec, lookVec));
+	float angle = acosf(dot);
+	float degrees = XMConvertToDegrees(angle);
+
+	XMVECTOR cross = XMVector3Cross(toObjeVec, lookVec);
+
+	if (XMVectorGetY(cross) > 0.0f)
+		degrees = 360.0f - degrees;
+
+	if (degrees < 90.0f || degrees > 270.0f)
+	{
+		fDistortionDegree = 360.0f - degrees;
+	}
+	else
+	{
+		fDistortionDegree = degrees + 180.0f;
+		if (fDistortionDegree > 360.0f)
+			fDistortionDegree -= 360.0f;
+	}
 }
 
 void CPhysicsObject::Move(const XMFLOAT3& xmf3Shift, bool bUpdateVelocity)

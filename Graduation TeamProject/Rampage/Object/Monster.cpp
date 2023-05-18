@@ -116,7 +116,11 @@ void CMonster::Update(float fTimeElapsed)
 		m_fDissolveThrethHold = m_fDissolveTime / m_fMaxDissolveTime;
 	}
 	
-	CPhysicsObject::Move(m_xmf3Velocity, false);
+	XMFLOAT3 xmf3NewVelocity = Vector3::TransformCoord(m_xmf3Velocity, XMMatrixRotationAxis(XMVECTOR{ 0.0f, 1.0f, 0.0f, 0.0f }, XMConvertToRadians(fDistortionDegree)));
+	CPhysicsObject::Move(xmf3NewVelocity, false);
+
+	if (xmf3NewVelocity.x + xmf3NewVelocity.z)
+		SetLookAt(Vector3::Add(GetPosition(), Vector3::Normalize(XMFLOAT3{ xmf3NewVelocity.x, 0.0f, xmf3NewVelocity.z })));
 
 	// 플레이어가 터레인보다 아래에 있지 않도록 하는 코드
 	if (m_pUpdatedContext) CPhysicsObject::OnUpdateCallback(fTimeElapsed);
