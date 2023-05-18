@@ -164,7 +164,7 @@ void CPlayer::SlideLookVec(CGameObject* pObject)
 	SetLookAt(xmf3NewDir);*/
 
 	// 왜곡 방향 결정
-	BoundingOrientedBox& bb_BoundingBox = pObject->GetBoundingBox();
+	/*BoundingOrientedBox& bb_BoundingBox = pObject->GetBoundingBox();
 	XMFLOAT3 xmf3BBCenter = GetBoundingBox().Center;
 	XMFLOAT3 xmf3ToObjectVec = Vector3::Subtract(bb_BoundingBox.Center, xmf3BBCenter);
 	XMFLOAT3 xmf3LookVec = GetLook();
@@ -172,7 +172,37 @@ void CPlayer::SlideLookVec(CGameObject* pObject)
 	XMFLOAT3 xmf3NewLookVec = Vector3::Subtract(xmf3LookVec, xmf3ToObjectVec);
 	xmf3NewLookVec.y = 0.0f;
 
-	SetLookAt(Vector3::Add(GetPosition(), xmf3NewLookVec));
+	SetLookAt(Vector3::Add(GetPosition(), xmf3NewLookVec));*/
+
+	//오브젝트로 향하는 벡터가 캐릭터 LookVec를 몇도 회전해야 향하게 되는지 구하기
+	BoundingOrientedBox& bb_BoundingBox = pObject->GetBoundingBox();
+	XMFLOAT3 xmf3BBCenter = GetBoundingBox().Center;
+
+	XMFLOAT3 xmf3ToObjectVec = Vector3::Subtract(bb_BoundingBox.Center, xmf3BBCenter);
+	xmf3ToObjectVec.y = 0.0f;
+
+	XMFLOAT3 xmf3Look = GetLook();
+	xmf3Look.y = 0.0f;
+
+	XMVECTOR toObjeVec = XMLoadFloat3(&xmf3ToObjectVec);
+	XMVECTOR lookVec = XMLoadFloat3(&xmf3Look);
+
+	toObjeVec = XMVector3Normalize(toObjeVec);
+	lookVec = XMVector3Normalize(lookVec);
+
+	float dot = XMVectorGetX(XMVector3Dot(toObjeVec, lookVec));
+	float angle = acosf(dot);
+	float degrees = XMConvertToDegrees(angle);
+
+	XMVECTOR cross = XMVector3Cross(toObjeVec, lookVec);
+	if (XMVectorGetY(cross) > 0.0f)
+		degrees = 360.0f - degrees;
+
+	std::wstring wMessage = { L"Degree: " };
+	std::wstring wDegree = std::to_wstring(degrees);
+
+	OutputDebugString((wMessage + wDegree).c_str());
+	OutputDebugString(L"\n");
 }
 
 #define KNIGHT_ROOT_MOTION
