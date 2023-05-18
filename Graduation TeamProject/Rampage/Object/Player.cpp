@@ -155,11 +155,24 @@ void CPlayer::Tmp()
 
 void CPlayer::SlideLookVec(CGameObject* pObject)
 {
+	// 맵 오브젝트에서 플레이어를 향하는 방향을 바라보게 함
+	/*BoundingOrientedBox& bb_BoundingBox = pObject->GetBoundingBox();
+	XMFLOAT3 xmf3BBCenter = GetBoundingBox().Center;
+	XMFLOAT3 xmf3NewDir = Vector3::Subtract(xmf3BBCenter, bb_BoundingBox.Center);
+	xmf3NewDir.y = 0.0f;
+	xmf3NewDir = Vector3::Add(GetPosition(), xmf3NewDir);
+	SetLookAt(xmf3NewDir);*/
+
+	// 왜곡 방향 결정
 	BoundingOrientedBox& bb_BoundingBox = pObject->GetBoundingBox();
 	XMFLOAT3 xmf3BBCenter = GetBoundingBox().Center;
-	XMFLOAT3 xmf3NewDir = Vector3::Normalize(Vector3::Subtract(xmf3BBCenter, bb_BoundingBox.Center));
+	XMFLOAT3 xmf3ToObjectVec = Vector3::Subtract(bb_BoundingBox.Center, xmf3BBCenter);
+	XMFLOAT3 xmf3LookVec = GetLook();
 
-	SetLookAt(xmf3NewDir);
+	XMFLOAT3 xmf3NewLookVec = Vector3::Subtract(xmf3LookVec, xmf3ToObjectVec);
+	xmf3NewLookVec.y = 0.0f;
+
+	SetLookAt(Vector3::Add(GetPosition(), xmf3NewLookVec));
 }
 
 #define KNIGHT_ROOT_MOTION

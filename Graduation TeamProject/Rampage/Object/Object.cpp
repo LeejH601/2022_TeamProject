@@ -683,9 +683,7 @@ void CMapObject::PrepareBoundingBox(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 	BoundingOrientedBox aambb = CreateAAMBB();
 	m_ObjectBoundingBox = BoundingOrientedBox{ aambb.Center, aambb.Extents, XMFLOAT4{0.0f, 0.0f, 0.0f, 1.0f} };
 #ifdef RENDER_BOUNDING_BOX
-	BoundingOrientedBox aambb = CreateAAMBB();
 	pBoundingBoxMesh = CBoundingBoxShader::GetInst()->AddBoundingObject(pd3dDevice, pd3dCommandList, this, aambb.Center, aambb.Extents);
-	m_ObjectBoundingBox = BoundingOrientedBox{ aambb.Center, aambb.Extents, XMFLOAT4{0.0f, 0.0f, 0.0f, 1.0f} };
 #endif // RENDER_BOUNDING_BOX
 }
 
