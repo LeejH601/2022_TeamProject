@@ -412,6 +412,7 @@ void SmokeParticleComponent::HandleMessage(const Message& message, const Particl
 		pParticleObject->SetLifeTime(m_fLifeTime);
 		pParticleObject->SetMaxParticleN(m_nParticleNumber);
 		pParticleObject->SetPosition(params.xmf3Position);
+		pParticleObject->EmitParticle(2);
 	}
 }
 

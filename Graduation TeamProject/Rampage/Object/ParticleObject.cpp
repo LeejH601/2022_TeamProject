@@ -227,6 +227,17 @@ void CParticleObject::EmitParticle(int emitType)
 		param.m_iTextureIndex = m_iTextureIndex;
 		param.m_iTextureCoord[0] = m_iTotalRow; param.m_iTextureCoord[1] = m_iTotalCol;
 		break;
+	case 2:
+		param.m_fLifeTime = m_fLifeTime;
+		param.m_nEmitNum = m_iEmitParticleN;
+		param.m_fEmitedSpeed = m_fSpeed;
+		param.m_xmf3EmitedPosition.x = m_xmf4x4Transform._41;
+		param.m_xmf3EmitedPosition.y = m_xmf4x4Transform._42;
+		param.m_xmf3EmitedPosition.z = m_xmf4x4Transform._43;
+		param.m_fEmitTime = Locator.GetTimer()->GetTotalTime();
+		param.m_iTextureIndex = m_iTextureIndex;
+		param.m_iTextureCoord[0] = m_iTotalRow; param.m_iTextureCoord[1] = m_iTotalCol;
+		break;
 	default:
 		break;
 	}
