@@ -1,5 +1,7 @@
 #include "PhysicsObject.h"
 #include "Terrain.h"
+#include "Map.h"
+#include "..\Shader\Shader.h"
 #include "..\Global\Locator.h"
 
 void CPhysicsObject::UpdateMatrix()
@@ -29,7 +31,8 @@ void CPhysicsObject::OnUpdateCallback(float fTimeElapsed)
 	m_bOnGround = false;
 	if (m_pUpdatedContext)
 	{
-		CSplatTerrain* pTerrain = (CSplatTerrain*)m_pUpdatedContext;
+		CMap* pMap = (CMap*)m_pUpdatedContext;
+		CSplatTerrain* pTerrain = (CSplatTerrain*)(pMap->GetTerrain().get());
 		XMFLOAT3 xmf3TerrainPos = pTerrain->GetPosition();
 
 		XMFLOAT3 xmf3ResultPos = GetPosition();

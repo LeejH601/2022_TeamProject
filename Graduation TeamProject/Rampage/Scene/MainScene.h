@@ -3,9 +3,8 @@
 #include "Scene.h"
 #include "..\Global\Locator.h"
 #include "..\Object\Object.h"
+#include "..\Object\Map.h"
 #include "..\Object\Light.h"
-#include "..\Object\Terrain.h"
-#include "..\Shader\TerrainShader.h"
 #include "..\Object\TextureManager.h"
 #include "..\Object\BillBoardObject.h"
 #include "..\Object\ParticleObject.h"
@@ -30,11 +29,12 @@ class CMainTMPScene : public CScene
 private:
 	RECT m_ScreendRect;
 
-	std::vector<std::unique_ptr<CGameObject>> m_pObjects;
+	std::vector<std::unique_ptr<CGameObject>> m_pEnemys;
+	std::unique_ptr<CMap> m_pMap;
+
 	std::vector<UINT> m_IObjectIndexs;
 	std::unique_ptr<CLight> m_pLight;
-	std::unique_ptr<CSplatTerrain> m_pTerrain;
-	std::unique_ptr<CShader> m_pTerrainShader;
+
 	std::unique_ptr<CShader> m_pDepthRenderShader;
 
 	std::unique_ptr<CTextureManager> m_pTextureManager = NULL;
@@ -82,11 +82,7 @@ public:
 	virtual void CreateGraphicsRootSignature(ID3D12Device* pd3dDevice);
 	virtual void CreateComputeRootSignature(ID3D12Device* pd3dDevice);
 
-	virtual void UpdateObjectArticulation() {
-		for (int i = 0; i < m_pObjects.size(); ++i) {
-			m_pObjects[i]->updateArticulationMatrix();
-		}
-	}
+	virtual void UpdateObjectArticulation();
 	virtual void RequestRegisterArticulation(RegisterArticulationParams param);
 	virtual void RegisterArticulations();
 
@@ -103,7 +99,6 @@ public:
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed, float fCurrentTime, CCamera* pCamera = NULL);
 	virtual void OnPostRender();
 
-	void LoadSceneFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, char* pstrFileName);
 	virtual void HandleCollision(const CollideParams& params);
 	virtual void HandleOnGround(const OnGroundParams& params);
 

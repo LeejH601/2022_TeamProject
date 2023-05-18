@@ -1,6 +1,7 @@
 #include "Player.h"
 #include "Monster.h"
 #include "Object.h"
+#include "Map.h"
 #include "..\Global\Camera.h"
 #include "..\Global\Locator.h"
 #include "..\Global\Global.h"
@@ -112,6 +113,8 @@ void CPlayer::Update(float fTimeElapsed)
 	if (m_pUpdatedContext) OnUpdateCallback(fTimeElapsed);
 
 	CPhysicsObject::Apply_Friction(fTimeElapsed);
+
+	m_xmf3PreviousPos = GetPosition();
 }
 
 void CPlayer::ProcessInput(DWORD dwDirection, float cxDelta, float cyDelta, float fTimeElapsed, CCamera* pCamera)
@@ -199,13 +202,38 @@ void CKnightPlayer::SetRigidDynamic()
 
 	Rigid = actor;
 }
+void CKnightPlayer::SetTargetPosition(const BoundingOrientedBox& targetBoundingBox)
+{
+	// 두 바운딩 박스의 중심점을 구함
+	XMFLOAT3 playerWeaponBoxCenter = m_TransformedWeaponBoundingBox.Center;
+	XMFLOAT3 monsterBodyBoxCenter = targetBoundingBox.Center;
+
+	// 플레이어 무기의 바운딩 박스의 중심에서 몬스터 몸체의 바운딩 박스의 중심을 향한 선분
+	XMVECTOR direction = XMLoadFloat3(&monsterBodyBoxCenter) - XMLoadFloat3(&playerWeaponBoxCenter);
+
+	// 몬스터 몸체의 바운딩 박스의 면과 교차하는 점을 구함
+	float distance;
+
+	if (targetBoundingBox.Intersects(XMLoadFloat3(&playerWeaponBoxCenter), direction, distance))
+	{
+		XMVECTOR intersectionPoint = XMLoadFloat3(&playerWeaponBoxCenter) + distance * direction;
+		XMStoreFloat3(&m_xmf3TargetPosition, intersectionPoint);
+	}
+}
 bool CKnightPlayer::CheckCollision(CGameObject* pTargetObject)
 {
 	if (m_iAttackId == ((CMonster*)pTargetObject)->GetPlayerAtkId() || ((CMonster*)pTargetObject)->m_fHP <= 0.0f)
 		return false;
 
-	BoundingBox TargetBoundingBox = pTargetObject->GetBoundingBox();
+	BoundingOrientedBox TargetBoundingBox = pTargetObject->GetBoundingBox();
 	if (pTargetObject->m_bEnable && ((CMonster*)pTargetObject)->m_fHP > 0 && m_TransformedWeaponBoundingBox.Intersects(TargetBoundingBox)) {
+		
+		SetTargetPosition(TargetBoundingBox);
+
+		CollideParams collide_params;
+		collide_params.xmf3CollidePosition = m_xmf3TargetPosition;
+		CMessageDispatcher::GetInst()->Dispatch_Message<CollideParams>(MessageType::COLLISION, &collide_params, nullptr);
+
 		SoundPlayParams SoundPlayParam;
 		SoundPlayParam.sound_category = SOUND_CATEGORY::SOUND_SHOCK;
 		CMessageDispatcher::GetInst()->Dispatch_Message<SoundPlayParams>(MessageType::PLAY_SOUND, &SoundPlayParam, m_pStateMachine->GetCurrentState());
@@ -224,7 +252,6 @@ bool CKnightPlayer::CheckCollision(CGameObject* pTargetObject)
 				m_pCamera->m_bCameraMoving = true;
 		}
 
-		m_xmf3TargetPosition = pTargetObject->GetPosition();
 		pTargetObject->SetHit(this);
 		std::string logMessage = "Atk player->monster"; logMessage = logMessage + " ID == { " + std::to_string(m_iAttackId) + " }";
 		CLogger::GetInst()->LogCollision(this, pTargetObject, logMessage);
@@ -248,20 +275,21 @@ void CKnightPlayer::Animate(float fTimeElapsed)
 		
 		SetPosition(XMFLOAT3(transform.p.x, transform.p.y, transform.p.z));
 	}
-	OnUpdateCallback(fTimeElapsed);
 }
 
 void CKnightPlayer::OnUpdateCallback(float fTimeElapsed)
 {
 	if (m_pUpdatedContext)
 	{
-		CSplatTerrain* pTerrain = (CSplatTerrain*)m_pUpdatedContext;
+		CMap* pMap = (CMap*)m_pUpdatedContext;
+		CSplatTerrain* pTerrain = (CSplatTerrain*)(pMap->GetTerrain().get());
 		XMFLOAT3 xmf3TerrainPos = pTerrain->GetPosition();
 		XMFLOAT3 xmf3Pos = XMFLOAT3{
 			m_pSkinnedAnimationController->m_pRootMotionObject->GetWorld()._41,
 			m_pSkinnedAnimationController->m_pRootMotionObject->GetWorld()._42,
 			m_pSkinnedAnimationController->m_pRootMotionObject->GetWorld()._43
 		};
+
 		XMFLOAT3 xmf3ResultPlayerPos = GetPosition();
 
 		xmf3ResultPlayerPos.x = std::clamp(xmf3ResultPlayerPos.x, xmf3TerrainPos.x + TERRAIN_SPAN, xmf3TerrainPos.x + pTerrain->GetWidth() - TERRAIN_SPAN);
@@ -271,8 +299,19 @@ void CKnightPlayer::OnUpdateCallback(float fTimeElapsed)
 
 		if (xmf3ResultPlayerPos.y < fTerrainY + xmf3TerrainPos.y)
 			xmf3ResultPlayerPos.y = fTerrainY + xmf3TerrainPos.y;
-			
-		SetPosition(xmf3ResultPlayerPos);
+
+		bool bUpdatePos = true;
+
+		for (int i = 0; i < pMap->GetMapObjects().size(); ++i) {
+			if (pMap->GetMapObjects()[i]->CheckCollision(this))
+			{
+				bUpdatePos = false;
+				break;
+			}
+		}
+		
+		bUpdatePos ? SetPosition(xmf3ResultPlayerPos) : SetPosition(m_xmf3PreviousPos);
+
 		UpdateTransform(NULL);
 	}
 }
@@ -280,7 +319,9 @@ void CKnightPlayer::UpdateTransform(XMFLOAT4X4* pxmf4x4Parent)
 {
 	CPhysicsObject::UpdateTransform(NULL);
 
-	pBodyBoundingBoxMesh->SetWorld(m_xmf4x4Transform);
+	if (pBodyBoundingBoxMesh)
+		pBodyBoundingBoxMesh->SetWorld(m_xmf4x4Transform);
+
 	m_BodyBoundingBox.Transform(m_TransformedBodyBoundingBox, XMLoadFloat4x4(&m_xmf4x4Transform));
 
 	if (pWeapon)
@@ -300,12 +341,13 @@ void CKnightPlayer::UpdateTransform(XMFLOAT4X4* pxmf4x4Parent)
 
 
 		XMFLOAT3 xmf3Direction = XMFLOAT3{ xmf4x4World._31, xmf4x4World._32, xmf4x4World._33 };
-		xmf3Position = Vector3::Add(xmf3Position, xmf3Direction, -0.8f);
+		xmf3Position = Vector3::Add(xmf3Position, xmf3Direction, -0.4f);
 		xmf4x4World._41 = xmf3Position.x;
 		xmf4x4World._42 = xmf3Position.y;
 		xmf4x4World._43 = xmf3Position.z;
 
-		pWeaponBoundingBoxMesh->SetWorld(xmf4x4World);
+		if (pWeaponBoundingBoxMesh)
+			pWeaponBoundingBoxMesh->SetWorld(xmf4x4World);
 
 		m_WeaponBoundingBox.Transform(m_TransformedWeaponBoundingBox, XMLoadFloat4x4(&xmf4x4World));
 
@@ -316,10 +358,10 @@ void CKnightPlayer::UpdateTransform(XMFLOAT4X4* pxmf4x4Parent)
 void CKnightPlayer::PrepareBoundingBox(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	pWeapon = CGameObject::FindFrame("Weapon_r");
-	pBodyBoundingBoxMesh = CBoundingBoxShader::GetInst()->AddBoundingObject(pd3dDevice, pd3dCommandList, this, XMFLOAT3(0.0f, 1.0f, 0.0f), XMFLOAT3(0.7f, 2.0f, 0.7f));
-	pWeaponBoundingBoxMesh = CBoundingBoxShader::GetInst()->AddBoundingObject(pd3dDevice, pd3dCommandList, this, XMFLOAT3(0.0f, 0.6f, 0.8f), XMFLOAT3(0.025f, 1.05f, 0.125f));
-	m_BodyBoundingBox = BoundingBox{ XMFLOAT3(0.0f, 1.0f, 0.0f), XMFLOAT3(0.7f, 2.0f, 0.7f) };
-	m_WeaponBoundingBox = BoundingBox{ XMFLOAT3(0.0f, 0.4f, 0.8f), XMFLOAT3(0.025f, 0.55f, 0.125f) };
+	pBodyBoundingBoxMesh = CBoundingBoxShader::GetInst()->AddBoundingObject(pd3dDevice, pd3dCommandList, this, XMFLOAT3(0.0f, 0.75f, 0.0f), XMFLOAT3(0.35f, 1.0f, 0.35f));
+	pWeaponBoundingBoxMesh = CBoundingBoxShader::GetInst()->AddBoundingObject(pd3dDevice, pd3dCommandList, this, XMFLOAT3(0.0f, 0.6f, 0.4f), XMFLOAT3(0.0125f, 0.525f, 0.0625f));
+	m_BodyBoundingBox = BoundingOrientedBox{ XMFLOAT3(0.0f, 0.75f, 0.0f), XMFLOAT3(0.35f, 1.0f, 0.35f), XMFLOAT4{0.0f, 0.0f, 0.0f, 1.0f} };
+	m_WeaponBoundingBox = BoundingOrientedBox{ XMFLOAT3(0.0f, 0.6f, 0.4f), XMFLOAT3(0.0125f, 0.525f, 0.0625f), XMFLOAT4{0.0f, 0.0f, 0.0f, 1.0f} };
 }
 
 
@@ -365,7 +407,7 @@ void CKightRootRollBackAnimationController::OnRootMotion(CGameObject* pRootGameO
 
 			//			pRootGameObject->MoveForward(fabs(xmf3Offset.x));
 			//			pRootGameObject->SetPosition(xmf3Position);
-			//			m_xmf3PreviousPosition = xmf3Position;
+			//			m_xmf3RootTransfromPreviousPosition = xmf3Position;
 #ifdef _WITH_DEBUG_ROOT_MOTION
 			TCHAR pstrDebug[256] = { 0 };
 			_stprintf_s(pstrDebug, 256, _T("Offset: (%.2f, %.2f, %.2f) (%.2f, %.2f, %.2f)\n"), xmf3Offset.x, xmf3Offset.y, xmf3Offset.z, pRootGameObject->m_xmf4x4Transform._41, pRootGameObject->m_xmf4x4Transform._42, pRootGameObject->m_xmf4x4Transform._43);

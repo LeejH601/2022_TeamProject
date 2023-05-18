@@ -314,6 +314,13 @@ void CSkinnedMesh::LoadMeshFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 
 	::ReadStringFromFile(pInFile, m_pstrMeshName);
 
+	std::wstring wMeshName;
+	size_t tmp = 0;
+	wMeshName.resize(strlen(m_pstrMeshName) + 1);
+	mbstowcs_s(&tmp, wMeshName.data(), (size_t)wMeshName.size(), m_pstrMeshName, (size_t)wMeshName.size());
+	OutputDebugString(wMeshName.c_str());
+	OutputDebugString(L"\n");
+
 	for (; ; )
 	{
 		::ReadStringFromFile(pInFile, pstrToken);
@@ -321,6 +328,24 @@ void CSkinnedMesh::LoadMeshFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 		{
 			nReads = (UINT)::fread(&m_xmf3AABBCenter, sizeof(XMFLOAT3), 1, pInFile);
 			nReads = (UINT)::fread(&m_xmf3AABBExtents, sizeof(XMFLOAT3), 1, pInFile);
+
+			/*std::wstring wBounds = L"m_xmf3AABBCenter.x: ";
+			wBounds = wBounds.append(std::to_wstring(m_xmf3AABBCenter.x));
+			wBounds = wBounds.append(L" m_xmf3AABBCenter.y: ");
+			wBounds = wBounds.append(std::to_wstring(m_xmf3AABBCenter.y));
+			wBounds = wBounds.append(L" m_xmf3AABBCenter.z: ");
+			wBounds = wBounds.append(std::to_wstring(m_xmf3AABBCenter.z));
+			OutputDebugString(wBounds.c_str());
+			OutputDebugString(L"\n");
+
+			std::wstring wExtents = L"m_xmf3AABBExtents.x: ";
+			wExtents = wExtents.append(std::to_wstring(m_xmf3AABBExtents.x));
+			wExtents = wExtents.append(L" m_xmf3AABBExtents.y: ");
+			wExtents = wExtents.append(std::to_wstring(m_xmf3AABBExtents.y));
+			wExtents = wExtents.append(L" m_xmf3AABBExtents.z: ");
+			wExtents = wExtents.append(std::to_wstring(m_xmf3AABBExtents.z));
+			OutputDebugString(wExtents.c_str());
+			OutputDebugString(L"\n");*/
 		}
 		else if (!strcmp(pstrToken, "<Positions>:"))
 		{
@@ -1072,12 +1097,12 @@ CSplatGridMesh::~CSplatGridMesh()
 //-------------------------------------------------------------------
 CBoundingBoxMesh::CBoundingBoxMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, XMFLOAT3 xmf3AABBCenter, XMFLOAT3 xmf3AABBExtents)
 {
-	//BoundingBox는 직육면체이다. 
+	//BoundingOrientedBox는 직육면체이다. 
 	m_nVertices = 8;
 	m_nOffset = 0;
 	m_nSlot = 0;
 	m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
-	float fx = xmf3AABBExtents.x * 0.5f, fy = xmf3AABBExtents.y * 0.5f, fz = xmf3AABBExtents.z * 0.5f;
+	float fx = xmf3AABBExtents.x, fy = xmf3AABBExtents.y, fz = xmf3AABBExtents.z;
 
 	//정점 버퍼는 직육면체의 꼭지점 8개에 대한 정점 데이터를 가진다.
 	m_pxmf3Positions.push_back(Vector3::Add(xmf3AABBCenter, XMFLOAT3(-fx, +fy, -fz)));

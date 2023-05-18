@@ -183,6 +183,7 @@
     <ClCompile Include="Object\Animation.cpp" />
     <ClCompile Include="Object\BillBoardObject.cpp" />
     <ClCompile Include="Object\Light.cpp" />
+    <ClCompile Include="Object\Map.cpp" />
     <ClCompile Include="Object\Mesh.cpp" />
     <ClCompile Include="Object\ModelManager.cpp" />
     <ClCompile Include="Object\Monster.cpp" />
@@ -251,6 +252,7 @@
     <ClInclude Include="Object\Animation.h" />
     <ClInclude Include="Object\BillBoardObject.h" />
     <ClInclude Include="Object\Light.h" />
+    <ClInclude Include="Object\Map.h" />
     <ClInclude Include="Object\Mesh.h" />
     <ClInclude Include="Object\ModelManager.h" />
     <ClInclude Include="Object\Monster.h" />
