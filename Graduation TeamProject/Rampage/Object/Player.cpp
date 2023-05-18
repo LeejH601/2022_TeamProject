@@ -153,6 +153,15 @@ void CPlayer::Tmp()
 	m_pSkinnedAnimationController->SetTrackAnimationSet(0, m_nAnimationNum++);
 }
 
+void CPlayer::SlideLookVec(CGameObject* pObject)
+{
+	BoundingOrientedBox& bb_BoundingBox = pObject->GetBoundingBox();
+	XMFLOAT3 xmf3BBCenter = GetBoundingBox().Center;
+	XMFLOAT3 xmf3NewDir = Vector3::Normalize(Vector3::Subtract(xmf3BBCenter, bb_BoundingBox.Center));
+
+	SetLookAt(xmf3NewDir);
+}
+
 #define KNIGHT_ROOT_MOTION
 CKnightPlayer::CKnightPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks) : CPlayer(pd3dDevice, pd3dCommandList, nAnimationTracks)
 {
@@ -298,17 +307,16 @@ void CKnightPlayer::OnUpdateCallback(float fTimeElapsed)
 		if (xmf3ResultPlayerPos.y < fTerrainY + xmf3TerrainPos.y)
 			xmf3ResultPlayerPos.y = fTerrainY + xmf3TerrainPos.y;
 
-		bool bUpdatePos = true;
-
+		
 		for (int i = 0; i < pMap->GetMapObjects().size(); ++i) {
 			if (pMap->GetMapObjects()[i]->CheckCollision(this))
 			{
-				bUpdatePos = false;
+				SlideLookVec(pMap->GetMapObjects()[i].get());
 				break;
 			}
 		}
 		
-		bUpdatePos ? SetPosition(xmf3ResultPlayerPos) : SetPosition(m_xmf3PreviousPos);
+		SetPosition(xmf3ResultPlayerPos);
 
 		UpdateTransform(NULL);
 	}

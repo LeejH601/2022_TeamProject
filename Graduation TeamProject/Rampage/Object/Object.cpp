@@ -657,7 +657,7 @@ bool CMapObject::CheckCollision(CGameObject* pTargetObject)
 
 	if (!Vector3::Length(m_ObjectBoundingBox.Extents))
 		return false;
-	
+
 	bool bCollision = m_TransformedObjectBoundingBox.Intersects(playerBoundingBox);
 
 	if (bCollision)
@@ -680,6 +680,8 @@ void CMapObject::UpdateTransform(XMFLOAT4X4* pxmf4x4Parent)
 
 void CMapObject::PrepareBoundingBox(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
+	BoundingOrientedBox aambb = CreateAAMBB();
+	m_ObjectBoundingBox = BoundingOrientedBox{ aambb.Center, aambb.Extents, XMFLOAT4{0.0f, 0.0f, 0.0f, 1.0f} };
 #ifdef RENDER_BOUNDING_BOX
 	BoundingOrientedBox aambb = CreateAAMBB();
 	pBoundingBoxMesh = CBoundingBoxShader::GetInst()->AddBoundingObject(pd3dDevice, pd3dCommandList, this, aambb.Center, aambb.Extents);
