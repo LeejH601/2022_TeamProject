@@ -101,7 +101,9 @@ void CPlayer::Update(float fTimeElapsed)
 	m_pStateMachine->Update(fTimeElapsed);
 
 	CPhysicsObject::Apply_Gravity(fTimeElapsed);
-	CPhysicsObject::Move(m_xmf3Velocity, false);
+	
+	XMFLOAT3 xmf3NewVelocity = Vector3::TransformCoord(m_xmf3Velocity, XMMatrixRotationAxis(XMVECTOR{ 0.0f, 1.0f, 0.0f, 0.0f }, XMConvertToRadians(fDistortionDegree)));
+	CPhysicsObject::Move(xmf3NewVelocity, false);
 
 	// 플레이어가 속도를 가진다면 해당 방향을 바라보게 하는 코드
 	if (m_xmf3Velocity.x + m_xmf3Velocity.z)
@@ -195,14 +197,20 @@ void CPlayer::SlideLookVec(CGameObject* pObject)
 	float degrees = XMConvertToDegrees(angle);
 
 	XMVECTOR cross = XMVector3Cross(toObjeVec, lookVec);
+
 	if (XMVectorGetY(cross) > 0.0f)
 		degrees = 360.0f - degrees;
 
-	std::wstring wMessage = { L"Degree: " };
-	std::wstring wDegree = std::to_wstring(degrees);
-
-	OutputDebugString((wMessage + wDegree).c_str());
-	OutputDebugString(L"\n");
+	if (degrees < 90.0f || degrees > 270.0f)
+	{
+		fDistortionDegree = 360.0f - degrees;
+	}
+	else
+	{
+		fDistortionDegree = degrees + 180.0f;
+		if (fDistortionDegree > 360.0f)
+			fDistortionDegree -= 360.0f;
+	}
 }
 
 #define KNIGHT_ROOT_MOTION
@@ -350,6 +358,7 @@ void CKnightPlayer::OnUpdateCallback(float fTimeElapsed)
 		if (xmf3ResultPlayerPos.y < fTerrainY + xmf3TerrainPos.y)
 			xmf3ResultPlayerPos.y = fTerrainY + xmf3TerrainPos.y;
 
+		fDistortionDegree = 0.0f;
 		
 		for (int i = 0; i < pMap->GetMapObjects().size(); ++i) {
 			if (pMap->GetMapObjects()[i]->CheckCollision(this))
@@ -362,6 +371,11 @@ void CKnightPlayer::OnUpdateCallback(float fTimeElapsed)
 		SetPosition(xmf3ResultPlayerPos);
 
 		UpdateTransform(NULL);
+
+		std::wstring wMessage = { L"DistortionDegree: " };
+		std::wstring wDegree = std::to_wstring(fDistortionDegree);
+		OutputDebugString((wMessage + wDegree).c_str());
+		OutputDebugString(L"\n");
 	}
 }
 void CKnightPlayer::UpdateTransform(XMFLOAT4X4* pxmf4x4Parent)

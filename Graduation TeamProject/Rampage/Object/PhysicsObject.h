@@ -13,6 +13,8 @@ protected:
 
 	XMFLOAT3 m_xmf3Velocity = XMFLOAT3(0.0f, 0.0f, 0.0f);
 
+	float fDistortionDegree = 0.0f;
+
 	float m_fPitch;
 	float m_fRoll;
 	float m_fYaw;
