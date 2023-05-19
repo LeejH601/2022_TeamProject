@@ -342,7 +342,7 @@ void ImpactEffectComponent::HandleMessage(const Message& message, const ImpactCo
 		pMultiSpriteParticle->SetAnimation(true);
 		pMultiSpriteParticle->SetEmitParticleN(m_nEmitParticleNumber);
 		pMultiSpriteParticle->SetMaxParticleN(m_nParticleNumber);
-		pMultiSpriteParticle->SetPosition(Vector3::Add(params.xmf3Position, m_xmfPosOffset));
+		pMultiSpriteParticle->SetPosition(params.xmf3Position);
 		pMultiSpriteParticle->SetTextureIndex(m_iTextureIndex + m_iTextureOffset);
 		pMultiSpriteParticle->EmitParticle(0);
 	}

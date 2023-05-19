@@ -248,7 +248,6 @@ void Atk_Player::OnRootMotion(CPlayer* player, float fTimeElapsed)
 
 void Atk_Player::Exit(CPlayer* player)
 {
-	OnRootMotion(player);
 }
 
 
@@ -929,6 +928,8 @@ Evasion_Player::~Evasion_Player()
 
 void Evasion_Player::Enter(CPlayer* player)
 {
+	player->m_xmf3RootTransfromPreviousPos = XMFLOAT3{ 0.f, 0.f , 0.f };
+
 	player->m_fCMDConstant = 1.0f;
 
 	player->m_bEvasioned = false;
@@ -1043,16 +1044,17 @@ void Evasion_Player::OnRootMotion(CPlayer* player, float fTimeElapsed)
 
 	CAnimationSet* pAnimationSet = pPlayerController->m_pAnimationSets->m_pAnimationSets[pPlayerController->m_pAnimationTracks[0].m_nAnimationSet];
 
-	if (pPlayerController->m_pAnimationTracks[0].m_fPosition == pAnimationSet->m_fLength)
-	{
-		if (fTimeElapsed > 0.0f)
-			SetPlayerRootPos(player);
-		else
-		{
-			pPlayerController->m_pRootMotionObject->m_xmf4x4Transform._41 = 0.f;
-			pPlayerController->m_pRootMotionObject->m_xmf4x4Transform._43 = 0.f;
-		}
-	}
+	XMFLOAT3 xmf3CurrentPos = XMFLOAT3{ player->m_pChild->m_xmf4x4Transform._41,
+	0.0f,
+	player->m_pChild->m_xmf4x4Transform._43 };
+
+	player->m_pChild->m_xmf4x4Transform._41 -= player->m_xmf3RootTransfromPreviousPos.x;
+	player->m_pChild->m_xmf4x4Transform._42 -= player->m_xmf3RootTransfromPreviousPos.y;
+	player->m_pChild->m_xmf4x4Transform._43 -= player->m_xmf3RootTransfromPreviousPos.z;
+
+	SetPlayerRootPos(player);
+
+	player->m_xmf3RootTransfromPreviousPos = xmf3CurrentPos;
 }
 
 void Evasion_Player::SetPlayerRootPos(CPlayer* player)
@@ -1068,7 +1070,6 @@ void Evasion_Player::SetPlayerRootPos(CPlayer* player)
 	player->SetPosition(xmf3Position);
 
 	pPlayerController->m_pRootMotionObject->m_xmf4x4Transform._41 = 0.f;
-	pPlayerController->m_pRootMotionObject->m_xmf4x4Transform._42 = 0.f;
 	pPlayerController->m_pRootMotionObject->m_xmf4x4Transform._43 = 0.f;
 }
 
@@ -1079,13 +1080,4 @@ void Atk_Player::CheckEvasion(CPlayer* player, float holdTime)
 		if (player->m_bEvasioned)
 			player->m_pStateMachine->ChangeState(Evasion_Player::GetInst());
 	}
-}
-
-void Atk_Player::OnRootMotion(CPlayer* player)
-{
-	CAnimationController* pPlayerController = player->m_pSkinnedAnimationController.get();
-
-	CAnimationSet* pAnimationSet = pPlayerController->m_pAnimationSets->m_pAnimationSets[pPlayerController->m_pAnimationTracks[0].m_nAnimationSet];
-
-	SetPlayerRootPos(player);
 }
