@@ -262,6 +262,7 @@ bool CKnightPlayer::CheckCollision(CGameObject* pTargetObject)
 	}
 	return false;
 }
+
 void CKnightPlayer::Animate(float fTimeElapsed)
 {
 	CGameObject::Animate(fTimeElapsed);

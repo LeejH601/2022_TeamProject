@@ -226,6 +226,9 @@
     <ClCompile Include="Object\Map.cpp">
       <Filter>Object</Filter>
     </ClCompile>
+    <ClCompile Include="Object\VertexPointParticleObject.cpp">
+      <Filter>Object</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Global\stdafx.h">
@@ -438,6 +441,9 @@
     <ClInclude Include="Global\Logger.h" />
     <ClInclude Include="Global\Utility.h" />
     <ClInclude Include="Object\Map.h">
+      <Filter>Object</Filter>
+    </ClInclude>
+    <ClInclude Include="Object\VertexPointParticleObject.h">
       <Filter>Object</Filter>
     </ClInclude>
   </ItemGroup>

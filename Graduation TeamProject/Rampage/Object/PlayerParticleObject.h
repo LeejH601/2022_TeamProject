@@ -16,11 +16,14 @@ public:
 
 	void SetSmokeObjects(CGameObject* pSmokeObject);
 	void SetTrailParticleObjects(CGameObject* pTrailObjects);
+	void SetVertexPointParticleObjects(CGameObject* pVPObject);
 
 	CGameObject* GetSmokeObjects();
 	CGameObject* GetTrailParticleObjects();
+	CGameObject* GetVertexPointParticleObject();
 
 private:
 	CGameObject* m_pSmokeObject = NULL;
 	CGameObject* m_pTrailParticleObject = NULL;
+	CGameObject* m_pVertexPointParicleObject = nullptr;
 };

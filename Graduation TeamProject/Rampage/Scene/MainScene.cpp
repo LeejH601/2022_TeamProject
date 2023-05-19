@@ -776,6 +776,7 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 
 	m_pSmokeObject = std::make_unique<CSmokeParticleObject>(L"Image/SmokeImages/Smoke2.dds", pd3dDevice, pd3dCommandList, GetGraphicsRootSignature(), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), 2.0f, XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT2(2.0f, 2.0f), MAX_PARTICLES, m_pParticleShader.get(), SMOKE_PARTICLE);
 
+	m_pVertexPointParticleObject = std::make_unique<CVertexPointParticleObject>(m_pTextureManager->LoadTextureIndex(TextureType::ParticleTexture, L"Image/ParticleImages/RoundSoftParticle.dds"), pd3dDevice, pd3dCommandList, GetGraphicsRootSignature(), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), 2.0f, XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT2(2.0f, 2.0f), MAX_PARTICLES, m_pParticleShader.get(), SPHERE_PARTICLE);
 	//for (int i = 0; i < MAX_UPDOWN_PARTICLE_OBJECT; i++)
 	//{
 	//	std::unique_ptr<CParticleObject> m_pMeterorObject = std::make_unique<CParticleObject>(m_pTextureManager->LoadParticleTexture(L"ParticleImage/Meteor.dds"), pd3dDevice, pd3dCommandList, GetGraphicsRootSignature(), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), 2.0f, XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT2(2.0f, 2.0f), MAX_PARTICLES, m_pParticleShader.get(), RECOVERY_PARTICLE);
@@ -787,6 +788,7 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 
 	CPlayerParticleObject::GetInst()->SetSmokeObjects(m_pSmokeObject.get());
 	CPlayerParticleObject::GetInst()->SetTrailParticleObjects(m_pTrailParticleObjects.get());
+	CPlayerParticleObject::GetInst()->SetVertexPointParticleObjects(m_pVertexPointParticleObject.get());
 
 	// COLLIDE LISTENER
 	std::unique_ptr<SceneCollideListener> pCollideListener = std::make_unique<SceneCollideListener>();
@@ -886,6 +888,14 @@ void CMainTMPScene::UpdateObjects(float fTimeElapsed)
 
 	m_pPlayer->Update(fTimeElapsed);
 
+	static bool isSetVPObject = false;
+	if (!isSetVPObject) {
+		CGameObject* obj = m_pPlayer->FindFrame("Sword_low");
+		m_pVertexPointParticleObject->SetWorldMatrixReference(&obj->m_xmf4x4World);
+		m_pVertexPointParticleObject->SetVertexPointsFromStaticMeshToRandom(obj->m_pMesh.get());
+		isSetVPObject = true;
+	}
+
 	// Update Camera
 	XMFLOAT3 xmf3PlayerPos = XMFLOAT3{
 		((CKnightPlayer*)m_pPlayer)->m_pSkinnedAnimationController->m_pRootMotionObject->GetWorld()._41,
@@ -955,8 +965,6 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 	//((CParticleObject*)m_pSmokeObject.get())->UpdateShaderVariables(pd3dCommandList, fCurrentTime, fTimeElapsed);
 	//((CParticleObject*)m_pSmokeObject.get())->Render(pd3dCommandList, nullptr, m_pParticleShader.get());
 
-
-
 	
 
 	//for (int i = 0; i < m_pUpDownParticleObjects.size(); ++i)
@@ -1015,6 +1023,9 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 			}
 		}
 		trailUpdateT = 0.0f;
+
+		m_pVertexPointParticleObject->EmitParticle(5);
+		m_pVertexPointParticleObject->SetEmit(true);
 	}
 
 	D3D12_GPU_VIRTUAL_ADDRESS d3dGpuVirtualAddress = m_pd3dcbDisolveParams->GetGPUVirtualAddress();
@@ -1050,6 +1061,10 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 		m_pTerrainSpriteObject[i]->Render(pd3dCommandList, true);
 	}
 	
+	m_pVertexPointParticleObject->Update(fTimeElapsed);
+	m_pVertexPointParticleObject->Animate(fTimeElapsed);
+	m_pVertexPointParticleObject->UpdateShaderVariables(pd3dCommandList, fCurrentTime, fTimeElapsed);
+	m_pVertexPointParticleObject->Render(pd3dCommandList, nullptr, m_pParticleShader.get());
 
 	for (int i = 0; i < m_pParticleObjects.size(); ++i)
 	{

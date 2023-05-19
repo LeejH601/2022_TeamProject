@@ -7,6 +7,7 @@ Buffer<float4> gRandomSphereBuffer : register(t50);
 #define SMOKE_PARTILCE 2
 #define TRAIL_PARTILCE 3
 #define ATTACK_PARTICLE 4
+#define VERTEXPOINT_PARTICLE 5
 
 //#define TYPE_DEFAULT -1
 
@@ -208,5 +209,6 @@ void GSParticleStreamOutput(point VS_PARTICLE_INPUT input[1], inout PointStream<
 		SmokeParticles(particle, output);
 	else if (particle.type == ATTACK_PARTICLE)
 		AttackParticles(particle, output);
-
+	else if (particle.type == VERTEXPOINT_PARTICLE)
+		SphereParticles(particle, output);
 }

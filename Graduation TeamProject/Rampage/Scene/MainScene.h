@@ -17,6 +17,7 @@
 #include "..\Shader\LensFlareShader.h"
 #include "..\Shader\SwordTrailShader.h"
 #include "..\Object\SwordTrailObject.h"
+#include "..\Object\VertexPointParticleObject.h"
 
 #define MAX_OBJECT 1000
 struct DissolveParams {
@@ -54,6 +55,7 @@ private:
 
 	std::unique_ptr<CSwordTrailShader> m_pSwordTrailShader;
 	std::vector<std::unique_ptr<CGameObject>> m_pSwordTrailObjects;
+	std::unique_ptr<CVertexPointParticleObject> m_pVertexPointParticleObject;
 
 	std::unique_ptr<CSkyBoxShader> m_pSkyBoxShader;
 	std::unique_ptr<CSkyBox> m_pSkyBoxObject;

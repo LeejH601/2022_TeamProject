@@ -15,6 +15,11 @@ void CPlayerParticleObject::SetTrailParticleObjects(CGameObject* pTrailObjects)
 	m_pTrailParticleObject = pTrailObjects;
 }
 
+void CPlayerParticleObject::SetVertexPointParticleObjects(CGameObject* pVPObject)
+{
+	m_pVertexPointParicleObject = pVPObject;
+}
+
 CGameObject* CPlayerParticleObject::GetSmokeObjects()
 {
 	return m_pSmokeObject;
@@ -23,4 +28,9 @@ CGameObject* CPlayerParticleObject::GetSmokeObjects()
 CGameObject* CPlayerParticleObject::GetTrailParticleObjects()
 {
 	return m_pTrailParticleObject;
+}
+
+CGameObject* CPlayerParticleObject::GetVertexPointParticleObject()
+{
+	return m_pVertexPointParicleObject;
 }

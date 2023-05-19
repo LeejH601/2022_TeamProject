@@ -1573,6 +1573,34 @@ void CParticleMesh::EmitParticle(int emitType, ParticleEmitDataParam& param)
 	memcpy(m_pBufferDataBegin, createdParticleBuffer.data(), m_ncreatedParticleNum * m_nStride);
 }
 
+void CParticleMesh::EmitParticleForVertexData(int emitType, ParticleEmitPositionlistParam& param)
+{
+	static std::vector<CParticleVertex> createdParticleBuffer(MAX_PARTICLES);
+
+	int nCreateParticleNum = m_ncreatedParticleNum + param.m_nEmitNum;
+
+	switch (emitType)
+	{
+	case 5:
+		for (int i = m_ncreatedParticleNum; i < nCreateParticleNum; ++i) {
+			createdParticleBuffer[i].m_xmf3Position = param.m_xmf3EmiedPositions[i-m_ncreatedParticleNum];
+			createdParticleBuffer[i].m_xmf3Velocity = param.m_xmf3Velocitys[i - m_ncreatedParticleNum];
+			createdParticleBuffer[i].m_xmf3Velocity = Vector3::ScalarProduct(Vector3::Normalize(createdParticleBuffer[i].m_xmf3Velocity), param.m_fEmitedSpeed, false);
+			createdParticleBuffer[i].m_iType = emitType;
+			createdParticleBuffer[i].m_fLifetime = param.m_fLifeTime;
+			createdParticleBuffer[i].m_fEmitTime = param.m_fEmitTime;
+			createdParticleBuffer[i].m_iTextureIndex = param.m_iTextureIndex;
+			memcpy(createdParticleBuffer[i].m_iTextureCoord, param.m_iTextureCoord, sizeof(UINT) * 2);
+		}
+		break;
+	default:
+		break;
+	}
+
+	m_ncreatedParticleNum = nCreateParticleNum;
+	memcpy(m_pBufferDataBegin, createdParticleBuffer.data(), m_ncreatedParticleNum * m_nStride);
+}
+
 CSkyBoxMesh::CSkyBoxMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fWidth, float fHeight, float fDepth)
 {
 	m_nVertices = 36;

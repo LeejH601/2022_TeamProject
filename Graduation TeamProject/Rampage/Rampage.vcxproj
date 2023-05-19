@@ -199,6 +199,7 @@
     <ClCompile Include="Object\Terrain.cpp" />
     <ClCompile Include="Object\Texture.cpp" />
     <ClCompile Include="Object\TextureManager.cpp" />
+    <ClCompile Include="Object\VertexPointParticleObject.cpp" />
     <ClCompile Include="Rampage.cpp" />
     <ClCompile Include="Scene\LobbyScene.cpp" />
     <ClCompile Include="Scene\MainScene.cpp" />
@@ -269,6 +270,7 @@
     <ClInclude Include="Object\Terrain.h" />
     <ClInclude Include="Object\Texture.h" />
     <ClInclude Include="Object\TextureManager.h" />
+    <ClInclude Include="Object\VertexPointParticleObject.h" />
     <ClInclude Include="Scene\LobbyScene.h" />
     <ClInclude Include="Scene\MainScene.h" />
     <ClInclude Include="Scene\Scene.h" />
