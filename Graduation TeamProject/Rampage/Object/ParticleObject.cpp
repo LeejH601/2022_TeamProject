@@ -246,6 +246,9 @@ CSmokeParticleObject::CSmokeParticleObject(LPCTSTR pszFileName, ID3D12Device* pd
 
 	m_iParticleType = iParticleType;
 
+	m_iTextureIndex = 3;
+
+
 	srand((unsigned)time(NULL));
 
 
@@ -255,3 +258,69 @@ CSmokeParticleObject::CSmokeParticleObject(LPCTSTR pszFileName, ID3D12Device* pd
 CSmokeParticleObject::~CSmokeParticleObject()
 {
 }
+
+CTerrainParticleObject::CTerrainParticleObject(LPCTSTR pszFileName, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, XMFLOAT3 xmf3Position, XMFLOAT3 xmf3Velocity, float fLifetime, XMFLOAT3 xmf3Acceleration, XMFLOAT3 xmf3Color, XMFLOAT2 xmf2Size, UINT nMaxParticles, CParticleShader* pShader, int iParticleType)
+{
+	m_xmf4x4World = Matrix4x4::Identity();
+	m_xmf4x4Transform = Matrix4x4::Identity();
+	m_xmf4x4Texture = Matrix4x4::Identity();
+
+	std::shared_ptr<CParticleMesh> pParticleMesh = std::make_shared<CParticleMesh>(pd3dDevice, pd3dCommandList, xmf3Position, xmf3Velocity, fLifetime, xmf3Acceleration, xmf3Color, xmf2Size, nMaxParticles);
+	SetMesh(pParticleMesh);
+
+	m_iParticleType = iParticleType;
+	m_iTextureIndex = 4;
+	srand((unsigned)time(NULL));
+
+
+	CreateShaderVariables(pd3dDevice, pd3dCommandList);
+}
+
+CTerrainParticleObject::~CTerrainParticleObject()
+{
+}
+
+//void CTerrainParticleObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList, float fCurrentTime, float fElapsedTime)
+//{
+//	CGameObject::UpdateShaderVariables(pd3dCommandList);
+//	m_pcbMappedFrameworkInfo->m_fCurrentTime = fCurrentTime;
+//	m_pcbMappedFrameworkInfo->m_fElapsedTime = fElapsedTime;
+//
+//	m_pcbMappedFrameworkInfo->m_fSpeed = m_fSpeed;
+//	m_pcbMappedFrameworkInfo->m_nFlareParticlesToEmit = m_iEmitParticleN;
+//	m_pcbMappedFrameworkInfo->m_xmf3Gravity = m_xmf3Direction; // 임시로 방향
+//	m_pcbMappedFrameworkInfo->m_xmf3Color = m_f3Color;
+//	m_pcbMappedFrameworkInfo->m_iTextureIndex = m_iTextureIndex;
+//	m_pcbMappedFrameworkInfo->m_nParticleType = m_iParticleType;
+//	m_pcbMappedFrameworkInfo->m_fLifeTime = m_fLifeTime;
+//	m_pcbMappedFrameworkInfo->m_fSize = Vector2::ScalarProduct(m_fSize, m_fDeltaSize, false);
+//	m_pcbMappedFrameworkInfo->m_bEmitter = dynamic_cast<CParticleMesh*>(m_pMesh.get())->m_bEmit;
+//	m_pcbMappedFrameworkInfo->m_iTextureCoord = XMUINT2(m_iTotalRow, m_iTotalCol);
+//
+//	D3D12_GPU_VIRTUAL_ADDRESS d3dGpuVirtualAddress = m_pd3dcbFrameworkInfo->GetGPUVirtualAddress();
+//	pd3dCommandList->SetGraphicsRootConstantBufferView(11, d3dGpuVirtualAddress);
+//}
+
+void CTerrainParticleObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, CShader* pShader)
+{
+	StreamOutRender(pd3dCommandList, pCamera, pShader);
+	DrawRender(pd3dCommandList, pCamera, pShader);
+}
+
+void CTerrainParticleObject::DrawRender(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, CShader* pShader)
+{
+	PreRender(pd3dCommandList, pShader, 2);
+	if (m_pMesh) m_pMesh->PreRender(pd3dCommandList, 2); //Draw
+	if (m_pMesh) m_pMesh->Render(pd3dCommandList, 2); //Draw
+}
+//void CTerrainParticleObject::Animate(float fTimeElapsed)
+//{
+//	if (m_fTime > m_fLifeTime * 0.7f)
+//	{
+//		if (m_fDeltaSize <= 1.f)
+//		{
+//			m_fDeltaSize += fTimeElapsed * 5.f;
+//		}
+//		Rotate(0.f, 0.f, 7.f);
+//	}
+//}

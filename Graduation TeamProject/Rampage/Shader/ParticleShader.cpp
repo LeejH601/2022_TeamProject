@@ -1,6 +1,6 @@
 #include "ParticleShader.h"
 #include "../Object/Mesh.h"
-void CParticleShader::CreateShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature, UINT nRenderTargets, DXGI_FORMAT* pdxgiRtvFormats, int nPipelineState)
+void CParticleShader::CreateShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature, UINT nRenderTargets, DXGI_FORMAT* pdxgiRtvFormats, int nPipelineState, bool bDepth)
 {
 	ID3DBlob* pd3dVertexShaderBlob = NULL, * pd3dPixelShaderBlob = NULL, * pd3dGeometryShaderBlob = NULL;
 
@@ -13,7 +13,7 @@ void CParticleShader::CreateShader(ID3D12Device* pd3dDevice, ID3D12RootSignature
 	d3dPipelineStateDesc.StreamOutput = CreateStreamOuputState(nPipelineState);
 	d3dPipelineStateDesc.RasterizerState = CreateRasterizerState(nPipelineState);
 	d3dPipelineStateDesc.BlendState = CreateBlendState(nPipelineState);
-	d3dPipelineStateDesc.DepthStencilState = CreateDepthStencilState(nPipelineState);
+	d3dPipelineStateDesc.DepthStencilState = CreateDepthStencilState(nPipelineState, bDepth);
 	d3dPipelineStateDesc.InputLayout = CreateInputLayout(nPipelineState);
 	d3dPipelineStateDesc.SampleMask = UINT_MAX;
 	d3dPipelineStateDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_POINT;
@@ -69,11 +69,11 @@ D3D12_RASTERIZER_DESC CParticleShader::CreateRasterizerState(int nPipelineState)
 	return(d3dRasterizerDesc);
 }
 
-D3D12_DEPTH_STENCIL_DESC CParticleShader::CreateDepthStencilState(int nPipelineState)
+D3D12_DEPTH_STENCIL_DESC CParticleShader::CreateDepthStencilState(int nPipelineState, bool bDepth)
 {
 	D3D12_DEPTH_STENCIL_DESC d3dDepthStencilDesc;
 	::ZeroMemory(&d3dDepthStencilDesc, sizeof(D3D12_DEPTH_STENCIL_DESC));
-	d3dDepthStencilDesc.DepthEnable = TRUE; 
+	d3dDepthStencilDesc.DepthEnable = bDepth;
 	d3dDepthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ZERO;
 	d3dDepthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS;
 	d3dDepthStencilDesc.StencilEnable = FALSE;
@@ -120,7 +120,7 @@ D3D12_SHADER_BYTECODE CParticleShader::CreateGeometryShader(ID3DBlob** ppd3dShad
 D3D12_INPUT_LAYOUT_DESC CParticleShader::CreateInputLayout(int nPipelineState)
 {
 	D3D12_INPUT_LAYOUT_DESC d3dInputLayoutDesc;
-	UINT nInputElementDescs = 7;
+	UINT nInputElementDescs = 8;
 	D3D12_INPUT_ELEMENT_DESC* pd3dInputElementDescs = new D3D12_INPUT_ELEMENT_DESC[nInputElementDescs];
 
 	pd3dInputElementDescs[0] = { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
@@ -130,6 +130,7 @@ D3D12_INPUT_LAYOUT_DESC CParticleShader::CreateInputLayout(int nPipelineState)
 	pd3dInputElementDescs[4] = { "EMITTIME", 0, DXGI_FORMAT_R32_FLOAT, 0, 32, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
 	pd3dInputElementDescs[5] = { "TEXTUREINDEX", 0, DXGI_FORMAT_R32_UINT, 0, 36, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
 	pd3dInputElementDescs[6] = { "TEXTURECOORD", 0, DXGI_FORMAT_R32G32_UINT, 0, 40, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+	pd3dInputElementDescs[7] = { "PARTICLETYPE", 0, DXGI_FORMAT_R32_UINT, 0, 48, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
 	d3dInputLayoutDesc.pInputElementDescs = pd3dInputElementDescs;
 	d3dInputLayoutDesc.NumElements = nInputElementDescs;
 
@@ -143,7 +144,7 @@ D3D12_STREAM_OUTPUT_DESC CParticleShader::CreateStreamOuputState(int nPipelineSt
 
 	if (nPipelineState == 0)
 	{
-		UINT nStreamOutputDecls = 7;
+		UINT nStreamOutputDecls = 8;
 		D3D12_SO_DECLARATION_ENTRY* pd3dStreamOutputDecls = new D3D12_SO_DECLARATION_ENTRY[nStreamOutputDecls];
 		pd3dStreamOutputDecls[0] = { 0, "POSITION", 0, 0, 3, 0 };
 		pd3dStreamOutputDecls[1] = { 0, "VELOCITY", 0, 0, 3, 0 };
@@ -152,6 +153,8 @@ D3D12_STREAM_OUTPUT_DESC CParticleShader::CreateStreamOuputState(int nPipelineSt
 		pd3dStreamOutputDecls[4] = { 0, "EMITTIME", 0, 0, 1, 0 };
 		pd3dStreamOutputDecls[5] = { 0, "TEXTUREINDEX", 0, 0, 1, 0 };
 		pd3dStreamOutputDecls[6] = { 0, "TEXTURECOORD", 0, 0, 2, 0 };
+		pd3dStreamOutputDecls[7] = { 0, "PARTICLETYPE", 0, 0, 1, 0 };
+
 		//float EmitTime : EMITTIME; // 방출 시작 시간
 		UINT* pBufferStrides = new UINT[1];
 		pBufferStrides[0] = sizeof(CParticleVertex);
@@ -168,7 +171,7 @@ D3D12_STREAM_OUTPUT_DESC CParticleShader::CreateStreamOuputState(int nPipelineSt
 
 void CParticleShader::CreateGraphicsPipelineState(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature, int nPipelineState)
 {
-	m_nPipelineStates = 2;
+	m_nPipelineStates = 3;
 	m_ppd3dPipelineStates.resize(m_nPipelineStates);
 	
 
@@ -178,6 +181,7 @@ void CParticleShader::CreateGraphicsPipelineState(ID3D12Device* pd3dDevice, ID3D
 
 	CParticleShader::CreateShader(pd3dDevice, pd3dGraphicsRootSignature, 0, &pdxgiRtvFormat, 0); //Stream Output Pipeline State // DXGI_FORMAT_UNKNOWN
 	CParticleShader::CreateShader(pd3dDevice, pd3dGraphicsRootSignature, 7, pdxgiRtvFormats, 1); //Draw Pipeline State // DXGI_FORMAT_R8G8B8A8_UNORM
+	CParticleShader::CreateShader(pd3dDevice, pd3dGraphicsRootSignature, 7, pdxgiRtvFormats, 2, false); //Draw Pipeline State - NoDepth(땅 위에 이펙트 전용)
 }
 
 void CParticleShader::OnPrepareRender(ID3D12GraphicsCommandList* pd3dCommandList, int nPipelineState)

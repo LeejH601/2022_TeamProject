@@ -275,7 +275,7 @@ void CTerrainSpriteObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3d
 	m_pcbMappedFrameworkInfo->m_nFlareParticlesToEmit = 100;
 	m_pcbMappedFrameworkInfo->m_xmf3Gravity = XMFLOAT3(0.0f, -9.8f, 0.0f);
 	m_pcbMappedFrameworkInfo->m_xmf3Color = XMFLOAT3(1.f, 1.f, 1.f);
-	m_pcbMappedFrameworkInfo->m_nParticleType = 0;
+	m_pcbMappedFrameworkInfo->m_nParticleType = 5;
 	m_pcbMappedFrameworkInfo->m_fLifeTime = m_fLifeTime;
 	m_pcbMappedFrameworkInfo->m_xmf3Color = m_xmf3Color;
 	m_pcbMappedFrameworkInfo->m_fSize = Vector2::ScalarProduct(m_fSize, m_fDeltaSize, false);

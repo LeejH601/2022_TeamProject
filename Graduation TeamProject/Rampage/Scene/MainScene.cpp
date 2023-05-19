@@ -686,7 +686,7 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 
 	for (int i = 0; i < MAX_TERRAINSPRITE_OBJECT; ++i)
 	{
-		std::unique_ptr<CGameObject> m_pSpriteObject = std::make_unique<CTerrainSpriteObject>(m_pTextureManager->LoadTextureIndex(TextureType::BillBoardTexture, L"Image/BillBoardImages/Circle1.dds"), pd3dDevice, pd3dCommandList, 0, 0, 15.f, 5.f);
+		std::unique_ptr<CGameObject> m_pSpriteObject = std::make_unique<CTerrainParticleObject>(L"Image/SmokeImages/Smoke2.dds", pd3dDevice, pd3dCommandList, GetGraphicsRootSignature(), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), 2.0f, XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT2(2.0f, 2.0f), MAX_PARTICLES, m_pParticleShader.get(), 5);
 		m_pTerrainSpriteObject.push_back(std::move(m_pSpriteObject));
 	}
 
@@ -862,8 +862,22 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 	m_pSkyBoxShader->Render(pd3dCommandList, 0);
 	m_pSkyBoxObject->Render(pd3dCommandList, m_pCurrentCamera);
 
+
+
 	m_pTerrainShader->Render(pd3dCommandList, 0);
 	m_pTerrain->Render(pd3dCommandList, true);
+
+	m_pTextureManager->SetTextureDescriptorHeap(pd3dCommandList);
+	m_pTextureManager->UpdateShaderVariables(pd3dCommandList);
+
+
+	for (int i = 0; i < m_pTerrainSpriteObject.size(); ++i)
+	{
+		((CParticleObject*)m_pTerrainSpriteObject[i].get())->Update(fTimeElapsed);
+		(static_cast<CParticleObject*>(m_pTerrainSpriteObject[i].get()))->Animate(fTimeElapsed);
+		(static_cast<CParticleObject*>(m_pTerrainSpriteObject[i].get()))->UpdateShaderVariables(pd3dCommandList, fCurrentTime, fTimeElapsed);
+		((CParticleObject*)m_pTerrainSpriteObject[i].get())->Render(pd3dCommandList, nullptr, m_pParticleShader.get());
+	}
 
 	//((CParticleObject*)m_pSmokeObject.get())->Update(fTimeElapsed);
 	//((CParticleObject*)m_pSmokeObject.get())->UpdateShaderVariables(pd3dCommandList, fCurrentTime, fTimeElapsed);
@@ -885,17 +899,7 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 	((CParticleObject*)m_pTrailParticleObjects.get())->Render(pd3dCommandList, nullptr, m_pParticleShader.get());
 	*/
 	//m_pBillBoardObjectShader->Render(pd3dCommandList, 0);
-	for (int i = 0; i < m_pTerrainSpriteObject.size(); ++i)
-	{
-		//(static_cast<CTerrainSpriteObject*>(m_pTerrainSpriteObject[i].get()))->UpdateShaderVariables(pd3dCommandList, fCurrentTime, fTimeElapsed);
-		//(static_cast<CTerrainSpriteObject*>(m_pTerrainSpriteObject[i].get()))->Animate(m_pTerrain.get(), fTimeElapsed);
-		//m_pTerrainSpriteObject[i]->Render(pd3dCommandList, true);
 
-		((CParticleObject*)m_pTerrainSpriteObject[i].get())->Update(fTimeElapsed);
-		((CParticleObject*)m_pTerrainSpriteObject[i].get())->Animate(fTimeElapsed);
-		((CParticleObject*)m_pTerrainSpriteObject[i].get())->UpdateShaderVariables(pd3dCommandList, fCurrentTime, fTimeElapsed);
-		((CParticleObject*)m_pTerrainSpriteObject[i].get())->Render(pd3dCommandList, nullptr, m_pParticleShader.get());
-	}
 
 	CModelShader::GetInst()->Render(pd3dCommandList, 0);
 
@@ -939,16 +943,15 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 	m_pPostProcessShader->Render(pd3dCommandList, pCamera);
 #endif // PostProcessing
 
-	m_pTextureManager->SetTextureDescriptorHeap(pd3dCommandList);
-	m_pTextureManager->UpdateShaderVariables(pd3dCommandList);
 
 
-	for (int i = 0; i < m_pTerrainSpriteObject.size(); ++i)
-	{
-		(static_cast<CTerrainSpriteObject*>(m_pTerrainSpriteObject[i].get()))->UpdateShaderVariables(pd3dCommandList, fCurrentTime, fTimeElapsed);
-		(static_cast<CTerrainSpriteObject*>(m_pTerrainSpriteObject[i].get()))->Animate(m_pTerrain.get(), fTimeElapsed);
-		m_pTerrainSpriteObject[i]->Render(pd3dCommandList, false);
-	}
+	//for (int i = 0; i < m_pTerrainSpriteObject.size(); ++i)
+	//{
+	//	((CParticleObject*)m_pTerrainSpriteObject[i].get())->Update(fTimeElapsed);
+	//	(static_cast<CParticleObject*>(m_pTerrainSpriteObject[i].get()))->Animate(fTimeElapsed);
+	//	(static_cast<CParticleObject*>(m_pTerrainSpriteObject[i].get()))->UpdateShaderVariables(pd3dCommandList, fCurrentTime, fTimeElapsed);
+	//	((CParticleObject*)m_pTerrainSpriteObject[i].get())->Render(pd3dCommandList, nullptr, m_pParticleShader.get());
+	//}
 	
 
 	for (int i = 0; i < m_pParticleObjects.size(); ++i)
@@ -1026,6 +1029,10 @@ void CMainTMPScene::OnPostRender()
 	for (int i = 0; i < m_pSpriteAttackObjects.size(); ++i)
 	{
 		((CParticleObject*)m_pSpriteAttackObjects[i].get())->OnPostRender();
+	}
+	for (int i = 0; i < m_pTerrainSpriteObject.size(); ++i)
+	{
+		((CParticleObject*)m_pTerrainSpriteObject[i].get())->OnPostRender();
 	}
 
 	//((CParticleObject*)m_pTrailParticleObjects.get())->OnPostRender();
@@ -1191,28 +1198,28 @@ void CMainTMPScene::HandleCollision(const CollideParams& params)
 	//	CMessageDispatcher::GetInst()->Dispatch_Message<ParticleUpDownParams>(MessageType::UPDATE_UPDOWNPARTICLE, &particleUpdown_comp_params, Damaged_Monster::GetInst());
 	//}
 
-	//std::vector<std::unique_ptr<CGameObject>>::iterator TerrainSpriteit = std::find_if(m_pTerrainSpriteObject.begin(), m_pTerrainSpriteObject.end(), [](const std::unique_ptr<CGameObject>& pTerrainSpriteObject) {
-	//	if (((CParticleObject*)pTerrainSpriteObject.get())->CheckCapacity())
-	//		return true;
-	//	return false;
-	//	});
+	std::vector<std::unique_ptr<CGameObject>>::iterator TerrainSpriteit = std::find_if(m_pTerrainSpriteObject.begin(), m_pTerrainSpriteObject.end(), [](const std::unique_ptr<CGameObject>& pTerrainSpriteObject) {
+		if (((CParticleObject*)pTerrainSpriteObject.get())->CheckCapacity())
+			return true;
+		return false;
+		});
 
-	//if (TerrainSpriteit != m_pTerrainSpriteObject.end())
-	//{
-	//	TerrainSpriteCompParams AttackSprite_comp_params;
-	//	AttackSprite_comp_params.pObject = (*TerrainSpriteit).get();
-	//	AttackSprite_comp_params.xmf3Position = params.xmf3CollidePosition;
-	//	CMessageDispatcher::GetInst()->Dispatch_Message<TerrainSpriteCompParams>(MessageType::UPDATE_SPRITE, &AttackSprite_comp_params, Spawn_Monster::GetInst());
-	//	TCHAR pstrDebug[256] = { 0 };
-	//	_stprintf_s(pstrDebug, 256, _T("바닥 충격 출력 %f, %f, %f\n"), params.xmf3CollidePosition.x, params.xmf3CollidePosition.y, params.xmf3CollidePosition.z);
-	//	OutputDebugString(pstrDebug);
-	//}
-	//else
-	//{
-	//	TCHAR pstrDebug[256] = { 0 };
-	//	_stprintf_s(pstrDebug, 256, _T("No바닥 충격 출력 %f, %f, %f\n"), params.xmf3CollidePosition.x, params.xmf3CollidePosition.y, params.xmf3CollidePosition.z);
-	//	OutputDebugString(pstrDebug);
-	//}
+	if (TerrainSpriteit != m_pTerrainSpriteObject.end())
+	{
+		TerrainSpriteCompParams AttackSprite_comp_params;
+		AttackSprite_comp_params.pObject = (*TerrainSpriteit).get();
+		AttackSprite_comp_params.xmf3Position = params.xmf3CollidePosition;
+		CMessageDispatcher::GetInst()->Dispatch_Message<TerrainSpriteCompParams>(MessageType::UPDATE_SPRITE, &AttackSprite_comp_params, Spawn_Monster::GetInst());
+		TCHAR pstrDebug[256] = { 0 };
+		_stprintf_s(pstrDebug, 256, _T("바닥 충격 출력 %f, %f, %f\n"), params.xmf3CollidePosition.x, params.xmf3CollidePosition.y, params.xmf3CollidePosition.z);
+		OutputDebugString(pstrDebug);
+	}
+	else
+	{
+		TCHAR pstrDebug[256] = { 0 };
+		_stprintf_s(pstrDebug, 256, _T("No바닥 충격 출력 %f, %f, %f\n"), params.xmf3CollidePosition.x, params.xmf3CollidePosition.y, params.xmf3CollidePosition.z);
+		OutputDebugString(pstrDebug);
+	}
 
 
 

@@ -540,7 +540,14 @@ void CSimulatorScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float f
 	m_pTextureManager->SetTextureDescriptorHeap(pd3dCommandList);
 	m_pTextureManager->UpdateShaderVariables(pd3dCommandList);
 
-
+	
+	for (int i = 0; i < m_pTerrainSpriteObject.size(); ++i)
+	{
+		((CParticleObject*)m_pTerrainSpriteObject[i].get())->Update(fTimeElapsed);
+		((CParticleObject*)m_pTerrainSpriteObject[i].get())->Animate(fTimeElapsed);
+		((CParticleObject*)m_pTerrainSpriteObject[i].get())->UpdateShaderVariables(pd3dCommandList, fCurrentTime, fTimeElapsed);
+		((CParticleObject*)m_pTerrainSpriteObject[i].get())->Render(pd3dCommandList, nullptr, m_pParticleShader.get());
+	}
 	for (int i = 0; i < m_pParticleObjects.size(); ++i)
 	{
 		((CParticleObject*)m_pParticleObjects[i].get())->Update(fTimeElapsed);
@@ -557,6 +564,8 @@ void CSimulatorScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float f
 		((CParticleObject*)m_pSpriteAttackObjects[i].get())->UpdateShaderVariables(pd3dCommandList, fCurrentTime, fTimeElapsed);
 		((CParticleObject*)m_pSpriteAttackObjects[i].get())->Render(pd3dCommandList, nullptr, m_pParticleShader.get());
 	}
+
+
 
 	m_pSwordTrailShader->Render(pd3dCommandList, pCamera, 0);
 	for (std::unique_ptr<CGameObject>& obj : m_pSwordTrailObjects) {

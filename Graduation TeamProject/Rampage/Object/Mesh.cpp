@@ -1323,7 +1323,7 @@ void CParticleMesh::CreateVertexBuffer(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 		pVertices[i].m_fLifetime = fLifetime;
 		pVertices[i].m_iType = 0;
 		pVertices[i].m_fEmitTime = 0.f;
-		//pVertices[i].m_iIndex = 0;
+		pVertices[i].m_iParticleType = 0;
 	}
 
 	m_pd3dPositionBuffer = CreateBufferResource(pd3dDevice, pd3dCommandList, pVertices, m_nStride * m_nVertices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dPositionUploadBuffer);
@@ -1401,7 +1401,7 @@ void CParticleMesh::PreRender(ID3D12GraphicsCommandList* pd3dCommandList, int nP
 		pd3dCommandList->CopyResource(m_pd3dDefaultBufferFilledSize, m_pd3dUploadBufferFilledSize);
 		::SynchronizeResourceTransition(pd3dCommandList, m_pd3dDefaultBufferFilledSize, D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_STREAM_OUT);
 	}
-	else if (nPipelineState == 1)
+	else if ((nPipelineState == 1) || (nPipelineState == 2))
 	{
 		::SynchronizeResourceTransition(pd3dCommandList, m_pd3dStreamOutputBuffer, D3D12_RESOURCE_STATE_STREAM_OUT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER);
 		::SynchronizeResourceTransition(pd3dCommandList, m_pd3dDrawBuffer, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, D3D12_RESOURCE_STATE_STREAM_OUT);
@@ -1438,7 +1438,7 @@ void CParticleMesh::Render(ID3D12GraphicsCommandList* pd3dCommandList, UINT nPip
 		::SynchronizeResourceTransition(pd3dCommandList, m_pd3dDefaultBufferFilledSize, D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_STREAM_OUT);
 #endif
 	}
-	else if (nPipelineState == 1)
+	else if ((nPipelineState == 1) || (nPipelineState == 2))
 	{
 		pd3dCommandList->SOSetTargets(0, 0, NULL); // 스트림 출력 버퍼 설정
 

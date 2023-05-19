@@ -7,6 +7,7 @@ struct VS_PARTICLE_INPUT
 	float EmitTime : EMITTIME; // 방출 시작 시간 
 	uint TextureIndex :TEXTUREINDEX;
 	uint2 SpriteTotalCoord : TEXTURECOORD;
+	uint ParticleType : PARTICLETYPE;
 };
 
 struct VS_PARTICLE_DRAW_OUTPUT
@@ -19,6 +20,7 @@ struct VS_PARTICLE_DRAW_OUTPUT
 	uint TextureIndex :TEXTUREINDEX;
 	uint2 SpriteTotalCoord : TEXTURECOORD;
 	uint2 SpriteCurrentCoord : TEXTURECOORD1;
+	uint ParticleType : PARTICLETYPE;
 };
 
 cbuffer cbFrameworkInfo : register(b7)
@@ -49,6 +51,11 @@ cbuffer cbGameObjectInfo : register(b0)
 	uint gnTexturesMask : packoffset(c8);
 }
 
+float interpolate(float start, float end, float fraction)
+{
+	return start + (end - start) * fraction;
+}
+
 uint2 SpriteAnimtaion(VS_PARTICLE_INPUT input, float AccumulatedTime, float LifeTime, uint TotalRow, uint TotalCol)
 {
 	float fraction = AccumulatedTime / LifeTime;
@@ -64,37 +71,20 @@ VS_PARTICLE_DRAW_OUTPUT VSParticleDraw(VS_PARTICLE_INPUT input)
 {
 	VS_PARTICLE_DRAW_OUTPUT output = (VS_PARTICLE_DRAW_OUTPUT)0;
 
+	output.ParticleType = input.ParticleType;
 	output.position = input.position;
 	output.velocity = input.velocity;
 	output.size = gfSize;
-	output.alpha = 1.f;
+
+	float fraction = (gfCurrentTime - input.EmitTime) / input.lifetime;
+	if (fraction >= 0.7) // 0.7f ~ 1.f 
+		output.alpha = 1.f - interpolate(0.f, 1.f, (fraction - 0.7f) / 0.3f);
+	else if (fraction <= 0.2) // 0.f ~ 0.1f
+		output.alpha = interpolate(0.f, 1.f, (fraction * 5.f));
+	else
+		output.alpha = 1.f;
 	output.TextureIndex = input.TextureIndex;
 	output.SpriteTotalCoord = input.SpriteTotalCoord;
 	output.SpriteCurrentCoord = SpriteAnimtaion(input, gfCurrentTime - input.EmitTime, input.lifetime, input.SpriteTotalCoord.x, input.SpriteTotalCoord.y);
 	return(output);
 }
-
-
-//if (fTimeElapsed >= 0.0f)
-//{
-//	m_fAccumulatedTime += fTimeElapsed;
-//
-//	float fraction = std::fmodf(m_fAccumulatedTime / m_fLifeTime, 1.0f);
-//	interval = 1.0f / (m_iTotalRow * m_iTotalCol);
-//
-//	m_iCurrentCol = (int)(fraction / (interval * m_iTotalRow));
-//	float remainvalue = (fraction / (interval * m_iTotalRow)) - m_iCurrentCol;
-//	m_iCurrentRow = (int)(remainvalue * m_iTotalRow);
-//
-//	if (m_fAccumulatedTime > m_fLifeTime)
-//	{
-//		m_iCurrentRow = 0;
-//		m_iCurrentCol = 0;
-//		m_fAccumulatedTime = 0.0f;
-//		m_bAnimation = false;
-//	}
-//}
-//m_xmf4x4World._11 = 1.0f / float(m_iTotalRow);
-//m_xmf4x4World._22 = 1.0f / float(m_iTotalCol);
-//m_xmf4x4World._31 = float(m_iCurrentRow) / float(m_iTotalRow);
-//m_xmf4x4World._32 = float(m_iCurrentCol) / float(m_iTotalCol);

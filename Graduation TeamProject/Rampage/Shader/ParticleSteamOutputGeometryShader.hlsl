@@ -5,6 +5,7 @@ Buffer<float4> gRandomSphereBuffer : register(t50);
 #define SMOKE_PARTILCE 2
 #define TRAIL_PARTILCE 3
 #define ATTACK_PARTICLE 4
+#define TERRAIN_PARTICLE 5
 
 //#define TYPE_DEFAULT -1
 #define TYPE_EMITTER 0
@@ -36,9 +37,10 @@ struct VS_PARTICLE_INPUT
 	float3 velocity : VELOCITY;
 	float lifetime : LIFETIME;
 	int type : TYPE;
-	float EmitTime : EMITTIME; // 방출 시작 시간 
+	float EmitTime : EMITTIME; // 방출 시작 시간 ;
 	uint TextureIndex :TEXTUREINDEX;
 	uint2 SpriteTotalCoord : TEXTURECOORD;
+	uint ParticleType : PARTICLETYPE;
 };
 
 cbuffer cbGameObjectInfo : register(b0)
@@ -108,6 +110,7 @@ void SphereParticles(VS_PARTICLE_INPUT input, inout PointStream<VS_PARTICLE_INPU
 		output.Append(particle);
 		if (bEmit)
 		{
+			particle.ParticleType = gnParticleType;
 			particle.SpriteTotalCoord = iTextureCoord;
 			particle.TextureIndex = iTextureIndex;
 			particle.type = TYPE_SIMULATOR;
@@ -126,7 +129,7 @@ void SphereParticles(VS_PARTICLE_INPUT input, inout PointStream<VS_PARTICLE_INPU
 	}
 	else if (particle.type == TYPE_SIMULATOR)
 	{
-		if (particle.lifetime > 0.f)
+		if ((gfCurrentTime - particle.EmitTime) <= particle.lifetime)
 		{
 			particle = OutputParticleToStream(particle, output);
 			output.Append(particle);
@@ -146,6 +149,7 @@ void SmokeParticles(VS_PARTICLE_INPUT input, inout PointStream<VS_PARTICLE_INPUT
 		output.Append(particle);
 		if (bEmit)
 		{
+			particle.ParticleType = gnParticleType;
 			particle.SpriteTotalCoord = iTextureCoord;
 			particle.TextureIndex = iTextureIndex;
 			particle.type = TYPE_SIMULATOR;
@@ -159,10 +163,9 @@ void SmokeParticles(VS_PARTICLE_INPUT input, inout PointStream<VS_PARTICLE_INPUT
 	}
 	else if (particle.type == TYPE_SIMULATOR)
 	{
-		if (particle.lifetime > 0.f)
+		if ((gfCurrentTime - particle.EmitTime) <= particle.lifetime)
 			OutputRandomParticleToStream(particle, output);
 	}
-
 }
 
 void AttackParticles(VS_PARTICLE_INPUT input, inout PointStream<VS_PARTICLE_INPUT> output)
@@ -174,6 +177,7 @@ void AttackParticles(VS_PARTICLE_INPUT input, inout PointStream<VS_PARTICLE_INPU
 		output.Append(particle);
 		if (bEmit)
 		{
+			particle.ParticleType = gnParticleType;
 			particle.SpriteTotalCoord = iTextureCoord;
 			particle.TextureIndex = iTextureIndex;
 			particle.type = TYPE_SIMULATOR;
@@ -202,6 +206,7 @@ void RecoveryParticles(VS_PARTICLE_INPUT input, inout PointStream<VS_PARTICLE_IN
 		output.Append(particle);
 		if (bEmit)
 		{
+			particle.ParticleType = gnParticleType;
 			particle.SpriteTotalCoord = iTextureCoord;
 			particle.TextureIndex = iTextureIndex;
 			particle.type = TYPE_SIMULATOR;
@@ -244,17 +249,48 @@ void RecoveryParticles(VS_PARTICLE_INPUT input, inout PointStream<VS_PARTICLE_IN
 	}
 }
 
+void TerrainParticles(VS_PARTICLE_INPUT input, inout PointStream<VS_PARTICLE_INPUT> output)
+{
+	VS_PARTICLE_INPUT particle = input;
+
+	if (particle.type == TYPE_EMITTER)
+	{
+		output.Append(particle);
+		if (bEmit)
+		{
+			particle.ParticleType = gnParticleType;
+			particle.SpriteTotalCoord = iTextureCoord;
+			particle.TextureIndex = iTextureIndex;
+			particle.type = TYPE_SIMULATOR;
+			particle.position = gmtxGameObject._41_42_43;
+			particle.EmitTime = gfCurrentTime; // 방출 시간 기록
+			particle.lifetime = gfLifeTime;
+			particle.velocity = float3(0.f, 0.f, 0.f);
+			output.Append(particle);
+		}
+	}
+	else if (particle.type == TYPE_SIMULATOR)
+	{
+		if ((gfCurrentTime - particle.EmitTime) <= particle.lifetime)
+		{
+			output.Append(input);
+		}
+	}
+}
+
 [maxvertexcount(30)]
 void GSParticleStreamOutput(point VS_PARTICLE_INPUT input[1], inout PointStream<VS_PARTICLE_INPUT> output)
 {
 	VS_PARTICLE_INPUT particle = input[0];
-	if (gnParticleType == SPHERE_PARTILCE)
+	if (particle.ParticleType == SPHERE_PARTILCE)
 		SphereParticles(particle, output);
-	else if (gnParticleType == RECOVERY_PARTILCE)
+	else if (particle.ParticleType == RECOVERY_PARTILCE)
 		RecoveryParticles(particle, output);
-	else if (gnParticleType == SMOKE_PARTILCE)
+	else if (particle.ParticleType == SMOKE_PARTILCE)
 		SmokeParticles(particle, output);
-	else if (gnParticleType == ATTACK_PARTICLE)
+	else if (particle.ParticleType == ATTACK_PARTICLE)
 		AttackParticles(particle, output);
+	else if (particle.ParticleType == TERRAIN_PARTICLE)
+		TerrainParticles(particle, output);
 
 }

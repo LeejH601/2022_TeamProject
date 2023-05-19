@@ -41,6 +41,7 @@ struct GS_PARTICLE_DRAW_OUTPUT
 	float alpha : ALPHA;
 	uint TextureIndex :TEXTUREINDEX;
 	uint2 SpriteTotalCoord : TEXTURECOORD;
+	uint ParticleType : PARTICLETYPE;
 };
 
 float4 PSParticleDraw(GS_PARTICLE_DRAW_OUTPUT input) : SV_TARGET1  // SphereTexture t50À» Á¦¿Ü
