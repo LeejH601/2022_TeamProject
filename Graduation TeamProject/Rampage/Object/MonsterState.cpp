@@ -8,7 +8,7 @@ Spawn_Monster::Spawn_Monster()
 	// TERRAIN SPRITE  ANIMATION
 	std::unique_ptr<TerrainSpriteComponent> pTerrainSpriteComponent = std::make_unique<TerrainSpriteComponent>();
 	m_pListeners.push_back(std::move(pTerrainSpriteComponent));
-	CMessageDispatcher::GetInst()->RegisterListener(MessageType::UPDATE_SPRITE, m_pListeners.back().get(), NULL);
+	CMessageDispatcher::GetInst()->RegisterListener(MessageType::UPDATE_SPRITE, m_pListeners.back().get(), this);
 }
 
 Spawn_Monster::~Spawn_Monster()

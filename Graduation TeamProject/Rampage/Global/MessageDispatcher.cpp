@@ -359,21 +359,46 @@ void TerrainSpriteComponent::HandleMessage(const Message& message, const Terrain
 	//if (!m_bEnable)
 	//	return;
 
-	CParticleObject* pMultiSprite = dynamic_cast<CParticleObject*>(params.pObject);
+	CParticleObject* pMultiSpriteParticle = dynamic_cast<CParticleObject*>(params.pObject);
 
-	if (pMultiSprite)
+	if (pMultiSpriteParticle)
 	{
-		pMultiSprite->SetEmit(true);
-		pMultiSprite->SetSize(m_fSize);
-		pMultiSprite->SetStartAlpha(m_fAlpha);
-		pMultiSprite->SetColor(m_xmf3Color);
-		pMultiSprite->SetSpeed(m_fSpeed);
-		pMultiSprite->SetLifeTime(m_fLifeTime);
-		//pParticle->SetMaxParticleN(m_nParticleNumber);
-		pMultiSprite->SetEmitParticleN(m_nEmitParticleNumber);
-		pMultiSprite->SetPosition(params.xmf3Position);
-		pMultiSprite->SetParticleType(m_iParticleType);
+		pMultiSpriteParticle->SetParticleType(m_iParticleType);
+		pMultiSpriteParticle->SetEmit(true);
+		pMultiSpriteParticle->SetTotalRowColumn(1, 1);
+		pMultiSpriteParticle->SetSize(m_fSize);
+		pMultiSpriteParticle->SetDirection(XMFLOAT3(0.f, 0.f, 0.f));
+		pMultiSpriteParticle->SetStartAlpha(m_fAlpha);
+		pMultiSpriteParticle->SetColor(m_xmf3Color);
+		pMultiSpriteParticle->SetLifeTime(m_fLifeTime);
+		pMultiSpriteParticle->SetAnimation(true);
+		pMultiSpriteParticle->SetEmitParticleN(m_nEmitParticleNumber);
+		pMultiSpriteParticle->SetMaxParticleN(m_nParticleNumber);
+		pMultiSpriteParticle->SetPosition(params.xmf3Position);
+		pMultiSpriteParticle->SetTextureIndex(4);
+		pMultiSpriteParticle->EmitParticle(0);
 	}
+
+
+	//CParticleObject* pMultiSprite = dynamic_cast<CParticleObject*>(params.pObject);
+
+	//if (pMultiSprite)
+	//{
+	//	pMultiSprite->SetParticleType(ParticleType::ATTACK_PARTICLE);
+	//	pMultiSprite->SetEmit(true);
+	//	pMultiSprite->SetSize(m_fSize);
+	//	pMultiSprite->SetTotalRowColumn(1, 1);
+	//	pMultiSprite->SetDirection(XMFLOAT3(0.f, 0.f, 0.f));
+	//	pMultiSprite->SetStartAlpha(m_fAlpha);
+	//	pMultiSprite->SetColor(m_xmf3Color);
+	//	pMultiSprite->SetSpeed(m_fSpeed);
+	//	pMultiSprite->SetLifeTime(m_fLifeTime);
+	//	//pParticle->SetMaxParticleN(m_nParticleNumber);
+	//	pMultiSprite->SetEmitParticleN(m_nEmitParticleNumber);
+	//	pMultiSprite->SetMaxParticleN(m_nParticleNumber);
+	//	pMultiSprite->SetPosition(params.xmf3Position);
+	//	pMultiSprite->EmitParticle(0);
+	//}
 
 	//if (pSpriteObject)
 	//{

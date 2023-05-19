@@ -705,31 +705,31 @@ void Run_Player::Execute(CPlayer* player, float fElapsedTime)
 	if (Vector3::Length(xmf3PlayerVel) == 0)
 		player->m_pStateMachine->ChangeState(Idle_Player::GetInst());
 
-	// ¹ß¹Ù´Ú »À¿¡
+	//// ¹ß¹Ù´Ú »À¿¡
 
-	float fTime = player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition;
-	XMFLOAT3 xmf3Position;
-	ParticleSmokeParams Particlesmoke_comp_params;
-	Particlesmoke_comp_params.pObject = CPlayerParticleObject::GetInst()->GetSmokeObjects();
-	if (Particlesmoke_comp_params.pObject && (((int)(fTime * 10.f)) == 9)) // 0.5f¸¶´Ù
-	{
-		CGameObject* pFoot_Left = player->FindFrame("foot_l");
-		memcpy(&xmf3Position, &(pFoot_Left->m_xmf4x4World._41), sizeof(XMFLOAT3));
-		Particlesmoke_comp_params.xmf3Position = xmf3Position;
-		Particlesmoke_comp_params.xmfDirection = player->m_xmfDirection;
+	//float fTime = player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition;
+	//XMFLOAT3 xmf3Position;
+	//ParticleSmokeParams Particlesmoke_comp_params;
+	//Particlesmoke_comp_params.pObject = CPlayerParticleObject::GetInst()->GetSmokeObjects();
+	//if (Particlesmoke_comp_params.pObject && (((int)(fTime * 10.f)) == 9)) // 0.5f¸¶´Ù
+	//{
+	//	CGameObject* pFoot_Left = player->FindFrame("foot_l");
+	//	memcpy(&xmf3Position, &(pFoot_Left->m_xmf4x4World._41), sizeof(XMFLOAT3));
+	//	Particlesmoke_comp_params.xmf3Position = xmf3Position;
+	//	Particlesmoke_comp_params.xmfDirection = player->m_xmfDirection;
 
-		CMessageDispatcher::GetInst()->Dispatch_Message<ParticleSmokeParams>(MessageType::UPDATE_SMOKEPARTICLE, &Particlesmoke_comp_params, player->m_pStateMachine->GetCurrentState());
-	}
+	//	CMessageDispatcher::GetInst()->Dispatch_Message<ParticleSmokeParams>(MessageType::UPDATE_SMOKEPARTICLE, &Particlesmoke_comp_params, player->m_pStateMachine->GetCurrentState());
+	//}
 
-	if (Particlesmoke_comp_params.pObject && (((int)(fTime * 10.f)) == 2)) // 0.6f¸¶´Ù
-	{
-		CGameObject* pFoot_Right = player->FindFrame("foot_r");
-		memcpy(&xmf3Position, &(pFoot_Right->m_xmf4x4World._41), sizeof(XMFLOAT3));
-		Particlesmoke_comp_params.xmf3Position = xmf3Position;
-		Particlesmoke_comp_params.xmfDirection = player->m_xmfDirection;
+	//if (Particlesmoke_comp_params.pObject && (((int)(fTime * 10.f)) == 2)) // 0.6f¸¶´Ù
+	//{
+	//	CGameObject* pFoot_Right = player->FindFrame("foot_r");
+	//	memcpy(&xmf3Position, &(pFoot_Right->m_xmf4x4World._41), sizeof(XMFLOAT3));
+	//	Particlesmoke_comp_params.xmf3Position = xmf3Position;
+	//	Particlesmoke_comp_params.xmfDirection = player->m_xmfDirection;
 
-		CMessageDispatcher::GetInst()->Dispatch_Message<ParticleSmokeParams>(MessageType::UPDATE_SMOKEPARTICLE, &Particlesmoke_comp_params, player->m_pStateMachine->GetCurrentState());
-	}
+	//	CMessageDispatcher::GetInst()->Dispatch_Message<ParticleSmokeParams>(MessageType::UPDATE_SMOKEPARTICLE, &Particlesmoke_comp_params, player->m_pStateMachine->GetCurrentState());
+	//}
 }
 
 void Run_Player::Animate(CPlayer* player, float fTimeElapsed)

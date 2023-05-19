@@ -379,6 +379,7 @@ struct ParticleEmitDataParam
 	float							m_fEmitTime = 0.0f;
 	UINT							m_iTextureIndex = 0;
 	UINT							m_iTextureCoord[2];
+	UINT							m_iParticleType;
 };
 
 #define MAX_PARTICLES				100000
