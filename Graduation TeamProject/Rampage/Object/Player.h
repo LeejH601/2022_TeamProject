@@ -83,7 +83,7 @@ public:
 	virtual void SetRigidDynamic();
 
 
-	virtual BoundingOrientedBox GetBoundingBox() { return m_TransformedBodyBoundingBox; }
+	virtual BoundingOrientedBox* GetBoundingBox() { return &m_TransformedBodyBoundingBox; }
 	virtual BoundingOrientedBox GetWeaponMeshBoundingBox() { return m_TransformedWeaponBoundingBox; }
 
 	void SetTargetPosition(const BoundingOrientedBox& targetBoundingBox);

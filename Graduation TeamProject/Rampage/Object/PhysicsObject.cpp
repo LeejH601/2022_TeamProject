@@ -205,10 +205,10 @@ void CPhysicsObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, bool b_U
 void CPhysicsObject::DistortLookVec(CGameObject* pObject)
 {
 	//오브젝트로 향하는 벡터가 캐릭터 LookVec를 몇도 회전해야 향하게 되는지 구하기
-	BoundingOrientedBox& bb_BoundingBox = pObject->GetBoundingBox();
-	XMFLOAT3 xmf3BBCenter = GetBoundingBox().Center;
+	BoundingOrientedBox* bb_BoundingBox = pObject->GetBoundingBox();
+	XMFLOAT3 xmf3BBCenter = GetBoundingBox()->Center;
 
-	XMFLOAT3 xmf3ToObjectVec = Vector3::Subtract(bb_BoundingBox.Center, xmf3BBCenter);
+	XMFLOAT3 xmf3ToObjectVec = Vector3::Subtract(bb_BoundingBox->Center, xmf3BBCenter);
 	xmf3ToObjectVec.y = 0.0f;
 
 	XMFLOAT3 xmf3Look = GetLook();
