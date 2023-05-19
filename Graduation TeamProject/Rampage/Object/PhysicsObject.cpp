@@ -64,14 +64,14 @@ void CPhysicsObject::OnUpdateCallback(float fTimeElapsed)
 
 void CPhysicsObject::Update(float fTimeElapsed)
 {
+	Animate(fTimeElapsed);
+
 	Apply_Gravity(fTimeElapsed);
 
 	Move(m_xmf3Velocity, false);
 
 	// 터레인보다 아래에 있지 않도록 하는 코드
 	if (m_pUpdatedContext)OnUpdateCallback(fTimeElapsed);
-
-	Animate(fTimeElapsed);
 
 	Apply_Friction(fTimeElapsed);
 }

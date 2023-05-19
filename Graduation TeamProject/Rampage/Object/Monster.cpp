@@ -99,11 +99,6 @@ void CMonster::SetScale(float x, float y, float z)
 
 void CMonster::Update(float fTimeElapsed)
 {
-	// 현재 행동을 선택함
-	m_pStateMachine->Update(fTimeElapsed);
-
-	CPhysicsObject::Apply_Gravity(fTimeElapsed);
-
 	if (!m_bDissolved) {
 		if (m_bSimulateArticulate) {
 			TestDissolvetime += fTimeElapsed;
@@ -111,25 +106,28 @@ void CMonster::Update(float fTimeElapsed)
 				m_bDissolved = true;
 		}
 	}
-	else{
+	else {
 		m_fDissolveTime += fTimeElapsed;
 		m_fDissolveThrethHold = m_fDissolveTime / m_fMaxDissolveTime;
 	}
-	
+
+	if (m_xmf3Velocity.x + m_xmf3Velocity.z)
+		SetLookAt(Vector3::Add(GetPosition(), Vector3::Normalize(XMFLOAT3{ m_xmf3Velocity.x, 0.0f, m_xmf3Velocity.z })));
+
+	// 현재 행동을 선택함
+	m_pStateMachine->Update(fTimeElapsed);
+	m_pStateMachine->Animate(fTimeElapsed);
+
+	CPhysicsObject::Apply_Gravity(fTimeElapsed);
+
 	XMFLOAT3 xmf3NewVelocity = Vector3::TransformCoord(m_xmf3Velocity, XMMatrixRotationAxis(XMVECTOR{ 0.0f, 1.0f, 0.0f, 0.0f }, XMConvertToRadians(fDistortionDegree)));
 	CPhysicsObject::Move(xmf3NewVelocity, false);
-
-	if (xmf3NewVelocity.x + xmf3NewVelocity.z)
-		SetLookAt(Vector3::Add(GetPosition(), Vector3::Normalize(XMFLOAT3{ xmf3NewVelocity.x, 0.0f, xmf3NewVelocity.z })));
 
 	// 플레이어가 터레인보다 아래에 있지 않도록 하는 코드
 	if (m_pUpdatedContext) CPhysicsObject::OnUpdateCallback(fTimeElapsed);
 
 	XMFLOAT3 xmf3ShakeVec = Vector3::ScalarProduct(Vector3::Normalize(GetRight()), m_fShakeDistance, false);
-
 	m_xmf3CalPos = Vector3::Add(m_xmf3Position, xmf3ShakeVec);
-
-	m_pStateMachine->Animate(fTimeElapsed);
 
 	CPhysicsObject::Apply_Friction(fTimeElapsed);
 }
