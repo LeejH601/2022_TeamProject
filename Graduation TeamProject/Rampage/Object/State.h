@@ -55,7 +55,7 @@ class Atk_Player : public CState<CPlayer>
 {
 public:
     virtual void InitAtkPlayer();
-    virtual void SetPlayerRootPos(CPlayer* player);
+    virtual void SetPlayerRootVel(CPlayer* player);
     virtual void CheckHitLag(CPlayer* player);
 
     virtual void CheckComboAttack(CPlayer* player) = 0;
@@ -184,7 +184,7 @@ public:
     virtual void OnRootMotion(CPlayer* player, float fTimeElapsed);
     virtual void Exit(CPlayer* player);
 
-    virtual void SetPlayerRootPos(CPlayer* player);
+    virtual void SetPlayerRootVel(CPlayer* player);
 };
 
 template<class entity_type>

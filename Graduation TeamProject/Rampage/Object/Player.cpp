@@ -65,6 +65,11 @@ XMFLOAT3 CPlayer::GetTargetPosition()
 	return m_xmf3TargetPosition;
 }
 
+void CPlayer::Move(const XMFLOAT3& xmf3Shift, bool bUpdateVelocity)
+{
+	CPhysicsObject::Move(xmf3Shift, bUpdateVelocity);
+}
+
 void CPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity, CCamera* pCamera)
 {
 	if (dwDirection)
@@ -98,18 +103,17 @@ void CPlayer::Update(float fTimeElapsed)
 	m_fTime += fTimeElapsed;
 	m_fCurLagTime += fTimeElapsed;
 
+	// 플레이어가 속도를 가진다면 해당 방향을 바라보게 하는 코드
+	if (m_xmf3Velocity.x + m_xmf3Velocity.z)
+		SetLookAt(Vector3::Add(GetPosition(), Vector3::Normalize(XMFLOAT3{ m_xmf3Velocity.x, 0.0f, m_xmf3Velocity.z })));
+
 	m_pStateMachine->Update(fTimeElapsed);
+	m_pStateMachine->Animate(fTimeElapsed);
 
 	CPhysicsObject::Apply_Gravity(fTimeElapsed);
-	
+
 	XMFLOAT3 xmf3NewVelocity = Vector3::TransformCoord(m_xmf3Velocity, XMMatrixRotationAxis(XMVECTOR{ 0.0f, 1.0f, 0.0f, 0.0f }, XMConvertToRadians(fDistortionDegree)));
 	CPhysicsObject::Move(xmf3NewVelocity, false);
-
-	// 플레이어가 속도를 가진다면 해당 방향을 바라보게 하는 코드
-	if (xmf3NewVelocity.x + xmf3NewVelocity.z)
-		SetLookAt(Vector3::Add(GetPosition(), Vector3::Normalize(XMFLOAT3{ xmf3NewVelocity.x, 0.0f, xmf3NewVelocity.z })));
-
-	m_pStateMachine->Animate(fTimeElapsed);
 
 	// 플레이어가 터레인보다 아래에 있지 않도록 하는 코드
 	if (m_pUpdatedContext) OnUpdateCallback(fTimeElapsed);

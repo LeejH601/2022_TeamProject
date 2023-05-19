@@ -201,7 +201,7 @@ void Atk_Player::InitAtkPlayer()
 	CMessageDispatcher::GetInst()->RegisterListener(MessageType::UPDATE_SWORDTRAIL, m_pListeners.back().get(), this);
 }
 
-void Atk_Player::SetPlayerRootPos(CPlayer* player)
+void Atk_Player::SetPlayerRootVel(CPlayer* player)
 {
 	CAnimationController* pPlayerController = player->m_pSkinnedAnimationController.get();
 
@@ -211,7 +211,7 @@ void Atk_Player::SetPlayerRootPos(CPlayer* player)
 		player->GetPosition().y,
 		pPlayerController->m_pRootMotionObject->GetWorld()._43 };
 
-	player->SetPosition(xmf3Position);
+	player->Move(Vector3::Subtract(xmf3Position, player->GetPosition()), true);
 
 	pPlayerController->m_pRootMotionObject->m_xmf4x4Transform._41 = 0.f;
 	pPlayerController->m_pRootMotionObject->m_xmf4x4Transform._43 = 0.f;
@@ -241,7 +241,7 @@ void Atk_Player::OnRootMotion(CPlayer* player, float fTimeElapsed)
 	player->m_pChild->m_xmf4x4Transform._42 -= player->m_xmf3RootTransfromPreviousPos.y;
 	player->m_pChild->m_xmf4x4Transform._43 -= player->m_xmf3RootTransfromPreviousPos.z;
 
-	SetPlayerRootPos(player);
+	SetPlayerRootVel(player);
 
 	player->m_xmf3RootTransfromPreviousPos = xmf3CurrentPos;
 }
@@ -274,7 +274,7 @@ void Atk1_Player::CheckComboAttack(CPlayer* player)
 		if (player->m_bAttack) {
 			CAnimationController* pPlayerController = player->m_pSkinnedAnimationController.get();
 			/*if (pPlayerController->m_bRootMotion)
-				SetPlayerRootPos(player);*/
+				SetPlayerRootVel(player);*/
 			player->m_pStateMachine->ChangeState(Atk2_Player::GetInst());
 		}
 	}
@@ -426,7 +426,7 @@ void Atk2_Player::CheckComboAttack(CPlayer* player)
 		{
 			CAnimationController* pPlayerController = player->m_pSkinnedAnimationController.get();
 			/*if (pPlayerController->m_bRootMotion)
-				SetPlayerRootPos(player);*/
+				SetPlayerRootVel(player);*/
 			player->m_pStateMachine->ChangeState(Atk3_Player::GetInst());
 		}
 	}
@@ -1052,12 +1052,12 @@ void Evasion_Player::OnRootMotion(CPlayer* player, float fTimeElapsed)
 	player->m_pChild->m_xmf4x4Transform._42 -= player->m_xmf3RootTransfromPreviousPos.y;
 	player->m_pChild->m_xmf4x4Transform._43 -= player->m_xmf3RootTransfromPreviousPos.z;
 
-	SetPlayerRootPos(player);
+	SetPlayerRootVel(player);
 
 	player->m_xmf3RootTransfromPreviousPos = xmf3CurrentPos;
 }
 
-void Evasion_Player::SetPlayerRootPos(CPlayer* player)
+void Evasion_Player::SetPlayerRootVel(CPlayer* player)
 {
 	CAnimationController* pPlayerController = player->m_pSkinnedAnimationController.get();
 
