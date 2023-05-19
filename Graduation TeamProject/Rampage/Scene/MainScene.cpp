@@ -385,7 +385,7 @@ void CMainTMPScene::RegisterArticulations()
 			rootWorld._21,rootWorld._22,rootWorld._23,rootWorld._24,
 			rootWorld._31,rootWorld._32,rootWorld._33,rootWorld._34,
 			rootWorld._41,rootWorld._42,rootWorld._43,rootWorld._44,
-		};
+		}; 
 		obj->m_pArticulation->copyInternalStateToCache(*obj->m_pArticulationCache, physx::PxArticulationCacheFlag::eALL);
 		physx::PxTransform* rootLInkTrans = &obj->m_pArticulationCache->rootLinkData->transform;
 		physx::PxMat44 tobonetrans = physx::PxMat44(_rootWorld);
@@ -983,7 +983,10 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 		((CParticleObject*)m_pTerrainSpriteObject[i].get())->Render(pd3dCommandList, nullptr, m_pParticleShader.get());
 	}
 
+
 	CModelShader::GetInst()->Render(pd3dCommandList, 0);
+
+	m_pMap->RenderMapObjects(pd3dCommandList);
 
 	if (m_pPlayer)
 	{
@@ -1025,7 +1028,6 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 		m_pEnemys[i]->Render(pd3dCommandList, true);
 	}
 
-	m_pMap->RenderMapObjects(pd3dCommandList);
 
 #ifdef RENDER_BOUNDING_BOX
 	CBoundingBoxShader::GetInst()->Render(pd3dCommandList, 0);

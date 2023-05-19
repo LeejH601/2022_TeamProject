@@ -131,7 +131,7 @@ public:\
 		return &m_pInst;\
 	}
 
-#define RENDER_BOUNDING_BOX
+//#define RENDER_BOUNDING_BOX
 
 extern UINT	gnCbvSrvDescriptorIncrementSize;
 extern UINT gnRtvDescriptorIncrementSize;
