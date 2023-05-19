@@ -3,8 +3,7 @@
 #include "Scene.h"
 #include "..\Object\Object.h"
 #include "..\Object\Light.h"
-#include "..\Object\Terrain.h"
-#include "..\Shader\TerrainShader.h"
+#include "..\Object\Map.h"
 #include "..\Object\Player.h"
 #include "..\Object\Monster.h"
 #include "..\Object\BillBoardObject.h"
@@ -21,8 +20,7 @@ private:
 	std::unique_ptr<CPlayer> m_pMainCharacter;
 	std::unique_ptr<CLight> m_pLight;
 
-	std::unique_ptr<CShader> m_pTerrainShader;
-	std::unique_ptr<CSplatTerrain> m_pTerrain;
+	std::unique_ptr<CMap> m_pMap;
 
 	std::unique_ptr<CShader> m_pDepthRenderShader;
 

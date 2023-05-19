@@ -13,6 +13,8 @@ protected:
 
 	XMFLOAT3 m_xmf3Velocity = XMFLOAT3(0.0f, 0.0f, 0.0f);
 
+	float fDistortionDegree = 0.0f;
+
 	float m_fPitch;
 	float m_fRoll;
 	float m_fYaw;
@@ -60,6 +62,7 @@ public:
 	virtual void Animate(float fTimeElapsed);
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, bool b_UseTexture, CCamera* pCamera = NULL);
 
+	virtual void DistortLookVec(CGameObject* pObject);
 	virtual void Move(const XMFLOAT3& xmf3Shift, bool bUpdateVelocity);
 
 	virtual void updateArticulationMatrix();

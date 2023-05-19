@@ -12,6 +12,18 @@
 
 class CParticleShader;
 
+struct CB_CURLNOISE_INFO
+{
+	float Dt;
+	float Time;
+	float FieldSpeed;
+	float NoiseStrength;
+	XMFLOAT3 FieldMainDirection;
+	float ProgressionRate;
+	XMFLOAT3 SpherePosition;
+	float LengthScale;
+	float SphereRadius;
+};
 
 class CParticleObject : public CGameObject
 {
@@ -51,6 +63,12 @@ public:
 	void SetParticleType(int iParticleType);
 	int	 GetParticleType();
 	void SetEmit(bool bEmit);
+	void SetFieldSpeed(float fFieldSpeed) { m_fFieldSpeed = fFieldSpeed; };
+	void SetNoiseStrength(float fNoiseStrength) { m_fNoiseStrength = fNoiseStrength; };
+	void SetProgressionRate(float fProgressionRate) { m_fProgressionRate = fProgressionRate; };
+	void SetLengthScale(float fLengthScale) { m_fLengthScale = fLengthScale; };
+	void SetFieldMainDirection(XMFLOAT3 xmf3FieldMainDirection) { m_xmf3FieldMainDirection = xmf3FieldMainDirection; };
+	void EmitParticle(int emitType);
 
 	void SetDirection(XMFLOAT3 xmf3Direction);
 	XMFLOAT3 GetDirection();
@@ -73,6 +91,12 @@ protected:
 
 	int			m_nVertices = 0;
 
+	float m_fFieldSpeed;
+	float m_fNoiseStrength;
+	XMFLOAT3 m_xmf3FieldMainDirection;
+	float m_fProgressionRate;
+	float m_fLengthScale;
+
 	int								m_iTotalRow = 1;
 	int								m_iTotalCol = 1;
 
@@ -85,6 +109,9 @@ protected:
 protected:
 	ComPtr<ID3D12Resource>	m_pd3dcbFrameworkInfo = NULL;
 	CB_FRAMEWORK_INFO* m_pcbMappedFrameworkInfo = NULL;
+
+	ComPtr<ID3D12Resource>	m_pd3dcbCurlNoiseInfo = NULL;
+	CB_CURLNOISE_INFO* m_pcbMappedCurlNoiseInfo = NULL;
 };
 
 class CSmokeParticleObject : public CParticleObject

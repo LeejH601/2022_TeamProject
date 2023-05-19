@@ -68,8 +68,9 @@ struct ParticleUpDownParams {
 struct ParticleTrailParams {
 	CGameObject* pObject;
 	XMFLOAT3 xmf3Position;
-	int iPlayerAttack; // ÇÃ·¹ÀÌ¾î °ø°Ý Á¾·ù
+	int iPlayerAttack; // ï¿½Ã·ï¿½ï¿½Ì¾ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 	float m_fTime = 0.f;
+	XMFLOAT3 xmf3Velocity;
 };
 
 struct TrailUpdateParams {
@@ -333,7 +334,7 @@ enum ParticleType {
     ATTACK_PARTICLE
 };
 
-#define MAX_PARTICLES				10000
+#define MAX_PARTICLES				100000
 class ParticleComponent : public IMessageListener {
 
     int m_nParticleNumber = MAX_PARTICLES;
@@ -341,6 +342,13 @@ class ParticleComponent : public IMessageListener {
     int m_iParticleType = ParticleType::SPHERE_PARTICLE;
     XMFLOAT2 m_fSize = XMFLOAT2(3.f, 3.f);
     float m_fAlpha = 1.f;
+
+	float m_fFieldSpeed;
+	float m_fNoiseStrength;
+	XMFLOAT3 m_xmf3FieldMainDirection;
+	float m_fProgressionRate;
+	float m_fLengthScale;
+
     float m_fLifeTime = 2.f;
     float m_fSpeed = 20.f;
     XMFLOAT3 m_xmf3Color = XMFLOAT3(1.f, 1.f, 1.f);
@@ -359,6 +367,12 @@ public:
     float& GetLifeTime() { return m_fLifeTime; }
     float& GetSpeed() { return m_fSpeed; }
     XMFLOAT3& GetColor() { return m_xmf3Color; }
+	float& GetFieldSpeed() { return m_fFieldSpeed; };
+	float& GetNoiseStrength() { return m_fNoiseStrength; };
+	float& GetProgressionRate() { return m_fProgressionRate; };
+	float& GetLengthScale() { return m_fLengthScale; };
+	XMFLOAT3& GetFieldMainDirection() { return m_xmf3FieldMainDirection; };
+
 	int& GetTextureIndex() { return m_iTextureIndex; }
 	int& GetTextureOffset() { return m_iTextureOffset; }
 
@@ -375,6 +389,12 @@ public:
     void SetColorR(float r) { m_xmf3Color.x = r; }
     void SetColorG(float g) { m_xmf3Color.y = g; }
     void SetColorB(float b) { m_xmf3Color.z = b; }
+	void SetFieldSpeed(float fFieldSpeed) { m_fFieldSpeed = fFieldSpeed; };
+	void SetNoiseStrength(float fNoiseStrength) { m_fNoiseStrength = fNoiseStrength; };
+	void SetProgressionRate(float fProgressionRate) { m_fProgressionRate = fProgressionRate; };
+	void SetLengthScale(float fLengthScale) { m_fLengthScale = fLengthScale; };
+	void SetFieldMainDirection(XMFLOAT3 xmf3FieldMainDirection) { m_xmf3FieldMainDirection = xmf3FieldMainDirection; };
+
 	void SetTextureIndex(int iIndex) { m_iTextureIndex = iIndex; };
 	void SetTextureOffset(int iOffset) { m_iTextureOffset = iOffset; }
 	virtual void HandleMessage(const Message& message, const ParticleCompParams& params);
@@ -400,6 +420,7 @@ public:
 	double m_fColorCurveTimes_G[MAX_COLORCURVES];
 	double m_fColorCurveTimes_B[MAX_COLORCURVES];
 	int m_nCurves;
+	float m_fEmissiveFactor = 10.0f;
 
 public:
 	TrailComponent();
@@ -421,7 +442,7 @@ class SmokeParticleComponent : public IMessageListener {
     XMFLOAT2 m_fSize = XMFLOAT2(3.f, 3.f);
     float m_fAlpha = 1.5f;
     float m_fLifeTime = 1.f;
-    float m_fSpeed = 10.f;
+    float m_fSpeed = 100.f;
     int m_iIndex = 0;
     XMFLOAT3 m_xmf3Color = XMFLOAT3(0.191f * 2.f, 0.167f * 2.f, 0.096f * 2.f);
     //XMFLOAT3 m_xmf3Color = XMFLOAT3(1.f, 1.f, 1.f);

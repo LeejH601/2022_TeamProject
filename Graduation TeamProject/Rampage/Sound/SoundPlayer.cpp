@@ -5,6 +5,10 @@ void CSoundPlayer::PlaySound(FMOD_SYSTEM* g_sound_system, SoundPlayInfo sound_pl
     std::this_thread::sleep_for(std::chrono::milliseconds(static_cast<int>(sound_play_info.fDelay * 1000)));
     sound_play_info.pSound->play(g_sound_system, channelgroup);
 
+    TCHAR pstrDebug[256] = { 0 };
+    _stprintf_s(pstrDebug, 256, _T("PlaySound\n"));
+    OutputDebugString(pstrDebug);
+
     // Play the sound and store the playing sound in the vector
     FMOD_CHANNEL* pChannel = nullptr;
     m_vPlayingSounds.push_back(sound_play_info.pSound->GetChannel());
@@ -13,6 +17,7 @@ void CSoundPlayer::PlaySound(FMOD_SYSTEM* g_sound_system, SoundPlayInfo sound_pl
 void CSoundPlayer::RegisterSound(CSound* pSound, float fDelay)
 {
 	SoundPlayInfo sound_play_info{ pSound, fDelay };
+ 
 	m_vSounds.push_back(sound_play_info);
 }
 

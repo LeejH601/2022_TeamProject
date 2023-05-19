@@ -346,7 +346,7 @@ void CSimulatorScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 	m_pDepthRenderShader->CreateCbvSrvUavDescriptorHeaps(pd3dDevice, 0, ((CDepthRenderShader*)m_pDepthRenderShader.get())->GetDepthTexture()->GetTextures());
 	m_pDepthRenderShader->CreateShaderResourceViews(pd3dDevice, ((CDepthRenderShader*)m_pDepthRenderShader.get())->GetDepthTexture(), 0, 9);
 
-	// Light 积己
+	// Light 锟斤拷锟斤拷
 	m_pLight = std::make_unique<CLight>();
 	m_pLight->CreateLightVariables(pd3dDevice, pd3dCommandList);
 
@@ -371,27 +371,19 @@ void CSimulatorScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 	m_pMainCharacter->m_pSkinnedAnimationController->m_bRootMotion = false;
 	m_pMainCharacter->m_pStateMachine->ChangeState(Idle_Player::GetInst());
 
-	((CDepthRenderShader*)m_pDepthRenderShader.get())->SetLight(m_pLight->GetLights());
-	((CDepthRenderShader*)m_pDepthRenderShader.get())->SetTerrain(m_pTerrain.get());
-
-	m_pTerrainShader = std::make_unique<CSplatTerrainShader>();
-	m_pTerrainShader->CreateShader(pd3dDevice, GetGraphicsRootSignature(), 7, pdxgiObjectRtvFormats, DXGI_FORMAT_D32_FLOAT, 0);
-	m_pTerrainShader->CreateCbvSrvUavDescriptorHeaps(pd3dDevice, 0, 13);
-	m_pTerrainShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
-
-	// Terrain 积己
-	XMFLOAT3 xmf3Scale(1.0f, 1.0f, 1.0f);
-	XMFLOAT4 xmf4Color(0.0f, 0.5f, 0.0f, 0.0f);
-	m_pTerrain = std::make_unique<CSplatTerrain>(pd3dDevice, pd3dCommandList, GetGraphicsRootSignature(), _T("Terrain/terrainHeightMap_5.raw"), 513, 513, 513, 513, xmf3Scale, xmf4Color, m_pTerrainShader.get());
-	m_pTerrain->SetPosition(XMFLOAT3(offset.x, 0, offset.z));
+	m_pMap = std::make_unique<CMap>();
+	m_pMap->Init(pd3dDevice, pd3dCommandList, GetGraphicsRootSignature());
+	m_pMap->GetTerrain()->SetPosition(XMFLOAT3(offset.x, 0, offset.z));
 
 	((CDepthRenderShader*)m_pDepthRenderShader.get())->RegisterObject(m_pMainCharacter.get());
-	m_pMainCharacter->SetUpdatedContext(m_pTerrain.get());
+	((CDepthRenderShader*)m_pDepthRenderShader.get())->SetLight(m_pLight->GetLights());
+	((CDepthRenderShader*)m_pDepthRenderShader.get())->SetTerrain(m_pMap->GetTerrain().get());
+	m_pMainCharacter->SetUpdatedContext(m_pMap.get());
 
 	for (int i = 0; i < m_pEnemys.size(); ++i)
 	{
 		((CDepthRenderShader*)m_pDepthRenderShader.get())->RegisterObject(m_pEnemys[i].get());
-		((CMonster*)m_pEnemys[i].get())->SetUpdatedContext(m_pTerrain.get());
+		((CMonster*)m_pEnemys[i].get())->SetUpdatedContext(m_pMap.get());
 	}
 
 	m_pTextureManager = std::make_unique<CTextureManager>();
@@ -403,9 +395,9 @@ void CSimulatorScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 	m_pTextureManager->LoadTexture(TextureType::BillBoardTexture, pd3dDevice, pd3dCommandList, L"Image/BillBoardImages/Fire_Effect.dds", 5, 6);
 	m_pTextureManager->LoadTexture(TextureType::BillBoardTexture, pd3dDevice, pd3dCommandList, L"Image/BillBoardImages/Circle1.dds", 1, 1);
 
-	m_pTextureManager->LoadTexture(TextureType::ParticleTexture, pd3dDevice, pd3dCommandList, L"Image/ParticleImages/RoundSoftParticle.dds", 0, 0);
-	m_pTextureManager->LoadTexture(TextureType::ParticleTexture, pd3dDevice, pd3dCommandList, L"Image/ParticleImages/Meteor.dds", 0, 0);
-	m_pTextureManager->LoadTexture(TextureType::ParticleTexture, pd3dDevice, pd3dCommandList, L"Image/ParticleImages/Effect0.dds", 0, 0);
+	m_pTextureManager->LoadTexture(TextureType::ParticleTexture, pd3dDevice, pd3dCommandList, L"Image/ParticleImages/RoundSoftParticle.dds", 1, 1);
+	m_pTextureManager->LoadTexture(TextureType::ParticleTexture, pd3dDevice, pd3dCommandList, L"Image/ParticleImages/Meteor.dds", 1, 1);
+	m_pTextureManager->LoadTexture(TextureType::ParticleTexture, pd3dDevice, pd3dCommandList, L"Image/ParticleImages/Effect0.dds", 1, 1);
 	m_pTextureManager->CreateResourceView(pd3dDevice, 0);
 
 
@@ -413,19 +405,19 @@ void CSimulatorScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 	m_pParticleShader->CreateGraphicsPipelineState(pd3dDevice, GetGraphicsRootSignature(), 0);
 
 
-	for (int i = 0; i < MAX_ATTACKSPRITE_OBJECT; ++i)
+	for (int i = 0; i < 1; ++i)
 	{
 		std::unique_ptr<CGameObject> m_pSpriteAttackObject = std::make_unique<CParticleObject>(m_pTextureManager->LoadTextureIndex(TextureType::BillBoardTexture, L"Image/BillBoardImages/Explode_8x8.dds"), pd3dDevice, pd3dCommandList, GetGraphicsRootSignature(), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), 2.0f, XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT2(2.0f, 2.0f), MAX_PARTICLES, m_pParticleShader.get(), SPHERE_PARTICLE);
 		m_pSpriteAttackObjects.push_back(std::move(m_pSpriteAttackObject));
 	}
 	
-	for (int i = 0; i < MAX_PARTICLE_OBJECT; ++i)
+	for (int i = 0; i < 1; ++i)
 	{
 		std::unique_ptr<CGameObject> m_pParticleObject = std::make_unique<CParticleObject>(m_pTextureManager->LoadTextureIndex(TextureType::ParticleTexture, L"Image/ParticleImages/RoundSoftParticle.dds"), pd3dDevice, pd3dCommandList, GetGraphicsRootSignature(), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), 2.0f, XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT2(2.0f, 2.0f), MAX_PARTICLES, m_pParticleShader.get(), SPHERE_PARTICLE);
 		m_pParticleObjects.push_back(std::move(m_pParticleObject));
 	}
 
-	for (int i = 0; i < MAX_TERRAINSPRITE_OBJECT; ++i)
+	for (int i = 0; i < 1; ++i)
 	{
 		std::unique_ptr<CGameObject> m_pSpriteObject = std::make_unique<CParticleObject>(m_pTextureManager->LoadTextureIndex(TextureType::BillBoardTexture, L"Image/BillBoardImages/Circle1.dds"), pd3dDevice, pd3dCommandList, GetGraphicsRootSignature(), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), 2.0f, XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT2(2.0f, 2.0f), MAX_PARTICLES, m_pParticleShader.get(), RECOVERY_PARTICLE);
 		m_pTerrainSpriteObject.push_back(std::move(m_pSpriteObject));
@@ -468,6 +460,11 @@ void CSimulatorScene::Update(float fTimeElapsed)
 
 void CSimulatorScene::UpdateObjects(float fTimeElapsed)
 {
+	if (m_pMainCharacter) {
+		if (!dynamic_cast<CPlayer*>(m_pMainCharacter.get())->m_pSwordTrailReference)
+			dynamic_cast<CPlayer*>(m_pMainCharacter.get())->m_pSwordTrailReference = m_pSwordTrailObjects.data();
+	}
+
 	AnimationCompParams animation_comp_params;
 	animation_comp_params.pObjects = &m_pEnemys;
 	animation_comp_params.fElapsedTime = fTimeElapsed;
@@ -504,9 +501,8 @@ void CSimulatorScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float f
 
 	m_pLight->Render(pd3dCommandList);
 
-	m_pTerrainShader->Render(pd3dCommandList, 0);
-	m_pTerrain->Render(pd3dCommandList, true);
-
+	m_pMap->RenderTerrain(pd3dCommandList);
+	
 	CModelShader::GetInst()->Render(pd3dCommandList, 1);
 
 	m_pMainCharacter->Animate(0.0f);
@@ -517,10 +513,20 @@ void CSimulatorScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float f
 	if (trailUpdateT > 0.008f) {
 		for (int i = 0; i < m_pSwordTrailObjects.size(); ++i) {
 			CSwordTrailObject* trailObj = dynamic_cast<CSwordTrailObject*>(m_pSwordTrailObjects[i].get());
-			if (trailObj->m_bIsUpdateTrailVariables)
-				trailObj->SetNextControllPoint(&(m_pMainCharacter->GetTrailControllPoint(0)), &((CPlayer*)m_pMainCharacter.get())->GetTrailControllPoint(1));
-			else
+			switch (trailObj->m_eTrailUpdateMethod)
+			{
+			case TRAIL_UPDATE_METHOD::UPDATE_NEW_CONTROL_POINT:
+				trailObj->SetNextControllPoint(&((CPlayer*)m_pMainCharacter.get())->GetTrailControllPoint(0), &((CPlayer*)m_pMainCharacter.get())->GetTrailControllPoint(1));
+				break;
+			case TRAIL_UPDATE_METHOD::NON_UPDATE_NEW_CONTROL_POINT:
+				break;
+			case TRAIL_UPDATE_METHOD::DELETE_CONTROL_POINT:
 				trailObj->SetNextControllPoint(nullptr, nullptr);
+
+				break;
+			default:
+				break;
+			}
 		}
 
 		trailUpdateT = 0.0f;
@@ -639,15 +645,12 @@ void CSimulatorScene::SetPlayerAnimationSet(int nSet)
 	{
 	case 0:
 		m_pMainCharacter->m_pStateMachine->ChangeState(Atk1_Player::GetInst());
-		m_pMainCharacter->m_iAttackId += 1;
 		break;
 	case 1:
 		m_pMainCharacter->m_pStateMachine->ChangeState(Atk2_Player::GetInst());
-		m_pMainCharacter->m_iAttackId += 1;
 		break;
 	case 2:
 		m_pMainCharacter->m_pStateMachine->ChangeState(Atk3_Player::GetInst());
-		m_pMainCharacter->m_iAttackId += 1;
 		break;
 	default:
 		break;

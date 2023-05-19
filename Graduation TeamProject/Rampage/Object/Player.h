@@ -21,9 +21,12 @@ public:
 	unsigned int m_iAttackId = 0;
 	bool m_bAttack = false;
 	bool m_bAttacked = false;
+	bool m_bEvasioned = false;
 
 	LPVOID m_pPlayerUpdatedContext = NULL;
 
+	XMFLOAT3 m_xmf3RootTransfromPreviousPos = XMFLOAT3{ 0.0f, 0.0f, 0.0f };
+	XMFLOAT3 m_xmf3PreviousPos = XMFLOAT3{ 0.0f, 0.0f, 0.0f };
 	XMFLOAT3 m_xmf3TargetPosition = XMFLOAT3(0.0f, 0.0f, 0.0f);
 	float m_fCMDConstant = 1.0f;
 
@@ -34,6 +37,9 @@ public:
 	float m_fCurLagTime = 0.f;
 
 	std::unique_ptr<CGameObject>* m_pSwordTrailReference = nullptr;
+
+	DWORD m_dwDirectionCache;
+	XMFLOAT3 m_xmf3DirectionCache;
 
 public:
 	CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks);
@@ -61,10 +67,10 @@ class CKnightPlayer : public CPlayer
 {
 private:
 	CGameObject* pWeapon;
-	BoundingBox m_BodyBoundingBox;
-	BoundingBox m_WeaponBoundingBox;
-	BoundingBox m_TransformedBodyBoundingBox;
-	BoundingBox m_TransformedWeaponBoundingBox;
+	BoundingOrientedBox m_BodyBoundingBox;
+	BoundingOrientedBox m_WeaponBoundingBox;
+	BoundingOrientedBox m_TransformedBodyBoundingBox;
+	BoundingOrientedBox m_TransformedWeaponBoundingBox;
 	CGameObject* pBodyBoundingBoxMesh;
 	CGameObject* pWeaponBoundingBoxMesh;
 	XMFLOAT4 m_xmf4TrailControllPoints[2];
@@ -76,9 +82,10 @@ public:
 	virtual void SetRigidDynamic();
 
 
-	virtual BoundingBox GetBoundingBox() { return m_TransformedBodyBoundingBox; }
-	virtual BoundingBox GetWeaponMeshBoundingBox() { return m_TransformedWeaponBoundingBox; }
+	virtual BoundingOrientedBox GetBoundingBox() { return m_TransformedBodyBoundingBox; }
+	virtual BoundingOrientedBox GetWeaponMeshBoundingBox() { return m_TransformedWeaponBoundingBox; }
 
+	void SetTargetPosition(const BoundingOrientedBox& targetBoundingBox);
 	virtual bool CheckCollision(CGameObject* pTargetObject);
 
 	virtual void Animate(float fTimeElapsed);

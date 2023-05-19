@@ -31,7 +31,7 @@ class CTextureManager
 
 public:
 	std::vector<D3D12_CPU_DESCRIPTOR_HANDLE> m_pd3dSrvCpuDescriptorHandles;
-	std::vector<D3D12_GPU_DESCRIPTOR_HANDLE> m_pd3dSrvGpuDescriptorHandles;	// Srv µð½ºÅ©¸³ÅÍ ÇÚµé
+	std::vector<D3D12_GPU_DESCRIPTOR_HANDLE> m_pd3dSrvGpuDescriptorHandles;	// Srv ï¿½ï¿½Å©ï¿½ï¿½ï¿½ï¿½ ï¿½Úµï¿½
 
 private:
 	std::shared_ptr<CTexture> m_pTextures[(UINT)TextureType::TextureType_End];

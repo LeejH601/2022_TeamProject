@@ -20,7 +20,7 @@ cbuffer cbCameraInfo : register(b1)
 	//float3 gf3CameraDirection : packoffset(c17);
 };
 
-#define MAX_TRAILCONTROLLPOINT 100
+#define MAX_TRAILCONTROLLPOINT 200
 #define MAX_COLORCURVES 8
 cbuffer cbTrailControllPoints : register(b5)
 {

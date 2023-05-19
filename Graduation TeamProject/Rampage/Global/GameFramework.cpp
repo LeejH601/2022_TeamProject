@@ -400,20 +400,6 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 		case VK_ESCAPE:
 			::PostQuitMessage(0);
 			break;
-		case VK_F5:
-		{
-			XMFLOAT3 xmf3MonsterPos[5];
-			XMFLOAT3 xmf3PlayerPos = m_pPlayer->GetPosition();
-			XMFLOAT3 xmf3PlayerLook = m_pPlayer->GetLook();
-			XMFLOAT3 xmf3PlayerRight = m_pPlayer->GetRight();
-			xmf3PlayerLook = Vector3::ScalarProduct(xmf3PlayerLook, 20.f, false);
-			
-			for (int i = 0; i < 5; i++)
-				xmf3MonsterPos[i] = Vector3::Add(Vector3::Add(Vector3::ScalarProduct(xmf3PlayerRight, -20 + i * 10, false), xmf3PlayerLook), xmf3PlayerPos);
-
-			CMonsterPool::GetInst()->SpawnMonster(5, xmf3MonsterPos);
-			break;
-		}
 		case VK_F9:
 			ChangeSwapChainState();
 			break;

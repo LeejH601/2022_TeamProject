@@ -69,6 +69,12 @@ enum class MONSTER_TYPE
 	SKELETON
 };
 
+enum class MAP_OBJ_TYPE
+{
+	ROCK,
+	TREE,
+};
+
 enum class SCENE_RETURN_TYPE
 {
 	NONE,

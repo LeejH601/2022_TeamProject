@@ -314,6 +314,13 @@ void CSkinnedMesh::LoadMeshFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 
 	::ReadStringFromFile(pInFile, m_pstrMeshName);
 
+	std::wstring wMeshName;
+	size_t tmp = 0;
+	wMeshName.resize(strlen(m_pstrMeshName) + 1);
+	mbstowcs_s(&tmp, wMeshName.data(), (size_t)wMeshName.size(), m_pstrMeshName, (size_t)wMeshName.size());
+	OutputDebugString(wMeshName.c_str());
+	OutputDebugString(L"\n");
+
 	for (; ; )
 	{
 		::ReadStringFromFile(pInFile, pstrToken);
@@ -321,6 +328,24 @@ void CSkinnedMesh::LoadMeshFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 		{
 			nReads = (UINT)::fread(&m_xmf3AABBCenter, sizeof(XMFLOAT3), 1, pInFile);
 			nReads = (UINT)::fread(&m_xmf3AABBExtents, sizeof(XMFLOAT3), 1, pInFile);
+
+			/*std::wstring wBounds = L"m_xmf3AABBCenter.x: ";
+			wBounds = wBounds.append(std::to_wstring(m_xmf3AABBCenter.x));
+			wBounds = wBounds.append(L" m_xmf3AABBCenter.y: ");
+			wBounds = wBounds.append(std::to_wstring(m_xmf3AABBCenter.y));
+			wBounds = wBounds.append(L" m_xmf3AABBCenter.z: ");
+			wBounds = wBounds.append(std::to_wstring(m_xmf3AABBCenter.z));
+			OutputDebugString(wBounds.c_str());
+			OutputDebugString(L"\n");
+
+			std::wstring wExtents = L"m_xmf3AABBExtents.x: ";
+			wExtents = wExtents.append(std::to_wstring(m_xmf3AABBExtents.x));
+			wExtents = wExtents.append(L" m_xmf3AABBExtents.y: ");
+			wExtents = wExtents.append(std::to_wstring(m_xmf3AABBExtents.y));
+			wExtents = wExtents.append(L" m_xmf3AABBExtents.z: ");
+			wExtents = wExtents.append(std::to_wstring(m_xmf3AABBExtents.z));
+			OutputDebugString(wExtents.c_str());
+			OutputDebugString(L"\n");*/
 		}
 		else if (!strcmp(pstrToken, "<Positions>:"))
 		{
@@ -1072,12 +1097,12 @@ CSplatGridMesh::~CSplatGridMesh()
 //-------------------------------------------------------------------
 CBoundingBoxMesh::CBoundingBoxMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, XMFLOAT3 xmf3AABBCenter, XMFLOAT3 xmf3AABBExtents)
 {
-	//BoundingBox는 직육면체이다. 
+	//BoundingOrientedBox는 직육면체이다. 
 	m_nVertices = 8;
 	m_nOffset = 0;
 	m_nSlot = 0;
 	m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
-	float fx = xmf3AABBExtents.x * 0.5f, fy = xmf3AABBExtents.y * 0.5f, fz = xmf3AABBExtents.z * 0.5f;
+	float fx = xmf3AABBExtents.x, fy = xmf3AABBExtents.y, fz = xmf3AABBExtents.z;
 
 	//정점 버퍼는 직육면체의 꼭지점 8개에 대한 정점 데이터를 가진다.
 	m_pxmf3Positions.push_back(Vector3::Add(xmf3AABBCenter, XMFLOAT3(-fx, +fy, -fz)));
@@ -1299,6 +1324,9 @@ CParticleMesh::~CParticleMesh()
 	if (m_pd3dDrawBuffer) m_pd3dDrawBuffer->Release();
 	if (m_pd3dDefaultBufferFilledSize) m_pd3dDefaultBufferFilledSize->Release();
 	if (m_pd3dUploadBufferFilledSize) m_pd3dUploadBufferFilledSize->Release();
+	if (m_pd3dDrawUploadBuffer) {
+		m_pd3dDrawUploadBuffer->Unmap(0, NULL);
+	}
 
 #ifdef _WITH_QUERY_DATA_SO_STATISTICS
 	if (m_pd3dSOQueryBuffer) m_pd3dSOQueryBuffer->Release();
@@ -1342,6 +1370,9 @@ void CParticleMesh::CreateStreamOutputBuffer(ID3D12Device* pd3dDevice, ID3D12Gra
 
 	m_pd3dStreamOutputBuffer = ::CreateParticleBufferResource(pd3dDevice, pd3dCommandList, NULL, (m_nStride * m_nMaxParticles), D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_STREAM_OUT, NULL);
 	m_pd3dDrawBuffer = ::CreateParticleBufferResource(pd3dDevice, pd3dCommandList, NULL, (m_nStride * m_nMaxParticles), D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
+	m_pd3dDrawUploadBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, (m_nStride * m_nMaxParticles), D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_COPY_SOURCE, NULL);
+
+	m_pd3dDrawUploadBuffer->Map(0, &m_d3dReadRange, (void**)&m_pBufferDataBegin);
 
 	UINT64 nBufferFilledSize = 0;
 	m_pd3dDefaultBufferFilledSize = ::CreateParticleBufferResource(pd3dDevice, pd3dCommandList, &nBufferFilledSize, sizeof(UINT64), D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_STREAM_OUT, NULL);
@@ -1368,11 +1399,6 @@ void CParticleMesh::PreRender(ID3D12GraphicsCommandList* pd3dCommandList, int nP
 
 	if (nPipelineState == 0)
 	{
-		if (m_bEmit)
-		{
-			m_nMaxParticles = m_nMaxParticle;
-			m_bEmit = false;
-		}
 		if (!m_bInitialized)
 		{
 			m_bInitialized = true;
@@ -1381,6 +1407,27 @@ void CParticleMesh::PreRender(ID3D12GraphicsCommandList* pd3dCommandList, int nP
 			m_pd3dPositionBufferView.BufferLocation = m_pd3dPositionBuffer->GetGPUVirtualAddress();
 			m_pd3dPositionBufferView.StrideInBytes = m_nStride;
 			m_pd3dPositionBufferView.SizeInBytes = m_nStride * m_nVertices;
+		}
+		if (m_bEmit)
+		{
+			m_nMaxParticles = m_nMaxParticle;
+
+			::SynchronizeResourceTransition(pd3dCommandList, m_pd3dDrawBuffer, D3D12_RESOURCE_STATE_STREAM_OUT, D3D12_RESOURCE_STATE_COPY_DEST);
+			pd3dCommandList->CopyBufferRegion(m_pd3dDrawBuffer, m_nVertices * m_nStride, m_pd3dDrawUploadBuffer.Get(), 0, m_ncreatedParticleNum * m_nStride);
+			::SynchronizeResourceTransition(pd3dCommandList, m_pd3dDrawBuffer, D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_STREAM_OUT);
+
+			m_nVertices += m_ncreatedParticleNum;
+			m_ncreatedParticleNum = 0;
+
+			m_pd3dPositionBufferView.BufferLocation = m_pd3dDrawBuffer->GetGPUVirtualAddress();
+			m_pd3dPositionBufferView.StrideInBytes = m_nStride;
+			m_pd3dPositionBufferView.SizeInBytes = m_nStride * m_nVertices;
+
+			TCHAR pstrDebug[256] = { 0 };
+			_stprintf_s(pstrDebug, 256, _T("emit particles ---- %d \n"), m_nVertices);
+			OutputDebugString(pstrDebug);
+
+			m_bEmit = false;
 		}
 		else
 		{
@@ -1480,6 +1527,50 @@ int CParticleMesh::OnPostRender(int nPipelineState)
 	}
 
 	return m_nVertices;
+}
+
+void CParticleMesh::EmitParticle(int emitType, ParticleEmitDataParam& param)
+{
+	static std::vector<CParticleVertex> createdParticleBuffer(MAX_PARTICLES);
+
+	static std::random_device rd;
+	static std::default_random_engine dre(rd());
+	static std::uniform_real_distribution<float> urd(-1, 1);
+
+	int nCreateParticleNum = m_ncreatedParticleNum + param.m_nEmitNum;
+	//static XMFLOAT3 offset{ 86.4804 , 0.0f, -183.7856 };;
+	switch (emitType)
+	{
+	case 0:
+		for (int i = m_ncreatedParticleNum; i < nCreateParticleNum; ++i) {
+			createdParticleBuffer[i].m_xmf3Position = param.m_xmf3EmitedPosition; /*XMFLOAT3(45 + offset.x, 60, 50 + offset.z)*/
+			createdParticleBuffer[i].m_xmf3Velocity = XMFLOAT3(urd(dre), urd(dre), urd(dre));
+			createdParticleBuffer[i].m_xmf3Velocity = Vector3::ScalarProduct(Vector3::Normalize(createdParticleBuffer[i].m_xmf3Velocity), param.m_fEmitedSpeed, false);
+			createdParticleBuffer[i].m_iType = emitType;
+			createdParticleBuffer[i].m_fLifetime = param.m_fLifeTime;
+			createdParticleBuffer[i].m_fEmitTime = param.m_fEmitTime;
+			createdParticleBuffer[i].m_iTextureIndex = param.m_iTextureIndex;
+			memcpy(createdParticleBuffer[i].m_iTextureCoord, param.m_iTextureCoord, sizeof(UINT) * 2);
+		}
+		break;
+	case 2:
+		for (int i = m_ncreatedParticleNum; i < nCreateParticleNum; ++i) {
+			createdParticleBuffer[i].m_xmf3Position = param.m_xmf3EmitedPosition; /*XMFLOAT3(45 + offset.x, 60, 50 + offset.z)*/
+			createdParticleBuffer[i].m_xmf3Velocity = XMFLOAT3(urd(dre), urd(dre), urd(dre));
+			createdParticleBuffer[i].m_xmf3Velocity = Vector3::ScalarProduct(Vector3::Normalize(createdParticleBuffer[i].m_xmf3Velocity), param.m_fEmitedSpeed, false);
+			createdParticleBuffer[i].m_iType = emitType;
+			createdParticleBuffer[i].m_fLifetime = param.m_fLifeTime;
+			createdParticleBuffer[i].m_fEmitTime = param.m_fEmitTime;
+			createdParticleBuffer[i].m_iTextureIndex = param.m_iTextureIndex;
+			memcpy(createdParticleBuffer[i].m_iTextureCoord, param.m_iTextureCoord, sizeof(UINT) * 2);
+		}
+		break;
+	default:
+		break;
+	}
+
+	m_ncreatedParticleNum = nCreateParticleNum;
+	memcpy(m_pBufferDataBegin, createdParticleBuffer.data(), m_ncreatedParticleNum * m_nStride);
 }
 
 CSkyBoxMesh::CSkyBoxMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fWidth, float fHeight, float fDepth)

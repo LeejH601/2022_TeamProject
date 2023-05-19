@@ -1,3 +1,5 @@
+#include "CurlNoise.hlsl"
+
 Buffer<float4> gRandomSphereBuffer : register(t50);
 
 #define SPHERE_PARTILCE 0
@@ -8,8 +10,7 @@ Buffer<float4> gRandomSphereBuffer : register(t50);
 #define TERRAIN_PARTICLE 5
 
 //#define TYPE_DEFAULT -1
-#define TYPE_EMITTER 0
-#define TYPE_SIMULATOR 1
+
 cbuffer cbFrameworkInfo : register(b7)
 {
 	float		gfCurrentTime : packoffset(c0.x);
@@ -46,16 +47,16 @@ struct VS_PARTICLE_INPUT
 cbuffer cbGameObjectInfo : register(b0)
 {
 	matrix gmtxGameObject : packoffset(c0);
-	matrix gmtxTexture : packoffset(c4); // ParticleIndex·Î »ç¿ë (_11)
-	uint gnTexturesMask : packoffset(c8); // ºôº¸µå ¾ËÆÄ°ª »ç¿ë(Billboard_PS)
+	matrix gmtxTexture : packoffset(c4); // ParticleIndexï¿½ï¿½ ï¿½ï¿½ï¿?(_11)
+	uint gnTexturesMask : packoffset(c8); // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ä°ï¿½ ï¿½ï¿½ï¿?Billboard_PS)
 };
 
-float rand(float2 seed) // ¾ç¼ö 
+float rand(float2 seed) // ï¿½ï¿½ï¿?
 {
 	return frac(sin(dot(seed.xy, float2(12.9898, 78.233))) * 43758.5453);
 }
 
-float RandomMinMax(float min, float max) // Min°ú Max »çÀÌÀÇ °ª ¹ÝÈ¯
+float RandomMinMax(float min, float max) // Minï¿½ï¿½ Max ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½È¯
 {
 	return lerp(min, max, rand(float2(gfCurrentTime, gfElapsedTime)));
 }
@@ -63,9 +64,11 @@ float RandomMinMax(float min, float max) // Min°ú Max »çÀÌÀÇ °ª ¹ÝÈ¯
 /////////////////////////////////////////////////////////////////////////////////////////////////
 VS_PARTICLE_INPUT OutputParticleToStream(VS_PARTICLE_INPUT input, inout PointStream<VS_PARTICLE_INPUT> output)
 {
+	//input.velocity += CalculrateCulrNoise(input.position).xyz;
 	input.position += gf3Gravity * input.velocity * gfElapsedTime;
 	//input.velocity += gf3Gravity * gfElapsedTime;
-	input.lifetime -= gfElapsedTime;
+	//input.velocity += float3(0.0f, -9.8f*20.0f, 0.0f) * gfElapsedTime;
+	//input.velocity += CalculrateCulrNoise(input.position).xyz;
 	return input;
 }
 
@@ -73,7 +76,6 @@ void OutputRandomParticleToStream(VS_PARTICLE_INPUT input, inout PointStream<VS_
 {
 	input.position += gf3Gravity * input.velocity * gfElapsedTime;
 	//input.velocity += gf3Gravity * gfElapsedTime;
-	input.lifetime -= gfElapsedTime;
 
 	output.Append(input);
 }
@@ -81,7 +83,6 @@ void OutputRandomAccelerationParticleToStream(VS_PARTICLE_INPUT input, inout Poi
 {
 	input.position += gf3Gravity * input.velocity * gfElapsedTime;
 	input.velocity += gf3Gravity * gfElapsedTime;
-	input.lifetime -= gfElapsedTime;
 
 	output.Append(input);
 }
@@ -94,7 +95,7 @@ float4 RandomDirectionOnSphere(float fOffset)
 
 void OutputEmberParticles(VS_PARTICLE_INPUT input, inout PointStream<VS_PARTICLE_INPUT> output)
 {
-	if (input.lifetime > 0.0f)
+	if ((gfCurrentTime - input.EmitTime) <= input.lifetime)
 	{
 		output.Append(OutputParticleToStream(input, output));
 	}
@@ -105,37 +106,21 @@ void SphereParticles(VS_PARTICLE_INPUT input, inout PointStream<VS_PARTICLE_INPU
 {
 	VS_PARTICLE_INPUT particle = input;
 
-	if (particle.type == TYPE_EMITTER)
+
+	if ((gfCurrentTime - particle.EmitTime) < particle.lifetime)
 	{
+		particle = OutputParticleToStream(particle, output);
+		//float3 resistanceDir = gmtxGameObject._41_42_43 - particle.position;
+		//float distance = length(resistanceDir) - (100.0f/2);
+		//distance = max(0.0f, distance);
+		//resistanceDir = normalize(resistanceDir) * length(particle.velocity);
+		//float resistanceValue = distance / 100.0f; // ï¿½Ö´ï¿½ ï¿½Ý°ï¿½ 20.0f
+		//particle.velocity += resistanceDir * resistanceValue; // ï¿½ï¿½ï¿½Óµï¿½ ï¿½ï¿½ï¿½ï¿½ï¿?ï¿½Ê¿ï¿½ï¿½ï¿½
+		/*float distance = length(particle.velocity);
+		particle.velocity += CalculrateCulrNoise(particle.position).xyz;
+		particle.velocity = normalize(particle.velocity) * distance;*/
 		output.Append(particle);
-		if (bEmit)
-		{
-			particle.ParticleType = gnParticleType;
-			particle.SpriteTotalCoord = iTextureCoord;
-			particle.TextureIndex = iTextureIndex;
-			particle.type = TYPE_SIMULATOR;
-			float4 f4Random = float4(0.0f, 0.0f, 0.0f, 0.0f);
-			particle.position = gmtxGameObject._41_42_43;
-			//particle.alpha = 1.f;
-			particle.EmitTime = gfCurrentTime; // ¹æÃâ ½Ã°£ ±â·Ï
-			for (int i = 0; i < gnFlareParticlesToEmit; i++)
-			{
-				particle.lifetime = gfLifeTime;
-				f4Random = RandomDirectionOnSphere(i + rand(gfCurrentTime));
-				particle.velocity = (f4Random.xyz * gfSpeed);
-				output.Append(particle);
-			}
-		}
 	}
-	else if (particle.type == TYPE_SIMULATOR)
-	{
-		if ((gfCurrentTime - particle.EmitTime) <= particle.lifetime)
-		{
-			particle = OutputParticleToStream(particle, output);
-			output.Append(particle);
-		}
-	}
-	
 }
 
 
@@ -144,56 +129,18 @@ void SmokeParticles(VS_PARTICLE_INPUT input, inout PointStream<VS_PARTICLE_INPUT
 	float3 Smokevelocity = { -float3(rand(gfCurrentTime), 0.f, 0.5f) };
 	VS_PARTICLE_INPUT particle = input;
 
-	if (particle.type == TYPE_EMITTER)
-	{
-		output.Append(particle);
-		if (bEmit)
-		{
-			particle.ParticleType = gnParticleType;
-			particle.SpriteTotalCoord = iTextureCoord;
-			particle.TextureIndex = iTextureIndex;
-			particle.type = TYPE_SIMULATOR;
-			particle.position = gmtxGameObject._41_42_43;
-			//particle.alpha = particle.lifetime / gfLifeTime;
-			particle.EmitTime = gfCurrentTime; // ¹æÃâ ½Ã°£ ±â·Ï
-			particle.lifetime = gfLifeTime;
-			particle.velocity = Smokevelocity * gfSpeed;
-			output.Append(particle);
-		}
-	}
-	else if (particle.type == TYPE_SIMULATOR)
-	{
-		if ((gfCurrentTime - particle.EmitTime) <= particle.lifetime)
-			OutputRandomParticleToStream(particle, output);
-	}
+	if (particle.lifetime > 0.f)
+		OutputRandomParticleToStream(particle, output);
+
 }
 
 void AttackParticles(VS_PARTICLE_INPUT input, inout PointStream<VS_PARTICLE_INPUT> output)
 {
 	VS_PARTICLE_INPUT particle = input;
 
-	if (particle.type == TYPE_EMITTER)
+	if ((gfCurrentTime - particle.EmitTime) <= particle.lifetime)
 	{
-		output.Append(particle);
-		if (bEmit)
-		{
-			particle.ParticleType = gnParticleType;
-			particle.SpriteTotalCoord = iTextureCoord;
-			particle.TextureIndex = iTextureIndex;
-			particle.type = TYPE_SIMULATOR;
-			particle.position = gmtxGameObject._41_42_43;
-			particle.EmitTime = gfCurrentTime; // ¹æÃâ ½Ã°£ ±â·Ï
-			particle.lifetime = gfLifeTime;
-			particle.velocity = float3(0.f, 0.f, 0.f);
-			output.Append(particle);
-		}
-	}
-	else if (particle.type == TYPE_SIMULATOR)
-	{
-		if ((gfCurrentTime - particle.EmitTime) <= particle.lifetime)
-		{
-			output.Append(input);
-		}
+		output.Append(input);
 	}
 }
 
@@ -201,80 +148,36 @@ void RecoveryParticles(VS_PARTICLE_INPUT input, inout PointStream<VS_PARTICLE_IN
 {
 	VS_PARTICLE_INPUT particle = input;
 
-	if (particle.type == TYPE_EMITTER)
+	if ((gfCurrentTime - particle.EmitTime) <= particle.lifetime)
 	{
-		output.Append(particle);
-		if (bEmit)
+		float3 position = gmtxGameObject._41_42_43;
+		float MoveValue = particle.position.y - position.y;
+		if (MoveValue > 7.f)
 		{
-			particle.ParticleType = gnParticleType;
-			particle.SpriteTotalCoord = iTextureCoord;
-			particle.TextureIndex = iTextureIndex;
-			particle.type = TYPE_SIMULATOR;
-			particle.EmitTime = gfCurrentTime; // ¹æÃâ ½Ã°£ ±â·Ï
-			float3 position = gmtxGameObject._41_42_43;
-			for (int i = 0; i < 20; i++) // 2¹ø ¹Ýº¹
-			{
-				particle.lifetime = gfLifeTime;
-				//particle.alpha = 1.f;
-				particle.velocity = float3(0.f, 3.f + rand(gfCurrentTime + i) * 3.f, 0.f);
-				particle.position.y = position.y;
-				particle.position.x = position.x + (i * 0.2f - (20 / 2) * 0.2f) * 0.5f + rand(gfCurrentTime + i) * 2.f;
-				particle.position.z = position.z + (i * 0.2f - (20 / 2) * 0.2f) * 0.5f + rand(gfCurrentTime - i) * 2.f;
-				output.Append(particle);
-			}
-		}
-	}
-	else if (particle.type == TYPE_SIMULATOR)
-	{
-		if (particle.lifetime > 0.f)
-		{
-			particle.type = TYPE_SIMULATOR;
-			float3 position = gmtxGameObject._41_42_43;
-			float MoveValue = particle.position.y - position.y;
-			if (MoveValue > 7.f)
-			{
-				particle.position.y = position.y;
-			}
-			//else if (MoveValue > 3.5f)
-			//{
-			//	//particle.alpha = particle.lifetime / gfLifeTime;
-			//}
-			OutputRandomAccelerationParticleToStream(particle, output);
-		}
 
+			particle.position.y = position.y;
+		}
+		//else if (MoveValue > 3.5f)
+		//{
+		//	//particle.alpha = particle.lifetime / gfLifeTime;
+		//}
+		OutputRandomAccelerationParticleToStream(particle, output);
 	}
-	else
-	{
-		output.Append(particle);
-	}
+
+	//}
+	//else
+	//{
+	//	output.Append(particle);
+	//}
 }
 
 void TerrainParticles(VS_PARTICLE_INPUT input, inout PointStream<VS_PARTICLE_INPUT> output)
 {
 	VS_PARTICLE_INPUT particle = input;
 
-	if (particle.type == TYPE_EMITTER)
+	if ((gfCurrentTime - particle.EmitTime) <= particle.lifetime)
 	{
-		output.Append(particle);
-		if (bEmit)
-		{
-			particle.ParticleType = gnParticleType;
-			particle.SpriteTotalCoord = iTextureCoord;
-			particle.TextureIndex = iTextureIndex;
-			particle.type = TYPE_SIMULATOR;
-			particle.position = gmtxGameObject._41_42_43;
-			particle.EmitTime = gfCurrentTime; // ¹æÃâ ½Ã°£ ±â·Ï
-			particle.lifetime = gfLifeTime;
-			particle.velocity = float3(0.f, 0.f, 0.f);
-			output.Append(particle);
-		}
-	}
-	else if (particle.type == TYPE_SIMULATOR)
-	{
-		if ((gfCurrentTime - particle.EmitTime) <= particle.lifetime)
-		{
-			output.Append(input);
-		}
+		output.Append(input);
 	}
 }
 
@@ -282,15 +185,14 @@ void TerrainParticles(VS_PARTICLE_INPUT input, inout PointStream<VS_PARTICLE_INP
 void GSParticleStreamOutput(point VS_PARTICLE_INPUT input[1], inout PointStream<VS_PARTICLE_INPUT> output)
 {
 	VS_PARTICLE_INPUT particle = input[0];
-	if (particle.ParticleType == SPHERE_PARTILCE)
+	if (particle.type == SPHERE_PARTILCE)
 		SphereParticles(particle, output);
-	else if (particle.ParticleType == RECOVERY_PARTILCE)
+	else if (particle.type == RECOVERY_PARTILCE)
 		RecoveryParticles(particle, output);
-	else if (particle.ParticleType == SMOKE_PARTILCE)
+	else if (particle.type == SMOKE_PARTILCE)
 		SmokeParticles(particle, output);
-	else if (particle.ParticleType == ATTACK_PARTICLE)
+	else if (particle.type == ATTACK_PARTICLE)
 		AttackParticles(particle, output);
 	else if (particle.ParticleType == TERRAIN_PARTICLE)
 		TerrainParticles(particle, output);
-
 }

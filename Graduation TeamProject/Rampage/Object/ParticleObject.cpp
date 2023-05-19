@@ -2,6 +2,8 @@
 #include "../Object/Texture.h"
 #include "ParticleObject.h"
 #include "../Shader/ParticleShader.h"
+#include "..\Global\Locator.h"
+#include "..\Global\Timer.h"
 
 CParticleObject::CParticleObject()
 {
@@ -17,6 +19,12 @@ CParticleObject::CParticleObject(int iTextureIndex, ID3D12Device* pd3dDevice, ID
 	SetMesh(pParticleMesh);
 
 	m_iParticleType = iParticleType;
+
+	m_fFieldSpeed = 10.0f;
+	m_fNoiseStrength = 1.0f;;
+	m_xmf3FieldMainDirection = XMFLOAT3(0.0f, 1.0f, 0.0f);
+	m_fProgressionRate = 10.0f;
+	m_fLengthScale = 1.0f;
 	
 	m_iTextureIndex = iTextureIndex;
 
@@ -38,6 +46,11 @@ void CParticleObject::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12Grap
 
 	m_pd3dcbFrameworkInfo->Map(0, NULL, (void**)&m_pcbMappedFrameworkInfo);
 
+
+	ncbElementBytes = ((sizeof(CB_CURLNOISE_INFO) + 255) & ~255); //256의 배수
+	m_pd3dcbCurlNoiseInfo = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, ncbElementBytes, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER | D3D12_RESOURCE_STATE_GENERIC_READ, NULL);
+
+	m_pd3dcbCurlNoiseInfo->Map(0, NULL, (void**)&m_pcbMappedCurlNoiseInfo);
 }
 
 void CParticleObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList, float fCurrentTime, float fElapsedTime)
@@ -59,6 +72,20 @@ void CParticleObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dComma
 
 	D3D12_GPU_VIRTUAL_ADDRESS d3dGpuVirtualAddress = m_pd3dcbFrameworkInfo->GetGPUVirtualAddress();
 	pd3dCommandList->SetGraphicsRootConstantBufferView(11, d3dGpuVirtualAddress);
+
+
+	m_pcbMappedCurlNoiseInfo->Dt = fElapsedTime;
+	m_pcbMappedCurlNoiseInfo->Time = fCurrentTime;
+	m_pcbMappedCurlNoiseInfo->FieldSpeed = m_fFieldSpeed;
+	m_pcbMappedCurlNoiseInfo->NoiseStrength = m_fNoiseStrength;
+	m_pcbMappedCurlNoiseInfo->ProgressionRate = m_fProgressionRate;
+	m_pcbMappedCurlNoiseInfo->LengthScale = m_fLengthScale;
+	m_pcbMappedCurlNoiseInfo->FieldMainDirection = m_xmf3FieldMainDirection; // 해당 축 방향으로 전진성을 가지는 편. noiseStrength가 낮을 때 이 방향으로 파티클이 나아가는 것처럼 만들어짐.
+	m_pcbMappedCurlNoiseInfo->SpherePosition = XMFLOAT3(0.0f, 0.0f, 0.0f);
+	m_pcbMappedCurlNoiseInfo->SphereRadius = 5.0f;
+
+	d3dGpuVirtualAddress = m_pd3dcbCurlNoiseInfo->GetGPUVirtualAddress();
+	pd3dCommandList->SetGraphicsRootConstantBufferView(3, d3dGpuVirtualAddress);
 }
 
 void CParticleObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
@@ -182,6 +209,39 @@ int CParticleObject::GetParticleType()
 void CParticleObject::SetEmit(bool bEmit)
 {
 	dynamic_cast<CParticleMesh*>(m_pMesh.get())->m_bEmit = bEmit;
+}
+
+void CParticleObject::EmitParticle(int emitType)
+{
+	ParticleEmitDataParam param; 
+	switch (emitType)
+	{
+	case 0:
+		param.m_fLifeTime = m_fLifeTime;
+		param.m_nEmitNum = m_iEmitParticleN;
+		param.m_fEmitedSpeed = m_fSpeed;
+		param.m_xmf3EmitedPosition.x = m_xmf4x4Transform._41;
+		param.m_xmf3EmitedPosition.y = m_xmf4x4Transform._42;
+		param.m_xmf3EmitedPosition.z = m_xmf4x4Transform._43;
+		param.m_fEmitTime = Locator.GetTimer()->GetTotalTime();
+		param.m_iTextureIndex = m_iTextureIndex;
+		param.m_iTextureCoord[0] = m_iTotalRow; param.m_iTextureCoord[1] = m_iTotalCol;
+		break;
+	case 2:
+		param.m_fLifeTime = m_fLifeTime;
+		param.m_nEmitNum = m_iEmitParticleN;
+		param.m_fEmitedSpeed = m_fSpeed;
+		param.m_xmf3EmitedPosition.x = m_xmf4x4Transform._41;
+		param.m_xmf3EmitedPosition.y = m_xmf4x4Transform._42;
+		param.m_xmf3EmitedPosition.z = m_xmf4x4Transform._43;
+		param.m_fEmitTime = Locator.GetTimer()->GetTotalTime();
+		param.m_iTextureIndex = m_iTextureIndex;
+		param.m_iTextureCoord[0] = m_iTotalRow; param.m_iTextureCoord[1] = m_iTotalCol;
+		break;
+	default:
+		break;
+	}
+	dynamic_cast<CParticleMesh*>(m_pMesh.get())->EmitParticle(emitType, param);
 }
 
 void CParticleObject::SetDirection(XMFLOAT3 xmf3Direction)

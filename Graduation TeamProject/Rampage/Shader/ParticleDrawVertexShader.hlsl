@@ -1,3 +1,5 @@
+#include "CurlNoise.hlsl"
+
 struct VS_PARTICLE_INPUT
 {
 	float3 position : POSITION;
@@ -58,7 +60,7 @@ float interpolate(float start, float end, float fraction)
 
 uint2 SpriteAnimtaion(VS_PARTICLE_INPUT input, float AccumulatedTime, float LifeTime, uint TotalRow, uint TotalCol)
 {
-	float fraction = AccumulatedTime / LifeTime;
+	float fraction = frac(AccumulatedTime / LifeTime); 
 	float interval = 1.0f / (TotalRow * TotalCol);
 	uint m_iCurrentCol = (int)(fraction / (interval * TotalRow));
 	float remainvalue = (fraction / (interval * TotalRow)) - m_iCurrentCol;
@@ -74,6 +76,7 @@ VS_PARTICLE_DRAW_OUTPUT VSParticleDraw(VS_PARTICLE_INPUT input)
 	output.ParticleType = input.ParticleType;
 	output.position = input.position;
 	output.velocity = input.velocity;
+	//output.velocity += CalculrateCulrNoise(input.position);
 	output.size = gfSize;
 
 	float fraction = (gfCurrentTime - input.EmitTime) / input.lifetime;

@@ -9,6 +9,7 @@
 #include "..\Sound\SoundManager.h"
 #include "..\Object\TextureManager.h"
 #include "implot.h"
+#include "implot_internal.h"
 
 #define NUM_FRAMES_IN_FLIGHT 3
 #define MAX_FILENAME_SIZE 100
@@ -128,6 +129,8 @@ void DataLoader::SaveComponentSet(FILE* pInFile, CState<CPlayer>* pState)
 
 	ParticleComponent* pParticleComponent = dynamic_cast<ParticleComponent*>(pState->GetParticleComponent());
 	ImpactEffectComponent* pImpactComponent = dynamic_cast<ImpactEffectComponent*>(pState->GetImpactComponent());
+
+	TrailComponent* pTrailComponent = dynamic_cast<TrailComponent*>(pState->GetTrailComponent());
 
 	std::string str = "<Components>:";
 	WriteStringFromFile(pInFile, str);
@@ -295,6 +298,27 @@ void DataLoader::SaveComponentSet(FILE* pInFile, CState<CPlayer>* pState)
 	WriteFloatFromFile(pInFile, pImpactComponent->GetColor().z);
 	WriteStringFromFile(pInFile, std::string("</ImpactComponent>:"));
 
+	WriteStringFromFile(pInFile, std::string("<TrailComponent>:"));
+	WriteStringFromFile(pInFile, std::string("<Enable>:"));
+	WriteIntegerFromFile(pInFile, pTrailComponent->GetEnable());
+	WriteStringFromFile(pInFile, std::string("<EmissiveFactor>:"));
+	WriteFloatFromFile(pInFile, pTrailComponent->m_fEmissiveFactor);
+	WriteStringFromFile(pInFile, std::string("<nCurves>:"));
+	WriteIntegerFromFile(pInFile, pTrailComponent->m_nCurves);
+	WriteStringFromFile(pInFile, std::string("<Rcurves>:"));
+	for (int i = 0; i < MAX_COLORCURVES; ++i)
+		WriteFloatFromFile(pInFile, pTrailComponent->m_fR_CurvePoints[i]);
+	WriteStringFromFile(pInFile, std::string("<Gcurves>:"));
+	for (int i = 0; i < MAX_COLORCURVES; ++i)
+		WriteFloatFromFile(pInFile, pTrailComponent->m_fG_CurvePoints[i]);
+	WriteStringFromFile(pInFile, std::string("<Bcurves>:"));
+	for (int i = 0; i < MAX_COLORCURVES; ++i)
+		WriteFloatFromFile(pInFile, pTrailComponent->m_fB_CurvePoints[i]);
+	WriteStringFromFile(pInFile, std::string("<Timecurves>:"));
+	for (int i = 0; i < MAX_COLORCURVES; ++i)
+		WriteFloatFromFile(pInFile, pTrailComponent->m_fColorCurveTimes_R[i]);
+	WriteStringFromFile(pInFile, std::string("</TrailComponent>:"));
+
 	str = "</Components>:";
 	WriteStringFromFile(pInFile, str);
 }
@@ -318,6 +342,8 @@ void DataLoader::LoadComponentSet(FILE* pInFile, CState<CPlayer>* pState)
 
 	ParticleComponent* pParticleComponent = dynamic_cast<ParticleComponent*>(pState->GetParticleComponent());
 	ImpactEffectComponent* pImpactComponent = dynamic_cast<ImpactEffectComponent*>(pState->GetImpactComponent());
+
+	TrailComponent* pTrailComponent = dynamic_cast<TrailComponent*>(pState->GetTrailComponent());
 
 	char buf[256];
 	std::string str;
@@ -732,6 +758,50 @@ void DataLoader::LoadComponentSet(FILE* pInFile, CState<CPlayer>* pState)
 				}
 			}
 		}
+		else if (!strcmp(buf, "<TrailComponent>:"))
+		{
+			for (; ; )
+			{
+				ReadStringFromFile(pInFile, buf);
+
+				if (!strcmp(buf, "<Enable>:"))
+				{
+					pTrailComponent->SetEnable(ReadIntegerFromFile(pInFile));
+				}
+				else if (!strcmp(buf, "<EmissiveFactor>:"))
+				{
+					pTrailComponent->m_fEmissiveFactor = ReadFloatFromFile(pInFile);
+				}
+				else if (!strcmp(buf, "<nCurves>:"))
+				{
+					pTrailComponent->m_nCurves = ReadIntegerFromFile(pInFile);
+				}
+				else if (!strcmp(buf, "<Rcurves>:"))
+				{
+					for(int i = 0;i<MAX_COLORCURVES;++i)
+						pTrailComponent->m_fR_CurvePoints[i] = ReadFloatFromFile(pInFile);
+				}
+				else if (!strcmp(buf, "<Gcurves>:"))
+				{
+					for (int i = 0; i < MAX_COLORCURVES; ++i)
+						pTrailComponent->m_fG_CurvePoints[i] = ReadFloatFromFile(pInFile);
+				}
+				else if (!strcmp(buf, "<Bcurves>:"))
+				{
+					for (int i = 0; i < MAX_COLORCURVES; ++i)
+						pTrailComponent->m_fB_CurvePoints[i] = ReadFloatFromFile(pInFile);
+				}
+				else if (!strcmp(buf, "<Timecurves>:"))
+				{
+					for (int i = 0; i < MAX_COLORCURVES; ++i)
+						pTrailComponent->m_fColorCurveTimes_R[i] = ReadFloatFromFile(pInFile);
+				}
+				else if (!strcmp(buf, "</TrailComponent>:"))
+				{
+					break;
+				}
+			}
+		}
 		else if (!strcmp(buf, "</Components>:"))
 		{
 			break;
@@ -978,7 +1048,7 @@ void CImGuiManager::SetUI()
 		ImGuiWindowFlags my_window_flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize;
 		ImGui::Begin(U8STR("타격감 프리셋 메뉴"), &show_preset_menu, my_window_flags);
 
-		std::string path = "..\\Rampage\\Data";
+		std::string path = "Data";
 		std::vector<std::u8string> v;
 		for (const auto& entry : std::filesystem::directory_iterator(path))
 		{
@@ -1303,6 +1373,26 @@ void CImGuiManager::ShowParticleManager(CState<CPlayer>* pCurrentAnimation)
 	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
 	ImGui::ColorEdit3(U8STR("색상"), (float*)&pParticleComponent->GetColor()); // Edit 3 floats representing a color
 
+	ImGui::SetNextItemWidth(190.f);
+	if (ImGui::DragFloat("FieldSpeed##ParticleEffect", &pParticleComponent->GetFieldSpeed(), DRAG_FLOAT_UNIT, 0.0f, FLT_MAX, "%.2f", 0))
+		pParticleComponent->GetFieldSpeed() = std::clamp(pParticleComponent->GetFieldSpeed(), FLT_MIN, FLT_MAX);
+
+	ImGui::SetNextItemWidth(190.f);
+	if (ImGui::DragFloat("NoiseStrength##ParticleEffect", &pParticleComponent->GetNoiseStrength(), DRAG_FLOAT_UNIT, 0.0f, FLT_MAX, "%.2f", 0))
+		pParticleComponent->GetNoiseStrength() = std::clamp(pParticleComponent->GetNoiseStrength(), FLT_MIN, FLT_MAX);
+
+	ImGui::SetNextItemWidth(190.f);
+	if (ImGui::DragFloat("ProgressionRate##ParticleEffect", &pParticleComponent->GetProgressionRate(), DRAG_FLOAT_UNIT, 0.0f, FLT_MAX, "%.2f", 0))
+		pParticleComponent->GetProgressionRate() = std::clamp(pParticleComponent->GetProgressionRate(), FLT_MIN, FLT_MAX);
+
+	ImGui::SetNextItemWidth(190.f);
+	if (ImGui::DragFloat("LengthScale##ParticleEffect", &pParticleComponent->GetLengthScale(), DRAG_FLOAT_UNIT, 0.0f, FLT_MAX, "%.2f", 0))
+		pParticleComponent->GetLengthScale() = std::clamp(pParticleComponent->GetLengthScale(), FLT_MIN, FLT_MAX);
+
+	ImGui::SetNextItemWidth(190.f);
+	float* DirectionData = (float*)(&pParticleComponent->GetFieldMainDirection());
+	ImGui::InputFloat3("FieldMainDirection##ParticleEffect", DirectionData, "%.2f", 0);
+
 	ImGui::End();
 }
 void CImGuiManager::ShowTrailManager(CState<CPlayer>* pCurrentAnimation)
@@ -1335,13 +1425,14 @@ void CImGuiManager::ShowTrailManager(CState<CPlayer>* pCurrentAnimation)
 		param.pShader = */
 	}
 
+	ImGui::DragFloat("Emissve##TrailEffect", &pTrailComponent->m_fEmissiveFactor);
 
 	ImGui::BulletText("Click and drag each point.");
 	static ImPlotDragToolFlags R_flags;
 	static ImPlotDragToolFlags G_flags;
 	static ImPlotDragToolFlags B_flags;
 	ImPlotAxisFlags ax_flags = ImPlotAxisFlags_NoTickLabels | ImPlotAxisFlags_NoTickMarks;
-	static bool VerticalInputFlag = true;
+	static bool VerticalInputFlag = false;
 
 	static int colorSelectFlag = 3;
 	ImGui::RadioButton("R##TrailEffect", &colorSelectFlag, 0); ImGui::SameLine();
@@ -1401,7 +1492,6 @@ void CImGuiManager::ShowTrailManager(CState<CPlayer>* pCurrentAnimation)
 	pTrailComponent->m_nCurves = std::clamp(pTrailComponent->m_nCurves, 2, MAX_COLORCURVES);
 
 	if (ImPlot::BeginPlot("##Bezier", ImVec2(-1, 0), ImPlotFlags_CanvasOnly)) {
-
 		int nCurveIndexs = pTrailComponent->m_nCurves;
 
 		//ImPlot::SetupAxesLimits(0, 1, 0, 1);
@@ -1409,18 +1499,26 @@ void CImGuiManager::ShowTrailManager(CState<CPlayer>* pCurrentAnimation)
 		static ImPlotPoint P[] = { ImPlotPoint(.05f,.05f), ImPlotPoint(0.2,0.4),  ImPlotPoint(0.8,0.6),  ImPlotPoint(.95f,.95f) };
 
 		for (int i = 0; i < nCurveIndexs; ++i) {
-			int id = i * 3;
+			int id = i * 4;
 			double yPointCache[3];
+			double TimeControllPoint = -0.2f;
 
 			yPointCache[0] = pTrailComponent->m_fColorCurveTimes_R[i]; yPointCache[1] = pTrailComponent->m_fColorCurveTimes_R[i]; yPointCache[2] = pTrailComponent->m_fColorCurveTimes_R[i];
 			ImPlot::DragPoint(id, &yPointCache[0], &pTrailComponent->m_fR_CurvePoints[i], ImVec4(1, 0, 0, 1), 4, R_flags);
-			ImPlot::DragPoint(id + 1, &yPointCache[1], &pTrailComponent->m_fG_CurvePoints[i], ImVec4(0, 1, 0, 1), 4, G_flags);
-			ImPlot::DragPoint(id + 2, &yPointCache[2], &pTrailComponent->m_fB_CurvePoints[i], ImVec4(0, 0, 1, 1), 4, B_flags);
+			ImPlot::DragPoint(id + 1, &yPointCache[0], &pTrailComponent->m_fG_CurvePoints[i], ImVec4(0, 1, 0, 1), 4, G_flags);
+			ImPlot::DragPoint(id + 2, &yPointCache[0], &pTrailComponent->m_fB_CurvePoints[i], ImVec4(0, 0, 1, 1), 4, B_flags);
 			if (VerticalInputFlag) {
 				yPointCache[0] = std::clamp(yPointCache[0], (double)0.0f, (double)1.0f);
 				if (i == 0 || i == nCurveIndexs - 1)
 					yPointCache[0] = i == 0 ? 0.0f : 1.0f;
 				pTrailComponent->m_fColorCurveTimes_R[i] = yPointCache[0];
+			}
+			ImPlot::DragPoint(id + 3, &pTrailComponent->m_fColorCurveTimes_R[i], &TimeControllPoint, ImVec4(1, 1, 1, 1), 4, B_flags);
+			TimeControllPoint = -0.2f;
+			{
+				pTrailComponent->m_fColorCurveTimes_R[i] = std::clamp(pTrailComponent->m_fColorCurveTimes_R[i], (double)0.0f, (double)1.0f);
+				if (i == 0 || i == nCurveIndexs - 1)
+					pTrailComponent->m_fColorCurveTimes_R[i] = i == 0 ? 0.0f : 1.0f;
 			}
 		}
 
@@ -1471,6 +1569,106 @@ void CImGuiManager::ShowTrailManager(CState<CPlayer>* pCurrentAnimation)
 			ImPlot::SetNextLineStyle(LineColor, 2);
 			ImPlot::PlotLine("##bez", &line[0].x, &line[0].y, 100 * (nCurveIndexs - 1), 0, 0, sizeof(ImPlotPoint));
 		}
+
+		float testColors = { 0.0 };
+		static int cmap = ImPlotColormap_RdBu;
+		static ImVec4 abc = { 1.0,0.0,0.0,1.0f };
+		static int interpolationCount = 30;
+		std::vector<ImU32> colors; colors.resize((MAX_COLORCURVES-1)* interpolationCount);
+
+		auto uncharted2_tonemap_partial = [](XMFLOAT3 x)
+		{
+			float A = 0.15f;
+			float B = 0.50f;
+			float C = 0.10f;
+			float D = 0.20f;
+			float E = 0.02f;
+			float F = 0.30f;
+			XMVECTOR a1 = (XMVectorMultiply(XMLoadFloat3(&Vector3::Add(Vector3::ScalarProduct(x, A, false), XMFLOAT3(B * C, B * C, B * C))), XMLoadFloat3(&x)) + XMLoadFloat3(&XMFLOAT3(D * E, D * E, D * E)));
+			XMVECTOR a2 = (XMVectorMultiply(XMLoadFloat3(&(Vector3::Add(Vector3::ScalarProduct(x, A, false), XMFLOAT3(B, B, B)))), XMLoadFloat3(&x)) + XMVectorMultiply(XMLoadFloat3(&XMFLOAT3(D, D, D)), XMLoadFloat3(&XMFLOAT3(F, F, F))));
+			XMVECTOR a3 = -XMVECTOR({ E,E,E }) / XMVECTOR({ F,F,F });
+			XMVECTOR b1 = a1 / a2;
+			XMVECTOR c1 = b1 + a3;
+
+			return c1;
+		};
+
+		auto uncharted2_filmic = [&](XMFLOAT3 v)
+		{
+			float exposure_bias = 2.0f;
+			XMVECTOR curr = uncharted2_tonemap_partial(Vector3::ScalarProduct(v, exposure_bias, false));
+
+			XMFLOAT3 W = XMFLOAT3(11.2f, 11.2f, 11.2f);
+			XMVECTOR white_scale = XMVECTOR({ 1.0f,1.0f,1.0f }) / uncharted2_tonemap_partial(W);
+			XMFLOAT3 result;
+			XMStoreFloat3(&result, XMVectorMultiply(curr, white_scale));
+			return result;
+		};
+
+		XMFLOAT3 basecolors[MAX_COLORCURVES];
+		for (int i = 0; i < pTrailComponent->m_nCurves; ++i) {
+			XMFLOAT3 RGB = uncharted2_filmic(XMFLOAT3(pTrailComponent->m_fR_CurvePoints[i], pTrailComponent->m_fG_CurvePoints[i], pTrailComponent->m_fB_CurvePoints[i]));
+			basecolors[i] = RGB;
+		}
+
+		int colorIndex = 0;
+
+		for (int t = 0; t < colors.size(); ++t) {
+			float newT = (float)t / colors.size();
+			int index = 0;
+			for (int i = 0; i < pTrailComponent->m_nCurves; ++i) {
+				if (pTrailComponent->m_fColorCurveTimes_R[i] >= newT) {
+					index = max(0, i - 1);
+					break;
+				}
+			}
+
+			float delta = newT - pTrailComponent->m_fColorCurveTimes_R[index];
+			delta *= 1.0f / ((float)pTrailComponent->m_fColorCurveTimes_R[index + 1] - (float)pTrailComponent->m_fColorCurveTimes_R[index]);
+			
+			XMFLOAT3 newColor; XMStoreFloat3(&newColor, XMVectorLerp(XMLoadFloat3(&basecolors[index]), XMLoadFloat3(&basecolors[index + 1]), delta));
+
+			BYTE byte_r = newColor.x * 255;
+			BYTE byte_g = newColor.y * 255;
+			BYTE byte_b = newColor.z * 255;
+
+			BYTE abgr[4] = { (BYTE)(255), byte_b, byte_g, byte_r };
+			BYTE rgba[4] = { byte_r, byte_g, byte_b, (BYTE)(255) };
+			memcpy(&colors[colorIndex++], rgba, sizeof(ImU32));
+		}
+		
+
+
+		/*for (int i = 0; i < pTrailComponent->m_nCurves - 1; ++i) {
+			for (int j = 0; j < interpolationCount; ++j) {
+				XMFLOAT3 newColor; XMStoreFloat3(&newColor, XMVectorLerp(XMLoadFloat3(&basecolors[i]), XMLoadFloat3(&basecolors[i + 1]), (float)j / interpolationCount));
+
+				BYTE byte_r = newColor.x * 255;
+				BYTE byte_g = newColor.y * 255;
+				BYTE byte_b = newColor.z * 255;
+
+				BYTE abgr[4] = { (BYTE)(255), byte_b, byte_g, byte_r };
+				BYTE rgba[4] = { byte_r, byte_g, byte_b, (BYTE)(255) };
+				memcpy(&colors[colorIndex++], rgba, sizeof(ImU32));
+			}
+		}*/
+
+		//ImGui::ColorConvertFloat4ToU32
+
+		static ImPlotColormap sampleColorMap = -1;
+		if(sampleColorMap == -1) 
+			sampleColorMap = ImPlot::AddColormap("testColorMap", colors.data(), colors.size(), false);
+		else {
+			ImPlotContext& gp = *GImPlot;
+			ImU32* sampleColorTable = const_cast<ImU32*>(gp.ColormapData.GetKeys(sampleColorMap));
+			ImU32 test[240]; memcpy(test, sampleColorTable, sizeof(ImU32) * 240);
+			int TableSize = gp.ColormapData.GetTableSize(sampleColorMap);
+			memcpy(sampleColorTable, colors.data(), colors.size() * sizeof(ImU32));
+		}
+		//ImVec2 cursorPos = ImGui::GetCurrentWindow()->DC.CursorPos;
+		//ImPlot::RenderColorBar(colors.data(), colors.size(), *ImGui::GetWindowDrawList(), ImRect(cursorPos.x, cursorPos.y, cursorPos.x + 200, cursorPos.y + 10), false, false, false);
+		ImPlot::ColormapSlider("testColorSlider", &testColors, &abc, "", sampleColorMap);
+		//ImPlot::PopColormap();
 
 		/*ImPlot::SetNextLineStyle(ImVec4(1, 0.5f, 1, 1));
 		ImPlot::PlotLine("##t1", &P[1].x, &P[1].y, 1, 0, 0, sizeof(ImPlotPoint));

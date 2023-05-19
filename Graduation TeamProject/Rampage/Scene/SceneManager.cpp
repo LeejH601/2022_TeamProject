@@ -73,13 +73,15 @@ bool CSceneManager::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPAR
 {
 	SCENE_RETURN_TYPE scene_return_type = m_pCurrentScene->OnProcessingKeyboardMessage(hWnd, nMessageID, wParam, lParam, dwDirection);
 
+
 	switch (scene_return_type)
 	{
 	case SCENE_RETURN_TYPE::NONE:
 		break;
 	case SCENE_RETURN_TYPE::POP_SCENE:
-		if (m_pCurrentScene == m_pLobbyScene.get())
+		if (m_pCurrentScene == m_pLobbyScene.get()) {
 			m_pCurrentScene = m_pMainScene.get();
+		}
 		break;
 	case SCENE_RETURN_TYPE::RETURN_PREVIOUS_SCENE:
 		if (m_pCurrentScene == m_pMainScene.get())

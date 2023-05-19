@@ -72,7 +72,7 @@ void CTextureManager::LoadSphereBuffer(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 
 void CTextureManager::LoadTexture(TextureType eTextureType, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, LPCTSTR pszFileName, int iRow, int Column)
 {
-	// Texture °°ÀºÁö È®ÀÎ
+	// Texture ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ È®ï¿½ï¿½
 	for (int i = 0; i < m_iTextureN[(UINT(eTextureType))]; i++)
 	{
 		if (!wcscmp(m_pTextures[UINT(eTextureType)]->GetTextureName(i), pszFileName))

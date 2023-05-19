@@ -63,7 +63,7 @@ void CMonster::CheckIsPlayerInFrontOfThis(XMFLOAT3 xmf3PlayerPosition)
 	if (!m_bCanChase)
 		return;
 
-	if (fDotProduct > 0.0f && m_fToPlayerLength < 40.0f)
+	if (/*fDotProduct > 0.0f && */m_fToPlayerLength < 22.5f)
 	{
 		m_xmf3ChasingVec = Vector3::Normalize(xmf3ToPlayerVec);
 
@@ -116,7 +116,11 @@ void CMonster::Update(float fTimeElapsed)
 		m_fDissolveThrethHold = m_fDissolveTime / m_fMaxDissolveTime;
 	}
 	
-	CPhysicsObject::Move(m_xmf3Velocity, false);
+	XMFLOAT3 xmf3NewVelocity = Vector3::TransformCoord(m_xmf3Velocity, XMMatrixRotationAxis(XMVECTOR{ 0.0f, 1.0f, 0.0f, 0.0f }, XMConvertToRadians(fDistortionDegree)));
+	CPhysicsObject::Move(xmf3NewVelocity, false);
+
+	if (xmf3NewVelocity.x + xmf3NewVelocity.z)
+		SetLookAt(Vector3::Add(GetPosition(), Vector3::Normalize(XMFLOAT3{ xmf3NewVelocity.x, 0.0f, xmf3NewVelocity.z })));
 
 	// 플레이어가 터레인보다 아래에 있지 않도록 하는 코드
 	if (m_pUpdatedContext) CPhysicsObject::OnUpdateCallback(fTimeElapsed);
@@ -133,14 +137,16 @@ void CMonster::UpdateTransform(XMFLOAT4X4* pxmf4x4Parent)
 {
 	CPhysicsObject::UpdateTransform(NULL);
 
-	m_BodyBoundingBox.Transform(m_TransformedBodyBoudningBox, XMLoadFloat4x4(&m_xmf4x4Transform));
+	m_BodyBoundingBox.Transform(m_TransformedBodyBoundingBox, XMLoadFloat4x4(&m_xmf4x4Transform));
 #ifdef RENDER_BOUNDING_BOX
-	pBodyBoundingBoxMesh->SetWorld(m_xmf4x4Transform);
+	if (pBodyBoundingBoxMesh)
+		pBodyBoundingBoxMesh->SetWorld(m_xmf4x4Transform);
 #endif // RENDER_BOUNDING_BOX
 
 	if (pWeapon)
 	{
 #ifdef RENDER_BOUNDING_BOX
+	if (pWeaponBoundingBoxMesh)
 		pWeaponBoundingBoxMesh->SetWorld(pWeapon->GetWorld());
 #endif 
 		m_WeaponBoundingBox.Transform(m_TransformedWeaponBoundingBox, XMLoadFloat4x4(&pWeapon->GetWorld()));
@@ -153,6 +159,11 @@ void CMonster::SetHit(CGameObject* pHitter)
 		((CPlayer*)pHitter)->m_fCurLagTime = 0.f;
 
 		SetLookAt(Vector3::Add(GetPosition(), XMFLOAT3(-m_xmf3HitterVec.x, 0.0f, -m_xmf3HitterVec.z)));
+
+		SoundPlayParams sound_play_params;
+		sound_play_params.monster_type = GetMonsterType();
+		sound_play_params.sound_category = SOUND_CATEGORY::SOUND_VOICE;
+		CMessageDispatcher::GetInst()->Dispatch_Message<SoundPlayParams>(MessageType::PLAY_SOUND, &sound_play_params, ((CPlayer*)(pHitter))->m_pStateMachine->GetCurrentState());
 
 		PlayerParams PlayerParam{ pHitter };
 		CMessageDispatcher::GetInst()->Dispatch_Message<PlayerParams>(MessageType::UPDATE_HITLAG, &PlayerParam, ((CPlayer*)pHitter)->m_pStateMachine->GetCurrentState());
@@ -181,9 +192,11 @@ void CMonster::UpdateTransformFromArticulation(XMFLOAT4X4* pxmf4x4Parent, std::v
 
 	XMFLOAT3 xAxis = XMFLOAT3(1.0f, 0.0f, 0.0f);
 	
-	m_BodyBoundingBox.Transform(m_TransformedBodyBoudningBox, XMLoadFloat4x4(&Matrix4x4::Multiply(XMMatrixRotationAxis(XMLoadFloat3(&xAxis), XMConvertToRadians(90.0f)), AritculatCacheMatrixs[0])));
+	m_BodyBoundingBox.Transform(m_TransformedBodyBoundingBox, XMLoadFloat4x4(&Matrix4x4::Multiply(XMMatrixRotationAxis(XMLoadFloat3(&xAxis), XMConvertToRadians(90.0f)), AritculatCacheMatrixs[0])));
 #ifdef RENDER_BOUNDING_BOX
-	pBodyBoundingBoxMesh->SetWorld(Matrix4x4::Multiply(XMMatrixRotationAxis(XMLoadFloat3(&xAxis), XMConvertToRadians(90.0f)), AritculatCacheMatrixs[0]));
+	if(pBodyBoundingBoxMesh)
+		pBodyBoundingBoxMesh->SetWorld(Matrix4x4::Multiply(XMMatrixRotationAxis(XMLoadFloat3(&xAxis), XMConvertToRadians(90.0f)), AritculatCacheMatrixs[0]));
+
 #endif // RENDER_BOUNDING_BOX
 	if (m_pSibling) m_pSibling->UpdateTransformFromArticulation(pxmf4x4Parent, pArtiLinkNames, AritculatCacheMatrixs, scale);
 	if (m_pChild) m_pChild->UpdateTransformFromArticulation(&m_xmf4x4World, pArtiLinkNames, AritculatCacheMatrixs, scale);
@@ -218,8 +231,8 @@ void COrcObject::PrepareBoundingBox(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 {
 	pWeapon = CGameObject::FindFrame("SM_Weapon");
 
-	m_BodyBoundingBox = BoundingBox{ XMFLOAT3(0.0f, 1.05f, 0.0f), XMFLOAT3(1.2f, 2.0f, 1.2f) };
-	m_WeaponBoundingBox = BoundingBox{ XMFLOAT3(0.0f, 0.0f, 0.85f), XMFLOAT3(0.3f, 0.6f, 0.35f) };
+	m_BodyBoundingBox = BoundingOrientedBox{ XMFLOAT3(0.0f, 1.05f, 0.0f), XMFLOAT3(1.2f, 2.0f, 1.2f), XMFLOAT4{0.0f, 0.0f, 0.0f, 1.0f} };
+	m_WeaponBoundingBox = BoundingOrientedBox{ XMFLOAT3(0.0f, 0.0f, 0.85f), XMFLOAT3(0.3f, 0.6f, 0.35f), XMFLOAT4{0.0f, 0.0f, 0.0f, 1.0f} };
 #ifdef RENDER_BOUNDING_BOX
 	pBodyBoundingBoxMesh = CBoundingBoxShader::GetInst()->AddBoundingObject(pd3dDevice, pd3dCommandList, this, XMFLOAT3(0.0f, 1.05f, 0.0f), XMFLOAT3(1.2f, 2.0f, 1.2f));
 	//pWeaponBodyBoundingBoxMesh = CBoundingBoxShader::GetInst()->AddBoundingObject(pd3dDevice, pd3dCommandList, pWeapon, XMFLOAT3(0.0f, 0.0f, 0.32f), XMFLOAT3(0.18f, 0.28f, 0.71f));
@@ -255,11 +268,12 @@ CGoblinObject::~CGoblinObject()
 void CGoblinObject::PrepareBoundingBox(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	pWeapon = CGameObject::FindFrame("SM_Weapon");
-	m_BodyBoundingBox = BoundingBox{ XMFLOAT3(0.0f, 0.75f, 0.0f), XMFLOAT3(0.6f, 1.1f, 0.6f) };
-	m_WeaponBoundingBox = BoundingBox{ XMFLOAT3(0.0f, 0.0f, 0.22f), XMFLOAT3(0.14f, 0.14f, 0.83f) };
+	m_BodyBoundingBox = BoundingOrientedBox{ XMFLOAT3(0.0f, 0.75f, 0.0f), XMFLOAT3(0.3f, 0.55f, 0.3f), XMFLOAT4{0.0f, 0.0f, 0.0f, 1.0f} };
+	m_WeaponBoundingBox = BoundingOrientedBox{ XMFLOAT3(0.0f, 0.0f, 0.22f), XMFLOAT3(0.07f, 0.07f, 0.415f), XMFLOAT4{0.0f, 0.0f, 0.0f, 1.0f} };
+	
 #ifdef RENDER_BOUNDING_BOX
-	pBodyBoundingBoxMesh = CBoundingBoxShader::GetInst()->AddBoundingObject(pd3dDevice, pd3dCommandList, this, XMFLOAT3(0.0f, 0.75f, 0.0f), XMFLOAT3(0.6f, 1.1f, 0.6f));
-	pWeaponBoundingBoxMesh = CBoundingBoxShader::GetInst()->AddBoundingObject(pd3dDevice, pd3dCommandList, pWeapon, XMFLOAT3(0.0f, 0.0f, 0.22f), XMFLOAT3(0.14f, 0.14f, 0.83f));
+	pBodyBoundingBoxMesh = CBoundingBoxShader::GetInst()->AddBoundingObject(pd3dDevice, pd3dCommandList, this, XMFLOAT3(0.0f, 0.75f, 0.0f), XMFLOAT3(0.3f, 0.55f, 0.3f));
+	pWeaponBoundingBoxMesh = CBoundingBoxShader::GetInst()->AddBoundingObject(pd3dDevice, pd3dCommandList, pWeapon, XMFLOAT3(0.0f, 0.0f, 0.22f), XMFLOAT3(0.07f, 0.07f, 0.415f));
 #endif
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -284,8 +298,8 @@ CSkeletonObject::~CSkeletonObject()
 void CSkeletonObject::PrepareBoundingBox(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	pWeapon = CGameObject::FindFrame("SM_Sword");
-	m_BodyBoundingBox = BoundingBox{ XMFLOAT3(0.0f, 1.0f, 0.0f), XMFLOAT3(0.7f, 2.0f, 0.7f) };
-	m_WeaponBoundingBox = BoundingBox{ XMFLOAT3(0.0f, 0.0f, 0.48f), XMFLOAT3(0.04f, 0.14f, 1.22f) };
+	m_BodyBoundingBox = BoundingOrientedBox{ XMFLOAT3(0.0f, 1.0f, 0.0f), XMFLOAT3(0.7f, 2.0f, 0.7f), XMFLOAT4{0.0f, 0.0f, 0.0f, 1.0f} };
+	m_WeaponBoundingBox = BoundingOrientedBox{ XMFLOAT3(0.0f, 0.0f, 0.48f), XMFLOAT3(0.04f, 0.14f, 1.22f), XMFLOAT4{0.0f, 0.0f, 0.0f, 1.0f} };
 #ifdef RENDER_BOUNDING_BOX
 	pBodyBoundingBoxMesh = CBoundingBoxShader::GetInst()->AddBoundingObject(pd3dDevice, pd3dCommandList, this, XMFLOAT3(0.0f, 1.0f, 0.0f), XMFLOAT3(0.7f, 2.0f, 0.7f));
 	pWeaponBoundingBoxMesh = CBoundingBoxShader::GetInst()->AddBoundingObject(pd3dDevice, pd3dCommandList, pWeapon, XMFLOAT3(0.0f, 0.0f, 0.48f), XMFLOAT3(0.04f, 0.14f, 1.22f));

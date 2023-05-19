@@ -19,7 +19,7 @@
 void CMainTMPScene::SetPlayer(CGameObject* pPlayer)
 {
 	m_pPlayer = pPlayer;
-	((CPlayer*)m_pPlayer)->SetUpdatedContext(m_pTerrain.get());
+	((CPlayer*)m_pPlayer)->SetUpdatedContext(m_pMap.get());
 	((CPlayer*)m_pPlayer)->SetCamera(m_pMainSceneCamera.get());
 	((CThirdPersonCamera*)m_pMainSceneCamera.get())->SetPlayer((CPlayer*)m_pPlayer);
 
@@ -340,6 +340,14 @@ void CMainTMPScene::CreateComputeRootSignature(ID3D12Device* pd3dDevice)
 	if (pd3dSignatureBlob) pd3dSignatureBlob->Release();
 	if (pd3dErrorBlob) pd3dErrorBlob->Release();
 }
+void CMainTMPScene::UpdateObjectArticulation()
+{
+	for (int i = 0; i < m_pEnemys.size(); ++i) {
+		m_pEnemys[i]->updateArticulationMatrix();
+	}
+
+	m_pMap->UpdateObjectArticulation();
+}
 void CMainTMPScene::RequestRegisterArticulation(RegisterArticulationParams param)
 {
 	m_lRequestObjects.emplace_back(param);
@@ -402,7 +410,6 @@ bool CMainTMPScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM 
 			if (!((CPlayer*)m_pPlayer)->m_bAttack)
 			{
 				((CPlayer*)m_pPlayer)->m_bAttack = true;
-				((CPlayer*)m_pPlayer)->m_iAttackId += 1;
 			}
 		}
 		break;
@@ -433,6 +440,29 @@ SCENE_RETURN_TYPE CMainTMPScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMe
 	case WM_KEYDOWN:
 		switch (wParam)
 		{
+		case VK_SHIFT:
+			if (m_pPlayer)
+			{
+				if (!((CPlayer*)m_pPlayer)->m_bEvasioned)
+				{
+					((CPlayer*)m_pPlayer)->m_bEvasioned = true;
+				}
+			}
+			break;
+		case VK_F5:
+		{
+			XMFLOAT3 xmf3MonsterPos[5];
+			XMFLOAT3 xmf3PlayerPos = m_pPlayer->GetPosition();
+			XMFLOAT3 xmf3PlayerLook = m_pPlayer->GetLook();
+			XMFLOAT3 xmf3PlayerRight = m_pPlayer->GetRight();
+			xmf3PlayerLook = Vector3::ScalarProduct(xmf3PlayerLook, 20.f, false);
+
+			for (int i = 0; i < 5; i++)
+				xmf3MonsterPos[i] = Vector3::Add(Vector3::Add(Vector3::ScalarProduct(xmf3PlayerRight, -20 + i * 10, false), xmf3PlayerLook), xmf3PlayerPos);
+
+			CMonsterPool::GetInst()->SpawnMonster(7, xmf3MonsterPos);
+			break;
+		}
 		case VK_BACK:
 			if (m_CurrentMouseCursorMode == MOUSE_CUROSR_MODE::THIRD_FERSON_MODE)
 			{
@@ -598,51 +628,99 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	CModelShader::GetInst()->CreateShaderVariables(pd3dDevice, pd3dCommandList);
 	CModelShader::GetInst()->CreateCbvSrvUavDescriptorHeaps(pd3dDevice, 0, 200);
 
-	std::unique_ptr<CGoblinObject> m_pGoblinObject = std::make_unique<CGoblinObject>(pd3dDevice, pd3dCommandList, 1);
-	m_pGoblinObject->SetPosition(XMFLOAT3(190, 50, -70));
-	m_pGoblinObject->SetScale(4.0f, 4.0f, 4.0f);
-	m_pGoblinObject->Rotate(0.0f, 180.0f, 0.0f);
-	m_pGoblinObject->m_fHP = 1000.f;
-	m_pGoblinObject->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
-	m_pGoblinObject->m_pSkinnedAnimationController->m_xmf3RootObjectScale = XMFLOAT3(10.0f, 10.0f, 10.0f);
-	m_pGoblinObject->CreateArticulation(1.0f);
-	m_pObjects.push_back(std::move(m_pGoblinObject));
+	std::unique_ptr<CMonster> m_pMonsterObject = std::make_unique<CGoblinObject>(pd3dDevice, pd3dCommandList, 1);
+	m_pMonsterObject->SetPosition(XMFLOAT3(190, 50, -70));
+	m_pMonsterObject->SetScale(4.0f, 4.0f, 4.0f);
+	m_pMonsterObject->Rotate(0.0f, 180.0f, 0.0f);
+	m_pMonsterObject->m_fHP = 1000.f;
+	m_pMonsterObject->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
+	m_pMonsterObject->m_pSkinnedAnimationController->m_xmf3RootObjectScale = XMFLOAT3(10.0f, 10.0f, 10.0f);
+	m_pMonsterObject->CreateArticulation(1.0f);
+	m_pEnemys.push_back(std::move(m_pMonsterObject));
+
+	m_pMonsterObject = std::make_unique<CGoblinObject>(pd3dDevice, pd3dCommandList, 1);
+	m_pMonsterObject->SetPosition(XMFLOAT3(190, 50, -70));
+	m_pMonsterObject->SetScale(4.0f, 4.0f, 4.0f);
+	m_pMonsterObject->Rotate(0.0f, 180.0f, 0.0f);
+	m_pMonsterObject->m_fHP = 100.f;
+	m_pMonsterObject->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
+	m_pMonsterObject->m_pSkinnedAnimationController->m_xmf3RootObjectScale = XMFLOAT3(10.0f, 10.0f, 10.0f);
+	m_pMonsterObject->CreateArticulation(1.0f);
+	CMonsterPool::GetInst()->SetNonActiveMonster(m_pMonsterObject.get());
+	m_pEnemys.push_back(std::move(m_pMonsterObject));
+
+	m_pMonsterObject = std::make_unique<CGoblinObject>(pd3dDevice, pd3dCommandList, 1);
+	m_pMonsterObject->SetPosition(XMFLOAT3(190, 50, -70));
+	m_pMonsterObject->SetScale(4.0f, 4.0f, 4.0f);
+	m_pMonsterObject->Rotate(0.0f, 180.0f, 0.0f);
+	m_pMonsterObject->m_fHP = 100.f;
+	m_pMonsterObject->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
+	m_pMonsterObject->m_pSkinnedAnimationController->m_xmf3RootObjectScale = XMFLOAT3(10.0f, 10.0f, 10.0f);
+	m_pMonsterObject->CreateArticulation(1.0f);
+	CMonsterPool::GetInst()->SetNonActiveMonster(m_pMonsterObject.get());
+	m_pEnemys.push_back(std::move(m_pMonsterObject));
+
+	m_pMonsterObject = std::make_unique<CGoblinObject>(pd3dDevice, pd3dCommandList, 1);
+	m_pMonsterObject->SetPosition(XMFLOAT3(190, 50, -70));
+	m_pMonsterObject->SetScale(4.0f, 4.0f, 4.0f);
+	m_pMonsterObject->Rotate(0.0f, 180.0f, 0.0f);
+	m_pMonsterObject->m_fHP = 100.f;
+	m_pMonsterObject->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
+	m_pMonsterObject->m_pSkinnedAnimationController->m_xmf3RootObjectScale = XMFLOAT3(10.0f, 10.0f, 10.0f);
+	m_pMonsterObject->CreateArticulation(1.0f);
+	CMonsterPool::GetInst()->SetNonActiveMonster(m_pMonsterObject.get());
+	m_pEnemys.push_back(std::move(m_pMonsterObject));
+
+	m_pMonsterObject = std::make_unique<CGoblinObject>(pd3dDevice, pd3dCommandList, 1);
+	m_pMonsterObject->SetPosition(XMFLOAT3(190, 50, -70));
+	m_pMonsterObject->SetScale(4.0f, 4.0f, 4.0f);
+	m_pMonsterObject->Rotate(0.0f, 180.0f, 0.0f);
+	m_pMonsterObject->m_fHP = 100.f;
+	m_pMonsterObject->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
+	m_pMonsterObject->m_pSkinnedAnimationController->m_xmf3RootObjectScale = XMFLOAT3(10.0f, 10.0f, 10.0f);
+	m_pMonsterObject->CreateArticulation(1.0f);
+	CMonsterPool::GetInst()->SetNonActiveMonster(m_pMonsterObject.get());
+	m_pEnemys.push_back(std::move(m_pMonsterObject));
+
+	m_pMonsterObject = std::make_unique<CGoblinObject>(pd3dDevice, pd3dCommandList, 1);
+	m_pMonsterObject->SetPosition(XMFLOAT3(190, 50, -70));
+	m_pMonsterObject->SetScale(4.0f, 4.0f, 4.0f);
+	m_pMonsterObject->Rotate(0.0f, 180.0f, 0.0f);
+	m_pMonsterObject->m_fHP = 100.f;
+	m_pMonsterObject->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
+	m_pMonsterObject->m_pSkinnedAnimationController->m_xmf3RootObjectScale = XMFLOAT3(10.0f, 10.0f, 10.0f);
+	m_pMonsterObject->CreateArticulation(1.0f);
+	CMonsterPool::GetInst()->SetNonActiveMonster(m_pMonsterObject.get());
+	m_pEnemys.push_back(std::move(m_pMonsterObject));
 
 	// Light 생성
 	m_pLight = std::make_unique<CLight>();
 	m_pLight->CreateLightVariables(pd3dDevice, pd3dCommandList);
 
-	m_pTerrainShader = std::make_unique<CSplatTerrainShader>();
-	m_pTerrainShader->CreateShader(pd3dDevice, GetGraphicsRootSignature(), 7, pdxgiObjectRtvFormats, DXGI_FORMAT_D32_FLOAT, 0);
-	m_pTerrainShader->CreateCbvSrvUavDescriptorHeaps(pd3dDevice, 0, 13);
-	m_pTerrainShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
+	
+	m_pMap = std::make_unique<CMap>();
+	m_pMap->Init(pd3dDevice, pd3dCommandList, GetGraphicsRootSignature());
+	m_pMap->GetTerrain()->SetPosition(XMFLOAT3(86.4804, -46.8876 - 46.8876 * 0.38819 + 6.5f, -183.7856));
+	m_pMap->GetTerrain()->SetRigidStatic();
+	m_pMap->LoadSceneFromFile(pd3dDevice, pd3dCommandList, "Object/Scene/Scene.bin");
 
-	// Terrain 생성
-	XMFLOAT3 xmf3Scale(1.0f, 1.0f, 1.0f);
-	XMFLOAT4 xmf4Color(0.0f, 0.5f, 0.0f, 0.0f);
-	m_pTerrain = std::make_unique<CSplatTerrain>(pd3dDevice, pd3dCommandList, GetGraphicsRootSignature(), _T("Terrain/terrainHeightMap257_2.raw"), 257, 257, 257, 257, xmf3Scale, xmf4Color, m_pTerrainShader.get());
-	float minHeight = FLT_MAX;
-	for (int x = 0; x < m_pTerrain->GetWidth(); ++x) {
-		for (int z = 0; z < m_pTerrain->GetLength(); ++z) {
-			if (minHeight > m_pTerrain->GetHeight(x, z)) {
-				minHeight = m_pTerrain->GetHeight(x, z);
-			}
-		}
+	int index = 0;
+
+	m_IObjectIndexs.resize(m_pEnemys.size() + m_pMap->GetMapObjects().size());
+
+	for (int i = 0; i < m_pEnemys.size(); ++i) {
+		((CDepthRenderShader*)m_pDepthRenderShader.get())->RegisterObject(m_pEnemys[i].get());
+		((CPhysicsObject*)m_pEnemys[i].get())->SetUpdatedContext(m_pMap.get());
+		m_IObjectIndexs[i] = index++;
 	}
-	m_pTerrain->SetPosition(XMFLOAT3(86.4804, -46.8876 - 46.8876 * 0.38819 + 6.5f, -183.7856));
-	m_pTerrain->SetRigidStatic();
-	LoadSceneFromFile(pd3dDevice, pd3dCommandList, "Object/Scene/Scene.bin");
-	m_IObjectIndexs.resize(m_pObjects.size());
-	for (int i = 0; i < m_pObjects.size(); ++i) {
-		((CDepthRenderShader*)m_pDepthRenderShader.get())->RegisterObject(m_pObjects[i].get());
 
-		if (dynamic_cast<CPhysicsObject*>(m_pObjects[i].get()))
-			((CPhysicsObject*)m_pObjects[i].get())->SetUpdatedContext(m_pTerrain.get());
-
-		m_IObjectIndexs[i] = i;
+	for (int i = 0; i < m_pMap->GetMapObjects().size(); ++i) {
+		((CDepthRenderShader*)m_pDepthRenderShader.get())->RegisterObject(m_pMap->GetMapObjects()[i].get());
+		m_IObjectIndexs[i] = index++;
 	}
+
 	((CDepthRenderShader*)m_pDepthRenderShader.get())->SetLight(m_pLight->GetLights());
-	((CDepthRenderShader*)m_pDepthRenderShader.get())->SetTerrain(m_pTerrain.get());
+	((CDepthRenderShader*)m_pDepthRenderShader.get())->SetTerrain(m_pMap->GetTerrain().get());
 
 	m_pSunLightShader = std::make_unique<CSunLightShader>();
 	m_pSunLightShader->CreateShader(pd3dDevice, GetGraphicsRootSignature(), 7, pdxgiObjectRtvFormats, DXGI_FORMAT_D32_FLOAT, 0);
@@ -678,25 +756,25 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pParticleShader = std::make_unique<CParticleShader>();
 	m_pParticleShader->CreateGraphicsPipelineState(pd3dDevice, GetGraphicsRootSignature(), 0);
 
-	for (int i = 0; i < MAX_ATTACKSPRITE_OBJECT; ++i)
+	for (int i = 0; i < 1; ++i)
 	{
-		std::unique_ptr<CGameObject> m_pSpriteAttackObject = std::make_unique<CParticleObject>(m_pTextureManager->LoadTextureIndex(TextureType::BillBoardTexture, L"Image/BillBoardImages/Fire_Effect.dds"), pd3dDevice, pd3dCommandList, GetGraphicsRootSignature(), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), 2.0f, XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT2(2.0f, 2.0f), MAX_PARTICLES, m_pParticleShader.get(), SPHERE_PARTICLE);
+		std::unique_ptr<CGameObject> m_pSpriteAttackObject = std::make_unique<CParticleObject>(m_pTextureManager->LoadTextureIndex(TextureType::SmokeTexture, L"Image/SmokeImages/Smoke2.dds"), pd3dDevice, pd3dCommandList, GetGraphicsRootSignature(), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), 2.0f, XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT2(2.0f, 2.0f), MAX_PARTICLES, m_pParticleShader.get(), SPHERE_PARTICLE);
 		m_pSpriteAttackObjects.push_back(std::move(m_pSpriteAttackObject));
 	}
 
-	for (int i = 0; i < MAX_TERRAINSPRITE_OBJECT; ++i)
+	for (int i = 0; i < 1; ++i)
 	{
-		std::unique_ptr<CGameObject> m_pSpriteObject = std::make_unique<CTerrainParticleObject>(L"Image/SmokeImages/Smoke2.dds", pd3dDevice, pd3dCommandList, GetGraphicsRootSignature(), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), 2.0f, XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT2(2.0f, 2.0f), MAX_PARTICLES, m_pParticleShader.get(), 5);
+		std::unique_ptr<CGameObject> m_pSpriteObject = std::make_unique<CParticleObject>(m_pTextureManager->LoadTextureIndex(TextureType::BillBoardTexture, L"Image/BillBoardImages/Circle1.dds"), pd3dDevice, pd3dCommandList, GetGraphicsRootSignature(), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), 2.0f, XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT2(2.0f, 2.0f), MAX_PARTICLES, m_pParticleShader.get(), 5);
 		m_pTerrainSpriteObject.push_back(std::move(m_pSpriteObject));
 	}
 
-	for (int i = 0; i < MAX_PARTICLE_OBJECT; ++i)
+	for (int i = 0; i < 1; ++i)
 	{
 		std::unique_ptr<CGameObject> m_pParticleObject = std::make_unique<CParticleObject>(m_pTextureManager->LoadTextureIndex(TextureType::ParticleTexture, L"Image/ParticleImages/RoundSoftParticle.dds"), pd3dDevice, pd3dCommandList, GetGraphicsRootSignature(), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), 2.0f, XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT2(2.0f, 2.0f), MAX_PARTICLES, m_pParticleShader.get(), SPHERE_PARTICLE);
 		m_pParticleObjects.push_back(std::move(m_pParticleObject));
 	}
 
-	m_pSmokeObject = std::make_unique<CSmokeParticleObject>(L"Image/SmokeImages/Smoke2.dds", pd3dDevice, pd3dCommandList, GetGraphicsRootSignature(), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), 2.0f, XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT2(2.0f, 2.0f), MAX_PARTICLES, m_pParticleShader.get(), SMOKE_PARTICLE);
+	m_pSmokeObject = std::make_unique<CSmokeParticleObject>(m_pTextureManager->LoadTextureIndex(TextureType::SmokeTexture, L"Image/SmokeImages/Smoke2.dds"), pd3dDevice, pd3dCommandList, GetGraphicsRootSignature(), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), 2.0f, XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT2(2.0f, 2.0f), MAX_PARTICLES, m_pParticleShader.get(), SMOKE_PARTICLE);
 
 	//for (int i = 0; i < MAX_UPDOWN_PARTICLE_OBJECT; i++)
 	//{
@@ -787,16 +865,20 @@ void CMainTMPScene::UpdateObjects(float fTimeElapsed)
 	}
 
 	AnimationCompParams animation_comp_params;
-	animation_comp_params.pObjects = &m_pObjects;
+	animation_comp_params.pObjects = &m_pEnemys;
 	animation_comp_params.fElapsedTime = fTimeElapsed;
 	CMessageDispatcher::GetInst()->Dispatch_Message<AnimationCompParams>(MessageType::UPDATE_OBJECT, &animation_comp_params, ((CPlayer*)m_pPlayer)->m_pStateMachine->GetCurrentState());
 
 	m_pLight->Update((CPlayer*)m_pPlayer);
 
-	for (int i = 0; i < m_pObjects.size(); ++i) {
-		m_pObjects[i]->Update(fTimeElapsed);
-		m_pcbMappedDisolveParams->dissolveThreshold[i] = m_pObjects[i]->m_fDissolveThrethHold;
+	for (int i = 0; i < m_pEnemys.size(); ++i) {
+		m_pEnemys[i]->Update(fTimeElapsed);
+		m_pcbMappedDisolveParams->dissolveThreshold[i] = m_pEnemys[i]->m_fDissolveThrethHold;
 	}
+
+	m_pMap->Update(fTimeElapsed);
+
+
 
 	for (std::unique_ptr<CGameObject>& obj : m_pSwordTrailObjects) {
 		obj->Update(fTimeElapsed);
@@ -809,7 +891,7 @@ void CMainTMPScene::UpdateObjects(float fTimeElapsed)
 		((CKnightPlayer*)m_pPlayer)->m_pSkinnedAnimationController->m_pRootMotionObject->GetWorld()._41,
 		 m_pPlayer->GetPosition().y,
 		((CKnightPlayer*)m_pPlayer)->m_pSkinnedAnimationController->m_pRootMotionObject->GetWorld()._43 };
-	xmf3PlayerPos.y += 12.5f;
+	xmf3PlayerPos.y += 8.0f;
 
 	m_pMainSceneCamera->Update(xmf3PlayerPos, fTimeElapsed);
 
@@ -863,21 +945,13 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 	m_pSkyBoxObject->Render(pd3dCommandList, m_pCurrentCamera);
 
 
-
-	m_pTerrainShader->Render(pd3dCommandList, 0);
-	m_pTerrain->Render(pd3dCommandList, true);
-
 	m_pTextureManager->SetTextureDescriptorHeap(pd3dCommandList);
 	m_pTextureManager->UpdateShaderVariables(pd3dCommandList);
 
 
-	for (int i = 0; i < m_pTerrainSpriteObject.size(); ++i)
-	{
-		((CParticleObject*)m_pTerrainSpriteObject[i].get())->Update(fTimeElapsed);
-		(static_cast<CParticleObject*>(m_pTerrainSpriteObject[i].get()))->Animate(fTimeElapsed);
-		(static_cast<CParticleObject*>(m_pTerrainSpriteObject[i].get()))->UpdateShaderVariables(pd3dCommandList, fCurrentTime, fTimeElapsed);
-		((CParticleObject*)m_pTerrainSpriteObject[i].get())->Render(pd3dCommandList, nullptr, m_pParticleShader.get());
-	}
+	m_pMap->RenderTerrain(pd3dCommandList);
+
+
 
 	//((CParticleObject*)m_pSmokeObject.get())->Update(fTimeElapsed);
 	//((CParticleObject*)m_pSmokeObject.get())->UpdateShaderVariables(pd3dCommandList, fCurrentTime, fTimeElapsed);
@@ -914,24 +988,36 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 	if (trailUpdateT > 0.008f) {
 		for (int i = 0; i < m_pSwordTrailObjects.size(); ++i) {
 			CSwordTrailObject* trailObj = dynamic_cast<CSwordTrailObject*>(m_pSwordTrailObjects[i].get());
-			if (trailObj->m_bIsUpdateTrailVariables)
+			switch (trailObj->m_eTrailUpdateMethod)
+			{
+			case TRAIL_UPDATE_METHOD::UPDATE_NEW_CONTROL_POINT:
 				trailObj->SetNextControllPoint(&((CPlayer*)m_pPlayer)->GetTrailControllPoint(0), &((CPlayer*)m_pPlayer)->GetTrailControllPoint(1));
-			else
+				break;
+			case TRAIL_UPDATE_METHOD::NON_UPDATE_NEW_CONTROL_POINT:
+				break;
+			case TRAIL_UPDATE_METHOD::DELETE_CONTROL_POINT:
 				trailObj->SetNextControllPoint(nullptr, nullptr);
+
+				break;
+			default:
+				break;
+			}
 		}
+		trailUpdateT = 0.0f;
 	}
 
 	D3D12_GPU_VIRTUAL_ADDRESS d3dGpuVirtualAddress = m_pd3dcbDisolveParams->GetGPUVirtualAddress();
 	pd3dCommandList->SetGraphicsRootConstantBufferView(7, d3dGpuVirtualAddress);
 
 	UINT index = 0;
-	for (int i = 0; i < m_pObjects.size(); ++i)
+	for (int i = 0; i < m_pEnemys.size(); ++i)
 	{
 		pd3dCommandList->SetGraphicsRoot32BitConstants(0, 1, &i, 33);
-		m_pObjects[i]->Animate(0.0f);
-		m_pObjects[i]->Render(pd3dCommandList, true);
+		m_pEnemys[i]->Animate(0.0f);
+		m_pEnemys[i]->Render(pd3dCommandList, true);
 	}
 
+	m_pMap->RenderMapObjects(pd3dCommandList);
 
 #ifdef RENDER_BOUNDING_BOX
 	CBoundingBoxShader::GetInst()->Render(pd3dCommandList, 0);
@@ -942,16 +1028,6 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 #ifdef PostProcessing
 	m_pPostProcessShader->Render(pd3dCommandList, pCamera);
 #endif // PostProcessing
-
-
-
-	//for (int i = 0; i < m_pTerrainSpriteObject.size(); ++i)
-	//{
-	//	((CParticleObject*)m_pTerrainSpriteObject[i].get())->Update(fTimeElapsed);
-	//	(static_cast<CParticleObject*>(m_pTerrainSpriteObject[i].get()))->Animate(fTimeElapsed);
-	//	(static_cast<CParticleObject*>(m_pTerrainSpriteObject[i].get()))->UpdateShaderVariables(pd3dCommandList, fCurrentTime, fTimeElapsed);
-	//	((CParticleObject*)m_pTerrainSpriteObject[i].get())->Render(pd3dCommandList, nullptr, m_pParticleShader.get());
-	//}
 	
 
 	for (int i = 0; i < m_pParticleObjects.size(); ++i)
@@ -968,6 +1044,13 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 		((CParticleObject*)m_pSpriteAttackObjects[i].get())->Animate(fTimeElapsed);
 		((CParticleObject*)m_pSpriteAttackObjects[i].get())->UpdateShaderVariables(pd3dCommandList, fCurrentTime, fTimeElapsed);
 		((CParticleObject*)m_pSpriteAttackObjects[i].get())->Render(pd3dCommandList, nullptr, m_pParticleShader.get());
+	}
+
+	for (int i = 0; i < m_pTerrainSpriteObject.size(); ++i)
+	{
+		((CParticleObject*)m_pTerrainSpriteObject[i].get())->Update(fTimeElapsed);
+		((CParticleObject*)(m_pTerrainSpriteObject[i].get()))->UpdateShaderVariables(pd3dCommandList, fCurrentTime, fTimeElapsed);
+		((CParticleObject*)m_pTerrainSpriteObject[i].get())->Render(pd3dCommandList, nullptr, m_pParticleShader.get());
 	}
 	//((CParticleObject*)m_pTrailParticleObjects.get())->Update(fTimeElapsed);
 	//((CParticleObject*)m_pTrailParticleObjects.get())->UpdateShaderVariables(pd3dCommandList, fCurrentTime, fTimeElapsed);
@@ -1039,119 +1122,6 @@ void CMainTMPScene::OnPostRender()
 
 }
 
-void CMainTMPScene::LoadSceneFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, char* pstrFileName)
-{
-	FILE* pInFile = NULL;
-	::fopen_s(&pInFile, pstrFileName, "rb");
-	::rewind(pInFile);
-
-	CMainTMPScene* pScene = this;
-
-	char pstrToken[64] = { '\0' };
-
-	int nGameObjects;
-
-	UINT nRead;
-
-	::ReadStringFromFile(pInFile, pstrToken);
-
-	if (!strcmp(pstrToken, "<GameObjects>:"))
-	{
-		int nObjects = ReadIntegerFromFile(pInFile);
-		for (int i = 0; i < nObjects; ++i) {
-			ReadStringFromFile(pInFile, pstrToken);
-			nRead = ReadStringFromFile(pInFile, pstrToken);
-
-			float buffer[16];
-			std::string objPath{ "Object/Scene/" };
-			objPath += static_cast<std::string>(pstrToken) + ".bin";
-
-
-
-			FILE* objFile = NULL;
-			::fopen_s(&objFile, objPath.data(), "rb");
-			::rewind(objFile);
-
-			std::unique_ptr<CGameObject> pObject = std::make_unique<CGameObject>();
-
-			nRead = (UINT)::fread(&buffer, sizeof(float), 16, pInFile);
-
-
-			XMFLOAT4X4 xmfWorld = {
-				buffer[0],buffer[1],buffer[2],buffer[3],
-				buffer[4],buffer[5],buffer[6],buffer[7],
-				buffer[8],buffer[9],buffer[10],buffer[11],
-				buffer[12],buffer[13],buffer[14],buffer[15]
-			};
-
-			CLoadedModelInfo* rootObj = CModelManager::GetInst()->LoadGeometryFromFileOfScene(pd3dDevice, pd3dCommandList, objFile);
-			rootObj->m_pModelRootObject->m_xmf4x4Transform = xmfWorld;
-
-			std::string name{ pstrToken };
-			if (name.find("Tree") != std::string::npos || name.find("Rock") != std::string::npos)
-			{
-				physx::PxTolerancesScale scale = Locator.GetPxPhysics()->getTolerancesScale();
-				physx::PxCookingParams params(scale);
-
-				params.meshPreprocessParams |= physx::PxMeshPreprocessingFlag::eDISABLE_CLEAN_MESH;
-
-				physx::PxTriangleMeshDesc meshDesc;
-				std::vector<XMFLOAT3> vertexs = rootObj->m_pModelRootObject->m_pMesh->GetVertexs();
-				std::vector<XMFLOAT3> world_vertexs; world_vertexs.resize(vertexs.size());
-				XMMATRIX trans = XMLoadFloat4x4(&rootObj->m_pModelRootObject->m_xmf4x4Transform);
-
-				XMVECTOR scaling;
-				XMVECTOR rotation;
-				XMVECTOR translation;
-				XMMatrixDecompose(&scaling, &rotation, &translation, XMLoadFloat4x4(&rootObj->m_pModelRootObject->m_xmf4x4Transform));
-				XMMATRIX rotationMatrix = XMMatrixRotationQuaternion(rotation);
-				XMMATRIX scalingMatrix = XMMatrixScalingFromVector(scaling);
-				XMMATRIX transformMatrix = scalingMatrix * rotationMatrix;
-
-				trans.r[3] = XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f);
-				int index = 0;
-				for (XMFLOAT3 pos : vertexs) {
-					XMFLOAT3 point = Vector3::TransformCoord(pos, transformMatrix);
-					world_vertexs[index++] = point;
-				}
-				meshDesc.points.count = vertexs.size();
-				meshDesc.points.stride = sizeof(physx::PxVec3);
-				meshDesc.points.data = world_vertexs.data();
-
-				std::vector<UINT> Indices = rootObj->m_pModelRootObject->m_pMesh->GetIndices();
-				meshDesc.triangles.count = Indices.size() / 3;
-				meshDesc.triangles.stride = 3 * sizeof(physx::PxU32);
-				meshDesc.triangles.data = Indices.data();
-
-
-				physx::PxTriangleMesh* aTriangleMesh = PxCreateTriangleMesh(params, meshDesc, Locator.GetPxPhysics()->getPhysicsInsertionCallback());
-
-				physx::PxTransform transform = physx::PxTransform(buffer[12], buffer[13], buffer[14]);
-				transform.q.normalize();
-				physx::PxMaterial* material = Locator.GetPxPhysics()->createMaterial(0.5, 0.5, 0.5);
-
-				physx::PxRigidStatic* actor = physx::PxCreateStatic(*Locator.GetPxPhysics(), transform, physx::PxTriangleMeshGeometry(aTriangleMesh), *material);
-				Locator.GetPxScene()->addActor(*actor);
-
-			}
-
-			pObject->SetChild(rootObj->m_pModelRootObject, true);
-			XMFLOAT4X4 matrix_scale = {
-					10, 0, 0, 0,
-					0, 10, 0, 0,
-					0, 0, 10, 0,
-					0, 0, 0, 1,
-			};
-			pObject->UpdateTransform(NULL);
-
-			//if (!objPath.contains("Rock"))
-			m_pObjects.push_back(std::move(pObject));
-
-			fclose(objFile);
-		}
-	}
-}
-
 void CMainTMPScene::HandleCollision(const CollideParams& params)
 {
 	std::vector<std::unique_ptr<CGameObject>>::iterator it = std::find_if(m_pParticleObjects.begin(), m_pParticleObjects.end(), [](const std::unique_ptr<CGameObject>& pParticleObject) {
@@ -1181,6 +1151,7 @@ void CMainTMPScene::HandleCollision(const CollideParams& params)
 		impact_comp_params.pObject = (*it).get();
 		impact_comp_params.xmf3Position = params.xmf3CollidePosition;
 		CMessageDispatcher::GetInst()->Dispatch_Message<ImpactCompParams>(MessageType::UPDATE_BILLBOARD, &impact_comp_params, ((CPlayer*)m_pPlayer)->m_pStateMachine->GetCurrentState());
+		CLogger::GetInst()->Log(std::string("Display Impact!!!!!!!!!!!!!"));
 	}
 
 	// Demo 사용x
@@ -1198,28 +1169,28 @@ void CMainTMPScene::HandleCollision(const CollideParams& params)
 	//	CMessageDispatcher::GetInst()->Dispatch_Message<ParticleUpDownParams>(MessageType::UPDATE_UPDOWNPARTICLE, &particleUpdown_comp_params, Damaged_Monster::GetInst());
 	//}
 
-	std::vector<std::unique_ptr<CGameObject>>::iterator TerrainSpriteit = std::find_if(m_pTerrainSpriteObject.begin(), m_pTerrainSpriteObject.end(), [](const std::unique_ptr<CGameObject>& pTerrainSpriteObject) {
-		if (((CParticleObject*)pTerrainSpriteObject.get())->CheckCapacity())
-			return true;
-		return false;
-		});
+	//std::vector<std::unique_ptr<CGameObject>>::iterator TerrainSpriteit = std::find_if(m_pTerrainSpriteObject.begin(), m_pTerrainSpriteObject.end(), [](const std::unique_ptr<CGameObject>& pTerrainSpriteObject) {
+	//	if (((CParticleObject*)pTerrainSpriteObject.get())->CheckCapacity())
+	//		return true;
+	//	return false;
+	//	});
 
-	if (TerrainSpriteit != m_pTerrainSpriteObject.end())
-	{
-		TerrainSpriteCompParams AttackSprite_comp_params;
-		AttackSprite_comp_params.pObject = (*TerrainSpriteit).get();
-		AttackSprite_comp_params.xmf3Position = params.xmf3CollidePosition;
-		CMessageDispatcher::GetInst()->Dispatch_Message<TerrainSpriteCompParams>(MessageType::UPDATE_SPRITE, &AttackSprite_comp_params, Spawn_Monster::GetInst());
-		TCHAR pstrDebug[256] = { 0 };
-		_stprintf_s(pstrDebug, 256, _T("바닥 충격 출력 %f, %f, %f\n"), params.xmf3CollidePosition.x, params.xmf3CollidePosition.y, params.xmf3CollidePosition.z);
-		OutputDebugString(pstrDebug);
-	}
-	else
-	{
-		TCHAR pstrDebug[256] = { 0 };
-		_stprintf_s(pstrDebug, 256, _T("No바닥 충격 출력 %f, %f, %f\n"), params.xmf3CollidePosition.x, params.xmf3CollidePosition.y, params.xmf3CollidePosition.z);
-		OutputDebugString(pstrDebug);
-	}
+	//if (TerrainSpriteit != m_pTerrainSpriteObject.end())
+	//{
+	//	TerrainSpriteCompParams AttackSprite_comp_params;
+	//	AttackSprite_comp_params.pObject = (*TerrainSpriteit).get();
+	//	AttackSprite_comp_params.xmf3Position = params.xmf3CollidePosition;
+	//	CMessageDispatcher::GetInst()->Dispatch_Message<TerrainSpriteCompParams>(MessageType::UPDATE_SPRITE, &AttackSprite_comp_params, Spawn_Monster::GetInst());
+	//	TCHAR pstrDebug[256] = { 0 };
+	//	_stprintf_s(pstrDebug, 256, _T("바닥 충격 출력 %f, %f, %f\n"), params.xmf3CollidePosition.x, params.xmf3CollidePosition.y, params.xmf3CollidePosition.z);
+	//	OutputDebugString(pstrDebug);
+	//}
+	//else
+	//{
+	//	TCHAR pstrDebug[256] = { 0 };
+	//	_stprintf_s(pstrDebug, 256, _T("No바닥 충격 출력 %f, %f, %f\n"), params.xmf3CollidePosition.x, params.xmf3CollidePosition.y, params.xmf3CollidePosition.z);
+	//	OutputDebugString(pstrDebug);
+	//}
 
 
 
