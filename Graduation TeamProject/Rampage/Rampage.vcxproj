@@ -182,6 +182,7 @@
     <ClCompile Include="ImGui\implot_items.cpp" />
     <ClCompile Include="Object\Animation.cpp" />
     <ClCompile Include="Object\BillBoardObject.cpp" />
+    <ClCompile Include="Object\CollisionChecker.cpp" />
     <ClCompile Include="Object\Light.cpp" />
     <ClCompile Include="Object\Map.cpp" />
     <ClCompile Include="Object\Mesh.cpp" />
@@ -251,6 +252,7 @@
     <ClInclude Include="ImGui\imstb_truetype.h" />
     <ClInclude Include="Object\Animation.h" />
     <ClInclude Include="Object\BillBoardObject.h" />
+    <ClInclude Include="Object\CollisionChecker.h" />
     <ClInclude Include="Object\Light.h" />
     <ClInclude Include="Object\Map.h" />
     <ClInclude Include="Object\Mesh.h" />
