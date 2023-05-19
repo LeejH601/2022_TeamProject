@@ -1067,7 +1067,7 @@ void Evasion_Player::SetPlayerRootVel(CPlayer* player)
 		player->GetPosition().y,
 		pPlayerController->m_pRootMotionObject->GetWorld()._43 };
 
-	player->SetPosition(xmf3Position);
+	player->Move(Vector3::Subtract(xmf3Position, player->GetPosition()), true);
 
 	pPlayerController->m_pRootMotionObject->m_xmf4x4Transform._41 = 0.f;
 	pPlayerController->m_pRootMotionObject->m_xmf4x4Transform._43 = 0.f;
