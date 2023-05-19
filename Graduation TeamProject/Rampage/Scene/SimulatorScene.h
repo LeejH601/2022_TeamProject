@@ -31,9 +31,6 @@ private:
 	std::vector<std::unique_ptr<CGameObject>> m_pSpriteAttackObjects;
 	std::vector<std::unique_ptr<CGameObject>> m_pTerrainSpriteObject;
 
-	std::unique_ptr<CBillBoardObjectShader> m_pBillBoardObjectShader;
-	std::vector<std::unique_ptr<CGameObject>> m_pBillBoardObjects;
-
 	std::unique_ptr<CSwordTrailShader> m_pSwordTrailShader;
 	std::vector<std::unique_ptr<CGameObject>> m_pSwordTrailObjects;
 

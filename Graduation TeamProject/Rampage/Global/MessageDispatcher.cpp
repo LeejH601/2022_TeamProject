@@ -281,7 +281,12 @@ void StunAnimationComponent::HandleMessage(const Message& message, const Animati
 }
 ParticleComponent::ParticleComponent()
 {
-	m_pTexture = CSimulatorScene::GetInst()->GetTextureManager()->GetParticleTextureList()[GetParticleIndex()];  // 미리 텍스쳐 셋팅(index: 0)
+
+	m_fFieldSpeed = 1.0f;
+	m_fNoiseStrength = 1.0f;;
+	m_xmf3FieldMainDirection = XMFLOAT3(0.0f, 1.0f, 0.0f);
+	m_fProgressionRate = 1.0f;
+	m_fLengthScale = 1.0f;
 }
 
 void ParticleComponent::HandleMessage(const Message& message, const ParticleCompParams& params)
@@ -299,28 +304,47 @@ void ParticleComponent::HandleMessage(const Message& message, const ParticleComp
 		pParticle->SetColor(m_xmf3Color);
 		pParticle->SetSpeed(m_fSpeed);
 		pParticle->SetLifeTime(m_fLifeTime);
-		//pParticle->SetMaxParticleN(m_nParticleNumber);
+		pParticle->SetMaxParticleN(m_nParticleNumber);
 		pParticle->SetEmitParticleN(m_nEmitParticleNumber);
 		pParticle->SetPosition(params.xmf3Position);
 		pParticle->SetParticleType(m_iParticleType);
-		pParticle->ChangeTexture(m_pTexture);
+		pParticle->SetFieldSpeed(m_fFieldSpeed);
+		pParticle->SetNoiseStrength(m_fNoiseStrength);
+		pParticle->SetFieldMainDirection(m_xmf3FieldMainDirection);
+		pParticle->SetProgressionRate(m_fProgressionRate);
+		pParticle->SetLengthScale(m_fLengthScale);
+		pParticle->SetTextureIndex(m_iTextureIndex + m_iTextureOffset);
+		pParticle->EmitParticle(0);
 	}
+}
+void ImpactEffectComponent::SetTotalRowColumn(int iTotalRow, int iTotalColumn)
+{
+	m_iTotalRow = iTotalRow;
+	m_iTotalColumn = iTotalColumn;
 }
 void ImpactEffectComponent::HandleMessage(const Message& message, const ImpactCompParams& params)
 {
 	if (!m_bEnable)
 		return;
 
-	CMultiSpriteObject* pMultiSprite = dynamic_cast<CMultiSpriteObject*>(params.pObject);
+	CParticleObject* pMultiSpriteParticle = dynamic_cast<CParticleObject*>(params.pObject);
 
-	if (pMultiSprite)
+	if (pMultiSpriteParticle)
 	{
-		pMultiSprite->SetEnable(true);
-		pMultiSprite->SetSize(m_fSize);
-		pMultiSprite->SetLifeTime(m_fSpeed);
-		pMultiSprite->SetStartAlpha(m_fAlpha);
-		pMultiSprite->SetPosition(params.xmf3Position);
-		pMultiSprite->ChangeTexture(m_pTexture);
+		pMultiSpriteParticle->SetParticleType(m_iParticleType);
+		pMultiSpriteParticle->SetEmit(true);
+		pMultiSpriteParticle->SetTotalRowColumn(m_iTotalRow, m_iTotalColumn);
+		pMultiSpriteParticle->SetSize(m_fSize);
+		pMultiSpriteParticle->SetDirection(XMFLOAT3(0.f, 0.f, 0.f));
+		pMultiSpriteParticle->SetStartAlpha(m_fAlpha);
+		pMultiSpriteParticle->SetColor(m_xmf3Color);
+		pMultiSpriteParticle->SetLifeTime(m_fLifeTime);
+		pMultiSpriteParticle->SetAnimation(true);
+		pMultiSpriteParticle->SetEmitParticleN(m_nEmitParticleNumber);
+		pMultiSpriteParticle->SetMaxParticleN(m_nParticleNumber);
+		pMultiSpriteParticle->SetPosition(params.xmf3Position);
+		pMultiSpriteParticle->SetTextureIndex(m_iTextureIndex + m_iTextureOffset);
+		pMultiSpriteParticle->EmitParticle(0);
 	}
 	CLogger::GetInst()->Log(std::string("MultiSprite HandleMessge Called"));
 }
@@ -329,23 +353,37 @@ void SceneCollideListener::HandleMessage(const Message& message, const CollidePa
 	m_pScene->HandleCollision(params);
 }
 
-void TerrainSpriteComponent::SetTexture(LPCTSTR pszFileName)
-{
-}
-
 void TerrainSpriteComponent::HandleMessage(const Message& message, const TerrainSpriteCompParams& params)
 {
-	CTerrainSpriteObject* pSpriteObject = dynamic_cast<CTerrainSpriteObject*>(params.pObject);
+	//CTerrainSpriteObject* pSpriteObject = dynamic_cast<CTerrainSpriteObject*>(params.pObject);
+	//if (!m_bEnable)
+	//	return;
 
-	if (pSpriteObject)
+	CParticleObject* pMultiSprite = dynamic_cast<CParticleObject*>(params.pObject);
+
+	if (pMultiSprite)
 	{
-		pSpriteObject->SetType(TerrainSpriteType::TERRAINSPRITE_CROSS_FADE);
-		pSpriteObject->SetEnable(true);
-		pSpriteObject->SetPosition(params.xmf3Position);
-		pSpriteObject->SetLifeTime(m_fLifeTime);
-		pSpriteObject->SetStart(true);
-		pSpriteObject->SetStartAlpha(1.f);
+		pMultiSprite->SetEmit(true);
+		pMultiSprite->SetSize(m_fSize);
+		pMultiSprite->SetStartAlpha(m_fAlpha);
+		pMultiSprite->SetColor(m_xmf3Color);
+		pMultiSprite->SetSpeed(m_fSpeed);
+		pMultiSprite->SetLifeTime(m_fLifeTime);
+		//pParticle->SetMaxParticleN(m_nParticleNumber);
+		pMultiSprite->SetEmitParticleN(m_nEmitParticleNumber);
+		pMultiSprite->SetPosition(params.xmf3Position);
+		pMultiSprite->SetParticleType(m_iParticleType);
 	}
+
+	//if (pSpriteObject)
+	//{
+	//	pSpriteObject->SetType(TerrainSpriteType::TERRAINSPRITE_CROSS_FADE);
+	//	pSpriteObject->SetEnable(true);
+	//	pSpriteObject->SetPosition(params.xmf3Position);
+	//	pSpriteObject->SetLifeTime(m_fLifeTime);
+	//	pSpriteObject->SetStart(true);
+	//	pSpriteObject->SetStartAlpha(1.f);
+	//}
 }
 
 void SmokeParticleComponent::HandleMessage(const Message& message, const ParticleSmokeParams& params)
@@ -364,6 +402,7 @@ void SmokeParticleComponent::HandleMessage(const Message& message, const Particl
 		pParticleObject->SetLifeTime(m_fLifeTime);
 		pParticleObject->SetMaxParticleN(m_nParticleNumber);
 		pParticleObject->SetPosition(params.xmf3Position);
+		pParticleObject->EmitParticle(2);
 	}
 }
 
@@ -397,11 +436,12 @@ void TrailParticleComponent::HandleMessage(const Message& message, const Particl
 		pParticleObject->SetSize(m_fSize);
 		pParticleObject->SetStartAlpha(m_fAlpha);
 		pParticleObject->SetColor(m_xmf3Color);
-		pParticleObject->SetSpeed(m_fSpeed);
-		pParticleObject->SetLifeTime(m_fLifeTime);
+		pParticleObject->SetSpeed(m_fSpeed * 300.0f);
+		pParticleObject->SetLifeTime(0.05f);
 		pParticleObject->SetMaxParticleN(m_nParticleNumber);
 		pParticleObject->SetEmitParticleN(m_nEmitMinParticleNumber + rand() % (m_nEmitMaxParticleNumber - m_nEmitMinParticleNumber));
 		pParticleObject->SetPosition(params.xmf3Position);
+		pParticleObject->SetDirection(params.xmf3Velocity);
 		//pParticleObject->ChangeTexture(m_pTexture);
 	}
 }
@@ -459,14 +499,15 @@ void TrailComponent::HandleMessage(const Message& message, const TrailUpdatePara
 	if (message.getType() == MessageType::UPDATE_SWORDTRAIL) {
 		CSwordTrailObject* pTrail = dynamic_cast<CSwordTrailObject*>(params.pObject);
 
-		pTrail->m_nCurves = 4;
+		pTrail->m_nCurves = this->m_nCurves;
 		for (int i = 0; i < this->m_nCurves; ++i) {
 			pTrail->m_fR_CurvePoints[i] = this->m_fR_CurvePoints[i];
 			pTrail->m_fG_CurvePoints[i] = this->m_fG_CurvePoints[i];
-			pTrail->m_fG_CurvePoints[i] = this->m_fG_CurvePoints[i];
+			pTrail->m_fB_CurvePoints[i] = this->m_fB_CurvePoints[i];
 			pTrail->m_fColorCurveTimes[i] = this->m_fColorCurveTimes_R[i];
 		}
-		pTrail->m_bIsUpdateTrailVariables = GetEnable();
+		pTrail->m_fEmissiveFactor = this->m_fEmissiveFactor;
+		pTrail->m_eTrailUpdateMethod = GetEnable() ? TRAIL_UPDATE_METHOD::UPDATE_NEW_CONTROL_POINT : TRAIL_UPDATE_METHOD::NON_UPDATE_NEW_CONTROL_POINT;
 	}
 }
 void SceneOnGroundListener::HandleMessage(const Message& message, const OnGroundParams& params)

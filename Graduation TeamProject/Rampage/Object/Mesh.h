@@ -307,6 +307,7 @@ public:
 	XMFLOAT2						m_xmf2Size;
 	float							m_fLifetime;
 	int								m_iBillBoard;
+	//int							m_iTextureIndex;
 public:
 	CSpriteVertex() { m_xmf2Size = XMFLOAT2(0.f, 0.f), m_iBillBoard = true; m_fLifetime = 0.f; }
 	CSpriteVertex(XMFLOAT2 xmf2Size, bool bBillBoard)
@@ -359,13 +360,27 @@ public:
 	XMFLOAT3						m_xmf3Velocity = XMFLOAT3(0.0f, 0.0f, 0.0f);
 	float							m_fLifetime = 0.0f;
 	UINT							m_iType = 0;
-
+	float							m_fEmitTime = 0.0f;
+	UINT							m_iTextureIndex = 0;
+	UINT							m_iTextureCoord[2];
 public:
 	CParticleVertex() { }
 	~CParticleVertex() { }
 };
 
-#define MAX_PARTICLES				10000
+struct ParticleEmitDataParam
+{
+	XMFLOAT3 m_xmf3EmitedPosition;
+	float m_fEmitedSpeed;
+	XMFLOAT3 m_xmf3EmitAxes;
+	int m_nEmitNum;
+	float m_fLifeTime;
+	float							m_fEmitTime = 0.0f;
+	UINT							m_iTextureIndex = 0;
+	UINT							m_iTextureCoord[2];
+};
+
+#define MAX_PARTICLES				100000
 
 //#define _WITH_QUERY_DATA_SO_STATISTICS
 
@@ -380,9 +395,15 @@ public:
 	UINT								m_nMaxParticles = MAX_PARTICLES;
 	UINT								m_nMaxParticle = MAX_PARTICLES;
 
+	int m_ncreatedParticleNum = 0;
+
 	ComPtr<ID3D12Resource>				m_pd3dVertexBuffer = NULL;
 	ID3D12Resource*						m_pd3dStreamOutputBuffer = NULL;
 	ID3D12Resource*						m_pd3dDrawBuffer = NULL;
+
+	D3D12_RANGE m_d3dReadRange = { 0, 0 };
+	UINT8* m_pBufferDataBegin = NULL;
+	ComPtr<ID3D12Resource>				m_pd3dDrawUploadBuffer;
 
 	ID3D12Resource*						m_pd3dDefaultBufferFilledSize = NULL;
 	ID3D12Resource*						m_pd3dUploadBufferFilledSize = NULL;
@@ -405,6 +426,8 @@ public:
 	virtual void PostRender(ID3D12GraphicsCommandList* pd3dCommandList, UINT nPipelineState);
 
 	virtual int OnPostRender(int nPipelineState);
+
+	void EmitParticle(int emitType, ParticleEmitDataParam& param);
 };
 
 

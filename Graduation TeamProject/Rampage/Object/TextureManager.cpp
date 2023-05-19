@@ -1,53 +1,63 @@
 #include "TextureManager.h"
 #include "..\Shader\BillBoardObjectShader.h"
 #include "..\Shader\ParticleShader.h"
-std::shared_ptr<CTexture> CTextureManager::LoadBillBoardTexture(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, LPCTSTR pszFileName, CBillBoardObjectShader* pShader, int iRow, int Column)
+
+void CTextureManager::CreateCbvSrvUavDescriptorHeaps(ID3D12Device* pd3dDevice, int nConstantBufferViews, int nShaderResourceViews, int nUnorderedAccessViews)
 {
-	for (const auto& texture : m_vBillBoardTextures)
-	{
-		if (!wcscmp(texture->GetTextureName(0), pszFileName))
-			return texture;
-	}
+	m_pd3dSrvCpuDescriptorHandles.resize(nShaderResourceViews);
+	m_pd3dSrvGpuDescriptorHandles.resize(nShaderResourceViews);
+	D3D12_DESCRIPTOR_HEAP_DESC d3dDescriptorHeapDesc;
+	d3dDescriptorHeapDesc.NumDescriptors = nConstantBufferViews + nShaderResourceViews + nUnorderedAccessViews;
+	d3dDescriptorHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+	d3dDescriptorHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
+	d3dDescriptorHeapDesc.NodeMask = 0;
+	pd3dDevice->CreateDescriptorHeap(&d3dDescriptorHeapDesc, __uuidof(ID3D12DescriptorHeap), (void**)m_pd3dCbvSrvUavDescriptorHeap.GetAddressOf());
 
-	std::shared_ptr<CTexture> pSpriteTexture = std::make_shared<CTexture>(1, RESOURCE_TEXTURE2D, 0, 1);
-	pSpriteTexture->SetRowColumn(iRow, Column);
-	pSpriteTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, pszFileName, RESOURCE_TEXTURE2D, 0);
+	m_d3dCbvCPUDescriptorStartHandle = m_pd3dCbvSrvUavDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
+	m_d3dCbvGPUDescriptorStartHandle = m_pd3dCbvSrvUavDescriptorHeap->GetGPUDescriptorHandleForHeapStart();
+	m_d3dSrvCPUDescriptorStartHandle.ptr = m_d3dCbvCPUDescriptorStartHandle.ptr + (::gnCbvSrvDescriptorIncrementSize * nConstantBufferViews);
+	m_d3dSrvGPUDescriptorStartHandle.ptr = m_d3dCbvGPUDescriptorStartHandle.ptr + (::gnCbvSrvDescriptorIncrementSize * nConstantBufferViews);
+	m_d3dUavCPUDescriptorStartHandle.ptr = m_d3dSrvCPUDescriptorStartHandle.ptr + (::gnCbvSrvDescriptorIncrementSize * nShaderResourceViews);
+	m_d3dUavGPUDescriptorStartHandle.ptr = m_d3dSrvGPUDescriptorStartHandle.ptr + (::gnCbvSrvDescriptorIncrementSize * nShaderResourceViews);
 
-	pShader->CreateShaderResourceViews(pd3dDevice, pSpriteTexture.get(), 0, 10);
-
-	m_vBillBoardTextures.emplace_back(pSpriteTexture);
-
-	return pSpriteTexture;
+	m_d3dSrvCPUDescriptorNextHandle = m_d3dSrvCPUDescriptorStartHandle;
+	m_d3dSrvGPUDescriptorNextHandle = m_d3dSrvGPUDescriptorStartHandle;
+	m_d3dUavCPUDescriptorNextHandle = m_d3dUavCPUDescriptorStartHandle;
+	m_d3dUavGPUDescriptorNextHandle = m_d3dUavGPUDescriptorStartHandle;
 }
 
-std::shared_ptr<CTexture> CTextureManager::LoadBillBoardTexture(LPCTSTR pszFileName)
+void CTextureManager::CreateResourceView(ID3D12Device* pd3dDevice, UINT nDescriptorHeapIndex)
 {
-	for (const auto& texture : m_vBillBoardTextures)
+	m_d3dSrvCPUDescriptorNextHandle.ptr += (::gnCbvSrvDescriptorIncrementSize * nDescriptorHeapIndex);
+	m_d3dSrvGPUDescriptorNextHandle.ptr += (::gnCbvSrvDescriptorIncrementSize * nDescriptorHeapIndex);
+
+	for (int i = 0; i < (UINT)TextureType::TextureType_End; i++)
 	{
-		if (!wcscmp(texture->GetTextureName(0), pszFileName))
-			return texture;
+		for (int j = 0; j < m_iTextureN[i]; j++)
+		{
+			ID3D12Resource* pShaderResource = m_pTextures[i]->GetResource(j);
+			D3D12_SHADER_RESOURCE_VIEW_DESC d3dShaderResourceViewDesc = m_pTextures[i]->GetShaderResourceViewDesc(j);
+			pd3dDevice->CreateShaderResourceView(pShaderResource, &d3dShaderResourceViewDesc, m_d3dSrvCPUDescriptorNextHandle);
+			m_d3dSrvCPUDescriptorNextHandle.ptr += ::gnCbvSrvDescriptorIncrementSize;
+			m_pd3dSrvCpuDescriptorHandles[i] = m_d3dSrvCPUDescriptorNextHandle;
+			m_pd3dSrvGpuDescriptorHandles[i] = m_d3dSrvGPUDescriptorNextHandle;
+			m_d3dSrvGPUDescriptorNextHandle.ptr += ::gnCbvSrvDescriptorIncrementSize;
+		}
 	}
-	return nullptr;
 }
 
-std::vector<std::shared_ptr<CTexture>>& CTextureManager::GetBillBoardTextureList()
+void CTextureManager::SetTextureDescriptorHeap(ID3D12GraphicsCommandList* pd3dCommandList)
 {
-	return m_vBillBoardTextures;
+	if (m_pd3dCbvSrvUavDescriptorHeap) pd3dCommandList->SetDescriptorHeaps(1, m_pd3dCbvSrvUavDescriptorHeap.GetAddressOf());
 }
 
-std::shared_ptr<CTexture> CTextureManager::LoadParticleTexture(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, LPCTSTR pszFileName, CParticleShader* pShader, int iRow, int Column)
+void CTextureManager::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
 {
-	for (const auto& texture : m_vParticleTextures)
-	{
-		if (!wcscmp(texture->GetTextureName(0), pszFileName))
-			return texture;
-	}
+	pd3dCommandList->SetGraphicsRootDescriptorTable(10, m_d3dCbvGPUDescriptorStartHandle);
+}
 
-	std::shared_ptr<CTexture> pParticleTexture = std::make_shared<CTexture>(3, RESOURCE_TEXTURE1D, 0, 1);
-	pParticleTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, pszFileName, RESOURCE_TEXTURE2D, 0);
-
-	srand((unsigned)time(NULL));
-
+void CTextureManager::LoadSphereBuffer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+{
 	XMFLOAT4* pxmf4RandomValues = new XMFLOAT4[1024];
 	for (int i = 0; i < 1024; i++)
 	{
@@ -57,29 +67,49 @@ std::shared_ptr<CTexture> CTextureManager::LoadParticleTexture(ID3D12Device* pd3
 		pxmf4RandomValues[i].w = float((rand() % 10000) - 5000) / 5000.0f;
 	}
 
-	pParticleTexture->CreateBuffer(pd3dDevice, pd3dCommandList, pxmf4RandomValues, 1024, sizeof(XMFLOAT4), DXGI_FORMAT_R32G32B32A32_FLOAT, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_GENERIC_READ, 1/*, RESOURCE_BUFFER*/);
-	pParticleTexture->CreateBuffer(pd3dDevice, pd3dCommandList, pxmf4RandomValues, 256, sizeof(XMFLOAT4), DXGI_FORMAT_R32G32B32A32_FLOAT, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_GENERIC_READ, 2/*, RESOURCE_TEXTURE1D*/);
-
-	pShader->CreateShaderResourceViews(pd3dDevice, pParticleTexture.get(), 0, 12);
-
-	m_vParticleTextures.emplace_back(pParticleTexture);
-
-	return pParticleTexture;
+	m_pTextures[(UINT)TextureType::SphereTexture]->CreateBuffer(pd3dDevice, pd3dCommandList, pxmf4RandomValues, 1024, sizeof(XMFLOAT4), DXGI_FORMAT_R32G32B32A32_FLOAT, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_GENERIC_READ, m_iTextureN[(UINT(TextureType::SphereTexture))]++/*, RESOURCE_BUFFER*/);
 }
 
-std::shared_ptr<CTexture> CTextureManager::LoadParticleTexture(LPCTSTR pszFileName)
+void CTextureManager::LoadTexture(TextureType eTextureType, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, LPCTSTR pszFileName, int iRow, int Column)
 {
-	for (const auto& texture : m_vParticleTextures)
+	// Texture ������ Ȯ��
+	for (int i = 0; i < m_iTextureN[(UINT(eTextureType))]; i++)
 	{
-		if (!wcscmp(texture->GetTextureName(0), pszFileName))
-			return texture;
+		if (!wcscmp(m_pTextures[UINT(eTextureType)]->GetTextureName(i), pszFileName))
+		{
+			return;
+		}
 	}
-	return nullptr;
-
-
+	m_pTextures[UINT(eTextureType)]->SetRowColumn(m_iTextureN[(UINT(eTextureType))], iRow, Column);
+	m_pTextures[UINT(eTextureType)]->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, pszFileName, RESOURCE_TEXTURE2D, m_iTextureN[(UINT(eTextureType))]++);
 }
 
-std::vector<std::shared_ptr<CTexture>>& CTextureManager::GetParticleTextureList()
+int CTextureManager::LoadTextureIndex(TextureType eTextureType, LPCTSTR pszFileName)
 {
-	return m_vParticleTextures;
+	for (int i = 0; i < m_iTextureN[(UINT(eTextureType))]; i++)
+	{
+		if (!wcscmp(m_pTextures[(UINT(eTextureType))]->GetTextureName(i), pszFileName))
+		{
+			return i;
+		}
+	}
+	return -1;
+}
+std::shared_ptr<CTexture> CTextureManager::GetTexture(TextureType eTextureType)
+{
+	return m_pTextures[(UINT(eTextureType))];
+}
+
+UINT CTextureManager::GetTextureListIndex(TextureType eTextureType)
+{
+	return m_iTextureN[(UINT(eTextureType))];
+}
+
+UINT CTextureManager::GetTextureOffset(TextureType eTextureType)
+{
+	int iOffset = 0;
+	for (int i = 0; i < UINT(eTextureType); i++)
+		iOffset += m_iTextureN[i];
+
+	return iOffset;
 }

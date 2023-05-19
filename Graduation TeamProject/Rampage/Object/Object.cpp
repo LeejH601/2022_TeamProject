@@ -91,6 +91,10 @@ void CGameObject::SetTexture(std::shared_ptr<CTexture> pTexture)
 		m_ppMaterials[0] = pMaterial;
 	}
 }
+void CGameObject::SetTextureIndex(int iIndex)
+{
+	m_iTextureIndex = iIndex;
+}
 void CGameObject::ChangeTexture(std::shared_ptr<CTexture> pTexture)
 {
 	if (m_ppMaterials.data())

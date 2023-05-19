@@ -3,7 +3,7 @@
 Texture2D gtxMappedTexture[8] : register(t0);
 SamplerState gSamplerState : register(s0);
 
-#define MAX_TRAILCONTROLLPOINT 100
+#define MAX_TRAILCONTROLLPOINT 200
 #define MAX_COLORCURVES 8
 cbuffer cbTrailControllPoints : register(b5)
 {
@@ -17,6 +17,7 @@ cbuffer cbTrailControllPoints : register(b5)
 	float gfNoiseConstants;
 	uint gnPoints;
 	float gnOffsetTime;
+	float gnEmissiveFactor;
 }
 
 struct GS_OUT
@@ -37,9 +38,9 @@ PS_MULTIPLE_RENDER_TARGETS_OUTPUT SwordTrail_PS(GS_OUT input)
 	float2 uv = input.uv.xy;
 	//uv.y /= 2.0f;
 	float4 BaseColor = gtxMappedTexture[0].Sample(gSamplerState, uv * float2(1.0f, 1.0f));
-	float4 NoiseColor = gtxMappedTexture[1].Sample(gSamplerState, uv * float2(1.0f, 1.0f) + gnOffsetTime);
+	float4 NoiseColor = gtxMappedTexture[1].Sample(gSamplerState, uv * float2(1.0f, 1.0f) - gnOffsetTime);
 
-	float EmissiveFactor = 1.5f;
+	float EmissiveFactor = gnEmissiveFactor;
 	//float EmissiveFactor = min(2.0f, uv.x * 4.0f);
 	float4 EmissiveColor;
 	int index = 0;
@@ -49,7 +50,8 @@ PS_MULTIPLE_RENDER_TARGETS_OUTPUT SwordTrail_PS(GS_OUT input)
 
 	//float ColorUV = lerp(uv1, uv2, frac(abs(fmod(gnOffsetTime * 0.25f + uv.x, 2.0f) - 1.0f)));
 	// 
-	// uv를 이용한 색상
+	// uv를 이용한 
+	// 
 	// float ColorUV = 1.0f - uv.y;
 	// Noise를 이용한 색상
 	float ColorUV = min(1.0f, NoiseColor.r * gfNoiseConstants);
@@ -80,7 +82,7 @@ PS_MULTIPLE_RENDER_TARGETS_OUTPUT SwordTrail_PS(GS_OUT input)
 	EmissiveColor.a = uv.x;
 	//EmissiveColor.rgb = float3(t, 0.0f, 0.0f);
 
-	EmissiveColor.rgb *= EmissiveFactor * 20.0f * NoiseColor.r;
+	EmissiveColor.rgb *= EmissiveFactor * 2.0f * NoiseColor.r;
 
 	float4 fColor;
 	fColor = BaseColor * EmissiveColor;

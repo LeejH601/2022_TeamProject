@@ -137,7 +137,8 @@ void CCamera::SetViewportsAndScissorRects(ID3D12GraphicsCommandList* pd3dCommand
 CThirdPersonCamera::CThirdPersonCamera() : CCamera()
 {
 	m_pPlayer = nullptr;
-	SetOffset(XMFLOAT3(0.0f, 0.0f,-15.0f));
+	SetOffset(XMFLOAT3(0.0f, 0.0f,0.0f));
+	m_xmf3Offset = XMFLOAT3(0.0f, 0.0f, -11.0f);
 }
 
 CThirdPersonCamera::~CThirdPersonCamera()

@@ -15,8 +15,7 @@ public:
 private:
 	int	m_nTextures = 0;		// Texture 개수
 
-	int m_iRow = 1;				// 스프라이트 열 개수
-	int m_iColumn = 1;			// 스프라이트 행 개수
+	std::vector<std::pair<int, int>> m_nTextureCoords;
 
 	std::vector<ComPtr<ID3D12Resource>> m_ppd3dTextures;	// Texture 리소스
 	std::vector<ComPtr<ID3D12Resource>> m_ppd3dTextureUploadBuffers;	//Texture 업로드 버퍼
@@ -94,6 +93,7 @@ public:
 	ID3D12Resource* CreateTexture(ID3D12Device* pd3dDevice, UINT nWidth, UINT nHeight, DXGI_FORMAT dxgiFormat, D3D12_RESOURCE_FLAGS d3dResourceFlags, D3D12_RESOURCE_STATES d3dResourceStates, D3D12_CLEAR_VALUE* pd3dClearValue, UINT nResourceType, UINT nIndex, UINT nMipLevels = 0);
 	ID3D12Resource* CreateTexture(ID3D12Device* pd3dDevice, UINT nWidth, UINT nHeight, UINT nElements, UINT nMipLevels, DXGI_FORMAT dxgiFormat, D3D12_RESOURCE_FLAGS d3dResourceFlags, D3D12_RESOURCE_STATES d3dResourceStates, D3D12_CLEAR_VALUE* pd3dClearValue, UINT nResourceType, UINT nIndex);
 	void LoadTextureFromDDSFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, const wchar_t* pszFileName, UINT nResourceType, UINT nIndex);
+	void CreateTexture(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, UINT nWidth, UINT nHeight, UINT nElements, UINT nMipLevels, DXGI_FORMAT dxgiFormat, D3D12_RESOURCE_FLAGS d3dResourceFlags, D3D12_RESOURCE_STATES d3dResourceStates, const wchar_t* textureName, UINT nResourceType, UINT nIndex, void* pData);
 	int LoadTextureFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CGameObject* pParent, FILE* pInFile, CShader* pShader, UINT nIndex);
 	void SetRootParameterIndex(int nIndex, UINT nRootParameterIndex);
 
@@ -102,10 +102,9 @@ public:
 
 	void ReleaseUploadBuffers();
 
-	void AnimateRowColumn(float fTime = 0.0f);
-	void SetRowColumn(int iRow, int iColumn);
-	int GetRow();
-	int GetColumn();
+	void SetRowColumn(int iIndex, int iRow, int iColumn);
+	int GetRow(int iIndex);
+	int GetColumn(int iIndex);
 };
 class CMaterial
 {

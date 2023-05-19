@@ -1,7 +1,7 @@
 #pragma once
 #include "Object.h"
 
-#define MAX_TRAILCONTROLLPOINTS 100
+#define MAX_TRAILCONTROLLPOINTS 200
 #define MAX_COLORCURVES 8
 
 struct VS_CB_SWTRAIL_INFO
@@ -16,8 +16,14 @@ struct VS_CB_SWTRAIL_INFO
 	float m_fNoiseConstants;
 	UINT m_nDrawedControllPoints;
 	float m_faccumulateTime;
+	float m_fEmissiveFactor;
 };
-
+enum class TRAIL_UPDATE_METHOD {
+	UPDATE_NEW_CONTROL_POINT,
+	NON_UPDATE_NEW_CONTROL_POINT,
+	DELETE_CONTROL_POINT,
+	COUNT
+};
 class TrailComponent;
 class CSwordTrailObject : public CGameObject
 {
@@ -40,13 +46,13 @@ class CSwordTrailObject : public CGameObject
 	float m_fColorCurveTimes[MAX_COLORCURVES];
 	UINT m_nCurves;
 	float m_fNoiseConstants;
+	float m_fEmissiveFactor;
 
 	std::unique_ptr<CTexture> m_pTexture;
 
 public:
 	float m_faccumulateTime;
-	bool m_bIsUpdateTrailVariables = false;
-
+	TRAIL_UPDATE_METHOD m_eTrailUpdateMethod = TRAIL_UPDATE_METHOD::NON_UPDATE_NEW_CONTROL_POINT;
 
 public:
 	CSwordTrailObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CShader* pTrailShader);
