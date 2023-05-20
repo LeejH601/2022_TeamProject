@@ -26,6 +26,7 @@ void CMainTMPScene::SetPlayer(CGameObject* pPlayer)
 	if (m_pDepthRenderShader.get())
 		((CDepthRenderShader*)m_pDepthRenderShader.get())->RegisterObject(pPlayer);
 
+	m_pCollisionChecker->RegisterObject(pPlayer);
 }
 
 void CMainTMPScene::OnPreRender(ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed)
@@ -693,6 +694,9 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	CMonsterPool::GetInst()->SetNonActiveMonster(m_pMonsterObject.get());
 	m_pObjects.push_back(std::move(m_pMonsterObject));*/
 
+	// CollisionChecker 持失
+	m_pCollisionChecker = std::make_unique<CollisionChecker>();
+
 	// Light 持失
 	m_pLight = std::make_unique<CLight>();
 	m_pLight->CreateLightVariables(pd3dDevice, pd3dCommandList);
@@ -712,6 +716,8 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 		((CDepthRenderShader*)m_pDepthRenderShader.get())->RegisterObject(m_pEnemys[i].get());
 		((CPhysicsObject*)m_pEnemys[i].get())->SetUpdatedContext(m_pMap.get());
 		m_IObjectIndexs[i] = index++;
+
+		m_pCollisionChecker->RegisterObject(m_pEnemys[i].get());
 	}
 
 	for (int i = 0; i < m_pMap->GetMapObjects().size(); ++i) {
@@ -877,8 +883,7 @@ void CMainTMPScene::UpdateObjects(float fTimeElapsed)
 	}
 
 	m_pMap->Update(fTimeElapsed);
-
-
+	m_pCollisionChecker->UpdateObjects(fTimeElapsed);
 
 	for (std::unique_ptr<CGameObject>& obj : m_pSwordTrailObjects) {
 		obj->Update(fTimeElapsed);

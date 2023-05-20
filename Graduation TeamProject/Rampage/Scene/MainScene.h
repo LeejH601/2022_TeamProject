@@ -17,6 +17,7 @@
 #include "..\Shader\LensFlareShader.h"
 #include "..\Shader\SwordTrailShader.h"
 #include "..\Object\SwordTrailObject.h"
+#include "..\Object\CollisionChecker.h"
 
 #define MAX_OBJECT 1000
 struct DissolveParams {
@@ -28,7 +29,8 @@ class CMainTMPScene : public CScene
 {
 private:
 	RECT m_ScreendRect;
-
+	
+	std::unique_ptr<CollisionChecker> m_pCollisionChecker = NULL;
 	std::vector<std::unique_ptr<CGameObject>> m_pEnemys;
 	std::unique_ptr<CMap> m_pMap;
 

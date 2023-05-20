@@ -223,22 +223,23 @@ void CPhysicsObject::DistortLookVec(CGameObject* pObject)
 	float dot = XMVectorGetX(XMVector3Dot(toObjeVec, lookVec));
 	float angle = acosf(dot);
 	float degrees = XMConvertToDegrees(angle);
+	float resultDegree = 0.0f;
 
 	XMVECTOR cross = XMVector3Cross(toObjeVec, lookVec);
 
 	if (XMVectorGetY(cross) > 0.0f)
 		degrees = 360.0f - degrees;
-
+	
 	if (degrees < 90.0f || degrees > 270.0f)
 	{
-		fDistortionDegree = 360.0f - degrees;
+		resultDegree = 360.0f - degrees;
 	}
 	else
 	{
-		fDistortionDegree = degrees + 180.0f;
-		if (fDistortionDegree > 360.0f)
-			fDistortionDegree -= 360.0f;
+		resultDegree = (float)((int)(degrees + 180.0f) % 360);
 	}
+
+	fDistortionDegree = (float)((int)(fDistortionDegree + resultDegree) % 360);
 }
 
 void CPhysicsObject::Move(const XMFLOAT3& xmf3Shift, bool bUpdateVelocity)
