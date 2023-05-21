@@ -1,6 +1,8 @@
 #include "Mesh.h"
 #include "Object.h"
 #include "..\Shader\BoundingBoxShader.h"
+#include "..\Global\Locator.h"
+#include "..\Global\Timer.h"
 
 // Mesh »ý¼ºÀÚ
 CMesh::~CMesh()
@@ -1416,16 +1418,16 @@ void CParticleMesh::PreRender(ID3D12GraphicsCommandList* pd3dCommandList, int nP
 			pd3dCommandList->CopyBufferRegion(m_pd3dDrawBuffer, m_nVertices * m_nStride, m_pd3dDrawUploadBuffer.Get(), 0, m_ncreatedParticleNum * m_nStride);
 			::SynchronizeResourceTransition(pd3dCommandList, m_pd3dDrawBuffer, D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_STREAM_OUT);
 
+			TCHAR pstrDebug[256] = { 0 };
+			_stprintf_s(pstrDebug, 256, _T("Stream Output Vertices = %d\n"), m_nVertices);
+			OutputDebugString(pstrDebug);
+
 			m_nVertices += m_ncreatedParticleNum;
 			m_ncreatedParticleNum = 0;
 
 			m_pd3dPositionBufferView.BufferLocation = m_pd3dDrawBuffer->GetGPUVirtualAddress();
 			m_pd3dPositionBufferView.StrideInBytes = m_nStride;
 			m_pd3dPositionBufferView.SizeInBytes = m_nStride * m_nVertices;
-
-			TCHAR pstrDebug[256] = { 0 };
-			_stprintf_s(pstrDebug, 256, _T("emit particles ---- %d \n"), m_nVertices);
-			OutputDebugString(pstrDebug);
 
 			m_bEmit = false;
 		}
@@ -1498,7 +1500,7 @@ void CParticleMesh::PostRender(ID3D12GraphicsCommandList* pd3dCommandList, UINT 
 {
 }
 
-//#define _WITH_DEBUG_STREAM_OUTPUT_VERTICES
+#define _WITH_DEBUG_STREAM_OUTPUT_VERTICES
 
 int CParticleMesh::OnPostRender(int nPipelineState)
 {
@@ -1575,30 +1577,39 @@ void CParticleMesh::EmitParticle(int emitType, ParticleEmitDataParam& param)
 
 void CParticleMesh::EmitParticleForVertexData(int emitType, ParticleEmitPositionlistParam& param)
 {
-	static std::vector<CParticleVertex> createdParticleBuffer(MAX_PARTICLES);
+	static std::vector<CParticleVertex> createdParticleBuffer2(MAX_PARTICLES);
 
 	int nCreateParticleNum = m_ncreatedParticleNum + param.m_nEmitNum;
+
+	
 
 	switch (emitType)
 	{
 	case 5:
+	{
+		int index = 0;
 		for (int i = m_ncreatedParticleNum; i < nCreateParticleNum; ++i) {
-			createdParticleBuffer[i].m_xmf3Position = param.m_xmf3EmiedPositions[i-m_ncreatedParticleNum];
-			createdParticleBuffer[i].m_xmf3Velocity = param.m_xmf3Velocitys[i - m_ncreatedParticleNum];
-			createdParticleBuffer[i].m_xmf3Velocity = Vector3::ScalarProduct(Vector3::Normalize(createdParticleBuffer[i].m_xmf3Velocity), param.m_fEmitedSpeed, false);
-			createdParticleBuffer[i].m_iType = emitType;
-			createdParticleBuffer[i].m_fLifetime = param.m_fLifeTime;
-			createdParticleBuffer[i].m_fEmitTime = param.m_fEmitTime;
-			createdParticleBuffer[i].m_iTextureIndex = param.m_iTextureIndex;
-			memcpy(createdParticleBuffer[i].m_iTextureCoord, param.m_iTextureCoord, sizeof(UINT) * 2);
+			createdParticleBuffer2[i].m_xmf3Position = param.m_xmf3EmiedPositions[index];
+			createdParticleBuffer2[i].m_xmf3Velocity = param.m_xmf3Velocitys[index];
+			createdParticleBuffer2[i].m_xmf3Velocity = Vector3::ScalarProduct(Vector3::Normalize(createdParticleBuffer2[i].m_xmf3Velocity), param.m_fEmitedSpeed, false);
+			createdParticleBuffer2[i].m_iType = emitType;
+			createdParticleBuffer2[i].m_fLifetime = param.m_fLifeTime;
+			createdParticleBuffer2[i].m_fEmitTime = Locator.GetTimer()->GetTotalTime();
+			createdParticleBuffer2[i].m_iTextureIndex = param.m_iTextureIndex;
+			memcpy(createdParticleBuffer2[i].m_iTextureCoord, param.m_iTextureCoord, sizeof(UINT) * 2);
+			index++;
 		}
-		break;
+		TCHAR pstrDebug[256] = { 0 };
+		_stprintf_s(pstrDebug, 256, _T("emit Time ---- %f \n"), createdParticleBuffer2[0].m_fEmitTime);
+		OutputDebugString(pstrDebug);
+	}
+	break;
 	default:
 		break;
 	}
 
 	m_ncreatedParticleNum = nCreateParticleNum;
-	memcpy(m_pBufferDataBegin, createdParticleBuffer.data(), m_ncreatedParticleNum * m_nStride);
+	memcpy(m_pBufferDataBegin, createdParticleBuffer2.data(), m_ncreatedParticleNum * m_nStride);
 }
 
 CSkyBoxMesh::CSkyBoxMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fWidth, float fHeight, float fDepth)

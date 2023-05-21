@@ -105,8 +105,8 @@ void SphereParticles(VS_PARTICLE_INPUT input, inout PointStream<VS_PARTICLE_INPU
 {
 	VS_PARTICLE_INPUT particle = input;
 
-
-	if ((gfCurrentTime - particle.EmitTime) < particle.lifetime)
+	float lifedTime = gfCurrentTime - particle.EmitTime;
+	if (lifedTime <= particle.lifetime)
 	{
 		particle = OutputParticleToStream(particle, output);
 		//float3 resistanceDir = gmtxGameObject._41_42_43 - particle.position;

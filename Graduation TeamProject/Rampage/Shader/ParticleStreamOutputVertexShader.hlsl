@@ -41,7 +41,7 @@ cbuffer cbGameObjectInfo : register(b0)
 
 VS_PARTICLE_INPUT VSParticleStreamOutput(VS_PARTICLE_INPUT input)
 {
-	if (input.type == 0) {
+	if (input.type == 0 || input.type == 5) {
 		float distance = length(input.velocity);
 		input.velocity += CalculrateCulrNoise(input.position).xyz;
 		input.velocity = normalize(input.velocity) * distance;
