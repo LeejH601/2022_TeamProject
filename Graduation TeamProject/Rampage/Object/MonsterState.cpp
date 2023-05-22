@@ -129,7 +129,11 @@ void Damaged_Monster::Enter(CMonster* monster)
 
 void Damaged_Monster::Execute(CMonster* monster, float fElapsedTime)
 {
+	XMFLOAT3 xmf3LookVec = Vector3::Add(monster->GetPosition(), monster->GetHitterVec());
+	monster->SetLookAt(Vector3::Add(monster->GetPosition(), XMFLOAT3(-monster->GetHitterVec().x, 0.0f, -monster->GetHitterVec().z)));
+
 	CAnimationSet* pAnimationSet = monster->m_pSkinnedAnimationController->m_pAnimationSets->m_pAnimationSets[monster->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_nAnimationSet];
+	
 	if (monster->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition == pAnimationSet->m_fLength)
 	{
 		monster->SetNotHit();
@@ -160,6 +164,8 @@ void Stun_Monster::Enter(CMonster* monster)
 
 void Stun_Monster::Execute(CMonster* monster, float fElapsedTime)
 {
+	XMFLOAT3 xmf3LookVec = Vector3::Add(monster->GetPosition(), monster->GetHitterVec());
+	monster->SetLookAt(Vector3::Add(monster->GetPosition(), XMFLOAT3(-monster->GetHitterVec().x, 0.0f, -monster->GetHitterVec().z)));
 }
 
 void Stun_Monster::Animate(CMonster* monster, float fElapsedTime)

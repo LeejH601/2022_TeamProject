@@ -156,8 +156,6 @@ void CMonster::SetHit(CGameObject* pHitter)
 		m_xmf3HitterVec = Vector3::Normalize(Vector3::Subtract(GetPosition(), pHitter->GetPosition()));
 		((CPlayer*)pHitter)->m_fCurLagTime = 0.f;
 
-		SetLookAt(Vector3::Add(GetPosition(), XMFLOAT3(-m_xmf3HitterVec.x, 0.0f, -m_xmf3HitterVec.z)));
-
 		SoundPlayParams sound_play_params;
 		sound_play_params.monster_type = GetMonsterType();
 		sound_play_params.sound_category = SOUND_CATEGORY::SOUND_VOICE;
