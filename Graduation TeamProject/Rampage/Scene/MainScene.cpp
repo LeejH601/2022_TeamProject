@@ -892,7 +892,8 @@ void CMainTMPScene::UpdateObjects(float fTimeElapsed)
 	if (!isSetVPObject) {
 		CGameObject* obj = m_pPlayer->FindFrame("Sword_low");
 		m_pVertexPointParticleObject->SetWorldMatrixReference(&obj->m_xmf4x4World);
-		m_pVertexPointParticleObject->SetVertexPointsFromStaticMeshToUniform(obj->m_pMesh.get());
+		m_pVertexPointParticleObject->SetVertexPointsFromSkinnedMeshToRandom(m_pPlayer->m_pSkinnedAnimationController->m_ppSkinnedMeshes[0], m_pPlayer->m_pSkinnedAnimationController.get());
+		//m_pVertexPointParticleObject->SetVertexPointsFromStaticMeshToUniform(obj->m_pMesh.get());
 		//m_pVertexPointParticleObject->SetVertexPointsFromStaticMeshToRandom(obj->m_pMesh.get());
 		isSetVPObject = true;
 	}
@@ -999,7 +1000,7 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 
 	if (m_pPlayer)
 	{
-		m_pPlayer->Animate(0.0f);
+		//m_pPlayer->Animate(0.0f);
 		m_pPlayer->Render(pd3dCommandList, true);
 	}
 
@@ -1025,15 +1026,15 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 		}
 		trailUpdateT = 0.0f;
 
-		static int count = 1;
+		static int count = 100;
 		count--;
 		if (count < 1) {
-			
-			count = 1;
+			m_pVertexPointParticleObject->EmitParticle(5);
+			m_pVertexPointParticleObject->SetEmit(true);
+			count = 100;
 		}
 	}
-	m_pVertexPointParticleObject->EmitParticle(5);
-	m_pVertexPointParticleObject->SetEmit(true);
+	
 	D3D12_GPU_VIRTUAL_ADDRESS d3dGpuVirtualAddress = m_pd3dcbDisolveParams->GetGPUVirtualAddress();
 	pd3dCommandList->SetGraphicsRootConstantBufferView(7, d3dGpuVirtualAddress);
 

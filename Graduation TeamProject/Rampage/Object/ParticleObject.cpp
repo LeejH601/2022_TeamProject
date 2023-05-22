@@ -20,10 +20,10 @@ CParticleObject::CParticleObject(int iTextureIndex, ID3D12Device* pd3dDevice, ID
 
 	m_iParticleType = iParticleType;
 
-	m_fFieldSpeed = 10.0f;
+	m_fFieldSpeed = 1.0f;
 	m_fNoiseStrength = 1.0f;;
 	m_xmf3FieldMainDirection = XMFLOAT3(0.0f, 1.0f, 0.0f);
-	m_fProgressionRate = 10.0f;
+	m_fProgressionRate = 1.0f;
 	m_fLengthScale = 1.0f;
 	
 	m_iTextureIndex = iTextureIndex;

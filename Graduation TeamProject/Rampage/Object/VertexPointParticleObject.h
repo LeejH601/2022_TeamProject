@@ -6,6 +6,12 @@ class CVertexPointParticleObject : public CParticleObject
 	std::vector<XMFLOAT3> m_vVertexPoints;
 	std::vector<XMFLOAT3> m_vNormals;
 	XMFLOAT4X4* m_xmf4x4WorldMatrixReference = nullptr;
+	std::vector<int> m_ivertexPointsIndices;
+
+	XMFLOAT4X4* m_pMeshBoneOffsets;
+	XMINT4* m_pMeshBoneIndices;
+	XMFLOAT4* m_pMeshBoneWeights;
+	CAnimationController* m_pAnimationContoroller = nullptr;
 
 public:
 	CVertexPointParticleObject();
@@ -16,7 +22,7 @@ public:
 	void EmitParticle(int emitType);
 
 	void SetWorldMatrixReference(XMFLOAT4X4* xmf4x4WorldReference) { m_xmf4x4WorldMatrixReference = xmf4x4WorldReference; };
-	void SetVertexPointsFromSkinnedMeshToRandom(CSkinnedMesh* pSkinnedMesh);
+	void SetVertexPointsFromSkinnedMeshToRandom(CSkinnedMesh* pSkinnedMesh, CAnimationController* pController);
 	void SetVertexPointsFromStaticMeshToRandom(CMesh* pMesh);
 	void SetVertexPointsFromStaticMeshToUniform(CMesh* pMesh);
 };

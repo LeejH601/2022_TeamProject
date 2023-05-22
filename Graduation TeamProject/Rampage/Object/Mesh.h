@@ -143,6 +143,9 @@ public:
 	virtual void ReleaseUploadBuffers() {};
 	void LoadMeshFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, FILE* pInFile);
 	void LoadSkinInfoFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, FILE* pInFile);
+
+	std::vector<XMINT4>* GetBoneIndices() { return &m_pxmn4BoneIndices; };
+	std::vector<XMFLOAT4>* GetBoneWeights() { return &m_pxmf4BoneWeights; };
 };
 
 struct TangentEdges
