@@ -171,7 +171,7 @@ D3D12_STREAM_OUTPUT_DESC CParticleShader::CreateStreamOuputState(int nPipelineSt
 
 void CParticleShader::CreateGraphicsPipelineState(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature, int nPipelineState)
 {
-	m_nPipelineStates = 3;
+	m_nPipelineStates = 4;
 	m_ppd3dPipelineStates.resize(m_nPipelineStates);
 	
 
@@ -181,7 +181,9 @@ void CParticleShader::CreateGraphicsPipelineState(ID3D12Device* pd3dDevice, ID3D
 
 	CParticleShader::CreateShader(pd3dDevice, pd3dGraphicsRootSignature, 0, &pdxgiRtvFormat, 0); //Stream Output Pipeline State // DXGI_FORMAT_UNKNOWN
 	CParticleShader::CreateShader(pd3dDevice, pd3dGraphicsRootSignature, 7, pdxgiRtvFormats, 1); //Draw Pipeline State // DXGI_FORMAT_R8G8B8A8_UNORM
-	CParticleShader::CreateShader(pd3dDevice, pd3dGraphicsRootSignature, 7, pdxgiRtvFormats, 2, false); //Draw Pipeline State - NoDepth(¶¥ À§¿¡ ÀÌÆåÆ® Àü¿ë)
+
+	CParticleShader::CreateShader(pd3dDevice, pd3dGraphicsRootSignature, 0, &pdxgiRtvFormat, 1, FALSE); //Stream Output Pipeline State // DXGI_FORMAT_UNKNOWN
+	CParticleShader::CreateShader(pd3dDevice, pd3dGraphicsRootSignature, 7, pdxgiRtvFormats, 2, FALSE); //Draw Pipeline State - NoDepth(¶¥ À§¿¡ ÀÌÆåÆ® Àü¿ë)
 }
 
 void CParticleShader::OnPrepareRender(ID3D12GraphicsCommandList* pd3dCommandList, int nPipelineState)

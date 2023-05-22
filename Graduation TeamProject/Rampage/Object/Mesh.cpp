@@ -1397,7 +1397,7 @@ void CParticleMesh::PreRender(ID3D12GraphicsCommandList* pd3dCommandList, int nP
 {
 	D3D12_VERTEX_BUFFER_VIEW m_pd3dPositionBufferView;
 
-	if (nPipelineState == 0)
+	if (nPipelineState == 0 || nPipelineState == 2) // 0 2
 	{
 		if (!m_bInitialized)
 		{
@@ -1448,7 +1448,7 @@ void CParticleMesh::PreRender(ID3D12GraphicsCommandList* pd3dCommandList, int nP
 		pd3dCommandList->CopyResource(m_pd3dDefaultBufferFilledSize, m_pd3dUploadBufferFilledSize);
 		::SynchronizeResourceTransition(pd3dCommandList, m_pd3dDefaultBufferFilledSize, D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_STREAM_OUT);
 	}
-	else if ((nPipelineState == 1) || (nPipelineState == 2))
+	else if (nPipelineState == 1 || nPipelineState == 3)
 	{
 		::SynchronizeResourceTransition(pd3dCommandList, m_pd3dStreamOutputBuffer, D3D12_RESOURCE_STATE_STREAM_OUT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER);
 		::SynchronizeResourceTransition(pd3dCommandList, m_pd3dDrawBuffer, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, D3D12_RESOURCE_STATE_STREAM_OUT);
@@ -1465,7 +1465,7 @@ void CParticleMesh::PreRender(ID3D12GraphicsCommandList* pd3dCommandList, int nP
 
 void CParticleMesh::Render(ID3D12GraphicsCommandList* pd3dCommandList, UINT nPipelineState)
 {
-	if (nPipelineState == 0)
+	if (nPipelineState == 0 || nPipelineState == 2) // 0 2
 	{
 		D3D12_STREAM_OUTPUT_BUFFER_VIEW pStreamOutputBufferViews[1] = { m_d3dStreamOutputBufferView };
 		pd3dCommandList->SOSetTargets(0, 1, pStreamOutputBufferViews); // // 스트림 출력 버퍼 설정
@@ -1485,7 +1485,7 @@ void CParticleMesh::Render(ID3D12GraphicsCommandList* pd3dCommandList, UINT nPip
 		::SynchronizeResourceTransition(pd3dCommandList, m_pd3dDefaultBufferFilledSize, D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_STREAM_OUT);
 #endif
 	}
-	else if ((nPipelineState == 1) || (nPipelineState == 2))
+	else if ((nPipelineState == 1) || (nPipelineState == 3))
 	{
 		pd3dCommandList->SOSetTargets(0, 0, NULL); // 스트림 출력 버퍼 설정
 

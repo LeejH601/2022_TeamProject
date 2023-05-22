@@ -952,14 +952,21 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 	m_pMap->RenderTerrain(pd3dCommandList);
 
 
+	for (int i = 0; i < m_pTerrainSpriteObject.size(); ++i)
+	{
+		((CParticleObject*)m_pTerrainSpriteObject[i].get())->Update(fTimeElapsed);
+		((CParticleObject*)(m_pTerrainSpriteObject[i].get()))->UpdateShaderVariables(pd3dCommandList, fCurrentTime, fTimeElapsed);
+		((CParticleObject*)m_pTerrainSpriteObject[i].get())->Render(pd3dCommandList, nullptr, m_pParticleShader.get());
+	}
 
+	
 	//((CParticleObject*)m_pSmokeObject.get())->Update(fTimeElapsed);
 	//((CParticleObject*)m_pSmokeObject.get())->UpdateShaderVariables(pd3dCommandList, fCurrentTime, fTimeElapsed);
 	//((CParticleObject*)m_pSmokeObject.get())->Render(pd3dCommandList, nullptr, m_pParticleShader.get());
 
 
 
-	
+
 
 	//for (int i = 0; i < m_pUpDownParticleObjects.size(); ++i)
 	//{
@@ -982,6 +989,8 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 		m_pPlayer->Animate(0.0f);
 		m_pPlayer->Render(pd3dCommandList, true);
 	}
+
+
 
 	static float trailUpdateT = 0.0f;
 	trailUpdateT += fTimeElapsed;
@@ -1046,12 +1055,7 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 		((CParticleObject*)m_pSpriteAttackObjects[i].get())->Render(pd3dCommandList, nullptr, m_pParticleShader.get());
 	}
 
-	for (int i = 0; i < m_pTerrainSpriteObject.size(); ++i)
-	{
-		((CParticleObject*)m_pTerrainSpriteObject[i].get())->Update(fTimeElapsed);
-		((CParticleObject*)(m_pTerrainSpriteObject[i].get()))->UpdateShaderVariables(pd3dCommandList, fCurrentTime, fTimeElapsed);
-		((CParticleObject*)m_pTerrainSpriteObject[i].get())->Render(pd3dCommandList, nullptr, m_pParticleShader.get());
-	}
+
 	//((CParticleObject*)m_pTrailParticleObjects.get())->Update(fTimeElapsed);
 	//((CParticleObject*)m_pTrailParticleObjects.get())->UpdateShaderVariables(pd3dCommandList, fCurrentTime, fTimeElapsed);
 	//((CParticleObject*)m_pTrailParticleObjects.get())->Render(pd3dCommandList, nullptr, m_pParticleShader.get());
@@ -1169,28 +1173,28 @@ void CMainTMPScene::HandleCollision(const CollideParams& params)
 	//	CMessageDispatcher::GetInst()->Dispatch_Message<ParticleUpDownParams>(MessageType::UPDATE_UPDOWNPARTICLE, &particleUpdown_comp_params, Damaged_Monster::GetInst());
 	//}
 
-	//std::vector<std::unique_ptr<CGameObject>>::iterator TerrainSpriteit = std::find_if(m_pTerrainSpriteObject.begin(), m_pTerrainSpriteObject.end(), [](const std::unique_ptr<CGameObject>& pTerrainSpriteObject) {
-	//	if (((CParticleObject*)pTerrainSpriteObject.get())->CheckCapacity())
-	//		return true;
-	//	return false;
-	//	});
+	std::vector<std::unique_ptr<CGameObject>>::iterator TerrainSpriteit = std::find_if(m_pTerrainSpriteObject.begin(), m_pTerrainSpriteObject.end(), [](const std::unique_ptr<CGameObject>& pTerrainSpriteObject) {
+		if (((CParticleObject*)pTerrainSpriteObject.get())->CheckCapacity())
+			return true;
+		return false;
+		});
 
-	//if (TerrainSpriteit != m_pTerrainSpriteObject.end())
-	//{
-	//	TerrainSpriteCompParams AttackSprite_comp_params;
-	//	AttackSprite_comp_params.pObject = (*TerrainSpriteit).get();
-	//	AttackSprite_comp_params.xmf3Position = params.xmf3CollidePosition;
-	//	CMessageDispatcher::GetInst()->Dispatch_Message<TerrainSpriteCompParams>(MessageType::UPDATE_SPRITE, &AttackSprite_comp_params, Spawn_Monster::GetInst());
-	//	TCHAR pstrDebug[256] = { 0 };
-	//	_stprintf_s(pstrDebug, 256, _T("바닥 충격 출력 %f, %f, %f\n"), params.xmf3CollidePosition.x, params.xmf3CollidePosition.y, params.xmf3CollidePosition.z);
-	//	OutputDebugString(pstrDebug);
-	//}
-	//else
-	//{
-	//	TCHAR pstrDebug[256] = { 0 };
-	//	_stprintf_s(pstrDebug, 256, _T("No바닥 충격 출력 %f, %f, %f\n"), params.xmf3CollidePosition.x, params.xmf3CollidePosition.y, params.xmf3CollidePosition.z);
-	//	OutputDebugString(pstrDebug);
-	//}
+	if (TerrainSpriteit != m_pTerrainSpriteObject.end())
+	{
+		TerrainSpriteCompParams AttackSprite_comp_params;
+		AttackSprite_comp_params.pObject = (*TerrainSpriteit).get();
+		AttackSprite_comp_params.xmf3Position = params.xmf3CollidePosition;
+		CMessageDispatcher::GetInst()->Dispatch_Message<TerrainSpriteCompParams>(MessageType::UPDATE_SPRITE, &AttackSprite_comp_params, Spawn_Monster::GetInst());
+		TCHAR pstrDebug[256] = { 0 };
+		_stprintf_s(pstrDebug, 256, _T("바닥 충격 출력 %f, %f, %f\n"), params.xmf3CollidePosition.x, params.xmf3CollidePosition.y, params.xmf3CollidePosition.z);
+		OutputDebugString(pstrDebug);
+	}
+	else
+	{
+		TCHAR pstrDebug[256] = { 0 };
+		_stprintf_s(pstrDebug, 256, _T("No바닥 충격 출력 %f, %f, %f\n"), params.xmf3CollidePosition.x, params.xmf3CollidePosition.y, params.xmf3CollidePosition.z);
+		OutputDebugString(pstrDebug);
+	}
 
 
 

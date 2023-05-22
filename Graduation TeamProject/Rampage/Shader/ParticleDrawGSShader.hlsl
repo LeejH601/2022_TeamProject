@@ -49,6 +49,8 @@ cbuffer cbCameraInfo : register(b1)
 
 static float3 gf3Positions[4] = { float3(-1.0f, +1.0f, 0.0f), float3(+1.0f, +1.0f, 0.0f), float3(-1.0f, -1.0f, 0.0f), float3(+1.0f, -1.0f, 0.0f) };
 static float3 gf3TerrainPositions[4] = { float3(-1.0f, 0.0f, 1.0f), float3(+1.0f, 0.0f, +1.0f), float3(-1.0f, 0.0f, -1.0f), float3(+1.0f,  0.0f, -1.0f) };
+
+
 static float2 gf2QuadUVs[4] = { float2(0.0f, 0.0f), float2(1.0f, 0.0f), float2(0.0f, 1.0f), float2(1.0f, 1.0f) };
 [maxvertexcount(4)]
 void GSParticleDraw(point VS_PARTICLE_DRAW_OUTPUT input[1], inout TriangleStream<GS_PARTICLE_DRAW_OUTPUT> outputStream)
@@ -70,23 +72,42 @@ void GSParticleDraw(point VS_PARTICLE_DRAW_OUTPUT input[1], inout TriangleStream
 	output.TextureIndex = input[0].TextureIndex;
 
 	float3 positionW;
-	for (int i = 0; i < 4; i++)
+
+	if (TERRAIN_PARTICLE == output.ParticleType)
 	{
-		if (TERRAIN_PARTICLE == output.ParticleType)
+		float3 center = input[0].position;
+		float3 vLook = gf3CameraPosition.xyz - center;
+		float3 vUp = float3(0.f, 1.0f, 0.0f);
+
+		vLook = normalize(vLook);
+		float3 vRight = cross(float3(0.f, 1.0f, 0.0f), vLook);
+
+		gf3TerrainPositions[0] = float4(center.x + input[0].size.x, center.y, center.z - input[0].size.y, 1.0f);
+		gf3TerrainPositions[1] = float4(center.x + input[0].size.x, center.y, center.z + input[0].size.y, 1.0f);
+		gf3TerrainPositions[2] = float4(center.x - input[0].size.x, center.y, center.z - input[0].size.y, 1.0f);
+		gf3TerrainPositions[3] = float4(center.x - input[0].size.x, center.y, center.z + input[0].size.y, 1.0f);
+
+		for (int i = 0; i < 4; i++)
 		{
-			gf3TerrainPositions[i].x = gf3TerrainPositions[i].x * input[0].size.x * 0.5f;
-			gf3TerrainPositions[i].z = gf3TerrainPositions[i].z * input[0].size.y * 0.5f;
-			positionW = gf3TerrainPositions[i] + input[0].position;
+			output.position = mul(mul(float4((gf3TerrainPositions[i]), 1.0f), gmtxView), gmtxProjection);
+			output.uv = mul(float3(gf2QuadUVs[i], 1.0f), (float3x3)(xmf4x4Coord)).xy;
+			outputStream.Append(output);
 		}
-		else
+
+	}
+	else
+	{
+		for (int i = 0; i < 4; i++)
 		{
 			gf3Positions[i].x = gf3Positions[i].x * input[0].size.x * 0.5f;
 			gf3Positions[i].y = gf3Positions[i].y * input[0].size.y * 0.5f;
 			positionW = mul((gf3Positions[i]), (float3x3)(gmtxInverseView)) + input[0].position;
+
+			output.position = mul(mul(float4((positionW), 1.0f), gmtxView), gmtxProjection);
+			output.uv = mul(float3(gf2QuadUVs[i], 1.0f), (float3x3)(xmf4x4Coord)).xy;
+			outputStream.Append(output);
+
 		}
-		output.position = mul(mul(float4((positionW), 1.0f), gmtxView), gmtxProjection);
-		output.uv = mul(float3(gf2QuadUVs[i], 1.0f), (float3x3)(xmf4x4Coord)).xy;
-		outputStream.Append(output);
 	}
 
 	outputStream.RestartStrip();

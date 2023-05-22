@@ -344,11 +344,19 @@ void CTerrainParticleObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, 
 	DrawRender(pd3dCommandList, pCamera, pShader);
 }
 
-void CTerrainParticleObject::DrawRender(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, CShader* pShader)
+void CTerrainParticleObject::StreamOutRender(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, CShader* pShader)
 {
 	PreRender(pd3dCommandList, pShader, 1);
-	if (m_pMesh) m_pMesh->PreRender(pd3dCommandList, 1); //Draw
-	if (m_pMesh) m_pMesh->Render(pd3dCommandList, 1); //Draw
+	if (m_pMesh) m_pMesh->PreRender(pd3dCommandList, 1); //Stream Output
+	if (m_pMesh) m_pMesh->Render(pd3dCommandList, 1); //Stream Output
+	if (m_pMesh) m_pMesh->PostRender(pd3dCommandList, 1); //Stream Output
+}
+
+void CTerrainParticleObject::DrawRender(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, CShader* pShader)
+{
+	PreRender(pd3dCommandList, pShader, 2);
+	if (m_pMesh) m_pMesh->PreRender(pd3dCommandList, 2); //Draw
+	if (m_pMesh) m_pMesh->Render(pd3dCommandList, 2); //Draw
 }
 //void CTerrainParticleObject::Animate(float fTimeElapsed)
 //{

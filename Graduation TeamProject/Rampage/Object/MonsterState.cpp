@@ -27,10 +27,13 @@ void Spawn_Monster::Enter(CMonster* monster)
 	monster->m_fDissolveTime = 0.f;
 	monster->m_fHP = 100.0f;
 	monster->m_fDissolveThrethHold = 0.f;
+	monster->CPhysicsObject::OnUpdateCallback(0.f);
 
+	XMFLOAT3 xmf3Position = monster->GetPosition();
+	//xmf3Position.y -= 10.f;
 	OnGroundParams OnGround_params;
-	OnGround_params.xmf3OnGroundPosition = monster->GetPosition();
-	CMessageDispatcher::GetInst()->Dispatch_Message<OnGroundParams>(MessageType::ONGROUND, &OnGround_params, nullptr);
+	OnGround_params.xmf3OnGroundPosition = xmf3Position;
+	CMessageDispatcher::GetInst()->Dispatch_Message<OnGroundParams>(MessageType::ONGROUND, &OnGround_params, this);
 }
 
 void Spawn_Monster::Execute(CMonster* monster, float fElapsedTime)

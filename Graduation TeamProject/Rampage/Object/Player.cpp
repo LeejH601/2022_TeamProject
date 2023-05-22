@@ -212,6 +212,7 @@ void CKnightPlayer::SetTargetPosition(const BoundingOrientedBox& targetBoundingB
 
 	// 플레이어 무기의 바운딩 박스의 중심에서 몬스터 몸체의 바운딩 박스의 중심을 향한 선분
 	XMVECTOR direction = XMLoadFloat3(&monsterBodyBoxCenter) - XMLoadFloat3(&playerWeaponBoxCenter);
+	direction = XMVector3Normalize(direction);
 
 	// 몬스터 몸체의 바운딩 박스의 면과 교차하는 점을 구함
 	float distance;

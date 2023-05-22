@@ -552,10 +552,10 @@ private:
 	int m_nEmitParticleNumber = 1.f;
 	int m_iParticleType = ParticleType::TERRAIN_PARTICLE;
 	int m_nParticleIndex = 0;
-	float m_fLifeTime = 3.f;
+	float m_fLifeTime = 5.f;
 	float m_fSpeed = 1.f;
 	float m_fAlpha = 1.f;
-	XMFLOAT2 m_fSize = XMFLOAT2(10.f, 10.f);
+	XMFLOAT2 m_fSize = XMFLOAT2(5.f, 5.f);
 	XMFLOAT3 m_xmf3Color = XMFLOAT3(1.f, 1.f, 1.f);
 	XMFLOAT3 m_xmfPosOffset = XMFLOAT3(0.f, 2.f, 0.f);
 	int m_iTextureIndex = 0;
