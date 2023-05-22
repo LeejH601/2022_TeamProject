@@ -38,6 +38,12 @@ CMonster::CMonster()
 	m_pListeners.push_back(std::move(pPlayerLocationListener));
 
 	CMessageDispatcher::GetInst()->RegisterListener(MessageType::CHECK_IS_PLAYER_IN_FRONT_OF_MONSTER, m_pListeners.back().get());
+
+	std::unique_ptr<DamageListener> pDamageListener = std::make_unique<DamageListener>();
+	pDamageListener->SetObject(this);
+	m_pListeners.push_back(std::move(pDamageListener));
+
+	CMessageDispatcher::GetInst()->RegisterListener(MessageType::APPLY_DAMAGE, m_pListeners.back().get(), this);
 }
 
 CMonster::~CMonster()
@@ -153,7 +159,7 @@ void CMonster::UpdateTransform(XMFLOAT4X4* pxmf4x4Parent)
 void CMonster::SetHit(CGameObject* pHitter)
 {
 	if (m_bSimulateArticulate == false) { // 변수 체크가 아닌 현재 상태 체크를 이용하는 것이 좋을듯
-		m_xmf3HitterVec = Vector3::Normalize(Vector3::Subtract(GetPosition(), pHitter->GetPosition()));
+		/*m_xmf3HitterVec = Vector3::Normalize(Vector3::Subtract(GetPosition(), pHitter->GetPosition()));
 		((CPlayer*)pHitter)->m_fCurLagTime = 0.f;
 
 		SoundPlayParams sound_play_params;
@@ -166,7 +172,7 @@ void CMonster::SetHit(CGameObject* pHitter)
 
 		m_pStateMachine->ChangeState(Idle_Monster::GetInst());
 		m_pStateMachine->ChangeState(Damaged_Monster::GetInst());
-		m_iPlayerAtkId = ((CPlayer*)pHitter)->GetAtkId();
+		m_iPlayerAtkId = ((CPlayer*)pHitter)->GetAtkId();*/
 	}
 	else {
 		TCHAR pstrDebug[256] = { 0 };

@@ -514,3 +514,26 @@ void SceneOnGroundListener::HandleMessage(const Message& message, const OnGround
 {
 	m_pScene->HandleOnGround(params);
 }
+
+void DamageListener::HandleMessage(const Message& message, const DamageParams& params)
+{
+	CPlayer* pPlayer = (CPlayer*)params.pPlayer;
+	CMonster* pMonster = (CMonster*)m_pObject;
+
+	if (pMonster->m_bSimulateArticulate == false) { // 변수 체크가 아닌 현재 상태 체크를 이용하는 것이 좋을듯
+		SoundPlayParams sound_play_params;
+		sound_play_params.monster_type = pMonster->GetMonsterType();
+		sound_play_params.sound_category = SOUND_CATEGORY::SOUND_VOICE;
+		CMessageDispatcher::GetInst()->Dispatch_Message<SoundPlayParams>(MessageType::PLAY_SOUND, &sound_play_params, pPlayer->m_pStateMachine->GetCurrentState());
+
+		pPlayer->m_fCurLagTime = 0.f;
+		pMonster->m_xmf3HitterVec = Vector3::Normalize(Vector3::Subtract(pMonster->GetPosition(), pPlayer->GetPosition()));
+
+		PlayerParams PlayerParam{ pPlayer };
+		CMessageDispatcher::GetInst()->Dispatch_Message<PlayerParams>(MessageType::UPDATE_HITLAG, &PlayerParam, pPlayer->m_pStateMachine->GetCurrentState());
+
+		pMonster->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
+		pMonster->m_pStateMachine->ChangeState(Damaged_Monster::GetInst());
+		pMonster->m_iPlayerAtkId = pPlayer->GetAtkId();
+	}
+}

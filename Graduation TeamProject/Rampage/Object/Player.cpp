@@ -259,7 +259,15 @@ bool CKnightPlayer::CheckCollision(CGameObject* pTargetObject)
 				m_pCamera->m_bCameraMoving = true;
 		}
 
-		pTargetObject->SetHit(this);
+		// Damage 메세지를 보냄
+
+		DamageParams damageParam;
+		damageParam.fDamage = 30.0f;
+		damageParam.fMaxStunTime = 0.0f;
+		damageParam.pPlayer = this;
+
+		CMessageDispatcher::GetInst()->Dispatch_Message<DamageParams>(MessageType::APPLY_DAMAGE, &damageParam, pTargetObject);
+
 		std::string logMessage = "Atk player->monster"; logMessage = logMessage + " ID == { " + std::to_string(m_iAttackId) + " }";
 		CLogger::GetInst()->LogCollision(this, pTargetObject, logMessage);
 

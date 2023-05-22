@@ -102,6 +102,12 @@ struct RegisterArticulationParams {
 	XMFLOAT3 m_force;
 };
 
+struct DamageParams {
+	CGameObject* pPlayer;
+	float fMaxStunTime;
+	float fDamage;
+};
+
 // Define message listener interface
 class IMessageListener {
 protected:
@@ -126,6 +132,8 @@ public:
 	virtual void HandleMessage(const Message& message, const ParticleUpDownParams& params) {}
 	virtual void HandleMessage(const Message& message, const ParticleTrailParams& params) {}
 	virtual void HandleMessage(const Message& message, const TrailUpdateParams& params){}
+
+	virtual void HandleMessage(const Message& message, const DamageParams& params) {}
 };
 
 // Define RegisterAriticulationListner
@@ -168,6 +176,15 @@ class SceneOnGroundListener : public IMessageListener {
 public:
     void SetScene(CScene* pScene) { m_pScene = pScene; }
     virtual void HandleMessage(const Message& message, const OnGroundParams& params);
+};
+
+// Define Player Attack component
+class DamageListener : public IMessageListener {
+private:
+	CGameObject* m_pObject;
+public:
+	void SetObject(CGameObject* pObject) { m_pObject = pObject; }
+	virtual void HandleMessage(const Message& message, const DamageParams& params);
 };
 
 // Define Sound Play component
