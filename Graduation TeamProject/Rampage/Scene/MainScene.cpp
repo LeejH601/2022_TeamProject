@@ -649,7 +649,7 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pMonsterObject->CreateArticulation(1.0f);
 	m_pEnemys.push_back(std::move(m_pMonsterObject));
 
-	m_pMonsterObject = std::make_unique<CGoblinObject>(pd3dDevice, pd3dCommandList, 1);
+	m_pMonsterObject = std::make_unique<COrcObject>(pd3dDevice, pd3dCommandList, 1);
 	m_pMonsterObject->SetPosition(XMFLOAT3(190, 50, -70));
 	m_pMonsterObject->SetScale(4.0f, 4.0f, 4.0f);
 	m_pMonsterObject->Rotate(0.0f, 180.0f, 0.0f);
@@ -659,7 +659,7 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pMonsterObject->CreateArticulation(1.0f);
 	m_pEnemys.push_back(std::move(m_pMonsterObject));
 
-	m_pMonsterObject = std::make_unique<CGoblinObject>(pd3dDevice, pd3dCommandList, 1);
+	m_pMonsterObject = std::make_unique<COrcObject>(pd3dDevice, pd3dCommandList, 1);
 	m_pMonsterObject->SetPosition(XMFLOAT3(190, 50, -70));
 	m_pMonsterObject->SetScale(4.0f, 4.0f, 4.0f);
 	m_pMonsterObject->Rotate(0.0f, 180.0f, 0.0f);
@@ -669,7 +669,7 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pMonsterObject->CreateArticulation(1.0f);
 	m_pEnemys.push_back(std::move(m_pMonsterObject));
 
-	m_pMonsterObject = std::make_unique<CGoblinObject>(pd3dDevice, pd3dCommandList, 1);
+	m_pMonsterObject = std::make_unique<CSkeletonObject>(pd3dDevice, pd3dCommandList, 1);
 	m_pMonsterObject->SetPosition(XMFLOAT3(190, 50, -70));
 	m_pMonsterObject->SetScale(4.0f, 4.0f, 4.0f);
 	m_pMonsterObject->Rotate(0.0f, 180.0f, 0.0f);
@@ -679,7 +679,7 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pMonsterObject->CreateArticulation(1.0f);
 	m_pEnemys.push_back(std::move(m_pMonsterObject));
 
-	m_pMonsterObject = std::make_unique<CGoblinObject>(pd3dDevice, pd3dCommandList, 1);
+	m_pMonsterObject = std::make_unique<CSkeletonObject>(pd3dDevice, pd3dCommandList, 1);
 	m_pMonsterObject->SetPosition(XMFLOAT3(190, 50, -70));
 	m_pMonsterObject->SetScale(4.0f, 4.0f, 4.0f);
 	m_pMonsterObject->Rotate(0.0f, 180.0f, 0.0f);
@@ -985,6 +985,8 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 
 	CModelShader::GetInst()->Render(pd3dCommandList, 0);
 
+	m_pMap->RenderMapObjects(pd3dCommandList);
+
 	if (m_pPlayer)
 	{
 		m_pPlayer->Animate(0.0f);
@@ -1025,7 +1027,6 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 		m_pEnemys[i]->Render(pd3dCommandList, true);
 	}
 
-	m_pMap->RenderMapObjects(pd3dCommandList);
 
 #ifdef RENDER_BOUNDING_BOX
 	CBoundingBoxShader::GetInst()->Render(pd3dCommandList, 0);
