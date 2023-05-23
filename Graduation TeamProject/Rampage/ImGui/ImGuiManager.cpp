@@ -1413,12 +1413,6 @@ void CImGuiManager::ShowTrailManager(CState<CPlayer>* pCurrentAnimation)
 	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
 	ImGui::Checkbox(U8STR("켜기/끄기##TrailEffect"), &pTrailComponent->GetEnable());
 
-	std::vector<std::string> mainTextureNames = TrailComponent::GetMainTextureNames();
-	std::vector<const char*> mainItems;
-	for (int i = 0; i < mainTextureNames.size(); i++)
-	{
-		mainItems.emplace_back(mainTextureNames[i].c_str());
-	}
 
 	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
 
@@ -1435,7 +1429,7 @@ void CImGuiManager::ShowTrailManager(CState<CPlayer>* pCurrentAnimation)
 	}
 
 	int mainTextureIndexCache = pTrailComponent->GetMainTextureIndex();
-	if (ImGui::Combo(U8STR("메인 텍스쳐##TrailEffect"), (int*)(&pTrailComponent->GetMainTextureIndex()), mainItems.data(), mainItems.size()))
+	if (ImGui::Combo(U8STR("메인 텍스쳐##TrailEffect"), (int*)(&pTrailComponent->GetMainTextureIndex()), items.data(), items.size()))
 	{
 		/*std::shared_ptr pTexture = vTexture[pParticleComponent->GetParticleIndex()];
 		pParticleComponent->SetParticleTexture(pTexture);*/

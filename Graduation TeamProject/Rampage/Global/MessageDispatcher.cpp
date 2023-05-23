@@ -491,6 +491,9 @@ TrailComponent::TrailComponent()
 	this->m_fColorCurveTimes_G[0] = 0.0f; this->m_fColorCurveTimes_G[1] = 0.3; this->m_fColorCurveTimes_G[2] = 0.6;  this->m_fColorCurveTimes_G[3] = 1.0;
 	this->m_fColorCurveTimes_B[0] = 0.0f; this->m_fColorCurveTimes_B[1] = 0.3; this->m_fColorCurveTimes_B[2] = 0.6;  this->m_fColorCurveTimes_B[3] = 1.0;
 	this->m_nCurves = 4;
+
+	this->SetMainTextureOffset(CSimulatorScene::GetInst()->GetTextureManager()->GetTextureOffset(TextureType::TrailBaseTexture));
+	this->SetNoiseTextureOffset(CSimulatorScene::GetInst()->GetTextureManager()->GetTextureOffset(TextureType::TrailNoiseTexture));
 }
 
 void TrailComponent::HandleMessage(const Message& message, const TrailUpdateParams& params)
@@ -508,6 +511,9 @@ void TrailComponent::HandleMessage(const Message& message, const TrailUpdatePara
 		}
 		pTrail->m_fEmissiveFactor = this->m_fEmissiveFactor;
 		pTrail->m_eTrailUpdateMethod = GetEnable() ? TRAIL_UPDATE_METHOD::UPDATE_NEW_CONTROL_POINT : TRAIL_UPDATE_METHOD::NON_UPDATE_NEW_CONTROL_POINT;
+
+		pTrail->SetTextureIndex(m_nMainTextureIndex + m_nMainTextureOffset);
+		pTrail->SetNoiseTextureIndex(m_nNoiseTextureIndex + m_nNoiseTextureOffset);
 	}
 }
 void SceneOnGroundListener::HandleMessage(const Message& message, const OnGroundParams& params)

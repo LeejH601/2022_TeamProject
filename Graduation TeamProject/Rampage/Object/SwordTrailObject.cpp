@@ -20,13 +20,13 @@ CSwordTrailObject::CSwordTrailObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 
 	pSwordTrailShader->CreateCbvSrvUavDescriptorHeaps(pd3dDevice, 0, 6, 0);
 
-	std::shared_ptr<CTexture> pTexture = std::make_shared<CTexture>(2, RESOURCE_TEXTURE2D, 0, 1);
-	pTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/T_Sword_Slash_11.dds", RESOURCE_TEXTURE2D, 0);
-	pTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/VAP1_Noise_4.dds", RESOURCE_TEXTURE2D, 1);
+	//std::shared_ptr<CTexture> pTexture = std::make_shared<CTexture>(2, RESOURCE_TEXTURE2D, 0, 1);
+	//pTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/T_Sword_Slash_11.dds", RESOURCE_TEXTURE2D, 0);
+	//pTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/VAP1_Noise_4.dds", RESOURCE_TEXTURE2D, 1);
 
-	pSwordTrailShader->CreateShaderResourceViews(pd3dDevice, pTexture.get(), 0, 2);
+	//pSwordTrailShader->CreateShaderResourceViews(pd3dDevice, pTexture.get(), 0, 2);
 
-	SetShader(pSwordTrailShader, pTexture);
+	SetShader(pSwordTrailShader);
 
 	m_fR_CurvePoints[0] = 0.0f; m_fR_CurvePoints[1] = 0.14; m_fR_CurvePoints[2] = 0.459;  m_fR_CurvePoints[3] = 1.892;
 	m_fG_CurvePoints[0] = 0.0f; m_fG_CurvePoints[1] = 0.005; m_fG_CurvePoints[2] = 0.067;  m_fG_CurvePoints[3] = 0.595;
@@ -69,6 +69,8 @@ void CSwordTrailObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCom
 	m_pcbMappedTrail->m_nCurves = m_nCurves;
 	m_pcbMappedTrail->m_fNoiseConstants = m_fNoiseConstants;
 	m_pcbMappedTrail->m_fEmissiveFactor = m_fEmissiveFactor;
+	m_pcbMappedTrail->gnBaseTextureIndex = m_iTextureIndex;
+	m_pcbMappedTrail->gnNoiseTextureIndex = m_iNoiseTextureIndex;
 
 	D3D12_GPU_VIRTUAL_ADDRESS d3dGpuVirtualAddress = m_pd3dcbTrail->GetGPUVirtualAddress();
 	pd3dCommandList->SetGraphicsRootConstantBufferView(7, d3dGpuVirtualAddress);

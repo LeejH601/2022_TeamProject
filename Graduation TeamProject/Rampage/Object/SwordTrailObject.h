@@ -17,6 +17,8 @@ struct VS_CB_SWTRAIL_INFO
 	UINT m_nDrawedControllPoints;
 	float m_faccumulateTime;
 	float m_fEmissiveFactor;
+	UINT gnBaseTextureIndex;
+	UINT gnNoiseTextureIndex;
 };
 enum class TRAIL_UPDATE_METHOD {
 	UPDATE_NEW_CONTROL_POINT,
@@ -40,6 +42,8 @@ class CSwordTrailObject : public CGameObject
 	ComPtr<ID3D12Resource> m_pd3dcbTrail = NULL;
 	VS_CB_SWTRAIL_INFO* m_pcbMappedTrail = NULL;
 
+	int m_iNoiseTextureIndex;
+
 	float m_fR_CurvePoints[MAX_COLORCURVES];
 	float m_fG_CurvePoints[MAX_COLORCURVES];
 	float m_fB_CurvePoints[MAX_COLORCURVES];
@@ -47,8 +51,6 @@ class CSwordTrailObject : public CGameObject
 	UINT m_nCurves;
 	float m_fNoiseConstants;
 	float m_fEmissiveFactor;
-
-	std::unique_ptr<CTexture> m_pTexture;
 
 public:
 	float m_faccumulateTime;
@@ -66,6 +68,7 @@ public:
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, bool b_UseTexture, CCamera* pCamera = NULL);
 
 	void SetNextControllPoint(XMFLOAT4* point1, XMFLOAT4* point2);
+	void SetNoiseTextureIndex(int index) { m_iNoiseTextureIndex = index; };
 };
 
 class CSwordTrailObjectEmitter : public CGameObject {
