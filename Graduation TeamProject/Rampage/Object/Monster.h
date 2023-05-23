@@ -31,6 +31,7 @@ public:
 	float m_fSensingRange;
 	
 	float m_fStunTime;
+	float m_fMaxStunTime;
 	float m_fStunStartTime;
 	float m_fShakeDistance;
 	float m_fDamageDistance;

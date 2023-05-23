@@ -134,6 +134,9 @@ void Damaged_Monster::Execute(CMonster* monster, float fElapsedTime)
 
 	CAnimationSet* pAnimationSet = monster->m_pSkinnedAnimationController->m_pAnimationSets->m_pAnimationSets[monster->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_nAnimationSet];
 	
+	if (monster->m_fStunStartTime < monster->m_pSkinnedAnimationController->m_fTime && !monster->m_bStunned)
+		monster->m_pStateMachine->ChangeState(Stun_Monster::GetInst());
+
 	if (monster->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition == pAnimationSet->m_fLength)
 	{
 		monster->SetNotHit();
@@ -166,6 +169,11 @@ void Stun_Monster::Execute(CMonster* monster, float fElapsedTime)
 {
 	XMFLOAT3 xmf3LookVec = Vector3::Add(monster->GetPosition(), monster->GetHitterVec());
 	monster->SetLookAt(Vector3::Add(monster->GetPosition(), XMFLOAT3(-monster->GetHitterVec().x, 0.0f, -monster->GetHitterVec().z)));
+
+	if (monster->m_fStunTime < monster->m_fMaxStunTime)
+		monster->m_fStunTime += fElapsedTime;
+	else
+		monster->m_pStateMachine->ChangeState(Damaged_Monster::GetInst());
 }
 
 void Stun_Monster::Animate(CMonster* monster, float fElapsedTime)

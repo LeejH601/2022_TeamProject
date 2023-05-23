@@ -158,27 +158,6 @@ void CMonster::UpdateTransform(XMFLOAT4X4* pxmf4x4Parent)
 }
 void CMonster::SetHit(CGameObject* pHitter)
 {
-	if (m_bSimulateArticulate == false) { // 변수 체크가 아닌 현재 상태 체크를 이용하는 것이 좋을듯
-		/*m_xmf3HitterVec = Vector3::Normalize(Vector3::Subtract(GetPosition(), pHitter->GetPosition()));
-		((CPlayer*)pHitter)->m_fCurLagTime = 0.f;
-
-		SoundPlayParams sound_play_params;
-		sound_play_params.monster_type = GetMonsterType();
-		sound_play_params.sound_category = SOUND_CATEGORY::SOUND_VOICE;
-		CMessageDispatcher::GetInst()->Dispatch_Message<SoundPlayParams>(MessageType::PLAY_SOUND, &sound_play_params, ((CPlayer*)(pHitter))->m_pStateMachine->GetCurrentState());
-
-		PlayerParams PlayerParam{ pHitter };
-		CMessageDispatcher::GetInst()->Dispatch_Message<PlayerParams>(MessageType::UPDATE_HITLAG, &PlayerParam, ((CPlayer*)pHitter)->m_pStateMachine->GetCurrentState());
-
-		m_pStateMachine->ChangeState(Idle_Monster::GetInst());
-		m_pStateMachine->ChangeState(Damaged_Monster::GetInst());
-		m_iPlayerAtkId = ((CPlayer*)pHitter)->GetAtkId();*/
-	}
-	else {
-		TCHAR pstrDebug[256] = { 0 };
-		//_stprintf_s(pstrDebug, 256, "Already Dead \n");
-		OutputDebugString(L"Already Dead");
-	}
 }
 void CMonster::UpdateTransformFromArticulation(XMFLOAT4X4* pxmf4x4Parent, std::vector<std::string> pArtiLinkNames, std::vector<XMFLOAT4X4>& AritculatCacheMatrixs, float scale)
 {

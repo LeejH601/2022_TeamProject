@@ -252,32 +252,6 @@ void ShakeAnimationComponent::HandleMessage(const Message& message, const Animat
 }
 void StunAnimationComponent::HandleMessage(const Message& message, const AnimationCompParams& params)
 {
-	if (!m_bEnable)
-		return;
-
-	for (int i = 0; i < params.pObjects->size(); ++i)
-	{
-		CGameObject* pObject = ((*(params.pObjects))[i]).get();
-
-		CMonster* pMonster = dynamic_cast<CMonster*>(pObject);
-
-		if (pMonster)
-		{
-			if (pMonster->m_pStateMachine->GetCurrentState() == Damaged_Monster::GetInst())
-			{
-				if (pMonster->m_fStunStartTime < pMonster->m_pSkinnedAnimationController->m_fTime && !pMonster->m_bStunned)
-					pMonster->m_pStateMachine->ChangeState(Stun_Monster::GetInst());
-			}
-
-			else if (pMonster->m_pStateMachine->GetCurrentState() == Stun_Monster::GetInst())
-			{
-				if (pMonster->m_fStunTime < m_fStunTime)
-					pMonster->m_fStunTime += params.fElapsedTime;
-				else
-					pMonster->m_pStateMachine->ChangeState(Damaged_Monster::GetInst());
-			}
-		}
-	}
 }
 ParticleComponent::ParticleComponent()
 {
@@ -526,14 +500,23 @@ void DamageListener::HandleMessage(const Message& message, const DamageParams& p
 		sound_play_params.sound_category = SOUND_CATEGORY::SOUND_VOICE;
 		CMessageDispatcher::GetInst()->Dispatch_Message<SoundPlayParams>(MessageType::PLAY_SOUND, &sound_play_params, pPlayer->m_pStateMachine->GetCurrentState());
 
-		pPlayer->m_fCurLagTime = 0.f;
-		pMonster->m_xmf3HitterVec = Vector3::Normalize(Vector3::Subtract(pMonster->GetPosition(), pPlayer->GetPosition()));
-
 		PlayerParams PlayerParam{ pPlayer };
 		CMessageDispatcher::GetInst()->Dispatch_Message<PlayerParams>(MessageType::UPDATE_HITLAG, &PlayerParam, pPlayer->m_pStateMachine->GetCurrentState());
 
+		StunAnimationComponent* pStunAnimationComponent = dynamic_cast<StunAnimationComponent*>(pPlayer->m_pStateMachine->GetCurrentState()->GetStunAnimationComponent());
+
+		pPlayer->m_fCurLagTime = 0.f;
+
+		pMonster->m_xmf3HitterVec = Vector3::Normalize(Vector3::Subtract(pMonster->GetPosition(), pPlayer->GetPosition()));
+		pStunAnimationComponent->GetEnable() ? pMonster->m_fMaxStunTime = pStunAnimationComponent->GetStunTime() : pMonster->m_fMaxStunTime = 0.0f;
 		pMonster->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
 		pMonster->m_pStateMachine->ChangeState(Damaged_Monster::GetInst());
 		pMonster->m_iPlayerAtkId = pPlayer->GetAtkId();
+	}
+
+	else {
+		TCHAR pstrDebug[256] = { 0 };
+		//_stprintf_s(pstrDebug, 256, "Already Dead \n");
+		OutputDebugString(L"Already Dead");
 	}
 }
