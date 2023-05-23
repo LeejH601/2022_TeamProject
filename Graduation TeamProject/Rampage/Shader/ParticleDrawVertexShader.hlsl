@@ -21,6 +21,8 @@ struct VS_PARTICLE_DRAW_OUTPUT
 	uint TextureIndex :TEXTUREINDEX;
 	uint2 SpriteTotalCoord : TEXTURECOORD;
 	uint2 SpriteCurrentCoord : TEXTURECOORD1;
+	float lifetime : LIFETIME;
+	float EmitTime : EMITTIME; // 방출 시작 시간 
 };
 
 cbuffer cbFrameworkInfo : register(b7)
@@ -74,6 +76,8 @@ VS_PARTICLE_DRAW_OUTPUT VSParticleDraw(VS_PARTICLE_INPUT input)
 	output.TextureIndex = input.TextureIndex;
 	output.SpriteTotalCoord = input.SpriteTotalCoord;
 	output.SpriteCurrentCoord = SpriteAnimtaion(input, gfCurrentTime - input.EmitTime, input.lifetime, input.SpriteTotalCoord.x, input.SpriteTotalCoord.y);
+	output.lifetime = input.lifetime;
+	output.EmitTime = input.EmitTime;
 	return(output);
 }
 

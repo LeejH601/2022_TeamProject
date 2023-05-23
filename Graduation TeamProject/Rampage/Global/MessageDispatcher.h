@@ -411,6 +411,8 @@ class TrailComponent : public IMessageListener
 	std::shared_ptr<CTexture> m_pTexture;
 	int m_nMainTextureIndex = 0;
 	int m_nNoiseTextureIndex = 0;
+	int m_nMainTextureOffset = 0;
+	int m_nNoiseTextureOffset = 0;
 
 public:
 	double m_fR_CurvePoints[MAX_COLORCURVES];
@@ -429,6 +431,8 @@ public:
 
 	int& GetMainTextureIndex() { return m_nMainTextureIndex; };
 	int& GetNoiseTextureIndex() { return m_nNoiseTextureIndex; };
+	void SetMainTextureOffset(int iOffset) { m_nMainTextureOffset = iOffset; }
+	void SetNoiseTextureOffset(int iOffset) { m_nNoiseTextureOffset = iOffset; }
 	virtual void HandleMessage(const Message& message, const TrailUpdateParams& params);
 };
 

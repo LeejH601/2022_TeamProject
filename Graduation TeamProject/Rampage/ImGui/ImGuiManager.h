@@ -25,6 +25,8 @@ private:
 	{
 		TYPE_IMPACT,
 		TYPE_PARTICLE,
+		TYPE_TRAILBASE,
+		TYPE_TRAILNOISE,
 	};
 	// Component Sets
 	std::unique_ptr<DataLoader> m_pDataLoader = NULL;
@@ -69,6 +71,8 @@ private:
 
 	D3D12_GPU_DESCRIPTOR_HANDLE m_d3dSrvGPUDescriptorHandle_ImpactTexture;
 	D3D12_GPU_DESCRIPTOR_HANDLE m_d3dSrvGPUDescriptorHandle_ParticleTexture;
+	D3D12_GPU_DESCRIPTOR_HANDLE m_d3dSrvGPUDescriptorHandle_TrailMainTexture;
+	D3D12_GPU_DESCRIPTOR_HANDLE m_d3dSrvGPUDescriptorHandle_TrailNoiseTexture;
 
 public:
 	DECLARE_SINGLE(CImGuiManager);

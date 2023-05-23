@@ -748,9 +748,15 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pTextureManager->LoadTexture(TextureType::BillBoardTexture, pd3dDevice, pd3dCommandList, L"Image/BillBoardImages/Fire_Effect.dds", 5, 6);
 	m_pTextureManager->LoadTexture(TextureType::BillBoardTexture, pd3dDevice, pd3dCommandList, L"Image/BillBoardImages/Circle1.dds", 1, 1);
 
-	m_pTextureManager->LoadTexture(TextureType::ParticleTexture, pd3dDevice, pd3dCommandList, L"Image/ParticleImages/RoundSoftParticle.dds", 0, 0);
+	m_pTextureManager->LoadTexture(TextureType::ParticleTexture, pd3dDevice, pd3dCommandList, L"Image/ParticleImages/TextureFlash2.dds", 1, 1);
 	m_pTextureManager->LoadTexture(TextureType::ParticleTexture, pd3dDevice, pd3dCommandList, L"Image/ParticleImages/Meteor.dds", 0, 0);
 	m_pTextureManager->LoadTexture(TextureType::ParticleTexture, pd3dDevice, pd3dCommandList, L"Image/ParticleImages/Effect0.dds", 0, 0);
+
+	m_pTextureManager->LoadTexture(TextureType::TrailBaseTexture, pd3dDevice, pd3dCommandList, L"Image/TrailImages/T_Sword_Slash_11.dds", 1, 1);
+	m_pTextureManager->LoadTexture(TextureType::TrailBaseTexture, pd3dDevice, pd3dCommandList, L"Image/TrailImages/T_Sword_Slash_21.dds", 1, 1);
+	m_pTextureManager->LoadTexture(TextureType::TrailNoiseTexture, pd3dDevice, pd3dCommandList, L"Image/TrailImages/VAP1_Noise_4.dds", 1, 1);
+	m_pTextureManager->LoadTexture(TextureType::TrailNoiseTexture, pd3dDevice, pd3dCommandList, L"Image/TrailImages/VAP1_Noise_14.dds", 1, 1);
+
 	m_pTextureManager->CreateResourceView(pd3dDevice, 0);
 
 	m_pParticleShader = std::make_unique<CParticleShader>();
@@ -892,7 +898,9 @@ void CMainTMPScene::UpdateObjects(float fTimeElapsed)
 	if (!isSetVPObject) {
 		CGameObject* obj = m_pPlayer->FindFrame("Sword_low");
 		m_pVertexPointParticleObject->SetWorldMatrixReference(&obj->m_xmf4x4World);
-		m_pVertexPointParticleObject->SetVertexPointsFromSkinnedMeshToRandom(m_pPlayer->m_pSkinnedAnimationController->m_ppSkinnedMeshes[0], m_pPlayer->m_pSkinnedAnimationController.get());
+		// body
+		m_pVertexPointParticleObject->SetVertexPointsFromSkinnedSubeMeshToRandom(m_pPlayer->m_pSkinnedAnimationController->m_ppSkinnedMeshes[0], 6, m_pPlayer->m_pSkinnedAnimationController.get());
+		//m_pVertexPointParticleObject->SetVertexPointsFromSkinnedMeshToRandom(m_pPlayer->m_pSkinnedAnimationController->m_ppSkinnedMeshes[0], m_pPlayer->m_pSkinnedAnimationController.get());
 		//m_pVertexPointParticleObject->SetVertexPointsFromStaticMeshToUniform(obj->m_pMesh.get());
 		//m_pVertexPointParticleObject->SetVertexPointsFromStaticMeshToRandom(obj->m_pMesh.get());
 		isSetVPObject = true;
@@ -1029,12 +1037,12 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 		static int count = 100;
 		count--;
 		if (count < 1) {
-			m_pVertexPointParticleObject->EmitParticle(5);
-			m_pVertexPointParticleObject->SetEmit(true);
+			
 			count = 100;
 		}
 	}
-	
+	m_pVertexPointParticleObject->EmitParticle(5);
+	m_pVertexPointParticleObject->SetEmit(true);
 	D3D12_GPU_VIRTUAL_ADDRESS d3dGpuVirtualAddress = m_pd3dcbDisolveParams->GetGPUVirtualAddress();
 	pd3dCommandList->SetGraphicsRootConstantBufferView(7, d3dGpuVirtualAddress);
 

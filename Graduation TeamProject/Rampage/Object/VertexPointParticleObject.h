@@ -23,6 +23,7 @@ public:
 
 	void SetWorldMatrixReference(XMFLOAT4X4* xmf4x4WorldReference) { m_xmf4x4WorldMatrixReference = xmf4x4WorldReference; };
 	void SetVertexPointsFromSkinnedMeshToRandom(CSkinnedMesh* pSkinnedMesh, CAnimationController* pController);
+	void SetVertexPointsFromSkinnedSubeMeshToRandom(CSkinnedMesh* pSkinnedMesh, UINT subMeshIndex, CAnimationController* pController);
 	void SetVertexPointsFromStaticMeshToRandom(CMesh* pMesh);
 	void SetVertexPointsFromStaticMeshToUniform(CMesh* pMesh);
 };

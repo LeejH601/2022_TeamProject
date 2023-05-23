@@ -14,20 +14,20 @@ CVertexPointParticleObject::CVertexPointParticleObject(int iTextureIndex, ID3D12
 {
 	this->SetEmit(true);
 	this->SetSize(XMFLOAT2(0.2, 0.2));
-	this->SetStartAlpha(2.0);
+	this->SetStartAlpha(1.0);
 	this->SetColor(XMFLOAT3(0.3803, 0.9372, 0.1098));
-	m_f3Color = Vector3::ScalarProduct(m_f3Color, 5.0f, false);
+	//m_f3Color = Vector3::ScalarProduct(m_f3Color, 5.0f, false);
 	this->SetSpeed(10.0f);
 	this->SetLifeTime(2.0f);
 	this->SetMaxParticleN(MAX_PARTICLES);
 	this->SetEmitParticleN(100);
 	this->SetParticleType(5);
 
-	m_fFieldSpeed = 200.0f;
+	m_fFieldSpeed = 5.0f;
 	m_fNoiseStrength = 1.0f;;
 	m_xmf3FieldMainDirection = XMFLOAT3(0.0f, 1.0f, 0.0f);
 	m_fProgressionRate = 1.0f;
-	m_fLengthScale = 2.0f;
+	m_fLengthScale = 1.0f;
 }
 
 CVertexPointParticleObject::~CVertexPointParticleObject()
@@ -46,7 +46,7 @@ void CVertexPointParticleObject::EmitParticle(int emitType)
 	{
 	case 5:
 		param.m_fLifeTime = 0.5f;
-		param.m_fEmitedSpeed = 30.0f;
+		param.m_fEmitedSpeed = 5.0f;
 		param.m_iTextureIndex = 1;
 		param.m_iTextureCoord[0] = m_iTotalRow; param.m_iTextureCoord[1] = m_iTotalCol;
 
@@ -62,20 +62,23 @@ void CVertexPointParticleObject::EmitParticle(int emitType)
 		if (m_pAnimationContoroller)
 		{
 			for (int i = 0; i < m_vVertexPoints.size(); ++i) {
-				XMFLOAT4X4 mtxVertexToBoneWorld = Matrix4x4::Identity();
+				XMFLOAT4X4 mtxVertexToBoneWorld;
+				ZeroMemory(&mtxVertexToBoneWorld, sizeof(XMFLOAT4X4));
 				int index = m_ivertexPointsIndices[i];
 
 				int BoneIndexs[4] = { m_pMeshBoneIndices[index].x,m_pMeshBoneIndices[index].y,m_pMeshBoneIndices[index].z,m_pMeshBoneIndices[index].w };
 				float BoneWeights[4] = { m_pMeshBoneWeights[index].x,m_pMeshBoneWeights[index].y,m_pMeshBoneWeights[index].z,m_pMeshBoneWeights[index].w };
 				for (int j = 0; j < 4; j++)
 				{
+					XMFLOAT4X4 BoneOffset = Matrix4x4::Transpose(m_pMeshBoneOffsets[BoneIndexs[j]]);
 					XMFLOAT4X4 BoneTransfrom = Matrix4x4::Transpose(m_pAnimationContoroller->m_ppcbxmf4x4MappedSkinningBoneTransforms[0][BoneIndexs[j]]);
-					mtxVertexToBoneWorld = Matrix4x4::Add(mtxVertexToBoneWorld, Matrix4x4::Scale(Matrix4x4::Multiply(m_pMeshBoneOffsets[BoneIndexs[j]], BoneTransfrom), BoneWeights[j]));
+					mtxVertexToBoneWorld = Matrix4x4::Add(mtxVertexToBoneWorld, Matrix4x4::Scale(Matrix4x4::Multiply(BoneOffset, BoneTransfrom), BoneWeights[j]));
 				}
 
 				XMFLOAT4 pos = { m_vVertexPoints[i].x,m_vVertexPoints[i].y, m_vVertexPoints[i].z, 1.0f };
 				XMStoreFloat3(&param.m_xmf3EmiedPositions[i], XMVector4Transform(XMLoadFloat4(&pos),XMLoadFloat4x4(& mtxVertexToBoneWorld)));
-				XMFLOAT4 velocity = { m_vNormals[i].x,m_vNormals[i].y, m_vNormals[i].z ,0.0f };
+				XMFLOAT4 velocity = {0,1,0 ,0.0f };
+				//XMFLOAT4 velocity = { m_vNormals[i].x,m_vNormals[i].y, m_vNormals[i].z ,0.0f };
 				XMStoreFloat3(&param.m_xmf3Velocitys[i], XMVector4Transform(XMLoadFloat4(&velocity), XMLoadFloat4x4(&mtxVertexToBoneWorld)));
 			}
 		}
@@ -96,7 +99,7 @@ void CVertexPointParticleObject::SetVertexPointsFromSkinnedMeshToRandom(CSkinned
 {
 	std::vector<XMFLOAT3>& meshVertexs = pSkinnedMesh->GetVertexs();
 	std::vector<XMFLOAT3>& meshNormal = pSkinnedMesh->GetNormals();
-	m_pMeshBoneOffsets = pSkinnedMesh->m_pxmf4x4BindPoseBoneOffsets.data();
+	m_pMeshBoneOffsets = pSkinnedMesh->m_pcbxmf4x4MappedBindPoseBoneOffsets;
 	m_pMeshBoneIndices = pSkinnedMesh->GetBoneIndices()->data();
 	m_pMeshBoneWeights = pSkinnedMesh->GetBoneWeights()->data();
 	m_pAnimationContoroller = pController;
@@ -105,7 +108,7 @@ void CVertexPointParticleObject::SetVertexPointsFromSkinnedMeshToRandom(CSkinned
 	static std::default_random_engine dre(rd());
 	std::uniform_int_distribution<int> uid(0, meshVertexs.size() - 1);
 
-	int nVertexPoint = int(meshVertexs.size() / 10);
+	int nVertexPoint = int(meshVertexs.size() / 100);
 	nVertexPoint = nVertexPoint < 1 ? 1 : nVertexPoint; // 반드시 1개는 존재하도록 조정
 
 	m_ivertexPointsIndices.resize(nVertexPoint);
@@ -120,6 +123,40 @@ void CVertexPointParticleObject::SetVertexPointsFromSkinnedMeshToRandom(CSkinned
 		m_vNormals[i] = meshNormal[m_ivertexPointsIndices[i]];
 	}
 }
+
+void CVertexPointParticleObject::SetVertexPointsFromSkinnedSubeMeshToRandom(CSkinnedMesh* pSkinnedMesh, UINT subMeshIndex, CAnimationController* pController)
+{
+	std::vector<XMFLOAT3>& meshVertexs = pSkinnedMesh->GetVertexs();
+	std::vector<XMFLOAT3>& meshNormal = pSkinnedMesh->GetNormals();
+	m_pMeshBoneOffsets = pSkinnedMesh->m_pcbxmf4x4MappedBindPoseBoneOffsets;
+	m_pMeshBoneIndices = pSkinnedMesh->GetBoneIndices()->data();
+	m_pMeshBoneWeights = pSkinnedMesh->GetBoneWeights()->data();
+	m_pAnimationContoroller = pController;
+
+	static std::random_device rd;
+	static std::default_random_engine dre(rd());
+
+	std::vector<UINT>& subSetIndices = pSkinnedMesh->GetSubSetIndices(subMeshIndex);
+
+	std::uniform_int_distribution<int> uid(0, subSetIndices.size() - 1);
+
+	int nVertexPoint = int(meshVertexs.size() / 100);
+	nVertexPoint = nVertexPoint < 1 ? 1 : nVertexPoint; // 반드시 1개는 존재하도록 조정
+
+	m_ivertexPointsIndices.resize(nVertexPoint);
+	for (int& vertexPoint : m_ivertexPointsIndices) {
+		vertexPoint = subSetIndices[uid(dre)];
+	}
+
+	m_vVertexPoints.resize(nVertexPoint);
+	m_vNormals.resize(nVertexPoint);
+	for (int i = 0; i < nVertexPoint; ++i) {
+		m_vVertexPoints[i] = meshVertexs[m_ivertexPointsIndices[i]];
+		m_vNormals[i] = meshNormal[m_ivertexPointsIndices[i]];
+	}
+}
+
+
 
 void CVertexPointParticleObject::SetVertexPointsFromStaticMeshToRandom(CMesh* pMesh)
 {

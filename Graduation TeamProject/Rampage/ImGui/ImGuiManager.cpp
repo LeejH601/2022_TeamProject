@@ -897,6 +897,12 @@ void CImGuiManager::SetPreviewTexture(ID3D12Device* pd3dDevice, CTexture* pTextu
 	case PREVIEW_TEXTURE_TYPE::TYPE_PARTICLE: // particle
 		m_d3dSrvGPUDescriptorHandle_ParticleTexture = d3dSrvGPUDescriptorHandle;
 		break;
+	case PREVIEW_TEXTURE_TYPE::TYPE_TRAILBASE: // trailbase
+		m_d3dSrvGPUDescriptorHandle_TrailMainTexture = d3dSrvGPUDescriptorHandle;
+		break;
+	case PREVIEW_TEXTURE_TYPE::TYPE_TRAILNOISE: // trailnoise
+		m_d3dSrvGPUDescriptorHandle_TrailNoiseTexture = d3dSrvGPUDescriptorHandle;
+		break;
 	default:
 		break;
 	}
@@ -1415,6 +1421,19 @@ void CImGuiManager::ShowTrailManager(CState<CPlayer>* pCurrentAnimation)
 	}
 
 	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
+
+	UINT m_iParticleTextureN = CSimulatorScene::GetInst()->GetTextureManager()->GetTextureListIndex(TextureType::TrailBaseTexture);
+	pTrailComponent->SetMainTextureOffset(CSimulatorScene::GetInst()->GetTextureManager()->GetTextureOffset(TextureType::TrailBaseTexture));
+	std::shared_ptr<CTexture> pTexture = CSimulatorScene::GetInst()->GetTextureManager()->GetTexture(TextureType::TrailBaseTexture);
+	std::vector<const char*> items;
+	std::vector <std::string> str(100);
+	for (int i = 0; i < m_iParticleTextureN; i++)
+	{
+		std::wstring wstr = pTexture->GetTextureName(i);
+		str[i].assign(wstr.begin(), wstr.end());
+		items.emplace_back(str[i].c_str());
+	}
+
 	int mainTextureIndexCache = pTrailComponent->GetMainTextureIndex();
 	if (ImGui::Combo(U8STR("메인 텍스쳐##TrailEffect"), (int*)(&pTrailComponent->GetMainTextureIndex()), mainItems.data(), mainItems.size()))
 	{
@@ -1424,6 +1443,13 @@ void CImGuiManager::ShowTrailManager(CState<CPlayer>* pCurrentAnimation)
 		/*TrailTextureUpdateParams param;
 		param.pShader = */
 	}
+
+	int my_image_width = 0.2f * m_lDesktopHeight;
+	int my_image_height = 0.2f * m_lDesktopHeight;
+
+
+	SetPreviewTexture(Locator.GetDevice(), pTexture.get(), pTrailComponent->GetMainTextureIndex(), 4, PREVIEW_TEXTURE_TYPE::TYPE_TRAILBASE);
+	ImGui::Image((ImTextureID)(m_d3dSrvGPUDescriptorHandle_TrailMainTexture.ptr), ImVec2((float)my_image_height, (float)my_image_height));
 
 	ImGui::DragFloat("Emissve##TrailEffect", &pTrailComponent->m_fEmissiveFactor);
 
@@ -1690,21 +1716,30 @@ void CImGuiManager::ShowTrailManager(CState<CPlayer>* pCurrentAnimation)
 	//		ImVec2(testPos.x + (200 * pTrailComponent->m_fColorCurveTimes_R[i + 1]), testPos.y + 10), color1, color2, color2, color1);
 	//}
 
-	std::vector<std::string> noiseTextureNames = TrailComponent::GetNoiseTexturNames();
-	std::vector<const char*> noiseItems;
-	for (int i = 0; i < noiseTextureNames.size(); i++)
+	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
+
+	UINT m_iNoiseTextureN = CSimulatorScene::GetInst()->GetTextureManager()->GetTextureListIndex(TextureType::TrailNoiseTexture);
+	pTrailComponent->SetNoiseTextureOffset(CSimulatorScene::GetInst()->GetTextureManager()->GetTextureOffset(TextureType::TrailNoiseTexture));
+	std::shared_ptr<CTexture> pNoiseTexture = CSimulatorScene::GetInst()->GetTextureManager()->GetTexture(TextureType::TrailNoiseTexture);
+	std::vector<const char*> Noiseitems;
+	std::vector <std::string> Noisestr(100);
+	for (int i = 0; i < m_iNoiseTextureN; i++)
 	{
-		noiseItems.emplace_back(noiseTextureNames[i].c_str());
+		std::wstring wstr = pNoiseTexture->GetTextureName(i);
+		Noisestr[i].assign(wstr.begin(), wstr.end());
+		Noiseitems.emplace_back(str[i].c_str());
 	}
 
-	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
-	int noiseTextureIndexCache = pTrailComponent->GetNoiseTextureIndex();
-	if (ImGui::Combo(U8STR("노이즈 텍스쳐##TrailEffect"), (int*)(&pTrailComponent->GetNoiseTextureIndex()), noiseItems.data(), noiseItems.size()))
+	int NoiseTextureIndexCache = pTrailComponent->GetNoiseTextureIndex();
+	if (ImGui::Combo(U8STR("노이즈 텍스쳐##TrailEffect"), (int*)(&pTrailComponent->GetNoiseTextureIndex()), Noiseitems.data(), Noiseitems.size()))
 	{
-		/*std::shared_ptr pTexture = vTexture[pParticleComponent->GetParticleIndex()];
-		pParticleComponent->SetParticleTexture(pTexture);*/
-		// 노이즈 텍스쳐 로드
 	}
+
+	my_image_width = 0.2f * m_lDesktopHeight;
+	my_image_height = 0.2f * m_lDesktopHeight;
+
+	SetPreviewTexture(Locator.GetDevice(), pNoiseTexture.get(), pTrailComponent->GetNoiseTextureIndex(), 5, PREVIEW_TEXTURE_TYPE::TYPE_TRAILNOISE);
+	ImGui::Image((ImTextureID)(m_d3dSrvGPUDescriptorHandle_TrailNoiseTexture.ptr), ImVec2((float)my_image_height, (float)my_image_height));
 
 	/*ImGui::SetNextItemWidth(190.f);
 	if (ImGui::DragFloat("XSize##TrailEffect", &pParticleComponent->GetXSize(), DRAG_FLOAT_UNIT, PARTICLE_SIZE_MIN, PARTICLE_SIZE_MAX, "%.2f", 0))

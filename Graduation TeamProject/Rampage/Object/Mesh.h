@@ -64,6 +64,7 @@ public:
 	std::vector<XMFLOAT3>& GetVertexs() { return m_pxmf3Positions; };
 	std::vector<UINT>& GetIndices() { return m_ppnSubSetIndices[0]; };
 	std::vector<XMFLOAT3>& GetNormals() { return m_pxmf3Normals; };
+	std::vector<UINT>& GetSubSetIndices(UINT index) { return m_ppnSubSetIndices[index]; };
 
 	UINT GetType() { return(m_nType); }
 	UINT GetVertices() { return(m_nVertices); }
