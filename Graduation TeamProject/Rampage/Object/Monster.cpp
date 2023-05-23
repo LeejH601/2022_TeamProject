@@ -135,6 +135,10 @@ void CMonster::Update(float fTimeElapsed)
 	XMFLOAT3 xmf3ShakeVec = Vector3::ScalarProduct(Vector3::Normalize(GetRight()), m_fShakeDistance, false);
 	m_xmf3CalPos = Vector3::Add(m_xmf3Position, xmf3ShakeVec);
 
+	/*std::wstring debugString{std::to_wstring(m_fShakeDistance)};
+	OutputDebugString(debugString.c_str());
+	OutputDebugString(L"\n");*/
+
 	CPhysicsObject::Apply_Friction(fTimeElapsed);
 }
 void CMonster::UpdateTransform(XMFLOAT4X4* pxmf4x4Parent)

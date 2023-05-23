@@ -38,6 +38,9 @@ public:
 	float m_fShakeFrequency;
 	float m_fMaxShakeDistance;
 	float m_fDamageDistance;
+	float m_fMaxDamageDistance;
+	float m_fDamageAnimationSpeed;
+
 	float m_fTotalDamageDistance;
 	float TestDissolvetime = 0.0f;
 

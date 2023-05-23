@@ -185,40 +185,6 @@ void CameraMoveComponent::HandleMessage(const Message& message, const CameraUpda
 }
 void DamageAnimationComponent::HandleMessage(const Message& message, const AnimationCompParams& params)
 {
-	if (!m_bEnable)
-		return;
-
-	float fDamageDistance = m_fSpeed * params.fElapsedTime;
-
-	for (int i = 0; i < params.pObjects->size(); ++i)
-	{
-		CGameObject* pObject = ((*(params.pObjects))[i]).get();
-
-		CMonster* pMonster = dynamic_cast<CMonster*>(pObject);
-
-		if (pMonster)
-		{
-			XMFLOAT3 xmf3DamageVec = XMFLOAT3(0.0f, 0.0f, 0.0f);
-
-			pMonster->m_fDamageDistance = 0.0f;
-
-			if ((pMonster->m_pStateMachine->GetCurrentState() == Damaged_Monster::GetInst()
-				|| pMonster->m_pStateMachine->GetCurrentState() == Stun_Monster::GetInst()))
-			{
-				if (pMonster->m_fTotalDamageDistance < m_fMaxDistance)
-				{
-					pMonster->m_fDamageDistance = fDamageDistance;
-					pMonster->m_fTotalDamageDistance += fDamageDistance;
-
-					if (m_fMaxDistance < pMonster->m_fTotalDamageDistance)
-						pMonster->m_fDamageDistance -= (pMonster->m_fTotalDamageDistance - m_fMaxDistance);
-				}
-			}
-
-			xmf3DamageVec = Vector3::ScalarProduct(XMFLOAT3{ pMonster->GetHitterVec().x, 0.0f, pMonster->GetHitterVec().z }, pMonster->m_fDamageDistance, false);
-			pMonster->Move(xmf3DamageVec, true);
-		}
-	}
 }
 void ShakeAnimationComponent::HandleMessage(const Message& message, const AnimationCompParams& params)
 {
@@ -476,14 +442,27 @@ void DamageListener::HandleMessage(const Message& message, const DamageParams& p
 		PlayerParams PlayerParam{ pPlayer };
 		CMessageDispatcher::GetInst()->Dispatch_Message<PlayerParams>(MessageType::UPDATE_HITLAG, &PlayerParam, pPlayer->m_pStateMachine->GetCurrentState());
 
+		DamageAnimationComponent* pDamageAnimationComponent = dynamic_cast<DamageAnimationComponent*>(pPlayer->m_pStateMachine->GetCurrentState()->GetDamageAnimationComponent());
 		ShakeAnimationComponent* pShakeAnimationComponent = dynamic_cast<ShakeAnimationComponent*>(pPlayer->m_pStateMachine->GetCurrentState()->GetShakeAnimationComponent());
 		StunAnimationComponent* pStunAnimationComponent = dynamic_cast<StunAnimationComponent*>(pPlayer->m_pStateMachine->GetCurrentState()->GetStunAnimationComponent());
 
 		pPlayer->m_fCurLagTime = 0.f;
 
 		pMonster->m_xmf3HitterVec = Vector3::Normalize(Vector3::Subtract(pMonster->GetPosition(), pPlayer->GetPosition()));
-		pStunAnimationComponent->GetEnable() ? pMonster->m_fMaxStunTime = pStunAnimationComponent->GetStunTime() : pMonster->m_fMaxStunTime = 0.0f;
-		pShakeAnimationComponent->GetEnable() ? pMonster->m_fShakeDuration = pShakeAnimationComponent->GetDuration() : pMonster->m_fShakeDuration = FLT_MIN;
+
+		pDamageAnimationComponent->GetEnable() ? 
+			pMonster->m_fMaxDamageDistance =pDamageAnimationComponent->GetMaxDistance() 
+			: pMonster->m_fMaxDamageDistance = 0.0f;
+		pDamageAnimationComponent->GetEnable() ? 
+			pMonster->m_fDamageAnimationSpeed = pDamageAnimationComponent->GetSpeed() 
+			: pMonster->m_fDamageAnimationSpeed = pMonster->m_fDamageAnimationSpeed;
+
+		pStunAnimationComponent->GetEnable() ? 
+			pMonster->m_fMaxStunTime = pStunAnimationComponent->GetStunTime() 
+			: pMonster->m_fMaxStunTime = 0.0f;
+		pShakeAnimationComponent->GetEnable() ? 
+			pMonster->m_fShakeDuration = pShakeAnimationComponent->GetDuration() 
+			: pMonster->m_fShakeDuration = FLT_MIN;
 		pMonster->m_fShakeFrequency = pShakeAnimationComponent->GetFrequency();
 
 		std::wstring debugString{ std::to_wstring(pMonster->m_fShakeFrequency) };

@@ -250,8 +250,6 @@ void Atk_Player::Exit(CPlayer* player)
 {
 }
 
-
-
 Atk1_Player::Atk1_Player()
 {
 	InitAtkPlayer();
