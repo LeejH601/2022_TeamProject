@@ -33,7 +33,10 @@ public:
 	float m_fStunTime;
 	float m_fMaxStunTime;
 	float m_fStunStartTime;
+	float m_fShakeDuration;
 	float m_fShakeDistance;
+	float m_fShakeFrequency;
+	float m_fMaxShakeDistance;
 	float m_fDamageDistance;
 	float m_fTotalDamageDistance;
 	float TestDissolvetime = 0.0f;

@@ -134,6 +134,19 @@ void Damaged_Monster::Execute(CMonster* monster, float fElapsedTime)
 
 	CAnimationSet* pAnimationSet = monster->m_pSkinnedAnimationController->m_pAnimationSets->m_pAnimationSets[monster->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_nAnimationSet];
 	
+	XMFLOAT3 xmf3ShakeVec = XMFLOAT3(0.0f, 0.0f, 0.0f);
+
+	monster->m_fShakeDistance = 0.0f;
+
+	float fElapsed = monster->m_pSkinnedAnimationController->m_fTime + monster->m_fStunTime;
+
+	if (monster->m_fShakeDuration > fElapsed)
+	{
+		float fShakeDistance = (monster->m_fMaxShakeDistance - (monster->m_fMaxShakeDistance / monster->m_fShakeDuration)
+			* fElapsed) * cos((2 * PI * fElapsed) / monster->m_fShakeFrequency);
+		monster->m_fShakeDistance = fShakeDistance;
+	}
+
 	if (monster->m_fStunStartTime < monster->m_pSkinnedAnimationController->m_fTime && !monster->m_bStunned)
 		monster->m_pStateMachine->ChangeState(Stun_Monster::GetInst());
 
@@ -169,6 +182,17 @@ void Stun_Monster::Execute(CMonster* monster, float fElapsedTime)
 {
 	XMFLOAT3 xmf3LookVec = Vector3::Add(monster->GetPosition(), monster->GetHitterVec());
 	monster->SetLookAt(Vector3::Add(monster->GetPosition(), XMFLOAT3(-monster->GetHitterVec().x, 0.0f, -monster->GetHitterVec().z)));
+
+	monster->m_fShakeDistance = 0.0f;
+
+	float fElapsed = monster->m_pSkinnedAnimationController->m_fTime + monster->m_fStunTime;
+
+	if (monster->m_fShakeDuration > fElapsed)
+	{
+		float fShakeDistance = (monster->m_fMaxShakeDistance - (monster->m_fMaxShakeDistance / monster->m_fShakeDuration)
+			* fElapsed) * cos((2 * PI * fElapsed) / monster->m_fShakeFrequency);
+		monster->m_fShakeDistance = fShakeDistance;
+	}
 
 	if (monster->m_fStunTime < monster->m_fMaxStunTime)
 		monster->m_fStunTime += fElapsedTime;
