@@ -79,13 +79,13 @@ VS_PARTICLE_DRAW_OUTPUT VSParticleDraw(VS_PARTICLE_INPUT input)
 	//output.velocity += CalculrateCulrNoise(input.position);
 	output.size = gfSize;
 
-	float fraction = (gfCurrentTime - input.EmitTime) / input.lifetime;
-	if (fraction >= 0.7) // 0.7f ~ 1.f 
-		output.alpha = 1.f - interpolate(0.f, 1.f, (fraction - 0.7f) / 0.3f);
-	else if (fraction <= 0.2) // 0.f ~ 0.1f
-		output.alpha = interpolate(0.f, 1.f, (fraction * 5.f));
-	else
-		output.alpha = 1.f;
+	//float fraction = (gfCurrentTime - input.EmitTime) / input.lifetime;
+	//if (fraction >= 0.7) // 0.7f ~ 1.f 
+	//	output.alpha = 1.f - interpolate(0.f, 1.f, (fraction - 0.7f) / 0.3f);
+	//else if (fraction <= 0.2) // 0.f ~ 0.1f
+	//	output.alpha = interpolate(0.f, 1.f, (fraction * 5.f));
+	//else
+	output.alpha = 1.f;
 	output.TextureIndex = input.TextureIndex;
 	output.SpriteTotalCoord = input.SpriteTotalCoord;
 	output.SpriteCurrentCoord = SpriteAnimtaion(input, gfCurrentTime - input.EmitTime, input.lifetime, input.SpriteTotalCoord.x, input.SpriteTotalCoord.y);

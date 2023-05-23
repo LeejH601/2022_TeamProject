@@ -723,6 +723,9 @@ void DataLoader::LoadComponentSet(FILE* pInFile, CState<CPlayer>* pState)
 				else if (!strcmp(buf, "<TextureIndex>:"))
 				{
 					pImpactComponent->SetTextureIndex(ReadIntegerFromFile(pInFile));
+					std::shared_ptr<CTexture> pTexture = CSimulatorScene::GetInst()->GetTextureManager()->GetTexture(TextureType::BillBoardTexture);
+					int iTextureIndex = pImpactComponent->GetTextureIndex();
+					pImpactComponent->SetTotalRowColumn(pTexture->GetRow(iTextureIndex), pTexture->GetColumn(iTextureIndex));
 				}
 				else if (!strcmp(buf, "<Size_X>:"))
 				{

@@ -281,7 +281,10 @@ void StunAnimationComponent::HandleMessage(const Message& message, const Animati
 }
 ParticleComponent::ParticleComponent()
 {
-
+	m_iTextureOffset = CSimulatorScene::GetInst()->GetTextureManager()->GetTextureOffset(TextureType::ParticleTexture);
+	//m_iTextureOffset = CSimulatorScene::GetInst()->GetTextureManager()->GetTextureOffset(TextureType::ParticleTexture);
+	//std::shared_ptr<CTexture> pTexture = CSimulatorScene::GetInst()->GetTextureManager()->GetTexture(TextureType::ParticleTexture);
+	
 	m_fFieldSpeed = 1.0f;
 	m_fNoiseStrength = 1.0f;;
 	m_xmf3FieldMainDirection = XMFLOAT3(0.0f, 1.0f, 0.0f);
@@ -316,6 +319,10 @@ void ParticleComponent::HandleMessage(const Message& message, const ParticleComp
 		pParticle->SetTextureIndex(m_iTextureIndex + m_iTextureOffset);
 		pParticle->EmitParticle(0);
 	}
+}
+ImpactEffectComponent::ImpactEffectComponent()
+{
+	m_iTextureOffset = CSimulatorScene::GetInst()->GetTextureManager()->GetTextureOffset(TextureType::BillBoardTexture);
 }
 void ImpactEffectComponent::SetTotalRowColumn(int iTotalRow, int iTotalColumn)
 {

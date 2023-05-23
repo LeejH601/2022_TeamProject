@@ -568,6 +568,8 @@ public:
 
 // Define Impact Effect component
 class ImpactEffectComponent : public IMessageListener {
+public:
+	ImpactEffectComponent();
 private:
     int m_nParticleNumber = MAX_PARTICLES;
     int m_nEmitParticleNumber = 1;
