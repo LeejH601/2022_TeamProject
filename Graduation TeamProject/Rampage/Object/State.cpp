@@ -930,8 +930,6 @@ void Evasion_Player::Enter(CPlayer* player)
 
 	player->m_fCMDConstant = 1.0f;
 
-	player->m_bEvasioned = false;
-
 	DWORD dwDirection = player->m_dwDirectionCache;
 	XMFLOAT3 xmf3Direction = player->m_xmf3DirectionCache; xmf3Direction = Vector3::Normalize(xmf3Direction);
 	XMFLOAT3 xmf3CameraDirection = player->m_pCamera->GetLookVector();
@@ -1028,7 +1026,7 @@ void Evasion_Player::Execute(CPlayer* player, float fElapsedTime)
 
 void Evasion_Player::Exit(CPlayer* player)
 {
-
+	player->m_bEvasioned = false;
 }
 
 void Evasion_Player::Animate(CPlayer* player, float fElapsedTime)
