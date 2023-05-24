@@ -54,7 +54,7 @@ XMFLOAT3 CPlayer::GetATKDirection()
 
 	else if (pPlayerState == Atk3_Player::GetInst())
 	{
-		xmf3Direction = GetLook();
+		xmf3Direction = GetRight();
 	}
 
 	return XMFLOAT3(xmf3Direction);
