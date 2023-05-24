@@ -36,6 +36,8 @@ private:
 	std::unique_ptr<CLight> m_pLight;
 
 	std::unique_ptr<CShader> m_pDepthRenderShader;
+	std::unique_ptr<CShader> m_pUIObjectShader;
+	std::vector<std::unique_ptr<CGameObject>> m_pUIObject;
 
 	std::unique_ptr<CTextureManager> m_pTextureManager = NULL;
 

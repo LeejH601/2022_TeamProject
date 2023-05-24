@@ -16,21 +16,29 @@ cbuffer cbCameraInfo : register(b1)
 	//float3 gf3CameraDirection : packoffset(c17);
 };
 
-struct VS_INPUT
+SamplerState gSamplerState : register(s0);
+
+struct VS_TEXTURED_INPUT
 {
 	float3 position : POSITION;
+	float2 uv : TEXCOORD;
 };
 
-struct VS_OUTPUT
+struct VS_TEXTURED_OUTPUT
 {
 	float4 position : SV_POSITION;
+	float2 uv : TEXCOORD;
 };
 
-VS_OUTPUT VS_Bound(VS_INPUT input)
+VS_TEXTURED_OUTPUT VSUIObject(VS_TEXTURED_INPUT input)
 {
-	VS_OUTPUT output;
+	VS_TEXTURED_OUTPUT output;
+	matrix Matrix = gmtxGameObject;
+	Matrix._11 = 1.f;
+	Matrix._22 = 1.f;
 
-	output.position = mul(mul(mul(float4(input.position, 1.0f), gmtxGameObject), gmtxView), gmtxProjection);
+	output.position = mul(mul(mul(float4(input.position, 1.0f), Matrix), gmtxInverseView), m_xmf4x4OrthoProjection);
+	output.uv = input.uv;
 
 	return(output);
 }

@@ -226,6 +226,12 @@
     <ClCompile Include="Object\Map.cpp">
       <Filter>Object</Filter>
     </ClCompile>
+    <ClCompile Include="Shader\UIObjectShader.cpp">
+      <Filter>Shader</Filter>
+    </ClCompile>
+    <ClCompile Include="Object\UIObject.cpp">
+      <Filter>Object</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Global\stdafx.h">
@@ -440,6 +446,12 @@
     <ClInclude Include="Object\Map.h">
       <Filter>Object</Filter>
     </ClInclude>
+    <ClInclude Include="Shader\UIObjectShader.h">
+      <Filter>Shader</Filter>
+    </ClInclude>
+    <ClInclude Include="Object\UIObject.h">
+      <Filter>Object</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shader\PlayerPixelShader.hlsl" />
@@ -479,6 +491,8 @@
     <FxCompile Include="Shader\SwordTrailGeometryShader.hlsl" />
     <FxCompile Include="Shader\SwordTrailPixelShader.hlsl" />
     <FxCompile Include="Shader\CurlNoise.hlsl" />
+    <FxCompile Include="Shader\UIObjectPixelShader.hlsl" />
+    <FxCompile Include="Shader\UIObjectVertexShader.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Shader\Header.hlsli" />

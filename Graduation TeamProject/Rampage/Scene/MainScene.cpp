@@ -13,6 +13,8 @@
 #include "..\Object\Monster.h"
 #include "..\Object\TextureManager.h"
 #include "..\Object\PlayerParticleObject.h"
+#include "..\Shader\UIObjectShader.h"
+#include "..\Object\UIObject.h"
 
 #include <PxForceMode.h>
 
@@ -820,6 +822,10 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 		m_pSwordTrailObjects.push_back(std::move(pSwordtrail));
 	}
 
+	m_pUIObjectShader = std::make_unique<CUIObjectShader>();
+	m_pUIObjectShader->CreateShader(pd3dDevice, GetGraphicsRootSignature(), 7, pdxgiObjectRtvFormats, DXGI_FORMAT_D32_FLOAT, 0);
+	std::unique_ptr<CUIObject> pUIObject = std::make_unique<CUIObject>(2, pd3dDevice, pd3dCommandList, 10.f);
+	m_pUIObject.push_back(std::move(pUIObject));
 }
 bool CMainTMPScene::ProcessInput(HWND hWnd, DWORD dwDirection, float fTimeElapsed)
 {
@@ -1064,6 +1070,8 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 	((CParticleObject*)m_pSmokeObject.get())->UpdateShaderVariables(pd3dCommandList, fCurrentTime, fTimeElapsed);
 	((CParticleObject*)m_pSmokeObject.get())->Render(pd3dCommandList, nullptr, m_pParticleShader.get());
 
+
+
 	/*m_pSwordTrailShader->Render(pd3dCommandList, pCamera, 0);*/
 	for (std::unique_ptr<CGameObject>& obj : m_pSwordTrailObjects) {
 		obj->Render(pd3dCommandList, true);
@@ -1071,6 +1079,13 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 
 	m_pLensFlareShader->CalculateFlaresPlace(m_pCurrentCamera, &m_pLight->GetLights()[0]);
 	m_pLensFlareShader->Render(pd3dCommandList, 0);
+
+	m_pUIObjectShader->Render(pd3dCommandList, 0);
+	for (int i = 0; i < m_pUIObject.size(); i++)
+	{
+		//m_pUIObject[i]->Update(fTimeElapsed);
+		m_pUIObject[i]->Render(pd3dCommandList, false, nullptr);
+	}
 
 	if (m_pd3dComputeRootSignature) pd3dCommandList->SetComputeRootSignature(m_pd3dComputeRootSignature.Get());
 	ID3D12Resource* pd3dSource;
@@ -1100,6 +1115,8 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 	pd3dCommandList->CopyResource(pd3dDestination, pd3dSource);
 	::SynchronizeResourceTransition(pd3dCommandList, pd3dDestination, D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_RENDER_TARGET);
 	::SynchronizeResourceTransition(pd3dCommandList, pd3dSource, D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+
+
 }
 
 void CMainTMPScene::OnPostRender()

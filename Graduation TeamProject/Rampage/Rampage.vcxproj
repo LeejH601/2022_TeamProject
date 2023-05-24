@@ -199,6 +199,7 @@
     <ClCompile Include="Object\Terrain.cpp" />
     <ClCompile Include="Object\Texture.cpp" />
     <ClCompile Include="Object\TextureManager.cpp" />
+    <ClCompile Include="Object\UIObject.cpp" />
     <ClCompile Include="Rampage.cpp" />
     <ClCompile Include="Scene\LobbyScene.cpp" />
     <ClCompile Include="Scene\MainScene.cpp" />
@@ -221,6 +222,7 @@
     <ClCompile Include="Shader\SwordTrailShader.cpp" />
     <ClCompile Include="Shader\TerrainObjectShader.cpp" />
     <ClCompile Include="Shader\TerrainShader.cpp" />
+    <ClCompile Include="Shader\UIObjectShader.cpp" />
     <ClCompile Include="Sound\Sound.cpp" />
     <ClCompile Include="Sound\SoundManager.cpp" />
     <ClCompile Include="Sound\SoundPlayer.cpp" />
@@ -269,6 +271,7 @@
     <ClInclude Include="Object\Terrain.h" />
     <ClInclude Include="Object\Texture.h" />
     <ClInclude Include="Object\TextureManager.h" />
+    <ClInclude Include="Object\UIObject.h" />
     <ClInclude Include="Scene\LobbyScene.h" />
     <ClInclude Include="Scene\MainScene.h" />
     <ClInclude Include="Scene\Scene.h" />
@@ -290,6 +293,7 @@
     <ClInclude Include="Shader\TerrainObjectShader.h" />
     <ClInclude Include="Shader\SwordTrailShader.h" />
     <ClInclude Include="Shader\TerrainShader.h" />
+    <ClInclude Include="Shader\UIObjectShader.h" />
     <ClInclude Include="Sound\Sound.h" />
     <ClInclude Include="Sound\SoundManager.h" />
     <ClInclude Include="Sound\SoundPlayer.h" />
@@ -727,6 +731,19 @@
       <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(Filename).cso</ObjectFileOutput>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="Shader\UIObjectPixelShader.hlsl">
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">PSUIObject</EntryPointName>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.1</ShaderModel>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(Filename).cso</ObjectFileOutput>
+    </FxCompile>
+    <FxCompile Include="Shader\UIObjectVertexShader.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.1</ShaderModel>
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">VSUIObject</EntryPointName>
+      <DisableOptimizations Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</DisableOptimizations>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(Filename).cso</ObjectFileOutput>
     </FxCompile>
     <FxCompile Include="TerrainPixelShader.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
