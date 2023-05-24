@@ -31,11 +31,6 @@ void SoundPlayComponent::HandleMessage(const Message& message, const SoundPlayPa
     if (message.getType() == MessageType::PLAY_SOUND && m_sc == params.sound_category && m_mt == params.monster_type) {
 		std::vector<CSound>::iterator pSound;
 
-		if (m_sc == SOUND_CATEGORY::SOUND_SHOOT)
-		{
-			OutputDebugString(L"Shoot Sound");
-		}
-
 		if (m_sc == SOUND_CATEGORY::SOUND_VOICE)
 		{
 			switch (m_mt)

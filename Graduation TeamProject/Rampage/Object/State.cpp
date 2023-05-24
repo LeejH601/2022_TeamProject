@@ -11,6 +11,8 @@
 #include "SwordTrailObject.h"
 #include "..\Global\Logger.h"
 
+#define ANGLE_MARGIN 22.5f
+
 Idle_Player::Idle_Player()
 {
 }
@@ -350,7 +352,7 @@ void Atk1_Player::Enter(CPlayer* player)
 	SoundPlayParams SoundPlayParam;
 	SoundPlayParam.sound_category = SOUND_CATEGORY::SOUND_SHOOT;
 	CMessageDispatcher::GetInst()->Dispatch_Message<SoundPlayParams>(MessageType::PLAY_SOUND, &SoundPlayParam, this);
-
+	OutputDebugString(L"Shoot Sound\n");
 
 	TrailUpdateParams trailParam;
 	trailParam.pObject = player->m_pSwordTrailReference[0].get();
@@ -930,17 +932,18 @@ void Evasion_Player::Enter(CPlayer* player)
 
 	player->m_fCMDConstant = 1.0f;
 
+	float degrees = 0.0f;
 	DWORD dwDirection = player->m_dwDirectionCache;
+	XMFLOAT3 xmf3Direction = XMFLOAT3{ 0.0f, 0.0f, 0.0f };
 	{
-		XMFLOAT3 xmf3MyDirection = XMFLOAT3{ 0.0f, 0.0f, 0.0f };
 
-		if (dwDirection & DIR_FORWARD)xmf3MyDirection = Vector3::Add(xmf3MyDirection, Vector3::Normalize(XMFLOAT3(player->m_pCamera->GetLookVector().x, 0.0f, player->m_pCamera->GetLookVector().z)));
-		if (dwDirection & DIR_BACKWARD)xmf3MyDirection = Vector3::Add(xmf3MyDirection, Vector3::Normalize(XMFLOAT3(player->m_pCamera->GetLookVector().x, 0.0f, player->m_pCamera->GetLookVector().z)), -1.0f);
-		if (dwDirection & DIR_RIGHT)xmf3MyDirection = Vector3::Add(xmf3MyDirection, Vector3::Normalize(XMFLOAT3(player->m_pCamera->GetRightVector().x, 0.0f, player->m_pCamera->GetRightVector().z)));
-		if (dwDirection & DIR_LEFT)xmf3MyDirection = Vector3::Add(xmf3MyDirection, Vector3::Normalize(XMFLOAT3(player->m_pCamera->GetRightVector().x, 0.0f, player->m_pCamera->GetRightVector().z)), -1.0f);
+		if (dwDirection & DIR_FORWARD)xmf3Direction = Vector3::Add(xmf3Direction, Vector3::Normalize(XMFLOAT3(player->m_pCamera->GetLookVector().x, 0.0f, player->m_pCamera->GetLookVector().z)));
+		if (dwDirection & DIR_BACKWARD)xmf3Direction = Vector3::Add(xmf3Direction, Vector3::Normalize(XMFLOAT3(player->m_pCamera->GetLookVector().x, 0.0f, player->m_pCamera->GetLookVector().z)), -1.0f);
+		if (dwDirection & DIR_RIGHT)xmf3Direction = Vector3::Add(xmf3Direction, Vector3::Normalize(XMFLOAT3(player->m_pCamera->GetRightVector().x, 0.0f, player->m_pCamera->GetRightVector().z)));
+		if (dwDirection & DIR_LEFT)xmf3Direction = Vector3::Add(xmf3Direction, Vector3::Normalize(XMFLOAT3(player->m_pCamera->GetRightVector().x, 0.0f, player->m_pCamera->GetRightVector().z)), -1.0f);
 	
 		XMVECTOR playerLookVec = XMLoadFloat3(&(player->GetLook()));
-		XMVECTOR rollVec = XMLoadFloat3(&xmf3MyDirection);
+		XMVECTOR rollVec = XMLoadFloat3(&xmf3Direction);
 
 		playerLookVec = XMVector3Normalize(playerLookVec);
 		rollVec = XMVector3Normalize(rollVec);
@@ -949,98 +952,85 @@ void Evasion_Player::Enter(CPlayer* player)
 		
 		if (dot < -1.0f + FLT_EPSILON || dot > 1.0f - FLT_EPSILON)
 		{
-			float degrees;
 			dot < -1.0f + FLT_EPSILON ? degrees = 180.0f : degrees = 0.0f;
-
-			std::wstring stringDegree{ std::to_wstring(degrees) };
-			OutputDebugString(L"Degree: ");
-			OutputDebugString(stringDegree.c_str());
-			OutputDebugString(L"\n");
 		}
 		else
 		{
 			float angle = acosf(dot);
-			float degrees = XMConvertToDegrees(angle);
+			degrees = XMConvertToDegrees(angle);
 
 			XMVECTOR cross = XMVector3Cross(rollVec, playerLookVec);
 
 			if (XMVectorGetY(cross) > 0.0f)
 				degrees = 360.0f - degrees;
-
-			std::wstring stringDegree{ std::to_wstring(degrees) };
-			OutputDebugString(L"Degree: ");
-			OutputDebugString(stringDegree.c_str());
-			OutputDebugString(L"\n");
 		}
 	}
 
-	XMFLOAT3 xmf3Direction = player->m_xmf3DirectionCache; 
-	xmf3Direction = Vector3::Normalize(xmf3Direction);
-
-	XMFLOAT3 xmf3CameraDirection = player->m_pCamera->GetLookVector();
-	xmf3CameraDirection.y = 0.0f; xmf3CameraDirection = Vector3::Normalize(xmf3CameraDirection);
-
-	float ceta_Player_and_Camera = Vector3::DotProduct(xmf3Direction, xmf3CameraDirection);
-	float ceta_Player_and_CameraCross = Vector3::DotProduct(xmf3Direction, Vector3::CrossProduct(player->GetUp(), xmf3CameraDirection));
-
-	float drgree_45 = 45.0f * XM_PI / 180.0f;
-	float drgree_135 = 135.0f * XM_PI / 180.0f;
-
-	CState<CPlayer>& previousState = *player->m_pStateMachine->GetPreviousState();
-	if (dynamic_cast<Idle_Player*>(&previousState)) {
+	if (0.0f <= degrees && degrees < 45.0f - ANGLE_MARGIN)
+	{
+		//정면
+		//OutputDebugString(L"정면\n");
 		player->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 12);
 	}
-	else if (dynamic_cast<Run_Player*>(&previousState)) {
+	else if (degrees < 90.0f - ANGLE_MARGIN)
+	{
+		//정면 - 오른쪽
+		//OutputDebugString(L"정면 - 오른쪽\n");
+		XMFLOAT3 newLookAt = Vector3::Add(player->GetLook(), player->GetRight());
+		player->SetLookAt(Vector3::Add(player->GetPosition(), 
+			Vector3::Normalize(newLookAt)));
 		player->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 12);
 	}
-	else {
-		if (ceta_Player_and_Camera > 0.000001f) {
-			if (ceta_Player_and_CameraCross > 0.000001f) {
-				// 왼쪽 위 사분면
-				float ceta = XMVector3AngleBetweenVectors(XMLoadFloat3(&xmf3Direction), XMLoadFloat3(&xmf3CameraDirection)).m128_f32[0];
-				if (ceta > drgree_45) { // 왼쪽 애니메이션
-					player->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 14);
-				}
-				else { // 전방 애니메이션
-					player->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 12);
-				}
-			}
-			else {
-				// 오른쪽 위 사분면
-				float ceta = XMVector3AngleBetweenVectors(XMLoadFloat3(&xmf3Direction), XMLoadFloat3(&xmf3CameraDirection)).m128_f32[0];
-				if (ceta > drgree_45) { // 오른쪽 애니메이션
-					player->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 13);
-				}
-				else { // 전방 애니메이션
-					player->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 12);
-				}
-			}
-		}
-		else if (ceta_Player_and_Camera < 0.000001f) {
-			if (ceta_Player_and_CameraCross > 0.000001f) {
-				// 왼쪽 뒤 사분면
-				float ceta = XMVector3AngleBetweenVectors(XMLoadFloat3(&xmf3Direction), XMLoadFloat3(&xmf3CameraDirection)).m128_f32[0];
-				if (ceta > drgree_135) { // 후방 애니메이션
-					player->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 11);
-				}
-				else { // 왼쪽 애니메이션
-					player->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 14);
-				}
-			}
-			else {
-				// 오른쪽 뒤 사분면
-				float ceta = XMVector3AngleBetweenVectors(XMLoadFloat3(&xmf3Direction), XMLoadFloat3(&xmf3CameraDirection)).m128_f32[0];
-				if (ceta > drgree_135) { // 후방 애니메이션
-					player->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 11);
-				}
-				else { // 오른쪽 애니메이션
-					player->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 13);
-				}
-			}
-		}
-		else {
-
-		}
+	else if (degrees < 135.0f - ANGLE_MARGIN)
+	{
+		//오른쪽
+		//OutputDebugString(L"오른쪽\n");
+		player->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 14);
+	}
+	else if (degrees < 180.0f - ANGLE_MARGIN)
+	{
+		//오른쪽 - 뒤
+		//OutputDebugString(L"오른쪽 - 뒤\n");
+		XMFLOAT3 newLookAt = Vector3::Add(player->GetLook(), Vector3::ScalarProduct(player->GetRight(), -1.0f));
+		player->SetLookAt(Vector3::Add(player->GetPosition(),
+			Vector3::Normalize(newLookAt)));
+		player->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 11);
+	}
+	else if (degrees < 225.0f - ANGLE_MARGIN)
+	{
+		//뒤
+		//OutputDebugString(L"뒤\n");
+		player->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 11);
+	}
+	else if (degrees < 270.0f - ANGLE_MARGIN)
+	{
+		//뒤 - 왼쪽
+		//OutputDebugString(L"뒤 - 왼쪽\n");
+		XMFLOAT3 newLookAt = Vector3::Add(player->GetLook(), player->GetRight());
+		player->SetLookAt(Vector3::Add(player->GetPosition(),
+			Vector3::Normalize(newLookAt)));
+		player->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 11);
+	}
+	else if (degrees < 315.0f - ANGLE_MARGIN)
+	{
+		//왼쪽
+		//OutputDebugString(L"왼쪽\n");
+		player->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 13);
+	}
+	else if (degrees < 360.0f - ANGLE_MARGIN)
+	{
+		//왼쪽 - 정면
+		//OutputDebugString(L"왼쪽 - 정면\n");
+		XMFLOAT3 newLookAt = Vector3::Add(player->GetLook(), Vector3::ScalarProduct(player->GetRight(), -1.0f));
+		player->SetLookAt(Vector3::Add(player->GetPosition(),
+			Vector3::Normalize(newLookAt)));
+		player->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 12);
+	}
+	else
+	{
+		//정면
+		//OutputDebugString(L"정면\n");
+		player->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 12);
 	}
 
 	player->m_pSkinnedAnimationController->m_fTime = 0.0f;
