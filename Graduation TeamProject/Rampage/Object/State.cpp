@@ -931,7 +931,52 @@ void Evasion_Player::Enter(CPlayer* player)
 	player->m_fCMDConstant = 1.0f;
 
 	DWORD dwDirection = player->m_dwDirectionCache;
-	XMFLOAT3 xmf3Direction = player->m_xmf3DirectionCache; xmf3Direction = Vector3::Normalize(xmf3Direction);
+	{
+		XMFLOAT3 xmf3MyDirection = XMFLOAT3{ 0.0f, 0.0f, 0.0f };
+
+		if (dwDirection & DIR_FORWARD)xmf3MyDirection = Vector3::Add(xmf3MyDirection, Vector3::Normalize(XMFLOAT3(player->m_pCamera->GetLookVector().x, 0.0f, player->m_pCamera->GetLookVector().z)));
+		if (dwDirection & DIR_BACKWARD)xmf3MyDirection = Vector3::Add(xmf3MyDirection, Vector3::Normalize(XMFLOAT3(player->m_pCamera->GetLookVector().x, 0.0f, player->m_pCamera->GetLookVector().z)), -1.0f);
+		if (dwDirection & DIR_RIGHT)xmf3MyDirection = Vector3::Add(xmf3MyDirection, Vector3::Normalize(XMFLOAT3(player->m_pCamera->GetRightVector().x, 0.0f, player->m_pCamera->GetRightVector().z)));
+		if (dwDirection & DIR_LEFT)xmf3MyDirection = Vector3::Add(xmf3MyDirection, Vector3::Normalize(XMFLOAT3(player->m_pCamera->GetRightVector().x, 0.0f, player->m_pCamera->GetRightVector().z)), -1.0f);
+	
+		XMVECTOR playerLookVec = XMLoadFloat3(&(player->GetLook()));
+		XMVECTOR rollVec = XMLoadFloat3(&xmf3MyDirection);
+
+		playerLookVec = XMVector3Normalize(playerLookVec);
+		rollVec = XMVector3Normalize(rollVec);
+
+		float dot = XMVectorGetX(XMVector3Dot(rollVec, playerLookVec));
+		
+		if (dot < -1.0f + FLT_EPSILON || dot > 1.0f - FLT_EPSILON)
+		{
+			float degrees;
+			dot < -1.0f + FLT_EPSILON ? degrees = 180.0f : degrees = 0.0f;
+
+			std::wstring stringDegree{ std::to_wstring(degrees) };
+			OutputDebugString(L"Degree: ");
+			OutputDebugString(stringDegree.c_str());
+			OutputDebugString(L"\n");
+		}
+		else
+		{
+			float angle = acosf(dot);
+			float degrees = XMConvertToDegrees(angle);
+
+			XMVECTOR cross = XMVector3Cross(rollVec, playerLookVec);
+
+			if (XMVectorGetY(cross) > 0.0f)
+				degrees = 360.0f - degrees;
+
+			std::wstring stringDegree{ std::to_wstring(degrees) };
+			OutputDebugString(L"Degree: ");
+			OutputDebugString(stringDegree.c_str());
+			OutputDebugString(L"\n");
+		}
+	}
+
+	XMFLOAT3 xmf3Direction = player->m_xmf3DirectionCache; 
+	xmf3Direction = Vector3::Normalize(xmf3Direction);
+
 	XMFLOAT3 xmf3CameraDirection = player->m_pCamera->GetLookVector();
 	xmf3CameraDirection.y = 0.0f; xmf3CameraDirection = Vector3::Normalize(xmf3CameraDirection);
 
