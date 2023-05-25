@@ -38,6 +38,12 @@ CMonster::CMonster()
 	m_pListeners.push_back(std::move(pPlayerLocationListener));
 
 	CMessageDispatcher::GetInst()->RegisterListener(MessageType::CHECK_IS_PLAYER_IN_FRONT_OF_MONSTER, m_pListeners.back().get());
+
+	std::unique_ptr<DamageListener> pDamageListener = std::make_unique<DamageListener>();
+	pDamageListener->SetObject(this);
+	m_pListeners.push_back(std::move(pDamageListener));
+
+	CMessageDispatcher::GetInst()->RegisterListener(MessageType::APPLY_DAMAGE, m_pListeners.back().get(), this);
 }
 
 CMonster::~CMonster()
@@ -99,11 +105,6 @@ void CMonster::SetScale(float x, float y, float z)
 
 void CMonster::Update(float fTimeElapsed)
 {
-	// 현재 행동을 선택함
-	m_pStateMachine->Update(fTimeElapsed);
-
-	CPhysicsObject::Apply_Gravity(fTimeElapsed);
-
 	if (!m_bDissolved) {
 		if (m_bSimulateArticulate) {
 			TestDissolvetime += fTimeElapsed;
@@ -111,25 +112,32 @@ void CMonster::Update(float fTimeElapsed)
 				m_bDissolved = true;
 		}
 	}
-	else{
+	else {
 		m_fDissolveTime += fTimeElapsed;
 		m_fDissolveThrethHold = m_fDissolveTime / m_fMaxDissolveTime;
 	}
-	
+
+	if (m_xmf3Velocity.x + m_xmf3Velocity.z)
+		SetLookAt(Vector3::Add(GetPosition(), Vector3::Normalize(XMFLOAT3{ m_xmf3Velocity.x, 0.0f, m_xmf3Velocity.z })));
+
+	// 현재 행동을 선택함
+	m_pStateMachine->Update(fTimeElapsed);
+	m_pStateMachine->Animate(fTimeElapsed);
+
+	CPhysicsObject::Apply_Gravity(fTimeElapsed);
+
 	XMFLOAT3 xmf3NewVelocity = Vector3::TransformCoord(m_xmf3Velocity, XMMatrixRotationAxis(XMVECTOR{ 0.0f, 1.0f, 0.0f, 0.0f }, XMConvertToRadians(fDistortionDegree)));
 	CPhysicsObject::Move(xmf3NewVelocity, false);
-
-	if (xmf3NewVelocity.x + xmf3NewVelocity.z)
-		SetLookAt(Vector3::Add(GetPosition(), Vector3::Normalize(XMFLOAT3{ xmf3NewVelocity.x, 0.0f, xmf3NewVelocity.z })));
 
 	// 플레이어가 터레인보다 아래에 있지 않도록 하는 코드
 	if (m_pUpdatedContext) CPhysicsObject::OnUpdateCallback(fTimeElapsed);
 
 	XMFLOAT3 xmf3ShakeVec = Vector3::ScalarProduct(Vector3::Normalize(GetRight()), m_fShakeDistance, false);
-
 	m_xmf3CalPos = Vector3::Add(m_xmf3Position, xmf3ShakeVec);
 
-	m_pStateMachine->Animate(fTimeElapsed);
+	/*std::wstring debugString{std::to_wstring(m_fShakeDistance)};
+	OutputDebugString(debugString.c_str());
+	OutputDebugString(L"\n");*/
 
 	CPhysicsObject::Apply_Friction(fTimeElapsed);
 }
@@ -154,29 +162,6 @@ void CMonster::UpdateTransform(XMFLOAT4X4* pxmf4x4Parent)
 }
 void CMonster::SetHit(CGameObject* pHitter)
 {
-	if (m_bSimulateArticulate == false) { // 변수 체크가 아닌 현재 상태 체크를 이용하는 것이 좋을듯
-		m_xmf3HitterVec = Vector3::Normalize(Vector3::Subtract(GetPosition(), pHitter->GetPosition()));
-		((CPlayer*)pHitter)->m_fCurLagTime = 0.f;
-
-		SetLookAt(Vector3::Add(GetPosition(), XMFLOAT3(-m_xmf3HitterVec.x, 0.0f, -m_xmf3HitterVec.z)));
-
-		SoundPlayParams sound_play_params;
-		sound_play_params.monster_type = GetMonsterType();
-		sound_play_params.sound_category = SOUND_CATEGORY::SOUND_VOICE;
-		CMessageDispatcher::GetInst()->Dispatch_Message<SoundPlayParams>(MessageType::PLAY_SOUND, &sound_play_params, ((CPlayer*)(pHitter))->m_pStateMachine->GetCurrentState());
-
-		PlayerParams PlayerParam{ pHitter };
-		CMessageDispatcher::GetInst()->Dispatch_Message<PlayerParams>(MessageType::UPDATE_HITLAG, &PlayerParam, ((CPlayer*)pHitter)->m_pStateMachine->GetCurrentState());
-
-		m_pStateMachine->ChangeState(Idle_Monster::GetInst());
-		m_pStateMachine->ChangeState(Damaged_Monster::GetInst());
-		m_iPlayerAtkId = ((CPlayer*)pHitter)->GetAtkId();
-	}
-	else {
-		TCHAR pstrDebug[256] = { 0 };
-		//_stprintf_s(pstrDebug, 256, "Already Dead \n");
-		OutputDebugString(L"Already Dead");
-	}
 }
 void CMonster::UpdateTransformFromArticulation(XMFLOAT4X4* pxmf4x4Parent, std::vector<std::string> pArtiLinkNames, std::vector<XMFLOAT4X4>& AritculatCacheMatrixs, float scale)
 {
@@ -231,12 +216,12 @@ void COrcObject::PrepareBoundingBox(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 {
 	pWeapon = CGameObject::FindFrame("SM_Weapon");
 
-	m_BodyBoundingBox = BoundingOrientedBox{ XMFLOAT3(0.0f, 1.05f, 0.0f), XMFLOAT3(1.2f, 2.0f, 1.2f), XMFLOAT4{0.0f, 0.0f, 0.0f, 1.0f} };
-	m_WeaponBoundingBox = BoundingOrientedBox{ XMFLOAT3(0.0f, 0.0f, 0.85f), XMFLOAT3(0.3f, 0.6f, 0.35f), XMFLOAT4{0.0f, 0.0f, 0.0f, 1.0f} };
+	m_BodyBoundingBox = BoundingOrientedBox{ XMFLOAT3(0.0f, 1.05f, 0.0f),  XMFLOAT3(0.6f, 1.0f, 0.6f), XMFLOAT4{0.0f, 0.0f, 0.0f, 1.0f} };
+	m_WeaponBoundingBox = BoundingOrientedBox{ XMFLOAT3(0.0f, 0.0f, 0.85f), XMFLOAT3(0.15f, 0.3f, 0.175f), XMFLOAT4{0.0f, 0.0f, 0.0f, 1.0f} };
 #ifdef RENDER_BOUNDING_BOX
-	pBodyBoundingBoxMesh = CBoundingBoxShader::GetInst()->AddBoundingObject(pd3dDevice, pd3dCommandList, this, XMFLOAT3(0.0f, 1.05f, 0.0f), XMFLOAT3(1.2f, 2.0f, 1.2f));
+	pBodyBoundingBoxMesh = CBoundingBoxShader::GetInst()->AddBoundingObject(pd3dDevice, pd3dCommandList, this, XMFLOAT3(0.0f, 1.05f, 0.0f), XMFLOAT3(0.6f, 1.0f, 0.6f));
 	//pWeaponBodyBoundingBoxMesh = CBoundingBoxShader::GetInst()->AddBoundingObject(pd3dDevice, pd3dCommandList, pWeapon, XMFLOAT3(0.0f, 0.0f, 0.32f), XMFLOAT3(0.18f, 0.28f, 0.71f));
-	pWeaponBoundingBoxMesh = CBoundingBoxShader::GetInst()->AddBoundingObject(pd3dDevice, pd3dCommandList, pWeapon, XMFLOAT3(0.0f, 0.0f, 0.85f), XMFLOAT3(0.3f, 0.6f, 0.35f));
+	pWeaponBoundingBoxMesh = CBoundingBoxShader::GetInst()->AddBoundingObject(pd3dDevice, pd3dCommandList, pWeapon, XMFLOAT3(0.0f, 0.0f, 0.85f), XMFLOAT3(0.15f, 0.3f, 0.175f));
 #endif
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -298,11 +283,11 @@ CSkeletonObject::~CSkeletonObject()
 void CSkeletonObject::PrepareBoundingBox(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	pWeapon = CGameObject::FindFrame("SM_Sword");
-	m_BodyBoundingBox = BoundingOrientedBox{ XMFLOAT3(0.0f, 1.0f, 0.0f), XMFLOAT3(0.7f, 2.0f, 0.7f), XMFLOAT4{0.0f, 0.0f, 0.0f, 1.0f} };
-	m_WeaponBoundingBox = BoundingOrientedBox{ XMFLOAT3(0.0f, 0.0f, 0.48f), XMFLOAT3(0.04f, 0.14f, 1.22f), XMFLOAT4{0.0f, 0.0f, 0.0f, 1.0f} };
+	m_BodyBoundingBox = BoundingOrientedBox{ XMFLOAT3(0.0f, 1.0f, 0.0f), XMFLOAT3(0.35f, 1.0f, 0.35f), XMFLOAT4{0.0f, 0.0f, 0.0f, 1.0f} };
+	m_WeaponBoundingBox = BoundingOrientedBox{ XMFLOAT3(0.0f, 0.0f, 0.48f), XMFLOAT3(0.02f, 0.07f, 0.61f), XMFLOAT4{0.0f, 0.0f, 0.0f, 1.0f} };
 #ifdef RENDER_BOUNDING_BOX
-	pBodyBoundingBoxMesh = CBoundingBoxShader::GetInst()->AddBoundingObject(pd3dDevice, pd3dCommandList, this, XMFLOAT3(0.0f, 1.0f, 0.0f), XMFLOAT3(0.7f, 2.0f, 0.7f));
-	pWeaponBoundingBoxMesh = CBoundingBoxShader::GetInst()->AddBoundingObject(pd3dDevice, pd3dCommandList, pWeapon, XMFLOAT3(0.0f, 0.0f, 0.48f), XMFLOAT3(0.04f, 0.14f, 1.22f));
+	pBodyBoundingBoxMesh = CBoundingBoxShader::GetInst()->AddBoundingObject(pd3dDevice, pd3dCommandList, this, XMFLOAT3(0.0f, 1.0f, 0.0f), XMFLOAT3(0.35f, 1.0f, 0.35f));
+	pWeaponBoundingBoxMesh = CBoundingBoxShader::GetInst()->AddBoundingObject(pd3dDevice, pd3dCommandList, pWeapon, XMFLOAT3(0.0f, 0.0f, 0.48f), XMFLOAT3(0.02f, 0.07f, 0.61f));
 #endif
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////

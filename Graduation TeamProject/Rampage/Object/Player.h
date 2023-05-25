@@ -59,6 +59,7 @@ public:
 	virtual void SetScale(float x, float y, float z);
 	void Tmp();
 
+	virtual void Move(const XMFLOAT3& xmf3Shift, bool bUpdateVelocity);
 	virtual void Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity, CCamera* pCamera);
 	virtual XMFLOAT4& GetTrailControllPoint(int n) { return XMFLOAT4{}; }
 };
@@ -82,7 +83,7 @@ public:
 	virtual void SetRigidDynamic();
 
 
-	virtual BoundingOrientedBox GetBoundingBox() { return m_TransformedBodyBoundingBox; }
+	virtual BoundingOrientedBox* GetBoundingBox() { return &m_TransformedBodyBoundingBox; }
 	virtual BoundingOrientedBox GetWeaponMeshBoundingBox() { return m_TransformedWeaponBoundingBox; }
 
 	void SetTargetPosition(const BoundingOrientedBox& targetBoundingBox);

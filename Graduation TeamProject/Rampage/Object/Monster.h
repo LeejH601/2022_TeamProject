@@ -31,9 +31,16 @@ public:
 	float m_fSensingRange;
 	
 	float m_fStunTime;
+	float m_fMaxStunTime;
 	float m_fStunStartTime;
+	float m_fShakeDuration;
 	float m_fShakeDistance;
+	float m_fShakeFrequency;
+	float m_fMaxShakeDistance;
 	float m_fDamageDistance;
+	float m_fMaxDamageDistance;
+	float m_fDamageAnimationSpeed;
+
 	float m_fTotalDamageDistance;
 	float TestDissolvetime = 0.0f;
 
@@ -71,8 +78,8 @@ public:
 	virtual bool CheckCollision(CGameObject* pTargetObject) {
 		if (pTargetObject)
 		{
-			BoundingOrientedBox TargetBoundingBox = pTargetObject->GetBoundingBox();
-			if (m_TransformedWeaponBoundingBox.Intersects(TargetBoundingBox)) {
+			BoundingOrientedBox* TargetBoundingBox = pTargetObject->GetBoundingBox();
+			if (m_TransformedWeaponBoundingBox.Intersects(*TargetBoundingBox)) {
 				pTargetObject->SetHit(this);
 				return true;
 			}
@@ -90,7 +97,7 @@ public:
 	COrcObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks);
 	virtual ~COrcObject();
 
-	virtual BoundingOrientedBox GetBoundingBox() { return m_TransformedBodyBoundingBox; }
+	virtual BoundingOrientedBox* GetBoundingBox() { return &m_TransformedBodyBoundingBox; }
 	virtual void PrepareBoundingBox(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 };
 
@@ -102,7 +109,7 @@ public:
 	CGoblinObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks);
 	virtual ~CGoblinObject();
 
-	virtual BoundingOrientedBox GetBoundingBox() { return m_TransformedBodyBoundingBox; }
+	virtual BoundingOrientedBox* GetBoundingBox() { return &m_TransformedBodyBoundingBox; }
 	virtual void PrepareBoundingBox(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 };
 
@@ -114,7 +121,7 @@ public:
 	CSkeletonObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks);
 	virtual ~CSkeletonObject();
 
-	virtual BoundingOrientedBox GetBoundingBox() { return m_TransformedBodyBoundingBox; }
+	virtual BoundingOrientedBox* GetBoundingBox() { return &m_TransformedBodyBoundingBox; }
 	virtual void PrepareBoundingBox(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 };
 

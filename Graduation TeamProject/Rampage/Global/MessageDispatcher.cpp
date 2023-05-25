@@ -30,6 +30,7 @@ void SoundPlayComponent::HandleMessage(const Message& message, const SoundPlayPa
 
     if (message.getType() == MessageType::PLAY_SOUND && m_sc == params.sound_category && m_mt == params.monster_type) {
 		std::vector<CSound>::iterator pSound;
+
 		if (m_sc == SOUND_CATEGORY::SOUND_VOICE)
 		{
 			switch (m_mt)
@@ -185,99 +186,12 @@ void CameraMoveComponent::HandleMessage(const Message& message, const CameraUpda
 }
 void DamageAnimationComponent::HandleMessage(const Message& message, const AnimationCompParams& params)
 {
-	if (!m_bEnable)
-		return;
-
-	float fDamageDistance = m_fSpeed * params.fElapsedTime;
-
-	for (int i = 0; i < params.pObjects->size(); ++i)
-	{
-		CGameObject* pObject = ((*(params.pObjects))[i]).get();
-
-		CMonster* pMonster = dynamic_cast<CMonster*>(pObject);
-
-		if (pMonster)
-		{
-			XMFLOAT3 xmf3DamageVec = XMFLOAT3(0.0f, 0.0f, 0.0f);
-
-			pMonster->m_fDamageDistance = 0.0f;
-
-			if ((pMonster->m_pStateMachine->GetCurrentState() == Damaged_Monster::GetInst()
-				|| pMonster->m_pStateMachine->GetCurrentState() == Stun_Monster::GetInst()))
-			{
-				if (pMonster->m_fTotalDamageDistance < m_fMaxDistance)
-				{
-					pMonster->m_fDamageDistance = fDamageDistance;
-					pMonster->m_fTotalDamageDistance += fDamageDistance;
-
-					if (m_fMaxDistance < pMonster->m_fTotalDamageDistance)
-						pMonster->m_fDamageDistance -= (pMonster->m_fTotalDamageDistance - m_fMaxDistance);
-				}
-			}
-
-			xmf3DamageVec = Vector3::ScalarProduct(XMFLOAT3{ pMonster->GetHitterVec().x, 0.0f, pMonster->GetHitterVec().z }, pMonster->m_fDamageDistance, false);
-			pMonster->Move(xmf3DamageVec, true);
-		}
-	}
 }
 void ShakeAnimationComponent::HandleMessage(const Message& message, const AnimationCompParams& params)
 {
-	if (!m_bEnable)
-		return;
-
-	for (int i = 0; i < params.pObjects->size(); ++i)
-	{
-		CGameObject* pObject = ((*(params.pObjects))[i]).get();
-
-		CMonster* pMonster = dynamic_cast<CMonster*>(pObject);
-
-		if (pMonster)
-		{
-			XMFLOAT3 xmf3ShakeVec = XMFLOAT3(0.0f, 0.0f, 0.0f);
-
-			pMonster->m_fShakeDistance = 0.0f;
-
-			float fTimeElapsed = pMonster->m_pSkinnedAnimationController->m_fTime + pMonster->m_fStunTime;
-
-			if (m_fDuration < fTimeElapsed)
-				return;
-
-			if (pMonster->m_pStateMachine->GetCurrentState() == Damaged_Monster::GetInst() || pMonster->m_pStateMachine->GetCurrentState() == Stun_Monster::GetInst())
-			{
-				float fShakeDistance = (m_fDistance - (m_fDistance / m_fDuration) * fTimeElapsed) * cos((2 * PI * fTimeElapsed) / m_fFrequency);
-				pMonster->m_fShakeDistance = fShakeDistance;
-			}
-		}
-	}
 }
 void StunAnimationComponent::HandleMessage(const Message& message, const AnimationCompParams& params)
 {
-	if (!m_bEnable)
-		return;
-
-	for (int i = 0; i < params.pObjects->size(); ++i)
-	{
-		CGameObject* pObject = ((*(params.pObjects))[i]).get();
-
-		CMonster* pMonster = dynamic_cast<CMonster*>(pObject);
-
-		if (pMonster)
-		{
-			if (pMonster->m_pStateMachine->GetCurrentState() == Damaged_Monster::GetInst())
-			{
-				if (pMonster->m_fStunStartTime < pMonster->m_pSkinnedAnimationController->m_fTime && !pMonster->m_bStunned)
-					pMonster->m_pStateMachine->ChangeState(Stun_Monster::GetInst());
-			}
-
-			else if (pMonster->m_pStateMachine->GetCurrentState() == Stun_Monster::GetInst())
-			{
-				if (pMonster->m_fStunTime < m_fStunTime)
-					pMonster->m_fStunTime += params.fElapsedTime;
-				else
-					pMonster->m_pStateMachine->ChangeState(Damaged_Monster::GetInst());
-			}
-		}
-	}
 }
 ParticleComponent::ParticleComponent()
 {
@@ -519,4 +433,58 @@ void TrailComponent::HandleMessage(const Message& message, const TrailUpdatePara
 void SceneOnGroundListener::HandleMessage(const Message& message, const OnGroundParams& params)
 {
 	m_pScene->HandleOnGround(params);
+}
+
+void DamageListener::HandleMessage(const Message& message, const DamageParams& params)
+{
+	CPlayer* pPlayer = (CPlayer*)params.pPlayer;
+	CMonster* pMonster = (CMonster*)m_pObject;
+
+	if (pMonster->m_bSimulateArticulate == false) { // 변수 체크가 아닌 현재 상태 체크를 이용하는 것이 좋을듯
+		SoundPlayParams sound_play_params;
+		sound_play_params.monster_type = pMonster->GetMonsterType();
+		sound_play_params.sound_category = SOUND_CATEGORY::SOUND_VOICE;
+		CMessageDispatcher::GetInst()->Dispatch_Message<SoundPlayParams>(MessageType::PLAY_SOUND, &sound_play_params, pPlayer->m_pStateMachine->GetCurrentState());
+
+		PlayerParams PlayerParam{ pPlayer };
+		CMessageDispatcher::GetInst()->Dispatch_Message<PlayerParams>(MessageType::UPDATE_HITLAG, &PlayerParam, pPlayer->m_pStateMachine->GetCurrentState());
+
+		DamageAnimationComponent* pDamageAnimationComponent = dynamic_cast<DamageAnimationComponent*>(pPlayer->m_pStateMachine->GetCurrentState()->GetDamageAnimationComponent());
+		ShakeAnimationComponent* pShakeAnimationComponent = dynamic_cast<ShakeAnimationComponent*>(pPlayer->m_pStateMachine->GetCurrentState()->GetShakeAnimationComponent());
+		StunAnimationComponent* pStunAnimationComponent = dynamic_cast<StunAnimationComponent*>(pPlayer->m_pStateMachine->GetCurrentState()->GetStunAnimationComponent());
+
+		pPlayer->m_fCurLagTime = 0.f;
+
+		pMonster->m_xmf3HitterVec = Vector3::Normalize(Vector3::Subtract(pMonster->GetPosition(), pPlayer->GetPosition()));
+
+		pDamageAnimationComponent->GetEnable() ? 
+			pMonster->m_fMaxDamageDistance =pDamageAnimationComponent->GetMaxDistance() 
+			: pMonster->m_fMaxDamageDistance = 0.0f;
+		pDamageAnimationComponent->GetEnable() ? 
+			pMonster->m_fDamageAnimationSpeed = pDamageAnimationComponent->GetSpeed() 
+			: pMonster->m_fDamageAnimationSpeed = pMonster->m_fDamageAnimationSpeed;
+
+		pStunAnimationComponent->GetEnable() ? 
+			pMonster->m_fMaxStunTime = pStunAnimationComponent->GetStunTime() 
+			: pMonster->m_fMaxStunTime = 0.0f;
+		pShakeAnimationComponent->GetEnable() ? 
+			pMonster->m_fShakeDuration = pShakeAnimationComponent->GetDuration() 
+			: pMonster->m_fShakeDuration = FLT_MIN;
+		pMonster->m_fShakeFrequency = pShakeAnimationComponent->GetFrequency();
+
+		std::wstring debugString{ std::to_wstring(pMonster->m_fShakeFrequency) };
+		OutputDebugString(debugString.c_str());
+		OutputDebugString(L"\n");
+
+		pMonster->m_fMaxShakeDistance = pShakeAnimationComponent->GetDistance();
+		pMonster->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
+		pMonster->m_pStateMachine->ChangeState(Damaged_Monster::GetInst());
+		pMonster->m_iPlayerAtkId = pPlayer->GetAtkId();
+	}
+
+	else {
+		TCHAR pstrDebug[256] = { 0 };
+		//_stprintf_s(pstrDebug, 256, "Already Dead \n");
+		OutputDebugString(L"Already Dead");
+	}
 }

@@ -26,6 +26,7 @@ void CMainTMPScene::SetPlayer(CGameObject* pPlayer)
 	if (m_pDepthRenderShader.get())
 		((CDepthRenderShader*)m_pDepthRenderShader.get())->RegisterObject(pPlayer);
 
+	m_pCollisionChecker->RegisterObject(pPlayer);
 }
 
 void CMainTMPScene::OnPreRender(ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed)
@@ -638,17 +639,6 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pMonsterObject->CreateArticulation(1.0f);
 	m_pEnemys.push_back(std::move(m_pMonsterObject));
 
-	/*m_pMonsterObject = std::make_unique<CGoblinObject>(pd3dDevice, pd3dCommandList, 1);
-	m_pMonsterObject->SetPosition(XMFLOAT3(190, 50, -70));
-	m_pMonsterObject->SetScale(4.0f, 4.0f, 4.0f);
-	m_pMonsterObject->Rotate(0.0f, 180.0f, 0.0f);
-	m_pMonsterObject->m_fHP = 100.f;
-	m_pMonsterObject->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
-	m_pMonsterObject->m_pSkinnedAnimationController->m_xmf3RootObjectScale = XMFLOAT3(10.0f, 10.0f, 10.0f);
-	m_pMonsterObject->CreateArticulation(1.0f);
-	CMonsterPool::GetInst()->SetNonActiveMonster(m_pMonsterObject.get());
-	m_pObjects.push_back(std::move(m_pMonsterObject));
-
 	m_pMonsterObject = std::make_unique<CGoblinObject>(pd3dDevice, pd3dCommandList, 1);
 	m_pMonsterObject->SetPosition(XMFLOAT3(190, 50, -70));
 	m_pMonsterObject->SetScale(4.0f, 4.0f, 4.0f);
@@ -657,10 +647,9 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pMonsterObject->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
 	m_pMonsterObject->m_pSkinnedAnimationController->m_xmf3RootObjectScale = XMFLOAT3(10.0f, 10.0f, 10.0f);
 	m_pMonsterObject->CreateArticulation(1.0f);
-	CMonsterPool::GetInst()->SetNonActiveMonster(m_pMonsterObject.get());
-	m_pObjects.push_back(std::move(m_pMonsterObject));
+	m_pEnemys.push_back(std::move(m_pMonsterObject));
 
-	m_pMonsterObject = std::make_unique<CGoblinObject>(pd3dDevice, pd3dCommandList, 1);
+	m_pMonsterObject = std::make_unique<COrcObject>(pd3dDevice, pd3dCommandList, 1);
 	m_pMonsterObject->SetPosition(XMFLOAT3(190, 50, -70));
 	m_pMonsterObject->SetScale(4.0f, 4.0f, 4.0f);
 	m_pMonsterObject->Rotate(0.0f, 180.0f, 0.0f);
@@ -668,10 +657,9 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pMonsterObject->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
 	m_pMonsterObject->m_pSkinnedAnimationController->m_xmf3RootObjectScale = XMFLOAT3(10.0f, 10.0f, 10.0f);
 	m_pMonsterObject->CreateArticulation(1.0f);
-	CMonsterPool::GetInst()->SetNonActiveMonster(m_pMonsterObject.get());
-	m_pObjects.push_back(std::move(m_pMonsterObject));
+	m_pEnemys.push_back(std::move(m_pMonsterObject));
 
-	m_pMonsterObject = std::make_unique<CGoblinObject>(pd3dDevice, pd3dCommandList, 1);
+	m_pMonsterObject = std::make_unique<COrcObject>(pd3dDevice, pd3dCommandList, 1);
 	m_pMonsterObject->SetPosition(XMFLOAT3(190, 50, -70));
 	m_pMonsterObject->SetScale(4.0f, 4.0f, 4.0f);
 	m_pMonsterObject->Rotate(0.0f, 180.0f, 0.0f);
@@ -679,10 +667,9 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pMonsterObject->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
 	m_pMonsterObject->m_pSkinnedAnimationController->m_xmf3RootObjectScale = XMFLOAT3(10.0f, 10.0f, 10.0f);
 	m_pMonsterObject->CreateArticulation(1.0f);
-	CMonsterPool::GetInst()->SetNonActiveMonster(m_pMonsterObject.get());
-	m_pObjects.push_back(std::move(m_pMonsterObject));
+	m_pEnemys.push_back(std::move(m_pMonsterObject));
 
-	m_pMonsterObject = std::make_unique<CGoblinObject>(pd3dDevice, pd3dCommandList, 1);
+	m_pMonsterObject = std::make_unique<CSkeletonObject>(pd3dDevice, pd3dCommandList, 1);
 	m_pMonsterObject->SetPosition(XMFLOAT3(190, 50, -70));
 	m_pMonsterObject->SetScale(4.0f, 4.0f, 4.0f);
 	m_pMonsterObject->Rotate(0.0f, 180.0f, 0.0f);
@@ -690,8 +677,20 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pMonsterObject->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
 	m_pMonsterObject->m_pSkinnedAnimationController->m_xmf3RootObjectScale = XMFLOAT3(10.0f, 10.0f, 10.0f);
 	m_pMonsterObject->CreateArticulation(1.0f);
-	CMonsterPool::GetInst()->SetNonActiveMonster(m_pMonsterObject.get());
-	m_pObjects.push_back(std::move(m_pMonsterObject));*/
+	m_pEnemys.push_back(std::move(m_pMonsterObject));
+
+	m_pMonsterObject = std::make_unique<CSkeletonObject>(pd3dDevice, pd3dCommandList, 1);
+	m_pMonsterObject->SetPosition(XMFLOAT3(190, 50, -70));
+	m_pMonsterObject->SetScale(4.0f, 4.0f, 4.0f);
+	m_pMonsterObject->Rotate(0.0f, 180.0f, 0.0f);
+	m_pMonsterObject->m_fHP = 100.f;
+	m_pMonsterObject->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
+	m_pMonsterObject->m_pSkinnedAnimationController->m_xmf3RootObjectScale = XMFLOAT3(10.0f, 10.0f, 10.0f);
+	m_pMonsterObject->CreateArticulation(1.0f);
+	m_pEnemys.push_back(std::move(m_pMonsterObject));
+
+	// CollisionChecker 持失
+	m_pCollisionChecker = std::make_unique<CollisionChecker>();
 
 	// Light 持失
 	m_pLight = std::make_unique<CLight>();
@@ -712,6 +711,8 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 		((CDepthRenderShader*)m_pDepthRenderShader.get())->RegisterObject(m_pEnemys[i].get());
 		((CPhysicsObject*)m_pEnemys[i].get())->SetUpdatedContext(m_pMap.get());
 		m_IObjectIndexs[i] = index++;
+
+		m_pCollisionChecker->RegisterObject(m_pEnemys[i].get());
 	}
 
 	for (int i = 0; i < m_pMap->GetMapObjects().size(); ++i) {
@@ -885,8 +886,7 @@ void CMainTMPScene::UpdateObjects(float fTimeElapsed)
 	}
 
 	m_pMap->Update(fTimeElapsed);
-
-
+	m_pCollisionChecker->UpdateObjects(fTimeElapsed);
 
 	for (std::unique_ptr<CGameObject>& obj : m_pSwordTrailObjects) {
 		obj->Update(fTimeElapsed);

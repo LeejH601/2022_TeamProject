@@ -657,12 +657,12 @@ void CMapObject::AddPhysicsScene(const XMFLOAT4X4& xmfWorld)
 
 bool CMapObject::CheckCollision(CGameObject* pTargetObject)
 {
-	BoundingOrientedBox playerBoundingBox = pTargetObject->GetBoundingBox();
+	BoundingOrientedBox* playerBoundingBox = pTargetObject->GetBoundingBox();
 
 	if (!Vector3::Length(m_ObjectBoundingBox.Extents))
 		return false;
 
-	bool bCollision = m_TransformedObjectBoundingBox.Intersects(playerBoundingBox);
+	bool bCollision = m_TransformedObjectBoundingBox.Intersects(*playerBoundingBox);
 
 	if (bCollision)
 	{

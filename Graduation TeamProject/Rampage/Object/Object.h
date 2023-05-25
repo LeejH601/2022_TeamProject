@@ -105,7 +105,7 @@ public:
 	CGameObject* GetParent() { return (m_pParent); }
 	UINT GetMeshType();
 	bool GetHit() { return bHit; }
-	virtual BoundingOrientedBox GetBoundingBox() { return BoundingOrientedBox{}; }
+	virtual BoundingOrientedBox* GetBoundingBox() { return nullptr; }
 	
 	void SetEnable(bool bEnable);
 	void SetChild(std::shared_ptr<CGameObject> pChild, bool bReferenceUpdate = false);
@@ -186,7 +186,7 @@ public:
 	void AddPhysicsScene(const XMFLOAT4X4& xmfWorld);
 	BoundingOrientedBox CreateAAMBB();
 
-	virtual BoundingOrientedBox GetBoundingBox() { return m_TransformedObjectBoundingBox; }
+	virtual BoundingOrientedBox* GetBoundingBox() { return &m_TransformedObjectBoundingBox; }
 
 	virtual bool CheckCollision(CGameObject* pTargetObject);
 	virtual void UpdateTransform(XMFLOAT4X4* pxmf4x4Parent = NULL);

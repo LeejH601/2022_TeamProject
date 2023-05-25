@@ -54,7 +54,7 @@ XMFLOAT3 CPlayer::GetATKDirection()
 
 	else if (pPlayerState == Atk3_Player::GetInst())
 	{
-		xmf3Direction = GetLook();
+		xmf3Direction = GetRight();
 	}
 
 	return XMFLOAT3(xmf3Direction);
@@ -63,6 +63,11 @@ XMFLOAT3 CPlayer::GetATKDirection()
 XMFLOAT3 CPlayer::GetTargetPosition()
 {
 	return m_xmf3TargetPosition;
+}
+
+void CPlayer::Move(const XMFLOAT3& xmf3Shift, bool bUpdateVelocity)
+{
+	CPhysicsObject::Move(xmf3Shift, bUpdateVelocity);
 }
 
 void CPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity, CCamera* pCamera)
@@ -98,18 +103,17 @@ void CPlayer::Update(float fTimeElapsed)
 	m_fTime += fTimeElapsed;
 	m_fCurLagTime += fTimeElapsed;
 
+	// 플레이어가 속도를 가진다면 해당 방향을 바라보게 하는 코드
+	if (m_xmf3Velocity.x + m_xmf3Velocity.z)
+		SetLookAt(Vector3::Add(GetPosition(), Vector3::Normalize(XMFLOAT3{ m_xmf3Velocity.x, 0.0f, m_xmf3Velocity.z })));
+
 	m_pStateMachine->Update(fTimeElapsed);
+	m_pStateMachine->Animate(fTimeElapsed);
 
 	CPhysicsObject::Apply_Gravity(fTimeElapsed);
-	
+
 	XMFLOAT3 xmf3NewVelocity = Vector3::TransformCoord(m_xmf3Velocity, XMMatrixRotationAxis(XMVECTOR{ 0.0f, 1.0f, 0.0f, 0.0f }, XMConvertToRadians(fDistortionDegree)));
 	CPhysicsObject::Move(xmf3NewVelocity, false);
-
-	// 플레이어가 속도를 가진다면 해당 방향을 바라보게 하는 코드
-	if (xmf3NewVelocity.x + xmf3NewVelocity.z)
-		SetLookAt(Vector3::Add(GetPosition(), Vector3::Normalize(XMFLOAT3{ xmf3NewVelocity.x, 0.0f, xmf3NewVelocity.z })));
-
-	m_pStateMachine->Animate(fTimeElapsed);
 
 	// 플레이어가 터레인보다 아래에 있지 않도록 하는 코드
 	if (m_pUpdatedContext) OnUpdateCallback(fTimeElapsed);
@@ -212,6 +216,7 @@ void CKnightPlayer::SetTargetPosition(const BoundingOrientedBox& targetBoundingB
 
 	// 플레이어 무기의 바운딩 박스의 중심에서 몬스터 몸체의 바운딩 박스의 중심을 향한 선분
 	XMVECTOR direction = XMLoadFloat3(&monsterBodyBoxCenter) - XMLoadFloat3(&playerWeaponBoxCenter);
+	direction = XMVector3Normalize(direction);
 
 	// 몬스터 몸체의 바운딩 박스의 면과 교차하는 점을 구함
 	float distance;
@@ -227,10 +232,10 @@ bool CKnightPlayer::CheckCollision(CGameObject* pTargetObject)
 	if (m_iAttackId == ((CMonster*)pTargetObject)->GetPlayerAtkId() || ((CMonster*)pTargetObject)->m_fHP <= 0.0f)
 		return false;
 
-	BoundingOrientedBox TargetBoundingBox = pTargetObject->GetBoundingBox();
-	if (pTargetObject->m_bEnable && ((CMonster*)pTargetObject)->m_fHP > 0 && m_TransformedWeaponBoundingBox.Intersects(TargetBoundingBox)) {
+	BoundingOrientedBox* TargetBoundingBox = pTargetObject->GetBoundingBox();
+	if (pTargetObject->m_bEnable && ((CMonster*)pTargetObject)->m_fHP > 0 && m_TransformedWeaponBoundingBox.Intersects(*TargetBoundingBox)) {
 		
-		SetTargetPosition(TargetBoundingBox);
+		SetTargetPosition(*TargetBoundingBox);
 
 		CollideParams collide_params;
 		collide_params.xmf3CollidePosition = m_xmf3TargetPosition;
@@ -254,7 +259,15 @@ bool CKnightPlayer::CheckCollision(CGameObject* pTargetObject)
 				m_pCamera->m_bCameraMoving = true;
 		}
 
-		pTargetObject->SetHit(this);
+		// Damage 메세지를 보냄
+
+		DamageParams damageParam;
+		damageParam.fDamage = 30.0f;
+		damageParam.fMaxStunTime = 0.0f;
+		damageParam.pPlayer = this;
+
+		CMessageDispatcher::GetInst()->Dispatch_Message<DamageParams>(MessageType::APPLY_DAMAGE, &damageParam, pTargetObject);
+
 		std::string logMessage = "Atk player->monster"; logMessage = logMessage + " ID == { " + std::to_string(m_iAttackId) + " }";
 		CLogger::GetInst()->LogCollision(this, pTargetObject, logMessage);
 

@@ -64,14 +64,14 @@ void CPhysicsObject::OnUpdateCallback(float fTimeElapsed)
 
 void CPhysicsObject::Update(float fTimeElapsed)
 {
+	Animate(fTimeElapsed);
+
 	Apply_Gravity(fTimeElapsed);
 
 	Move(m_xmf3Velocity, false);
 
 	// 터레인보다 아래에 있지 않도록 하는 코드
 	if (m_pUpdatedContext)OnUpdateCallback(fTimeElapsed);
-
-	Animate(fTimeElapsed);
 
 	Apply_Friction(fTimeElapsed);
 }
@@ -205,10 +205,10 @@ void CPhysicsObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, bool b_U
 void CPhysicsObject::DistortLookVec(CGameObject* pObject)
 {
 	//오브젝트로 향하는 벡터가 캐릭터 LookVec를 몇도 회전해야 향하게 되는지 구하기
-	BoundingOrientedBox& bb_BoundingBox = pObject->GetBoundingBox();
-	XMFLOAT3 xmf3BBCenter = GetBoundingBox().Center;
+	BoundingOrientedBox* bb_BoundingBox = pObject->GetBoundingBox();
+	XMFLOAT3 xmf3BBCenter = GetBoundingBox()->Center;
 
-	XMFLOAT3 xmf3ToObjectVec = Vector3::Subtract(bb_BoundingBox.Center, xmf3BBCenter);
+	XMFLOAT3 xmf3ToObjectVec = Vector3::Subtract(bb_BoundingBox->Center, xmf3BBCenter);
 	xmf3ToObjectVec.y = 0.0f;
 
 	XMFLOAT3 xmf3Look = GetLook();
@@ -223,22 +223,23 @@ void CPhysicsObject::DistortLookVec(CGameObject* pObject)
 	float dot = XMVectorGetX(XMVector3Dot(toObjeVec, lookVec));
 	float angle = acosf(dot);
 	float degrees = XMConvertToDegrees(angle);
+	float resultDegree = 0.0f;
 
 	XMVECTOR cross = XMVector3Cross(toObjeVec, lookVec);
 
 	if (XMVectorGetY(cross) > 0.0f)
 		degrees = 360.0f - degrees;
-
+	
 	if (degrees < 90.0f || degrees > 270.0f)
 	{
-		fDistortionDegree = 360.0f - degrees;
+		resultDegree = 360.0f - degrees;
 	}
 	else
 	{
-		fDistortionDegree = degrees + 180.0f;
-		if (fDistortionDegree > 360.0f)
-			fDistortionDegree -= 360.0f;
+		resultDegree = (float)((int)(degrees + 180.0f) % 360);
 	}
+
+	fDistortionDegree = (float)((int)(fDistortionDegree + resultDegree) % 360);
 }
 
 void CPhysicsObject::Move(const XMFLOAT3& xmf3Shift, bool bUpdateVelocity)
