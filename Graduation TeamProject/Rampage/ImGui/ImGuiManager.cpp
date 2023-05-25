@@ -1263,6 +1263,54 @@ void CImGuiManager::SetUI()
 		}
 		ImGui::End();
 	}
+
+	{
+		ImGuiWindowFlags my_window_flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_MenuBar;
+		bool* p_open = NULL;
+
+		ImGui::SetNextWindowSize(ImVec2(m_lDesktopWidth * 0.3f, 0.0f), ImGuiCond_Always);
+		ImGui::Begin(U8STR("창작 마당"), p_open, my_window_flags);
+
+		if (ImGui::BeginMenuBar())
+		{
+			if (ImGui::BeginMenu(U8STR("메뉴")))
+			{
+				if (ImGui::MenuItem(U8STR("새로고침"), NULL))
+				{
+				}
+				ImGui::EndMenu();
+			}
+			ImGui::EndMenuBar();
+		}
+
+		// Sample 1
+		/*ImGui::Columns(6, "Creation Column", false);
+		ImGui::Separator();
+		ImGui::Text(U8STR("ID")); ImGui::NextColumn();
+		ImGui::Text(U8STR("이름")); ImGui::NextColumn();
+		ImGui::Text(U8STR("좋아요")); ImGui::NextColumn();
+		ImGui::Text(U8STR("싫어요")); ImGui::NextColumn();
+		ImGui::Text(U8STR("신고하기버튼")); ImGui::NextColumn();
+		ImGui::Text(U8STR("불러오기버튼")); ImGui::NextColumn();
+		ImGui::Separator();
+		std::vector<std::u8string> vIDs{ u8"창작자1", u8"창작자2" , u8"창작자3" };
+		std::vector<std::u8string> vNames{ u8"프리셋1", u8"프리셋2" , u8"프리셋3" };
+		std::vector<std::u8string> vGoodSigns{ u8"123", u8"456", u8"789" };
+		std::vector<std::u8string> vBadSigns{ u8"321", u8"654", u8"987" };
+		for (int i = 0; i < 3; i++)
+		{
+			ImGui::Text(reinterpret_cast<const char*>(vIDs[i].c_str())); ImGui::NextColumn();
+			ImGui::Text(reinterpret_cast<const char*>(vNames[i].c_str())); ImGui::NextColumn();
+			ImGui::Text(reinterpret_cast<const char*>(vGoodSigns[i].c_str())); ImGui::NextColumn();
+			ImGui::Text(reinterpret_cast<const char*>(vBadSigns[i].c_str())); ImGui::NextColumn();
+			ImGui::Button(U8STR("신고하기"), ImVec2(-FLT_MIN, 0.0f)); ImGui::NextColumn();
+			ImGui::Button(U8STR("불러오기"), ImVec2(-FLT_MIN, 0.0f)); ImGui::NextColumn();
+		}
+		ImGui::Columns(1);
+		ImGui::Separator();*/
+
+		ImGui::End();
+	}
 }
 void CImGuiManager::ShowImpactManager(CState<CPlayer>* pCurrentAnimation)
 {
