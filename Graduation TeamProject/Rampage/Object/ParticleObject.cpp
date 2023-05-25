@@ -228,6 +228,7 @@ void CParticleObject::EmitParticle(int emitType)
 		param.m_iTextureIndex = m_iTextureIndex;
 		param.m_iTextureCoord[0] = m_iTotalRow; param.m_iTextureCoord[1] = m_iTotalCol;
 		param.m_xmf2Size = m_fSize;
+		param.m_fEmissive = m_fEmissive;
 		break;
 	default:
 		break;

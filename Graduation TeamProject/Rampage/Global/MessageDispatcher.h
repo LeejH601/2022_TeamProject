@@ -371,6 +371,7 @@ class ParticleComponent : public IMessageListener {
     XMFLOAT3 m_xmf3Color = XMFLOAT3(1.f, 1.f, 1.f);
 	int m_iTextureIndex = 0;
 	int m_iTextureOffset = 0;
+	float m_fEmissive = 1.0f;
 public:
     ParticleComponent();
 
@@ -389,6 +390,7 @@ public:
 	float& GetProgressionRate() { return m_fProgressionRate; };
 	float& GetLengthScale() { return m_fLengthScale; };
 	XMFLOAT3& GetFieldMainDirection() { return m_xmf3FieldMainDirection; };
+	float& GetEmissive() { return m_fEmissive; };
 
 	int& GetTextureIndex() { return m_iTextureIndex; }
 	int& GetTextureOffset() { return m_iTextureOffset; }
@@ -411,6 +413,7 @@ public:
 	void SetProgressionRate(float fProgressionRate) { m_fProgressionRate = fProgressionRate; };
 	void SetLengthScale(float fLengthScale) { m_fLengthScale = fLengthScale; };
 	void SetFieldMainDirection(XMFLOAT3 xmf3FieldMainDirection) { m_xmf3FieldMainDirection = xmf3FieldMainDirection; };
+	void SetEmissive(float fEmissive) { m_fEmissive = fEmissive; };
 
 	void SetTextureIndex(int iIndex) { m_iTextureIndex = iIndex; };
 	void SetTextureOffset(int iOffset) { m_iTextureOffset = iOffset; }
@@ -598,6 +601,7 @@ private:
 	int m_iTextureIndex = 0;
 	int m_iTextureOffset = 0;
 	int m_iTotalRow, m_iTotalColumn;
+	float m_fEmissive = 1.0f;
 
 public:
 	int& GetTextureIndex() { return m_iTextureIndex; }
@@ -610,6 +614,7 @@ public:
 
 	float& GetXSize() { return m_fSize.x; }
 	float& GetYSize() { return m_fSize.y; }
+	float& GetEmissive() { return m_fEmissive; };
 
 	void SetTextureIndex(int nTextureIndex) { m_iTextureIndex = nTextureIndex; }
 	void SetSize(XMFLOAT2 fSize) { m_fSize = fSize; }
@@ -622,6 +627,7 @@ public:
 	void SetColorB(float b) { m_xmf3Color.z = b; }
 	void SetTextureOffset(int iOffset) { m_iTextureOffset = iOffset; }
 	void SetTotalRowColumn(int iTotalRow, int iTotalColumn);
+	void SetEmissive(float fEmissive) { m_fEmissive = fEmissive; };
 	virtual void HandleMessage(const Message& message, const ImpactCompParams& params);
 };
 

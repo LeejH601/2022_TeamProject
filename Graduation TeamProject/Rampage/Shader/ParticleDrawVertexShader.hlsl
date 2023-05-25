@@ -13,6 +13,7 @@ struct VS_PARTICLE_DRAW_OUTPUT
 	uint2 SpriteCurrentCoord : TEXTURECOORD1;
 	float lifetime : LIFETIME;
 	float EmitTime : EMITTIME; // 방출 시작 시간 
+	float emissive : EMISSIVE;
 };
 
 cbuffer cbFrameworkInfo : register(b7)
@@ -68,6 +69,7 @@ VS_PARTICLE_DRAW_OUTPUT VSParticleDraw(VS_PARTICLE_INPUT input)
 	output.SpriteCurrentCoord = SpriteAnimtaion(input, gfCurrentTime - input.EmitTime, input.lifetime, input.SpriteTotalCoord.x, input.SpriteTotalCoord.y);
 	output.lifetime = input.lifetime;
 	output.EmitTime = input.EmitTime;
+	output.emissive = input.emissive;
 	return(output);
 }
 

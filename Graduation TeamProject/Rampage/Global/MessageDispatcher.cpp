@@ -228,6 +228,7 @@ void ParticleComponent::HandleMessage(const Message& message, const ParticleComp
 		pParticle->SetProgressionRate(m_fProgressionRate);
 		pParticle->SetLengthScale(m_fLengthScale);
 		pParticle->SetTextureIndex(m_iTextureIndex + m_iTextureOffset);
+		pParticle->SetEmissive(m_fEmissive);
 		pParticle->EmitParticle(0);
 	}
 }
@@ -258,6 +259,7 @@ void ImpactEffectComponent::HandleMessage(const Message& message, const ImpactCo
 		pMultiSpriteParticle->SetMaxParticleN(m_nParticleNumber);
 		pMultiSpriteParticle->SetPosition(params.xmf3Position);
 		pMultiSpriteParticle->SetTextureIndex(m_iTextureIndex + m_iTextureOffset);
+		pMultiSpriteParticle->SetEmissive(m_fEmissive);
 		pMultiSpriteParticle->EmitParticle(0);
 	}
 	CLogger::GetInst()->Log(std::string("MultiSprite HandleMessge Called"));

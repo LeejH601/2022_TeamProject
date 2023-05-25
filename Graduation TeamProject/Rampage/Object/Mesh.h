@@ -369,6 +369,7 @@ public:
 	UINT							m_iTextureIndex = 0;
 	UINT							m_iTextureCoord[2];
 	XMFLOAT2						m_xmf2Size = XMFLOAT2(1.0f, 1.0f);
+	float							m_fEmissive = 1.0f;
 public:
 	CParticleVertex() { }
 	~CParticleVertex() { }
@@ -385,6 +386,7 @@ struct ParticleEmitDataParam
 	UINT							m_iTextureIndex = 0;
 	UINT							m_iTextureCoord[2];
 	XMFLOAT2						m_xmf2Size = XMFLOAT2(1.0f, 1.0f);
+	float m_fEmissive;
 };
 
 struct ParticleEmitPositionlistParam
@@ -399,6 +401,7 @@ struct ParticleEmitPositionlistParam
 	UINT							m_iTextureIndex = 0;
 	UINT							m_iTextureCoord[2];
 	XMFLOAT2						m_xmf2Size = XMFLOAT2(1.0f, 1.0f);
+	float m_fEmissive;
 };
 
 #define MAX_PARTICLES				100000

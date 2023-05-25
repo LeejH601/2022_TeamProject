@@ -1316,6 +1316,11 @@ void CImGuiManager::ShowImpactManager(CState<CPlayer>* pCurrentAnimation)
 
 	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
 	ImGui::ColorEdit3(U8STR("색상##ImpactEffect"), (float*)&pImpactEffectComponent->GetColor()); // Edit 3 floats representing a color
+
+	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
+	if (ImGui::DragFloat(U8STR("Emissive##ImpactEffect"), &pImpactEffectComponent->GetEmissive(), DRAG_FLOAT_UNIT, IMPACT_EMISSIVE_MIN, IMPACT_EMISSIVE_MAX, "%.2f", 0))
+		pImpactEffectComponent->GetEmissive() = std::clamp(pImpactEffectComponent->GetEmissive(), IMPACT_EMISSIVE_MIN, IMPACT_EMISSIVE_MAX);
+
 	ImGui::End();
 }
 void CImGuiManager::ShowParticleManager(CState<CPlayer>* pCurrentAnimation)
@@ -1378,6 +1383,10 @@ void CImGuiManager::ShowParticleManager(CState<CPlayer>* pCurrentAnimation)
 
 	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
 	ImGui::ColorEdit3(U8STR("색상"), (float*)&pParticleComponent->GetColor()); // Edit 3 floats representing a color
+
+	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
+	if (ImGui::DragFloat("Emissive##ParticleEffect", &pParticleComponent->GetEmissive(), DRAG_FLOAT_UNIT, IMPACT_EMISSIVE_MIN, IMPACT_EMISSIVE_MAX, "%.2f", 0))
+		pParticleComponent->GetEmissive() = std::clamp(pParticleComponent->GetEmissive(), IMPACT_EMISSIVE_MIN, IMPACT_EMISSIVE_MAX);
 
 	ImGui::SetNextItemWidth(190.f);
 	if (ImGui::DragFloat("FieldSpeed##ParticleEffect", &pParticleComponent->GetFieldSpeed(), DRAG_FLOAT_UNIT, 0.0f, FLT_MAX, "%.2f", 0))

@@ -8,6 +8,9 @@
 #define IMPACT_SIZE_MIN 0.0f
 #define IMPACT_SIZE_MAX 10.0f
 
+#define IMPACT_EMISSIVE_MIN 0.0f
+#define IMPACT_EMISSIVE_MAX 30.0f
+
 #define IMPACT_ALPHA_MIN 0.0f
 #define IMPACT_ALPHA_MAX 10.0f
 

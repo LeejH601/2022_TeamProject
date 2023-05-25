@@ -68,6 +68,7 @@ public:
 	void SetProgressionRate(float fProgressionRate) { m_fProgressionRate = fProgressionRate; };
 	void SetLengthScale(float fLengthScale) { m_fLengthScale = fLengthScale; };
 	void SetFieldMainDirection(XMFLOAT3 xmf3FieldMainDirection) { m_xmf3FieldMainDirection = xmf3FieldMainDirection; };
+	void SetEmissive(float fEmissive) { m_fEmissive = fEmissive; };
 	void EmitParticle(int emitType);
 
 	void SetDirection(XMFLOAT3 xmf3Direction);
@@ -90,6 +91,8 @@ protected:
 	XMFLOAT3	m_xmf3Direction = XMFLOAT3(1.f, 1.f, 1.f);
 
 	int			m_nVertices = 0;
+
+	float		m_fEmissive = 1.0f;
 
 	float m_fFieldSpeed;
 	float m_fNoiseStrength;

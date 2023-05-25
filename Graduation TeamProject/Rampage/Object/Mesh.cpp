@@ -1553,6 +1553,7 @@ void CParticleMesh::EmitParticle(int emitType, ParticleEmitDataParam& param)
 			createdParticleBuffer[i].m_fEmitTime = param.m_fEmitTime;
 			createdParticleBuffer[i].m_iTextureIndex = param.m_iTextureIndex;
 			createdParticleBuffer[i].m_xmf2Size = param.m_xmf2Size;
+			createdParticleBuffer[i].m_fEmissive = param.m_fEmissive;
 			memcpy(createdParticleBuffer[i].m_iTextureCoord, param.m_iTextureCoord, sizeof(UINT) * 2);
 		}
 		break;
@@ -1566,6 +1567,7 @@ void CParticleMesh::EmitParticle(int emitType, ParticleEmitDataParam& param)
 			createdParticleBuffer[i].m_fEmitTime = param.m_fEmitTime;
 			createdParticleBuffer[i].m_iTextureIndex = param.m_iTextureIndex;
 			createdParticleBuffer[i].m_xmf2Size = param.m_xmf2Size;
+			createdParticleBuffer[i].m_fEmissive = param.m_fEmissive;
 			memcpy(createdParticleBuffer[i].m_iTextureCoord, param.m_iTextureCoord, sizeof(UINT) * 2);
 		}
 		break;
@@ -1599,6 +1601,7 @@ void CParticleMesh::EmitParticleForVertexData(int emitType, ParticleEmitPosition
 			createdParticleBuffer2[i].m_fEmitTime = Locator.GetTimer()->GetTotalTime();
 			createdParticleBuffer2[i].m_iTextureIndex = param.m_iTextureIndex;
 			createdParticleBuffer2[i].m_xmf2Size = param.m_xmf2Size;
+			createdParticleBuffer2[i].m_fEmissive = param.m_fEmissive;
 			memcpy(createdParticleBuffer2[i].m_iTextureCoord, param.m_iTextureCoord, sizeof(UINT) * 2);
 			index++;
 		}

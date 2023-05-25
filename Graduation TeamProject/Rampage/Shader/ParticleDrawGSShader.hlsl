@@ -10,6 +10,7 @@ struct VS_PARTICLE_DRAW_OUTPUT
 	uint2 CurrentCoord : TEXTURECOORD1;
 	float lifetime : LIFETIME;
 	float EmitTime : EMITTIME; // 방출 시작 시간 
+	float emissive : EMISSIVE;
 };
 
 struct GS_PARTICLE_DRAW_OUTPUT
@@ -22,6 +23,7 @@ struct GS_PARTICLE_DRAW_OUTPUT
 	uint2 TextureCoord : TEXTURECOORD;
 	float lifetime : LIFETIME;
 	float EmitTime : EMITTIME; // 방출 시작 시간 
+	float emissive : EMISSIVE;
 };
 
 
@@ -65,6 +67,7 @@ void GSParticleDraw(point VS_PARTICLE_DRAW_OUTPUT input[1], inout TriangleStream
 	output.TextureIndex = input[0].TextureIndex;
 	output.lifetime = input[0].lifetime;
 	output.EmitTime = input[0].EmitTime;
+	output.emissive = input[0].emissive;
 	for (int i = 0; i < 4; i++)
 	{
 		gf3Positions[i].x = gf3Positions[i].x * input[0].size.x * 0.5f;
