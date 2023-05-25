@@ -1,3 +1,4 @@
+#include "InputLayouts.hlsli"
 #include "CurlNoise.hlsl"
 
 cbuffer cbFrameworkInfo : register(b7)
@@ -21,16 +22,7 @@ cbuffer cbFrameworkInfo : register(b7)
 
 };
 
-struct VS_PARTICLE_INPUT
-{
-	float3 position : POSITION;
-	float3 velocity : VELOCITY;
-	float lifetime : LIFETIME;
-	int type : TYPE;
-	float EmitTime : EMITTIME; // ���� ���� �ð� 
-	uint TextureIndex :TEXTUREINDEX;
-	uint2 SpriteTotalCoord : TEXTURECOORD;
-};
+
 
 cbuffer cbGameObjectInfo : register(b0)
 {

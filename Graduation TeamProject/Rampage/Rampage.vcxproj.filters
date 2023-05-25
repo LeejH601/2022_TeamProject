@@ -496,5 +496,6 @@
     <None Include="Shader\Header.hlsli" />
     <FxCompile Include="Shader\SkyBoxPixelShader.hlsl" />
     <FxCompile Include="Shader\SkyBoxVertexShader.hlsl" />
+    <None Include="Shader\InputLayouts.hlsli" />
   </ItemGroup>
 </Project>

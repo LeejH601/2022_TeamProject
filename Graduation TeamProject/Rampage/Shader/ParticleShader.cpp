@@ -120,7 +120,7 @@ D3D12_SHADER_BYTECODE CParticleShader::CreateGeometryShader(ID3DBlob** ppd3dShad
 D3D12_INPUT_LAYOUT_DESC CParticleShader::CreateInputLayout(int nPipelineState)
 {
 	D3D12_INPUT_LAYOUT_DESC d3dInputLayoutDesc;
-	UINT nInputElementDescs = 7;
+	UINT nInputElementDescs = 8;
 	D3D12_INPUT_ELEMENT_DESC* pd3dInputElementDescs = new D3D12_INPUT_ELEMENT_DESC[nInputElementDescs];
 
 	pd3dInputElementDescs[0] = { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
@@ -130,6 +130,7 @@ D3D12_INPUT_LAYOUT_DESC CParticleShader::CreateInputLayout(int nPipelineState)
 	pd3dInputElementDescs[4] = { "EMITTIME", 0, DXGI_FORMAT_R32_FLOAT, 0, 32, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
 	pd3dInputElementDescs[5] = { "TEXTUREINDEX", 0, DXGI_FORMAT_R32_UINT, 0, 36, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
 	pd3dInputElementDescs[6] = { "TEXTURECOORD", 0, DXGI_FORMAT_R32G32_UINT, 0, 40, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+	pd3dInputElementDescs[7] = { "SIZE", 0, DXGI_FORMAT_R32G32_UINT, 0, 48, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
 	d3dInputLayoutDesc.pInputElementDescs = pd3dInputElementDescs;
 	d3dInputLayoutDesc.NumElements = nInputElementDescs;
 
@@ -143,7 +144,7 @@ D3D12_STREAM_OUTPUT_DESC CParticleShader::CreateStreamOuputState(int nPipelineSt
 
 	if (nPipelineState == 0)
 	{
-		UINT nStreamOutputDecls = 7;
+		UINT nStreamOutputDecls = 8;
 		D3D12_SO_DECLARATION_ENTRY* pd3dStreamOutputDecls = new D3D12_SO_DECLARATION_ENTRY[nStreamOutputDecls];
 		pd3dStreamOutputDecls[0] = { 0, "POSITION", 0, 0, 3, 0 };
 		pd3dStreamOutputDecls[1] = { 0, "VELOCITY", 0, 0, 3, 0 };
@@ -152,6 +153,7 @@ D3D12_STREAM_OUTPUT_DESC CParticleShader::CreateStreamOuputState(int nPipelineSt
 		pd3dStreamOutputDecls[4] = { 0, "EMITTIME", 0, 0, 1, 0 };
 		pd3dStreamOutputDecls[5] = { 0, "TEXTUREINDEX", 0, 0, 1, 0 };
 		pd3dStreamOutputDecls[6] = { 0, "TEXTURECOORD", 0, 0, 2, 0 };
+		pd3dStreamOutputDecls[7] = { 0, "SIZE", 0, 0, 2, 0 };
 		//float EmitTime : EMITTIME; // 방출 시작 시간
 		UINT* pBufferStrides = new UINT[1];
 		pBufferStrides[0] = sizeof(CParticleVertex);
