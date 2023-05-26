@@ -1319,6 +1319,16 @@ void CImGuiManager::SetUI()
 			ImGui::Columns(1);
 			ImGui::Separator();
 
+			ImGuiStyle& style = ImGui::GetStyle();
+			ImVec4 originalColor = style.Colors[ImGuiCol_Button];
+			style.Colors[ImGuiCol_Button] = ImVec4(0, 0, 0, 0);
+			ImGui::Button(U8STR("1")); ImGui::SameLine();
+			ImGui::Button(U8STR("2")); ImGui::SameLine();
+			ImGui::Button(U8STR("3")); ImGui::SameLine();
+			ImGui::Button(U8STR("4")); ImGui::SameLine();
+			ImGui::Button(U8STR("5")); ImGui::SameLine();
+			style.Colors[ImGuiCol_Button] = originalColor;
+
 			ImGui::EndChild();
 		}
 
@@ -1330,11 +1340,19 @@ void CImGuiManager::SetUI()
 
 			char keyword[256] = {};
 			ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 5.0f);
-			ImGui::BeginChild("ChildR", ImVec2(0, 260), true);
+			ImGui::BeginChild("ChildR", ImVec2(0, 0.135f * m_lDesktopWidth), true);
+
+			const char* items[] = { U8STR("ID"), U8STR("이름") };
+
+			static int selectedSearchStyle = 0;
+			ImGui::SetNextItemWidth(-FLT_MIN);
+			ImGui::Combo(U8STR("##searchStyle"), &selectedSearchStyle, items, IM_ARRAYSIZE(items));
+			
 			ImGui::InputText(U8STR("##keywordText"), reinterpret_cast<char*>(searchText.data()), 256);
 			ImGui::SameLine();
-			if (ImGui::Button(U8STR("검색"), ImVec2(-FLT_MIN, 0.0f)))
+			if (ImGui::Button(U8STR("검색##keywordSearch"), ImVec2(-FLT_MIN, 0.0f)))
 				OutputDebugString(ConvertU8ToW(searchText).c_str());
+
 			ImGui::EndChild();
 			ImGui::PopStyleVar();
 		}
