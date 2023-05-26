@@ -1295,16 +1295,36 @@ void CImGuiManager::SetUI()
 			};
 
 			static std::vector<CreationItem> vCreationItems{
-				CreationItem{ m_pRTTexture.get(), u8"창작자1", u8"프리셋2", 123, 321 },
-				CreationItem{ m_pRTTexture.get(), u8"창작자2", u8"프리셋1", 789, 654 },
-				CreationItem{ m_pRTTexture.get(), u8"창작자3", u8"프리셋3", 456, 987 }
+				CreationItem{ m_pRTTexture.get(), u8"창작자1", u8"프리셋2", rand() % 1000, rand() % 1000},
+				CreationItem{ m_pRTTexture.get(), u8"창작자2", u8"프리셋1", rand() % 1000, rand() % 1000 },
+				CreationItem{ m_pRTTexture.get(), u8"창작자3", u8"프리셋3", rand() % 1000, rand() % 1000 },
+				CreationItem{ m_pRTTexture.get(), u8"창작자12", u8"프리셋4", rand() % 1000, rand() % 1000 },
+				CreationItem{ m_pRTTexture.get(), u8"창작자11", u8"프리셋6", rand() % 1000, rand() % 1000 },
+				CreationItem{ m_pRTTexture.get(), u8"창작자7", u8"프리셋5", rand() % 1000, rand() % 1000 },
+				CreationItem{ m_pRTTexture.get(), u8"창작자8", u8"프리셋7", rand() % 1000, rand() % 1000 },
+				CreationItem{ m_pRTTexture.get(), u8"창작자9", u8"프리셋9", rand() % 1000, rand() % 1000 },
+				CreationItem{ m_pRTTexture.get(), u8"창작자10", u8"프리셋11", rand() % 1000, rand() % 1000 },
+				CreationItem{ m_pRTTexture.get(), u8"창작자6", u8"프리셋10", rand() % 1000, rand() % 1000 },
+				CreationItem{ m_pRTTexture.get(), u8"창작자5", u8"프리셋8", rand() % 1000, rand() % 1000 },
+				CreationItem{ m_pRTTexture.get(), u8"창작자4", u8"프리셋12", rand() % 1000, rand() % 1000 },
 			};
+
+			// 기본 정렬 추후엔 삭제 필요
+			std::sort(vCreationItems.begin(), vCreationItems.end(), [](const CreationItem& A, const CreationItem& B)
+				{
+					return A.id < B.id;
+				}
+			);
+
+			static int selectedAllignStyle = 0;
+			static int selectedPageNum = 0;
 
 			ImGui::Text(U8STR("정렬기준: ")); ImGui::SameLine();
 
 			const char* allignStyle[] = { U8STR("ID"), U8STR("이름"), U8STR("좋아요"), U8STR("싫어요") };
-			static int selectedAllignStyle = 0;
 			ImGui::SetNextItemWidth(-FLT_MIN);
+
+			// 기준에 따라 정렬
 			if (ImGui::Combo(U8STR("##allignStyle"), &selectedAllignStyle, allignStyle, IM_ARRAYSIZE(allignStyle)))
 			{
 				switch (selectedAllignStyle)
@@ -1356,12 +1376,15 @@ void CImGuiManager::SetUI()
 			{
 				int my_image_width = 0.05f * m_lDesktopWidth;
 				int my_image_height = 0.05f * m_lDesktopHeight;
-				ImGui::Image((ImTextureID)m_pRTTexture->m_pd3dSrvGpuDescriptorHandles[0].ptr, ImVec2((float)my_image_width, (float)my_image_height));
+				int index = selectedPageNum * 3 + i;
+
+				ImGui::Image((ImTextureID)m_pRTTexture->m_pd3dSrvGpuDescriptorHandles[0].ptr, 
+					ImVec2((float)my_image_width, (float)my_image_height));
 				ImGui::NextColumn();
-				ImGui::Text(reinterpret_cast<const char*>(vCreationItems[i].id.c_str())); ImGui::NextColumn();
-				ImGui::Text(reinterpret_cast<const char*>(vCreationItems[i].name.c_str())); ImGui::NextColumn();
-				ImGui::Text(std::to_string(vCreationItems[i].nGoodSign).c_str()); ImGui::NextColumn();
-				ImGui::Text(std::to_string(vCreationItems[i].nBadSign).c_str()); ImGui::NextColumn();
+				ImGui::Text(reinterpret_cast<const char*>(vCreationItems[index].id.c_str())); ImGui::NextColumn();
+				ImGui::Text(reinterpret_cast<const char*>(vCreationItems[index].name.c_str())); ImGui::NextColumn();
+				ImGui::Text(std::to_string(vCreationItems[index].nGoodSign).c_str()); ImGui::NextColumn();
+				ImGui::Text(std::to_string(vCreationItems[index].nBadSign).c_str()); ImGui::NextColumn();
 				ImGui::Button(U8STR("신고하기"), ImVec2(-FLT_MIN, 0.0f)); ImGui::NextColumn();
 				ImGui::Button(U8STR("불러오기"), ImVec2(-FLT_MIN, 0.0f)); ImGui::NextColumn();
 			}
@@ -1371,11 +1394,12 @@ void CImGuiManager::SetUI()
 			ImGuiStyle& style = ImGui::GetStyle();
 			ImVec4 originalColor = style.Colors[ImGuiCol_Button];
 			style.Colors[ImGuiCol_Button] = ImVec4(0, 0, 0, 0);
-			ImGui::Button(U8STR("1")); ImGui::SameLine();
-			ImGui::Button(U8STR("2")); ImGui::SameLine();
-			ImGui::Button(U8STR("3")); ImGui::SameLine();
-			ImGui::Button(U8STR("4")); ImGui::SameLine();
-			ImGui::Button(U8STR("5")); ImGui::SameLine();
+			for (int i = 0; i < vCreationItems.size() / 3; ++i)
+			{
+				if (ImGui::Button(std::to_string(i + 1).c_str()))
+					selectedPageNum = i;
+				ImGui::SameLine();
+			}
 			style.Colors[ImGuiCol_Button] = originalColor;
 
 			ImGui::EndChild();
