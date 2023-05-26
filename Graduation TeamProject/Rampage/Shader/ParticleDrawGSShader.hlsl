@@ -68,14 +68,45 @@ void GSParticleDraw(point VS_PARTICLE_DRAW_OUTPUT input[1], inout TriangleStream
 	output.lifetime = input[0].lifetime;
 	output.EmitTime = input[0].EmitTime;
 	output.emissive = input[0].emissive;
+
+
+	float3 WorldNormal = float3(0, 1.0f, 0);
+	float3 velocityInCameraSpace = mul(float4(input[0].velocity, 0.0f), gmtxView);
+	float3 velocity = normalize(velocityInCameraSpace);
+
+	velocityInCameraSpace = normalize(float3(velocityInCameraSpace.x, velocityInCameraSpace.y, 0.0f));
+	float3 normalVelocity = float3(-velocityInCameraSpace.y, velocityInCameraSpace.x, 0.0f);
+
+	float3 Positions[4] = { velocityInCameraSpace - normalVelocity, velocityInCameraSpace + normalVelocity, 
+		-velocityInCameraSpace - normalVelocity, -velocityInCameraSpace + normalVelocity };
+
+	float cosCeta = dot(WorldNormal, velocityInCameraSpace);
+	if (cosCeta == 0.00001f) cosCeta = 0.1f;
+	float ceta = acos(cosCeta); // radian
+	if (velocityInCameraSpace.x < 0)
+		ceta = -ceta;
+	float3x3 rotate = float3x3(cos(ceta), -sin(ceta), 0,
+		sin(ceta), cos(ceta), 0,
+		0, 0, 1);
+
+	float scaleValue = 1.0 - velocity.z; //?
+	scaleValue = 1.0f;
+
 	for (int i = 0; i < 4; i++)
 	{
 		gf3Positions[i].x = gf3Positions[i].x * input[0].size.x * 0.5f;
-		gf3Positions[i].y = gf3Positions[i].y * input[0].size.y * 0.5f;
+		gf3Positions[i].y = gf3Positions[i].y * (input[0].size.y * scaleValue) * 0.5f;
+		gf3Positions[i] = mul(gf3Positions[i], rotate);
 
-		float3 positionW = mul((gf3Positions[i]), (float3x3)(gmtxInverseView)) + input[0].position;
+		float3 positionW = input[0].position;
+
+		output.position = mul(float4(positionW, 1.0f), gmtxView);
+		output.position.xyz += gf3Positions[i];
+		output.position = mul(output.position, gmtxProjection);
+
+	/*	float3 positionW = mul((gf3Positions[i]), (float3x3)(gmtxInverseView)) + input[0].position;
 		
-		output.position = mul(mul(float4(positionW, 1.0f), gmtxView), gmtxProjection);
+		output.position = mul(mul(float4(positionW, 1.0f), gmtxView), gmtxProjection);*/
 		output.uv = mul(float3(gf2QuadUVs[i], 1.0f), (float3x3)(xmf4x4Coord)).xy;
 		outputStream.Append(output);
 	}
