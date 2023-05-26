@@ -13,8 +13,10 @@ public:
 public:
 	void SetSize(XMFLOAT2 xmf2Size);
 	void SetScreenPosition(XMFLOAT2 xmf2ScreenPosition);
+	void SetTextureIndex(UINT iTextureIndex);
 
 protected:
 	XMFLOAT2 m_xmf2Size = XMFLOAT2(1.f, 1.f);
 	XMFLOAT2 m_xmf2ScreenPosition = XMFLOAT2(0.f, 0.f);
+	UINT	m_iTextureIndex = 0;
 };	

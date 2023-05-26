@@ -45,8 +45,10 @@ struct VS_TEXTURED_OUTPUT
 
 PS_MULTIPLE_RENDER_TARGETS_OUTPUT PSUIObject(VS_TEXTURED_OUTPUT input)
 {
+	uint TextureIndex = gmtxGameObject._33; // TextureIndex
+
 	PS_MULTIPLE_RENDER_TARGETS_OUTPUT output;
-	float4 cColor = gtxtTexture[1].Sample(gSamplerState, input.uv);
+	float4 cColor = gtxtTexture[TextureIndex].Sample(gSamplerState, input.uv);
 	output.f4Color = cColor;
 	output.f4Scene = cColor;
 	return(output);

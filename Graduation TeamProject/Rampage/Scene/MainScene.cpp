@@ -753,6 +753,11 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pTextureManager->LoadTexture(TextureType::ParticleTexture, pd3dDevice, pd3dCommandList, L"Image/ParticleImages/RoundSoftParticle.dds", 0, 0);
 	m_pTextureManager->LoadTexture(TextureType::ParticleTexture, pd3dDevice, pd3dCommandList, L"Image/ParticleImages/Meteor.dds", 0, 0);
 	m_pTextureManager->LoadTexture(TextureType::ParticleTexture, pd3dDevice, pd3dCommandList, L"Image/ParticleImages/Effect0.dds", 0, 0);
+
+	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/Frame.dds", 0, 0);
+	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/Hp.dds", 0, 0);
+	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/Mana.dds", 0, 0);
+
 	m_pTextureManager->CreateResourceView(pd3dDevice, 0);
 
 	m_pParticleShader = std::make_unique<CParticleShader>();
@@ -825,9 +830,23 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pUIObjectShader = std::make_unique<CUIObjectShader>();
 	m_pUIObjectShader->CreateShader(pd3dDevice, GetGraphicsRootSignature(), 7, pdxgiObjectRtvFormats, DXGI_FORMAT_D32_FLOAT, 0);
 	std::unique_ptr<CUIObject> pUIObject = std::make_unique<CUIObject>(2, pd3dDevice, pd3dCommandList, 10.f);
-	pUIObject->SetSize(XMFLOAT2(FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT));
-	pUIObject->SetScreenPosition(XMFLOAT2((float)FRAME_BUFFER_WIDTH * 0.5f, (float)FRAME_BUFFER_HEIGHT * 0.5f));
+	pUIObject->SetSize(XMFLOAT2(814.f * 0.7f, 253.f * 0.7f));
+	pUIObject->SetScreenPosition(XMFLOAT2(FRAME_BUFFER_WIDTH * 0.2f, FRAME_BUFFER_HEIGHT * 0.2f));
+	pUIObject->SetTextureIndex(7);
 	m_pUIObject.push_back(std::move(pUIObject));
+
+	pUIObject = std::make_unique<CUIObject>(2, pd3dDevice, pd3dCommandList, 10.f);
+	pUIObject->SetSize(XMFLOAT2(426 * 0.7f, 42 * 0.7f));
+	pUIObject->SetScreenPosition(XMFLOAT2(FRAME_BUFFER_WIDTH * 0.2f + 75.f, FRAME_BUFFER_HEIGHT * 0.2f + 30.f));
+	pUIObject->SetTextureIndex(8);
+	m_pUIObject.push_back(std::move(pUIObject));
+
+	pUIObject = std::make_unique<CUIObject>(2, pd3dDevice, pd3dCommandList, 10.f);
+	pUIObject->SetSize(XMFLOAT2(426 * 0.5f, 42 * 0.5f));
+	pUIObject->SetScreenPosition(XMFLOAT2(FRAME_BUFFER_WIDTH * 0.2f + 45.f, FRAME_BUFFER_HEIGHT * 0.2f - 10.f));
+	pUIObject->SetTextureIndex(9);
+	m_pUIObject.push_back(std::move(pUIObject));
+
 	// 0 ~ FRAME_BUFFER_WIDTH, 0 ~ FRAME_BUFFER_HEIGHT
 	// -1 ~ 1
 }

@@ -24,14 +24,14 @@ void CUIObject::Update(float fTimeElapsed)
 	if (m_bEnable) {
 		//m_xmf2ScreenPosition5 = XMFLOAT2()
 		// 화면 크기를 기준으로 Size 설정 최대 크기 (MAX WIDTH: FRAME_BUFFER_WIDTH, MAX_HEIGHT: FRAME_BUFFER_HEIGHT)
-		m_xmf4x4World._11 = m_xmf2Size.x / (FRAME_BUFFER_WIDTH * 0.5f);
-		m_xmf4x4World._22 = m_xmf2Size.y / (FRAME_BUFFER_HEIGHT * 0.5f);
-
+		m_xmf4x4World._11 = m_xmf2Size.x / (FRAME_BUFFER_WIDTH);
+		m_xmf4x4World._22 = m_xmf2Size.y / (FRAME_BUFFER_HEIGHT);
+		m_xmf4x4World._33 = m_iTextureIndex; // TextureIndex
 		//1, 023x((정규 좌표) + 1.0)x0.5
 
 		// -1 ~ 1
-		m_xmf4x4World._41 = ((m_xmf2ScreenPosition.x / FRAME_BUFFER_WIDTH) - 0.5f) * 2.f;
-		m_xmf4x4World._42 = ((m_xmf2ScreenPosition.y / FRAME_BUFFER_HEIGHT) - 0.5f) * 2.f;
+		m_xmf4x4World._41 = (m_xmf2ScreenPosition.x / FRAME_BUFFER_WIDTH);
+		m_xmf4x4World._42 = (m_xmf2ScreenPosition.y / FRAME_BUFFER_HEIGHT);
 		//(m_xmf2ScreenPosition.y * 2.f) / (FRAME_BUFFER_HEIGHT); // -1 ~ 1
 		m_xmf4x4World._43 = 0.f;
 	}
@@ -74,4 +74,9 @@ void CUIObject::SetSize(XMFLOAT2 xmf2Size)
 void CUIObject::SetScreenPosition(XMFLOAT2 xmf2ScreenPosition)
 {
 	m_xmf2ScreenPosition = xmf2ScreenPosition;
+}
+
+void CUIObject::SetTextureIndex(UINT iTextureIndex)
+{
+	m_iTextureIndex = iTextureIndex;
 }
