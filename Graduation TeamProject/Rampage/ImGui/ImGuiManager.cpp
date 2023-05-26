@@ -1286,12 +1286,59 @@ void CImGuiManager::SetUI()
 		{
 			ImGui::BeginChild("ChildL", ImVec2(ImGui::GetContentRegionAvail().x * 0.66f, 0.15f * m_lDesktopWidth), false);
 		
+			struct CreationItem {
+				CTexture* preview;
+				std::u8string id;
+				std::u8string name;
+				int nGoodSign;
+				int nBadSign;
+			};
+
+			static std::vector<CreationItem> vCreationItems{
+				CreationItem{ m_pRTTexture.get(), u8"창작자1", u8"프리셋2", 123, 321 },
+				CreationItem{ m_pRTTexture.get(), u8"창작자2", u8"프리셋1", 789, 654 },
+				CreationItem{ m_pRTTexture.get(), u8"창작자3", u8"프리셋3", 456, 987 }
+			};
+
 			ImGui::Text(U8STR("정렬기준: ")); ImGui::SameLine();
 
 			const char* allignStyle[] = { U8STR("ID"), U8STR("이름"), U8STR("좋아요"), U8STR("싫어요") };
 			static int selectedAllignStyle = 0;
 			ImGui::SetNextItemWidth(-FLT_MIN);
-			ImGui::Combo(U8STR("##allignStyle"), &selectedAllignStyle, allignStyle, IM_ARRAYSIZE(allignStyle));
+			if (ImGui::Combo(U8STR("##allignStyle"), &selectedAllignStyle, allignStyle, IM_ARRAYSIZE(allignStyle)))
+			{
+				switch (selectedAllignStyle)
+				{
+				case 0:
+					std::sort(vCreationItems.begin(), vCreationItems.end(), [](const CreationItem& A, const CreationItem& B)
+						{
+							return A.id < B.id;
+						}
+					);
+					break;
+				case 1:
+					std::sort(vCreationItems.begin(), vCreationItems.end(), [](const CreationItem& A, const CreationItem& B)
+						{
+							return A.name < B.name;
+						}
+					);
+					break;
+				case 2:
+					std::sort(vCreationItems.begin(), vCreationItems.end(), [](const CreationItem& A, const CreationItem& B)
+						{
+							return A.nGoodSign < B.nGoodSign;
+						}
+					);
+					break;
+				case 3:
+					std::sort(vCreationItems.begin(), vCreationItems.end(), [](const CreationItem& A, const CreationItem& B)
+						{
+							return A.nBadSign < B.nBadSign;
+						}
+					);
+					break;
+				}
+			}
 
 			// Sample 1
 			ImGui::Columns(7, "Creation Column", false);
@@ -1304,19 +1351,6 @@ void CImGuiManager::SetUI()
 			ImGui::Text(U8STR("신고")); ImGui::NextColumn();
 			ImGui::Text(U8STR("불러오기")); ImGui::NextColumn();
 			ImGui::Separator();
-
-			struct CreationItem {
-				CTexture* preview;
-				std::u8string id;
-				std::u8string name;
-				int nGoodSign;
-				int nBadSign;
-			};
-
-			std::vector<CreationItem> vCreationItems;
-			vCreationItems.push_back(CreationItem{ m_pRTTexture.get(), u8"창작자1", u8"프리셋1", 123, 321 });
-			vCreationItems.push_back(CreationItem{ m_pRTTexture.get(), u8"창작자2", u8"프리셋2", 456, 654 });
-			vCreationItems.push_back(CreationItem{ m_pRTTexture.get(), u8"창작자3", u8"프리셋3", 789, 987 });
 
 			for (int i = 0; i < 3; i++)
 			{
