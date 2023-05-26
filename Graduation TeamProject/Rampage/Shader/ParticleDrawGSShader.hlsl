@@ -1,3 +1,5 @@
+#include "InputLayouts.hlsli"
+
 struct VS_PARTICLE_DRAW_OUTPUT
 {
 	float3 position : POSITION;
@@ -11,19 +13,7 @@ struct VS_PARTICLE_DRAW_OUTPUT
 	float lifetime : LIFETIME;
 	float EmitTime : EMITTIME; // 방출 시작 시간 
 	float emissive : EMISSIVE;
-};
-
-struct GS_PARTICLE_DRAW_OUTPUT
-{
-	float4 position : SV_Position;
-	float4 color : COLOR;
-	float2 uv : TEXTURE;
-	float alpha : ALPHA;
-	uint TextureIndex :TEXTUREINDEX;
-	uint2 TextureCoord : TEXTURECOORD;
-	float lifetime : LIFETIME;
-	float EmitTime : EMITTIME; // 방출 시작 시간 
-	float emissive : EMISSIVE;
+	uint rotateFlag : ROTATEFLAG;
 };
 
 
@@ -85,11 +75,14 @@ void GSParticleDraw(point VS_PARTICLE_DRAW_OUTPUT input[1], inout TriangleStream
 	float ceta = acos(cosCeta); // radian
 	if (velocityInCameraSpace.x < 0)
 		ceta = -ceta;
+
+	ceta *= float(input[0].rotateFlag);
+
 	float3x3 rotate = float3x3(cos(ceta), -sin(ceta), 0,
 		sin(ceta), cos(ceta), 0,
 		0, 0, 1);
 
-	float scaleValue = 1.0 - velocity.z; //?
+	float scaleValue = 1.0 - min(velocity.z, float(input[0].rotateFlag));
 	scaleValue = 1.0f;
 
 	for (int i = 0; i < 4; i++)

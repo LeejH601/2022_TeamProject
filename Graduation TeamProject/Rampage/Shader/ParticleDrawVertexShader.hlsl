@@ -14,6 +14,7 @@ struct VS_PARTICLE_DRAW_OUTPUT
 	float lifetime : LIFETIME;
 	float EmitTime : EMITTIME; // 방출 시작 시간 
 	float emissive : EMISSIVE;
+	bool rotateFlag : ROTATEFLAG;
 };
 
 cbuffer cbFrameworkInfo : register(b7)
@@ -70,6 +71,7 @@ VS_PARTICLE_DRAW_OUTPUT VSParticleDraw(VS_PARTICLE_INPUT input)
 	output.lifetime = input.lifetime;
 	output.EmitTime = input.EmitTime;
 	output.emissive = input.emissive;
+	output.rotateFlag = input.rotateFlag;
 	return(output);
 }
 

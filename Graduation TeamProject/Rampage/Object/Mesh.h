@@ -370,6 +370,7 @@ public:
 	UINT							m_iTextureCoord[2];
 	XMFLOAT2						m_xmf2Size = XMFLOAT2(1.0f, 1.0f);
 	float							m_fEmissive = 1.0f;
+	UINT							m_bSimulateRotate = true;
 public:
 	CParticleVertex() { }
 	~CParticleVertex() { }
