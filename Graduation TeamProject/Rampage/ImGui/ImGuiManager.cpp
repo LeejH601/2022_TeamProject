@@ -1264,173 +1264,8 @@ void CImGuiManager::SetUI()
 		ImGui::End();
 	}
 
-	{
-		ImGuiWindowFlags my_window_flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_MenuBar;
-		bool* p_open = NULL;
-
-		ImGui::SetNextWindowSize(ImVec2(m_lDesktopWidth * 0.6f, 0.0f), ImGuiCond_Always);
-		ImGui::Begin(U8STR("창작 마당"), p_open, my_window_flags);
-
-		if (ImGui::BeginMenuBar())
-		{
-			if (ImGui::BeginMenu(U8STR("메뉴")))
-			{
-				if (ImGui::MenuItem(U8STR("새로고침"), NULL))
-				{
-				}
-				ImGui::EndMenu();
-			}
-			ImGui::EndMenuBar();
-		}
-
-		{
-			ImGui::BeginChild("ChildL", ImVec2(ImGui::GetContentRegionAvail().x * 0.66f, 0.15f * m_lDesktopWidth), false);
-		
-			struct CreationItem {
-				CTexture* preview;
-				std::u8string id;
-				std::u8string name;
-				int nGoodSign;
-				int nBadSign;
-			};
-
-			static std::vector<CreationItem> vCreationItems{
-				CreationItem{ m_pRTTexture.get(), u8"창작자1", u8"프리셋2", rand() % 1000, rand() % 1000},
-				CreationItem{ m_pRTTexture.get(), u8"창작자2", u8"프리셋1", rand() % 1000, rand() % 1000 },
-				CreationItem{ m_pRTTexture.get(), u8"창작자3", u8"프리셋3", rand() % 1000, rand() % 1000 },
-				CreationItem{ m_pRTTexture.get(), u8"창작자12", u8"프리셋4", rand() % 1000, rand() % 1000 },
-				CreationItem{ m_pRTTexture.get(), u8"창작자11", u8"프리셋6", rand() % 1000, rand() % 1000 },
-				CreationItem{ m_pRTTexture.get(), u8"창작자7", u8"프리셋5", rand() % 1000, rand() % 1000 },
-				CreationItem{ m_pRTTexture.get(), u8"창작자8", u8"프리셋7", rand() % 1000, rand() % 1000 },
-				CreationItem{ m_pRTTexture.get(), u8"창작자9", u8"프리셋9", rand() % 1000, rand() % 1000 },
-				CreationItem{ m_pRTTexture.get(), u8"창작자10", u8"프리셋11", rand() % 1000, rand() % 1000 },
-				CreationItem{ m_pRTTexture.get(), u8"창작자6", u8"프리셋10", rand() % 1000, rand() % 1000 },
-				CreationItem{ m_pRTTexture.get(), u8"창작자5", u8"프리셋8", rand() % 1000, rand() % 1000 },
-				CreationItem{ m_pRTTexture.get(), u8"창작자4", u8"프리셋12", rand() % 1000, rand() % 1000 },
-			};
-
-			// 기본 정렬 추후엔 삭제 필요
-			std::sort(vCreationItems.begin(), vCreationItems.end(), [](const CreationItem& A, const CreationItem& B)
-				{
-					return A.id < B.id;
-				}
-			);
-
-			static int selectedAllignStyle = 0;
-			static int selectedPageNum = 0;
-
-			ImGui::Text(U8STR("정렬기준: ")); ImGui::SameLine();
-
-			const char* allignStyle[] = { U8STR("ID"), U8STR("이름"), U8STR("좋아요"), U8STR("싫어요") };
-			ImGui::SetNextItemWidth(-FLT_MIN);
-
-			// 기준에 따라 정렬
-			if (ImGui::Combo(U8STR("##allignStyle"), &selectedAllignStyle, allignStyle, IM_ARRAYSIZE(allignStyle)))
-			{
-				switch (selectedAllignStyle)
-				{
-				case 0:
-					std::sort(vCreationItems.begin(), vCreationItems.end(), [](const CreationItem& A, const CreationItem& B)
-						{
-							return A.id < B.id;
-						}
-					);
-					break;
-				case 1:
-					std::sort(vCreationItems.begin(), vCreationItems.end(), [](const CreationItem& A, const CreationItem& B)
-						{
-							return A.name < B.name;
-						}
-					);
-					break;
-				case 2:
-					std::sort(vCreationItems.begin(), vCreationItems.end(), [](const CreationItem& A, const CreationItem& B)
-						{
-							return A.nGoodSign < B.nGoodSign;
-						}
-					);
-					break;
-				case 3:
-					std::sort(vCreationItems.begin(), vCreationItems.end(), [](const CreationItem& A, const CreationItem& B)
-						{
-							return A.nBadSign < B.nBadSign;
-						}
-					);
-					break;
-				}
-			}
-
-			// Sample 1
-			ImGui::Columns(7, "Creation Column", false);
-			ImGui::Separator();
-			ImGui::Text(U8STR("이미지")); ImGui::NextColumn();
-			ImGui::Text(U8STR("ID")); ImGui::NextColumn();
-			ImGui::Text(U8STR("이름")); ImGui::NextColumn();
-			ImGui::Text(U8STR("좋아요")); ImGui::NextColumn();
-			ImGui::Text(U8STR("싫어요")); ImGui::NextColumn();
-			ImGui::Text(U8STR("신고")); ImGui::NextColumn();
-			ImGui::Text(U8STR("불러오기")); ImGui::NextColumn();
-			ImGui::Separator();
-
-			for (int i = 0; i < 3; i++)
-			{
-				int my_image_width = 0.05f * m_lDesktopWidth;
-				int my_image_height = 0.05f * m_lDesktopHeight;
-				int index = selectedPageNum * 3 + i;
-
-				ImGui::Image((ImTextureID)m_pRTTexture->m_pd3dSrvGpuDescriptorHandles[0].ptr, 
-					ImVec2((float)my_image_width, (float)my_image_height));
-				ImGui::NextColumn();
-				ImGui::Text(reinterpret_cast<const char*>(vCreationItems[index].id.c_str())); ImGui::NextColumn();
-				ImGui::Text(reinterpret_cast<const char*>(vCreationItems[index].name.c_str())); ImGui::NextColumn();
-				ImGui::Text(std::to_string(vCreationItems[index].nGoodSign).c_str()); ImGui::NextColumn();
-				ImGui::Text(std::to_string(vCreationItems[index].nBadSign).c_str()); ImGui::NextColumn();
-				ImGui::Button(U8STR("신고하기"), ImVec2(-FLT_MIN, 0.0f)); ImGui::NextColumn();
-				ImGui::Button(U8STR("불러오기"), ImVec2(-FLT_MIN, 0.0f)); ImGui::NextColumn();
-			}
-			ImGui::Columns(1);
-			ImGui::Separator();
-
-			ImGuiStyle& style = ImGui::GetStyle();
-			ImVec4 originalColor = style.Colors[ImGuiCol_Button];
-			style.Colors[ImGuiCol_Button] = ImVec4(0, 0, 0, 0);
-			for (int i = 0; i < vCreationItems.size() / 3; ++i)
-			{
-				if (ImGui::Button(std::to_string(i + 1).c_str()))
-					selectedPageNum = i;
-				ImGui::SameLine();
-			}
-			style.Colors[ImGuiCol_Button] = originalColor;
-
-			ImGui::EndChild();
-		}
-
-		ImGui::SameLine(0.0f, 0.01f * m_lDesktopWidth);
-
-		{
-			static std::u8string searchText;
-			searchText.resize(256);
-
-			char keyword[256] = {};
-			ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 5.0f);
-			ImGui::BeginChild("ChildR", ImVec2(0, 0.15f * m_lDesktopWidth), true);
-
-			const char* items[] = { U8STR("ID"), U8STR("이름") };
-
-			static int selectedSearchStyle = 0;
-			ImGui::SetNextItemWidth(-FLT_MIN);
-			ImGui::Combo(U8STR("##searchStyle"), &selectedSearchStyle, items, IM_ARRAYSIZE(items));
-			
-			ImGui::InputText(U8STR("##keywordText"), reinterpret_cast<char*>(searchText.data()), 256);
-			ImGui::SameLine();
-			if (ImGui::Button(U8STR("검색##keywordSearch"), ImVec2(-FLT_MIN, 0.0f)))
-				OutputDebugString(ConvertU8ToW(searchText).c_str());
-
-			ImGui::EndChild();
-			ImGui::PopStyleVar();
-		}
-		ImGui::End();
-	}
+	// 창작마당
+	ShowCreationMenu();
 }
 void CImGuiManager::ShowImpactManager(CState<CPlayer>* pCurrentAnimation)
 {
@@ -2205,6 +2040,207 @@ void CImGuiManager::ShowDamageMoanSoundManager(CState<CPlayer>* pCurrentAnimatio
 	if (ImGui::DragFloat(U8STR("음량(스켈레톤)##skeletonmoansound"), &pSkeletonMoanComponent->GetVolume(), DRAG_FLOAT_UNIT, MOAN_SOUND_VOLUME_MIN, MOAN_SOUND_VOLUME_MAX, "%.2f", 0))
 		pSkeletonMoanComponent->GetVolume() = std::clamp(pSkeletonMoanComponent->GetVolume(), MOAN_SOUND_VOLUME_MIN, MOAN_SOUND_VOLUME_MAX);
 
+	ImGui::End();
+}
+void CImGuiManager::ShowCreationMenu()
+{
+	ImGuiWindowFlags my_window_flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_MenuBar;
+	bool* p_open = NULL;
+
+	ImGui::SetNextWindowSize(ImVec2(m_lDesktopWidth * 0.6f, 0.0f), ImGuiCond_Always);
+	ImGui::Begin(U8STR("창작 마당"), p_open, my_window_flags);
+
+	if (ImGui::BeginMenuBar())
+	{
+		if (ImGui::BeginMenu(U8STR("메뉴")))
+		{
+			if (ImGui::MenuItem(U8STR("새로고침"), NULL))
+			{
+			}
+			ImGui::EndMenu();
+		}
+		ImGui::EndMenuBar();
+	}
+
+	{
+		ImGui::BeginChild("ChildL", ImVec2(ImGui::GetContentRegionAvail().x * 0.66f, 0.15f * m_lDesktopWidth), false);
+
+		struct CreationItem {
+			CTexture* preview;
+			std::u8string id;
+			std::u8string name;
+			int nGoodSign;
+			int nBadSign;
+		};
+
+		static std::vector<CreationItem> vCreationItems{
+			CreationItem{ m_pRTTexture.get(), u8"창작자1", u8"프리셋2", rand() % 1000, rand() % 1000},
+			CreationItem{ m_pRTTexture.get(), u8"창작자2", u8"프리셋1", rand() % 1000, rand() % 1000 },
+			CreationItem{ m_pRTTexture.get(), u8"창작자3", u8"프리셋3", rand() % 1000, rand() % 1000 },
+			CreationItem{ m_pRTTexture.get(), u8"창작자12", u8"프리셋4", rand() % 1000, rand() % 1000 },
+			CreationItem{ m_pRTTexture.get(), u8"창작자11", u8"프리셋6", rand() % 1000, rand() % 1000 },
+			CreationItem{ m_pRTTexture.get(), u8"창작자7", u8"프리셋5", rand() % 1000, rand() % 1000 },
+			CreationItem{ m_pRTTexture.get(), u8"창작자8", u8"프리셋7", rand() % 1000, rand() % 1000 },
+			CreationItem{ m_pRTTexture.get(), u8"창작자9", u8"프리셋9", rand() % 1000, rand() % 1000 },
+			CreationItem{ m_pRTTexture.get(), u8"창작자10", u8"프리셋11", rand() % 1000, rand() % 1000 },
+			CreationItem{ m_pRTTexture.get(), u8"창작자6", u8"프리셋10", rand() % 1000, rand() % 1000 },
+			CreationItem{ m_pRTTexture.get(), u8"창작자5", u8"프리셋8", rand() % 1000, rand() % 1000 },
+			CreationItem{ m_pRTTexture.get(), u8"창작자4", u8"프리셋12", rand() % 1000, rand() % 1000 },
+		};
+
+		static int selectedAllignStyle = 0;
+		static int selectedPageNum = 0;
+		static bool upperBound = false;
+
+		// 기준에 따라 정렬
+		switch (selectedAllignStyle)
+		{
+		case 0:
+			std::sort(vCreationItems.begin(), vCreationItems.end(), [](const CreationItem& A, const CreationItem& B)
+				{
+					return A.id < B.id;
+				}
+			);
+			break;
+		case 1:
+			std::sort(vCreationItems.begin(), vCreationItems.end(), [](const CreationItem& A, const CreationItem& B)
+				{
+					return A.id > B.id;
+				}
+			);
+			break;
+		case 2:
+			std::sort(vCreationItems.begin(), vCreationItems.end(), [](const CreationItem& A, const CreationItem& B)
+				{
+					return A.name < B.name;
+				}
+			);
+			break;
+		case 3:
+			std::sort(vCreationItems.begin(), vCreationItems.end(), [](const CreationItem& A, const CreationItem& B)
+				{
+					return A.name > B.name;
+				}
+			);
+			break;
+		case 4:
+			std::sort(vCreationItems.begin(), vCreationItems.end(), [](const CreationItem& A, const CreationItem& B)
+				{
+					return A.nGoodSign < B.nGoodSign;
+				}
+			);
+			break;
+		case 5:
+			std::sort(vCreationItems.begin(), vCreationItems.end(), [](const CreationItem& A, const CreationItem& B)
+				{
+					return A.nGoodSign > B.nGoodSign;
+				}
+			);
+			break;
+		case 6:
+			std::sort(vCreationItems.begin(), vCreationItems.end(), [](const CreationItem& A, const CreationItem& B)
+				{
+					return A.nBadSign < B.nBadSign;
+				}
+			);
+			break;
+		case 7:
+			std::sort(vCreationItems.begin(), vCreationItems.end(), [](const CreationItem& A, const CreationItem& B)
+				{
+					return A.nBadSign > B.nBadSign;
+				}
+			);
+			break;
+		}
+
+		ImGui::Text(U8STR("정렬기준: ")); ImGui::SameLine();
+
+		const char* allignStyle[] = { U8STR("ID(오름차순)"), U8STR("ID(내림차순)"), 
+			U8STR("이름(오름차순)"),  U8STR("이름(내림차순)"),
+			U8STR("좋아요(오름차순)"), U8STR("좋아요(내림차순)"),
+			U8STR("싫어요(오름차순)"), U8STR("싫어요(내림차순)") };
+		ImGui::SetNextItemWidth(-FLT_MIN);
+
+		ImGui::Combo(U8STR("##allignStyle"), &selectedAllignStyle, allignStyle, IM_ARRAYSIZE(allignStyle));
+
+		// Sample 1
+		ImGui::Columns(7, "Creation Column", false);
+		ImGui::Separator();
+		ImGui::Text(U8STR("이미지")); ImGui::NextColumn();
+		ImGui::Text(U8STR("ID")); ImGui::NextColumn();
+		ImGui::Text(U8STR("이름")); ImGui::NextColumn();
+		ImGui::Text(U8STR("좋아요")); ImGui::NextColumn();
+		ImGui::Text(U8STR("싫어요")); ImGui::NextColumn();
+		ImGui::Text(U8STR("신고")); ImGui::NextColumn();
+		ImGui::Text(U8STR("불러오기")); ImGui::NextColumn();
+		ImGui::Separator();
+
+		for (int i = 0; i < 3; i++)
+		{
+			int my_image_width = 0.05f * m_lDesktopWidth;
+			int my_image_height = 0.05f * m_lDesktopHeight;
+			int index = selectedPageNum * 3 + i;
+
+			ImGui::Image((ImTextureID)m_pRTTexture->m_pd3dSrvGpuDescriptorHandles[0].ptr,
+				ImVec2((float)my_image_width, (float)my_image_height));
+			ImGui::NextColumn();
+			ImGui::Text(reinterpret_cast<const char*>(vCreationItems[index].id.c_str())); ImGui::NextColumn();
+			ImGui::Text(reinterpret_cast<const char*>(vCreationItems[index].name.c_str())); ImGui::NextColumn();
+			ImGui::Text(std::to_string(vCreationItems[index].nGoodSign).c_str()); ImGui::NextColumn();
+			ImGui::Text(std::to_string(vCreationItems[index].nBadSign).c_str()); ImGui::NextColumn();
+			ImGui::Button(U8STR("신고하기"), ImVec2(-FLT_MIN, 0.0f)); ImGui::NextColumn();
+			ImGui::Button(U8STR("불러오기"), ImVec2(-FLT_MIN, 0.0f)); ImGui::NextColumn();
+		}
+		ImGui::Columns(1);
+		ImGui::Separator();
+
+		ImGuiStyle& style = ImGui::GetStyle();
+		ImVec4 originalColor = style.Colors[ImGuiCol_Button];
+		style.Colors[ImGuiCol_Button] = ImVec4(0, 0, 0, 0);
+		for (int i = 0; i < vCreationItems.size() / 3; ++i)
+		{
+			if (i == selectedPageNum)
+			{
+				style.Colors[ImGuiCol_Button] = style.Colors[ImGuiCol_ButtonActive];
+				ImGui::Button(std::to_string(i + 1).c_str());
+				style.Colors[ImGuiCol_Button] = ImVec4(0, 0, 0, 0);
+			}
+			else
+			{
+				if (ImGui::Button(std::to_string(i + 1).c_str()))
+					selectedPageNum = i;
+			}
+			ImGui::SameLine();
+		}
+		style.Colors[ImGuiCol_Button] = originalColor;
+
+		ImGui::EndChild();
+	}
+
+	ImGui::SameLine(0.0f, 0.01f * m_lDesktopWidth);
+
+	{
+		static std::u8string searchText;
+		searchText.resize(256);
+
+		char keyword[256] = {};
+		ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 5.0f);
+		ImGui::BeginChild("ChildR", ImVec2(0, 0.15f * m_lDesktopWidth), true);
+
+		const char* items[] = { U8STR("ID"), U8STR("이름") };
+
+		static int selectedSearchStyle = 0;
+		ImGui::SetNextItemWidth(-FLT_MIN);
+		ImGui::Combo(U8STR("##searchStyle"), &selectedSearchStyle, items, IM_ARRAYSIZE(items));
+
+		ImGui::InputText(U8STR("##keywordText"), reinterpret_cast<char*>(searchText.data()), 256);
+		ImGui::SameLine();
+		if (ImGui::Button(U8STR("검색##keywordSearch"), ImVec2(-FLT_MIN, 0.0f)))
+			OutputDebugString(ConvertU8ToW(searchText).c_str());
+
+		ImGui::EndChild();
+		ImGui::PopStyleVar();
+	}
 	ImGui::End();
 }
 void CImGuiManager::OnPrepareRender(ID3D12GraphicsCommandList* pd3dCommandList, D3D12_CPU_DESCRIPTOR_HANDLE* d3dDsvDescriptorCPUHandle, float fTimeElapsed, float fCurrentTime, CCamera* pCamera)
