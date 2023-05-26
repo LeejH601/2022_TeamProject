@@ -1284,8 +1284,15 @@ void CImGuiManager::SetUI()
 		}
 
 		{
-			ImGui::BeginChild("ChildL", ImVec2(ImGui::GetContentRegionAvail().x * 0.66f, 260), false);
+			ImGui::BeginChild("ChildL", ImVec2(ImGui::GetContentRegionAvail().x * 0.66f, 0.15f * m_lDesktopWidth), false);
 		
+			ImGui::Text(U8STR("정렬기준: ")); ImGui::SameLine();
+
+			const char* allignStyle[] = { U8STR("ID"), U8STR("이름"), U8STR("좋아요"), U8STR("싫어요") };
+			static int selectedAllignStyle = 0;
+			ImGui::SetNextItemWidth(-FLT_MIN);
+			ImGui::Combo(U8STR("##allignStyle"), &selectedAllignStyle, allignStyle, IM_ARRAYSIZE(allignStyle));
+
 			// Sample 1
 			ImGui::Columns(7, "Creation Column", false);
 			ImGui::Separator();
@@ -1298,21 +1305,29 @@ void CImGuiManager::SetUI()
 			ImGui::Text(U8STR("불러오기")); ImGui::NextColumn();
 			ImGui::Separator();
 
-			std::vector<CTexture*> vPreviews{ m_pRTTexture.get(), m_pRTTexture.get() , m_pRTTexture.get() };
-			std::vector<std::u8string> vIDs{ u8"창작자1", u8"창작자2" , u8"창작자3" };
-			std::vector<std::u8string> vNames{ u8"프리셋1", u8"프리셋2" , u8"프리셋3" };
-			std::vector<std::u8string> vGoodSigns{ u8"123", u8"456", u8"789" };
-			std::vector<std::u8string> vBadSigns{ u8"321", u8"654", u8"987" };
+			struct CreationItem {
+				CTexture* preview;
+				std::u8string id;
+				std::u8string name;
+				std::u8string nGoodSign;
+				std::u8string nBadSign;
+			};
+
+			std::vector<CreationItem> vCreationItems;
+			vCreationItems.push_back(CreationItem{ m_pRTTexture.get(), u8"창작자1", u8"프리셋1", u8"123", u8"321" });
+			vCreationItems.push_back(CreationItem{ m_pRTTexture.get(), u8"창작자2", u8"프리셋2", u8"456", u8"654" });
+			vCreationItems.push_back(CreationItem{ m_pRTTexture.get(), u8"창작자3", u8"프리셋3", u8"789", u8"987" });
+
 			for (int i = 0; i < 3; i++)
 			{
 				int my_image_width = 0.05f * m_lDesktopWidth;
 				int my_image_height = 0.05f * m_lDesktopHeight;
 				ImGui::Image((ImTextureID)m_pRTTexture->m_pd3dSrvGpuDescriptorHandles[0].ptr, ImVec2((float)my_image_width, (float)my_image_height));
 				ImGui::NextColumn();
-				ImGui::Text(reinterpret_cast<const char*>(vIDs[i].c_str())); ImGui::NextColumn();
-				ImGui::Text(reinterpret_cast<const char*>(vNames[i].c_str())); ImGui::NextColumn();
-				ImGui::Text(reinterpret_cast<const char*>(vGoodSigns[i].c_str())); ImGui::NextColumn();
-				ImGui::Text(reinterpret_cast<const char*>(vBadSigns[i].c_str())); ImGui::NextColumn();
+				ImGui::Text(reinterpret_cast<const char*>(vCreationItems[i].id.c_str())); ImGui::NextColumn();
+				ImGui::Text(reinterpret_cast<const char*>(vCreationItems[i].name.c_str())); ImGui::NextColumn();
+				ImGui::Text(reinterpret_cast<const char*>(vCreationItems[i].nGoodSign.c_str())); ImGui::NextColumn();
+				ImGui::Text(reinterpret_cast<const char*>(vCreationItems[i].nBadSign.c_str())); ImGui::NextColumn();
 				ImGui::Button(U8STR("신고하기"), ImVec2(-FLT_MIN, 0.0f)); ImGui::NextColumn();
 				ImGui::Button(U8STR("불러오기"), ImVec2(-FLT_MIN, 0.0f)); ImGui::NextColumn();
 			}
@@ -1340,7 +1355,7 @@ void CImGuiManager::SetUI()
 
 			char keyword[256] = {};
 			ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 5.0f);
-			ImGui::BeginChild("ChildR", ImVec2(0, 0.135f * m_lDesktopWidth), true);
+			ImGui::BeginChild("ChildR", ImVec2(0, 0.15f * m_lDesktopWidth), true);
 
 			const char* items[] = { U8STR("ID"), U8STR("이름") };
 
