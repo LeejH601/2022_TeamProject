@@ -1309,14 +1309,14 @@ void CImGuiManager::SetUI()
 				CTexture* preview;
 				std::u8string id;
 				std::u8string name;
-				std::u8string nGoodSign;
-				std::u8string nBadSign;
+				int nGoodSign;
+				int nBadSign;
 			};
 
 			std::vector<CreationItem> vCreationItems;
-			vCreationItems.push_back(CreationItem{ m_pRTTexture.get(), u8"창작자1", u8"프리셋1", u8"123", u8"321" });
-			vCreationItems.push_back(CreationItem{ m_pRTTexture.get(), u8"창작자2", u8"프리셋2", u8"456", u8"654" });
-			vCreationItems.push_back(CreationItem{ m_pRTTexture.get(), u8"창작자3", u8"프리셋3", u8"789", u8"987" });
+			vCreationItems.push_back(CreationItem{ m_pRTTexture.get(), u8"창작자1", u8"프리셋1", 123, 321 });
+			vCreationItems.push_back(CreationItem{ m_pRTTexture.get(), u8"창작자2", u8"프리셋2", 456, 654 });
+			vCreationItems.push_back(CreationItem{ m_pRTTexture.get(), u8"창작자3", u8"프리셋3", 789, 987 });
 
 			for (int i = 0; i < 3; i++)
 			{
@@ -1326,8 +1326,8 @@ void CImGuiManager::SetUI()
 				ImGui::NextColumn();
 				ImGui::Text(reinterpret_cast<const char*>(vCreationItems[i].id.c_str())); ImGui::NextColumn();
 				ImGui::Text(reinterpret_cast<const char*>(vCreationItems[i].name.c_str())); ImGui::NextColumn();
-				ImGui::Text(reinterpret_cast<const char*>(vCreationItems[i].nGoodSign.c_str())); ImGui::NextColumn();
-				ImGui::Text(reinterpret_cast<const char*>(vCreationItems[i].nBadSign.c_str())); ImGui::NextColumn();
+				ImGui::Text(std::to_string(vCreationItems[i].nGoodSign).c_str()); ImGui::NextColumn();
+				ImGui::Text(std::to_string(vCreationItems[i].nBadSign).c_str()); ImGui::NextColumn();
 				ImGui::Button(U8STR("신고하기"), ImVec2(-FLT_MIN, 0.0f)); ImGui::NextColumn();
 				ImGui::Button(U8STR("불러오기"), ImVec2(-FLT_MIN, 0.0f)); ImGui::NextColumn();
 			}
