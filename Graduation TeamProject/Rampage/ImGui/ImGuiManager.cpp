@@ -1325,13 +1325,16 @@ void CImGuiManager::SetUI()
 		ImGui::SameLine(0.0f, 0.01f * m_lDesktopWidth);
 
 		{
-			char searchText[256] = { '\n' };
+			static std::u8string searchText;
+			searchText.resize(256);
 
+			char keyword[256] = {};
 			ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 5.0f);
 			ImGui::BeginChild("ChildR", ImVec2(0, 260), true);
-			ImGui::InputText(U8STR(""), searchText, sizeof(searchText));
+			ImGui::InputText(U8STR("##keywordText"), reinterpret_cast<char*>(searchText.data()), 256);
 			ImGui::SameLine();
-			ImGui::Button(U8STR("버튼버튼"), ImVec2(-FLT_MIN, 0.0f));
+			if (ImGui::Button(U8STR("검색"), ImVec2(-FLT_MIN, 0.0f)))
+				OutputDebugString(ConvertU8ToW(searchText).c_str());
 			ImGui::EndChild();
 			ImGui::PopStyleVar();
 		}
