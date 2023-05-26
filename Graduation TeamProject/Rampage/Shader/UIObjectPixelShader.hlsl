@@ -34,6 +34,7 @@ struct VS_TEXTURED_INPUT
 {
 	float3 position : POSITION;
 	float2 uv : TEXCOORD;
+	float2 size : SIZE;
 };
 
 struct VS_TEXTURED_OUTPUT
@@ -42,11 +43,10 @@ struct VS_TEXTURED_OUTPUT
 	float2 uv : TEXCOORD;
 };
 
-
 PS_MULTIPLE_RENDER_TARGETS_OUTPUT PSUIObject(VS_TEXTURED_OUTPUT input)
 {
 	PS_MULTIPLE_RENDER_TARGETS_OUTPUT output;
-	float4 cColor = gtxtTexture[3].Sample(gSamplerState, input.uv);
+	float4 cColor = gtxtTexture[1].Sample(gSamplerState, input.uv);
 	output.f4Color = cColor;
 	output.f4Scene = cColor;
 	return(output);

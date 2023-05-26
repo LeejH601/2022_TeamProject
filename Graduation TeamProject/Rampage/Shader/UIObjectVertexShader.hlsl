@@ -1,3 +1,7 @@
+
+#define FRAME_BUFFER_WIDTH 1920
+#define FRAME_BUFFER_HEIGHT 1080
+
 cbuffer cbGameObjectInfo : register(b0)
 {
 	matrix gmtxGameObject : packoffset(c0);
@@ -22,6 +26,7 @@ struct VS_TEXTURED_INPUT
 {
 	float3 position : POSITION;
 	float2 uv : TEXCOORD;
+	float2 size : SIZE;
 };
 
 struct VS_TEXTURED_OUTPUT
@@ -33,11 +38,13 @@ struct VS_TEXTURED_OUTPUT
 VS_TEXTURED_OUTPUT VSUIObject(VS_TEXTURED_INPUT input)
 {
 	VS_TEXTURED_OUTPUT output;
-	matrix Matrix = gmtxGameObject;
-	Matrix._11 = 1.f;
-	Matrix._22 = 1.f;
-
+	matrix Matrix = gmtxInverseView;
+	float2 uvPosition = gmtxGameObject._41_42; // 0 ~ 1
+	Matrix._11_22 = gmtxGameObject._11_22;
+	Matrix._33 = 0.f;
 	output.position = mul(mul(mul(float4(input.position, 1.0f), Matrix), gmtxInverseView), m_xmf4x4OrthoProjection);
+	output.position += float4(uvPosition, 0.f, 0.f);
+
 	output.uv = input.uv;
 
 	return(output);

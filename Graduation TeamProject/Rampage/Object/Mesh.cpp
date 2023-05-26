@@ -1682,7 +1682,7 @@ CUIRectMesh::CUIRectMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd
 	m_nStride = sizeof(CUIVertex);
 	CUIVertex pVertices[6];
 	m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
-	float fx = (1.f), fy = (1.f) , fz = 0.f;
+	float fx = 0.5f, fy = 0.5f , fz = 0.f;
 
 	pVertices[0] = CUIVertex(XMFLOAT3(-fx, +fy, fz), XMFLOAT2(1.0f, 0.0f));
 	pVertices[1] = CUIVertex(XMFLOAT3(-fx, -fy, fz), XMFLOAT2(1.0f, 1.0f));

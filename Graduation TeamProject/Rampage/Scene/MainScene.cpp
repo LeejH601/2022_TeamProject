@@ -825,7 +825,11 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pUIObjectShader = std::make_unique<CUIObjectShader>();
 	m_pUIObjectShader->CreateShader(pd3dDevice, GetGraphicsRootSignature(), 7, pdxgiObjectRtvFormats, DXGI_FORMAT_D32_FLOAT, 0);
 	std::unique_ptr<CUIObject> pUIObject = std::make_unique<CUIObject>(2, pd3dDevice, pd3dCommandList, 10.f);
+	pUIObject->SetSize(XMFLOAT2(FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT));
+	pUIObject->SetScreenPosition(XMFLOAT2((float)FRAME_BUFFER_WIDTH * 0.5f, (float)FRAME_BUFFER_HEIGHT * 0.5f));
 	m_pUIObject.push_back(std::move(pUIObject));
+	// 0 ~ FRAME_BUFFER_WIDTH, 0 ~ FRAME_BUFFER_HEIGHT
+	// -1 ~ 1
 }
 bool CMainTMPScene::ProcessInput(HWND hWnd, DWORD dwDirection, float fTimeElapsed)
 {
@@ -1083,7 +1087,7 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 	m_pUIObjectShader->Render(pd3dCommandList, 0);
 	for (int i = 0; i < m_pUIObject.size(); i++)
 	{
-		//m_pUIObject[i]->Update(fTimeElapsed);
+		m_pUIObject[i]->Update(fTimeElapsed);
 		m_pUIObject[i]->Render(pd3dCommandList, false, nullptr);
 	}
 

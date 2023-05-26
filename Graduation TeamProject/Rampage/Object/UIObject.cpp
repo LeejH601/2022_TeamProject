@@ -19,10 +19,21 @@ CUIObject::~CUIObject()
 {
 }
 
-void CUIObject::Animate(float fTimeElapsed)
+void CUIObject::Update(float fTimeElapsed)
 {
 	if (m_bEnable) {
-		CGameObject::Animate(fTimeElapsed);
+		//m_xmf2ScreenPosition5 = XMFLOAT2()
+		// 화면 크기를 기준으로 Size 설정 최대 크기 (MAX WIDTH: FRAME_BUFFER_WIDTH, MAX_HEIGHT: FRAME_BUFFER_HEIGHT)
+		m_xmf4x4World._11 = m_xmf2Size.x / (FRAME_BUFFER_WIDTH * 0.5f);
+		m_xmf4x4World._22 = m_xmf2Size.y / (FRAME_BUFFER_HEIGHT * 0.5f);
+
+		//1, 023x((정규 좌표) + 1.0)x0.5
+
+		// -1 ~ 1
+		m_xmf4x4World._41 = ((m_xmf2ScreenPosition.x / FRAME_BUFFER_WIDTH) - 0.5f) * 2.f;
+		m_xmf4x4World._42 = ((m_xmf2ScreenPosition.y / FRAME_BUFFER_HEIGHT) - 0.5f) * 2.f;
+		//(m_xmf2ScreenPosition.y * 2.f) / (FRAME_BUFFER_HEIGHT); // -1 ~ 1
+		m_xmf4x4World._43 = 0.f;
 	}
 }
 
@@ -30,10 +41,10 @@ void CUIObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, bool b_UseTex
 {
 	if (!m_bEnable)
 		return;
-	if (m_pSkinnedAnimationController) m_pSkinnedAnimationController->UpdateShaderVariables(pd3dCommandList);
-
 	if (m_pMesh)
 	{
+		// UI Size 정보 Update
+		// 
 		// CGameObject의 정보를 넘길 버퍼가 있고, 해당 버퍼에 대한 CPU 포인터가 있으면 UpdateShaderVariables 함수를 호출한다.
 		UpdateShaderVariables(pd3dCommandList);
 		// 여기서 메쉬의 렌더를 한다.
@@ -53,4 +64,14 @@ void CUIObject::SetEnable(bool bEnable)
 bool& CUIObject::GetEnable()
 {
 	return m_bEnable;
+}
+
+void CUIObject::SetSize(XMFLOAT2 xmf2Size)
+{
+	m_xmf2Size = xmf2Size;
+}
+
+void CUIObject::SetScreenPosition(XMFLOAT2 xmf2ScreenPosition)
+{
+	m_xmf2ScreenPosition = xmf2ScreenPosition;
 }
