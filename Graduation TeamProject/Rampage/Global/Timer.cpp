@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "Timer.h"
+#include "MessageDispatcher.h"
 
 CGameTimer::CGameTimer()
 {
@@ -18,6 +19,12 @@ CGameTimer::CGameTimer()
 	m_nFramesPerSecond = 0;
 	m_fFPSTimeElapsed = 0.0f;
 	m_fTotalTimeElasped = 0.0f;
+
+	std::unique_ptr<UpdateDynamicTimeScaleListener> pUpdateDynamicTimeScaleListener = std::make_unique<UpdateDynamicTimeScaleListener>();
+	pUpdateDynamicTimeScaleListener->SetTimer(this);
+	m_pListeners.push_back(std::move(pUpdateDynamicTimeScaleListener));
+
+	CMessageDispatcher::GetInst()->RegisterListener(MessageType::SET_DYNAMIC_TIMER_SCALE, m_pListeners.back().get());
 }
 
 CGameTimer::~CGameTimer()
@@ -131,4 +138,27 @@ long long CGameTimer::GetNowTime()
 	auto now = std::chrono::duration_cast<std::chrono::microseconds>(tp);
 
 	return now.count();
+}
+
+void CGameTimer::SetDynamicTimeScale(float fDynamicTimeScale, float fDuration)
+{
+	m_fDynamicTimeScale *= fDynamicTimeScale;
+
+	std::wstring timeScale{ std::to_wstring(m_fDynamicTimeScale) };
+	OutputDebugString(timeScale.c_str());
+	OutputDebugString(L"\n");
+
+	std::thread restorTimer_thread(&CGameTimer::RestoreDynamicTimeScale, this, fDynamicTimeScale, fDuration);
+	restorTimer_thread.detach();
+}
+
+void CGameTimer::RestoreDynamicTimeScale(float fDynamicTimeScale, float fDuration)
+{
+	std::this_thread::sleep_for(std::chrono::milliseconds(static_cast<int>(fDuration * 1000)));
+
+	m_fDynamicTimeScale /= fDynamicTimeScale;
+
+	std::wstring timeScale{ std::to_wstring(m_fDynamicTimeScale) };
+	OutputDebugString(timeScale.c_str());
+	OutputDebugString(L"\n");
 }

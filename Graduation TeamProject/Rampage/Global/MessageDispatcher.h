@@ -8,6 +8,7 @@ class CScene;
 class CMainTMPScene;
 class CTexture;
 class CShader;
+class CGameTimer;
 
 // Define base message class
 class Message {
@@ -108,6 +109,11 @@ struct DamageParams {
 	float fDamage;
 };
 
+struct TimerParams {
+	float fDynamicTimeScale;
+	float fDuration;
+};
+
 // Define message listener interface
 class IMessageListener {
 protected:
@@ -134,6 +140,14 @@ public:
 	virtual void HandleMessage(const Message& message, const TrailUpdateParams& params){}
 
 	virtual void HandleMessage(const Message& message, const DamageParams& params) {}
+	virtual void HandleMessage(const Message& message, const TimerParams& params) {}
+};
+
+class UpdateDynamicTimeScaleListener : public IMessageListener {
+	CGameTimer* m_pTimer;
+public:
+	void SetTimer(CGameTimer* pTimer) { m_pTimer = pTimer; }
+	virtual void HandleMessage(const Message& message, const TimerParams& params);
 };
 
 // Define RegisterAriticulationListner

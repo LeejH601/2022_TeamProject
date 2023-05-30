@@ -3,6 +3,7 @@
 
 const ULONG MAX_SAMPLE_COUNT = 50;
 
+class IMessageListener;
 class CGameTimer
 {
 public:
@@ -23,6 +24,8 @@ public:
 		return m_nCurrentPerformanceCounter;
 	};
 
+	void SetDynamicTimeScale(float fDynamicTimeScale, float fDuration);
+	void RestoreDynamicTimeScale(float fDynamicTimeScale, float fDuration);
 private:
 	double m_fTimeScale;
 	double m_fTotalTimeElasped;
@@ -46,5 +49,7 @@ private:
 	float							m_fFPSTimeElapsed;
 
 	bool							m_bStopped;
+
+	std::vector<std::unique_ptr<IMessageListener>> m_pListeners;
 };
 

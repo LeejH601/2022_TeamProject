@@ -34,7 +34,9 @@ public:
 
 	float m_fTime = 0.f;
 	float m_fMaxTime = 0.f;
+
 	float m_fCurLagTime = 0.f;
+	float m_fMaxLagTime = 0.f;
 
 	std::unique_ptr<CGameObject>* m_pSwordTrailReference = nullptr;
 

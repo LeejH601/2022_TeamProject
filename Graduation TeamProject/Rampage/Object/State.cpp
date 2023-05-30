@@ -47,7 +47,7 @@ void Idle_Player::Execute(CPlayer* player, float fElapsedTime)
 
 void Idle_Player::Animate(CPlayer* player, float fElapsedTime)
 {
-	player->Animate(fElapsedTime * player->GetAnimationPlayWeight());
+	player->Animate(fElapsedTime);
 }
 
 void Idle_Player::OnRootMotion(CPlayer* player, float fTimeElapsed)
@@ -219,16 +219,6 @@ void Atk_Player::SetPlayerRootVel(CPlayer* player)
 	pPlayerController->m_pRootMotionObject->m_xmf4x4Transform._43 = 0.f;
 }
 
-void Atk_Player::CheckHitLag(CPlayer* player)
-{
-	HitLagComponent* pHitLagComponent = dynamic_cast<HitLagComponent*>(GetHitLagComponent());
-	if (player->m_fCurLagTime > pHitLagComponent->GetMaxLagTime())
-	{
-		PlayerParams PlayerParam{ player };
-		CMessageDispatcher::GetInst()->Dispatch_Message<PlayerParams>(MessageType::UPDATE_HITLAG, &PlayerParam, this);
-	}
-}
-
 void Atk_Player::OnRootMotion(CPlayer* player, float fTimeElapsed)
 {
 	CAnimationController* pPlayerController = player->m_pSkinnedAnimationController.get();
@@ -369,7 +359,6 @@ void Atk1_Player::Execute(CPlayer* player, float fElapsedTime)
 
 	SendCollisionMessage(player);
 	CheckComboAttack(player);
-	CheckHitLag(player);
 
 	CheckEvasion(player, 0.7f);
 
@@ -383,7 +372,7 @@ void Atk1_Player::Execute(CPlayer* player, float fElapsedTime)
 
 void Atk1_Player::Animate(CPlayer* player, float fElapsedTime)
 {
-	player->Animate(fElapsedTime * player->GetAnimationPlayWeight());
+	player->Animate(fElapsedTime);
 }
 
 void Atk1_Player::Exit(CPlayer* player)
@@ -480,7 +469,6 @@ void Atk2_Player::Execute(CPlayer* player, float fElapsedTime)
 
 	SendCollisionMessage(player);
 	CheckComboAttack(player);
-	CheckHitLag(player);
 
 	CheckEvasion(player, 0.7f);
 
@@ -494,7 +482,7 @@ void Atk2_Player::Execute(CPlayer* player, float fElapsedTime)
 
 void Atk2_Player::Animate(CPlayer* player, float fElapsedTime)
 {
-	player->Animate(fElapsedTime * player->GetAnimationPlayWeight());
+	player->Animate(fElapsedTime);
 }
 
 void Atk2_Player::Exit(CPlayer* player)
@@ -613,7 +601,6 @@ void Atk3_Player::Execute(CPlayer* player, float fElapsedTime)
 {
 	SendCollisionMessage(player);
 	CheckComboAttack(player);
-	CheckHitLag(player);
 
 	CheckEvasion(player, 0.7f);
 
@@ -640,7 +627,7 @@ void Atk3_Player::Execute(CPlayer* player, float fElapsedTime)
 
 void Atk3_Player::Animate(CPlayer* player, float fElapsedTime)
 {
-	player->Animate(fElapsedTime * player->GetAnimationPlayWeight());
+	player->Animate(fElapsedTime);
 }
 
 void Atk3_Player::Exit(CPlayer* player)
@@ -734,7 +721,7 @@ void Run_Player::Execute(CPlayer* player, float fElapsedTime)
 
 void Run_Player::Animate(CPlayer* player, float fTimeElapsed)
 {
-	player->Animate(fTimeElapsed * player->GetAnimationPlayWeight());
+	player->Animate(fTimeElapsed);
 }
 
 void Run_Player::Exit(CPlayer* player)
@@ -825,7 +812,7 @@ void Atk4_Player::SendCollisionMessage(CPlayer* player)
 
 void Atk4_Player::Animate(CPlayer* player, float fElapsedTime)
 {
-	player->Animate(fElapsedTime * player->GetAnimationPlayWeight());
+	player->Animate(fElapsedTime);
 }
 
 void Atk4_Player::Exit(CPlayer* player)
@@ -901,7 +888,7 @@ void Atk5_Player::Execute(CPlayer* player, float fElapsedTime)
 
 void Atk5_Player::Animate(CPlayer* player, float fElapsedTime)
 {
-	player->Animate(fElapsedTime * player->GetAnimationPlayWeight());
+	player->Animate(fElapsedTime);
 }
 
 void Atk5_Player::Exit(CPlayer* player)
@@ -1066,7 +1053,7 @@ void Evasion_Player::Exit(CPlayer* player)
 
 void Evasion_Player::Animate(CPlayer* player, float fElapsedTime)
 {
-	player->Animate(fElapsedTime * player->GetAnimationPlayWeight());
+	player->Animate(fElapsedTime);
 }
 
 void Evasion_Player::OnRootMotion(CPlayer* player, float fTimeElapsed)
