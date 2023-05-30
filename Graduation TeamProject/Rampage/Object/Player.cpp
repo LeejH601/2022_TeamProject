@@ -101,7 +101,6 @@ bool CPlayer::CheckCollision(CGameObject* pTargetObject)
 void CPlayer::Update(float fTimeElapsed)
 {
 	m_fTime += fTimeElapsed;
-	m_fCurLagTime += fTimeElapsed;
 
 	// 플레이어가 속도를 가진다면 해당 방향을 바라보게 하는 코드
 	if (m_xmf3Velocity.x + m_xmf3Velocity.z)

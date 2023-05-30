@@ -31,8 +31,6 @@ void Idle_Player::Enter(CPlayer* player)
 
 	player->m_xmf3RootTransfromPreviousPos = XMFLOAT3{ 0.f, 0.f , 0.f };
 	player->m_bAttack = false; // 사용자가 좌클릭시 true가 되는 변수
-
-	player->m_fAnimationPlayWeight = 1.0f;
 }
 
 void Idle_Player::Execute(CPlayer* player, float fElapsedTime)
@@ -336,9 +334,6 @@ void Atk1_Player::Enter(CPlayer* player)
 
 	player->m_xmf3RootTransfromPreviousPos = XMFLOAT3{ 0.f, 0.f , 0.f };
 
-	player->m_fCurLagTime = 0.f;
-	player->m_fAnimationPlayWeight = 1.0f;
-
 	SoundPlayParams SoundPlayParam;
 	SoundPlayParam.sound_category = SOUND_CATEGORY::SOUND_SHOOT;
 	CMessageDispatcher::GetInst()->Dispatch_Message<SoundPlayParams>(MessageType::PLAY_SOUND, &SoundPlayParam, this);
@@ -446,9 +441,6 @@ void Atk2_Player::Enter(CPlayer* player)
 	player->m_fCMDConstant = 1.0f;
 
 	player->m_xmf3RootTransfromPreviousPos = XMFLOAT3{ 0.f, 0.f , 0.f };
-
-	player->m_fCurLagTime = 0.f;
-	player->m_fAnimationPlayWeight = 1.0f;
 
 	SoundPlayParams SoundPlayParam;
 	SoundPlayParam.sound_category = SOUND_CATEGORY::SOUND_SHOOT;
@@ -581,9 +573,6 @@ void Atk3_Player::Enter(CPlayer* player)
 
 	player->m_xmf3RootTransfromPreviousPos = XMFLOAT3{ 0.f, 0.f , 0.f };
 
-	player->m_fCurLagTime = 0.f;
-	player->m_fAnimationPlayWeight = 1.0f;
-
 	SoundPlayParams SoundPlayParam;
 	SoundPlayParam.sound_category = SOUND_CATEGORY::SOUND_SHOOT;
 	CMessageDispatcher::GetInst()->Dispatch_Message<SoundPlayParams>(MessageType::PLAY_SOUND, &SoundPlayParam, this);
@@ -672,7 +661,6 @@ void Run_Player::Enter(CPlayer* player)
 	player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition = 0.0f;
 	player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_nType = ANIMATION_TYPE_LOOP;
 	player->m_bAttack = false; // 사용자가 좌클릭시 true가 되는 변수
-	player->m_fAnimationPlayWeight = 1.0f;
 
 	player->m_xmf3RootTransfromPreviousPos = XMFLOAT3{ 0.f, 0.f , 0.f };
 
@@ -759,9 +747,6 @@ void Atk4_Player::Enter(CPlayer* player)
 
 	player->m_xmf3RootTransfromPreviousPos = XMFLOAT3{ 0.f, 0.f , 0.f };
 
-	player->m_fCurLagTime = 0.f;
-	player->m_fAnimationPlayWeight = 1.0f;
-
 	if (player->m_pSwordTrailReference) {
 		//dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[3].get())->m_bIsUpdateTrailVariables = true;
 		dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[3].get())->m_faccumulateTime = 0.0f;
@@ -845,9 +830,6 @@ void Atk5_Player::Enter(CPlayer* player)
 	player->m_bAttack = false; // 사용자가 좌클릭시 true가 되는 변수
 
 	player->m_xmf3RootTransfromPreviousPos = XMFLOAT3{ 0.f, 0.f , 0.f };
-
-	player->m_fCurLagTime = 0.f;
-	player->m_fAnimationPlayWeight = 1.0f;
 
 	if (player->m_pSwordTrailReference) {
 		//dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[4].get())->m_bIsUpdateTrailVariables = true;
@@ -1023,9 +1005,6 @@ void Evasion_Player::Enter(CPlayer* player)
 	player->m_pSkinnedAnimationController->m_fTime = 0.0f;
 	player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition = 0.0f;
 	player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_nType = ANIMATION_TYPE_ONCE;
-
-	player->m_fCurLagTime = 0.f;
-	player->m_fAnimationPlayWeight = 1.0f;
 }
 
 void Evasion_Player::Execute(CPlayer* player, float fElapsedTime)

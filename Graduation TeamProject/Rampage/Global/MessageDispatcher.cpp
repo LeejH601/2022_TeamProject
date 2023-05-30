@@ -454,8 +454,6 @@ void DamageListener::HandleMessage(const Message& message, const DamageParams& p
 
 		if (pHitLagComponent->GetEnable())
 		{
-			pPlayer->m_fMaxLagTime = pHitLagComponent->GetMaxLagTime();
-
 			TimerParams timerParams;
 			timerParams.fDynamicTimeScale = pHitLagComponent->GetLagScale();
 			timerParams.fDuration = pHitLagComponent->GetMaxLagTime();
@@ -465,8 +463,6 @@ void DamageListener::HandleMessage(const Message& message, const DamageParams& p
 		DamageAnimationComponent* pDamageAnimationComponent = dynamic_cast<DamageAnimationComponent*>(pPlayer->m_pStateMachine->GetCurrentState()->GetDamageAnimationComponent());
 		ShakeAnimationComponent* pShakeAnimationComponent = dynamic_cast<ShakeAnimationComponent*>(pPlayer->m_pStateMachine->GetCurrentState()->GetShakeAnimationComponent());
 		StunAnimationComponent* pStunAnimationComponent = dynamic_cast<StunAnimationComponent*>(pPlayer->m_pStateMachine->GetCurrentState()->GetStunAnimationComponent());
-
-		pPlayer->m_fCurLagTime = 0.f;
 
 		pMonster->m_xmf3HitterVec = Vector3::Normalize(Vector3::Subtract(pMonster->GetPosition(), pPlayer->GetPosition()));
 
