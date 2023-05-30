@@ -1054,12 +1054,16 @@ void CImGuiManager::SetUI()
 		ImGuiWindowFlags my_window_flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize;
 		ImGui::Begin(U8STR("타격감 프리셋 메뉴"), &show_preset_menu, my_window_flags);
 
-		std::string path = "Data";
+		std::wstring path = L"Data";
 		std::vector<std::u8string> v;
-		for (const auto& entry : std::filesystem::directory_iterator(path))
+
+		if (std::filesystem::exists(path))
 		{
-			v.emplace_back(entry.path().u8string().substr(entry.path().u8string().find_last_of(u8"/\\") + 1));
+			for (const auto& entry : std::filesystem::directory_iterator(path))
+				v.emplace_back(entry.path().u8string().substr(entry.path().u8string().find_last_of(u8"/\\") + 1));
 		}
+		else
+			CreateDirectoryIfNotExists(path);
 
 		static int idx = 0;
 		if (ImGui::BeginListBox(U8STR("프리셋 리스트")))
@@ -2236,8 +2240,9 @@ void CImGuiManager::ShowCreationMenu()
 		ImGui::InputText(U8STR("##keywordText"), reinterpret_cast<char*>(searchText.data()), 256);
 		ImGui::SameLine();
 		if (ImGui::Button(U8STR("검색##keywordSearch"), ImVec2(-FLT_MIN, 0.0f)))
+		{
 			OutputDebugString(ConvertU8ToW(searchText).c_str());
-
+		}
 		ImGui::EndChild();
 		ImGui::PopStyleVar();
 	}
