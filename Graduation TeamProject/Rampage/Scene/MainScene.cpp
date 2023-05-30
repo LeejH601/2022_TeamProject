@@ -1004,6 +1004,9 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 
 	CModelShader::GetInst()->Render(pd3dCommandList, 0);
 
+	D3D12_GPU_VIRTUAL_ADDRESS d3dGpuVirtualAddress = m_pd3dcbDisolveParams->GetGPUVirtualAddress();
+	pd3dCommandList->SetGraphicsRootConstantBufferView(7, d3dGpuVirtualAddress);
+
 	m_pMap->RenderMapObjects(pd3dCommandList);
 
 	if (m_pPlayer)
@@ -1037,14 +1040,13 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 		static int count = 100;
 		count--;
 		if (count < 1) {
-			
+
 			count = 100;
 		}
 	}
+
 	m_pVertexPointParticleObject->EmitParticle(5);
 	m_pVertexPointParticleObject->SetEmit(true);
-	D3D12_GPU_VIRTUAL_ADDRESS d3dGpuVirtualAddress = m_pd3dcbDisolveParams->GetGPUVirtualAddress();
-	pd3dCommandList->SetGraphicsRootConstantBufferView(7, d3dGpuVirtualAddress);
 
 	UINT index = 0;
 	for (int i = 0; i < m_pEnemys.size(); ++i)
