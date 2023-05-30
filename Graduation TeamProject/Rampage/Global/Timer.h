@@ -25,6 +25,9 @@ public:
 
 private:
 	double m_fTimeScale;
+	double m_fTotalTimeElasped;
+
+	float m_fDynamicTimeScale;
 	float m_fTimeElapsed;
 
 	__int64							m_nBasePerformanceCounter;
