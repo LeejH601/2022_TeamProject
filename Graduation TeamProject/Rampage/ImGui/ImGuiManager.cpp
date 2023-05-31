@@ -119,6 +119,7 @@ void DataLoader::SaveComponentSet(FILE* pInFile, CState<CPlayer>* pState)
 	DamageAnimationComponent* pDamageAnimationComponent = dynamic_cast<DamageAnimationComponent*>(pState->GetDamageAnimationComponent());
 	ShakeAnimationComponent* pShakeAnimationComponent = dynamic_cast<ShakeAnimationComponent*>(pState->GetShakeAnimationComponent());
 	StunAnimationComponent* pStunAnimationComponent = dynamic_cast<StunAnimationComponent*>(pState->GetStunAnimationComponent());
+	HitLagComponent* pHitLagComponent = dynamic_cast<HitLagComponent*>(pState->GetHitLagComponent());
 
 	SoundPlayComponent* pShockSoundComponent = dynamic_cast<SoundPlayComponent*>(pState->GetShockSoundComponent());
 	SoundPlayComponent* pShootSoundComponent = dynamic_cast<SoundPlayComponent*>(pState->GetShootSoundComponent());
@@ -196,6 +197,15 @@ void DataLoader::SaveComponentSet(FILE* pInFile, CState<CPlayer>* pState)
 	WriteStringFromFile(pInFile, std::string("<StunTime>:"));
 	WriteFloatFromFile(pInFile, pStunAnimationComponent->GetStunTime());
 	WriteStringFromFile(pInFile, std::string("</StunAnimationComponent>:"));
+
+	WriteStringFromFile(pInFile, std::string("<HitLagComponent>:"));
+	WriteStringFromFile(pInFile, std::string("<Enable>:"));
+	WriteIntegerFromFile(pInFile, pHitLagComponent->GetEnable());
+	WriteStringFromFile(pInFile, std::string("<LagScale>:"));
+	WriteFloatFromFile(pInFile, pHitLagComponent->GetLagScale());
+	WriteStringFromFile(pInFile, std::string("<MaxLagTime>:"));
+	WriteFloatFromFile(pInFile, pHitLagComponent->GetMaxLagTime());
+	WriteStringFromFile(pInFile, std::string("</HitLagComponent>:"));
 
 	WriteStringFromFile(pInFile, std::string("<CEffectSoundComponent>:"));
 	WriteStringFromFile(pInFile, std::string("<Enable>:"));
@@ -332,6 +342,7 @@ void DataLoader::LoadComponentSet(FILE* pInFile, CState<CPlayer>* pState)
 	DamageAnimationComponent* pDamageAnimationComponent = dynamic_cast<DamageAnimationComponent*>(pState->GetDamageAnimationComponent());
 	ShakeAnimationComponent* pShakeAnimationComponent = dynamic_cast<ShakeAnimationComponent*>(pState->GetShakeAnimationComponent());
 	StunAnimationComponent* pStunAnimationComponent = dynamic_cast<StunAnimationComponent*>(pState->GetStunAnimationComponent());
+	HitLagComponent* pHitLagComponent = dynamic_cast<HitLagComponent*>(pState->GetHitLagComponent());
 
 	SoundPlayComponent* pShockSoundComponent = dynamic_cast<SoundPlayComponent*>(pState->GetShockSoundComponent());
 	SoundPlayComponent* pShootSoundComponent = dynamic_cast<SoundPlayComponent*>(pState->GetShootSoundComponent());
@@ -509,6 +520,30 @@ void DataLoader::LoadComponentSet(FILE* pInFile, CState<CPlayer>* pState)
 					pStunAnimationComponent->SetStunTime(ReadFloatFromFile(pInFile));
 				}
 				else if (!strcmp(buf, "</StunAnimationComponent>:"))
+				{
+					break;
+				}
+			}
+		}
+		else if (!strcmp(buf, "<HitLagComponent>:"))
+		{
+			for (; ; )
+			{
+				ReadStringFromFile(pInFile, buf);
+
+				if (!strcmp(buf, "<Enable>:"))
+				{
+					pHitLagComponent->SetEnable(ReadIntegerFromFile(pInFile));
+				}
+				else if (!strcmp(buf, "<LagScale>:"))
+				{
+					pHitLagComponent->SetLagScale(ReadFloatFromFile(pInFile));
+				}
+				else if (!strcmp(buf, "<MaxLagTime>:"))
+				{
+					pHitLagComponent->SetMaxLagTime(ReadFloatFromFile(pInFile));
+				}
+				else if (!strcmp(buf, "</HitLagComponent>:"))
 				{
 					break;
 				}
