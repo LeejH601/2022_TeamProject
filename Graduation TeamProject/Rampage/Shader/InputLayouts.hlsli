@@ -9,7 +9,8 @@ struct VS_PARTICLE_INPUT
 	uint2 SpriteTotalCoord : TEXTURECOORD;
 	float2 size : SIZE;
 	float emissive : EMISSIVE;
-	int rotateFlag : ROTATEFLAG;
+	uint rotateFlag : ROTATEFLAG;
+	uint ScaleFlag : SCALEFLAG;
 };
 
 

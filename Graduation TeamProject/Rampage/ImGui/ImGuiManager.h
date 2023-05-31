@@ -27,6 +27,7 @@ private:
 		TYPE_PARTICLE,
 		TYPE_TRAILBASE,
 		TYPE_TRAILNOISE,
+		TYPE_SLASHHIT,
 	};
 	// Component Sets
 	std::unique_ptr<DataLoader> m_pDataLoader = NULL;
@@ -73,6 +74,7 @@ private:
 	D3D12_GPU_DESCRIPTOR_HANDLE m_d3dSrvGPUDescriptorHandle_ParticleTexture;
 	D3D12_GPU_DESCRIPTOR_HANDLE m_d3dSrvGPUDescriptorHandle_TrailMainTexture;
 	D3D12_GPU_DESCRIPTOR_HANDLE m_d3dSrvGPUDescriptorHandle_TrailNoiseTexture;
+	D3D12_GPU_DESCRIPTOR_HANDLE m_d3dSrvGPUDescriptorHandle_SlashHitTexture;
 
 public:
 	DECLARE_SINGLE(CImGuiManager);
@@ -96,6 +98,7 @@ public:
 
 	void ShowImpactManager(CState<CPlayer>* pCurrentAnimation);
 	void ShowParticleManager(CState<CPlayer>* pCurrentAnimation);
+	void ShowSlashHitManager(CState<CPlayer>* pCurrentAnimation);
 	void ShowTrailManager(CState<CPlayer>* pCurrentAnimation);
 	void ShowDamageAnimationManager(CState<CPlayer>* pCurrentAnimation);
 	void ShowShakeAnimationManager(CState<CPlayer>* pCurrentAnimation);

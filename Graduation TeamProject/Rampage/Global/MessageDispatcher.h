@@ -23,7 +23,7 @@ struct PlayerParams {
 };
 
 struct MonsterParams {
-    CGameObject* pMonster;
+	CGameObject* pMonster;
 };
 
 struct SoundPlayParams {
@@ -84,7 +84,7 @@ struct CollideParams {
 };
 
 struct OnGroundParams {
-    XMFLOAT3 xmf3OnGroundPosition;
+	XMFLOAT3 xmf3OnGroundPosition;
 };
 
 struct AttackSpriteCompParams {
@@ -117,21 +117,21 @@ public:
 	void SetEnable(bool bEnable) { m_bEnable = bEnable; }
 	virtual void Reset() { }
 
-    virtual void HandleMessage(const Message& message, const CollideParams& params) {}
-    virtual void HandleMessage(const Message& message, const OnGroundParams& params) {}
-    virtual void HandleMessage(const Message& message, const PlayerParams& params) {}
-    virtual void HandleMessage(const Message& message, const SoundPlayParams& params) {}
-    virtual void HandleMessage(const Message& message, const CameraUpdateParams& params) {}
-    virtual void HandleMessage(const Message& message, const AnimationCompParams& params) {}
-    virtual void HandleMessage(const Message& message, const ParticleCompParams& params) {}
-    virtual void HandleMessage(const Message& message, const ImpactCompParams& params) {}
-    virtual void HandleMessage(const Message& message, const ParticleSmokeParams& params) {}
-    virtual void HandleMessage(const Message& message, const TerrainSpriteCompParams& params) {}
-    virtual void HandleMessage(const Message& message, const RegisterArticulationParams& params) {}
+	virtual void HandleMessage(const Message& message, const CollideParams& params) {}
+	virtual void HandleMessage(const Message& message, const OnGroundParams& params) {}
+	virtual void HandleMessage(const Message& message, const PlayerParams& params) {}
+	virtual void HandleMessage(const Message& message, const SoundPlayParams& params) {}
+	virtual void HandleMessage(const Message& message, const CameraUpdateParams& params) {}
+	virtual void HandleMessage(const Message& message, const AnimationCompParams& params) {}
+	virtual void HandleMessage(const Message& message, const ParticleCompParams& params) {}
+	virtual void HandleMessage(const Message& message, const ImpactCompParams& params) {}
+	virtual void HandleMessage(const Message& message, const ParticleSmokeParams& params) {}
+	virtual void HandleMessage(const Message& message, const TerrainSpriteCompParams& params) {}
+	virtual void HandleMessage(const Message& message, const RegisterArticulationParams& params) {}
 
 	virtual void HandleMessage(const Message& message, const ParticleUpDownParams& params) {}
 	virtual void HandleMessage(const Message& message, const ParticleTrailParams& params) {}
-	virtual void HandleMessage(const Message& message, const TrailUpdateParams& params){}
+	virtual void HandleMessage(const Message& message, const TrailUpdateParams& params) {}
 
 	virtual void HandleMessage(const Message& message, const DamageParams& params) {}
 };
@@ -172,10 +172,10 @@ public:
 
 // Define OnGroundListener
 class SceneOnGroundListener : public IMessageListener {
-    CScene* m_pScene;
+	CScene* m_pScene;
 public:
-    void SetScene(CScene* pScene) { m_pScene = pScene; }
-    virtual void HandleMessage(const Message& message, const OnGroundParams& params);
+	void SetScene(CScene* pScene) { m_pScene = pScene; }
+	virtual void HandleMessage(const Message& message, const OnGroundParams& params);
 };
 
 // Define Player Attack component
@@ -330,35 +330,35 @@ public:
 
 // Define HitLag Animation component
 class HitLagComponent : public IMessageListener {
-    float m_fLagScale = 0.5f;
-    float m_fMaxLagTime = 0.5f;
+	float m_fLagScale = 0.5f;
+	float m_fMaxLagTime = 0.5f;
 public:
-    float& GetMaxLagTime() { return m_fMaxLagTime; }
-    float& GetLagScale() { return m_fLagScale; }
+	float& GetMaxLagTime() { return m_fMaxLagTime; }
+	float& GetLagScale() { return m_fLagScale; }
 
-    void SetMaxLagTime(float maxlagtime) { m_fMaxLagTime = maxlagtime; }
-    void SetLagScale(float lagScale) { m_fLagScale = lagScale; }
+	void SetMaxLagTime(float maxlagtime) { m_fMaxLagTime = maxlagtime; }
+	void SetLagScale(float lagScale) { m_fLagScale = lagScale; }
 
-    virtual void HandleMessage(const Message& message, const PlayerParams& params);
+	virtual void HandleMessage(const Message& message, const PlayerParams& params);
 };
 
 // Define Particle Animation component
 enum ParticleType {
-    SPHERE_PARTICLE,
-    RECOVERY_PARTICLE,
-    SMOKE_PARTICLE,
-    TRAIL_PARTICLE,
-    ATTACK_PARTICLE
+	SPHERE_PARTICLE,
+	RECOVERY_PARTICLE,
+	SMOKE_PARTICLE,
+	TRAIL_PARTICLE,
+	ATTACK_PARTICLE
 };
 
 #define MAX_PARTICLES				100000
 class ParticleComponent : public IMessageListener {
-
-    int m_nParticleNumber = MAX_PARTICLES;
-    int m_nEmitParticleNumber = 500;
-    int m_iParticleType = ParticleType::SPHERE_PARTICLE;
-    XMFLOAT2 m_fSize = XMFLOAT2(3.f, 3.f);
-    float m_fAlpha = 1.f;
+protected:
+	int m_nParticleNumber = MAX_PARTICLES;
+	int m_nEmitParticleNumber = 500;
+	int m_iParticleType = ParticleType::SPHERE_PARTICLE;
+	XMFLOAT2 m_fSize = XMFLOAT2(3.f, 3.f);
+	float m_fAlpha = 1.f;
 
 	float m_fFieldSpeed;
 	float m_fNoiseStrength;
@@ -366,25 +366,27 @@ class ParticleComponent : public IMessageListener {
 	float m_fProgressionRate;
 	float m_fLengthScale;
 
-    float m_fLifeTime = 2.f;
-    float m_fSpeed = 20.f;
-    XMFLOAT3 m_xmf3Color = XMFLOAT3(1.f, 1.f, 1.f);
+	float m_fLifeTime = 2.f;
+	float m_fSpeed = 20.f;
+	XMFLOAT3 m_xmf3Color = XMFLOAT3(1.f, 1.f, 1.f);
 	int m_iTextureIndex = 0;
 	int m_iTextureOffset = 0;
 	float m_fEmissive = 1.0f;
+	bool m_bSimulateRotate = false;
+	bool m_bScaleFlag = false;
 public:
-    ParticleComponent();
+	ParticleComponent();
 
 public:
-    //int& GetParticleNumber() { return m_nParticleNumber; }
-    int& GetEmitParticleNumber() { return m_nEmitParticleNumber; }
-    XMFLOAT2& GetSize() { return m_fSize; }
-    float& GetXSize() { return m_fSize.x; }
-    float& GetYSize() { return m_fSize.y; }
-    float& GetAlpha() { return m_fAlpha; }
-    float& GetLifeTime() { return m_fLifeTime; }
-    float& GetSpeed() { return m_fSpeed; }
-    XMFLOAT3& GetColor() { return m_xmf3Color; }
+	//int& GetParticleNumber() { return m_nParticleNumber; }
+	int& GetEmitParticleNumber() { return m_nEmitParticleNumber; }
+	XMFLOAT2& GetSize() { return m_fSize; }
+	float& GetXSize() { return m_fSize.x; }
+	float& GetYSize() { return m_fSize.y; }
+	float& GetAlpha() { return m_fAlpha; }
+	float& GetLifeTime() { return m_fLifeTime; }
+	float& GetSpeed() { return m_fSpeed; }
+	XMFLOAT3& GetColor() { return m_xmf3Color; }
 	float& GetFieldSpeed() { return m_fFieldSpeed; };
 	float& GetNoiseStrength() { return m_fNoiseStrength; };
 	float& GetProgressionRate() { return m_fProgressionRate; };
@@ -394,29 +396,40 @@ public:
 
 	int& GetTextureIndex() { return m_iTextureIndex; }
 	int& GetTextureOffset() { return m_iTextureOffset; }
+	bool& GetRotateFactor() { return m_bSimulateRotate; };
+	bool& GetScaleFactor() { return m_bScaleFlag; };
 
-    void SetEmitParticleNumber(int iEmitParticleNumber) { m_nEmitParticleNumber = iEmitParticleNumber; }
-    void SetParticleNumber(int nParticleNumber) { m_nParticleNumber = nParticleNumber; }
-    void SetParticleType(int iParticleType) { m_iParticleType = iParticleType; }
-    void SetSize(XMFLOAT2 fSize) { m_fSize = fSize; }
-    void SetSizeX(float fSize) { m_fSize.x = fSize; }
-    void SetSizeY(float fSize) { m_fSize.y = fSize; }
-    void SetAlpha(float fAlpha) { m_fAlpha = fAlpha; }
-    void SetLifeTime(float fLifeTime) { m_fLifeTime = fLifeTime; }
-    void SetSpeed(float fSpeed) { m_fSpeed = fSpeed; }
-    void SetColor(XMFLOAT3 xmf3Color) { m_xmf3Color = xmf3Color; }
-    void SetColorR(float r) { m_xmf3Color.x = r; }
-    void SetColorG(float g) { m_xmf3Color.y = g; }
-    void SetColorB(float b) { m_xmf3Color.z = b; }
+	void SetEmitParticleNumber(int iEmitParticleNumber) { m_nEmitParticleNumber = iEmitParticleNumber; }
+	void SetParticleNumber(int nParticleNumber) { m_nParticleNumber = nParticleNumber; }
+	void SetParticleType(int iParticleType) { m_iParticleType = iParticleType; }
+	void SetSize(XMFLOAT2 fSize) { m_fSize = fSize; }
+	void SetSizeX(float fSize) { m_fSize.x = fSize; }
+	void SetSizeY(float fSize) { m_fSize.y = fSize; }
+	void SetAlpha(float fAlpha) { m_fAlpha = fAlpha; }
+	void SetLifeTime(float fLifeTime) { m_fLifeTime = fLifeTime; }
+	void SetSpeed(float fSpeed) { m_fSpeed = fSpeed; }
+	void SetColor(XMFLOAT3 xmf3Color) { m_xmf3Color = xmf3Color; }
+	void SetColorR(float r) { m_xmf3Color.x = r; }
+	void SetColorG(float g) { m_xmf3Color.y = g; }
+	void SetColorB(float b) { m_xmf3Color.z = b; }
 	void SetFieldSpeed(float fFieldSpeed) { m_fFieldSpeed = fFieldSpeed; };
 	void SetNoiseStrength(float fNoiseStrength) { m_fNoiseStrength = fNoiseStrength; };
 	void SetProgressionRate(float fProgressionRate) { m_fProgressionRate = fProgressionRate; };
 	void SetLengthScale(float fLengthScale) { m_fLengthScale = fLengthScale; };
 	void SetFieldMainDirection(XMFLOAT3 xmf3FieldMainDirection) { m_xmf3FieldMainDirection = xmf3FieldMainDirection; };
 	void SetEmissive(float fEmissive) { m_fEmissive = fEmissive; };
+	void SetRotateFacotr(bool input) { m_bSimulateRotate = input; };
+	void SetScaleFacotr(bool input) { m_bScaleFlag = input; };
 
 	void SetTextureIndex(int iIndex) { m_iTextureIndex = iIndex; };
 	void SetTextureOffset(int iOffset) { m_iTextureOffset = iOffset; }
+	virtual void HandleMessage(const Message& message, const ParticleCompParams& params);
+};
+
+class SlashHitComponent : public ParticleComponent 
+{
+public:
+	SlashHitComponent();
 	virtual void HandleMessage(const Message& message, const ParticleCompParams& params);
 };
 
@@ -426,7 +439,7 @@ class TrailComponent : public IMessageListener
 	static std::vector<std::string> s_MainTextureNames;
 	static std::vector<std::string> s_NoiseTextureNames;
 
-	
+
 
 	std::shared_ptr<CTexture> m_pTexture;
 	int m_nMainTextureIndex = 0;
@@ -460,16 +473,16 @@ inline std::vector<std::string> TrailComponent::s_MainTextureNames = { "Image/T_
 inline std::vector<std::string> TrailComponent::s_NoiseTextureNames = { "Image/VAP1_Noise_4", "Image/VAP1_Noise_14" };
 
 class SmokeParticleComponent : public IMessageListener {
-    int m_nParticleNumber = 20;
-    int m_iParticleType = ParticleType::SMOKE_PARTICLE;
-    int m_nParticleIndex = 0;
-    XMFLOAT2 m_fSize = XMFLOAT2(3.f, 3.f);
-    float m_fAlpha = 1.5f;
-    float m_fLifeTime = 1.f;
-    float m_fSpeed = 100.f;
-    int m_iIndex = 0;
-    XMFLOAT3 m_xmf3Color = XMFLOAT3(0.191f * 2.f, 0.167f * 2.f, 0.096f * 2.f);
-    //XMFLOAT3 m_xmf3Color = XMFLOAT3(1.f, 1.f, 1.f);
+	int m_nParticleNumber = 20;
+	int m_iParticleType = ParticleType::SMOKE_PARTICLE;
+	int m_nParticleIndex = 0;
+	XMFLOAT2 m_fSize = XMFLOAT2(3.f, 3.f);
+	float m_fAlpha = 1.5f;
+	float m_fLifeTime = 1.f;
+	float m_fSpeed = 100.f;
+	int m_iIndex = 0;
+	XMFLOAT3 m_xmf3Color = XMFLOAT3(0.191f * 2.f, 0.167f * 2.f, 0.096f * 2.f);
+	//XMFLOAT3 m_xmf3Color = XMFLOAT3(1.f, 1.f, 1.f);
 public:
 	int& GetParticleNumber() { return m_nParticleNumber; }
 	int& GetParticleIndex() { return m_nParticleIndex; }
@@ -570,11 +583,11 @@ enum TerrainSpriteType {
 class TerrainSpriteComponent : public IMessageListener
 {
 private:
-    int m_nParticleNumber = MAX_PARTICLES;
-    int m_nEmitParticleNumber = 500;
-    int m_iParticleType = ParticleType::ATTACK_PARTICLE;
-    int m_nParticleIndex = 0;
-    XMFLOAT3 m_xmf3Color = XMFLOAT3(1.f, 1.f, 1.f);
+	int m_nParticleNumber = MAX_PARTICLES;
+	int m_nEmitParticleNumber = 500;
+	int m_iParticleType = ParticleType::ATTACK_PARTICLE;
+	int m_nParticleIndex = 0;
+	XMFLOAT3 m_xmf3Color = XMFLOAT3(1.f, 1.f, 1.f);
 	float   m_fSpeed = 5.f;
 	float   m_fAlpha = 1.f;
 	XMFLOAT2   m_fSize = XMFLOAT2(0.5f, 0.5f);
@@ -588,11 +601,11 @@ public:
 // Define Impact Effect component
 class ImpactEffectComponent : public IMessageListener {
 private:
-    int m_nParticleNumber = MAX_PARTICLES;
-    int m_nEmitParticleNumber = 1;
-    int m_iParticleType = ParticleType::ATTACK_PARTICLE;
-    int m_nParticleIndex = 0;
-    float m_fLifeTime = 3.f;
+	int m_nParticleNumber = MAX_PARTICLES;
+	int m_nEmitParticleNumber = 1;
+	int m_iParticleType = ParticleType::ATTACK_PARTICLE;
+	int m_nParticleIndex = 0;
+	float m_fLifeTime = 3.f;
 	float m_fSpeed = 1.f;
 	float m_fAlpha = 1.f;
 	XMFLOAT2 m_fSize = XMFLOAT2(3.f, 3.f);
@@ -602,6 +615,7 @@ private:
 	int m_iTextureOffset = 0;
 	int m_iTotalRow, m_iTotalColumn;
 	float m_fEmissive = 1.0f;
+	bool m_bSimulateRotate = false;
 
 public:
 	int& GetTextureIndex() { return m_iTextureIndex; }
@@ -615,6 +629,7 @@ public:
 	float& GetXSize() { return m_fSize.x; }
 	float& GetYSize() { return m_fSize.y; }
 	float& GetEmissive() { return m_fEmissive; };
+	bool& GetRotateFactor() { return m_bSimulateRotate; };
 
 	void SetTextureIndex(int nTextureIndex) { m_iTextureIndex = nTextureIndex; }
 	void SetSize(XMFLOAT2 fSize) { m_fSize = fSize; }
@@ -628,6 +643,7 @@ public:
 	void SetTextureOffset(int iOffset) { m_iTextureOffset = iOffset; }
 	void SetTotalRowColumn(int iTotalRow, int iTotalColumn);
 	void SetEmissive(float fEmissive) { m_fEmissive = fEmissive; };
+	void SetRotateFactor(bool input) { m_bSimulateRotate = input; };
 	virtual void HandleMessage(const Message& message, const ImpactCompParams& params);
 };
 

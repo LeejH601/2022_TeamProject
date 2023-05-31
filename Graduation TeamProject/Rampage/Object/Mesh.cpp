@@ -1554,6 +1554,8 @@ void CParticleMesh::EmitParticle(int emitType, ParticleEmitDataParam& param)
 			createdParticleBuffer[i].m_iTextureIndex = param.m_iTextureIndex;
 			createdParticleBuffer[i].m_xmf2Size = param.m_xmf2Size;
 			createdParticleBuffer[i].m_fEmissive = param.m_fEmissive;
+			createdParticleBuffer[i].m_bSimulateRotate = (int)param.m_bSimulateRotate;
+			createdParticleBuffer[i].m_bScaleFlag = (int)param.m_bScaleFlag;
 			memcpy(createdParticleBuffer[i].m_iTextureCoord, param.m_iTextureCoord, sizeof(UINT) * 2);
 		}
 		break;
@@ -1568,6 +1570,24 @@ void CParticleMesh::EmitParticle(int emitType, ParticleEmitDataParam& param)
 			createdParticleBuffer[i].m_iTextureIndex = param.m_iTextureIndex;
 			createdParticleBuffer[i].m_xmf2Size = param.m_xmf2Size;
 			createdParticleBuffer[i].m_fEmissive = param.m_fEmissive;
+			createdParticleBuffer[i].m_bSimulateRotate = (int)param.m_bSimulateRotate;
+			createdParticleBuffer[i].m_bScaleFlag = (int)param.m_bScaleFlag;
+			memcpy(createdParticleBuffer[i].m_iTextureCoord, param.m_iTextureCoord, sizeof(UINT) * 2);
+		}
+		break;
+	case 6:
+		for (int i = m_ncreatedParticleNum; i < nCreateParticleNum; ++i) {
+			createdParticleBuffer[i].m_xmf3Position = param.m_xmf3EmitedPosition; /*XMFLOAT3(45 + offset.x, 60, 50 + offset.z)*/
+			createdParticleBuffer[i].m_xmf3Velocity = param.m_xmf3EmitAxes;
+			createdParticleBuffer[i].m_xmf3Velocity = Vector3::ScalarProduct(Vector3::Normalize(createdParticleBuffer[i].m_xmf3Velocity), param.m_fEmitedSpeed, false);
+			createdParticleBuffer[i].m_iType = emitType;
+			createdParticleBuffer[i].m_fLifetime = param.m_fLifeTime;
+			createdParticleBuffer[i].m_fEmitTime = param.m_fEmitTime;
+			createdParticleBuffer[i].m_iTextureIndex = param.m_iTextureIndex;
+			createdParticleBuffer[i].m_xmf2Size = param.m_xmf2Size;
+			createdParticleBuffer[i].m_fEmissive = param.m_fEmissive;
+			createdParticleBuffer[i].m_bSimulateRotate = (int)param.m_bSimulateRotate;
+			createdParticleBuffer[i].m_bScaleFlag = (int)param.m_bScaleFlag;
 			memcpy(createdParticleBuffer[i].m_iTextureCoord, param.m_iTextureCoord, sizeof(UINT) * 2);
 		}
 		break;

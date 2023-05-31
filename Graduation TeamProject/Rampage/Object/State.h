@@ -29,6 +29,7 @@ public:
     virtual IMessageListener* GetTrailComponent();
     virtual IMessageListener* GetUpDownParticleComponent();
     virtual IMessageListener* GetImpactComponent();
+    virtual IMessageListener* GetSlashHitComponent();
 
 	virtual void Enter(entity_type*) = 0;
 	virtual void Execute(entity_type*, float) = 0;
@@ -477,3 +478,22 @@ inline IMessageListener* CState<entity_type>::GetImpactComponent()
 
     return nullptr;
 }
+
+
+template<class entity_type>
+inline IMessageListener* CState<entity_type>::GetSlashHitComponent()
+{
+    std::vector<std::unique_ptr<IMessageListener>>::iterator p = std::find_if(m_pListeners.begin(), m_pListeners.end(), [](const std::unique_ptr<IMessageListener>& listener) {
+        SlashHitComponent* pImpactComponent = dynamic_cast<SlashHitComponent*>(listener.get());
+        if (pImpactComponent) {
+            return true;
+        }
+        return false;
+        });
+
+    if (p != m_pListeners.end())
+        return (*p).get();
+
+    return nullptr;
+}
+

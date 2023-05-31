@@ -201,6 +201,10 @@ void Atk_Player::InitAtkPlayer()
 	std::unique_ptr<TrailComponent> pTrailComponent = std::make_unique<TrailComponent>();
 	m_pListeners.push_back(std::move(pTrailComponent));
 	CMessageDispatcher::GetInst()->RegisterListener(MessageType::UPDATE_SWORDTRAIL, m_pListeners.back().get(), this);
+
+	std::unique_ptr<SlashHitComponent> pSlashHitComponent = std::make_unique<SlashHitComponent>();
+	m_pListeners.push_back(std::move(pSlashHitComponent));
+	CMessageDispatcher::GetInst()->RegisterListener(MessageType::UPDATE_SLASHHITPARTICLE, m_pListeners.back().get(), this);
 }
 
 void Atk_Player::SetPlayerRootVel(CPlayer* player)

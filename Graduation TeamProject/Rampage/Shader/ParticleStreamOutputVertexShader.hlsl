@@ -33,9 +33,10 @@ cbuffer cbGameObjectInfo : register(b0)
 
 VS_PARTICLE_INPUT VSParticleStreamOutput(VS_PARTICLE_INPUT input)
 {
-	if (input.type == 0 || input.type == 5) {
+	uint type = input.type;
+	if (type == 0 || type == 5) {
 		float distance = length(input.velocity);
-		input.velocity += CalculrateCulrNoise(input.position).xyz;
+		input.velocity += CalculrateCulrNoise(input.position).xyz * (1.0f - float(input.rotateFlag));
 		input.velocity = normalize(input.velocity) * distance;
 	}
 	

@@ -410,6 +410,9 @@ void CSimulatorScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 	m_pParticleShader = std::make_unique<CParticleShader>();
 	m_pParticleShader->CreateGraphicsPipelineState(pd3dDevice, GetGraphicsRootSignature(), 0);
 
+	m_pSlashHitShader = std::make_unique<CSlashHitShader>();
+	m_pSlashHitShader->CreateGraphicsPipelineState(pd3dDevice, GetGraphicsRootSignature(), 0);
+
 
 	for (int i = 0; i < 1; ++i)
 	{
@@ -428,6 +431,8 @@ void CSimulatorScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 		std::unique_ptr<CGameObject> m_pSpriteObject = std::make_unique<CParticleObject>(m_pTextureManager->LoadTextureIndex(TextureType::BillBoardTexture, L"Image/BillBoardImages/Circle1.dds"), pd3dDevice, pd3dCommandList, GetGraphicsRootSignature(), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), 2.0f, XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT2(2.0f, 2.0f), MAX_PARTICLES, m_pParticleShader.get(), RECOVERY_PARTICLE);
 		m_pTerrainSpriteObject.push_back(std::move(m_pSpriteObject));
 	}
+
+	m_pSlashHitObjects = std::make_unique<CParticleObject>(m_pTextureManager->LoadTextureIndex(TextureType::BillBoardTexture, L"Image/BillBoardImages/Circle1.dds"), pd3dDevice, pd3dCommandList, GetGraphicsRootSignature(), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), 2.0f, XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT2(2.0f, 2.0f), MAX_PARTICLES, m_pSlashHitShader.get(), RECOVERY_PARTICLE);
 
 
 	m_pPostProcessShader = std::make_unique<CPostProcessShader>();
@@ -570,6 +575,11 @@ void CSimulatorScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float f
 		((CParticleObject*)m_pSpriteAttackObjects[i].get())->Render(pd3dCommandList, nullptr, m_pParticleShader.get());
 	}
 
+	m_pSlashHitObjects->Update(fTimeElapsed);
+	m_pSlashHitObjects->Animate(fTimeElapsed);
+	m_pSlashHitObjects->UpdateShaderVariables(pd3dCommandList, fCurrentTime, fTimeElapsed);
+	m_pSlashHitObjects->Render(pd3dCommandList, nullptr, m_pSlashHitShader.get());
+
 	m_pSwordTrailShader->Render(pd3dCommandList, pCamera, 0);
 	for (std::unique_ptr<CGameObject>& obj : m_pSwordTrailObjects) {
 		obj->Render(pd3dCommandList, true);
@@ -622,7 +632,7 @@ void CSimulatorScene::OnPostRender()
 	{
 		((CParticleObject*)m_pTerrainSpriteObject[i].get())->OnPostRender();
 	}
-
+	m_pSlashHitObjects.get()->OnPostRender();
 }
 
 void CSimulatorScene::ResetMonster()
@@ -674,6 +684,10 @@ void CSimulatorScene::HandleCollision(const CollideParams& params)
 		particle_comp_params.pObject = (*it).get();
 		particle_comp_params.xmf3Position = params.xmf3CollidePosition;
 		CMessageDispatcher::GetInst()->Dispatch_Message<ParticleCompParams>(MessageType::UPDATE_PARTICLE, &particle_comp_params, m_pMainCharacter->m_pStateMachine->GetCurrentState());
+
+		particle_comp_params.pObject = m_pSlashHitObjects.get();
+		dynamic_cast<CParticleObject*>(m_pSlashHitObjects.get())->SetEmitAxis(m_pMainCharacter->m_xmf3AtkDirection);
+		CMessageDispatcher::GetInst()->Dispatch_Message<ParticleCompParams>(MessageType::UPDATE_SLASHHITPARTICLE, &particle_comp_params, m_pMainCharacter->m_pStateMachine->GetCurrentState());
 	}
 
 	//it = std::find_if(m_pUpDownParticleObjects.begin(), m_pUpDownParticleObjects.end(), [](const std::unique_ptr<CGameObject>& pBillBoardObject) {

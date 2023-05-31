@@ -17,6 +17,9 @@
 #define PARTICLE_SIZE_MIN 0.0f
 #define PARTICLE_SIZE_MAX 10.0f
 
+#define SLASH_SIZE_MIN 0.0f
+#define SLASH_SIZE_MAX 100.0f
+
 #define PARTICLE_ALPHA_MIN 0.0f
 #define PARTICLE_ALPHA_MAX 10.0f
 

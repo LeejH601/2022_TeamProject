@@ -1,5 +1,26 @@
 #include "InputLayouts.hlsli"
 
+cbuffer cbFrameworkInfo : register(b7)
+{
+	float		gfCurrentTime : packoffset(c0.x);
+	float		gfElapsedTime : packoffset(c0.y);
+	float		gfLifeTime : packoffset(c0.z);
+	bool		bEmit : packoffset(c0.w);
+
+	uint2		iTextureCoord : packoffset(c1.x);
+	uint		iTextureIndex : packoffset(c1.z);
+	uint		gnParticleType : packoffset(c1.w);
+
+	float3		gf3Gravity : packoffset(c2.x);
+	float		gfSpeed : packoffset(c2.w);
+
+	float3		gfColor : packoffset(c3.x);
+	uint		gnFlareParticlesToEmit : packoffset(c3.w);
+
+	float2		gfSize : packoffset(c4.x);
+
+};
+
 struct VS_PARTICLE_DRAW_OUTPUT
 {
 	float3 position : POSITION;
@@ -14,8 +35,9 @@ struct VS_PARTICLE_DRAW_OUTPUT
 	float EmitTime : EMITTIME; // 방출 시작 시간 
 	float emissive : EMISSIVE;
 	uint rotateFlag : ROTATEFLAG;
+	uint ScaleFlag : SCALEFLAG;
+	uint type : TYPE;
 };
-
 
 cbuffer cbGameObjectInfo : register(b0)
 {
@@ -71,24 +93,39 @@ void GSParticleDraw(point VS_PARTICLE_DRAW_OUTPUT input[1], inout TriangleStream
 		-velocityInCameraSpace - normalVelocity, -velocityInCameraSpace + normalVelocity };
 
 	float cosCeta = dot(WorldNormal, velocityInCameraSpace);
+
 	if (cosCeta == 0.00001f) cosCeta = 0.1f;
 	float ceta = acos(cosCeta); // radian
 	if (velocityInCameraSpace.x < 0)
 		ceta = -ceta;
 
-	ceta *= float(input[0].rotateFlag);
+	uint rotateFlag = input[0].rotateFlag;
+	if (input[0].rotateFlag == 0)
+		ceta = 0;
 
 	float3x3 rotate = float3x3(cos(ceta), -sin(ceta), 0,
 		sin(ceta), cos(ceta), 0,
 		0, 0, 1);
 
-	float scaleValue = 1.0 - min(velocity.z, float(input[0].rotateFlag));
-	scaleValue = 1.0f;
+	uint scaleFlag = input[0].ScaleFlag;
+	float scaleValue = 1.0 - min(velocity.z, float(input[0].ScaleFlag));
+	if (input[0].ScaleFlag == 0)
+		scaleValue = 1.0f;
+
+	float sizeX = input[0].size.x;
+	float sizeY = input[0].size.y;
+
+	if (input[0].type == 6) {
+		float lifedTime = gfCurrentTime - input[0].EmitTime;
+		float value = lifedTime / input[0].lifetime;
+		sizeX *= 1.0f - value;
+	}
+	
 
 	for (int i = 0; i < 4; i++)
 	{
-		gf3Positions[i].x = gf3Positions[i].x * input[0].size.x * 0.5f;
-		gf3Positions[i].y = gf3Positions[i].y * (input[0].size.y * scaleValue) * 0.5f;
+		gf3Positions[i].x = gf3Positions[i].x * sizeX * 0.5f;
+		gf3Positions[i].y = gf3Positions[i].y * (sizeY * scaleValue) * 0.5f;
 		gf3Positions[i] = mul(gf3Positions[i], rotate);
 
 		float3 positionW = input[0].position;

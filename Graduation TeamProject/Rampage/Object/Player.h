@@ -41,6 +41,8 @@ public:
 	DWORD m_dwDirectionCache;
 	XMFLOAT3 m_xmf3DirectionCache;
 
+	XMFLOAT3 m_xmf3AtkDirection;
+
 public:
 	CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks);
 	virtual ~CPlayer();
@@ -75,6 +77,7 @@ private:
 	CGameObject* pBodyBoundingBoxMesh;
 	CGameObject* pWeaponBoundingBoxMesh;
 	XMFLOAT4 m_xmf4TrailControllPoints[2];
+	XMFLOAT3 m_xmf4PrevTrailVertexPoint;
 
 public:
 	CKnightPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks);

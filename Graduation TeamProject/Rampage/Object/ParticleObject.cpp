@@ -218,9 +218,11 @@ void CParticleObject::EmitParticle(int emitType)
 	{
 	case 0:
 	case 2:
+	case 6:
 		param.m_fLifeTime = m_fLifeTime;
 		param.m_nEmitNum = m_iEmitParticleN;
 		param.m_fEmitedSpeed = m_fSpeed;
+		param.m_xmf3EmitAxes = m_xmf3EmitAxis;
 		param.m_xmf3EmitedPosition.x = m_xmf4x4Transform._41;
 		param.m_xmf3EmitedPosition.y = m_xmf4x4Transform._42;
 		param.m_xmf3EmitedPosition.z = m_xmf4x4Transform._43;
@@ -229,6 +231,8 @@ void CParticleObject::EmitParticle(int emitType)
 		param.m_iTextureCoord[0] = m_iTotalRow; param.m_iTextureCoord[1] = m_iTotalCol;
 		param.m_xmf2Size = m_fSize;
 		param.m_fEmissive = m_fEmissive;
+		param.m_bSimulateRotate = m_bSimulateRotate;
+		param.m_bScaleFlag = m_bScaleFlag;
 		break;
 	default:
 		break;

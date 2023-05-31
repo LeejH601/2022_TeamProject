@@ -229,6 +229,8 @@ void ParticleComponent::HandleMessage(const Message& message, const ParticleComp
 		pParticle->SetLengthScale(m_fLengthScale);
 		pParticle->SetTextureIndex(m_iTextureIndex + m_iTextureOffset);
 		pParticle->SetEmissive(m_fEmissive);
+		pParticle->SetRotateFactor(m_bSimulateRotate);
+		pParticle->SetScaleFactor(m_bSimulateRotate);
 		pParticle->EmitParticle(0);
 	}
 }
@@ -488,5 +490,51 @@ void DamageListener::HandleMessage(const Message& message, const DamageParams& p
 		TCHAR pstrDebug[256] = { 0 };
 		//_stprintf_s(pstrDebug, 256, "Already Dead \n");
 		OutputDebugString(L"Already Dead");
+	}
+}
+
+SlashHitComponent::SlashHitComponent()
+{
+	m_bSimulateRotate = true;
+	m_bScaleFlag = false;
+	m_fSize.x = 1.0f; m_fSize.y = 20.f;
+	m_nEmitParticleNumber = 1;
+	m_bEnable = true;
+	m_iTextureOffset = 5;
+	m_iTextureIndex = 0;
+	m_fLifeTime = 0.5f;
+	m_fEmissive = 2.0f;
+	m_xmf3Color = XMFLOAT3(1.0f, 0.1f, 0.0f);
+}
+
+void SlashHitComponent::HandleMessage(const Message& message, const ParticleCompParams& params)
+{
+	if (!m_bEnable)
+		return;
+
+	CParticleObject* pParticle = dynamic_cast<CParticleObject*>(params.pObject);
+
+	if (pParticle)
+	{
+		pParticle->SetEmit(true);
+		pParticle->SetSize(m_fSize);
+		pParticle->SetStartAlpha(m_fAlpha);
+		pParticle->SetColor(m_xmf3Color);
+		pParticle->SetSpeed(m_fSpeed);
+		pParticle->SetLifeTime(m_fLifeTime);
+		pParticle->SetMaxParticleN(m_nParticleNumber);
+		pParticle->SetEmitParticleN(m_nEmitParticleNumber);
+		pParticle->SetPosition(params.xmf3Position);
+		pParticle->SetParticleType(m_iParticleType);
+		pParticle->SetFieldSpeed(m_fFieldSpeed);
+		pParticle->SetNoiseStrength(m_fNoiseStrength);
+		pParticle->SetFieldMainDirection(m_xmf3FieldMainDirection);
+		pParticle->SetProgressionRate(m_fProgressionRate);
+		pParticle->SetLengthScale(m_fLengthScale);
+		pParticle->SetTextureIndex(m_iTextureIndex + m_iTextureOffset);
+		pParticle->SetEmissive(m_fEmissive);
+		pParticle->SetRotateFactor(m_bSimulateRotate);
+		pParticle->SetScaleFactor(m_bScaleFlag);
+		pParticle->EmitParticle(6);
 	}
 }

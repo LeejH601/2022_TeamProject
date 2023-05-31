@@ -164,8 +164,8 @@ void CPlayer::Tmp()
 #define KNIGHT_ROOT_MOTION
 CKnightPlayer::CKnightPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks) : CPlayer(pd3dDevice, pd3dCommandList, nAnimationTracks)
 {
-	CLoadedModelInfo* pKnightModel = CModelManager::GetInst()->GetModelInfo("Object/SK_FKnightB_long_sword_2.bin");;
-	if (!pKnightModel) pKnightModel = CModelManager::GetInst()->LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, "Object/SK_FKnightB_long_sword_2.bin");
+	CLoadedModelInfo* pKnightModel = CModelManager::GetInst()->GetModelInfo("Object/SK_FKnightB_Dragonblade.bin");;
+	if (!pKnightModel) pKnightModel = CModelManager::GetInst()->LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, "Object/SK_FKnightB_Dragonblade.bin");
 
 	CGameObject* obj = pKnightModel->m_pModelRootObject->FindFrame("SK_FKnightB_05");
 	m_pPelvisObject = pKnightModel->m_pModelRootObject->FindFrame("pelvis");
@@ -236,6 +236,8 @@ bool CKnightPlayer::CheckCollision(CGameObject* pTargetObject)
 	if (pTargetObject->m_bEnable && ((CMonster*)pTargetObject)->m_fHP > 0 && m_TransformedWeaponBoundingBox.Intersects(*TargetBoundingBox)) {
 		
 		SetTargetPosition(*TargetBoundingBox);
+		XMFLOAT3 xmf3NowTrailVertexPoint = XMFLOAT3(m_xmf4TrailControllPoints[0].x, m_xmf4TrailControllPoints[0].y, m_xmf4TrailControllPoints[0].z);
+		m_xmf3AtkDirection = Vector3::Normalize(Vector3::Subtract(xmf3NowTrailVertexPoint, m_xmf4PrevTrailVertexPoint));
 
 		CollideParams collide_params;
 		collide_params.xmf3CollidePosition = m_xmf3TargetPosition;
@@ -344,10 +346,10 @@ void CKnightPlayer::UpdateTransform(XMFLOAT4X4* pxmf4x4Parent)
 	{
 		XMFLOAT4X4 xmf4x4World = pWeapon->GetWorld();
 
-		XMMATRIX mtxRotate = XMMatrixRotationRollPitchYaw(XMConvertToRadians(-15.0f), XMConvertToRadians(0.0f), XMConvertToRadians(0.0f));
-		xmf4x4World = Matrix4x4::Multiply(mtxRotate, xmf4x4World);
+		/*XMMATRIX mtxRotate = XMMatrixRotationRollPitchYaw(XMConvertToRadians(-15.0f), XMConvertToRadians(0.0f), XMConvertToRadians(0.0f));
+		xmf4x4World = Matrix4x4::Multiply(mtxRotate, xmf4x4World);*/
 
-		XMFLOAT3 xmf3Position = XMFLOAT3{ xmf4x4World._41, xmf4x4World._42, xmf4x4World._43 };
+		//XMFLOAT3 xmf3Position = XMFLOAT3{ xmf4x4World._41, xmf4x4World._42, xmf4x4World._43 };
 
 		XMFLOAT3 controllBasePos = XMFLOAT3(0.0f, 0.2f, 0.0f);
 		controllBasePos = Vector3::TransformCoord(controllBasePos, xmf4x4World);
@@ -356,16 +358,18 @@ void CKnightPlayer::UpdateTransform(XMFLOAT4X4* pxmf4x4Parent)
 		//offsetPosition = Vector3::Add(controllBasePos, m_TransformedWeaponBoundingBox.Extents);
 
 
-		XMFLOAT3 xmf3Direction = XMFLOAT3{ xmf4x4World._31, xmf4x4World._32, xmf4x4World._33 };
+	/*	XMFLOAT3 xmf3Direction = XMFLOAT3{ xmf4x4World._31, xmf4x4World._32, xmf4x4World._33 };
 		xmf3Position = Vector3::Add(xmf3Position, xmf3Direction, -0.4f);
 		xmf4x4World._41 = xmf3Position.x;
 		xmf4x4World._42 = xmf3Position.y;
-		xmf4x4World._43 = xmf3Position.z;
+		xmf4x4World._43 = xmf3Position.z;*/
 
 		if (pWeaponBoundingBoxMesh)
 			pWeaponBoundingBoxMesh->SetWorld(xmf4x4World);
 
 		m_WeaponBoundingBox.Transform(m_TransformedWeaponBoundingBox, XMLoadFloat4x4(&xmf4x4World));
+
+		m_xmf4PrevTrailVertexPoint = XMFLOAT3( m_xmf4TrailControllPoints[1].x, m_xmf4TrailControllPoints[1].y, m_xmf4TrailControllPoints[1].z);
 
 		m_xmf4TrailControllPoints[0] = XMFLOAT4(controllBasePos.x, controllBasePos.y, controllBasePos.z, 1.0f);
 		m_xmf4TrailControllPoints[1] = XMFLOAT4(offsetPosition.x, offsetPosition.y, offsetPosition.z, 1.0f);
@@ -373,11 +377,18 @@ void CKnightPlayer::UpdateTransform(XMFLOAT4X4* pxmf4x4Parent)
 }
 void CKnightPlayer::PrepareBoundingBox(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
-	pWeapon = CGameObject::FindFrame("Weapon_r");
+	pWeapon = CGameObject::FindFrame("Dragonblade");
+	UpdateTransform(NULL);
+
+	XMFLOAT3 center = pWeapon->m_pMesh->GetBoundingCenter();
+	XMFLOAT3 extent = pWeapon->m_pMesh->GetBoundingExtent();
+	//XMStoreFloat3(&center, XMVector3TransformCoord(XMVECTOR({ center.x, center.y, center.z, 1.0f }), XMLoadFloat4x4(&pWeapon->m_xmf4x4World)));
+	//XMStoreFloat3(&extent, XMVector3TransformCoord(XMVECTOR({ extent.x, extent.y, extent.z, 0.0f }), XMLoadFloat4x4(&pWeapon->m_xmf4x4World)));
+
 	pBodyBoundingBoxMesh = CBoundingBoxShader::GetInst()->AddBoundingObject(pd3dDevice, pd3dCommandList, this, XMFLOAT3(0.0f, 0.75f, 0.0f), XMFLOAT3(0.35f, 1.0f, 0.35f));
-	pWeaponBoundingBoxMesh = CBoundingBoxShader::GetInst()->AddBoundingObject(pd3dDevice, pd3dCommandList, this, XMFLOAT3(0.0f, 0.6f, 0.4f), XMFLOAT3(0.0125f, 0.525f, 0.0625f));
+	pWeaponBoundingBoxMesh = CBoundingBoxShader::GetInst()->AddBoundingObject(pd3dDevice, pd3dCommandList, this, center, extent);
 	m_BodyBoundingBox = BoundingOrientedBox{ XMFLOAT3(0.0f, 0.75f, 0.0f), XMFLOAT3(0.35f, 1.0f, 0.35f), XMFLOAT4{0.0f, 0.0f, 0.0f, 1.0f} };
-	m_WeaponBoundingBox = BoundingOrientedBox{ XMFLOAT3(0.0f, 0.6f, 0.4f), XMFLOAT3(0.0125f, 0.525f, 0.0625f), XMFLOAT4{0.0f, 0.0f, 0.0f, 1.0f} };
+	m_WeaponBoundingBox = BoundingOrientedBox{ center, extent, XMFLOAT4{0.0f, 0.0f, 0.0f, 1.0f} };
 }
 
 

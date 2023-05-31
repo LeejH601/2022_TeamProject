@@ -69,6 +69,9 @@ public:
 	void SetLengthScale(float fLengthScale) { m_fLengthScale = fLengthScale; };
 	void SetFieldMainDirection(XMFLOAT3 xmf3FieldMainDirection) { m_xmf3FieldMainDirection = xmf3FieldMainDirection; };
 	void SetEmissive(float fEmissive) { m_fEmissive = fEmissive; };
+	void SetRotateFactor(bool input) { m_bSimulateRotate = input;};
+	void SetScaleFactor(bool input) { m_bScaleFlag = input; };
+	void SetEmitAxis(XMFLOAT3 EmitAxis) { m_xmf3EmitAxis = EmitAxis; };
 	void EmitParticle(int emitType);
 
 	void SetDirection(XMFLOAT3 xmf3Direction);
@@ -93,6 +96,9 @@ protected:
 	int			m_nVertices = 0;
 
 	float		m_fEmissive = 1.0f;
+	bool		m_bSimulateRotate = false;
+	bool		m_bScaleFlag = false;
+	XMFLOAT3	m_xmf3EmitAxis = XMFLOAT3(0.f, 1.f, 0.f);
 
 	float m_fFieldSpeed;
 	float m_fNoiseStrength;

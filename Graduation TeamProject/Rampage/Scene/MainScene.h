@@ -43,6 +43,7 @@ private:
 	std::unique_ptr<CTextureManager> m_pTextureManager = NULL;
 
 	std::unique_ptr<CParticleShader> m_pParticleShader;
+	std::unique_ptr<CSlashHitShader> m_pSlashHitShader;
 	std::vector<std::unique_ptr<CGameObject>> m_pParticleObjects;
 	//std::vector<std::unique_ptr<CGameObject>> m_pUpDownParticleObjects;
 	std::vector<std::unique_ptr<CGameObject>> m_pSpriteAttackObjects;
@@ -58,6 +59,7 @@ private:
 	std::unique_ptr<CSwordTrailShader> m_pSwordTrailShader;
 	std::vector<std::unique_ptr<CGameObject>> m_pSwordTrailObjects;
 	std::unique_ptr<CVertexPointParticleObject> m_pVertexPointParticleObject;
+	std::unique_ptr<CParticleObject> m_pSlashHitObjects;
 
 	std::unique_ptr<CSkyBoxShader> m_pSkyBoxShader;
 	std::unique_ptr<CSkyBox> m_pSkyBoxObject;
