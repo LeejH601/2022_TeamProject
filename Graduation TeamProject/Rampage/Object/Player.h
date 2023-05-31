@@ -41,6 +41,9 @@ public:
 	DWORD m_dwDirectionCache;
 	XMFLOAT3 m_xmf3DirectionCache;
 
+	float m_fStamina;
+	float m_fTotalStamina;
+	bool m_bKeyInput = false;
 public:
 	CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks);
 	virtual ~CPlayer();

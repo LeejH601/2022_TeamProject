@@ -40,6 +40,7 @@ VS_TEXTURED_OUTPUT VSUIObject(uint nVertexID : SV_VertexID)
 	VS_TEXTURED_OUTPUT output;
 	float2 fSize = gmtxGameObject._11_22; // 0 ~ 1
 	float2 fScreenPos = gmtxGameObject._41_42 * 2.f - 1; // 0 ~ 1 -> -1 ~ 1 º¯È¯
+
 	if (nVertexID == 0) { output.position = float4(-fSize.x, +fSize.y, 0.0f, 1.0f); output.uv = float2(0.0f, 0.0f); }
 	if (nVertexID == 1) { output.position = float4(+fSize.x, +fSize.y, 0.0f, 1.0f); output.uv = float2(1.0f, 0.0f); }
 	if (nVertexID == 2) { output.position = float4(+fSize.x, -fSize.y, 0.0f, 1.0f); output.uv = float2(1.0f, 1.0f); }
@@ -50,4 +51,3 @@ VS_TEXTURED_OUTPUT VSUIObject(uint nVertexID : SV_VertexID)
 	output.position += float4(fScreenPos, 0.f, 0.f);
 	return(output);
 }
-

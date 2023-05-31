@@ -13,7 +13,6 @@ public:
 	XMFLOAT3 m_xmf3WanderVec;
 	XMFLOAT3 m_xmf3ChasingVec;
 
-	float m_fHP;
 	unsigned int m_iPlayerAtkId = 999;
 
 	bool m_bIsDummy = false;

@@ -757,6 +757,9 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/Frame.dds", 0, 0);
 	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/Hp.dds", 0, 0);
 	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/Mana.dds", 0, 0);
+	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/Tonus.dds", 0, 0);
+	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/Mana2.dds", 0, 0);
+	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/Blood.dds", 0, 0);
 
 	m_pTextureManager->CreateResourceView(pd3dDevice, 0);
 
@@ -831,22 +834,27 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pUIObjectShader->CreateShader(pd3dDevice, GetGraphicsRootSignature(), 7, pdxgiObjectRtvFormats, DXGI_FORMAT_D32_FLOAT, 0);
 	std::unique_ptr<CUIObject> pUIObject = std::make_unique<CUIObject>(2, pd3dDevice, pd3dCommandList, 10.f);
 	pUIObject->SetSize(XMFLOAT2(814.f * 0.7f, 253.f * 0.7f));
-	pUIObject->SetScreenPosition(XMFLOAT2(FRAME_BUFFER_WIDTH * 0.2f, FRAME_BUFFER_HEIGHT * 0.2f));
+	pUIObject->SetScreenPosition(XMFLOAT2(FRAME_BUFFER_WIDTH * 0.2f, FRAME_BUFFER_HEIGHT * 0.8f));
 	pUIObject->SetTextureIndex(7);
 	m_pUIObject.push_back(std::move(pUIObject));
 
-	pUIObject = std::make_unique<CUIObject>(2, pd3dDevice, pd3dCommandList, 10.f);
-	pUIObject->SetSize(XMFLOAT2(426 * 0.7f, 42 * 0.7f));
-	pUIObject->SetScreenPosition(XMFLOAT2(FRAME_BUFFER_WIDTH * 0.2f + 75.f, FRAME_BUFFER_HEIGHT * 0.2f + 30.f));
+	pUIObject = std::make_unique<CHPObject>(2, pd3dDevice, pd3dCommandList, 10.f);
+	pUIObject->SetSize(XMFLOAT2(426 * 0.65f, 42 * 0.65f));
+	pUIObject->SetScreenPosition(XMFLOAT2(FRAME_BUFFER_WIDTH * 0.2f + 80.f, FRAME_BUFFER_HEIGHT * 0.8f + 25.f));
 	pUIObject->SetTextureIndex(8);
 	m_pUIObject.push_back(std::move(pUIObject));
 
-	pUIObject = std::make_unique<CUIObject>(2, pd3dDevice, pd3dCommandList, 10.f);
-	pUIObject->SetSize(XMFLOAT2(426 * 0.5f, 42 * 0.5f));
-	pUIObject->SetScreenPosition(XMFLOAT2(FRAME_BUFFER_WIDTH * 0.2f + 45.f, FRAME_BUFFER_HEIGHT * 0.2f - 10.f));
+	pUIObject = std::make_unique<CSTAMINAObject>(2, pd3dDevice, pd3dCommandList, 10.f);
+	pUIObject->SetSize(XMFLOAT2(426 * 0.48f, 42 * 0.48f));
+	pUIObject->SetScreenPosition(XMFLOAT2(FRAME_BUFFER_WIDTH * 0.2f + 45.f, FRAME_BUFFER_HEIGHT * 0.8f - 10.f));
 	pUIObject->SetTextureIndex(9);
 	m_pUIObject.push_back(std::move(pUIObject));
 
+	//pUIObject = std::make_unique<CSTAMINAObject>(2, pd3dDevice, pd3dCommandList, 10.f);
+	//pUIObject->SetSize(XMFLOAT2(FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT));
+	//pUIObject->SetScreenPosition(XMFLOAT2(FRAME_BUFFER_WIDTH * 0.5f, FRAME_BUFFER_HEIGHT * 0.5f));
+	//pUIObject->SetTextureIndex(12);
+	//m_pUIObject.push_back(std::move(pUIObject));
 	// 0 ~ FRAME_BUFFER_WIDTH, 0 ~ FRAME_BUFFER_HEIGHT
 	// -1 ~ 1
 }
@@ -914,7 +922,8 @@ void CMainTMPScene::UpdateObjects(float fTimeElapsed)
 	}
 
 	m_pPlayer->Update(fTimeElapsed);
-
+	dynamic_cast<CBarObject*>(m_pUIObject[1].get())->Set_Value( ((CPhysicsObject*)m_pPlayer)->m_fHP, ((CPhysicsObject*)m_pPlayer)->m_fTotalHP);
+	dynamic_cast<CBarObject*>(m_pUIObject[2].get())->Set_Value(((CPlayer*)m_pPlayer)->m_fStamina, ((CPlayer*)m_pPlayer)->m_fTotalStamina);
 	// Update Camera
 	XMFLOAT3 xmf3PlayerPos = XMFLOAT3{
 		((CKnightPlayer*)m_pPlayer)->m_pSkinnedAnimationController->m_pRootMotionObject->GetWorld()._41,
@@ -1212,30 +1221,6 @@ void CMainTMPScene::HandleCollision(const CollideParams& params)
 	//	particleUpdown_comp_params.xmf3Position = params.xmf3CollidePosition;
 	//	CMessageDispatcher::GetInst()->Dispatch_Message<ParticleUpDownParams>(MessageType::UPDATE_UPDOWNPARTICLE, &particleUpdown_comp_params, Damaged_Monster::GetInst());
 	//}
-
-	std::vector<std::unique_ptr<CGameObject>>::iterator TerrainSpriteit = std::find_if(m_pTerrainSpriteObject.begin(), m_pTerrainSpriteObject.end(), [](const std::unique_ptr<CGameObject>& pTerrainSpriteObject) {
-		if (((CParticleObject*)pTerrainSpriteObject.get())->CheckCapacity())
-			return true;
-		return false;
-		});
-
-	if (TerrainSpriteit != m_pTerrainSpriteObject.end())
-	{
-		TerrainSpriteCompParams AttackSprite_comp_params;
-		AttackSprite_comp_params.pObject = (*TerrainSpriteit).get();
-		AttackSprite_comp_params.xmf3Position = params.xmf3CollidePosition;
-		CMessageDispatcher::GetInst()->Dispatch_Message<TerrainSpriteCompParams>(MessageType::UPDATE_SPRITE, &AttackSprite_comp_params, Spawn_Monster::GetInst());
-		TCHAR pstrDebug[256] = { 0 };
-		_stprintf_s(pstrDebug, 256, _T("바닥 충격 출력 %f, %f, %f\n"), params.xmf3CollidePosition.x, params.xmf3CollidePosition.y, params.xmf3CollidePosition.z);
-		OutputDebugString(pstrDebug);
-	}
-	else
-	{
-		TCHAR pstrDebug[256] = { 0 };
-		_stprintf_s(pstrDebug, 256, _T("No바닥 충격 출력 %f, %f, %f\n"), params.xmf3CollidePosition.x, params.xmf3CollidePosition.y, params.xmf3CollidePosition.z);
-		OutputDebugString(pstrDebug);
-	}
-
 
 
 }

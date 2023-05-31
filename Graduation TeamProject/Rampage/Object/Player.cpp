@@ -16,6 +16,8 @@
 
 CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks)
 {
+	m_fHP = 100.f;
+	m_fTotalHP = 100.f;
 	m_xmf4x4World = Matrix4x4::Identity();
 	m_xmf4x4Transform = Matrix4x4::Identity();
 	m_xmf4x4Texture = Matrix4x4::Identity();
@@ -29,6 +31,9 @@ CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 	m_fSpeedKperH = 6.0f;
 	m_fSpeedMperS = m_fSpeedKperH * 1000.0f / 3600.0f;
 	m_fSpeedUperS = m_fSpeedMperS * 100.0f / 4.0f;
+
+	m_fTotalStamina = 100.f;
+	m_fStamina = 100.f;
 }
 
 CPlayer::~CPlayer()
@@ -116,7 +121,15 @@ void CPlayer::Update(float fTimeElapsed)
 
 	CPhysicsObject::Apply_Friction(fTimeElapsed);
 
+	
+	if (Vector3::Length(Vector3::Subtract(m_xmf3PreviousPos, GetPosition())) <= 0.f && (m_fStamina < m_fTotalStamina))
+		m_fStamina += 2.f * m_fSpeedUperS * fTimeElapsed * ((m_fTotalStamina - m_fStamina) / m_fTotalStamina);
+
 	m_xmf3PreviousPos = GetPosition();
+
+
+
+	m_bKeyInput = false;
 }
 
 void CPlayer::ProcessInput(DWORD dwDirection, float cxDelta, float cyDelta, float fTimeElapsed, CCamera* pCamera)
@@ -125,6 +138,7 @@ void CPlayer::ProcessInput(DWORD dwDirection, float cxDelta, float cyDelta, floa
 
 	GetKeyboardState(pKeysBuffer);
 
+	m_bKeyInput = true;
 	if ((dwDirection != 0) || (cxDelta != 0.0f) || (cyDelta != 0.0f))
 	{
 		if (dwDirection)
@@ -141,6 +155,9 @@ void CPlayer::ProcessInput(DWORD dwDirection, float cxDelta, float cyDelta, floa
 			m_xmfDirection = xmf3Shift;
 			m_dwDirectionCache = dwDirection;
 			m_xmf3DirectionCache = xmf3Shift;
+
+			if (m_fStamina > 0)
+				m_fStamina -= fTimeElapsed * m_fSpeedUperS;
 		}
 	}
 }
@@ -245,6 +262,7 @@ bool CKnightPlayer::CheckCollision(CGameObject* pTargetObject)
 		_stprintf_s(pstrDebug, 256, _T("CheckCollision\n"));
 		OutputDebugString(pstrDebug);
 
+		m_fHP -= 30.f;
 		if (m_pCamera)
 		{
 			if (m_pStateMachine->GetCurrentState()->GetCameraShakeComponent()->GetEnable())
