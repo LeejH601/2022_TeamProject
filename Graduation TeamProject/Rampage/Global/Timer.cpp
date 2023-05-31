@@ -142,6 +142,9 @@ long long CGameTimer::GetNowTime()
 
 void CGameTimer::SetDynamicTimeScale(float fDynamicTimeScale, float fDuration)
 {
+	if (m_fDynamicTimeScale < 0.1f)
+		return;
+
 	m_fDynamicTimeScale *= fDynamicTimeScale;
 
 	std::wstring timeScale{ std::to_wstring(m_fDynamicTimeScale) };
