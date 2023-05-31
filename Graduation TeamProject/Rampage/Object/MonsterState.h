@@ -108,7 +108,7 @@ public:
 class Dead_Monster : public CState<CMonster>
 {
 private:
-    float m_fMaxDeadTime = 23.f;
+    float m_fMaxDeadTime = 8.5f;
 public:
     DECLARE_SINGLE(Dead_Monster);
     virtual void Enter(CMonster* monster);
