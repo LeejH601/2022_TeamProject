@@ -361,6 +361,9 @@ void Atk1_Player::Enter(CPlayer* player)
 	if (player->m_pSwordTrailReference) {
 		dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[0].get())->m_faccumulateTime = 0.0f;
 	}
+	if (player->m_fStamina > 0)
+		player->m_fStamina -= player->m_fTotalStamina * 0.2f;
+
 }
 
 void Atk1_Player::Execute(CPlayer* player, float fElapsedTime)
@@ -379,6 +382,7 @@ void Atk1_Player::Execute(CPlayer* player, float fElapsedTime)
 	}
 
 	SpawnTrailParticle(player);
+
 }
 
 void Atk1_Player::Animate(CPlayer* player, float fElapsedTime)
@@ -472,6 +476,9 @@ void Atk2_Player::Enter(CPlayer* player)
 	if (player->m_pSwordTrailReference) {
 		dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[1].get())->m_faccumulateTime = 0.0f;
 	}
+
+	if (player->m_fStamina > 0)
+		player->m_fStamina -= player->m_fTotalStamina * 0.2f;
 }
 
 void Atk2_Player::Execute(CPlayer* player, float fElapsedTime)
@@ -607,6 +614,9 @@ void Atk3_Player::Enter(CPlayer* player)
 	if (player->m_pSwordTrailReference) {
 		dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[2].get())->m_faccumulateTime = 0.0f;
 	}
+
+	if (player->m_fStamina > 0)
+		player->m_fStamina -= player->m_fTotalStamina * 0.2f;
 }
 
 void Atk3_Player::Execute(CPlayer* player, float fElapsedTime)
@@ -688,6 +698,7 @@ void Run_Player::Enter(CPlayer* player)
 	player->m_fAnimationPlayWeight = 1.0f;
 
 	player->m_xmf3RootTransfromPreviousPos = XMFLOAT3{ 0.f, 0.f , 0.f };
+
 
 }
 
@@ -783,6 +794,9 @@ void Atk4_Player::Enter(CPlayer* player)
 	/*SoundPlayParams SoundPlayParam;
 	SoundPlayParam.sound_category = SOUND_CATEGORY::SOUND_SHOOT;
 	CMessageDispatcher::GetInst()->Dispatch_Message<SoundPlayParams>(MessageType::PLAY_SOUND, &SoundPlayParam, this);*/
+
+	if (player->m_fStamina > 0)
+		player->m_fStamina -= player->m_fTotalStamina * 0.2f;
 }
 
 void Atk4_Player::CheckComboAttack(CPlayer* player)
@@ -870,6 +884,9 @@ void Atk5_Player::Enter(CPlayer* player)
 	/*SoundPlayParams SoundPlayParam;
 	SoundPlayParam.sound_category = SOUND_CATEGORY::SOUND_SHOOT;
 	CMessageDispatcher::GetInst()->Dispatch_Message<SoundPlayParams>(MessageType::PLAY_SOUND, &SoundPlayParam, this);*/
+
+	if (player->m_fStamina > 0)
+		player->m_fStamina -= player->m_fTotalStamina * 0.2f;
 }
 
 void Atk5_Player::SpawnTrailParticle(CPlayer* player)

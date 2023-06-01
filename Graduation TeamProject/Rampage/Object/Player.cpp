@@ -70,6 +70,7 @@ XMFLOAT3 CPlayer::GetTargetPosition()
 	return m_xmf3TargetPosition;
 }
 
+
 void CPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity, CCamera* pCamera)
 {
 	if (dwDirection)
@@ -121,15 +122,15 @@ void CPlayer::Update(float fTimeElapsed)
 
 	CPhysicsObject::Apply_Friction(fTimeElapsed);
 
-	
-	if (Vector3::Length(Vector3::Subtract(m_xmf3PreviousPos, GetPosition())) <= 0.f && (m_fStamina < m_fTotalStamina))
-		m_fStamina += 2.f * m_fSpeedUperS * fTimeElapsed * ((m_fTotalStamina - m_fStamina) / m_fTotalStamina);
-
 	m_xmf3PreviousPos = GetPosition();
 
+	UpdateStamina(fTimeElapsed);
+}
 
-
-	m_bKeyInput = false;
+void CPlayer::UpdateStamina(float fTimeElapsed)
+{
+	if ((m_pStateMachine->GetCurrentState() == Idle_Player::GetInst()) || (m_pStateMachine->GetCurrentState() == Run_Player::GetInst()))
+		m_fStamina += 2.f * m_fSpeedUperS * fTimeElapsed * ((m_fTotalStamina - m_fStamina) / m_fTotalStamina);
 }
 
 void CPlayer::ProcessInput(DWORD dwDirection, float cxDelta, float cyDelta, float fTimeElapsed, CCamera* pCamera)
@@ -155,9 +156,6 @@ void CPlayer::ProcessInput(DWORD dwDirection, float cxDelta, float cyDelta, floa
 			m_xmfDirection = xmf3Shift;
 			m_dwDirectionCache = dwDirection;
 			m_xmf3DirectionCache = xmf3Shift;
-
-			if (m_fStamina > 0)
-				m_fStamina -= fTimeElapsed * m_fSpeedUperS;
 		}
 	}
 }
