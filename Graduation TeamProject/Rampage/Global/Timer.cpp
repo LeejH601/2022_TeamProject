@@ -2,6 +2,8 @@
 #include "Timer.h"
 #include "MessageDispatcher.h"
 
+std::mutex fDynamicScaleMutex;
+
 CGameTimer::CGameTimer()
 {
 	::QueryPerformanceCounter((LARGE_INTEGER*)&m_nLastPerformanceCounter);
@@ -142,7 +144,9 @@ long long CGameTimer::GetNowTime()
 
 void CGameTimer::SetDynamicTimeScale(float fDynamicTimeScale, float fDuration, float fMinTimeScale)
 {
-	if (m_fDynamicTimeScale <= fMinTimeScale)
+	std::lock_guard<std::mutex> lock(fDynamicScaleMutex);
+
+	if (m_fDynamicTimeScale - fMinTimeScale < FLT_EPSILON)
 		return;
 
 	m_fDynamicTimeScale *= fDynamicTimeScale;
@@ -160,6 +164,7 @@ void CGameTimer::RestoreDynamicTimeScale(float fDynamicTimeScale, float fDuratio
 {
 	std::this_thread::sleep_for(std::chrono::milliseconds(static_cast<int>(fDuration * 1000)));
 
+	std::lock_guard<std::mutex> lock(fDynamicScaleMutex);
 	m_fDynamicTimeScale /= fDynamicTimeScale;
 
 	std::wstring timeScale{ std::to_wstring(m_fDynamicTimeScale) };

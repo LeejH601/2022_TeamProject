@@ -40,6 +40,7 @@
 
 //--------------------------
 #include <iostream>
+#include <mutex>
 #include <shlobj_core.h>
 #include <codecvt>
 #include <fstream>
