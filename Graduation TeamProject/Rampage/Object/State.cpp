@@ -262,8 +262,6 @@ void Atk1_Player::CheckComboAttack(CPlayer* player)
 			dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[0].get())->m_eTrailUpdateMethod = TRAIL_UPDATE_METHOD::DELETE_CONTROL_POINT;
 		if (player->m_bAttack) {
 			CAnimationController* pPlayerController = player->m_pSkinnedAnimationController.get();
-			/*if (pPlayerController->m_bRootMotion)
-				SetPlayerRootVel(player);*/
 			player->m_pStateMachine->ChangeState(Atk2_Player::GetInst());
 		}
 	}
@@ -329,7 +327,6 @@ void Atk1_Player::Enter(CPlayer* player)
 	player->m_pSkinnedAnimationController->m_fTime = 0.0f;
 	player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition = 0.0f;
 	player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_nType = ANIMATION_TYPE_ONCE;
-	player->m_bAttacked = false;
 	player->m_bAttack = false; // 사용자가 좌클릭시 true가 되는 변수
 	player->m_fCMDConstant = 1.0f;
 
@@ -373,6 +370,8 @@ void Atk1_Player::Animate(CPlayer* player, float fElapsedTime)
 
 void Atk1_Player::Exit(CPlayer* player)
 {
+	CLogger::GetInst()->Log(std::string("Player Exit Atk1"));
+
 	if (player->m_pCamera)
 	{
 		player->m_pCamera->m_bCameraShaking = false;
@@ -410,8 +409,6 @@ void Atk2_Player::CheckComboAttack(CPlayer* player)
 		if (player->m_bAttack)
 		{
 			CAnimationController* pPlayerController = player->m_pSkinnedAnimationController.get();
-			/*if (pPlayerController->m_bRootMotion)
-				SetPlayerRootVel(player);*/
 			player->m_pStateMachine->ChangeState(Atk3_Player::GetInst());
 		}
 	}
@@ -437,7 +434,6 @@ void Atk2_Player::Enter(CPlayer* player)
 	player->m_pSkinnedAnimationController->m_fTime = 0.0f;
 	player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition = 0.2f;
 	player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_nType = ANIMATION_TYPE_ONCE;
-	player->m_bAttacked = false;
 	player->m_bAttack = false; // 사용자가 좌클릭시 true가 되는 변수
 	player->m_fCMDConstant = 1.0f;
 
@@ -569,7 +565,6 @@ void Atk3_Player::Enter(CPlayer* player)
 	player->m_pSkinnedAnimationController->m_fTime = 0.0f;
 	player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition = 0.0f;
 	player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_nType = ANIMATION_TYPE_ONCE;
-	player->m_bAttacked = false;
 	player->m_bAttack = false; // 사용자가 좌클릭시 true가 되는 변수
 
 	player->m_xmf3RootTransfromPreviousPos = XMFLOAT3{ 0.f, 0.f , 0.f };
@@ -671,15 +666,15 @@ void Run_Player::Execute(CPlayer* player, float fElapsedTime)
 {
 	XMFLOAT3 xmf3PlayerVel = player->GetVelocity();
 
+	// Idle 상태로 복귀하는 코드
+	if (Vector3::Length(xmf3PlayerVel) == 0)
+		player->m_pStateMachine->ChangeState(Idle_Player::GetInst());
+
 	if (player->m_bAttack)
 		player->m_pStateMachine->ChangeState(Atk1_Player::GetInst());
 
 	if (player->m_bEvasioned)
 		player->m_pStateMachine->ChangeState(Evasion_Player::GetInst());
-
-	// Idle 상태로 복귀하는 코드
-	if (Vector3::Length(xmf3PlayerVel) == 0)
-		player->m_pStateMachine->ChangeState(Idle_Player::GetInst());
 
 	// 발바닥 뼈에
 
@@ -743,7 +738,6 @@ void Atk4_Player::Enter(CPlayer* player)
 	player->m_pSkinnedAnimationController->m_fTime = 0.0f;
 	player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition = 0.0f;
 	player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_nType = ANIMATION_TYPE_ONCE;
-	player->m_bAttacked = false;
 	player->m_bAttack = false; // 사용자가 좌클릭시 true가 되는 변수
 
 	player->m_xmf3RootTransfromPreviousPos = XMFLOAT3{ 0.f, 0.f , 0.f };
@@ -827,7 +821,6 @@ void Atk5_Player::Enter(CPlayer* player)
 	player->m_pSkinnedAnimationController->m_fTime = 0.0f;
 	player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition = 0.0f;
 	player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_nType = ANIMATION_TYPE_ONCE;
-	player->m_bAttacked = false;
 	player->m_bAttack = false; // 사용자가 좌클릭시 true가 되는 변수
 
 	player->m_xmf3RootTransfromPreviousPos = XMFLOAT3{ 0.f, 0.f , 0.f };

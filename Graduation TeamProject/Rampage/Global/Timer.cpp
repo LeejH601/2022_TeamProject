@@ -151,10 +151,10 @@ void CGameTimer::SetDynamicTimeScale(float fDynamicTimeScale, float fDuration, f
 
 	m_fDynamicTimeScale *= fDynamicTimeScale;
 
-	std::wstring timeScale{ std::to_wstring(m_fDynamicTimeScale) };
+	/*std::wstring timeScale{ std::to_wstring(m_fDynamicTimeScale) };
 	OutputDebugString(L"SetDynamicTimeScale: ");
 	OutputDebugString(timeScale.c_str());
-	OutputDebugString(L"\n");
+	OutputDebugString(L"\n");*/
 
 	std::thread restorTimer_thread(&CGameTimer::RestoreDynamicTimeScale, this, fDynamicTimeScale, fDuration);
 	restorTimer_thread.detach();
@@ -167,8 +167,8 @@ void CGameTimer::RestoreDynamicTimeScale(float fDynamicTimeScale, float fDuratio
 	std::lock_guard<std::mutex> lock(fDynamicScaleMutex);
 	m_fDynamicTimeScale /= fDynamicTimeScale;
 
-	std::wstring timeScale{ std::to_wstring(m_fDynamicTimeScale) };
+	/*std::wstring timeScale{ std::to_wstring(m_fDynamicTimeScale) };
 	OutputDebugString(L"RestoreDynamicTimeScale: ");
 	OutputDebugString(timeScale.c_str());
-	OutputDebugString(L"\n");
+	OutputDebugString(L"\n");*/
 }

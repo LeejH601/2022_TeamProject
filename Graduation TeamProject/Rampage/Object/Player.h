@@ -18,7 +18,6 @@ public:
 
 	unsigned int m_iAttackId = 0;
 	bool m_bAttack = false;
-	bool m_bAttacked = false;
 	bool m_bEvasioned = false;
 
 	LPVOID m_pPlayerUpdatedContext = NULL;
