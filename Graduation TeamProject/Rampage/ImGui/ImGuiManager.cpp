@@ -203,8 +203,10 @@ void DataLoader::SaveComponentSet(FILE* pInFile, CState<CPlayer>* pState)
 	WriteIntegerFromFile(pInFile, pHitLagComponent->GetEnable());
 	WriteStringFromFile(pInFile, std::string("<LagScale>:"));
 	WriteFloatFromFile(pInFile, pHitLagComponent->GetLagScale());
-	WriteStringFromFile(pInFile, std::string("<MaxLagTime>:"));
-	WriteFloatFromFile(pInFile, pHitLagComponent->GetMaxLagTime());
+	WriteStringFromFile(pInFile, std::string("<Duration>:"));
+	WriteFloatFromFile(pInFile, pHitLagComponent->GetDuration());
+	WriteStringFromFile(pInFile, std::string("<MinTimeScale>:"));
+	WriteFloatFromFile(pInFile, pHitLagComponent->GetMinTimeScale());
 	WriteStringFromFile(pInFile, std::string("</HitLagComponent>:"));
 
 	WriteStringFromFile(pInFile, std::string("<CEffectSoundComponent>:"));
@@ -539,9 +541,13 @@ void DataLoader::LoadComponentSet(FILE* pInFile, CState<CPlayer>* pState)
 				{
 					pHitLagComponent->SetLagScale(ReadFloatFromFile(pInFile));
 				}
-				else if (!strcmp(buf, "<MaxLagTime>:"))
+				else if (!strcmp(buf, "<Duration>:"))
 				{
-					pHitLagComponent->SetMaxLagTime(ReadFloatFromFile(pInFile));
+					pHitLagComponent->SetDuration(ReadFloatFromFile(pInFile));
+				}
+				else if (!strcmp(buf, "<MinTimeScale>:"))
+				{
+					pHitLagComponent->SetMinTimeScale(ReadFloatFromFile(pInFile));
 				}
 				else if (!strcmp(buf, "</HitLagComponent>:"))
 				{
@@ -1871,12 +1877,16 @@ void CImGuiManager::ShowHitLagManager(CState<CPlayer>* pCurrentAnimation)
 	ImGui::Checkbox(U8STR("켜기/끄기##HitLag"), &pHitLagComponent->GetEnable());
 
 	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
-	if (ImGui::DragFloat(U8STR("지속시간##Move"), &pHitLagComponent->GetMaxLagTime(), DRAG_FLOAT_UNIT, HIT_LAG_MAXTIME_MIN, HIT_LAG_MAXTIME_MAX, "%.2f", 0))
-		pHitLagComponent->GetMaxLagTime() = std::clamp(pHitLagComponent->GetMaxLagTime(), HIT_LAG_MAXTIME_MIN, HIT_LAG_MAXTIME_MAX);
-
+	if (ImGui::DragFloat(U8STR("지속시간##Move"), &pHitLagComponent->GetLagScale(), DRAG_FLOAT_UNIT, HIT_LAG_DURATION_MIN, HIT_LAG_DURATION_MAX, "%.2f", 0))
+		pHitLagComponent->GetLagScale() = std::clamp(pHitLagComponent->GetDuration(), HIT_LAG_DURATION_MIN, HIT_LAG_DURATION_MAX);
+	
 	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
-	if (ImGui::DragFloat(U8STR("애니메이션 배율##Move"), &pHitLagComponent->GetLagScale(), DRAG_FLOAT_UNIT, HIT_LAG_SCALEWEIGHT_MIN, HIT_LAG_SCALEWEIGHT_MAX, "%.2f", 0))
+	if (ImGui::DragFloat(U8STR("역경직 배율##Move"), &pHitLagComponent->GetLagScale(), DRAG_FLOAT_UNIT, HIT_LAG_SCALEWEIGHT_MIN, HIT_LAG_SCALEWEIGHT_MAX, "%.2f", 0))
 		pHitLagComponent->GetLagScale() = std::clamp(pHitLagComponent->GetLagScale(), HIT_LAG_SCALEWEIGHT_MIN, HIT_LAG_SCALEWEIGHT_MAX);
+	
+	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
+	if (ImGui::DragFloat(U8STR("최소 시간 배율##Move"), &pHitLagComponent->GetMinTimeScale(), DRAG_FLOAT_UNIT, HIT_LAG_MAXTIME_MIN, HIT_LAG_MAXTIME_MAX, "%.2f", 0))
+		pHitLagComponent->GetMinTimeScale() = std::clamp(pHitLagComponent->GetMinTimeScale(), HIT_LAG_MAXTIME_MIN, HIT_LAG_MAXTIME_MAX);
 	ImGui::End();
 }
 void CImGuiManager::ShowCameraMoveManager(CState<CPlayer>* pCurrentAnimation)

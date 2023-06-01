@@ -24,7 +24,7 @@ public:
 		return m_nCurrentPerformanceCounter;
 	};
 
-	void SetDynamicTimeScale(float fDynamicTimeScale, float fDuration);
+	void SetDynamicTimeScale(float fDynamicTimeScale, float fDuration, float fMinTimeScale);
 	void RestoreDynamicTimeScale(float fDynamicTimeScale, float fDuration);
 private:
 	double m_fTimeScale;

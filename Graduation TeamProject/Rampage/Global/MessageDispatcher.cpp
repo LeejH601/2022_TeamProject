@@ -456,7 +456,8 @@ void DamageListener::HandleMessage(const Message& message, const DamageParams& p
 		{
 			TimerParams timerParams;
 			timerParams.fDynamicTimeScale = pHitLagComponent->GetLagScale();
-			timerParams.fDuration = pHitLagComponent->GetMaxLagTime();
+			timerParams.fDuration = pHitLagComponent->GetDuration();
+			timerParams.fMinTimeScale = pHitLagComponent->GetMinTimeScale();
 			CMessageDispatcher::GetInst()->Dispatch_Message<TimerParams>(MessageType::SET_DYNAMIC_TIMER_SCALE, &timerParams, nullptr);
 		}
 
@@ -500,5 +501,5 @@ void DamageListener::HandleMessage(const Message& message, const DamageParams& p
 
 void UpdateDynamicTimeScaleListener::HandleMessage(const Message& message, const TimerParams& params)
 {
-	m_pTimer->SetDynamicTimeScale(params.fDynamicTimeScale, params.fDuration);
+	m_pTimer->SetDynamicTimeScale(params.fDynamicTimeScale, params.fDuration, params.fMinTimeScale);
 }

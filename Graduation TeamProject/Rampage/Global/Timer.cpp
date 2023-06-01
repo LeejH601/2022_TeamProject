@@ -140,14 +140,15 @@ long long CGameTimer::GetNowTime()
 	return now.count();
 }
 
-void CGameTimer::SetDynamicTimeScale(float fDynamicTimeScale, float fDuration)
+void CGameTimer::SetDynamicTimeScale(float fDynamicTimeScale, float fDuration, float fMinTimeScale)
 {
-	if (m_fDynamicTimeScale < 0.1f)
+	if (m_fDynamicTimeScale <= fMinTimeScale)
 		return;
 
 	m_fDynamicTimeScale *= fDynamicTimeScale;
 
 	std::wstring timeScale{ std::to_wstring(m_fDynamicTimeScale) };
+	OutputDebugString(L"SetDynamicTimeScale: ");
 	OutputDebugString(timeScale.c_str());
 	OutputDebugString(L"\n");
 
@@ -162,6 +163,7 @@ void CGameTimer::RestoreDynamicTimeScale(float fDynamicTimeScale, float fDuratio
 	m_fDynamicTimeScale /= fDynamicTimeScale;
 
 	std::wstring timeScale{ std::to_wstring(m_fDynamicTimeScale) };
+	OutputDebugString(L"RestoreDynamicTimeScale: ");
 	OutputDebugString(timeScale.c_str());
 	OutputDebugString(L"\n");
 }
