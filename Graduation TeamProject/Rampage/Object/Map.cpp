@@ -54,7 +54,7 @@ void CMap::LoadSceneFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 	::fopen_s(&pInFile, pstrFileName, "rb");
 	::rewind(pInFile);
 
-	char pstrToken[64] = { '\0' };
+	char pstrToken[256] = { '\0' };
 
 	int nGameObjects;
 
@@ -65,55 +65,73 @@ void CMap::LoadSceneFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 	std::wstring TextString = L"Loading Scene";
 	OutputDebugString(TextString.c_str());
 
-	if (!strcmp(pstrToken, "<GameObjects>:"))
+	try
 	{
-		int nObjects = ReadIntegerFromFile(pInFile);
-		for (int i = 0; i < nObjects; ++i) {
-			ReadStringFromFile(pInFile, pstrToken);
-			nRead = ReadStringFromFile(pInFile, pstrToken);
+		if (!strcmp(pstrToken, "<GameObjects>:"))
+		{
+			int nObjects = ReadIntegerFromFile(pInFile);
+			for (int i = 0; i < nObjects; ++i) {
+				ReadStringFromFile(pInFile, pstrToken);
+				nRead = ReadStringFromFile(pInFile, pstrToken);
+				pstrToken[nRead] = '\0';
 
-			float buffer[16];
-			std::string objPath{ "Object/Scene/" };
-			objPath += static_cast<std::string>(pstrToken) + ".bin";
+				std::string objName = pstrToken;
+				TextString.assign(objName.begin(), objName.end());
+				TextString += L"Loading.....\n";
+				OutputDebugString(TextString.c_str());
 
-			FILE* objFile = NULL;
-			::fopen_s(&objFile, objPath.data(), "rb");
-			::rewind(objFile);
+				if (pstrToken[0] == '\0')
+					break;
 
-			nRead = (UINT)::fread(&buffer, sizeof(float), 16, pInFile);
+				float buffer[16];
+				std::string objPath{ "Object/Scene/" };
+				objPath += static_cast<std::string>(pstrToken) + ".bin";
 
-			XMFLOAT4X4 xmfWorld = {
-				buffer[0],buffer[1],buffer[2],buffer[3],
-				buffer[4],buffer[5],buffer[6],buffer[7],
-				buffer[8],buffer[9],buffer[10],buffer[11],
-				buffer[12],buffer[13],buffer[14],buffer[15]
-			};
-			
-			int nSkinnedMeshes;
-			std::unique_ptr<CMapObject> pMapObject = std::make_unique<CMapObject>();
+				FILE* objFile = NULL;
+				::fopen_s(&objFile, objPath.data(), "rb");
+				::rewind(objFile);
 
-			pMapObject->LoadObject(pd3dDevice, pd3dCommandList, objFile);
 
-			pMapObject->m_xmf4x4Transform = xmfWorld;
+				nRead = (UINT)::fread(&buffer, sizeof(float), 16, pInFile);
+				XMFLOAT4X4 xmfWorld = {
+					buffer[0],buffer[1],buffer[2],buffer[3],
+					buffer[4],buffer[5],buffer[6],buffer[7],
+					buffer[8],buffer[9],buffer[10],buffer[11],
+					buffer[12],buffer[13],buffer[14],buffer[15]
+				};
 
-			std::string name{ pstrToken };
-			if (name.find("Tree") != std::string::npos || name.find("Rock") != std::string::npos)
-			{
-				if (name.find("Tree") != std::string::npos)
+				int nSkinnedMeshes;
+				std::unique_ptr<CMapObject> pMapObject = std::make_unique<CMapObject>();
+
+				pMapObject->LoadObject(pd3dDevice, pd3dCommandList, objFile);
+
+				pMapObject->m_xmf4x4Transform = xmfWorld;
+
+				std::string name{ pstrToken };
+				if (name.find("Tree") != std::string::npos || name.find("Rock") != std::string::npos)
 				{
-					pMapObject->SetObjType(MAP_OBJ_TYPE::TREE);
-					pMapObject->PrepareBoundingBox(pd3dDevice, pd3dCommandList);
-					pMapObject->AddPhysicsScene(xmfWorld);
+					if (name.find("Tree") != std::string::npos)
+					{
+						pMapObject->SetObjType(MAP_OBJ_TYPE::TREE);
+						pMapObject->PrepareBoundingBox(pd3dDevice, pd3dCommandList);
+						pMapObject->AddPhysicsScene(xmfWorld);
+					}
+					else
+						pMapObject->SetObjType(MAP_OBJ_TYPE::ROCK);
 				}
-				else
-					pMapObject->SetObjType(MAP_OBJ_TYPE::ROCK);
+
+				pMapObject->UpdateTransform(NULL);
+
+				m_pMapObjects.push_back(std::move(pMapObject));
+
+				fclose(objFile);
 			}
-
-			pMapObject->UpdateTransform(NULL);
-			
-			m_pMapObjects.push_back(std::move(pMapObject));
-
-			fclose(objFile);
 		}
 	}
+	catch (const std::exception&)
+	{
+
+	}
+	
+	fclose(pInFile);
 }

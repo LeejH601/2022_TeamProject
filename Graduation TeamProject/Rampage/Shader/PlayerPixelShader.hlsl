@@ -108,10 +108,10 @@ PS_MULTIPLE_RENDER_TARGETS_OUTPUT PS_Player(VS_OUTPUT input)
 {
 	PS_MULTIPLE_RENDER_TARGETS_OUTPUT output;
 	float4 cAlbedoColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
-	float4 cSpecularColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
+	float4 cSpecularColor = float4(0.0f, 0.0f, 0.0f, 0.0f);
 	float4 cNormalColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
-	float4 cMetallicColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
-	float4 cEmissionColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
+	float4 cMetallicColor = float4(0.0f, 0.0f, 0.0f, 0.0f);
+	float4 cEmissionColor = float4(0.0f, 0.0f, 0.0f, 0.0f);
 
 
 	if (gnTexturesMask & MATERIAL_ALBEDO_MAP) cAlbedoColor = gtxMappedTexture[0].Sample(gSamplerState, input.uv);
@@ -130,7 +130,7 @@ PS_MULTIPLE_RENDER_TARGETS_OUTPUT PS_Player(VS_OUTPUT input)
 	normal = (2.0f * normal) - 1.0f;
 
 	float4 cColor = cAlbedoColor + cSpecularColor + cEmissionColor;
-	//cColor.xyz *= 1.5f;
+	//cColor.xyz *= 1.5f;s
 
 	float3 normalW = mul(normal, TBN);
 
