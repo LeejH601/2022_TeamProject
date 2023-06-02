@@ -894,24 +894,24 @@ void CMainTMPScene::UpdateObjects(float fTimeElapsed)
 
 	m_pPlayer->Update(fTimeElapsed);
 
-	static bool isSetVPObject = false;
-	if (!isSetVPObject) {
-		CGameObject* obj = m_pPlayer->FindFrame("Sword_low");
-		m_pVertexPointParticleObject->SetWorldMatrixReference(&obj->m_xmf4x4World);
-		// body
-		m_pVertexPointParticleObject->SetVertexPointsFromSkinnedSubeMeshToRandom(m_pPlayer->m_pSkinnedAnimationController->m_ppSkinnedMeshes[0], 6, m_pPlayer->m_pSkinnedAnimationController.get());
-		//m_pVertexPointParticleObject->SetVertexPointsFromSkinnedMeshToRandom(m_pPlayer->m_pSkinnedAnimationController->m_ppSkinnedMeshes[0], m_pPlayer->m_pSkinnedAnimationController.get());
-		//m_pVertexPointParticleObject->SetVertexPointsFromStaticMeshToUniform(obj->m_pMesh.get());
-		//m_pVertexPointParticleObject->SetVertexPointsFromStaticMeshToRandom(obj->m_pMesh.get());
-		isSetVPObject = true;
-	}
+	//static bool isSetVPObject = false;
+	//if (!isSetVPObject) {
+	//	CGameObject* obj = m_pPlayer->FindFrame("Sword_low");
+	//	m_pVertexPointParticleObject->SetWorldMatrixReference(&obj->m_xmf4x4World);
+	//	// body
+	//	m_pVertexPointParticleObject->SetVertexPointsFromSkinnedSubeMeshToRandom(m_pPlayer->m_pSkinnedAnimationController->m_ppSkinnedMeshes[0], 6, m_pPlayer->m_pSkinnedAnimationController.get());
+	//	//m_pVertexPointParticleObject->SetVertexPointsFromSkinnedMeshToRandom(m_pPlayer->m_pSkinnedAnimationController->m_ppSkinnedMeshes[0], m_pPlayer->m_pSkinnedAnimationController.get());
+	//	//m_pVertexPointParticleObject->SetVertexPointsFromStaticMeshToUniform(obj->m_pMesh.get());
+	//	//m_pVertexPointParticleObject->SetVertexPointsFromStaticMeshToRandom(obj->m_pMesh.get());
+	//	isSetVPObject = true;
+	//}
 
 	// Update Camera
 	XMFLOAT3 xmf3PlayerPos = XMFLOAT3{
 		((CKnightPlayer*)m_pPlayer)->m_pSkinnedAnimationController->m_pRootMotionObject->GetWorld()._41,
 		 m_pPlayer->GetPosition().y,
 		((CKnightPlayer*)m_pPlayer)->m_pSkinnedAnimationController->m_pRootMotionObject->GetWorld()._43 };
-	xmf3PlayerPos.y += 8.0f;
+	xmf3PlayerPos.y += 0.35f;
 
 	m_pMainSceneCamera->Update(xmf3PlayerPos, fTimeElapsed);
 
@@ -1045,8 +1045,8 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 		}
 	}
 
-	m_pVertexPointParticleObject->EmitParticle(5);
-	m_pVertexPointParticleObject->SetEmit(true);
+	//m_pVertexPointParticleObject->EmitParticle(5);
+	//m_pVertexPointParticleObject->SetEmit(true);
 
 	UINT index = 0;
 	for (int i = 0; i < m_pEnemys.size(); ++i)
@@ -1103,10 +1103,10 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 	((CParticleObject*)m_pSmokeObject.get())->UpdateShaderVariables(pd3dCommandList, fCurrentTime, fTimeElapsed);
 	((CParticleObject*)m_pSmokeObject.get())->Render(pd3dCommandList, nullptr, m_pParticleShader.get());
 
-	m_pVertexPointParticleObject->Update(fTimeElapsed);
-	m_pVertexPointParticleObject->Animate(fTimeElapsed);
-	m_pVertexPointParticleObject->UpdateShaderVariables(pd3dCommandList, fCurrentTime, fTimeElapsed);
-	m_pVertexPointParticleObject->Render(pd3dCommandList, nullptr, m_pParticleShader.get());
+	//m_pVertexPointParticleObject->Update(fTimeElapsed);
+	//m_pVertexPointParticleObject->Animate(fTimeElapsed);
+	//m_pVertexPointParticleObject->UpdateShaderVariables(pd3dCommandList, fCurrentTime, fTimeElapsed);
+	//m_pVertexPointParticleObject->Render(pd3dCommandList, nullptr, m_pParticleShader.get());
 
 	/*m_pSwordTrailShader->Render(pd3dCommandList, pCamera, 0);*/
 	for (std::unique_ptr<CGameObject>& obj : m_pSwordTrailObjects) {
@@ -1163,7 +1163,7 @@ void CMainTMPScene::OnPostRender()
 	}
 
 	//((CParticleObject*)m_pTrailParticleObjects.get())->OnPostRender();
-	m_pVertexPointParticleObject.get()->OnPostRender();
+	//m_pVertexPointParticleObject.get()->OnPostRender();
 }
 
 void CMainTMPScene::HandleCollision(const CollideParams& params)
