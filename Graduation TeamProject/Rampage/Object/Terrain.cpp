@@ -151,7 +151,7 @@ void CSplatTerrain::SetRigidStatic()
 	Desc.nbColumns =  m_nLength/* * m_xmf3Scale.z*/;
 	Desc.nbRows = m_nWidth/* * m_xmf3Scale.x*/;
 
-	BYTE* Pixels = m_pHeightMapImage->GetRawImagePixels();
+	WORD* Pixels = m_pHeightMapImage->GetRawImagePixels();
 	physx::PxReal minHeight = PX_MAX_F32;
 	physx::PxReal maxHeight = -PX_MAX_F32;
 	for (int z = 0; z < Desc.nbColumns; z++)

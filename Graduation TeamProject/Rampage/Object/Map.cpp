@@ -18,7 +18,7 @@ void CMap::Init(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommand
 	// Terrain »ý¼º
 	XMFLOAT3 xmf3Scale(1.0f, 1.0f, 1.0f);
 	XMFLOAT4 xmf4Color(0.0f, 0.5f, 0.0f, 0.0f);
-	m_pTerrain = std::make_unique<CSplatTerrain>(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, _T("Terrain/terrainHeightMap257_2.raw"), 257, 257, 257, 257, xmf3Scale, xmf4Color, m_pTerrainShader.get());
+	m_pTerrain = std::make_unique<CSplatTerrain>(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, _T("Terrain/terrainNew.raw"), 257, 257, 257, 257, xmf3Scale, xmf4Color, m_pTerrainShader.get());
 }
 
 void CMap::UpdateObjectArticulation()

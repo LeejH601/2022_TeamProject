@@ -625,16 +625,16 @@ CRawFormatImage::CRawFormatImage(LPCTSTR pFileName, int nWidth, int nLength, boo
 	m_nWidth = nWidth;
 	m_nLength = nLength;
 
-	BYTE* pRawImagePixels = new BYTE[m_nWidth * m_nLength];
+	WORD* pRawImagePixels = new WORD[m_nWidth * m_nLength];
 
 	HANDLE hFile = ::CreateFile(pFileName, GENERIC_READ, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL | FILE_ATTRIBUTE_READONLY, NULL);
 	DWORD dwBytesRead;
-	::ReadFile(hFile, pRawImagePixels, (m_nWidth * m_nLength), &dwBytesRead, NULL);
+	::ReadFile(hFile, pRawImagePixels, (m_nWidth * m_nLength) * sizeof(WORD), &dwBytesRead, NULL);
 	::CloseHandle(hFile);
 
 	if (bFlipY)
 	{
-		m_pRawImagePixels = new BYTE[m_nWidth * m_nLength];
+		m_pRawImagePixels = new WORD[m_nWidth * m_nLength];
 		for (int z = 0; z < m_nLength; z++)
 		{
 			for (int x = 0; x < m_nWidth; x++)
@@ -643,6 +643,8 @@ CRawFormatImage::CRawFormatImage(LPCTSTR pFileName, int nWidth, int nLength, boo
 			}
 		}
 
+		WORD test[66049];
+		memcpy(test, m_pRawImagePixels, sizeof(test));
 		if (pRawImagePixels) delete[] pRawImagePixels;
 	}
 	else
@@ -854,7 +856,7 @@ void CHeightMapGridMesh::ReleaseUploadBuffers()
 float CHeightMapGridMesh::OnGetHeight(int x, int z, void* pContext, bool SampleByImage)
 {
 	CHeightMapImage* pHeightMapImage = (CHeightMapImage*)pContext;
-	BYTE* pHeightMapPixels = pHeightMapImage->GetRawImagePixels();
+	WORD* pHeightMapPixels = pHeightMapImage->GetRawImagePixels();
 	XMFLOAT3 xmf3Scale = pHeightMapImage->GetScale();
 	int nWidth = pHeightMapImage->GetRawImageWidth();
 	float fHeight;
