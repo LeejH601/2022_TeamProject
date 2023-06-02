@@ -1622,6 +1622,9 @@ void CParticleMesh::EmitParticleForVertexData(int emitType, ParticleEmitPosition
 			createdParticleBuffer2[i].m_iTextureIndex = param.m_iTextureIndex;
 			createdParticleBuffer2[i].m_xmf2Size = param.m_xmf2Size;
 			createdParticleBuffer2[i].m_fEmissive = param.m_fEmissive;
+			createdParticleBuffer2[i].m_bSimulateRotate = (int)param.m_bSimulateRotate;
+			createdParticleBuffer2[i].m_bScaleFlag = (int)param.m_bScaleFlag;
+
 			memcpy(createdParticleBuffer2[i].m_iTextureCoord, param.m_iTextureCoord, sizeof(UINT) * 2);
 			index++;
 		}

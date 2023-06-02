@@ -300,6 +300,10 @@ int CTexture::LoadTextureFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 					m_pnRootParameterIndices[nIndex] = nParameterIndex;
 				}
 			}
+			else {
+				LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, m_ppstrTextureNames[nIndex].data(), RESOURCE_TEXTURE2D, nIndex);
+				pShader->CreateShaderResourceView(pd3dDevice, this, nIndex);
+			}
 		}
 	}
 	return(bLoaded);

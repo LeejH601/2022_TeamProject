@@ -390,6 +390,8 @@ void CGameObject::LoadMaterialsFromFile(ID3D12Device* pd3dDevice, ID3D12Graphics
 	std::shared_ptr<CMaterial> pMaterial = NULL;
 	std::shared_ptr<CTexture> pTexture = NULL;
 
+	static int TextureLoadCnt = 3;
+
 	for (; ; )
 	{
 		nReads = (UINT)::fread(&nStrLength, sizeof(BYTE), 1, pInFile);
@@ -398,6 +400,12 @@ void CGameObject::LoadMaterialsFromFile(ID3D12Device* pd3dDevice, ID3D12Graphics
 
 		if (!strcmp(pstrToken, "<Material>:"))
 		{
+			
+			/*if (TextureLoadCnt < 3) {
+				for(int i =0;i< 3 - TextureLoadCnt;++i)
+					CModelShader::GetInst()->DescriptorHandleMoveNext();
+			}*/
+			//TextureLoadCnt = 0;
 			nReads = (UINT)::fread(&nMaterial, sizeof(int), 1, pInFile);
 
 			pMaterial = std::make_shared<CMaterial>();
@@ -444,6 +452,7 @@ void CGameObject::LoadMaterialsFromFile(ID3D12Device* pd3dDevice, ID3D12Graphics
 		}
 		else if (!strcmp(pstrToken, "<AlbedoMap>:"))
 		{
+			//TextureLoadCnt++;
 			if (pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, pParent, pInFile, CModelShader::GetInst(), 0)) pMaterial->SetMaterialType(MATERIAL_ALBEDO_MAP);
 		}
 		/*else if (!strcmp(pstrToken, "<SpecularMap>:"))
@@ -452,7 +461,13 @@ void CGameObject::LoadMaterialsFromFile(ID3D12Device* pd3dDevice, ID3D12Graphics
 		}*/
 		else if (!strcmp(pstrToken, "<NormalMap>:"))
 		{
-			if (pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, pParent, pInFile, CModelShader::GetInst(), 2)) pMaterial->SetMaterialType(MATERIAL_NORMAL_MAP);
+			if (pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, pParent, pInFile, CModelShader::GetInst(), 2)) {
+				pMaterial->SetMaterialType(MATERIAL_NORMAL_MAP);
+				
+			}
+			else {
+				CModelShader::GetInst()->DescriptorHandleMoveNext();
+			}
 			pTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Object/Textures/Grainy10.dds", RESOURCE_TEXTURE2D, 3);
 			CModelShader::GetInst()->CreateShaderResourceView(pd3dDevice, pTexture.get(), 3);
 		}

@@ -59,6 +59,11 @@ void CVertexPointParticleObject::EmitParticle(int emitType)
 		param.m_xmf3EmiedPositions.resize(m_vVertexPoints.size());
 		param.m_xmf3Velocitys.resize(m_vVertexPoints.size());
 
+		param.m_xmf2Size = m_fSize;
+		param.m_fEmissive = m_fEmissive;
+		param.m_bSimulateRotate = m_bSimulateRotate;
+		param.m_bScaleFlag = m_bScaleFlag;
+
 		if (m_pAnimationContoroller)
 		{
 			for (int i = 0; i < m_vVertexPoints.size(); ++i) {

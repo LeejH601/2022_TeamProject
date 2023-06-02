@@ -9,7 +9,7 @@ protected:
 	int	m_nPipelineStates = 0;
 	std::vector<ComPtr<ID3D12PipelineState>> m_ppd3dPipelineStates;
 	ComPtr<ID3D12DescriptorHeap> m_pd3dCbvSrvUavDescriptorHeap;
-	
+
 	D3D12_CPU_DESCRIPTOR_HANDLE	m_d3dCbvCPUDescriptorStartHandle;
 	D3D12_GPU_DESCRIPTOR_HANDLE	m_d3dCbvGPUDescriptorStartHandle;
 
@@ -77,9 +77,14 @@ public:
 	D3D12_GPU_DESCRIPTOR_HANDLE GetGPUCbvDescriptorStartHandle() { return(m_d3dCbvGPUDescriptorStartHandle); }
 	D3D12_CPU_DESCRIPTOR_HANDLE GetCPUSrvDescriptorStartHandle() { return(m_d3dSrvCPUDescriptorStartHandle); }
 	D3D12_GPU_DESCRIPTOR_HANDLE GetGPUSrvDescriptorStartHandle() { return(m_d3dSrvGPUDescriptorStartHandle); }
-	
+
 	void ResetSrvNextHandleToStart() {
 		m_d3dSrvCPUDescriptorNextHandle = m_d3dSrvCPUDescriptorStartHandle;
 		m_d3dSrvGPUDescriptorNextHandle = m_d3dSrvGPUDescriptorStartHandle;
+	}
+
+	void DescriptorHandleMoveNext() {
+		m_d3dSrvCPUDescriptorNextHandle.ptr += gnCbvSrvDescriptorIncrementSize;
+		m_d3dSrvGPUDescriptorNextHandle.ptr += gnCbvSrvDescriptorIncrementSize;
 	}
 };
