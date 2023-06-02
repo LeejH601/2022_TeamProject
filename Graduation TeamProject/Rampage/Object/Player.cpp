@@ -125,6 +125,7 @@ void CPlayer::Update(float fTimeElapsed)
 	m_xmf3PreviousPos = GetPosition();
 
 	UpdateStamina(fTimeElapsed);
+	UpdateCombo(fTimeElapsed);
 }
 
 void CPlayer::UpdateStamina(float fTimeElapsed)
@@ -139,7 +140,6 @@ void CPlayer::ProcessInput(DWORD dwDirection, float cxDelta, float cyDelta, floa
 
 	GetKeyboardState(pKeysBuffer);
 
-	m_bKeyInput = true;
 	if ((dwDirection != 0) || (cxDelta != 0.0f) || (cyDelta != 0.0f))
 	{
 		if (dwDirection)
@@ -170,6 +170,25 @@ void CPlayer::SetScale(float x, float y, float z)
 void CPlayer::Tmp()
 {
 	m_pSkinnedAnimationController->SetTrackAnimationSet(0, m_nAnimationNum++);
+}
+// ui ±¸ÇÏ±â, 
+void CPlayer::UpdateCombo(float fTimeElapsed)
+{
+	m_iCombo++;
+	m_fComboTime -= fTimeElapsed;
+	if (m_fComboTime < 0.f)
+	{
+		
+		m_fComboTime = m_fComboFullTime;
+		
+		//m_iCombo = 0;
+	}
+	else if (m_bCombo)
+	{
+		m_fComboTime = m_fComboFullTime;
+		m_iCombo++;
+		m_bCombo = false;
+	}
 }
 
 #define KNIGHT_ROOT_MOTION
@@ -260,6 +279,7 @@ bool CKnightPlayer::CheckCollision(CGameObject* pTargetObject)
 		_stprintf_s(pstrDebug, 256, _T("CheckCollision\n"));
 		OutputDebugString(pstrDebug);
 
+		m_bCombo = true;
 		m_fHP -= 30.f;
 		if (m_pCamera)
 		{
@@ -378,7 +398,7 @@ void CKnightPlayer::PrepareBoundingBox(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 {
 	pWeapon = CGameObject::FindFrame("Weapon_r");
 	pBodyBoundingBoxMesh = CBoundingBoxShader::GetInst()->AddBoundingObject(pd3dDevice, pd3dCommandList, this, XMFLOAT3(0.0f, 0.75f, 0.0f), XMFLOAT3(0.35f, 1.0f, 0.35f));
-	pWeaponBoundingBoxMesh = CBoundingBoxShader::GetInst()->AddBoundingObject(pd3dDevice, pd3dCommandList, this, XMFLOAT3(0.0f, 0.6f, 0.4f), XMFLOAT3(0.0125f, 0.525f, 0.0625f));
+	pWeaponBoundingBoxMesh = CBoundingBoxShader::GetInst()->AddBoundingObject(pd3dDevice, pd3dCommandList, this, XMFLOAT3(0.0f, 0.6f, 0.4f), XMFLOAT3(0.0125f, 0.525f, 0.0625f)); // 
 	m_BodyBoundingBox = BoundingOrientedBox{ XMFLOAT3(0.0f, 0.75f, 0.0f), XMFLOAT3(0.35f, 1.0f, 0.35f), XMFLOAT4{0.0f, 0.0f, 0.0f, 1.0f} };
 	m_WeaponBoundingBox = BoundingOrientedBox{ XMFLOAT3(0.0f, 0.6f, 0.4f), XMFLOAT3(0.0125f, 0.525f, 0.0625f), XMFLOAT4{0.0f, 0.0f, 0.0f, 1.0f} };
 }
@@ -475,4 +495,3 @@ void CKightRootMoveAnimationController::OnRootMotion(CGameObject* pRootGameObjec
 		m_pRootMotionObject->m_xmf4x4Transform._43 = 0.f;
 	}
 }
-

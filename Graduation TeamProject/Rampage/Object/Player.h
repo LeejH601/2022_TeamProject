@@ -43,7 +43,11 @@ public:
 
 	float m_fStamina;
 	float m_fTotalStamina;
-	bool m_bKeyInput = false;
+	UINT m_iCombo = 0;
+	float m_fComboFullTime = 10.f;
+	float m_fComboTime = m_fComboFullTime;
+	bool m_bCombo = false;
+	
 public:
 	CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks);
 	virtual ~CPlayer();
@@ -63,7 +67,7 @@ public:
 	void Tmp();
 
 	void UpdateStamina(float fTimeElapsed);
-
+	void UpdateCombo(float fTimeElapsed);
 	virtual void Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity, CCamera* pCamera);
 	virtual XMFLOAT4& GetTrailControllPoint(int n) { return XMFLOAT4{}; }
 };
