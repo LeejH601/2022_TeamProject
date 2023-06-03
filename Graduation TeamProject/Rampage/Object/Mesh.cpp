@@ -640,6 +640,9 @@ CRawFormatImage::CRawFormatImage(LPCTSTR pFileName, int nWidth, int nLength, boo
 			for (int x = 0; x < m_nWidth; x++)
 			{
 				m_pRawImagePixels[x + ((m_nLength - 1 - z) * m_nWidth)] = pRawImagePixels[x + (z * m_nWidth)];
+				/*BYTE lByte = LOBYTE(m_pRawImagePixels[x + ((m_nLength - 1 - z) * m_nWidth)]);
+				BYTE hByte = HIBYTE(m_pRawImagePixels[x + ((m_nLength - 1 - z) * m_nWidth)]);
+				m_pRawImagePixels[x + ((m_nLength - 1 - z) * m_nWidth)] = MAKEWORD(lByte, hByte);*/
 			}
 		}
 
@@ -671,9 +674,9 @@ XMFLOAT3 CHeightMapImage::GetHeightMapNormal(int x, int z)
 	int nHeightMapIndex = x + (z * m_nWidth);
 	int xHeightMapAdd = (x < (m_nWidth - 1)) ? 1 : -1;
 	int zHeightMapAdd = (z < (m_nLength - 1)) ? m_nWidth : -m_nWidth;
-	float y1 = (float)m_pRawImagePixels[nHeightMapIndex] * m_xmf3Scale.y;
-	float y2 = (float)m_pRawImagePixels[nHeightMapIndex + xHeightMapAdd] * m_xmf3Scale.y;
-	float y3 = (float)m_pRawImagePixels[nHeightMapIndex + zHeightMapAdd] * m_xmf3Scale.y;
+	float y1 = (float)m_pRawImagePixels[nHeightMapIndex] * m_xmf3Scale.y; y1 = y1 / 65535 * m_fMaxHeight;
+	float y2 = (float)m_pRawImagePixels[nHeightMapIndex + xHeightMapAdd] * m_xmf3Scale.y;  y2 = y2 / 65535 * m_fMaxHeight;
+	float y3 = (float)m_pRawImagePixels[nHeightMapIndex + zHeightMapAdd] * m_xmf3Scale.y;  y3 = y3 / 65535 * m_fMaxHeight;
 	XMFLOAT3 xmf3Edge1 = XMFLOAT3(0.0f, y3 - y1, m_xmf3Scale.z);
 	XMFLOAT3 xmf3Edge2 = XMFLOAT3(m_xmf3Scale.x, y2 - y1, 0.0f);
 	XMFLOAT3 xmf3Normal = Vector3::CrossProduct(xmf3Edge1, xmf3Edge2, true);
@@ -688,9 +691,9 @@ TangentEdges CHeightMapImage::GetHeightMapTangent(int x, int z)
 	int nHeightMapIndex = x + (z * m_nWidth);
 	int xHeightMapAdd = (x < (m_nWidth - 1)) ? 1 : -1;
 	int zHeightMapAdd = (z < (m_nLength - 1)) ? m_nWidth : -m_nWidth;
-	float y1 = (float)m_pRawImagePixels[nHeightMapIndex] * m_xmf3Scale.y;
-	float y2 = (float)m_pRawImagePixels[nHeightMapIndex + xHeightMapAdd] * m_xmf3Scale.y;
-	float y3 = (float)m_pRawImagePixels[nHeightMapIndex + zHeightMapAdd] * m_xmf3Scale.y;
+	float y1 = (float)m_pRawImagePixels[nHeightMapIndex] * m_xmf3Scale.y; y1 = y1 / 65535 * m_fMaxHeight;
+	float y2 = (float)m_pRawImagePixels[nHeightMapIndex + xHeightMapAdd] * m_xmf3Scale.y; y2 = y2 / 65535 * m_fMaxHeight;
+	float y3 = (float)m_pRawImagePixels[nHeightMapIndex + zHeightMapAdd] * m_xmf3Scale.y; y3 = y3 / 65535 * m_fMaxHeight;
 	XMFLOAT3 xmf3Edge1 = XMFLOAT3(0.0f, y3 - y1, m_xmf3Scale.z);
 	XMFLOAT3 xmf3Edge2 = XMFLOAT3(m_xmf3Scale.x, y2 - y1, 0.0f);
 
@@ -733,6 +736,8 @@ float CHeightMapImage::GetHeight(float fx, float fz, bool bReverseQuad)
 	float fTopHeight = fTopLeft * (1 - fxPercent) + fTopRight * fxPercent;
 	float fBottomHeight = fBottomLeft * (1 - fxPercent) + fBottomRight * fxPercent;
 	float fHeight = fBottomHeight * (1 - fzPercent) + fTopHeight * fzPercent;
+
+	fHeight = (fHeight / 65535) * m_fMaxHeight;
 
 	return(fHeight);
 }
@@ -864,6 +869,8 @@ float CHeightMapGridMesh::OnGetHeight(int x, int z, void* pContext, bool SampleB
 		fHeight = pHeightMapPixels[x + (z * nWidth)] * xmf3Scale.y;
 	else
 		fHeight = m_pxmf3Positions[x + (z * nWidth)].y;
+
+	fHeight = (fHeight / 65535) * m_fMaxHeight;
 	return(fHeight);
 }
 XMFLOAT4 CHeightMapGridMesh::OnGetColor(int x, int z, void* pContext)
@@ -932,7 +939,7 @@ CSplatGridMesh::CSplatGridMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 			fHeight = (1 - fx) * ((1 - fz) * hLT + fz * hLB) + fx * ((1 - fz) * hRT + fz * hRB);
 			m_pxmf3Positions[i] = XMFLOAT3((x * m_xmf3Scale.x), fHeight, (z * m_xmf3Scale.z));
 			m_pxmf4Colors[i] = Vector4::Add(OnGetColor(x, z, pContext), xmf4Color);
-			m_pxmf2TextureCoords0[i] = XMFLOAT2(float(x) / float(m_xmf3Scale.x * 35.0f), float(z) / float(m_xmf3Scale.z * 35.0f));
+			m_pxmf2TextureCoords0[i] = XMFLOAT2(float(x) / float(m_xmf3Scale.x * 10.0f), float(z) / float(m_xmf3Scale.z * 10.0f));
 			m_pxmf2TextureCoords1[i] = XMFLOAT2(float(x) / float(cxHeightMap - 1), float(czHeightMap - 1 - z) / float(czHeightMap - 1));
 			if (fHeight < fMinHeight) fMinHeight = fHeight;
 			if (fHeight > fMaxHeight) fMaxHeight = fHeight;

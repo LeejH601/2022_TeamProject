@@ -717,6 +717,7 @@ BoundingOrientedBox CMapObject::CreateAAMBB()
 		bbox.Extents = m_pMesh->GetBoundingExtent();
 		break;
 	case MAP_OBJ_TYPE::TREE:
+	case MAP_OBJ_TYPE::PROP:
 		{
 			BoundingOrientedBox tmpbox;
 			XMFLOAT3 minCoord = minCoord = { FLT_MAX, FLT_MAX, FLT_MAX };

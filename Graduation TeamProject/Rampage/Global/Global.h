@@ -75,6 +75,7 @@ enum class MAP_OBJ_TYPE
 {
 	ROCK,
 	TREE,
+	PROP,
 };
 
 enum class SCENE_RETURN_TYPE

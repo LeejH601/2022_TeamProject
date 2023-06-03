@@ -74,7 +74,7 @@ CSplatTerrain::CSplatTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 	int czQuadsPerBlock = nBlockLength - 1;
 
 	m_xmf3Scale = xmf3Scale;
-	XMStoreFloat3(&m_xmf3Scale, XMVectorScale(XMLoadFloat3(&m_xmf3Scale), 0.38819f*2));
+	XMStoreFloat3(&m_xmf3Scale, XMVectorScale(XMLoadFloat3(&m_xmf3Scale), 0.9765625));
 	m_xmf3Scale.y = xmf3Scale.y;
 
 	m_pHeightMapImage = new CHeightMapImage(pFileName, nWidth, nLength, m_xmf3Scale);
@@ -185,7 +185,7 @@ void CSplatTerrain::SetRigidStatic()
 			physx::PxI16 height;
 			//height = physx::PxI16(quantization * ((float)(m_pHeightMapImage->GetRawImagePixel(x, z) - minHeight) / deltaHeight));
 			//height = (int)(((float)(m_pHeightMapImage->GetRawImagePixel(x, z) - minHeight) / deltaHeight)*100);
-			height = physx::PxI16((m_pHeightMapImage->GetRawImagePixel(x, z)));
+			height = physx::PxI16(floor(float(m_pHeightMapImage->GetRawImagePixel(x, z)) / 65535 * 332.5 + 0.5f));
 
 			physx::PxHeightFieldSample& smp = hfSamples[(x * Desc.nbColumns) + z];
 			smp.height = height;
@@ -218,10 +218,10 @@ void CSplatTerrain::SetRigidStatic()
 
 	//physx::PxVec3 pos = convertToPhysXCoordSystem(matrix).column3.getXYZ();
 
-	physx::PxTransform transform(physx::PxVec3(86.4804, -46.8876 - 46.8876 * 0.38819 + 6.5f, -183.7856));
+	//physx::PxTransform transform(physx::PxVec3(86.4804, -46.8876 - 46.8876 * 0.38819 + 6.5f, -183.7856));
 
 	physx::PxMaterial* material = pPhysics->createMaterial(0.7, 0.5, 0.0);
-	physx::PxRigidStatic* plane = pPhysics->createRigidStatic(transform);
+	physx::PxRigidStatic* plane = pPhysics->createRigidStatic(physx::PxTransform(physx::PxVec3(0,0,0)));
 
 
 	physx::PxShape* planeShape = pPhysics->createShape(HeightGeometry, *material);

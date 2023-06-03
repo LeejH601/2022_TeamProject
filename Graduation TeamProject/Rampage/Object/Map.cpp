@@ -116,8 +116,15 @@ void CMap::LoadSceneFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 						pMapObject->PrepareBoundingBox(pd3dDevice, pd3dCommandList);
 						pMapObject->AddPhysicsScene(xmfWorld);
 					}
-					else
+					else {
 						pMapObject->SetObjType(MAP_OBJ_TYPE::ROCK);
+						pMapObject->AddPhysicsScene(xmfWorld);
+					}
+				}
+				else if (name.find("Ruin") != std::string::npos || (name.find("Prop") != std::string::npos && name.find("Arch_01") == std::string::npos)) {
+					pMapObject->SetObjType(MAP_OBJ_TYPE::PROP);
+					pMapObject->PrepareBoundingBox(pd3dDevice, pd3dCommandList);
+					pMapObject->AddPhysicsScene(xmfWorld);
 				}
 
 				pMapObject->UpdateTransform(NULL);

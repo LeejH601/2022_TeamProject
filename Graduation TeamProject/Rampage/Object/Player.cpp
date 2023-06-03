@@ -28,7 +28,7 @@ CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 
 	m_fSpeedKperH = 6.0f;
 	m_fSpeedMperS = m_fSpeedKperH * 1000.0f / 3600.0f;
-	m_fSpeedUperS = m_fSpeedMperS * 100.0f / 4.0f;
+	m_fSpeedUperS = m_fSpeedMperS * 100.0f / 8.0f;
 }
 
 CPlayer::~CPlayer()

@@ -183,6 +183,7 @@ class CHeightMapImage : public CRawFormatImage
 {
 protected:
 	XMFLOAT3					m_xmf3Scale;
+	float						m_fMaxHeight = 332.5f;
 
 public:
 	CHeightMapImage(LPCTSTR pFileName, int nWidth, int nLength, XMFLOAT3 xmf3Scale);
@@ -199,6 +200,7 @@ protected:
 	int								m_nWidth;
 	int								m_nLength;
 	XMFLOAT3						m_xmf3Scale;
+	float							m_fMaxHeight = 332.5f;
 
 protected:
 

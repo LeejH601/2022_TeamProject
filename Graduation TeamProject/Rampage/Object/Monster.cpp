@@ -18,7 +18,7 @@ CMonster::CMonster()
 	m_fDissolveTime = 0.0f;
 	TestDissolvetime = 0.0f;
 
-	m_fHP = 100.0f;
+	m_fHP = 300.0f;
 
 	m_fSpeedKperH = 1.0f;
 	m_fSpeedMperS = m_fSpeedKperH * 1000.0f / 3600.0f;

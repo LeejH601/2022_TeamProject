@@ -399,7 +399,8 @@ void Dead_Monster::Enter(CMonster* monster)
 		RegisterArticulationParams Request_params;
 		Request_params.pObject = monster;
 		XMFLOAT3 force = monster->GetHitterVec();
-		force = Vector3::ScalarProduct(force, 300.0f, false);
+		XMStoreFloat3(&force, XMVector3Rotate(XMLoadFloat3(&force), XMVECTOR({ 0, 1.0, 0, 1 })));
+		force = Vector3::ScalarProduct(force, 50.0f, false);
 		Request_params.m_force = force;
 		CMessageDispatcher::GetInst()->Dispatch_Message<RegisterArticulationParams>(MessageType::REQUEST_REGISTERARTI, &Request_params, nullptr);
 		monster->m_bArticulationOnPxScene = true;
@@ -408,7 +409,7 @@ void Dead_Monster::Enter(CMonster* monster)
 		RegisterArticulationParams Request_params;
 		Request_params.pObject = monster;
 		XMFLOAT3 force = monster->GetHitterVec();
-		force = Vector3::ScalarProduct(force, 300.0f, false);
+		force = Vector3::ScalarProduct(force, 50.0f, false);
 		Request_params.m_force = force;
 		CMessageDispatcher::GetInst()->Dispatch_Message<RegisterArticulationParams>(MessageType::REQUEST_REGISTERARTI, &Request_params, nullptr);
 		monster->m_bArticulationOnPxScene = true;

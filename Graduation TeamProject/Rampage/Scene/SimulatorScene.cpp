@@ -332,8 +332,8 @@ void CSimulatorScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 
 	m_pSimulaterCamera = std::make_unique<CSimulatorCamera>();
 	m_pSimulaterCamera->Init(pd3dDevice, pd3dCommandList);
-	m_pSimulaterCamera->SetPosition(XMFLOAT3(43 + offset.x, 62, 46 + offset.z));
-	m_pSimulaterCamera->SetLookAt(XMFLOAT3(100 + offset.x, 0, 100 + offset.z));
+	m_pSimulaterCamera->SetPosition(XMFLOAT3(43 + offset.x, 15, 46 + offset.z));
+	m_pSimulaterCamera->SetLookAt(XMFLOAT3(75 + offset.x, 0, 75 + offset.z));
 	m_pSimulaterCamera->RegenerateViewMatrix();
 
 	CModelShader::GetInst()->CreateShader(pd3dDevice, GetGraphicsRootSignature(), 7, pdxgiObjectRtvFormats, DXGI_FORMAT_D32_FLOAT, 1);
@@ -353,8 +353,8 @@ void CSimulatorScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 	// 4->HIT
 	// 5->IDLE
 	std::unique_ptr<CMonster> m_pDummyEnemy = std::make_unique<CGoblinObject>(pd3dDevice, pd3dCommandList, 1);
-	m_pDummyEnemy->SetPosition(XMFLOAT3(50 + offset.x, 100, 50 + offset.z));
-	m_pDummyEnemy->SetScale(4.0f, 4.0f, 4.0f);
+	m_pDummyEnemy->SetPosition(XMFLOAT3(47.5 + offset.x, 100, 50 + offset.z));
+	m_pDummyEnemy->SetScale(2.0f, 2.0f, 2.0f);
 	m_pDummyEnemy->Rotate(0.0f, -90.0f, 0.0f);
 	m_pDummyEnemy->m_fHP = FLT_MAX;
 	m_pDummyEnemy->m_bIsDummy = true;
@@ -366,7 +366,7 @@ void CSimulatorScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 	m_pMainCharacter = std::make_unique<CKnightPlayer>(pd3dDevice, pd3dCommandList, 1);
 	m_pMainCharacter->SetCamera(m_pSimulaterCamera.get());
 	m_pMainCharacter->SetPosition(XMFLOAT3(45 + offset.x, 100, 50 + offset.z));
-	m_pMainCharacter->SetScale(4.0f, 4.0f, 4.0f);
+	m_pMainCharacter->SetScale(2.0f, 2.0f, 2.0f);
 	m_pMainCharacter->Rotate(0.0f, 90.0f, 0.0f);
 	m_pMainCharacter->m_pSkinnedAnimationController->m_bRootMotion = false;
 	m_pMainCharacter->m_pStateMachine->ChangeState(Idle_Player::GetInst());
@@ -640,8 +640,8 @@ void CSimulatorScene::ResetMonster()
 	XMFLOAT3 offset{ 86.4804 , 0.0f, -183.7856 };
 	XMFLOAT3 xmf3LookAt{ m_pMainCharacter->GetPosition().x, m_pEnemys[0]->GetPosition().y, m_pMainCharacter->GetPosition().z};
 	
-	m_pEnemys[0]->SetPosition(XMFLOAT3(50 + offset.x, 100, 50 + offset.z));
-	m_pEnemys[0]->SetScale(4.0f, 4.0f, 4.0f);
+	m_pEnemys[0]->SetPosition(XMFLOAT3(47.5 + offset.x, 100, 50 + offset.z));
+	m_pEnemys[0]->SetScale(2.0,2.0,2.0);
 	m_pEnemys[0]->SetLookAt(xmf3LookAt);
 	(dynamic_cast<CMonster*>(m_pEnemys[0].get()))->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
 }

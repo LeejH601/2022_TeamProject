@@ -631,7 +631,7 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 
 	std::unique_ptr<CMonster> m_pMonsterObject = std::make_unique<CGoblinObject>(pd3dDevice, pd3dCommandList, 1);
 	m_pMonsterObject->SetPosition(XMFLOAT3(190, 50, -70));
-	m_pMonsterObject->SetScale(4.0f, 4.0f, 4.0f);
+	m_pMonsterObject->SetScale(2.0f, 2.0f, 2.0f);
 	m_pMonsterObject->Rotate(0.0f, 180.0f, 0.0f);
 	m_pMonsterObject->m_fHP = 1000.f;
 	m_pMonsterObject->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
@@ -641,9 +641,9 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 
 	m_pMonsterObject = std::make_unique<CGoblinObject>(pd3dDevice, pd3dCommandList, 1);
 	m_pMonsterObject->SetPosition(XMFLOAT3(190, 50, -70));
-	m_pMonsterObject->SetScale(4.0f, 4.0f, 4.0f);
+	m_pMonsterObject->SetScale(2.0f, 2.0f, 2.0f);
 	m_pMonsterObject->Rotate(0.0f, 180.0f, 0.0f);
-	m_pMonsterObject->m_fHP = 100.f;
+	m_pMonsterObject->m_fHP = 300.f;
 	m_pMonsterObject->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
 	m_pMonsterObject->m_pSkinnedAnimationController->m_xmf3RootObjectScale = XMFLOAT3(10.0f, 10.0f, 10.0f);
 	m_pMonsterObject->CreateArticulation(1.0f);
@@ -651,9 +651,9 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 
 	m_pMonsterObject = std::make_unique<COrcObject>(pd3dDevice, pd3dCommandList, 1);
 	m_pMonsterObject->SetPosition(XMFLOAT3(190, 50, -70));
-	m_pMonsterObject->SetScale(4.0f, 4.0f, 4.0f);
+	m_pMonsterObject->SetScale(2.0f, 2.0f, 2.0f);
 	m_pMonsterObject->Rotate(0.0f, 180.0f, 0.0f);
-	m_pMonsterObject->m_fHP = 100.f;
+	m_pMonsterObject->m_fHP = 300.f;
 	m_pMonsterObject->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
 	m_pMonsterObject->m_pSkinnedAnimationController->m_xmf3RootObjectScale = XMFLOAT3(10.0f, 10.0f, 10.0f);
 	m_pMonsterObject->CreateArticulation(1.0f);
@@ -661,9 +661,9 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 
 	m_pMonsterObject = std::make_unique<COrcObject>(pd3dDevice, pd3dCommandList, 1);
 	m_pMonsterObject->SetPosition(XMFLOAT3(190, 50, -70));
-	m_pMonsterObject->SetScale(4.0f, 4.0f, 4.0f);
+	m_pMonsterObject->SetScale(2.0f, 2.0f, 2.0f);
 	m_pMonsterObject->Rotate(0.0f, 180.0f, 0.0f);
-	m_pMonsterObject->m_fHP = 100.f;
+	m_pMonsterObject->m_fHP = 300.f;
 	m_pMonsterObject->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
 	m_pMonsterObject->m_pSkinnedAnimationController->m_xmf3RootObjectScale = XMFLOAT3(10.0f, 10.0f, 10.0f);
 	m_pMonsterObject->CreateArticulation(1.0f);
@@ -671,9 +671,9 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 
 	m_pMonsterObject = std::make_unique<CSkeletonObject>(pd3dDevice, pd3dCommandList, 1);
 	m_pMonsterObject->SetPosition(XMFLOAT3(190, 50, -70));
-	m_pMonsterObject->SetScale(4.0f, 4.0f, 4.0f);
+	m_pMonsterObject->SetScale(2.0f, 2.0f, 2.0f);
 	m_pMonsterObject->Rotate(0.0f, 180.0f, 0.0f);
-	m_pMonsterObject->m_fHP = 100.f;
+	m_pMonsterObject->m_fHP = 300.f;
 	m_pMonsterObject->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
 	m_pMonsterObject->m_pSkinnedAnimationController->m_xmf3RootObjectScale = XMFLOAT3(10.0f, 10.0f, 10.0f);
 	m_pMonsterObject->CreateArticulation(1.0f);
@@ -681,9 +681,9 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 
 	m_pMonsterObject = std::make_unique<CSkeletonObject>(pd3dDevice, pd3dCommandList, 1);
 	m_pMonsterObject->SetPosition(XMFLOAT3(190, 50, -70));
-	m_pMonsterObject->SetScale(4.0f, 4.0f, 4.0f);
+	m_pMonsterObject->SetScale(2.0f, 2.0f, 2.0f);
 	m_pMonsterObject->Rotate(0.0f, 180.0f, 0.0f);
-	m_pMonsterObject->m_fHP = 100.f;
+	m_pMonsterObject->m_fHP = 300.f;
 	m_pMonsterObject->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
 	m_pMonsterObject->m_pSkinnedAnimationController->m_xmf3RootObjectScale = XMFLOAT3(10.0f, 10.0f, 10.0f);
 	m_pMonsterObject->CreateArticulation(1.0f);
@@ -699,7 +699,7 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	
 	m_pMap = std::make_unique<CMap>();
 	m_pMap->Init(pd3dDevice, pd3dCommandList, GetGraphicsRootSignature());
-	m_pMap->GetTerrain()->SetPosition(XMFLOAT3(86.4804, -46.8876 - 46.8876 * 0.38819 + 6.5f, -183.7856));
+	//m_pMap->GetTerrain()->SetPosition(XMFLOAT3(86.4804, -46.8876 - 46.8876 * 0.38819 + 6.5f, -183.7856));
 	m_pMap->GetTerrain()->SetRigidStatic();
 	m_pMap->LoadSceneFromFile(pd3dDevice, pd3dCommandList, "Object/Scene/Scene.bin");
 
@@ -915,7 +915,7 @@ void CMainTMPScene::UpdateObjects(float fTimeElapsed)
 		((CKnightPlayer*)m_pPlayer)->m_pSkinnedAnimationController->m_pRootMotionObject->GetWorld()._41,
 		 m_pPlayer->GetPosition().y,
 		((CKnightPlayer*)m_pPlayer)->m_pSkinnedAnimationController->m_pRootMotionObject->GetWorld()._43 };
-	xmf3PlayerPos.y += 8.0f;
+	xmf3PlayerPos.y += 8.0f / 2.0f;
 
 	m_pMainSceneCamera->Update(xmf3PlayerPos, fTimeElapsed);
 
@@ -1045,8 +1045,9 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 			count = 100;
 		}
 	}
-	m_pVertexPointParticleObject->EmitParticle(5);
-	m_pVertexPointParticleObject->SetEmit(true);
+	/*m_pVertexPointParticleObject->EmitParticle(5);
+	m_pVertexPointParticleObject->SetEmit(true);*/
+
 	D3D12_GPU_VIRTUAL_ADDRESS d3dGpuVirtualAddress = m_pd3dcbDisolveParams->GetGPUVirtualAddress();
 	pd3dCommandList->SetGraphicsRootConstantBufferView(7, d3dGpuVirtualAddress);
 
@@ -1105,10 +1106,13 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 	((CParticleObject*)m_pSmokeObject.get())->UpdateShaderVariables(pd3dCommandList, fCurrentTime, fTimeElapsed);
 	((CParticleObject*)m_pSmokeObject.get())->Render(pd3dCommandList, nullptr, m_pParticleShader.get());
 
-	m_pVertexPointParticleObject->Update(fTimeElapsed);
-	m_pVertexPointParticleObject->Animate(fTimeElapsed);
-	m_pVertexPointParticleObject->UpdateShaderVariables(pd3dCommandList, fCurrentTime, fTimeElapsed);
-	m_pVertexPointParticleObject->Render(pd3dCommandList, nullptr, m_pParticleShader.get());
+	{
+		m_pVertexPointParticleObject->Update(fTimeElapsed);
+		m_pVertexPointParticleObject->Animate(fTimeElapsed);
+		m_pVertexPointParticleObject->UpdateShaderVariables(pd3dCommandList, fCurrentTime, fTimeElapsed);
+		m_pVertexPointParticleObject->Render(pd3dCommandList, nullptr, m_pParticleShader.get());
+	}
+	
 
 	m_pSlashHitObjects->Update(fTimeElapsed);
 	m_pSlashHitObjects->Animate(fTimeElapsed);
