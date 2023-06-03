@@ -115,10 +115,22 @@ void GSParticleDraw(point VS_PARTICLE_DRAW_OUTPUT input[1], inout TriangleStream
 	float sizeX = input[0].size.x;
 	float sizeY = input[0].size.y;
 
+	
 	if (input[0].type == 6) {
 		float lifedTime = gfCurrentTime - input[0].EmitTime;
 		float value = lifedTime / input[0].lifetime;
-		sizeX *= 1.0f - value;
+
+		float convertPoint = 0.1f;
+		float inclinationY = 1 / (convertPoint * input[0].lifetime);
+
+		float inclinationX_b = sizeY / 10.0f;
+		float inclinationX = -(inclinationX_b - 1) / (convertPoint * input[0].lifetime);
+		float inclinationX_disappear = 1.0 / (input[0].lifetime * (convertPoint - 1.0));
+		float disapper_b = 1.0 - convertPoint / (convertPoint - 1.0);
+		
+		sizeY *= min(1.0, inclinationY * lifedTime);
+		sizeX *= max(inclinationX * lifedTime + inclinationX_b, inclinationX_disappear * lifedTime + disapper_b);
+		//sizeX *= 1.0f - value;
 	}
 	
 
