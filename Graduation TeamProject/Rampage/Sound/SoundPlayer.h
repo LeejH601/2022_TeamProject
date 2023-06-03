@@ -11,7 +11,6 @@ class CSoundPlayer
     };
 
     std::vector<SoundPlayInfo> m_vSounds;
-    std::vector<FMOD_CHANNEL*> m_vPlayingSounds;
     
     void PlaySound(FMOD_SYSTEM* g_sound_system, SoundPlayInfo sound_play_info, FMOD_CHANNELGROUP* channelgroup);
 public:
@@ -20,5 +19,4 @@ public:
 
     void RegisterSound(CSound* pSound, float fDelay = 0.0f);
     void PlaySounds(FMOD_SYSTEM* g_sound_system, FMOD_CHANNELGROUP* channelgroup);
-    void StopSounds();
 };

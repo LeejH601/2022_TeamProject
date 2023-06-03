@@ -1,5 +1,6 @@
 #include "MessageDispatcher.h"
 #include "Camera.h"
+#include "Timer.h"
 #include "..\Scene\Scene.h"
 #include "..\Object\Object.h"
 #include "..\Object\Player.h"
@@ -388,17 +389,19 @@ void HitLagComponent::HandleMessage(const Message& message, const PlayerParams& 
 	if (!m_bEnable)
 		return;
 
-	if (message.getType() == MessageType::UPDATE_HITLAG) {
+	/*if (message.getType() == MessageType::UPDATE_HITLAG) {
 		CPlayer* pPlayer = (CPlayer*)params.pPlayer;
 		if (pPlayer->m_fCurLagTime < m_fMaxLagTime)
 		{
 			pPlayer->m_fAnimationPlayWeight *= m_fLagScale;
+			
 			if (pPlayer->m_fAnimationPlayWeight < pPlayer->m_fAnimationPlayerWeightMin)
 				pPlayer->m_fAnimationPlayWeight = pPlayer->m_fAnimationPlayerWeightMin;
 		}
 		else
 			pPlayer->m_fAnimationPlayWeight = 1.0f;
-	}
+
+	}*/
 }
 TrailComponent::TrailComponent()
 {
@@ -450,14 +453,21 @@ void DamageListener::HandleMessage(const Message& message, const DamageParams& p
 		sound_play_params.sound_category = SOUND_CATEGORY::SOUND_VOICE;
 		CMessageDispatcher::GetInst()->Dispatch_Message<SoundPlayParams>(MessageType::PLAY_SOUND, &sound_play_params, pPlayer->m_pStateMachine->GetCurrentState());
 
-		PlayerParams PlayerParam{ pPlayer };
-		CMessageDispatcher::GetInst()->Dispatch_Message<PlayerParams>(MessageType::UPDATE_HITLAG, &PlayerParam, pPlayer->m_pStateMachine->GetCurrentState());
+		// Update Hit Lag
+		HitLagComponent* pHitLagComponent = dynamic_cast<HitLagComponent*>(pPlayer->m_pStateMachine->GetCurrentState()->GetHitLagComponent());
+
+		if (pHitLagComponent->GetEnable())
+		{
+			TimerParams timerParams;
+			timerParams.fDynamicTimeScale = pHitLagComponent->GetLagScale();
+			timerParams.fDuration = pHitLagComponent->GetDuration();
+			timerParams.fMinTimeScale = pHitLagComponent->GetMinTimeScale();
+			CMessageDispatcher::GetInst()->Dispatch_Message<TimerParams>(MessageType::SET_DYNAMIC_TIMER_SCALE, &timerParams, nullptr);
+		}
 
 		DamageAnimationComponent* pDamageAnimationComponent = dynamic_cast<DamageAnimationComponent*>(pPlayer->m_pStateMachine->GetCurrentState()->GetDamageAnimationComponent());
 		ShakeAnimationComponent* pShakeAnimationComponent = dynamic_cast<ShakeAnimationComponent*>(pPlayer->m_pStateMachine->GetCurrentState()->GetShakeAnimationComponent());
 		StunAnimationComponent* pStunAnimationComponent = dynamic_cast<StunAnimationComponent*>(pPlayer->m_pStateMachine->GetCurrentState()->GetStunAnimationComponent());
-
-		pPlayer->m_fCurLagTime = 0.f;
 
 		pMonster->m_xmf3HitterVec = Vector3::Normalize(Vector3::Subtract(pMonster->GetPosition(), pPlayer->GetPosition()));
 
@@ -476,9 +486,9 @@ void DamageListener::HandleMessage(const Message& message, const DamageParams& p
 			: pMonster->m_fShakeDuration = FLT_MIN;
 		pMonster->m_fShakeFrequency = pShakeAnimationComponent->GetFrequency();
 
-		std::wstring debugString{ std::to_wstring(pMonster->m_fShakeFrequency) };
+		/*std::wstring debugString{ std::to_wstring(pMonster->m_fShakeFrequency) };
 		OutputDebugString(debugString.c_str());
-		OutputDebugString(L"\n");
+		OutputDebugString(L"\n");*/
 
 		pMonster->m_fMaxShakeDistance = pShakeAnimationComponent->GetDistance();
 		pMonster->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
@@ -491,6 +501,11 @@ void DamageListener::HandleMessage(const Message& message, const DamageParams& p
 		//_stprintf_s(pstrDebug, 256, "Already Dead \n");
 		OutputDebugString(L"Already Dead");
 	}
+}
+
+void UpdateDynamicTimeScaleListener::HandleMessage(const Message& message, const TimerParams& params)
+{
+	m_pTimer->SetDynamicTimeScale(params.fDynamicTimeScale, params.fDuration, params.fMinTimeScale);
 }
 
 SlashHitComponent::SlashHitComponent()

@@ -57,7 +57,6 @@ class Atk_Player : public CState<CPlayer>
 public:
     virtual void InitAtkPlayer();
     virtual void SetPlayerRootVel(CPlayer* player);
-    virtual void CheckHitLag(CPlayer* player);
 
     virtual void CheckComboAttack(CPlayer* player) = 0;
     virtual void SendCollisionMessage(CPlayer* player) = 0;

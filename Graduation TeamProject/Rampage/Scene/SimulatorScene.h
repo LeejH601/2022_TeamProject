@@ -12,7 +12,10 @@
 #include "..\Object\TextureManager.h"
 #include "..\Shader\SwordTrailShader.h"
 
-
+#define MAX_OBJECT 1000
+struct DissolveDummyParams {
+	float dissolveThreshold[MAX_OBJECT];
+};
 class CSimulatorScene : public CScene
 {
 private:
@@ -38,6 +41,9 @@ private:
 
 	std::unique_ptr<CTextureManager> m_pTextureManager = NULL;
 	std::unique_ptr<CCamera> m_pSimulaterCamera = NULL;
+
+	DissolveDummyParams* m_pcbMappedDisolveParams = nullptr;
+	ComPtr<ID3D12Resource> m_pd3dcbDisolveParams = nullptr;
 public:
 	DECLARE_SINGLE(CSimulatorScene);
 	CSimulatorScene() {}

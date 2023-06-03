@@ -26,9 +26,10 @@ CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 	m_pStateMachine->SetCurrentState(Idle_Player::GetInst());
 	m_pStateMachine->SetPreviousState(Idle_Player::GetInst());
 
-	m_fSpeedKperH = 6.0f;
+	float fMeterPerUnit = 2.0f / 2.0f;
+	m_fSpeedKperH = 44.0f;
 	m_fSpeedMperS = m_fSpeedKperH * 1000.0f / 3600.0f;
-	m_fSpeedUperS = m_fSpeedMperS * 100.0f / 8.0f;
+	m_fSpeedUperS = m_fSpeedMperS * (1.0 / fMeterPerUnit);
 }
 
 CPlayer::~CPlayer()
@@ -101,7 +102,6 @@ bool CPlayer::CheckCollision(CGameObject* pTargetObject)
 void CPlayer::Update(float fTimeElapsed)
 {
 	m_fTime += fTimeElapsed;
-	m_fCurLagTime += fTimeElapsed;
 
 	// 플레이어가 속도를 가진다면 해당 방향을 바라보게 하는 코드
 	if (m_xmf3Velocity.x + m_xmf3Velocity.z)

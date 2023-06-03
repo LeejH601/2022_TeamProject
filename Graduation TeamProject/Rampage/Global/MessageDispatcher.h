@@ -8,6 +8,7 @@ class CScene;
 class CMainTMPScene;
 class CTexture;
 class CShader;
+class CGameTimer;
 
 // Define base message class
 class Message {
@@ -108,6 +109,12 @@ struct DamageParams {
 	float fDamage;
 };
 
+struct TimerParams {
+	float fDynamicTimeScale;
+	float fDuration;
+	float fMinTimeScale;
+};
+
 // Define message listener interface
 class IMessageListener {
 protected:
@@ -134,6 +141,14 @@ public:
 	virtual void HandleMessage(const Message& message, const TrailUpdateParams& params) {}
 
 	virtual void HandleMessage(const Message& message, const DamageParams& params) {}
+	virtual void HandleMessage(const Message& message, const TimerParams& params) {}
+};
+
+class UpdateDynamicTimeScaleListener : public IMessageListener {
+	CGameTimer* m_pTimer;
+public:
+	void SetTimer(CGameTimer* pTimer) { m_pTimer = pTimer; }
+	virtual void HandleMessage(const Message& message, const TimerParams& params);
 };
 
 // Define RegisterAriticulationListner
@@ -330,14 +345,17 @@ public:
 
 // Define HitLag Animation component
 class HitLagComponent : public IMessageListener {
-	float m_fLagScale = 0.5f;
-	float m_fMaxLagTime = 0.5f;
+    float m_fLagScale = 0.5f;
+    float m_fDuration = 0.5f;
+	float m_fMinTimeScale = 0.1f;
 public:
-	float& GetMaxLagTime() { return m_fMaxLagTime; }
-	float& GetLagScale() { return m_fLagScale; }
+    float& GetDuration() { return m_fDuration; }
+    float& GetLagScale() { return m_fLagScale; }
+	float& GetMinTimeScale () { return m_fMinTimeScale; }
 
-	void SetMaxLagTime(float maxlagtime) { m_fMaxLagTime = maxlagtime; }
-	void SetLagScale(float lagScale) { m_fLagScale = lagScale; }
+    void SetDuration(float fDuration) { m_fDuration = fDuration; }
+    void SetLagScale(float lagScale) { m_fLagScale = lagScale; }
+	void SetMinTimeScale(float fMinTimeScale) { m_fMinTimeScale = fMinTimeScale; }
 
 	virtual void HandleMessage(const Message& message, const PlayerParams& params);
 };

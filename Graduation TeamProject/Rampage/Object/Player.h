@@ -15,12 +15,9 @@ public:
 	std::unique_ptr<CStateMachine<CPlayer>> m_pStateMachine;
 
 	int m_nAnimationNum = 0;
-	const float m_fAnimationPlayerWeightMin = 0.1f;
-	float m_fAnimationPlayWeight = 1.0f;
 
 	unsigned int m_iAttackId = 0;
 	bool m_bAttack = false;
-	bool m_bAttacked = false;
 	bool m_bEvasioned = false;
 
 	LPVOID m_pPlayerUpdatedContext = NULL;
@@ -34,7 +31,6 @@ public:
 
 	float m_fTime = 0.f;
 	float m_fMaxTime = 0.f;
-	float m_fCurLagTime = 0.f;
 
 	std::unique_ptr<CGameObject>* m_pSwordTrailReference = nullptr;
 
@@ -48,8 +44,6 @@ public:
 	virtual ~CPlayer();
 
 	int GetAtkId() { return m_iAttackId; }
-	const float& GetAnimationPlayWeightMin() { return m_fAnimationPlayerWeightMin; }
-	float GetAnimationPlayWeight() { return m_fAnimationPlayWeight; }
 	XMFLOAT3 GetATKDirection();
 	XMFLOAT3 GetTargetPosition();
 

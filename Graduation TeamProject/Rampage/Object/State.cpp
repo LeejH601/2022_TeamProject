@@ -31,8 +31,6 @@ void Idle_Player::Enter(CPlayer* player)
 
 	player->m_xmf3RootTransfromPreviousPos = XMFLOAT3{ 0.f, 0.f , 0.f };
 	player->m_bAttack = false; // 사용자가 좌클릭시 true가 되는 변수
-
-	player->m_fAnimationPlayWeight = 1.0f;
 }
 
 void Idle_Player::Execute(CPlayer* player, float fElapsedTime)
@@ -47,7 +45,7 @@ void Idle_Player::Execute(CPlayer* player, float fElapsedTime)
 
 void Idle_Player::Animate(CPlayer* player, float fElapsedTime)
 {
-	player->Animate(fElapsedTime * player->GetAnimationPlayWeight());
+	player->Animate(fElapsedTime);
 }
 
 void Idle_Player::OnRootMotion(CPlayer* player, float fTimeElapsed)
@@ -162,8 +160,9 @@ void Atk_Player::InitAtkPlayer()
 
 	// HitLag ANIMATION
 	std::unique_ptr<HitLagComponent> pHitLagComponent = std::make_unique<HitLagComponent>();
-	pHitLagComponent->SetMaxLagTime(0.5f);
 	pHitLagComponent->SetLagScale(0.5f);
+	pHitLagComponent->SetDuration(0.5f);
+	pHitLagComponent->SetMinTimeScale(0.5f);
 	m_pListeners.push_back(std::move(pHitLagComponent));
 	CMessageDispatcher::GetInst()->RegisterListener(MessageType::UPDATE_HITLAG, m_pListeners.back().get(), this);
 
@@ -223,16 +222,6 @@ void Atk_Player::SetPlayerRootVel(CPlayer* player)
 	pPlayerController->m_pRootMotionObject->m_xmf4x4Transform._43 = 0.f;
 }
 
-void Atk_Player::CheckHitLag(CPlayer* player)
-{
-	HitLagComponent* pHitLagComponent = dynamic_cast<HitLagComponent*>(GetHitLagComponent());
-	if (player->m_fCurLagTime > pHitLagComponent->GetMaxLagTime())
-	{
-		PlayerParams PlayerParam{ player };
-		CMessageDispatcher::GetInst()->Dispatch_Message<PlayerParams>(MessageType::UPDATE_HITLAG, &PlayerParam, this);
-	}
-}
-
 void Atk_Player::OnRootMotion(CPlayer* player, float fTimeElapsed)
 {
 	CAnimationController* pPlayerController = player->m_pSkinnedAnimationController.get();
@@ -277,8 +266,6 @@ void Atk1_Player::CheckComboAttack(CPlayer* player)
 			dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[0].get())->m_eTrailUpdateMethod = TRAIL_UPDATE_METHOD::DELETE_CONTROL_POINT;
 		if (player->m_bAttack) {
 			CAnimationController* pPlayerController = player->m_pSkinnedAnimationController.get();
-			/*if (pPlayerController->m_bRootMotion)
-				SetPlayerRootVel(player);*/
 			player->m_pStateMachine->ChangeState(Atk2_Player::GetInst());
 		}
 	}
@@ -344,14 +331,10 @@ void Atk1_Player::Enter(CPlayer* player)
 	player->m_pSkinnedAnimationController->m_fTime = 0.0f;
 	player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition = 0.0f;
 	player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_nType = ANIMATION_TYPE_ONCE;
-	player->m_bAttacked = false;
 	player->m_bAttack = false; // 사용자가 좌클릭시 true가 되는 변수
 	player->m_fCMDConstant = 1.0f;
 
 	player->m_xmf3RootTransfromPreviousPos = XMFLOAT3{ 0.f, 0.f , 0.f };
-
-	player->m_fCurLagTime = 0.f;
-	player->m_fAnimationPlayWeight = 1.0f;
 
 	SoundPlayParams SoundPlayParam;
 	SoundPlayParam.sound_category = SOUND_CATEGORY::SOUND_SHOOT;
@@ -373,7 +356,6 @@ void Atk1_Player::Execute(CPlayer* player, float fElapsedTime)
 
 	SendCollisionMessage(player);
 	CheckComboAttack(player);
-	CheckHitLag(player);
 
 	CheckEvasion(player, 0.7f);
 
@@ -387,11 +369,13 @@ void Atk1_Player::Execute(CPlayer* player, float fElapsedTime)
 
 void Atk1_Player::Animate(CPlayer* player, float fElapsedTime)
 {
-	player->Animate(fElapsedTime * player->GetAnimationPlayWeight());
+	player->Animate(fElapsedTime);
 }
 
 void Atk1_Player::Exit(CPlayer* player)
 {
+	CLogger::GetInst()->Log(std::string("Player Exit Atk1"));
+
 	if (player->m_pCamera)
 	{
 		player->m_pCamera->m_bCameraShaking = false;
@@ -429,8 +413,6 @@ void Atk2_Player::CheckComboAttack(CPlayer* player)
 		if (player->m_bAttack)
 		{
 			CAnimationController* pPlayerController = player->m_pSkinnedAnimationController.get();
-			/*if (pPlayerController->m_bRootMotion)
-				SetPlayerRootVel(player);*/
 			player->m_pStateMachine->ChangeState(Atk3_Player::GetInst());
 		}
 	}
@@ -456,14 +438,10 @@ void Atk2_Player::Enter(CPlayer* player)
 	player->m_pSkinnedAnimationController->m_fTime = 0.0f;
 	player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition = 0.2f;
 	player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_nType = ANIMATION_TYPE_ONCE;
-	player->m_bAttacked = false;
 	player->m_bAttack = false; // 사용자가 좌클릭시 true가 되는 변수
 	player->m_fCMDConstant = 1.0f;
 
 	player->m_xmf3RootTransfromPreviousPos = XMFLOAT3{ 0.f, 0.f , 0.f };
-
-	player->m_fCurLagTime = 0.f;
-	player->m_fAnimationPlayWeight = 1.0f;
 
 	SoundPlayParams SoundPlayParam;
 	SoundPlayParam.sound_category = SOUND_CATEGORY::SOUND_SHOOT;
@@ -484,7 +462,6 @@ void Atk2_Player::Execute(CPlayer* player, float fElapsedTime)
 
 	SendCollisionMessage(player);
 	CheckComboAttack(player);
-	CheckHitLag(player);
 
 	CheckEvasion(player, 0.7f);
 
@@ -498,7 +475,7 @@ void Atk2_Player::Execute(CPlayer* player, float fElapsedTime)
 
 void Atk2_Player::Animate(CPlayer* player, float fElapsedTime)
 {
-	player->Animate(fElapsedTime * player->GetAnimationPlayWeight());
+	player->Animate(fElapsedTime);
 }
 
 void Atk2_Player::Exit(CPlayer* player)
@@ -592,13 +569,9 @@ void Atk3_Player::Enter(CPlayer* player)
 	player->m_pSkinnedAnimationController->m_fTime = 0.0f;
 	player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition = 0.0f;
 	player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_nType = ANIMATION_TYPE_ONCE;
-	player->m_bAttacked = false;
 	player->m_bAttack = false; // 사용자가 좌클릭시 true가 되는 변수
 
 	player->m_xmf3RootTransfromPreviousPos = XMFLOAT3{ 0.f, 0.f , 0.f };
-
-	player->m_fCurLagTime = 0.f;
-	player->m_fAnimationPlayWeight = 1.0f;
 
 	SoundPlayParams SoundPlayParam;
 	SoundPlayParam.sound_category = SOUND_CATEGORY::SOUND_SHOOT;
@@ -617,7 +590,6 @@ void Atk3_Player::Execute(CPlayer* player, float fElapsedTime)
 {
 	SendCollisionMessage(player);
 	CheckComboAttack(player);
-	CheckHitLag(player);
 
 	CheckEvasion(player, 0.7f);
 
@@ -644,7 +616,7 @@ void Atk3_Player::Execute(CPlayer* player, float fElapsedTime)
 
 void Atk3_Player::Animate(CPlayer* player, float fElapsedTime)
 {
-	player->Animate(fElapsedTime * player->GetAnimationPlayWeight());
+	player->Animate(fElapsedTime);
 }
 
 void Atk3_Player::Exit(CPlayer* player)
@@ -689,7 +661,6 @@ void Run_Player::Enter(CPlayer* player)
 	player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition = 0.0f;
 	player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_nType = ANIMATION_TYPE_LOOP;
 	player->m_bAttack = false; // 사용자가 좌클릭시 true가 되는 변수
-	player->m_fAnimationPlayWeight = 1.0f;
 
 	player->m_xmf3RootTransfromPreviousPos = XMFLOAT3{ 0.f, 0.f , 0.f };
 
@@ -699,15 +670,15 @@ void Run_Player::Execute(CPlayer* player, float fElapsedTime)
 {
 	XMFLOAT3 xmf3PlayerVel = player->GetVelocity();
 
+	// Idle 상태로 복귀하는 코드
+	if (Vector3::Length(xmf3PlayerVel) == 0)
+		player->m_pStateMachine->ChangeState(Idle_Player::GetInst());
+
 	if (player->m_bAttack)
 		player->m_pStateMachine->ChangeState(Atk1_Player::GetInst());
 
 	if (player->m_bEvasioned)
 		player->m_pStateMachine->ChangeState(Evasion_Player::GetInst());
-
-	// Idle 상태로 복귀하는 코드
-	if (Vector3::Length(xmf3PlayerVel) == 0)
-		player->m_pStateMachine->ChangeState(Idle_Player::GetInst());
 
 	// 발바닥 뼈에
 
@@ -738,7 +709,7 @@ void Run_Player::Execute(CPlayer* player, float fElapsedTime)
 
 void Run_Player::Animate(CPlayer* player, float fTimeElapsed)
 {
-	player->Animate(fTimeElapsed * player->GetAnimationPlayWeight());
+	player->Animate(fTimeElapsed);
 }
 
 void Run_Player::Exit(CPlayer* player)
@@ -771,13 +742,9 @@ void Atk4_Player::Enter(CPlayer* player)
 	player->m_pSkinnedAnimationController->m_fTime = 0.0f;
 	player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition = 0.0f;
 	player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_nType = ANIMATION_TYPE_ONCE;
-	player->m_bAttacked = false;
 	player->m_bAttack = false; // 사용자가 좌클릭시 true가 되는 변수
 
 	player->m_xmf3RootTransfromPreviousPos = XMFLOAT3{ 0.f, 0.f , 0.f };
-
-	player->m_fCurLagTime = 0.f;
-	player->m_fAnimationPlayWeight = 1.0f;
 
 	if (player->m_pSwordTrailReference) {
 		//dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[3].get())->m_bIsUpdateTrailVariables = true;
@@ -829,7 +796,7 @@ void Atk4_Player::SendCollisionMessage(CPlayer* player)
 
 void Atk4_Player::Animate(CPlayer* player, float fElapsedTime)
 {
-	player->Animate(fElapsedTime * player->GetAnimationPlayWeight());
+	player->Animate(fElapsedTime);
 }
 
 void Atk4_Player::Exit(CPlayer* player)
@@ -858,13 +825,9 @@ void Atk5_Player::Enter(CPlayer* player)
 	player->m_pSkinnedAnimationController->m_fTime = 0.0f;
 	player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition = 0.0f;
 	player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_nType = ANIMATION_TYPE_ONCE;
-	player->m_bAttacked = false;
 	player->m_bAttack = false; // 사용자가 좌클릭시 true가 되는 변수
 
 	player->m_xmf3RootTransfromPreviousPos = XMFLOAT3{ 0.f, 0.f , 0.f };
-
-	player->m_fCurLagTime = 0.f;
-	player->m_fAnimationPlayWeight = 1.0f;
 
 	if (player->m_pSwordTrailReference) {
 		//dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[4].get())->m_bIsUpdateTrailVariables = true;
@@ -905,7 +868,7 @@ void Atk5_Player::Execute(CPlayer* player, float fElapsedTime)
 
 void Atk5_Player::Animate(CPlayer* player, float fElapsedTime)
 {
-	player->Animate(fElapsedTime * player->GetAnimationPlayWeight());
+	player->Animate(fElapsedTime);
 }
 
 void Atk5_Player::Exit(CPlayer* player)
@@ -1040,9 +1003,6 @@ void Evasion_Player::Enter(CPlayer* player)
 	player->m_pSkinnedAnimationController->m_fTime = 0.0f;
 	player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition = 0.0f;
 	player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_nType = ANIMATION_TYPE_ONCE;
-
-	player->m_fCurLagTime = 0.f;
-	player->m_fAnimationPlayWeight = 1.0f;
 }
 
 void Evasion_Player::Execute(CPlayer* player, float fElapsedTime)
@@ -1070,7 +1030,7 @@ void Evasion_Player::Exit(CPlayer* player)
 
 void Evasion_Player::Animate(CPlayer* player, float fElapsedTime)
 {
-	player->Animate(fElapsedTime * player->GetAnimationPlayWeight());
+	player->Animate(fElapsedTime);
 }
 
 void Evasion_Player::OnRootMotion(CPlayer* player, float fTimeElapsed)

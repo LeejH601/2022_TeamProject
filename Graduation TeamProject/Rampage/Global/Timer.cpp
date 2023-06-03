@@ -1,5 +1,8 @@
 #include "stdafx.h"
 #include "Timer.h"
+#include "MessageDispatcher.h"
+
+std::mutex fDynamicScaleMutex;
 
 CGameTimer::CGameTimer()
 {
@@ -11,10 +14,19 @@ CGameTimer::CGameTimer()
 	m_nPausedPerformanceCounter = 0;
 	m_nStopPerformanceCounter = 0;
 
+	m_fDynamicTimeScale = 1.0f;
+
 	m_nSampleCount = 0;
 	m_nCurrentFrameRate = 0;
 	m_nFramesPerSecond = 0;
 	m_fFPSTimeElapsed = 0.0f;
+	m_fTotalTimeElasped = 0.0f;
+
+	std::unique_ptr<UpdateDynamicTimeScaleListener> pUpdateDynamicTimeScaleListener = std::make_unique<UpdateDynamicTimeScaleListener>();
+	pUpdateDynamicTimeScaleListener->SetTimer(this);
+	m_pListeners.push_back(std::move(pUpdateDynamicTimeScaleListener));
+
+	CMessageDispatcher::GetInst()->RegisterListener(MessageType::SET_DYNAMIC_TIMER_SCALE, m_pListeners.back().get());
 }
 
 CGameTimer::~CGameTimer()
@@ -60,6 +72,9 @@ void CGameTimer::Tick(float fLockFPS)
 	for (ULONG i = 0; i < m_nSampleCount; ++i)
 		m_fTimeElapsed += m_fFrameTime[i];
 	if (m_nSampleCount > 0) m_fTimeElapsed /= m_nSampleCount; // 정시 시간 샘플들의 평균으로 최종적인 정지 시간값을 결정
+
+	m_fTimeElapsed *= m_fDynamicTimeScale;
+	m_fTotalTimeElasped += m_fTimeElapsed;
 }
 
 void CGameTimer::Start()
@@ -110,9 +125,7 @@ float CGameTimer::GetFrameTimeElapsed()
 
 float CGameTimer::GetTotalTime()
 {
-	if (m_bStopped)
-		return float(((m_nStopPerformanceCounter - m_nPausedPerformanceCounter) - m_nBasePerformanceCounter) * m_fTimeScale);
-	return float(((m_nCurrentPerformanceCounter - m_nPausedPerformanceCounter) - m_nBasePerformanceCounter) * m_fTimeScale);
+	return m_fTotalTimeElasped;
 }
 
 long long CGameTimer::GetNowTimeAfter(float second)
@@ -127,4 +140,35 @@ long long CGameTimer::GetNowTime()
 	auto now = std::chrono::duration_cast<std::chrono::microseconds>(tp);
 
 	return now.count();
+}
+
+void CGameTimer::SetDynamicTimeScale(float fDynamicTimeScale, float fDuration, float fMinTimeScale)
+{
+	std::lock_guard<std::mutex> lock(fDynamicScaleMutex);
+
+	if (m_fDynamicTimeScale - fMinTimeScale < FLT_EPSILON)
+		return;
+
+	m_fDynamicTimeScale *= fDynamicTimeScale;
+
+	/*std::wstring timeScale{ std::to_wstring(m_fDynamicTimeScale) };
+	OutputDebugString(L"SetDynamicTimeScale: ");
+	OutputDebugString(timeScale.c_str());
+	OutputDebugString(L"\n");*/
+
+	std::thread restorTimer_thread(&CGameTimer::RestoreDynamicTimeScale, this, fDynamicTimeScale, fDuration);
+	restorTimer_thread.detach();
+}
+
+void CGameTimer::RestoreDynamicTimeScale(float fDynamicTimeScale, float fDuration)
+{
+	std::this_thread::sleep_for(std::chrono::milliseconds(static_cast<int>(fDuration * 1000)));
+
+	std::lock_guard<std::mutex> lock(fDynamicScaleMutex);
+	m_fDynamicTimeScale /= fDynamicTimeScale;
+
+	/*std::wstring timeScale{ std::to_wstring(m_fDynamicTimeScale) };
+	OutputDebugString(L"RestoreDynamicTimeScale: ");
+	OutputDebugString(timeScale.c_str());
+	OutputDebugString(L"\n");*/
 }
