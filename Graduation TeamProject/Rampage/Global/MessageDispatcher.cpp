@@ -263,7 +263,7 @@ void ImpactEffectComponent::HandleMessage(const Message& message, const ImpactCo
 		pMultiSpriteParticle->SetPosition(params.xmf3Position);
 		pMultiSpriteParticle->SetTextureIndex(m_iTextureIndex + m_iTextureOffset);
 		pMultiSpriteParticle->SetEmissive(m_fEmissive);
-		pMultiSpriteParticle->EmitParticle(0);
+		pMultiSpriteParticle->EmitParticle(7);
 	}
 	CLogger::GetInst()->Log(std::string("MultiSprite HandleMessge Called"));
 }

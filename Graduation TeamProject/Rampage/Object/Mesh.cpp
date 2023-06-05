@@ -1553,6 +1553,7 @@ void CParticleMesh::EmitParticle(int emitType, ParticleEmitDataParam& param)
 	switch (emitType)
 	{
 	case 0:
+	case 7:
 		for (int i = m_ncreatedParticleNum; i < nCreateParticleNum; ++i) {
 			createdParticleBuffer[i].m_xmf3Position = param.m_xmf3EmitedPosition; /*XMFLOAT3(45 + offset.x, 60, 50 + offset.z)*/
 			createdParticleBuffer[i].m_xmf3Velocity = XMFLOAT3(urd(dre), urd(dre), urd(dre));

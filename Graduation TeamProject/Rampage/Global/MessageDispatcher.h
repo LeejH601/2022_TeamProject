@@ -591,6 +591,7 @@ public:
 	virtual void HandleMessage(const Message& message, const ParticleTrailParams& params);
 };
 
+
 enum TerrainSpriteType {
 	TERRAINSPRITE_CROSS_FADE,
 	TERRAINSPRITE_FADE_IN,

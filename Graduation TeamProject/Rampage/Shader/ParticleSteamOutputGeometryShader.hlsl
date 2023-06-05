@@ -10,6 +10,7 @@ Buffer<float4> gRandomSphereBuffer : register(t50);
 #define ATTACK_PARTICLE 4
 #define VERTEXPOINT_PARTICLE 5
 #define SLASHHIT_PARTICLE 6
+#define IMPACT_PARTICLE 7
 
 //#define TYPE_DEFAULT -1
 
@@ -198,6 +199,16 @@ void SlashHitParticles(VS_PARTICLE_INPUT input, inout PointStream<VS_PARTICLE_IN
 	}
 }
 
+void ImpactParticles(VS_PARTICLE_INPUT input, inout PointStream<VS_PARTICLE_INPUT> output) {
+	VS_PARTICLE_INPUT particle = input;
+
+	float lifedTime = gfCurrentTime - particle.EmitTime;
+	if (lifedTime <= particle.lifetime)
+	{
+		output.Append(particle);
+	}
+}
+
 [maxvertexcount(16)]
 void GSParticleStreamOutput(point VS_PARTICLE_INPUT input[1], inout PointStream<VS_PARTICLE_INPUT> output)
 {
@@ -214,4 +225,7 @@ void GSParticleStreamOutput(point VS_PARTICLE_INPUT input[1], inout PointStream<
 		SphereParticles(particle, output);
 	else if(particle.type == SLASHHIT_PARTICLE)
 		SlashHitParticles(particle, output);
+	else if (particle.type == IMPACT_PARTICLE) {
+		ImpactParticles(particle, output);
+	}
 }

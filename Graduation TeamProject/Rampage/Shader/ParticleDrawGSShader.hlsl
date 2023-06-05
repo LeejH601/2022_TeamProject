@@ -115,12 +115,12 @@ void GSParticleDraw(point VS_PARTICLE_DRAW_OUTPUT input[1], inout TriangleStream
 	float sizeX = input[0].size.x;
 	float sizeY = input[0].size.y;
 
-	
+	float3 offset = float3(0, 0, 0);
 	if (input[0].type == 6) {
 		float lifedTime = gfCurrentTime - input[0].EmitTime;
 		float value = lifedTime / input[0].lifetime;
 
-		float convertPoint = 0.1f;
+		float convertPoint = 0.25f;
 		float inclinationY = 1 / (convertPoint * input[0].lifetime);
 
 		float inclinationX_b = sizeY / 10.0f;
@@ -131,13 +131,19 @@ void GSParticleDraw(point VS_PARTICLE_DRAW_OUTPUT input[1], inout TriangleStream
 		sizeY *= min(1.0, inclinationY * lifedTime);
 		sizeX *= max(inclinationX * lifedTime + inclinationX_b, inclinationX_disappear * lifedTime + disapper_b);
 		//sizeX *= 1.0f - value;
+
+		float length = input[0].size.y * 0.25f;
+		float dt = lifedTime / input[0].lifetime;
+
+		offset.y = -dt * length;
 	}
+	
 	
 
 	for (int i = 0; i < 4; i++)
 	{
 		gf3Positions[i].x = gf3Positions[i].x * sizeX * 0.5f;
-		gf3Positions[i].y = gf3Positions[i].y * (sizeY * scaleValue) * 0.5f;
+		gf3Positions[i].y = offset.y + gf3Positions[i].y * (sizeY * scaleValue) * 0.5f;
 		gf3Positions[i] = mul(gf3Positions[i], rotate);
 
 		float3 positionW = input[0].position;
