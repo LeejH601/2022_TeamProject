@@ -703,6 +703,8 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pMap->GetTerrain()->SetRigidStatic();
 	m_pMap->LoadSceneFromFile(pd3dDevice, pd3dCommandList, "Object/Scene/Scene.bin");
 
+	m_pMainSceneCamera->SetUpdatedContext(m_pMap.get());
+
 	int index = 0;
 
 	m_IObjectIndexs.resize(m_pEnemys.size() + m_pMap->GetMapObjects().size());
