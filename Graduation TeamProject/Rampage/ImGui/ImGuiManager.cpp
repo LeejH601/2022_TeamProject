@@ -1563,7 +1563,7 @@ void CImGuiManager::ShowSlashHitManager(CState<CPlayer>* pCurrentAnimation)
 	ImGuiWindowFlags my_window_flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize;
 	bool* b_open = nullptr;
 
-	ImGui::Begin(U8STR("파티클 이펙트 관리자"), b_open, my_window_flags);
+	ImGui::Begin(U8STR("창상 이펙트 관리자\0"), b_open, my_window_flags);
 
 	SlashHitComponent* pSlashHitComponent = dynamic_cast<SlashHitComponent*>(pCurrentAnimation->GetSlashHitComponent());
 
