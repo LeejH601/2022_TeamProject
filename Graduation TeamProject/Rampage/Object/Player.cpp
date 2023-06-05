@@ -26,10 +26,8 @@ CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 	m_pStateMachine->SetCurrentState(Idle_Player::GetInst());
 	m_pStateMachine->SetPreviousState(Idle_Player::GetInst());
 
-	float fMeterPerUnit = 2.0f / 2.0f;
 	m_fSpeedKperH = 44.0f;
-	m_fSpeedMperS = m_fSpeedKperH * 1000.0f / 3600.0f;
-	m_fSpeedUperS = m_fSpeedMperS * (1.0 / fMeterPerUnit);
+	m_fSpeedUperS = MeterToUnit(m_fSpeedKperH * 1000.0f) / 3600.0f;
 }
 
 CPlayer::~CPlayer()
@@ -374,8 +372,10 @@ void CKnightPlayer::UpdateTransform(XMFLOAT4X4* pxmf4x4Parent)
 void CKnightPlayer::PrepareBoundingBox(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	pWeapon = CGameObject::FindFrame("Weapon_r");
+#ifdef RENDER_BOUNDING_BOX
 	pBodyBoundingBoxMesh = CBoundingBoxShader::GetInst()->AddBoundingObject(pd3dDevice, pd3dCommandList, this, XMFLOAT3(0.0f, 0.75f, 0.0f), XMFLOAT3(0.35f, 1.0f, 0.35f));
 	pWeaponBoundingBoxMesh = CBoundingBoxShader::GetInst()->AddBoundingObject(pd3dDevice, pd3dCommandList, this, XMFLOAT3(0.0f, 0.6f, 0.4f), XMFLOAT3(0.0125f, 0.525f, 0.0625f));
+#endif // RENDER_BOUNDING_BOX
 	m_BodyBoundingBox = BoundingOrientedBox{ XMFLOAT3(0.0f, 0.75f, 0.0f), XMFLOAT3(0.35f, 1.0f, 0.35f), XMFLOAT4{0.0f, 0.0f, 0.0f, 1.0f} };
 	m_WeaponBoundingBox = BoundingOrientedBox{ XMFLOAT3(0.0f, 0.6f, 0.4f), XMFLOAT3(0.0125f, 0.525f, 0.0625f), XMFLOAT4{0.0f, 0.0f, 0.0f, 1.0f} };
 }

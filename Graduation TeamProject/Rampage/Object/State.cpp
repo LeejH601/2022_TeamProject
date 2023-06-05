@@ -677,7 +677,6 @@ void Run_Player::Execute(CPlayer* player, float fElapsedTime)
 		player->m_pStateMachine->ChangeState(Evasion_Player::GetInst());
 
 	// ¹ß¹Ù´Ú »À¿¡
-
 	float fTime = player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition;
 	XMFLOAT3 xmf3Position;
 	ParticleSmokeParams Particlesmoke_comp_params;

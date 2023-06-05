@@ -1418,10 +1418,6 @@ void CParticleMesh::PreRender(ID3D12GraphicsCommandList* pd3dCommandList, int nP
 			pd3dCommandList->CopyBufferRegion(m_pd3dDrawBuffer, m_nVertices * m_nStride, m_pd3dDrawUploadBuffer.Get(), 0, m_ncreatedParticleNum * m_nStride);
 			::SynchronizeResourceTransition(pd3dCommandList, m_pd3dDrawBuffer, D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_STREAM_OUT);
 
-			TCHAR pstrDebug[256] = { 0 };
-			_stprintf_s(pstrDebug, 256, _T("Stream Output Vertices = %d\n"), m_nVertices);
-			OutputDebugString(pstrDebug);
-
 			m_nVertices += m_ncreatedParticleNum;
 			m_ncreatedParticleNum = 0;
 
@@ -1500,7 +1496,7 @@ void CParticleMesh::PostRender(ID3D12GraphicsCommandList* pd3dCommandList, UINT 
 {
 }
 
-#define _WITH_DEBUG_STREAM_OUTPUT_VERTICES
+//#define _WITH_DEBUG_STREAM_OUTPUT_VERTICES
 
 int CParticleMesh::OnPostRender(int nPipelineState)
 {
@@ -1581,8 +1577,6 @@ void CParticleMesh::EmitParticleForVertexData(int emitType, ParticleEmitPosition
 
 	int nCreateParticleNum = m_ncreatedParticleNum + param.m_nEmitNum;
 
-	
-
 	switch (emitType)
 	{
 	case 5:
@@ -1599,9 +1593,9 @@ void CParticleMesh::EmitParticleForVertexData(int emitType, ParticleEmitPosition
 			memcpy(createdParticleBuffer2[i].m_iTextureCoord, param.m_iTextureCoord, sizeof(UINT) * 2);
 			index++;
 		}
-		TCHAR pstrDebug[256] = { 0 };
+		/*TCHAR pstrDebug[256] = { 0 };
 		_stprintf_s(pstrDebug, 256, _T("emit Time ---- %f \n"), createdParticleBuffer2[0].m_fEmitTime);
-		OutputDebugString(pstrDebug);
+		OutputDebugString(pstrDebug);*/
 	}
 	break;
 	default:
