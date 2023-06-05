@@ -915,7 +915,7 @@ void CMainTMPScene::UpdateObjects(float fTimeElapsed)
 		((CKnightPlayer*)m_pPlayer)->m_pSkinnedAnimationController->m_pRootMotionObject->GetWorld()._41,
 		 m_pPlayer->GetPosition().y,
 		((CKnightPlayer*)m_pPlayer)->m_pSkinnedAnimationController->m_pRootMotionObject->GetWorld()._43 };
-	xmf3PlayerPos.y += 0.35f;
+	xmf3PlayerPos.y += 8.0f / 2.0;
 
 	m_pMainSceneCamera->Update(xmf3PlayerPos, fTimeElapsed);
 
@@ -1008,16 +1008,17 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 
 	CModelShader::GetInst()->Render(pd3dCommandList, 0);
 
-	D3D12_GPU_VIRTUAL_ADDRESS d3dGpuVirtualAddress = m_pd3dcbDisolveParams->GetGPUVirtualAddress();
-	pd3dCommandList->SetGraphicsRootConstantBufferView(7, d3dGpuVirtualAddress);
-
-	m_pMap->RenderMapObjects(pd3dCommandList);
-
 	if (m_pPlayer)
 	{
 		//m_pPlayer->Animate(0.0f);
 		m_pPlayer->Render(pd3dCommandList, true);
 	}
+
+	m_pMap->RenderMapObjects(pd3dCommandList);
+
+	D3D12_GPU_VIRTUAL_ADDRESS d3dGpuVirtualAddress = m_pd3dcbDisolveParams->GetGPUVirtualAddress();
+	pd3dCommandList->SetGraphicsRootConstantBufferView(7, d3dGpuVirtualAddress);
+	
 
 	static float trailUpdateT = 0.0f;
 	trailUpdateT += fTimeElapsed;
