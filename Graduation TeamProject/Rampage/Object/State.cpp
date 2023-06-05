@@ -364,6 +364,8 @@ void Atk1_Player::Enter(CPlayer* player)
 	if (player->m_fStamina > 0)
 		player->m_fStamina -= player->m_fTotalStamina * 0.2f;
 
+	player->UpdateCombo(0.f);
+
 }
 
 void Atk1_Player::Execute(CPlayer* player, float fElapsedTime)
@@ -479,6 +481,8 @@ void Atk2_Player::Enter(CPlayer* player)
 
 	if (player->m_fStamina > 0)
 		player->m_fStamina -= player->m_fTotalStamina * 0.2f;
+
+	player->UpdateCombo(0.f);
 }
 
 void Atk2_Player::Execute(CPlayer* player, float fElapsedTime)
@@ -617,6 +621,8 @@ void Atk3_Player::Enter(CPlayer* player)
 
 	if (player->m_fStamina > 0)
 		player->m_fStamina -= player->m_fTotalStamina * 0.2f;
+
+	player->UpdateCombo(0.f);
 }
 
 void Atk3_Player::Execute(CPlayer* player, float fElapsedTime)
@@ -797,6 +803,8 @@ void Atk4_Player::Enter(CPlayer* player)
 
 	if (player->m_fStamina > 0)
 		player->m_fStamina -= player->m_fTotalStamina * 0.2f;
+
+	player->UpdateCombo(0.f);
 }
 
 void Atk4_Player::CheckComboAttack(CPlayer* player)
@@ -887,6 +895,8 @@ void Atk5_Player::Enter(CPlayer* player)
 
 	if (player->m_fStamina > 0)
 		player->m_fStamina -= player->m_fTotalStamina * 0.2f;
+
+	player->UpdateCombo(0.f);
 }
 
 void Atk5_Player::SpawnTrailParticle(CPlayer* player)

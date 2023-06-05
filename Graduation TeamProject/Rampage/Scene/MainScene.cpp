@@ -761,7 +761,7 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/Mana2.dds", 0, 0);
 	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/Blood.dds", 0, 0);
 
-	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/Number/Combo.dds", 0, 0);
+	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/Combo2.dds", 0, 0);
 	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/Number/0.dds", 0, 0);
 	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/Number/1.dds", 0, 0);
 	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/Number/2.dds", 0, 0);
@@ -864,18 +864,18 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 
 
 
-	pUIObject = std::make_unique<CUIObject>(2, pd3dDevice, pd3dCommandList, 10.f);
+	/*pUIObject = std::make_unique<CUIObject>(2, pd3dDevice, pd3dCommandList, 10.f);
 	pUIObject->SetSize(XMFLOAT2(243.f * 1.f, 58.f * 1.f));
 	pUIObject->SetScreenPosition(XMFLOAT2(FRAME_BUFFER_WIDTH * 0.75f, FRAME_BUFFER_HEIGHT * 0.5f));
 	pUIObject->SetTextureIndex(13);
-	m_pUIObject.push_back(std::move(pUIObject));
+	m_pUIObject.push_back(std::move(pUIObject));*/
 
 
 
 	pUIObject = std::make_unique<CNumberObject>(14, 35, pd3dDevice, pd3dCommandList, 10.f);
-	pUIObject->SetSize(XMFLOAT2(64.f, 78.f));
+	pUIObject->SetSize(XMFLOAT2(48.f * 1.5f, 64.f * 1.5f));
 	pUIObject->SetScreenPosition(XMFLOAT2(FRAME_BUFFER_WIDTH * 0.85f, FRAME_BUFFER_HEIGHT * 0.5f));
-	pUIObject->SetTextureIndex(14);
+	pUIObject->SetTextureIndex(14); 
 	m_pUIObject.push_back(std::move(pUIObject));
 
 	//pUIObject = std::make_unique<CSTAMINAObject>(2, pd3dDevice, pd3dCommandList, 10.f);
@@ -952,7 +952,7 @@ void CMainTMPScene::UpdateObjects(float fTimeElapsed)
 	m_pPlayer->Update(fTimeElapsed);
 	dynamic_cast<CBarObject*>(m_pUIObject[1].get())->Set_Value( ((CPhysicsObject*)m_pPlayer)->m_fHP, ((CPhysicsObject*)m_pPlayer)->m_fTotalHP);
 	dynamic_cast<CBarObject*>(m_pUIObject[2].get())->Set_Value(((CPlayer*)m_pPlayer)->m_fStamina, ((CPlayer*)m_pPlayer)->m_fTotalStamina);
-	dynamic_cast<CNumberObject*>(m_pUIObject[4].get())->UpdateNumber(((CPlayer*)m_pPlayer)->m_iCombo);
+	dynamic_cast<CNumberObject*>(m_pUIObject[3].get())->UpdateNumber(((CPlayer*)m_pPlayer)->m_iCombo);
 	// Update Camera
 	XMFLOAT3 xmf3PlayerPos = XMFLOAT3{
 		((CKnightPlayer*)m_pPlayer)->m_pSkinnedAnimationController->m_pRootMotionObject->GetWorld()._41,

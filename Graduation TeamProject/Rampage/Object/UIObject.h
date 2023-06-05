@@ -76,5 +76,6 @@ public:
 protected:
 	std::vector<UINT> m_vecNumObject;
 	UINT m_iNumber = 0;
-	
+	float m_fAnimationTime = 1.f;
+	bool m_bAnimation = false;
 };

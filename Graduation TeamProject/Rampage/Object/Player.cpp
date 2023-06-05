@@ -125,7 +125,7 @@ void CPlayer::Update(float fTimeElapsed)
 	m_xmf3PreviousPos = GetPosition();
 
 	UpdateStamina(fTimeElapsed);
-	UpdateCombo(fTimeElapsed);
+	//UpdateCombo(fTimeElapsed);
 }
 
 void CPlayer::UpdateStamina(float fTimeElapsed)
@@ -175,20 +175,20 @@ void CPlayer::Tmp()
 void CPlayer::UpdateCombo(float fTimeElapsed)
 {
 	m_iCombo++;
-	m_fComboTime -= fTimeElapsed;
-	if (m_fComboTime < 0.f)
-	{
-		
-		m_fComboTime = m_fComboFullTime;
-		
-		//m_iCombo = 0;
-	}
-	else if (m_bCombo)
-	{
-		m_fComboTime = m_fComboFullTime;
-		m_iCombo++;
-		m_bCombo = false;
-	}
+	//m_fComboTime -= fTimeElapsed;
+	//if (m_fComboTime < 0.f)
+	//{
+	//	
+	//	m_fComboTime = m_fComboFullTime;
+	//	
+	//	m_iCombo = 0;
+	//}
+	//else if (m_bCombo)
+	//{
+	//	m_fComboTime = m_fComboFullTime;
+	//	m_iCombo++;
+	//	m_bCombo = false;
+	//}
 }
 
 #define KNIGHT_ROOT_MOTION

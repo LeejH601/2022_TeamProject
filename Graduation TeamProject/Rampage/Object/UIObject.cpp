@@ -284,31 +284,37 @@ CNumberObject::~CNumberObject()
 
 void CNumberObject::UpdateNumber(UINT iNumber)
 {
-	m_iNumber = iNumber;
+	if (m_iNumber != iNumber)
+	{
+		m_iNumber = iNumber;
 
-	// 십의 몇 자리인지 구함
-	int N = 0;
-	int SaveNum = iNumber;
-	while ((SaveNum / 10) >= 1)
-	{
-		N++;
-		SaveNum /= 10;
-	}
-	m_vecNumObject.resize(N + 1);
-	for (int i = m_vecNumObject.size() - 1; i >= 0; i--)
-	{
-		m_vecNumObject[i] = iNumber / ((int)pow(10, i));
-		iNumber = iNumber % ((int)pow(10, i));
+		// 십의 몇 자리인지 구함
+		int N = 0;
+		int SaveNum = iNumber;
+		while ((SaveNum / 10) >= 1)
+		{
+			N++;
+			SaveNum /= 10;
+		}
+		m_vecNumObject.resize(N + 1);
+		for (int i = m_vecNumObject.size() - 1; i >= 0; i--)
+		{
+			m_vecNumObject[i] = iNumber / ((int)pow(10, i));
+			iNumber = iNumber % ((int)pow(10, i));
+		}
+		m_fAnimationTime = 0.f;
+		m_bAnimation = true;
 	}
 }
 
 void CNumberObject::UpdateNumberTexture(UINT N, UINT ORDER)
 {
 	if (m_bEnable) {
+
 		//m_xmf2ScreenPosition5 = XMFLOAT2()
 		// 화면 크기를 기준으로 Size 설정 최대 크기 (MAX WIDTH: FRAME_BUFFER_WIDTH, MAX_HEIGHT: FRAME_BUFFER_HEIGHT)
-		m_xmf4x4World._11 = (/*(m_fCurrentHp / m_fTotalHp) * */m_xmf2Size.x) / (FRAME_BUFFER_WIDTH);
-		m_xmf4x4World._22 = m_xmf2Size.y / (FRAME_BUFFER_HEIGHT);
+		m_xmf4x4World._11 = ((/*(m_fCurrentHp / m_fTotalHp) * */m_xmf2Size.x) / (FRAME_BUFFER_WIDTH)) * m_fAnimationTime;
+		m_xmf4x4World._22 = (m_xmf2Size.y / (FRAME_BUFFER_HEIGHT)) * m_fAnimationTime;
 
 		m_xmf4x4World._33 = m_iTextureIndex + N; // 텍스쳐 인덱스
 
@@ -319,7 +325,7 @@ void CNumberObject::UpdateNumberTexture(UINT N, UINT ORDER)
 
 		// -1 ~ 1
 		m_xmf4x4World._41 = (m_xmf2ScreenPosition.x / FRAME_BUFFER_WIDTH) + ((m_xmf2Size.x) / (FRAME_BUFFER_WIDTH) * 0.725f * ORDER);
-		m_xmf4x4World._42 = (m_xmf2ScreenPosition.y / FRAME_BUFFER_HEIGHT);
+		m_xmf4x4World._42 = (m_xmf2ScreenPosition.y / FRAME_BUFFER_HEIGHT) + (1.f - m_fAnimationTime) * 0.03f;
 		//(m_xmf2ScreenPosition.y * 2.f) / (FRAME_BUFFER_HEIGHT); // -1 ~ 1
 		m_xmf4x4World._43 = 0.f;
 	}
@@ -330,6 +336,20 @@ void CNumberObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, bool b_Us
 {
 	if (!m_bEnable)
 		return;
+	if (m_fAnimationTime > 2.5f)
+	{
+		m_bAnimation = false;
+	}
+	if (m_fAnimationTime >= 1.f && (!m_bAnimation))
+	{
+		m_fAnimationTime -= 1.f;
+		if (m_fAnimationTime < 1.f)
+		{
+			m_fAnimationTime = 1.f;
+		}
+	}
+	else
+		m_fAnimationTime += 0.8f;
 	if (m_pMesh)
 	{
 		// UI Size 정보 Update
