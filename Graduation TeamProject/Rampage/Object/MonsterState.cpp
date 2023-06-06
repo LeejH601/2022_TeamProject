@@ -414,6 +414,7 @@ void Dead_Monster::Enter(CMonster* monster)
 		CMessageDispatcher::GetInst()->Dispatch_Message<RegisterArticulationParams>(MessageType::REQUEST_REGISTERARTI, &Request_params, nullptr);
 		monster->m_bArticulationOnPxScene = true;
 	}
+	monster->m_bArticulationSleep = false;
 }
 
 void Dead_Monster::Execute(CMonster* monster, float fElapsedTime)

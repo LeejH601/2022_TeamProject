@@ -115,6 +115,13 @@ void CMonster::Update(float fTimeElapsed)
 	else {
 		m_fDissolveTime += fTimeElapsed;
 		m_fDissolveThrethHold = m_fDissolveTime / m_fMaxDissolveTime;
+		if (m_fDissolveThrethHold > 1.0f && m_bArticulationSleep == false) {
+			m_bArticulationSleep = true;
+			m_bSimulateArticulate = false;
+			RegisterArticulationSleepParams Request_params;
+			Request_params.pObject = this;
+			CMessageDispatcher::GetInst()->Dispatch_Message<RegisterArticulationSleepParams>(MessageType::REQUEST_SLEEPARTI, &Request_params, nullptr);
+		}
 	}
 
 	if (m_xmf3Velocity.x + m_xmf3Velocity.z)

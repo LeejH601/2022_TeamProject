@@ -553,3 +553,8 @@ void SlashHitComponent::HandleMessage(const Message& message, const ParticleComp
 		pParticle->EmitParticle(6);
 	}
 }
+
+void RegisterArticulationSleepListener::HandleMessage(const Message& message, const RegisterArticulationSleepParams& params)
+{
+	m_pScene->RequestSleepArticulation(params);
+}

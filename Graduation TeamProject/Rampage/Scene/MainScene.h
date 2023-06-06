@@ -76,6 +76,7 @@ private:
 	ComPtr<ID3D12Resource> m_pd3dcbDisolveParams = nullptr;
 
 	std::list<RegisterArticulationParams> m_lRequestObjects;
+	std::list<RegisterArticulationSleepParams> m_lSleepObjects;
 public:
 	CMainTMPScene() {}
 	virtual ~CMainTMPScene() {}
@@ -91,6 +92,8 @@ public:
 	virtual void UpdateObjectArticulation();
 	virtual void RequestRegisterArticulation(RegisterArticulationParams param);
 	virtual void RegisterArticulations();
+	virtual void RequestSleepArticulation(RegisterArticulationSleepParams param);
+	virtual void SleepArticulations();
 
 	virtual bool OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
 	virtual SCENE_RETURN_TYPE OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam, DWORD& dwDirection);

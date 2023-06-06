@@ -361,6 +361,7 @@ physx::PxArticulationLink* CPhysicsObject::SetLink(physx::PxArticulationReducedC
 		physx::PxShape* shape = physx::PxRigidActorExt::createExclusiveShape(*link, linkCapsuleGeometry, *material);
 		physx::PxVec3 localpos = (child.p + parent.p) * 0.5f;
 		physx::PxRigidBodyExt::updateMassAndInertia(*link, 1.0f);
+		link->getInboundJoint()->setMaxJointVelocity(physx::PxPi * 3.0f);
 	}
 
 	return link;
@@ -375,8 +376,10 @@ void CPhysicsObject::CreateArticulation(float meshScale)
 
 	m_pArticulation = Locator.GetPxPhysics()->createArticulationReducedCoordinate();
 	m_pArticulation->setArticulationFlag(physx::PxArticulationFlag::eDISABLE_SELF_COLLISION, true);
-	m_pArticulation->setSolverIterationCounts(30, 10);
-	m_pArticulation->setMaxCOMLinearVelocity(FLT_MAX);
+	//m_pArticulation->setArticulationFlag(physx::PxArticulationFlag::eDRIVE_LIMITS_ARE_FORCES, true);
+	m_pArticulation->setSolverIterationCounts(10, 5);
+	m_pArticulation->setMaxCOMLinearVelocity(30.0f);
+	m_pArticulation->setMaxCOMAngularVelocity(physx::PxPi / 32.0);
 
 	JointAxisDesc FixDesc;
 	FixDesc.type = physx::PxArticulationJointType::eFIX;

@@ -103,6 +103,10 @@ struct RegisterArticulationParams {
 	XMFLOAT3 m_force;
 };
 
+struct RegisterArticulationSleepParams {
+	CGameObject* pObject;
+};
+
 struct DamageParams {
 	CGameObject* pPlayer;
 	float fMaxStunTime;
@@ -135,6 +139,7 @@ public:
 	virtual void HandleMessage(const Message& message, const ParticleSmokeParams& params) {}
 	virtual void HandleMessage(const Message& message, const TerrainSpriteCompParams& params) {}
 	virtual void HandleMessage(const Message& message, const RegisterArticulationParams& params) {}
+	virtual void HandleMessage(const Message& message, const RegisterArticulationSleepParams& params) {}
 
 	virtual void HandleMessage(const Message& message, const ParticleUpDownParams& params) {}
 	virtual void HandleMessage(const Message& message, const ParticleTrailParams& params) {}
@@ -157,6 +162,14 @@ class RegisterArticulationListener : public IMessageListener {
 public:
 	void SetScene(CMainTMPScene* pScene) { m_pScene = pScene; };
 	virtual void HandleMessage(const Message& message, const RegisterArticulationParams& params);
+};
+
+// Define RegisterAriticulationListner
+class RegisterArticulationSleepListener : public IMessageListener {
+	CMainTMPScene* m_pScene;
+public:
+	void SetScene(CMainTMPScene* pScene) { m_pScene = pScene; };
+	virtual void HandleMessage(const Message& message, const RegisterArticulationSleepParams& params);
 };
 
 // Define Player Attack component

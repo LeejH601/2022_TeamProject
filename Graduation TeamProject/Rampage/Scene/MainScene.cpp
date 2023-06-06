@@ -359,6 +359,8 @@ void CMainTMPScene::RegisterArticulations()
 		CGameObject* obj = param.pObject;
 		bool flag = false;
 		flag = Locator.GetPxScene()->addArticulation(*obj->m_pArticulation);
+		obj->m_pArticulation->wakeUp();
+		obj->m_pArticulation->setArticulationFlag(physx::PxArticulationFlag::eFIX_BASE, false);
 
 		int index = 0;
 		for (XMFLOAT4X4& world : obj->m_AritculatCacheMatrixs) {
@@ -386,7 +388,7 @@ void CMainTMPScene::RegisterArticulations()
 			rootWorld._21,rootWorld._22,rootWorld._23,rootWorld._24,
 			rootWorld._31,rootWorld._32,rootWorld._33,rootWorld._34,
 			rootWorld._41,rootWorld._42,rootWorld._43,rootWorld._44,
-		}; 
+		};
 		obj->m_pArticulation->copyInternalStateToCache(*obj->m_pArticulationCache, physx::PxArticulationCacheFlag::eALL);
 		physx::PxTransform* rootLInkTrans = &obj->m_pArticulationCache->rootLinkData->transform;
 		physx::PxMat44 tobonetrans = physx::PxMat44(_rootWorld);
@@ -399,6 +401,19 @@ void CMainTMPScene::RegisterArticulations()
 		obj->m_pArticulationLinks[1]->addForce(physx::PxVec3(force.x, force.y, force.z), physx::PxForceMode::eIMPULSE);
 	}
 	m_lRequestObjects.clear();
+}
+void CMainTMPScene::RequestSleepArticulation(RegisterArticulationSleepParams param)
+{
+	m_lSleepObjects.emplace_back(param);
+}
+void CMainTMPScene::SleepArticulations()
+{
+	for (RegisterArticulationSleepParams& param : m_lSleepObjects) {
+		param.pObject->m_pArticulation->setArticulationFlag(physx::PxArticulationFlag::eFIX_BASE, true);
+		param.pObject->m_pArticulation->putToSleep();
+		Locator.GetPxScene()->removeArticulation(*param.pObject->m_pArticulation);
+	}
+	m_lSleepObjects.clear();
 }
 bool CMainTMPScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
 {
@@ -594,8 +609,15 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	listener->SetScene(this);
 	listener->SetEnable(true);
 	m_pListeners.push_back(std::move(listener));
-
 	CMessageDispatcher::GetInst()->RegisterListener(MessageType::REQUEST_REGISTERARTI, m_pListeners.back().get(), nullptr);
+
+
+	std::unique_ptr<RegisterArticulationSleepListener> slistener = std::make_unique<RegisterArticulationSleepListener>();
+	slistener->SetScene(this);
+	slistener->SetEnable(true);
+	m_pListeners.push_back(std::move(slistener));
+	CMessageDispatcher::GetInst()->RegisterListener(MessageType::REQUEST_SLEEPARTI, m_pListeners.back().get(), nullptr);
+
 
 	UINT ncbElementBytes = ((sizeof(DissolveParams) + 255) & ~255); //256의 배수
 	m_pd3dcbDisolveParams = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, ncbElementBytes, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
@@ -639,55 +661,58 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pMonsterObject->CreateArticulation(1.0f);
 	m_pEnemys.push_back(std::move(m_pMonsterObject));
 
-	m_pMonsterObject = std::make_unique<CGoblinObject>(pd3dDevice, pd3dCommandList, 1);
-	m_pMonsterObject->SetPosition(XMFLOAT3(190, 50, -70));
-	m_pMonsterObject->SetScale(2.0f, 2.0f, 2.0f);
-	m_pMonsterObject->Rotate(0.0f, 180.0f, 0.0f);
-	m_pMonsterObject->m_fHP = 310.f;
-	m_pMonsterObject->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
-	m_pMonsterObject->m_pSkinnedAnimationController->m_xmf3RootObjectScale = XMFLOAT3(10.0f, 10.0f, 10.0f);
-	m_pMonsterObject->CreateArticulation(1.0f);
-	m_pEnemys.push_back(std::move(m_pMonsterObject));
+	for (int i = 0; i < 15; ++i) {
+		m_pMonsterObject = std::make_unique<CGoblinObject>(pd3dDevice, pd3dCommandList, 1);
+		m_pMonsterObject->SetPosition(XMFLOAT3(190, 50, 70));
+		m_pMonsterObject->SetScale(2.0f, 2.0f, 2.0f);
+		m_pMonsterObject->Rotate(0.0f, 180.0f, 0.0f);
+		m_pMonsterObject->m_fHP = 100;
+		m_pMonsterObject->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
+		m_pMonsterObject->m_pSkinnedAnimationController->m_xmf3RootObjectScale = XMFLOAT3(10.0f, 10.0f, 10.0f);
+		m_pMonsterObject->CreateArticulation(1.0f);
+		m_pEnemys.push_back(std::move(m_pMonsterObject));
 
-	m_pMonsterObject = std::make_unique<COrcObject>(pd3dDevice, pd3dCommandList, 1);
-	m_pMonsterObject->SetPosition(XMFLOAT3(190, 50, -70));
-	m_pMonsterObject->SetScale(2.0f, 2.0f, 2.0f);
-	m_pMonsterObject->Rotate(0.0f, 180.0f, 0.0f);
-	m_pMonsterObject->m_fHP = 310.f;
-	m_pMonsterObject->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
-	m_pMonsterObject->m_pSkinnedAnimationController->m_xmf3RootObjectScale = XMFLOAT3(10.0f, 10.0f, 10.0f);
-	m_pMonsterObject->CreateArticulation(1.0f);
-	m_pEnemys.push_back(std::move(m_pMonsterObject));
+		m_pMonsterObject = std::make_unique<COrcObject>(pd3dDevice, pd3dCommandList, 1);
+		m_pMonsterObject->SetPosition(XMFLOAT3(190, 50, 70));
+		m_pMonsterObject->SetScale(2.0f, 2.0f, 2.0f);
+		m_pMonsterObject->Rotate(0.0f, 180.0f, 0.0f);
+		m_pMonsterObject->m_fHP = 100;
+		m_pMonsterObject->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
+		m_pMonsterObject->m_pSkinnedAnimationController->m_xmf3RootObjectScale = XMFLOAT3(10.0f, 10.0f, 10.0f);
+		m_pMonsterObject->CreateArticulation(1.0f);
+		m_pEnemys.push_back(std::move(m_pMonsterObject));
 
-	m_pMonsterObject = std::make_unique<COrcObject>(pd3dDevice, pd3dCommandList, 1);
-	m_pMonsterObject->SetPosition(XMFLOAT3(190, 50, -70));
-	m_pMonsterObject->SetScale(2.0f, 2.0f, 2.0f);
-	m_pMonsterObject->Rotate(0.0f, 180.0f, 0.0f);
-	m_pMonsterObject->m_fHP = 310.f;
-	m_pMonsterObject->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
-	m_pMonsterObject->m_pSkinnedAnimationController->m_xmf3RootObjectScale = XMFLOAT3(10.0f, 10.0f, 10.0f);
-	m_pMonsterObject->CreateArticulation(1.0f);
-	m_pEnemys.push_back(std::move(m_pMonsterObject));
+		m_pMonsterObject = std::make_unique<COrcObject>(pd3dDevice, pd3dCommandList, 1);
+		m_pMonsterObject->SetPosition(XMFLOAT3(190, 50, 70));
+		m_pMonsterObject->SetScale(2.0f, 2.0f, 2.0f);
+		m_pMonsterObject->Rotate(0.0f, 180.0f, 0.0f);
+		m_pMonsterObject->m_fHP = 100;
+		m_pMonsterObject->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
+		m_pMonsterObject->m_pSkinnedAnimationController->m_xmf3RootObjectScale = XMFLOAT3(10.0f, 10.0f, 10.0f);
+		m_pMonsterObject->CreateArticulation(1.0f);
+		m_pEnemys.push_back(std::move(m_pMonsterObject));
 
-	m_pMonsterObject = std::make_unique<CSkeletonObject>(pd3dDevice, pd3dCommandList, 1);
-	m_pMonsterObject->SetPosition(XMFLOAT3(190, 50, -70));
-	m_pMonsterObject->SetScale(2.0f, 2.0f, 2.0f);
-	m_pMonsterObject->Rotate(0.0f, 180.0f, 0.0f);
-	m_pMonsterObject->m_fHP = 310.f;
-	m_pMonsterObject->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
-	m_pMonsterObject->m_pSkinnedAnimationController->m_xmf3RootObjectScale = XMFLOAT3(10.0f, 10.0f, 10.0f);
-	m_pMonsterObject->CreateArticulation(1.0f);
-	m_pEnemys.push_back(std::move(m_pMonsterObject));
+		m_pMonsterObject = std::make_unique<CSkeletonObject>(pd3dDevice, pd3dCommandList, 1);
+		m_pMonsterObject->SetPosition(XMFLOAT3(190, 50, 70));
+		m_pMonsterObject->SetScale(2.0f, 2.0f, 2.0f);
+		m_pMonsterObject->Rotate(0.0f, 180.0f, 0.0f);
+		m_pMonsterObject->m_fHP = 100;
+		m_pMonsterObject->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
+		m_pMonsterObject->m_pSkinnedAnimationController->m_xmf3RootObjectScale = XMFLOAT3(10.0f, 10.0f, 10.0f);
+		m_pMonsterObject->CreateArticulation(1.0f);
+		m_pEnemys.push_back(std::move(m_pMonsterObject));
 
-	m_pMonsterObject = std::make_unique<CSkeletonObject>(pd3dDevice, pd3dCommandList, 1);
-	m_pMonsterObject->SetPosition(XMFLOAT3(190, 50, -70));
-	m_pMonsterObject->SetScale(2.0f, 2.0f, 2.0f);
-	m_pMonsterObject->Rotate(0.0f, 180.0f, 0.0f);
-	m_pMonsterObject->m_fHP = 310.f;
-	m_pMonsterObject->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
-	m_pMonsterObject->m_pSkinnedAnimationController->m_xmf3RootObjectScale = XMFLOAT3(10.0f, 10.0f, 10.0f);
-	m_pMonsterObject->CreateArticulation(1.0f);
-	m_pEnemys.push_back(std::move(m_pMonsterObject));
+		m_pMonsterObject = std::make_unique<CSkeletonObject>(pd3dDevice, pd3dCommandList, 1);
+		m_pMonsterObject->SetPosition(XMFLOAT3(190, 50, 70));
+		m_pMonsterObject->SetScale(2.0f, 2.0f, 2.0f);
+		m_pMonsterObject->Rotate(0.0f, 180.0f, 0.0f);
+		m_pMonsterObject->m_fHP = 100;
+		m_pMonsterObject->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
+		m_pMonsterObject->m_pSkinnedAnimationController->m_xmf3RootObjectScale = XMFLOAT3(10.0f, 10.0f, 10.0f);
+		m_pMonsterObject->CreateArticulation(1.0f);
+		m_pEnemys.push_back(std::move(m_pMonsterObject));
+	}
+
 
 	// CollisionChecker 생성
 	m_pCollisionChecker = std::make_unique<CollisionChecker>();
@@ -696,7 +721,7 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pLight = std::make_unique<CLight>();
 	m_pLight->CreateLightVariables(pd3dDevice, pd3dCommandList);
 
-	
+
 	m_pMap = std::make_unique<CMap>();
 	m_pMap->Init(pd3dDevice, pd3dCommandList, GetGraphicsRootSignature());
 	//m_pMap->GetTerrain()->SetPosition(XMFLOAT3(86.4804, -46.8876 - 46.8876 * 0.38819 + 6.5f, -183.7856));
@@ -716,7 +741,7 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	}
 
 	for (int i = 0; i < m_pMap->GetMapObjects().size(); ++i) {
-		((CDepthRenderShader*)m_pDepthRenderShader.get())->RegisterObject(m_pMap->GetMapObjects()[i].get());
+		((CDepthRenderShader*)m_pDepthRenderShader.get())->RegisterObject(m_pMap->GetMapObjects()[i].get(), 0); // register type map
 		m_IObjectIndexs[i] = index++;
 	}
 
@@ -762,7 +787,7 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 
 	m_pParticleShader = std::make_unique<CParticleShader>();
 	m_pParticleShader->CreateGraphicsPipelineState(pd3dDevice, GetGraphicsRootSignature(), 0);
-	
+
 	m_pSlashHitShader = std::make_unique<CSlashHitShader>();
 	m_pSlashHitShader->CreateGraphicsPipelineState(pd3dDevice, GetGraphicsRootSignature(), 0);
 
@@ -783,7 +808,7 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 		std::unique_ptr<CGameObject> m_pParticleObject = std::make_unique<CParticleObject>(m_pTextureManager->LoadTextureIndex(TextureType::ParticleTexture, L"Image/ParticleImages/RoundSoftParticle.dds"), pd3dDevice, pd3dCommandList, GetGraphicsRootSignature(), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), 2.0f, XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT2(2.0f, 2.0f), MAX_PARTICLES, m_pParticleShader.get(), SPHERE_PARTICLE);
 		m_pParticleObjects.push_back(std::move(m_pParticleObject));
 	}
-	
+
 	m_pSlashHitObjects = std::make_unique<CParticleObject>(m_pTextureManager->LoadTextureIndex(TextureType::BillBoardTexture, L"Image/BillBoardImages/Circle1.dds"), pd3dDevice, pd3dCommandList, GetGraphicsRootSignature(), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), 2.0f, XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT2(2.0f, 2.0f), MAX_PARTICLES, m_pSlashHitShader.get(), RECOVERY_PARTICLE);
 	m_pSmokeObject = std::make_unique<CSmokeParticleObject>(L"Image/SmokeImages/Smoke2.dds", pd3dDevice, pd3dCommandList, GetGraphicsRootSignature(), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), 2.0f, XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT2(2.0f, 2.0f), MAX_PARTICLES, m_pParticleShader.get(), SMOKE_PARTICLE);
 
@@ -888,9 +913,13 @@ void CMainTMPScene::UpdateObjects(float fTimeElapsed)
 		m_pEnemys[i]->Update(fTimeElapsed);
 		m_pcbMappedDisolveParams->dissolveThreshold[i] = m_pEnemys[i]->m_fDissolveThrethHold;
 	}
+	
 
 	m_pMap->Update(fTimeElapsed);
+
+
 	m_pCollisionChecker->UpdateObjects(fTimeElapsed);
+	
 
 	for (std::unique_ptr<CGameObject>& obj : m_pSwordTrailObjects) {
 		obj->Update(fTimeElapsed);
@@ -944,6 +973,7 @@ void CMainTMPScene::Update(float fTimeElapsed)
 		b_simulation = true;
 	}
 	if (Locator.GetPxScene()->fetchResults(false)) {
+		SleepArticulations();
 		RegisterArticulations();
 		UpdateObjectArticulation();
 		b_simulation = false;
@@ -969,17 +999,17 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 	m_pSkyBoxObject->Render(pd3dCommandList, m_pCurrentCamera);
 
 	m_pMap->RenderTerrain(pd3dCommandList);
-	
+
 	((CParticleObject*)m_pSmokeObject.get())->Update(fTimeElapsed);
 	((CParticleObject*)m_pSmokeObject.get())->UpdateShaderVariables(pd3dCommandList, fCurrentTime, fTimeElapsed);
 	((CParticleObject*)m_pSmokeObject.get())->Render(pd3dCommandList, nullptr, m_pParticleShader.get());
 
-	
+
 	//((CParticleObject*)m_pSmokeObject.get())->Update(fTimeElapsed);
 	//((CParticleObject*)m_pSmokeObject.get())->UpdateShaderVariables(pd3dCommandList, fCurrentTime, fTimeElapsed);
 	//((CParticleObject*)m_pSmokeObject.get())->Render(pd3dCommandList, nullptr, m_pParticleShader.get());
 
-	
+
 
 	//for (int i = 0; i < m_pUpDownParticleObjects.size(); ++i)
 	//{
@@ -987,7 +1017,7 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 	//	((CParticleObject*)m_pUpDownParticleObjects[i].get())->UpdateShaderVariables(pd3dCommandList, fCurrentTime, fTimeElapsed);
 	//	((CParticleObject*)m_pUpDownParticleObjects[i].get())->Render(pd3dCommandList, nullptr, m_pParticleShader.get());
 	//}
-	
+
 	/*((CParticleObject*)m_pTrailParticleObjects.get())->Update(fTimeElapsed);
 	((CParticleObject*)m_pTrailParticleObjects.get())->UpdateShaderVariables(pd3dCommandList, fCurrentTime, fTimeElapsed);
 	((CParticleObject*)m_pTrailParticleObjects.get())->Render(pd3dCommandList, nullptr, m_pParticleShader.get());
@@ -1018,7 +1048,7 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 
 	D3D12_GPU_VIRTUAL_ADDRESS d3dGpuVirtualAddress = m_pd3dcbDisolveParams->GetGPUVirtualAddress();
 	pd3dCommandList->SetGraphicsRootConstantBufferView(7, d3dGpuVirtualAddress);
-	
+
 
 	static float trailUpdateT = 0.0f;
 	trailUpdateT += fTimeElapsed;
@@ -1053,6 +1083,13 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 	//m_pVertexPointParticleObject->EmitParticle(5);
 	//m_pVertexPointParticleObject->SetEmit(true);
 
+	/*std::chrono::system_clock::time_point start = std::chrono::system_clock::now();
+	std::chrono::system_clock::time_point end = std::chrono::system_clock::now();
+	std::chrono::duration<double> result = end - start;
+	TCHAR pstrDebug[256] = { 0 };
+	_stprintf_s(pstrDebug, 256, _T("enemy update time :%f\n"), result.count());
+	OutputDebugString(pstrDebug);*/
+
 	UINT index = 0;
 	for (int i = 0; i < m_pEnemys.size(); ++i)
 	{
@@ -1060,7 +1097,7 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 		m_pEnemys[i]->Animate(0.0f);
 		m_pEnemys[i]->Render(pd3dCommandList, true);
 	}
-
+	
 
 #ifdef RENDER_BOUNDING_BOX
 	CBoundingBoxShader::GetInst()->Render(pd3dCommandList, 0);
@@ -1082,8 +1119,8 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 		(static_cast<CTerrainSpriteObject*>(m_pTerrainSpriteObject[i].get()))->Animate(m_pMap->GetTerrain().get(), fTimeElapsed);
 		m_pTerrainSpriteObject[i]->Render(pd3dCommandList, true);
 	}
-	
-	
+
+
 
 	for (int i = 0; i < m_pParticleObjects.size(); ++i)
 	{
@@ -1114,7 +1151,7 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 		m_pVertexPointParticleObject->UpdateShaderVariables(pd3dCommandList, fCurrentTime, fTimeElapsed);
 		m_pVertexPointParticleObject->Render(pd3dCommandList, nullptr, m_pParticleShader.get());
 	}
-	
+
 
 	m_pSlashHitObjects->Update(fTimeElapsed);
 	m_pSlashHitObjects->Animate(fTimeElapsed);

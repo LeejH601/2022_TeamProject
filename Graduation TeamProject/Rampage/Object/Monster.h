@@ -44,6 +44,8 @@ public:
 	float m_fTotalDamageDistance;
 	float TestDissolvetime = 0.0f;
 
+	bool m_bArticulationSleep = false;
+
 	MONSTER_TYPE m_MonsterType;
 	std::unique_ptr<CStateMachine<CMonster>> m_pStateMachine;
 

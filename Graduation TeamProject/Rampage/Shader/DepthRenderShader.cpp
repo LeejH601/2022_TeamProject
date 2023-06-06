@@ -143,6 +143,8 @@ void CDepthRenderShader::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12G
 	m_pd3dcbToLightSpaces = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, ncbDepthElementBytes, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
 
 	m_pd3dcbToLightSpaces->Map(0, NULL, (void**)&m_pcbMappedToLightSpaces);
+
+
 }
 void CDepthRenderShader::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
 {
@@ -169,10 +171,14 @@ void CDepthRenderShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 	HRESULT hResult = pd3dDevice->CreateDescriptorHeap(&d3dDescriptorHeapDesc, __uuidof(ID3D12DescriptorHeap), (void**)&m_pd3dRtvDescriptorHeap);
 
 	m_pDepthTexture = std::make_unique<CTexture>(MAX_DEPTH_TEXTURES, RESOURCE_TEXTURE2D_ARRAY, 0, 1);
+	m_pBakedMapObjectDepthTexture = std::make_unique<CTexture>(MAX_DEPTH_TEXTURES, RESOURCE_TEXTURE2D_ARRAY, 0, 1);
 
 	D3D12_CLEAR_VALUE d3dClearValue = { DXGI_FORMAT_R32_FLOAT, { 1.0f, 1.0f, 1.0f, 1.0f } };
-	for (UINT i = 0; i < MAX_DEPTH_TEXTURES; i++) m_pDepthTexture->CreateTexture(pd3dDevice, _DEPTH_BUFFER_WIDTH, _DEPTH_BUFFER_HEIGHT, DXGI_FORMAT_R32_FLOAT, D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET, D3D12_RESOURCE_STATE_COMMON, &d3dClearValue, RESOURCE_TEXTURE2D, i);
-
+	for (UINT i = 0; i < MAX_DEPTH_TEXTURES; i++) {
+		m_pDepthTexture->CreateTexture(pd3dDevice, _DEPTH_BUFFER_WIDTH, _DEPTH_BUFFER_HEIGHT, DXGI_FORMAT_R32_FLOAT, D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET, D3D12_RESOURCE_STATE_COMMON, &d3dClearValue, RESOURCE_TEXTURE2D, i);
+		m_pBakedMapObjectDepthTexture->CreateTexture(pd3dDevice, _DEPTH_BUFFER_WIDTH, _DEPTH_BUFFER_HEIGHT, DXGI_FORMAT_R32_FLOAT, D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET, D3D12_RESOURCE_STATE_COMMON, &d3dClearValue, RESOURCE_TEXTURE2D, i);
+	}
+		
 	D3D12_RENDER_TARGET_VIEW_DESC d3dRenderTargetViewDesc;
 	d3dRenderTargetViewDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
 	d3dRenderTargetViewDesc.Texture2D.MipSlice = 0;
@@ -244,10 +250,31 @@ void CDepthRenderShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCam
 	pCamera->UpdateShaderVariables(pd3dCommandList);
 
 	CShader::Render(pd3dCommandList, 0);
-	for (int i = 0; i < m_pObjects.size(); ++i)
+	if (!m_bisBakedMap) {
+		for (int i = 0; i < m_pMapObjects.size(); ++i)
+		{
+			//m_pObjects[i]->Animate(fTimeElapsed);
+			m_pMapObjects[i]->Render(pd3dCommandList, false);
+		}
+		
+		/*::SynchronizeResourceTransition(pd3dCommandList, m_pBakedMapObjectDepthTexture.get()->GetResource(0), D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_COPY_DEST);
+		::SynchronizeResourceTransition(pd3dCommandList, m_pDepthTexture.get()->GetResource(0), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_COPY_SOURCE);
+		pd3dCommandList->CopyResource(m_pBakedMapObjectDepthTexture.get()->GetResource(0), m_pDepthTexture.get()->GetResource(0));
+		::SynchronizeResourceTransition(pd3dCommandList, m_pBakedMapObjectDepthTexture.get()->GetResource(0), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_COMMON);
+		::SynchronizeResourceTransition(pd3dCommandList, m_pDepthTexture.get()->GetResource(0), D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_RENDER_TARGET);
+		m_bisBakedMap = true;*/
+	}
+	else {
+		::SynchronizeResourceTransition(pd3dCommandList, m_pBakedMapObjectDepthTexture.get()->GetResource(0), D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_COPY_SOURCE);
+		::SynchronizeResourceTransition(pd3dCommandList, m_pDepthTexture.get()->GetResource(0), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_COPY_DEST);
+		pd3dCommandList->CopyResource(m_pDepthTexture.get()->GetResource(0), m_pBakedMapObjectDepthTexture.get()->GetResource(0));
+		::SynchronizeResourceTransition(pd3dCommandList, m_pBakedMapObjectDepthTexture.get()->GetResource(0), D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_COMMON);
+		::SynchronizeResourceTransition(pd3dCommandList, m_pDepthTexture.get()->GetResource(0), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_RENDER_TARGET);
+	}
+	for (int i = 0; i < m_pDynamicObjects.size(); ++i)
 	{
 		//m_pObjects[i]->Animate(fTimeElapsed);
-		m_pObjects[i]->Render(pd3dCommandList, false);
+		m_pDynamicObjects[i]->Render(pd3dCommandList, false);
 	}
 	/*if (m_pTerrain)
 	{
