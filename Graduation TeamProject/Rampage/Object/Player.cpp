@@ -186,7 +186,6 @@ CKnightPlayer::CKnightPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 	m_pSkinnedAnimationController->m_pRootMotionObject = pKnightModel->m_pModelRootObject->FindFrame("SK_FKnightB");
 	if (m_pSkinnedAnimationController->m_pRootMotionObject) {
 		m_pSkinnedAnimationController->m_bRootMotion = true;
-		m_pSkinnedAnimationController->m_xmf3RootObjectScale = XMFLOAT3(4.0f, 4.0f, 4.0f);
 	}
 #endif // KNIGHT_ROOT_MOTION
 }
