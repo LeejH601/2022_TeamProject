@@ -466,3 +466,10 @@ float MeterToUnit(float fMeter)
 
 	return fMeter * (1.0f / fMeterPerUnit);
 }
+
+float UnitToMeter(float fUnit)
+{
+	float fMeterPerUnit = 2.0f / 4.0f;		// (캐릭터 키 - 2m) : (Unit)
+
+	return fUnit * fMeterPerUnit;
+}

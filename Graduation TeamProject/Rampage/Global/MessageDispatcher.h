@@ -611,6 +611,7 @@ private:
 	float m_fSpeed = 1.f;
 	float m_fAlpha = 1.f;
 	XMFLOAT2 m_fSize = XMFLOAT2(3.f, 3.f);
+	XMFLOAT2 m_fMeterSize = XMFLOAT2(UnitToMeter(m_fSize.x), UnitToMeter(m_fSize.y));
 	XMFLOAT3 m_xmf3Color = XMFLOAT3(1.f, 1.f, 1.f);
 	XMFLOAT3 m_xmfPosOffset = XMFLOAT3(0.f, 2.f, 0.f);
 	int m_iTextureIndex = 0;
@@ -626,13 +627,17 @@ public:
 	XMFLOAT2& GetSize() { return m_fSize; }
 	XMFLOAT3& GetColor() { return m_xmf3Color; }
 
-	float& GetXSize() { return m_fSize.x; }
-	float& GetYSize() { return m_fSize.y; }
+	float GetXSize() { return m_fSize.x; }
+	float& GetXMeterSize() { return m_fMeterSize.x; }
+	float GetYSize() { return m_fSize.y; }
+	float& GetYMeterSize() { return m_fMeterSize.y; }
 
 	void SetTextureIndex(int nTextureIndex) { m_iTextureIndex = nTextureIndex; }
 	void SetSize(XMFLOAT2 fSize) { m_fSize = fSize; }
 	void SetSizeX(float fSize) { m_fSize.x = fSize; }
 	void SetSizeY(float fSize) { m_fSize.y = fSize; }
+	void SetMeterSizeX(float fMeterSize) { m_fMeterSize.x = fMeterSize; }
+	void SetMeterSizeY(float fMeterSize) { m_fMeterSize.y = fMeterSize; }
 	void SetAlpha(float fAlpha) { m_fAlpha = fAlpha; }
 	void SetSpeed(float fSpeed) { m_fSpeed = fSpeed; }
 	void SetColorR(float r) { m_xmf3Color.x = r; }
