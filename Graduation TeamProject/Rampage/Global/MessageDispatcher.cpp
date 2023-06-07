@@ -66,7 +66,7 @@ void CameraShakeComponent::Update(CCamera* pCamera, float fElapsedTime)
 		float RotateConstant = urd(dre);
 		RotateConstant *= XM_PI;
 
-		CameraDir = Vector3::ScalarProduct(CameraDir, fShakeDistance, false);
+		CameraDir = Vector3::ScalarProduct(CameraDir, MeterToUnit(fShakeDistance), false);
 		XMMATRIX RotateMatrix = XMMatrixRotationAxis(XMLoadFloat3(&pCamera->GetLookVector()), RotateConstant);
 
 		XMFLOAT3 ShakeOffset; 
@@ -104,7 +104,7 @@ void CameraZoomerComponent::Update(CCamera* pCamera, float fElapsedTime, const C
 		m_fCurrDistance += length;
 
 		XMFLOAT3 xmf3ZoomDirection = Vector3::Normalize(Vector3::Subtract(pCamera->GetPosition(), ((CPlayer*)(params.pPlayer))->GetTargetPosition()));
-		offset = Vector3::Add(offset, Vector3::ScalarProduct(xmf3ZoomDirection, length * ZoomConstant, false));
+		offset = Vector3::Add(offset, Vector3::ScalarProduct(xmf3ZoomDirection, MeterToUnit(length * ZoomConstant), false));
 
 		pCamera->m_xmf3CalculatedPosition = Vector3::Add(pCamera->m_xmf3CalculatedPosition, offset);
 	}
@@ -120,7 +120,7 @@ void CameraZoomerComponent::Update(CCamera* pCamera, float fElapsedTime, const C
 		m_fCurrDistance += length;
 
 		XMFLOAT3 xmf3ZoomDirection = Vector3::Normalize(Vector3::Subtract(pCamera->GetPosition(), ((CPlayer*)(params.pPlayer))->GetTargetPosition()));
-		offset = Vector3::Add(offset, Vector3::ScalarProduct(xmf3ZoomDirection, -length * ZoomConstant, false));
+		offset = Vector3::Add(offset, Vector3::ScalarProduct(xmf3ZoomDirection, MeterToUnit(-length * ZoomConstant), false));
 
 		pCamera->m_xmf3CalculatedPosition = Vector3::Add(pCamera->m_xmf3CalculatedPosition, offset);
 	}
@@ -151,7 +151,7 @@ void CameraMoveComponent::Update(CCamera* pCamera, float fElapsedTime, const Cam
 
 		m_fCurrDistance += length;
 
-		offset = Vector3::Add(offset, Vector3::ScalarProduct(((CPlayer*)(params.pPlayer))->GetATKDirection(), length, false));
+		offset = Vector3::Add(offset, Vector3::ScalarProduct(((CPlayer*)(params.pPlayer))->GetATKDirection(), MeterToUnit(length), false));
 
 		pCamera->m_xmf3CalculatedPosition = Vector3::Add(pCamera->m_xmf3CalculatedPosition, offset);
 	}
@@ -166,7 +166,7 @@ void CameraMoveComponent::Update(CCamera* pCamera, float fElapsedTime, const Cam
 		float length = m_fBackSpeed * 1.0f * fElapsedTime;
 		m_fCurrDistance += length;
 
-		offset = Vector3::Add(offset, Vector3::ScalarProduct(((CPlayer*)(params.pPlayer))->GetATKDirection(), -length, false));
+		offset = Vector3::Add(offset, Vector3::ScalarProduct(((CPlayer*)(params.pPlayer))->GetATKDirection(), -MeterToUnit(length), false));
 
 		pCamera->m_xmf3CalculatedPosition = Vector3::Add(pCamera->m_xmf3CalculatedPosition, offset);
 	}

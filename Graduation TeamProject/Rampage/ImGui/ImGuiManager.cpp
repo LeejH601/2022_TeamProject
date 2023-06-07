@@ -1814,11 +1814,11 @@ void CImGuiManager::ShowDamageAnimationManager(CState<CPlayer>* pCurrentAnimatio
 	ImGui::Checkbox(U8STR("켜기/끄기##DamageAnimation"), &pDamageAnimationComponent->GetEnable());
 
 	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
-	if (ImGui::DragFloat(U8STR("최대거리##DamageAnimation"), &pDamageAnimationComponent->GetMaxDistance(), DRAG_FLOAT_UNIT, DAMAGE_ANIMATION_DISTANCE_MIN, DAMAGE_ANIMATION_DISTANCE_MAX, "%.2f", 0))
+	if (ImGui::DragFloat(U8STR("최대거리(미터)##DamageAnimation"), &pDamageAnimationComponent->GetMaxDistance(), DRAG_FLOAT_UNIT, DAMAGE_ANIMATION_DISTANCE_MIN, DAMAGE_ANIMATION_DISTANCE_MAX, "%.2f", 0))
 		pDamageAnimationComponent->GetMaxDistance() = std::clamp(pDamageAnimationComponent->GetMaxDistance(), DAMAGE_ANIMATION_DISTANCE_MIN, DAMAGE_ANIMATION_DISTANCE_MAX);
 
 	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
-	if (ImGui::DragFloat(U8STR("속도##DamageAnimation"), &pDamageAnimationComponent->GetSpeed(), DRAG_FLOAT_UNIT, DAMAGE_ANIMATION_SPEED_MIN, DAMAGE_ANIMATION_SPEED_MAX, "%.2f", 0))
+	if (ImGui::DragFloat(U8STR("속도(m/s)##DamageAnimation"), &pDamageAnimationComponent->GetSpeed(), DRAG_FLOAT_UNIT, DAMAGE_ANIMATION_SPEED_MIN, DAMAGE_ANIMATION_SPEED_MAX, "%.2f", 0))
 		pDamageAnimationComponent->GetSpeed() = std::clamp(pDamageAnimationComponent->GetSpeed(), DAMAGE_ANIMATION_SPEED_MIN, DAMAGE_ANIMATION_SPEED_MAX);
 
 	ImGui::End();
@@ -1835,13 +1835,12 @@ void CImGuiManager::ShowShakeAnimationManager(CState<CPlayer>* pCurrentAnimation
 	ImGui::Checkbox(U8STR("켜기/끄기##ShakeAnimation"), &pShakeAnimationComponent->GetEnable());
 
 	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
-	if (ImGui::DragFloat(U8STR("지속시간##ShakeAnimation"), &pShakeAnimationComponent->GetDuration(), DRAG_FLOAT_UNIT, SHAKE_ANIMATION_DURATION_MIN, SHAKE_ANIMATION_DURATION_MAX, "%.2f", 0))
+	if (ImGui::DragFloat(U8STR("지속시간(초)##ShakeAnimation"), &pShakeAnimationComponent->GetDuration(), DRAG_FLOAT_UNIT, SHAKE_ANIMATION_DURATION_MIN, SHAKE_ANIMATION_DURATION_MAX, "%.2f", 0))
 		pShakeAnimationComponent->GetDuration() = std::clamp(pShakeAnimationComponent->GetDuration(), SHAKE_ANIMATION_DURATION_MIN, SHAKE_ANIMATION_DURATION_MAX);
 
 	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
-	if (ImGui::DragFloat(U8STR("거리##ShakeAnimation"), &pShakeAnimationComponent->GetDistance(), DRAG_FLOAT_UNIT, SHAKE_ANIMATION_DISTANCE_MIN, SHAKE_ANIMATION_DISTANCE_MAX, "%.2f", 0))
+	if (ImGui::DragFloat(U8STR("거리(미터)##ShakeAnimation"), &pShakeAnimationComponent->GetDistance(), DRAG_FLOAT_UNIT, SHAKE_ANIMATION_DISTANCE_MIN, SHAKE_ANIMATION_DISTANCE_MAX, "%.2f", 0))
 		pShakeAnimationComponent->GetDistance() = std::clamp(pShakeAnimationComponent->GetDistance(), SHAKE_ANIMATION_DISTANCE_MIN, SHAKE_ANIMATION_DISTANCE_MAX);
-
 
 	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
 	if (ImGui::DragFloat(U8STR("빈도##ShakeAnimation"), &pShakeAnimationComponent->GetFrequency(), DRAG_FLOAT_UNIT, SHAKE_ANIMATION_FREQUENCY_MIN, SHAKE_ANIMATION_FREQUENCY_MAX, "%.3f", 0))
@@ -1861,7 +1860,7 @@ void CImGuiManager::ShowStunAnimationManager(CState<CPlayer>* pCurrentAnimation)
 	ImGui::Checkbox(U8STR("켜기/끄기##StunAnimation"), &pStunAnimationComponent->GetEnable());
 
 	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
-	if (ImGui::DragFloat(U8STR("경직시간##StunAnimation"), &pStunAnimationComponent->GetStunTime(), DRAG_FLOAT_UNIT, STUN_ANIMATION_STUNTIME_MIN, STUN_ANIMATION_STUNTIME_MAX, "%.2f", 0))
+	if (ImGui::DragFloat(U8STR("경직시간(초)##StunAnimation"), &pStunAnimationComponent->GetStunTime(), DRAG_FLOAT_UNIT, STUN_ANIMATION_STUNTIME_MIN, STUN_ANIMATION_STUNTIME_MAX, "%.2f", 0))
 		pStunAnimationComponent->GetStunTime() = std::clamp(pStunAnimationComponent->GetStunTime(), STUN_ANIMATION_STUNTIME_MIN, STUN_ANIMATION_STUNTIME_MAX);
 
 	ImGui::End();
@@ -1877,7 +1876,7 @@ void CImGuiManager::ShowHitLagManager(CState<CPlayer>* pCurrentAnimation)
 	ImGui::Checkbox(U8STR("켜기/끄기##HitLag"), &pHitLagComponent->GetEnable());
 
 	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
-	if (ImGui::DragFloat(U8STR("지속시간##Move"), &pHitLagComponent->GetLagScale(), DRAG_FLOAT_UNIT, HIT_LAG_DURATION_MIN, HIT_LAG_DURATION_MAX, "%.2f", 0))
+	if (ImGui::DragFloat(U8STR("지속시간(초)##Move"), &pHitLagComponent->GetLagScale(), DRAG_FLOAT_UNIT, HIT_LAG_DURATION_MIN, HIT_LAG_DURATION_MAX, "%.2f", 0))
 		pHitLagComponent->GetLagScale() = std::clamp(pHitLagComponent->GetDuration(), HIT_LAG_DURATION_MIN, HIT_LAG_DURATION_MAX);
 	
 	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
@@ -1901,15 +1900,15 @@ void CImGuiManager::ShowCameraMoveManager(CState<CPlayer>* pCurrentAnimation)
 	ImGui::Checkbox(U8STR("켜기/끄기##Move"), &pCameraMoveComponent->GetEnable());
 
 	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
-	if (ImGui::DragFloat(U8STR("거리##Move"), &pCameraMoveComponent->GetMaxDistance(), DRAG_FLOAT_UNIT, CAMERA_MOVE_DISTANCE_MIN, CAMERA_MOVE_DISTANCE_MAX, "%.2f", 0))
+	if (ImGui::DragFloat(U8STR("거리(미터)##Move"), &pCameraMoveComponent->GetMaxDistance(), DRAG_FLOAT_UNIT, CAMERA_MOVE_DISTANCE_MIN, CAMERA_MOVE_DISTANCE_MAX, "%.2f", 0))
 		pCameraMoveComponent->GetMaxDistance() = std::clamp(pCameraMoveComponent->GetMaxDistance(), CAMERA_MOVE_DISTANCE_MIN, CAMERA_MOVE_DISTANCE_MAX);
 
 	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
-	if (ImGui::DragFloat(U8STR("시간##Move"), &pCameraMoveComponent->GetMovingTime(), DRAG_FLOAT_UNIT, CAMERA_MOVE_TIME_MIN, CAMERA_MOVE_TIME_MAX, "%.2f", 0))
+	if (ImGui::DragFloat(U8STR("시간(초)##Move"), &pCameraMoveComponent->GetMovingTime(), DRAG_FLOAT_UNIT, CAMERA_MOVE_TIME_MIN, CAMERA_MOVE_TIME_MAX, "%.2f", 0))
 		pCameraMoveComponent->GetMovingTime() = std::clamp(pCameraMoveComponent->GetMovingTime(), CAMERA_MOVE_TIME_MIN, CAMERA_MOVE_TIME_MAX);
 
 	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
-	if (ImGui::DragFloat(U8STR("복귀시간##Move"), &pCameraMoveComponent->GetRollBackTime(), DRAG_FLOAT_UNIT, CAMERA_MOVE_ROLLBACKTIME_MIN, CAMERA_MOVE_ROLLBACKTIME_MAX, "%.2f", 0))
+	if (ImGui::DragFloat(U8STR("복귀시간(초)##Move"), &pCameraMoveComponent->GetRollBackTime(), DRAG_FLOAT_UNIT, CAMERA_MOVE_ROLLBACKTIME_MIN, CAMERA_MOVE_ROLLBACKTIME_MAX, "%.2f", 0))
 		pCameraMoveComponent->GetRollBackTime() = std::clamp(pCameraMoveComponent->GetRollBackTime(), CAMERA_MOVE_ROLLBACKTIME_MIN, CAMERA_MOVE_ROLLBACKTIME_MAX);
 
 	ImGui::End();
@@ -1926,11 +1925,11 @@ void CImGuiManager::ShowCameraShakeManager(CState<CPlayer>* pCurrentAnimation)
 	ImGui::Checkbox(U8STR("켜기/끄기##Shake"), &pCameraShakerComponent->GetEnable());
 
 	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
-	if (ImGui::DragFloat(U8STR("흔들림 규모##Shake"), &pCameraShakerComponent->GetMagnitude(), DRAG_FLOAT_UNIT, CAMERA_SHAKE_MAGNITUDE_MIN, CAMERA_SHAKE_MAGNITUDE_MAX, "%.2f", 0))
+	if (ImGui::DragFloat(U8STR("흔들림 규모(미터)##Shake"), &pCameraShakerComponent->GetMagnitude(), DRAG_FLOAT_UNIT, CAMERA_SHAKE_MAGNITUDE_MIN, CAMERA_SHAKE_MAGNITUDE_MAX, "%.2f", 0))
 		pCameraShakerComponent->GetMagnitude() = std::clamp(pCameraShakerComponent->GetMagnitude(), CAMERA_SHAKE_MAGNITUDE_MIN, CAMERA_SHAKE_MAGNITUDE_MAX);
 
 	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
-	if (ImGui::DragFloat(U8STR("지속 시간##Shake"), &pCameraShakerComponent->GetDuration(), DRAG_FLOAT_UNIT, CAMERA_SHAKE_DURATION_MIN, CAMERA_SHAKE_DURATION_MAX, "%.2f", 0))
+	if (ImGui::DragFloat(U8STR("지속 시간(초)##Shake"), &pCameraShakerComponent->GetDuration(), DRAG_FLOAT_UNIT, CAMERA_SHAKE_DURATION_MIN, CAMERA_SHAKE_DURATION_MAX, "%.2f", 0))
 		pCameraShakerComponent->GetDuration() = std::clamp(pCameraShakerComponent->GetDuration(), CAMERA_SHAKE_DURATION_MIN, CAMERA_SHAKE_DURATION_MAX);
 
 	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
@@ -1951,15 +1950,15 @@ void CImGuiManager::ShowCameraZoomManager(CState<CPlayer>* pCurrentAnimation)
 	ImGui::Checkbox(U8STR("켜기/끄기##Zoom"), &pCameraZoomerComponent->GetEnable());
 
 	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
-	if (ImGui::DragFloat(U8STR("거리##Zoom"), &pCameraZoomerComponent->GetMaxDistance(), DRAG_FLOAT_UNIT, CAMERA_ZOOMINOUT_DISTANCE_MIN, CAMERA_ZOOMINOUT_DISTANCE_MAX, "%.2f", 0))
+	if (ImGui::DragFloat(U8STR("거리(미터)##Zoom"), &pCameraZoomerComponent->GetMaxDistance(), DRAG_FLOAT_UNIT, CAMERA_ZOOMINOUT_DISTANCE_MIN, CAMERA_ZOOMINOUT_DISTANCE_MAX, "%.2f", 0))
 		pCameraZoomerComponent->GetMaxDistance() = std::clamp(pCameraZoomerComponent->GetMaxDistance(), CAMERA_ZOOMINOUT_DISTANCE_MIN, CAMERA_ZOOMINOUT_DISTANCE_MAX);
 
 	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
-	if (ImGui::DragFloat(U8STR("시간##Zoom"), &pCameraZoomerComponent->GetMovingTime(), DRAG_FLOAT_UNIT, CAMERA_ZOOMINOUT_TIME_MIN, CAMERA_ZOOMINOUT_TIME_MAX, "%.2f", 0))
+	if (ImGui::DragFloat(U8STR("시간(초)##Zoom"), &pCameraZoomerComponent->GetMovingTime(), DRAG_FLOAT_UNIT, CAMERA_ZOOMINOUT_TIME_MIN, CAMERA_ZOOMINOUT_TIME_MAX, "%.2f", 0))
 		pCameraZoomerComponent->GetMovingTime() = std::clamp(pCameraZoomerComponent->GetMovingTime(), CAMERA_ZOOMINOUT_TIME_MIN, CAMERA_ZOOMINOUT_TIME_MAX);
 
 	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
-	if (ImGui::DragFloat(U8STR("복귀시간##Zoom"), &pCameraZoomerComponent->GetRollBackTime(), DRAG_FLOAT_UNIT, CAMERA_ZOOMINOUT_ROLLBACKTIME_MIN, CAMERA_ZOOMINOUT_ROLLBACKTIME_MAX, "%.2f", 0))
+	if (ImGui::DragFloat(U8STR("복귀시간(초)##Zoom"), &pCameraZoomerComponent->GetRollBackTime(), DRAG_FLOAT_UNIT, CAMERA_ZOOMINOUT_ROLLBACKTIME_MIN, CAMERA_ZOOMINOUT_ROLLBACKTIME_MAX, "%.2f", 0))
 		pCameraZoomerComponent->GetRollBackTime() = std::clamp(pCameraZoomerComponent->GetRollBackTime(), CAMERA_ZOOMINOUT_ROLLBACKTIME_MIN, CAMERA_ZOOMINOUT_ROLLBACKTIME_MAX);
 
 
@@ -1990,7 +1989,7 @@ void CImGuiManager::ShowShockSoundManager(CState<CPlayer>* pCurrentAnimation)
 	ImGui::Combo(U8STR("소리##effectsound"), (int*)&pShockSoundComponent->GetSoundNumber(), items.data(), items.size());
 
 	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
-	if (ImGui::DragFloat(U8STR("지연시간##effectsound"), &pShockSoundComponent->GetDelay(), DRAG_FLOAT_UNIT, SHOCK_SOUND_DELAY_MIN, SHOCK_SOUND_DELAY_MAX, "%.2f", 0))
+	if (ImGui::DragFloat(U8STR("지연시간(초)##effectsound"), &pShockSoundComponent->GetDelay(), DRAG_FLOAT_UNIT, SHOCK_SOUND_DELAY_MIN, SHOCK_SOUND_DELAY_MAX, "%.2f", 0))
 		pShockSoundComponent->GetDelay() = std::clamp(pShockSoundComponent->GetDelay(), SHOCK_SOUND_DELAY_MIN, SHOCK_SOUND_DELAY_MAX);
 
 	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
@@ -2021,7 +2020,7 @@ void CImGuiManager::ShowShootSoundManager(CState<CPlayer>* pCurrentAnimation)
 	ImGui::Combo(U8STR("소리##shootsound"), (int*)&pShootSoundComponent->GetSoundNumber(), items.data(), items.size());
 
 	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
-	if (ImGui::DragFloat(U8STR("지연시간##shootsound"), &pShootSoundComponent->GetDelay(), DRAG_FLOAT_UNIT, SHOOTING_SOUND_DELAY_MIN, SHOOTING_SOUND_DELAY_MAX, "%.2f", 0))
+	if (ImGui::DragFloat(U8STR("지연시간(초)##shootsound"), &pShootSoundComponent->GetDelay(), DRAG_FLOAT_UNIT, SHOOTING_SOUND_DELAY_MIN, SHOOTING_SOUND_DELAY_MAX, "%.2f", 0))
 		pShootSoundComponent->GetDelay() = std::clamp(pShootSoundComponent->GetDelay(), SHOOTING_SOUND_DELAY_MIN, SHOOTING_SOUND_DELAY_MAX);
 
 	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
@@ -2054,7 +2053,7 @@ void CImGuiManager::ShowDamageMoanSoundManager(CState<CPlayer>* pCurrentAnimatio
 	ImGui::Combo(U8STR("소리(고블린)##goblinmoansound"), (int*)&pGoblinMoanComponent->GetSoundNumber(), items.data(), GOBLIN_MOAN_SOUND_NUM);
 
 	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
-	if (ImGui::DragFloat(U8STR("지연시간(고블린)##goblinmoansound"), &pGoblinMoanComponent->GetDelay(), DRAG_FLOAT_UNIT, MOAN_SOUND_DELAY_MIN, MOAN_SOUND_DELAY_MAX, "%.2f", 0))
+	if (ImGui::DragFloat(U8STR("지연시간(초)(고블린)##goblinmoansound"), &pGoblinMoanComponent->GetDelay(), DRAG_FLOAT_UNIT, MOAN_SOUND_DELAY_MIN, MOAN_SOUND_DELAY_MAX, "%.2f", 0))
 		pGoblinMoanComponent->GetDelay() = std::clamp(pGoblinMoanComponent->GetDelay(), MOAN_SOUND_DELAY_MIN, MOAN_SOUND_DELAY_MAX);
 
 	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
@@ -2068,7 +2067,7 @@ void CImGuiManager::ShowDamageMoanSoundManager(CState<CPlayer>* pCurrentAnimatio
 	ImGui::Combo(U8STR("소리(오크)##orcmoansound"), (int*)&pOrcMoanComponent->GetSoundNumber(), items.data() + GOBLIN_MOAN_SOUND_NUM, ORC_MOAN_SOUND_NUM);
 
 	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
-	if (ImGui::DragFloat(U8STR("지연시간(오크)##orcmoansound"), &pOrcMoanComponent->GetDelay(), DRAG_FLOAT_UNIT, MOAN_SOUND_DELAY_MIN, MOAN_SOUND_DELAY_MAX, "%.2f", 0))
+	if (ImGui::DragFloat(U8STR("지연시간(초)(오크)##orcmoansound"), &pOrcMoanComponent->GetDelay(), DRAG_FLOAT_UNIT, MOAN_SOUND_DELAY_MIN, MOAN_SOUND_DELAY_MAX, "%.2f", 0))
 		pOrcMoanComponent->GetDelay() = std::clamp(pOrcMoanComponent->GetDelay(), MOAN_SOUND_DELAY_MIN, MOAN_SOUND_DELAY_MAX);
 
 	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
@@ -2076,13 +2075,13 @@ void CImGuiManager::ShowDamageMoanSoundManager(CState<CPlayer>* pCurrentAnimatio
 		pOrcMoanComponent->GetVolume() = std::clamp(pOrcMoanComponent->GetVolume(), MOAN_SOUND_VOLUME_MIN, MOAN_SOUND_VOLUME_MAX);
 
 	ImGui::SetNextItemWidth(0.125f * m_lDesktopWidth);
-	ImGui::Checkbox(U8STR("켜기/끄기(Skeleton)##skeletonmoansound"), &pSkeletonMoanComponent->GetEnable());
+	ImGui::Checkbox(U8STR("켜기/끄기(스켈레톤)##skeletonmoansound"), &pSkeletonMoanComponent->GetEnable());
 
 	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
 	ImGui::Combo(U8STR("소리(스켈레톤)##skeletonmoansound"), (int*)&pSkeletonMoanComponent->GetSoundNumber(), items.data() + GOBLIN_MOAN_SOUND_NUM + ORC_MOAN_SOUND_NUM, SKELETON_MOAN_SOUND_NUM);
 
 	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
-	if (ImGui::DragFloat(U8STR("지연시간(스켈레톤)##skeletonmoansound"), &pSkeletonMoanComponent->GetDelay(), DRAG_FLOAT_UNIT, MOAN_SOUND_DELAY_MIN, MOAN_SOUND_DELAY_MAX, "%.2f", 0))
+	if (ImGui::DragFloat(U8STR("지연시간(초)(스켈레톤)##skeletonmoansound"), &pSkeletonMoanComponent->GetDelay(), DRAG_FLOAT_UNIT, MOAN_SOUND_DELAY_MIN, MOAN_SOUND_DELAY_MAX, "%.2f", 0))
 		pSkeletonMoanComponent->GetDelay() = std::clamp(pSkeletonMoanComponent->GetDelay(), MOAN_SOUND_DELAY_MIN, MOAN_SOUND_DELAY_MAX);
 
 	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);

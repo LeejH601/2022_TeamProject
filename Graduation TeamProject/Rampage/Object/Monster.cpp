@@ -133,7 +133,7 @@ void CMonster::Update(float fTimeElapsed)
 	// 플레이어가 터레인보다 아래에 있지 않도록 하는 코드
 	if (m_pUpdatedContext) CPhysicsObject::OnUpdateCallback(fTimeElapsed);
 
-	XMFLOAT3 xmf3ShakeVec = Vector3::ScalarProduct(Vector3::Normalize(GetRight()), m_fShakeDistance, false);
+	XMFLOAT3 xmf3ShakeVec = Vector3::ScalarProduct(Vector3::Normalize(GetRight()), MeterToUnit(m_fShakeDistance), false);
 	m_xmf3CalPos = Vector3::Add(m_xmf3Position, xmf3ShakeVec);
 
 	/*std::wstring debugString{std::to_wstring(m_fShakeDistance)};
