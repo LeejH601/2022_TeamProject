@@ -768,12 +768,10 @@ void DataLoader::LoadComponentSet(FILE* pInFile, CState<CPlayer>* pState)
 				else if (!strcmp(buf, "<Size_X>:"))
 				{
 					pImpactComponent->SetSizeX(ReadFloatFromFile(pInFile));
-					pImpactComponent->SetMeterSizeX(UnitToMeter(pImpactComponent->GetXSize()));
 				}
 				else if (!strcmp(buf, "<Size_Y>:"))
 				{
 					pImpactComponent->SetSizeY(ReadFloatFromFile(pInFile));
-					pImpactComponent->SetMeterSizeY(UnitToMeter(pImpactComponent->GetYSize()));
 				}
 				else if (!strcmp(buf, "<Speed>:"))
 				{
@@ -1349,7 +1347,7 @@ void CImGuiManager::ShowImpactManager(CState<CPlayer>* pCurrentAnimation)
 	}
 
 	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
-	if (ImGui::DragFloat(U8STR("수명(초)##ImpactEffect"), &pImpactEffectComponent->GetLifetime(), DRAG_FLOAT_UNIT, IMPACT_LIFETIME_MIN, IMPACT_LIFETIME_MAX, "%.2f", 0))
+	if (ImGui::DragFloat(U8STR("수명##ImpactEffect"), &pImpactEffectComponent->GetLifetime(), DRAG_FLOAT_UNIT, IMPACT_LIFETIME_MIN, IMPACT_LIFETIME_MAX, "%.2f", 0))
 		pImpactEffectComponent->GetLifetime() = std::clamp(pImpactEffectComponent->GetLifetime(), IMPACT_LIFETIME_MIN, IMPACT_LIFETIME_MAX);
 
 	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
@@ -1357,17 +1355,13 @@ void CImGuiManager::ShowImpactManager(CState<CPlayer>* pCurrentAnimation)
 		pImpactEffectComponent->GetAlpha() = std::clamp(pImpactEffectComponent->GetAlpha(), IMPACT_ALPHA_MIN, IMPACT_ALPHA_MAX);
 
 	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
-	if (ImGui::DragFloat(U8STR("X 크기(미터)##ImpactEffect"), &pImpactEffectComponent->GetXMeterSize(), DRAG_FLOAT_UNIT, UnitToMeter(IMPACT_SIZE_MIN), UnitToMeter(IMPACT_SIZE_MAX), "%.2f", 0))
-	{
-		pImpactEffectComponent->GetXMeterSize() = std::clamp(pImpactEffectComponent->GetXMeterSize(), UnitToMeter(IMPACT_SIZE_MIN), UnitToMeter(IMPACT_SIZE_MAX));
-		pImpactEffectComponent->SetSizeX(MeterToUnit(pImpactEffectComponent->GetXMeterSize()));
-	}
+	if (ImGui::DragFloat(U8STR("X 크기##ImpactEffect"), &pImpactEffectComponent->GetXSize(), DRAG_FLOAT_UNIT, IMPACT_SIZE_MIN, IMPACT_SIZE_MAX, "%.2f", 0))
+		pImpactEffectComponent->GetXSize() = std::clamp(pImpactEffectComponent->GetXSize(), IMPACT_SIZE_MIN, IMPACT_SIZE_MAX);
+
 	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
-	if (ImGui::DragFloat(U8STR("Y 크기(미터)##ImpactEffect"), &pImpactEffectComponent->GetYMeterSize(), DRAG_FLOAT_UNIT, UnitToMeter(IMPACT_SIZE_MIN), UnitToMeter(IMPACT_SIZE_MAX), "%.2f", 0))
-	{
-		pImpactEffectComponent->GetYMeterSize() = std::clamp(pImpactEffectComponent->GetYMeterSize(), UnitToMeter(IMPACT_SIZE_MIN), UnitToMeter(IMPACT_SIZE_MAX));
-		pImpactEffectComponent->SetSizeY(MeterToUnit(pImpactEffectComponent->GetYMeterSize()));
-	}
+	if (ImGui::DragFloat(U8STR("Y 크기##ImpactEffect"), &pImpactEffectComponent->GetYSize(), DRAG_FLOAT_UNIT, IMPACT_SIZE_MIN, IMPACT_SIZE_MAX, "%.2f", 0))
+		pImpactEffectComponent->GetYSize() = std::clamp(pImpactEffectComponent->GetYSize(), IMPACT_SIZE_MIN, IMPACT_SIZE_MAX);
+
 	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
 	ImGui::ColorEdit3(U8STR("색상##ImpactEffect"), (float*)&pImpactEffectComponent->GetColor()); // Edit 3 floats representing a color
 	ImGui::End();
