@@ -1347,7 +1347,7 @@ void CImGuiManager::ShowImpactManager(CState<CPlayer>* pCurrentAnimation)
 	}
 
 	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
-	if (ImGui::DragFloat(U8STR("수명##ImpactEffect"), &pImpactEffectComponent->GetLifetime(), DRAG_FLOAT_UNIT, IMPACT_LIFETIME_MIN, IMPACT_LIFETIME_MAX, "%.2f", 0))
+	if (ImGui::DragFloat(U8STR("수명(초)##ImpactEffect"), &pImpactEffectComponent->GetLifetime(), DRAG_FLOAT_UNIT, IMPACT_LIFETIME_MIN, IMPACT_LIFETIME_MAX, "%.2f", 0))
 		pImpactEffectComponent->GetLifetime() = std::clamp(pImpactEffectComponent->GetLifetime(), IMPACT_LIFETIME_MIN, IMPACT_LIFETIME_MAX);
 
 	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
@@ -1355,11 +1355,11 @@ void CImGuiManager::ShowImpactManager(CState<CPlayer>* pCurrentAnimation)
 		pImpactEffectComponent->GetAlpha() = std::clamp(pImpactEffectComponent->GetAlpha(), IMPACT_ALPHA_MIN, IMPACT_ALPHA_MAX);
 
 	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
-	if (ImGui::DragFloat(U8STR("X 크기##ImpactEffect"), &pImpactEffectComponent->GetXSize(), DRAG_FLOAT_UNIT, IMPACT_SIZE_MIN, IMPACT_SIZE_MAX, "%.2f", 0))
+	if (ImGui::DragFloat(U8STR("X 크기(미터)##ImpactEffect"), &pImpactEffectComponent->GetXSize(), DRAG_FLOAT_UNIT, IMPACT_SIZE_MIN, IMPACT_SIZE_MAX, "%.2f", 0))
 		pImpactEffectComponent->GetXSize() = std::clamp(pImpactEffectComponent->GetXSize(), IMPACT_SIZE_MIN, IMPACT_SIZE_MAX);
 
 	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
-	if (ImGui::DragFloat(U8STR("Y 크기##ImpactEffect"), &pImpactEffectComponent->GetYSize(), DRAG_FLOAT_UNIT, IMPACT_SIZE_MIN, IMPACT_SIZE_MAX, "%.2f", 0))
+	if (ImGui::DragFloat(U8STR("Y 크기(미터)##ImpactEffect"), &pImpactEffectComponent->GetYSize(), DRAG_FLOAT_UNIT, IMPACT_SIZE_MIN, IMPACT_SIZE_MAX, "%.2f", 0))
 		pImpactEffectComponent->GetYSize() = std::clamp(pImpactEffectComponent->GetYSize(), IMPACT_SIZE_MIN, IMPACT_SIZE_MAX);
 
 	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
@@ -1401,11 +1401,11 @@ void CImGuiManager::ShowParticleManager(CState<CPlayer>* pCurrentAnimation)
 	ImGui::Image((ImTextureID)(m_d3dSrvGPUDescriptorHandle_ParticleTexture.ptr), ImVec2((float)my_image_height, (float)my_image_height));
 
 	ImGui::SetNextItemWidth(190.f);
-	if (ImGui::DragFloat("XSize##ParticleEffect", &pParticleComponent->GetXSize(), DRAG_FLOAT_UNIT, PARTICLE_SIZE_MIN, PARTICLE_SIZE_MAX, "%.2f", 0))
+	if (ImGui::DragFloat(U8STR("X 크기(미터)##ParticleEffect"), &pParticleComponent->GetXSize(), DRAG_FLOAT_UNIT, PARTICLE_SIZE_MIN, PARTICLE_SIZE_MAX, "%.2f", 0))
 		pParticleComponent->GetXSize() = std::clamp(pParticleComponent->GetXSize(), PARTICLE_SIZE_MIN, PARTICLE_SIZE_MAX);
 
 	ImGui::SetNextItemWidth(190.f);
-	if (ImGui::DragFloat("YSize##ParticleEffect", &pParticleComponent->GetYSize(), DRAG_FLOAT_UNIT, PARTICLE_SIZE_MIN, PARTICLE_SIZE_MAX, "%.2f", 0))
+	if (ImGui::DragFloat(U8STR("Y 크기(미터)##ParticleEffect"), &pParticleComponent->GetYSize(), DRAG_FLOAT_UNIT, PARTICLE_SIZE_MIN, PARTICLE_SIZE_MAX, "%.2f", 0))
 		pParticleComponent->GetYSize() = std::clamp(pParticleComponent->GetYSize(), PARTICLE_SIZE_MIN, PARTICLE_SIZE_MAX);
 
 	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
@@ -1413,7 +1413,7 @@ void CImGuiManager::ShowParticleManager(CState<CPlayer>* pCurrentAnimation)
 		pParticleComponent->GetAlpha() = std::clamp(pParticleComponent->GetAlpha(), PARTICLE_ALPHA_MIN, PARTICLE_ALPHA_MAX);
 
 	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
-	if (ImGui::DragFloat(U8STR("수명##ParticleEffect"), &pParticleComponent->GetLifeTime(), DRAG_FLOAT_UNIT, PARTICLE_LIFETIME_MIN, PARTICLE_LIFETIME_MAX, "%.1f", 0))
+	if (ImGui::DragFloat(U8STR("수명(초)##ParticleEffect"), &pParticleComponent->GetLifeTime(), DRAG_FLOAT_UNIT, PARTICLE_LIFETIME_MIN, PARTICLE_LIFETIME_MAX, "%.1f", 0))
 		pParticleComponent->GetLifeTime() = std::clamp(pParticleComponent->GetLifeTime(), PARTICLE_LIFETIME_MIN, PARTICLE_LIFETIME_MAX);
 
 	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
@@ -1421,7 +1421,7 @@ void CImGuiManager::ShowParticleManager(CState<CPlayer>* pCurrentAnimation)
 		pParticleComponent->GetEmitParticleNumber() = std::clamp(pParticleComponent->GetEmitParticleNumber(), PARTICLE_COUNT_MIN, PARTICLE_COUNT_MAX);
 
 	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
-	if (ImGui::DragFloat(U8STR("속도##ParticleEffect"), &pParticleComponent->GetSpeed(), DRAG_FLOAT_UNIT, PARTICLE_SPEED_MIN, PARTICLE_SPEED_MAX, "%.1f", 0))
+	if (ImGui::DragFloat(U8STR("속도(m/s)##ParticleEffect"), &pParticleComponent->GetSpeed(), DRAG_FLOAT_UNIT, PARTICLE_SPEED_MIN, PARTICLE_SPEED_MAX, "%.1f", 0))
 		pParticleComponent->GetSpeed() = std::clamp(pParticleComponent->GetSpeed(), PARTICLE_SPEED_MIN, PARTICLE_SPEED_MAX);
 
 	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);

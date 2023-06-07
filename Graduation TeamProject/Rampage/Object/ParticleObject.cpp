@@ -59,14 +59,14 @@ void CParticleObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dComma
 	m_pcbMappedFrameworkInfo->m_fCurrentTime = fCurrentTime;
 	m_pcbMappedFrameworkInfo->m_fElapsedTime = fElapsedTime;
 
-	m_pcbMappedFrameworkInfo->m_fSpeed = m_fSpeed;
+	m_pcbMappedFrameworkInfo->m_fSpeed = MeterToUnit(m_fSpeed);
 	m_pcbMappedFrameworkInfo->m_nFlareParticlesToEmit = m_iEmitParticleN;
 	m_pcbMappedFrameworkInfo->m_xmf3Gravity = m_xmf3Direction; // 임시로 방향
 	m_pcbMappedFrameworkInfo->m_xmf3Color = m_f3Color;
 	m_pcbMappedFrameworkInfo->m_iTextureIndex = m_iTextureIndex;
 	m_pcbMappedFrameworkInfo->m_nParticleType = m_iParticleType;
 	m_pcbMappedFrameworkInfo->m_fLifeTime = m_fLifeTime;
-	m_pcbMappedFrameworkInfo->m_fSize = m_fSize;
+	m_pcbMappedFrameworkInfo->m_fSize = XMFLOAT2(MeterToUnit(m_fSize.x), MeterToUnit(m_fSize.y));
 	m_pcbMappedFrameworkInfo->m_bEmitter = dynamic_cast<CParticleMesh*>(m_pMesh.get())->m_bEmit;
 	m_pcbMappedFrameworkInfo->m_iTextureCoord = XMUINT2(m_iTotalRow, m_iTotalCol);
 
