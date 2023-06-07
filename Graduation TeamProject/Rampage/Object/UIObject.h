@@ -78,4 +78,20 @@ protected:
 	UINT m_iNumber = 0;
 	float m_fAnimationTime = 1.f;
 	bool m_bAnimation = false;
+	float m_fAlpha = 0.f;
+};
+
+class CBloodEffectObject : public CUIObject
+{
+public:
+	CBloodEffectObject(int iTextureIndex, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fSize);
+	virtual ~CBloodEffectObject();
+
+	virtual void Update(float fTimeElapsed);
+
+private:
+	float m_fSize = 0.5f;
+	float m_fAlpha = 1.f;
+	float m_fLifeTime = 0.f;
+	bool m_bAnimation = false;
 };

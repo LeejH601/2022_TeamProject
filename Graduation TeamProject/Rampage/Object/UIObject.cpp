@@ -7,6 +7,11 @@
 CUIObject::CUIObject(int iTextureIndex, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fSize)
 {
 	m_xmf4x4World = Matrix4x4::Identity();
+	m_xmf4x4World._23 = 1.f; // ALPHA
+
+	m_xmf4x4World._21 = 1.f; // RGBN // 2.8
+	m_xmf4x4World._31 = 1.f;
+	m_xmf4x4World._44 = 1.f;
 	m_xmf4x4Transform = Matrix4x4::Identity();
 	m_xmf4x4Texture = Matrix4x4::Identity();
 	m_iTextureIndex = iTextureIndex;
@@ -18,6 +23,12 @@ CUIObject::CUIObject(int iTextureIndex, ID3D12Device* pd3dDevice, ID3D12Graphics
 CUIObject::CUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fSize)
 {
 	m_xmf4x4World = Matrix4x4::Identity();
+	m_xmf4x4World._21 = 1.f; // RGBN
+	m_xmf4x4World._23 = 1.f; // ALPHA
+
+	m_xmf4x4World._21 = 1.f; // RGBN // 2.8
+	m_xmf4x4World._31 = 1.f;
+	m_xmf4x4World._44 = 1.f;
 	m_xmf4x4Transform = Matrix4x4::Identity();
 	m_xmf4x4Texture = Matrix4x4::Identity();
 
@@ -43,6 +54,7 @@ void CUIObject::Update(float fTimeElapsed)
 		m_xmf4x4World._12 = 1.f; // U
 		m_xmf4x4World._13 = 1.f; // V
 
+		m_xmf4x4World._21 = 1.f; // RGBN
 		// -1 ~ 1
 		m_xmf4x4World._41 = (m_xmf2ScreenPosition.x / FRAME_BUFFER_WIDTH);
 		m_xmf4x4World._42 = (m_xmf2ScreenPosition.y / FRAME_BUFFER_HEIGHT);
@@ -117,6 +129,7 @@ void CBarObject::Update(float fTimeElapsed)
 		m_xmf4x4World._12 = m_fCurrentValue / m_fTotalValue; // U
 		m_xmf4x4World._13 = 1.f; // V
 
+		m_xmf4x4World._21 = 1.f; // RGBN
 		//1, 023x((정규 좌표) + 1.0)x0.5
 
 		// -1 ~ 1
@@ -188,6 +201,8 @@ void CHPObject::PreBarUpdate(float fTimeElapsed)
 		m_xmf4x4World._12 = m_fPreValue / m_fTotalValue; // U
 		m_xmf4x4World._13 = 1.f; // V
 
+		m_xmf4x4World._21 = 1.f; // RGBN
+
 		//1, 023x((정규 좌표) + 1.0)x0.5
 
 		// -1 ~ 1
@@ -210,6 +225,8 @@ void CHPObject::CurBarUpdate(float fTimeElapsed)
 
 		m_xmf4x4World._12 = m_fCurrentValue / m_fTotalValue; // U
 		m_xmf4x4World._13 = 1.f; // V
+
+		m_xmf4x4World._21 = 1.f; // RGBN
 
 		// -1 ~ 1
 		m_xmf4x4World._41 = (m_xmf2ScreenPosition.x / FRAME_BUFFER_WIDTH);
@@ -242,8 +259,10 @@ void CSTAMINAObject::PreBarUpdate(float fTimeElapsed)
 		m_xmf4x4World._12 = m_fPreValue / m_fTotalValue; // U
 		m_xmf4x4World._13 = 1.f; // V
 
-		//1, 023x((정규 좌표) + 1.0)x0.5
+		m_xmf4x4World._21 = 1.f; // RGBN
 
+		//1, 023x((정규 좌표) + 1.0)x0.5
+	
 		// -1 ~ 1
 		m_xmf4x4World._41 = (m_xmf2ScreenPosition.x / FRAME_BUFFER_WIDTH);
 		m_xmf4x4World._42 = (m_xmf2ScreenPosition.y / FRAME_BUFFER_HEIGHT);
@@ -264,6 +283,8 @@ void CSTAMINAObject::CurBarUpdate(float fTimeElapsed)
 
 		m_xmf4x4World._12 = m_fCurrentValue / m_fTotalValue; // U
 		m_xmf4x4World._13 = 1.f; // V
+
+		m_xmf4x4World._21 = 1.f; // RGBN
 
 		// -1 ~ 1
 		m_xmf4x4World._41 = (m_xmf2ScreenPosition.x / FRAME_BUFFER_WIDTH);
@@ -303,6 +324,7 @@ void CNumberObject::UpdateNumber(UINT iNumber)
 			iNumber = iNumber % ((int)pow(10, i));
 		}
 		m_fAnimationTime = 0.f;
+		m_fAlpha = 0.45f;
 		m_bAnimation = true;
 	}
 }
@@ -311,21 +333,40 @@ void CNumberObject::UpdateNumberTexture(UINT N, UINT ORDER)
 {
 	if (m_bEnable) {
 
+		if(m_fAlpha <= 1.5f)
+			m_fAlpha += 0.03f;
 		//m_xmf2ScreenPosition5 = XMFLOAT2()
 		// 화면 크기를 기준으로 Size 설정 최대 크기 (MAX WIDTH: FRAME_BUFFER_WIDTH, MAX_HEIGHT: FRAME_BUFFER_HEIGHT)
 		m_xmf4x4World._11 = ((/*(m_fCurrentHp / m_fTotalHp) * */m_xmf2Size.x) / (FRAME_BUFFER_WIDTH)) * m_fAnimationTime;
-		m_xmf4x4World._22 = (m_xmf2Size.y / (FRAME_BUFFER_HEIGHT)) * m_fAnimationTime;
+		m_xmf4x4World._22 = (m_xmf2Size.y / (FRAME_BUFFER_HEIGHT)); // *m_fAnimationTime;
 
 		m_xmf4x4World._33 = m_iTextureIndex + N; // 텍스쳐 인덱스
 
 		m_xmf4x4World._12 = 1.f; // U
 		m_xmf4x4World._13 = 1.f; // V
 
-		//1, 023x((정규 좌표) + 1.0)x0.5
+		float color = 2.8f;
+		m_xmf4x4World._21 = 1.f; // RGBN // 2.8
+		m_xmf4x4World._31 = 1.f;// +(m_iNumber % 10) * 0.1f;
+		m_xmf4x4World._44 = 1.f;// +(m_iNumber % 10) * 0.1f;
+		if ((m_iNumber / 3) % 3 == 0) // 0. 3, 6
+			m_xmf4x4World._21 = color;
+		else if ((m_iNumber / 3) % 3 == 1) // 1, 4, 7 -> 보라색
+		{
+			m_xmf4x4World._44 = color;
+		}
+		else if ((m_iNumber / 3) % 3 == 2) // 2, 5, 8
+		{
+			m_xmf4x4World._21 = color;
+			m_xmf4x4World._44 = color;
+		}
 
+		m_xmf4x4World._23 = m_fAlpha; // ALPHA
+		//1, 023x((정규 좌표) + 1.0)x0.5
+		
 		// -1 ~ 1
-		m_xmf4x4World._41 = (m_xmf2ScreenPosition.x / FRAME_BUFFER_WIDTH) + ((m_xmf2Size.x) / (FRAME_BUFFER_WIDTH) * 0.725f * ORDER);
-		m_xmf4x4World._42 = (m_xmf2ScreenPosition.y / FRAME_BUFFER_HEIGHT) + (1.f - m_fAnimationTime) * 0.03f;
+		m_xmf4x4World._41 = (m_xmf2ScreenPosition.x / FRAME_BUFFER_WIDTH) + ((m_xmf2Size.x) / (FRAME_BUFFER_WIDTH) * (0.725f - (1.f - m_fAnimationTime)) * ORDER);
+		m_xmf4x4World._42 = (m_xmf2ScreenPosition.y / FRAME_BUFFER_HEIGHT) + (1.f - m_fAnimationTime) * 0.01f;
 		//(m_xmf2ScreenPosition.y * 2.f) / (FRAME_BUFFER_HEIGHT); // -1 ~ 1
 		m_xmf4x4World._43 = 0.f;
 	}
@@ -336,7 +377,7 @@ void CNumberObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, bool b_Us
 {
 	if (!m_bEnable)
 		return;
-	if (m_fAnimationTime > 2.5f)
+	if (m_fAnimationTime > 1.3f)
 	{
 		m_bAnimation = false;
 	}
@@ -350,6 +391,8 @@ void CNumberObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, bool b_Us
 	}
 	else
 		m_fAnimationTime += 0.8f;
+
+
 	if (m_pMesh)
 	{
 		// UI Size 정보 Update
@@ -367,4 +410,68 @@ void CNumberObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, bool b_Us
 
 	if (m_pChild) m_pChild->Render(pd3dCommandList, b_UseTexture, pCamera);
 	if (m_pSibling) m_pSibling->Render(pd3dCommandList, b_UseTexture, pCamera);
+}
+
+CBloodEffectObject::CBloodEffectObject(int iTextureIndex, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fSize) : CUIObject(iTextureIndex, pd3dDevice, pd3dCommandList, fSize)
+{
+}
+
+CBloodEffectObject::~CBloodEffectObject()
+{
+}
+
+void CBloodEffectObject::Update(float fTimeElapsed)
+{
+	if (m_bEnable) {
+		//m_xmf2ScreenPosition5 = XMFLOAT2()
+		// 화면 크기를 기준으로 Size 설정 최대 크기 (MAX WIDTH: FRAME_BUFFER_WIDTH, MAX_HEIGHT: FRAME_BUFFER_HEIGHT)
+		//m_xmf4x4World._11 = (/*(m_fCurrentHp / m_fTotalHp) * */m_xmf2Size.x) / (FRAME_BUFFER_WIDTH);
+		//m_xmf4x4World._22 = m_xmf2Size.y / (FRAME_BUFFER_HEIGHT);
+
+		// 0 ~ 1
+		// 0 ~ 2 -> -1 ~ 1
+		// 1 ~ 2
+		// 
+		// 0 ~ 1 ~ 0
+		if (m_fLifeTime <= 0.7f && !m_bAnimation)
+		{
+			m_fLifeTime += fTimeElapsed * 0.4f;
+		}
+		else
+		{
+			m_bAnimation = true;
+			if (m_fLifeTime >= 0.2f)
+			{
+				m_fLifeTime -= fTimeElapsed * 0.8f;
+			}
+			else
+			{
+				m_bEnable = false;
+				m_bAnimation = false;
+				m_fLifeTime = 0.2f;
+			}
+
+		}
+
+		m_xmf4x4World._11 = (/*(m_fCurrentHp / m_fTotalHp) * */m_xmf2Size.x) / (FRAME_BUFFER_WIDTH);
+		m_xmf4x4World._22 = m_xmf2Size.y / (FRAME_BUFFER_HEIGHT);
+
+		m_xmf4x4World._33 = m_iTextureIndex; // 텍스쳐 인덱스
+
+		m_xmf4x4World._12 = 1.f; // U
+		m_xmf4x4World._13 = 1.f; // V
+
+		m_xmf4x4World._21 = 1.f; // RGBN
+		//1, 023x((정규 좌표) + 1.0)x0.5
+
+		// -1 ~ 1
+		m_xmf4x4World._41 = (m_xmf2ScreenPosition.x / FRAME_BUFFER_WIDTH);
+		m_xmf4x4World._42 = (m_xmf2ScreenPosition.y / FRAME_BUFFER_HEIGHT);
+		//(m_xmf2ScreenPosition.y * 2.f) / (FRAME_BUFFER_HEIGHT); // -1 ~ 1
+		m_xmf4x4World._43 = 0.f;
+
+
+		m_xmf4x4World._23 = m_fLifeTime; // ALPHA
+	}
+
 }
