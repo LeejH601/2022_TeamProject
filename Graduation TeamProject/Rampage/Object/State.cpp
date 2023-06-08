@@ -35,12 +35,12 @@ void Idle_Player::Enter(CPlayer* player)
 
 void Idle_Player::Execute(CPlayer* player, float fElapsedTime)
 {
-	// 사용자가 좌클릭을 했으면 Atk1_Player로 상태 변경
-	if (player->m_bAttack)
-		player->m_pStateMachine->ChangeState(Atk1_Player::GetInst());
-
 	if (player->m_bEvasioned)
 		player->m_pStateMachine->ChangeState(Evasion_Player::GetInst());
+
+	// 사용자가 좌클릭을 했으면 Atk1_Player로 상태 변경
+	else if (player->m_bAttack)
+		player->m_pStateMachine->ChangeState(Atk1_Player::GetInst());
 }
 
 void Idle_Player::Animate(CPlayer* player, float fElapsedTime)
@@ -670,18 +670,17 @@ void Run_Player::Execute(CPlayer* player, float fElapsedTime)
 {
 	XMFLOAT3 xmf3PlayerVel = player->GetVelocity();
 
-	// Idle 상태로 복귀하는 코드
-	if (Vector3::Length(xmf3PlayerVel) == 0)
-		player->m_pStateMachine->ChangeState(Idle_Player::GetInst());
-
-	if (player->m_bAttack)
-		player->m_pStateMachine->ChangeState(Atk1_Player::GetInst());
-
 	if (player->m_bEvasioned)
 		player->m_pStateMachine->ChangeState(Evasion_Player::GetInst());
 
-	// 발바닥 뼈에
+	else if (player->m_bAttack)
+		player->m_pStateMachine->ChangeState(Atk1_Player::GetInst());
 
+	// Idle 상태로 복귀하는 코드
+	else if (Vector3::Length(xmf3PlayerVel) == 0)
+		player->m_pStateMachine->ChangeState(Idle_Player::GetInst());
+
+	// 발바닥 뼈에
 	float fTime = player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition;
 	XMFLOAT3 xmf3Position;
 	ParticleSmokeParams Particlesmoke_comp_params;

@@ -10,9 +10,11 @@ CMonster::CMonster()
 	m_pStateMachine->SetCurrentState(Idle_Monster::GetInst());
 	m_pStateMachine->SetPreviousState(Idle_Monster::GetInst());
 	m_pStateMachine->SetGlobalState(Global_Monster::GetInst());
-	m_fStunStartTime = 0.0f;
 	m_fShakeDistance = 0.0f;
+
 	m_fStunTime = 0.0f;
+	m_fStunStartTime = 0.2f;
+
 	m_fMaxDissolveTime = 3.0f;
 	m_fDissolveThrethHold = 0.0f;
 	m_fDissolveTime = 0.0f;
@@ -20,12 +22,11 @@ CMonster::CMonster()
 
 	m_fHP = 300.0f;
 
-	m_fSpeedKperH = 1.0f;
-	m_fSpeedMperS = m_fSpeedKperH * 1000.0f / 3600.0f;
-	m_fSpeedUperS = m_fSpeedMperS * 100.0f / 4.0f;
+	m_fSpeedKperH = 10.0f;
+	m_fSpeedUperS = MeterToUnit(m_fSpeedKperH * 1000.0f) / 3600.0f;
 
-	m_fAttackRange = 5.f;
-	m_fSensingRange = 40.f;
+	m_fAttackRange = MeterToUnit(1.0f);
+	m_fSensingRange = MeterToUnit(20.0f);
 
 	std::unique_ptr<PlayerAttackListener> pCollisionComponent = std::make_unique<PlayerAttackListener>();
 	pCollisionComponent->SetObject(this);
@@ -139,7 +140,7 @@ void CMonster::Update(float fTimeElapsed)
 	// 플레이어가 터레인보다 아래에 있지 않도록 하는 코드
 	if (m_pUpdatedContext) CPhysicsObject::OnUpdateCallback(fTimeElapsed);
 
-	XMFLOAT3 xmf3ShakeVec = Vector3::ScalarProduct(Vector3::Normalize(GetRight()), m_fShakeDistance, false);
+	XMFLOAT3 xmf3ShakeVec = Vector3::ScalarProduct(Vector3::Normalize(GetRight()), MeterToUnit(m_fShakeDistance), false);
 	m_xmf3CalPos = Vector3::Add(m_xmf3Position, xmf3ShakeVec);
 
 	/*std::wstring debugString{std::to_wstring(m_fShakeDistance)};
@@ -199,13 +200,6 @@ COrcObject::COrcObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3d
 {
 	m_MonsterType = MONSTER_TYPE::ORC;
 
-	m_fSpeedKperH = 1.0f;
-	m_fSpeedMperS = m_fSpeedKperH * 1000.0f / 3600.0f;
-	m_fSpeedUperS = m_fSpeedMperS * 100.0f / 4.0f;
-
-	m_fAttackRange = 8.f;
-	m_fSensingRange = 30.f;
-
 	CLoadedModelInfo* pOrcModel = CModelManager::GetInst()->GetModelInfo("Object/Orc.bin");;
 	if (!pOrcModel) pOrcModel = CModelManager::GetInst()->LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, "Object/Orc.bin");
 
@@ -236,13 +230,6 @@ void COrcObject::PrepareBoundingBox(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 CGoblinObject::CGoblinObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks)
 {
 	m_MonsterType = MONSTER_TYPE::GOBLIN;
-
-	m_fStunTime = 0.0f;
-	m_fStunStartTime = 0.2f;
-
-	m_fSpeedKperH = 1.5f;
-	m_fSpeedMperS = m_fSpeedKperH * 1000.0f / 3600.0f;
-	m_fSpeedUperS = m_fSpeedMperS * 100.0f / 4.0f;
 
 	CLoadedModelInfo* pGoblinModel = CModelManager::GetInst()->GetModelInfo("Object/Goblin.bin");;
 	if (!pGoblinModel) pGoblinModel = CModelManager::GetInst()->LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, "Object/Goblin.bin");

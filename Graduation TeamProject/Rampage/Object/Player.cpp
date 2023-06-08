@@ -26,10 +26,8 @@ CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 	m_pStateMachine->SetCurrentState(Idle_Player::GetInst());
 	m_pStateMachine->SetPreviousState(Idle_Player::GetInst());
 
-	float fMeterPerUnit = 2.0f / 2.0f;
 	m_fSpeedKperH = 44.0f;
-	m_fSpeedMperS = m_fSpeedKperH * 1000.0f / 3600.0f;
-	m_fSpeedUperS = m_fSpeedMperS * (1.0 / fMeterPerUnit);
+	m_fSpeedUperS = MeterToUnit(m_fSpeedKperH * 1000.0f) / 3600.0f;
 }
 
 CPlayer::~CPlayer()
@@ -188,7 +186,6 @@ CKnightPlayer::CKnightPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 	m_pSkinnedAnimationController->m_pRootMotionObject = pKnightModel->m_pModelRootObject->FindFrame("SK_FKnightB");
 	if (m_pSkinnedAnimationController->m_pRootMotionObject) {
 		m_pSkinnedAnimationController->m_bRootMotion = true;
-		m_pSkinnedAnimationController->m_xmf3RootObjectScale = XMFLOAT3(4.0f, 4.0f, 4.0f);
 	}
 #endif // KNIGHT_ROOT_MOTION
 }
