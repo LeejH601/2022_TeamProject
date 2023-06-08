@@ -72,6 +72,7 @@ public:
 	virtual ~CNumberObject();
 	void UpdateNumber(UINT iNumber);
 	void UpdateNumberTexture(UINT N, UINT ORDER);
+	void UpdateLifeTime();
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, bool b_UseTexture, CCamera* pCamera = NULL);
 protected:
 	std::vector<UINT> m_vecNumObject;
@@ -87,6 +88,7 @@ public:
 	CBloodEffectObject(int iTextureIndex, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fSize);
 	virtual ~CBloodEffectObject();
 
+	virtual void UpdateLifeTime(float fTimeElapsed);
 	virtual void Update(float fTimeElapsed);
 
 private:

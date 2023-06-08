@@ -101,6 +101,8 @@ public:
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed, float fCurrentTime, CCamera* pCamera = NULL);
 	virtual void OnPostRender();
 
+	virtual void UIUpdate(CPlayer* pPlayer);
+	virtual void LoadTextureObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	virtual void HandleCollision(const CollideParams& params);
 	virtual void HandleOnGround(const OnGroundParams& params);
 

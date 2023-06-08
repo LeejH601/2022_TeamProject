@@ -373,10 +373,8 @@ void CNumberObject::UpdateNumberTexture(UINT N, UINT ORDER)
 
 }
 
-void CNumberObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, bool b_UseTexture, CCamera* pCamera)
+void CNumberObject::UpdateLifeTime()
 {
-	if (!m_bEnable)
-		return;
 	if (m_fAnimationTime > 1.3f)
 	{
 		m_bAnimation = false;
@@ -391,8 +389,14 @@ void CNumberObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, bool b_Us
 	}
 	else
 		m_fAnimationTime += 0.8f;
+}
 
-
+void CNumberObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, bool b_UseTexture, CCamera* pCamera)
+{
+	if (!m_bEnable)
+		return;
+	
+	UpdateLifeTime();
 	if (m_pMesh)
 	{
 		// UI Size 정보 Update
@@ -420,39 +424,29 @@ CBloodEffectObject::~CBloodEffectObject()
 {
 }
 
+void CBloodEffectObject::UpdateLifeTime(float fTimeElapsed)
+{
+	if (m_fLifeTime <= 0.7f && !m_bAnimation)
+		m_fLifeTime += fTimeElapsed * 0.4f;
+	else
+	{
+		m_bAnimation = true;
+		if (m_fLifeTime >= 0.2f)
+			m_fLifeTime -= fTimeElapsed * 0.8f;
+		else
+		{
+			m_bEnable = false;
+			m_bAnimation = false;
+			m_fLifeTime = 0.2f;
+		}
+	}
+}
+
 void CBloodEffectObject::Update(float fTimeElapsed)
 {
 	if (m_bEnable) {
-		//m_xmf2ScreenPosition5 = XMFLOAT2()
-		// 화면 크기를 기준으로 Size 설정 최대 크기 (MAX WIDTH: FRAME_BUFFER_WIDTH, MAX_HEIGHT: FRAME_BUFFER_HEIGHT)
-		//m_xmf4x4World._11 = (/*(m_fCurrentHp / m_fTotalHp) * */m_xmf2Size.x) / (FRAME_BUFFER_WIDTH);
-		//m_xmf4x4World._22 = m_xmf2Size.y / (FRAME_BUFFER_HEIGHT);
 
-		// 0 ~ 1
-		// 0 ~ 2 -> -1 ~ 1
-		// 1 ~ 2
-		// 
-		// 0 ~ 1 ~ 0
-		if (m_fLifeTime <= 0.7f && !m_bAnimation)
-		{
-			m_fLifeTime += fTimeElapsed * 0.4f;
-		}
-		else
-		{
-			m_bAnimation = true;
-			if (m_fLifeTime >= 0.2f)
-			{
-				m_fLifeTime -= fTimeElapsed * 0.8f;
-			}
-			else
-			{
-				m_bEnable = false;
-				m_bAnimation = false;
-				m_fLifeTime = 0.2f;
-			}
-
-		}
-
+		UpdateLifeTime(fTimeElapsed);
 		m_xmf4x4World._11 = (/*(m_fCurrentHp / m_fTotalHp) * */m_xmf2Size.x) / (FRAME_BUFFER_WIDTH);
 		m_xmf4x4World._22 = m_xmf2Size.y / (FRAME_BUFFER_HEIGHT);
 
@@ -467,7 +461,6 @@ void CBloodEffectObject::Update(float fTimeElapsed)
 		// -1 ~ 1
 		m_xmf4x4World._41 = (m_xmf2ScreenPosition.x / FRAME_BUFFER_WIDTH);
 		m_xmf4x4World._42 = (m_xmf2ScreenPosition.y / FRAME_BUFFER_HEIGHT);
-		//(m_xmf2ScreenPosition.y * 2.f) / (FRAME_BUFFER_HEIGHT); // -1 ~ 1
 		m_xmf4x4World._43 = 0.f;
 
 
