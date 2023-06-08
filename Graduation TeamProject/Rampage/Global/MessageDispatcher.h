@@ -676,6 +676,7 @@ public:
 	void SetTotalRowColumn(int iTotalRow, int iTotalColumn);
 	void SetEmissive(float fEmissive) { m_fEmissive = fEmissive; };
 	void SetRotateFactor(bool input) { m_bSimulateRotate = input; };
+	void SetLifeTime(float fLifeTime) { m_fLifeTime = fLifeTime; };
 	virtual void HandleMessage(const Message& message, const ImpactCompParams& params);
 };
 

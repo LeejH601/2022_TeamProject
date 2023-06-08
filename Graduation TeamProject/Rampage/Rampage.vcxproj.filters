@@ -491,6 +491,8 @@
     <FxCompile Include="Shader\SwordTrailGeometryShader.hlsl" />
     <FxCompile Include="Shader\SwordTrailPixelShader.hlsl" />
     <FxCompile Include="Shader\CurlNoise.hlsl" />
+    <FxCompile Include="Shader\TerrainDetailShader.hlsl" />
+    <FxCompile Include="Shader\TerrainDetailGeometryShader.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Shader\Header.hlsli" />

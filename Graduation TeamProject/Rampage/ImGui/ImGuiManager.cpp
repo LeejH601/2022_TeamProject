@@ -288,6 +288,8 @@ void DataLoader::SaveComponentSet(FILE* pInFile, CState<CPlayer>* pState)
 	WriteFloatFromFile(pInFile, pParticleComponent->GetColor().y);
 	WriteStringFromFile(pInFile, std::string("<Color_B>:"));
 	WriteFloatFromFile(pInFile, pParticleComponent->GetColor().z);
+	WriteStringFromFile(pInFile, std::string("<SimulateRotate>:"));
+	WriteIntegerFromFile(pInFile, pParticleComponent->GetRotateFactor());
 	WriteStringFromFile(pInFile, std::string("<FieldSpeed>:"));
 	WriteFloatFromFile(pInFile, pParticleComponent->GetFieldSpeed());
 	WriteStringFromFile(pInFile, std::string("<NoiseStrength>:"));
@@ -313,8 +315,8 @@ void DataLoader::SaveComponentSet(FILE* pInFile, CState<CPlayer>* pState)
 	WriteFloatFromFile(pInFile, pImpactComponent->GetSize().x);
 	WriteStringFromFile(pInFile, std::string("<Size_Y>:"));
 	WriteFloatFromFile(pInFile, pImpactComponent->GetSize().y);
-	WriteStringFromFile(pInFile, std::string("<Speed>:"));
-	WriteFloatFromFile(pInFile, pImpactComponent->GetSpeed());
+	WriteStringFromFile(pInFile, std::string("<LifeTime>:"));
+	WriteFloatFromFile(pInFile, pImpactComponent->GetLifetime());
 	WriteStringFromFile(pInFile, std::string("<Alpha>:"));
 	WriteFloatFromFile(pInFile, pImpactComponent->GetAlpha());
 	WriteStringFromFile(pInFile, std::string("<Color_R>:"));
@@ -790,6 +792,10 @@ void DataLoader::LoadComponentSet(FILE* pInFile, CState<CPlayer>* pState)
 				{
 					pParticleComponent->SetColorB(ReadFloatFromFile(pInFile));
 				}
+				else if (!strcmp(buf, "<SimulateRotate>:"))
+				{
+					pParticleComponent->SetRotateFacotr(ReadIntegerFromFile(pInFile));
+				}
 				else if (!strcmp(buf, "<FieldSpeed>:"))
 				{
 					pParticleComponent->SetFieldSpeed(ReadFloatFromFile(pInFile));
@@ -906,9 +912,9 @@ void DataLoader::LoadComponentSet(FILE* pInFile, CState<CPlayer>* pState)
 				{
 					pImpactComponent->SetSizeY(ReadFloatFromFile(pInFile));
 				}
-				else if (!strcmp(buf, "<Speed>:"))
+				else if (!strcmp(buf, "<LifeTime>:"))
 				{
-					pImpactComponent->SetSpeed(ReadFloatFromFile(pInFile));
+					pImpactComponent->SetLifeTime(ReadFloatFromFile(pInFile));
 				}
 				else if (!strcmp(buf, "<Alpha>:"))
 				{
