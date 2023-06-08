@@ -24,10 +24,17 @@ struct CB_FRAMEWORK_INFO
 	XMFLOAT2				m_fSize = XMFLOAT2(1.f, 1.f);
 };
 
+#define MAX_DETAILS_INSTANCES_ONE_DRAW_CALL 4000
+struct CB_DETAIL_INFO
+{
+	XMFLOAT3 m_xmf3WorldPositions[MAX_DETAILS_INSTANCES_ONE_DRAW_CALL];
+};
+
 
 class CBillBoardObject : public CGameObject
 {
 public:
+	CBillBoardObject() = default;
 	CBillBoardObject(int iTextureIndex, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fSize, bool bBillBoard); // 이미지 이름, 
 	virtual ~CBillBoardObject();
 	virtual void CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
@@ -102,3 +109,23 @@ private:
 	TerrainSpriteType m_eTerrainSpriteType = TerrainSpriteType::TERRAINSPRITE_CROSS_FADE;
 };
 
+class CDetailObject : public CBillBoardObject 
+{
+public:
+	CDetailObject() = default;
+	CDetailObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, void* pContext);
+	virtual void CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList, float fCurrentTime, float fElapsedTime);
+	virtual ~CDetailObject() = default;
+
+	//virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, bool b_UseTexture, CCamera* pCamera = NULL);
+
+protected:
+	ComPtr<ID3D12Resource>			m_pd3dcbDetailInfo = NULL;
+	CB_DETAIL_INFO*				m_pcbMappedDetailInfo = NULL;
+
+	int nDetails = 0;
+	std::vector<XMFLOAT3> m_xmf3DetailPositions;
+
+
+};

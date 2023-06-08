@@ -308,3 +308,64 @@ void CTerrainSpriteObject::SetType(TerrainSpriteType eType)
 {
 	m_eTerrainSpriteType = eType;
 }
+
+CDetailObject::CDetailObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, void* pContext)
+{
+	/*std::shared_ptr<CTexture> pDetailMap = std::make_shared<CTexture>(1, RESOURCE_TEXTURE2D, 0, 1);
+
+	pDetailMap->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Terrain/DetailMap1.dds", 1, 1);*/
+	
+	char* buf = new char[1024 * 1024];
+	int* data = new int[1024 * 1024];
+	std::ifstream in{ "Terrain/DetailMap1.bin", std::ios_base::binary };
+
+	CSplatTerrain* pTerrain = (CSplatTerrain*)pContext;
+	int terrainWidth = pTerrain->GetWidth();
+	int terrainLength = pTerrain->GetLength();
+
+	nDetails = 0;
+
+	in.read((char*)data, sizeof(int) * 1024 * 1024);
+	for (int i = 0; i < 1024 * 1024; ++i) {
+		//data[i] = atoi(&buf[i]);
+		nDetails += data[i];
+	}
+
+	m_xmf3DetailPositions.resize(nDetails);
+	int index = 0;
+	for (int i = 0; i < 1024 * 1024; ++i) {
+		if (data[i] > 0) {
+			for (int j = 0; j < data[i]; ++j) {
+				XMFLOAT3 pos;
+				pos.x = i / 1024;
+				pos.z = i % 1024;
+				pos.x = pos.x * float(terrainWidth) / 1024;
+				pos.z = pos.z * float(terrainLength) / 1024;
+
+				pos.y = pTerrain->GetHeight(pos.x, pos.z);
+
+				m_xmf3DetailPositions[index++] = pos;
+			}
+		}
+	}
+
+
+	printf("d");
+}
+
+void CDetailObject::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	UINT ncbElementBytes = ((sizeof(CB_DETAIL_INFO) + 255) & ~255); //256ÀÇ ¹è¼ö
+	m_pd3dcbDetailInfo = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, ncbElementBytes, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER | D3D12_RESOURCE_STATE_GENERIC_READ, NULL);
+
+	m_pd3dcbDetailInfo->Map(0, NULL, (void**)&m_pcbMappedDetailInfo);
+}
+
+void CDetailObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList, float fCurrentTime, float fElapsedTime)
+{
+
+
+
+	D3D12_GPU_VIRTUAL_ADDRESS d3dGpuVirtualAddress = m_pd3dcbFrameworkInfo->GetGPUVirtualAddress();
+	pd3dCommandList->SetGraphicsRootConstantBufferView(11, d3dGpuVirtualAddress);
+}

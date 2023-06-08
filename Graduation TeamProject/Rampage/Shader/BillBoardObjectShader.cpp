@@ -125,3 +125,40 @@ D3D12_INPUT_LAYOUT_DESC CBillBoardObjectShader::CreateInputLayout(int nPipelineS
 
 	return(d3dInputLayoutDesc);
 }
+
+D3D12_SHADER_BYTECODE CTerrainDetailShader::CreateVertexShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
+{
+	return D3D12_SHADER_BYTECODE();
+}
+
+D3D12_SHADER_BYTECODE CTerrainDetailShader::CreatePixelShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
+{
+	return D3D12_SHADER_BYTECODE();
+}
+
+D3D12_SHADER_BYTECODE CTerrainDetailShader::CreateGeometryShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
+{
+	return D3D12_SHADER_BYTECODE();
+}
+
+D3D12_INPUT_LAYOUT_DESC CTerrainDetailShader::CreateInputLayout(int nPipelineState)
+{
+	//UINT nInputElementDescs = 2;
+	//D3D12_INPUT_ELEMENT_DESC* pd3dInputElementDescs = new D3D12_INPUT_ELEMENT_DESC[nInputElementDescs];
+
+	//pd3dInputElementDescs[0] = { "SIZE", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+	//pd3dInputElementDescs[1] = { "USEBILLBOARD", 0, DXGI_FORMAT_R8_UINT, 0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+	////pd3dInputElementDescs[3] = { "TEXTUREINDEX", 0, DXGI_FORMAT_R8_SINT, 0, 16, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+
+	//D3D12_INPUT_LAYOUT_DESC d3dInputLayoutDesc;
+	//d3dInputLayoutDesc.pInputElementDescs = pd3dInputElementDescs;
+	//d3dInputLayoutDesc.NumElements = nInputElementDescs;
+
+	//return(d3dInputLayoutDesc);
+
+	D3D12_INPUT_LAYOUT_DESC d3dInputLayoutDesc;
+	d3dInputLayoutDesc.pInputElementDescs = NULL;
+	d3dInputLayoutDesc.NumElements = 0;
+
+	return(d3dInputLayoutDesc);
+}

@@ -326,6 +326,21 @@ public:
 	~CSpriteVertex() { }
 };
 
+class CDetailVertex
+{
+public:
+	XMFLOAT2						m_xmf2Size;
+	int								m_iBillBoard;
+public:
+	CDetailVertex() { m_xmf2Size = XMFLOAT2(0.f, 0.f), m_iBillBoard = true;}
+	CDetailVertex(XMFLOAT2 xmf2Size, bool bBillBoard)
+	{
+		m_xmf2Size = xmf2Size;
+		m_iBillBoard = bBillBoard;
+	}
+	~CDetailVertex() { }
+};
+
 class CTerrainMesh : public CMesh
 {
 
