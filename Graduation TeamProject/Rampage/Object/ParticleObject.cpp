@@ -91,10 +91,6 @@ void CParticleObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dComma
 void CParticleObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	CGameObject::UpdateShaderVariables(pd3dCommandList);
-	m_xmf4x4Texture._11 = m_iTextureIndex;
-	XMFLOAT4X4 xmfTexture;
-	XMStoreFloat4x4(&xmfTexture, XMMatrixTranspose(XMLoadFloat4x4(&m_xmf4x4Texture)));
-	pd3dCommandList->SetGraphicsRoot32BitConstants(0, 16, &m_xmf4x4Texture, 16);
 }
 
 void CParticleObject::PreRender(ID3D12GraphicsCommandList* pd3dCommandList, CShader* pShader, int nPipelineState)
@@ -292,7 +288,7 @@ void CParticleObject::AnimateRowColumn(float fTimeElapsed)
 	m_xmf4x4World._32 = float(m_iCurrentCol) / float(m_iTotalCol);
 }
 
-CSmokeParticleObject::CSmokeParticleObject(LPCTSTR pszFileName, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, XMFLOAT3 xmf3Position, XMFLOAT3 xmf3Velocity, float fLifetime, XMFLOAT3 xmf3Acceleration, XMFLOAT3 xmf3Color, XMFLOAT2 xmf2Size, UINT nMaxParticles, CParticleShader* pShader, int iParticleType) : CParticleObject()
+CSmokeParticleObject::CSmokeParticleObject(int iTextureIndex, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, XMFLOAT3 xmf3Position, XMFLOAT3 xmf3Velocity, float fLifetime, XMFLOAT3 xmf3Acceleration, XMFLOAT3 xmf3Color, XMFLOAT2 xmf2Size, UINT nMaxParticles, CParticleShader* pShader, int iParticleType) : CParticleObject()
 {
 	m_xmf4x4World = Matrix4x4::Identity();
 	m_xmf4x4Transform = Matrix4x4::Identity();
@@ -303,6 +299,9 @@ CSmokeParticleObject::CSmokeParticleObject(LPCTSTR pszFileName, ID3D12Device* pd
 
 	m_iParticleType = iParticleType;
 
+	m_iTextureIndex = iTextureIndex;
+
+
 	srand((unsigned)time(NULL));
 
 
@@ -312,3 +311,56 @@ CSmokeParticleObject::CSmokeParticleObject(LPCTSTR pszFileName, ID3D12Device* pd
 CSmokeParticleObject::~CSmokeParticleObject()
 {
 }
+
+CTerrainParticleObject::CTerrainParticleObject(int iTextureIndex, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, XMFLOAT3 xmf3Position, XMFLOAT3 xmf3Velocity, float fLifetime, XMFLOAT3 xmf3Acceleration, XMFLOAT3 xmf3Color, XMFLOAT2 xmf2Size, UINT nMaxParticles, CParticleShader* pShader, int iParticleType)
+{
+	m_xmf4x4World = Matrix4x4::Identity();
+	m_xmf4x4Transform = Matrix4x4::Identity();
+	m_xmf4x4Texture = Matrix4x4::Identity();
+
+	std::shared_ptr<CParticleMesh> pParticleMesh = std::make_shared<CParticleMesh>(pd3dDevice, pd3dCommandList, xmf3Position, xmf3Velocity, fLifetime, xmf3Acceleration, xmf3Color, xmf2Size, nMaxParticles);
+	SetMesh(pParticleMesh);
+
+	m_iParticleType = iParticleType;
+	m_iTextureIndex = iTextureIndex;
+	srand((unsigned)time(NULL));
+
+
+	CreateShaderVariables(pd3dDevice, pd3dCommandList);
+}
+
+CTerrainParticleObject::~CTerrainParticleObject()
+{
+}
+
+void CTerrainParticleObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, CShader* pShader)
+{
+	StreamOutRender(pd3dCommandList, pCamera, pShader);
+	DrawRender(pd3dCommandList, pCamera, pShader);
+}
+
+void CTerrainParticleObject::StreamOutRender(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, CShader* pShader)
+{
+	PreRender(pd3dCommandList, pShader, 1);
+	if (m_pMesh) m_pMesh->PreRender(pd3dCommandList, 1); //Stream Output
+	if (m_pMesh) m_pMesh->Render(pd3dCommandList, 1); //Stream Output
+	if (m_pMesh) m_pMesh->PostRender(pd3dCommandList, 1); //Stream Output
+}
+
+void CTerrainParticleObject::DrawRender(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, CShader* pShader)
+{
+	PreRender(pd3dCommandList, pShader, 2);
+	if (m_pMesh) m_pMesh->PreRender(pd3dCommandList, 2); //Draw
+	if (m_pMesh) m_pMesh->Render(pd3dCommandList, 2); //Draw
+}
+//void CTerrainParticleObject::Animate(float fTimeElapsed)
+//{
+//	if (m_fTime > m_fLifeTime * 0.7f)
+//	{
+//		if (m_fDeltaSize <= 1.f)
+//		{
+//			m_fDeltaSize += fTimeElapsed * 5.f;
+//		}
+//		Rotate(0.f, 0.f, 7.f);
+//	}
+//}

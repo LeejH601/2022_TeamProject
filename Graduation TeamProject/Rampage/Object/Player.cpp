@@ -16,6 +16,8 @@
 
 CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks)
 {
+	m_fHP = 100.f;
+	m_fTotalHP = 100.f;
 	m_xmf4x4World = Matrix4x4::Identity();
 	m_xmf4x4Transform = Matrix4x4::Identity();
 	m_xmf4x4Texture = Matrix4x4::Identity();
@@ -28,6 +30,10 @@ CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 
 	m_fSpeedKperH = 44.0f;
 	m_fSpeedUperS = MeterToUnit(m_fSpeedKperH * 1000.0f) / 3600.0f;
+
+
+	m_fTotalStamina = 100.f;
+	m_fStamina = 100.f;
 }
 
 CPlayer::~CPlayer()
@@ -119,6 +125,15 @@ void CPlayer::Update(float fTimeElapsed)
 	CPhysicsObject::Apply_Friction(fTimeElapsed);
 
 	m_xmf3PreviousPos = GetPosition();
+
+	UpdateStamina(fTimeElapsed);
+	//UpdateCombo(fTimeElapsed);
+}
+
+void CPlayer::UpdateStamina(float fTimeElapsed)
+{
+	if ((m_pStateMachine->GetCurrentState() == Idle_Player::GetInst()) || (m_pStateMachine->GetCurrentState() == Run_Player::GetInst()))
+		m_fStamina += 2.f * m_fSpeedUperS * fTimeElapsed * ((m_fTotalStamina - m_fStamina) / m_fTotalStamina);
 }
 
 void CPlayer::ProcessInput(DWORD dwDirection, float cxDelta, float cyDelta, float fTimeElapsed, CCamera* pCamera)
@@ -157,6 +172,25 @@ void CPlayer::SetScale(float x, float y, float z)
 void CPlayer::Tmp()
 {
 	m_pSkinnedAnimationController->SetTrackAnimationSet(0, m_nAnimationNum++);
+}
+// ui ±¸ÇÏ±â, 
+void CPlayer::UpdateCombo(float fTimeElapsed)
+{
+	m_iCombo++;
+	//m_fComboTime -= fTimeElapsed;
+	//if (m_fComboTime < 0.f)
+	//{
+	//	
+	//	m_fComboTime = m_fComboFullTime;
+	//	
+	//	m_iCombo = 0;
+	//}
+	//else if (m_bCombo)
+	//{
+	//	m_fComboTime = m_fComboFullTime;
+	//	m_iCombo++;
+	//	m_bCombo = false;
+	//}
 }
 
 #define KNIGHT_ROOT_MOTION
@@ -248,6 +282,8 @@ bool CKnightPlayer::CheckCollision(CGameObject* pTargetObject)
 		_stprintf_s(pstrDebug, 256, _T("CheckCollision\n"));
 		OutputDebugString(pstrDebug);
 
+		m_bCombo = true;
+		m_fHP -= 30.f;
 		if (m_pCamera)
 		{
 			if (m_pStateMachine->GetCurrentState()->GetCameraShakeComponent()->GetEnable())
@@ -480,4 +516,3 @@ void CKightRootMoveAnimationController::OnRootMotion(CGameObject* pRootGameObjec
 		m_pRootMotionObject->m_xmf4x4Transform._43 = 0.f;
 	}
 }
-

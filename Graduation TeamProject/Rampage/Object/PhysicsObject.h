@@ -24,6 +24,10 @@ protected:
 	bool m_bOnGround = false; // ¶¥¿¡ ´êÀºÁö ¿©ºÎ
 
 public:
+	float m_fTotalHP;
+	float m_fHP;
+
+public:
 	virtual void UpdateMatrix();
 	virtual void UpdateTransform(XMFLOAT4X4* pxmf4x4Parent = NULL);
 

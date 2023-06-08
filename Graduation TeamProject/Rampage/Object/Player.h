@@ -37,6 +37,13 @@ public:
 	DWORD m_dwDirectionCache;
 	XMFLOAT3 m_xmf3DirectionCache;
 
+	float m_fStamina;
+	float m_fTotalStamina;
+	UINT m_iCombo = 0;
+	float m_fComboFullTime = 10.f;
+	float m_fComboTime = m_fComboFullTime;
+	bool m_bCombo = false;
+	
 	XMFLOAT3 m_xmf3AtkDirection;
 
 public:
@@ -55,6 +62,8 @@ public:
 	virtual void SetScale(float x, float y, float z);
 	void Tmp();
 
+	void UpdateStamina(float fTimeElapsed);
+	void UpdateCombo(float fTimeElapsed);
 	virtual void Move(const XMFLOAT3& xmf3Shift, bool bUpdateVelocity);
 	virtual void Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity, CCamera* pCamera);
 	virtual XMFLOAT4& GetTrailControllPoint(int n) { return XMFLOAT4{}; }

@@ -348,6 +348,11 @@ void Atk1_Player::Enter(CPlayer* player)
 	if (player->m_pSwordTrailReference) {
 		dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[0].get())->m_faccumulateTime = 0.0f;
 	}
+	if (player->m_fStamina > 0)
+		player->m_fStamina -= player->m_fTotalStamina * 0.2f;
+
+	player->UpdateCombo(0.f);
+
 }
 
 void Atk1_Player::Execute(CPlayer* player, float fElapsedTime)
@@ -365,6 +370,7 @@ void Atk1_Player::Execute(CPlayer* player, float fElapsedTime)
 	}
 
 	SpawnTrailParticle(player);
+
 }
 
 void Atk1_Player::Animate(CPlayer* player, float fElapsedTime)
@@ -454,6 +460,11 @@ void Atk2_Player::Enter(CPlayer* player)
 	if (player->m_pSwordTrailReference) {
 		dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[1].get())->m_faccumulateTime = 0.0f;
 	}
+
+	if (player->m_fStamina > 0)
+		player->m_fStamina -= player->m_fTotalStamina * 0.2f;
+
+	player->UpdateCombo(0.f);
 }
 
 void Atk2_Player::Execute(CPlayer* player, float fElapsedTime)
@@ -584,6 +595,11 @@ void Atk3_Player::Enter(CPlayer* player)
 	if (player->m_pSwordTrailReference) {
 		dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[2].get())->m_faccumulateTime = 0.0f;
 	}
+
+	if (player->m_fStamina > 0)
+		player->m_fStamina -= player->m_fTotalStamina * 0.2f;
+
+	player->UpdateCombo(0.f);
 }
 
 void Atk3_Player::Execute(CPlayer* player, float fElapsedTime)
@@ -664,6 +680,7 @@ void Run_Player::Enter(CPlayer* player)
 
 	player->m_xmf3RootTransfromPreviousPos = XMFLOAT3{ 0.f, 0.f , 0.f };
 
+
 }
 
 void Run_Player::Execute(CPlayer* player, float fElapsedTime)
@@ -680,30 +697,31 @@ void Run_Player::Execute(CPlayer* player, float fElapsedTime)
 	else if (Vector3::Length(xmf3PlayerVel) == 0)
 		player->m_pStateMachine->ChangeState(Idle_Player::GetInst());
 
-	// ¹ß¹Ù´Ú »À¿¡
-	float fTime = player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition;
-	XMFLOAT3 xmf3Position;
-	ParticleSmokeParams Particlesmoke_comp_params;
-	Particlesmoke_comp_params.pObject = CPlayerParticleObject::GetInst()->GetSmokeObjects();
-	if (Particlesmoke_comp_params.pObject && (((int)(fTime * 10.f)) == 9)) // 0.5f¸¶´Ù
-	{
-		CGameObject* pFoot_Left = player->FindFrame("foot_l");
-		memcpy(&xmf3Position, &(pFoot_Left->m_xmf4x4World._41), sizeof(XMFLOAT3));
-		Particlesmoke_comp_params.xmf3Position = xmf3Position;
-		Particlesmoke_comp_params.xmfDirection = player->m_xmfDirection;
+	//// ¹ß¹Ù´Ú »À¿¡
 
-		CMessageDispatcher::GetInst()->Dispatch_Message<ParticleSmokeParams>(MessageType::UPDATE_SMOKEPARTICLE, &Particlesmoke_comp_params, player->m_pStateMachine->GetCurrentState());
-	}
+	//float fTime = player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition;
+	//XMFLOAT3 xmf3Position;
+	//ParticleSmokeParams Particlesmoke_comp_params;
+	//Particlesmoke_comp_params.pObject = CPlayerParticleObject::GetInst()->GetSmokeObjects();
+	//if (Particlesmoke_comp_params.pObject && (((int)(fTime * 10.f)) == 9)) // 0.5f¸¶´Ù
+	//{
+	//	CGameObject* pFoot_Left = player->FindFrame("foot_l");
+	//	memcpy(&xmf3Position, &(pFoot_Left->m_xmf4x4World._41), sizeof(XMFLOAT3));
+	//	Particlesmoke_comp_params.xmf3Position = xmf3Position;
+	//	Particlesmoke_comp_params.xmfDirection = player->m_xmfDirection;
 
-	if (Particlesmoke_comp_params.pObject && (((int)(fTime * 10.f)) == 2)) // 0.6f¸¶´Ù
-	{
-		CGameObject* pFoot_Right = player->FindFrame("foot_r");
-		memcpy(&xmf3Position, &(pFoot_Right->m_xmf4x4World._41), sizeof(XMFLOAT3));
-		Particlesmoke_comp_params.xmf3Position = xmf3Position;
-		Particlesmoke_comp_params.xmfDirection = player->m_xmfDirection;
+	//	CMessageDispatcher::GetInst()->Dispatch_Message<ParticleSmokeParams>(MessageType::UPDATE_SMOKEPARTICLE, &Particlesmoke_comp_params, player->m_pStateMachine->GetCurrentState());
+	//}
 
-		CMessageDispatcher::GetInst()->Dispatch_Message<ParticleSmokeParams>(MessageType::UPDATE_SMOKEPARTICLE, &Particlesmoke_comp_params, player->m_pStateMachine->GetCurrentState());
-	}
+	//if (Particlesmoke_comp_params.pObject && (((int)(fTime * 10.f)) == 2)) // 0.6f¸¶´Ù
+	//{
+	//	CGameObject* pFoot_Right = player->FindFrame("foot_r");
+	//	memcpy(&xmf3Position, &(pFoot_Right->m_xmf4x4World._41), sizeof(XMFLOAT3));
+	//	Particlesmoke_comp_params.xmf3Position = xmf3Position;
+	//	Particlesmoke_comp_params.xmfDirection = player->m_xmfDirection;
+
+	//	CMessageDispatcher::GetInst()->Dispatch_Message<ParticleSmokeParams>(MessageType::UPDATE_SMOKEPARTICLE, &Particlesmoke_comp_params, player->m_pStateMachine->GetCurrentState());
+	//}
 }
 
 void Run_Player::Animate(CPlayer* player, float fTimeElapsed)
@@ -753,6 +771,11 @@ void Atk4_Player::Enter(CPlayer* player)
 	/*SoundPlayParams SoundPlayParam;
 	SoundPlayParam.sound_category = SOUND_CATEGORY::SOUND_SHOOT;
 	CMessageDispatcher::GetInst()->Dispatch_Message<SoundPlayParams>(MessageType::PLAY_SOUND, &SoundPlayParam, this);*/
+
+	if (player->m_fStamina > 0)
+		player->m_fStamina -= player->m_fTotalStamina * 0.2f;
+
+	player->UpdateCombo(0.f);
 }
 
 void Atk4_Player::CheckComboAttack(CPlayer* player)
@@ -836,6 +859,11 @@ void Atk5_Player::Enter(CPlayer* player)
 	/*SoundPlayParams SoundPlayParam;
 	SoundPlayParam.sound_category = SOUND_CATEGORY::SOUND_SHOOT;
 	CMessageDispatcher::GetInst()->Dispatch_Message<SoundPlayParams>(MessageType::PLAY_SOUND, &SoundPlayParam, this);*/
+
+	if (player->m_fStamina > 0)
+		player->m_fStamina -= player->m_fTotalStamina * 0.2f;
+
+	player->UpdateCombo(0.f);
 }
 
 void Atk5_Player::SpawnTrailParticle(CPlayer* player)
