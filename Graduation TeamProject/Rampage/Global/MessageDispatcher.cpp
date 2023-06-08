@@ -302,7 +302,7 @@ void TerrainSpriteComponent::HandleMessage(const Message& message, const Terrain
 		pMultiSpriteParticle->SetMaxParticleN(m_nParticleNumber);
 		pMultiSpriteParticle->SetPosition(params.xmf3Position);
 		pMultiSpriteParticle->SetTextureIndex(4);
-		pMultiSpriteParticle->EmitParticle(0);
+		pMultiSpriteParticle->EmitParticle(8);
 	}
 
 

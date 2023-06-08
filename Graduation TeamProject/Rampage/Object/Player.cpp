@@ -196,6 +196,7 @@ void CPlayer::UpdateCombo(float fTimeElapsed)
 #define KNIGHT_ROOT_MOTION
 CKnightPlayer::CKnightPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks) : CPlayer(pd3dDevice, pd3dCommandList, nAnimationTracks)
 {
+	m_fHP = 100.0f;
 	CLoadedModelInfo* pKnightModel = CModelManager::GetInst()->GetModelInfo("Object/SK_FKnightB_Dragonblade.bin");;
 	if (!pKnightModel) pKnightModel = CModelManager::GetInst()->LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, "Object/SK_FKnightB_Dragonblade.bin");
 

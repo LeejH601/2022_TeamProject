@@ -1362,7 +1362,6 @@ void CParticleMesh::CreateVertexBuffer(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 		pVertices[i].m_fLifetime = fLifetime;
 		pVertices[i].m_iType = 0;
 		pVertices[i].m_fEmitTime = 0.f;
-		pVertices[i].m_iParticleType = 0;
 	}
 
 	m_pd3dPositionBuffer = CreateBufferResource(pd3dDevice, pd3dCommandList, pVertices, m_nStride * m_nVertices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dPositionUploadBuffer);
@@ -1550,6 +1549,7 @@ void CParticleMesh::EmitParticle(int emitType, ParticleEmitDataParam& param)
 	{
 	case 0:
 	case 7:
+	case 8:
 		for (int i = m_ncreatedParticleNum; i < nCreateParticleNum; ++i) {
 			createdParticleBuffer[i].m_xmf3Position = param.m_xmf3EmitedPosition; /*XMFLOAT3(45 + offset.x, 60, 50 + offset.z)*/
 			createdParticleBuffer[i].m_xmf3Velocity = XMFLOAT3(urd(dre), urd(dre), urd(dre));
