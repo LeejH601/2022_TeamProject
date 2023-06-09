@@ -592,6 +592,10 @@ void RegisterArticulationSleepListener::HandleMessage(const Message& message, co
 	m_pScene->RequestSleepArticulation(params);
 }
 
-void MonsterAttackListener::HandleMessage(const Message& message, const PlayerParams& params)
+void MonsterAttackListener::HandleMessage(const Message& message, const MonsterParams& params)
 {
+	if (message.getType() == MessageType::MONSTER_ATTACK)
+	{
+		params.pMonster->CheckCollision(m_pPlayer);
+	}
 }

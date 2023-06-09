@@ -4,6 +4,7 @@
 #define SKELETON_MOAN_SOUND_NUM 1
 
 enum class MessageType {
+	MONSTER_ATTACK,
 	PLAYER_ATTACK,
 	PLAY_SOUND,
 	COLLISION,

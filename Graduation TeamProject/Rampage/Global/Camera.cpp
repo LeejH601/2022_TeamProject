@@ -163,10 +163,6 @@ void CThirdPersonCamera::ProcessInput(DWORD dwDirection, float cxDelta, float cy
 
 	if (cxDelta || cyDelta)
 		Rotate(cyDelta, cxDelta, 0.0f);
-
-	std::wstring pitchString = { std::to_wstring(m_fPitch) };
-	OutputDebugString(pitchString.c_str());
-	OutputDebugString(L"\n");
 }
 
 void CThirdPersonCamera::Rotate(float fPitch, float fYaw, float fRoll)

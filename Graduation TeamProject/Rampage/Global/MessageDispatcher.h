@@ -153,10 +153,10 @@ public:
 // Define Monster Attack component
 class MonsterAttackListener : public IMessageListener {
 private:
-	CGameObject* m_pObject;
+	CGameObject* m_pPlayer;
 public:
-	void SetObject(CGameObject* pObject) { m_pObject = pObject; }
-	virtual void HandleMessage(const Message& message, const PlayerParams& params);
+	void SetObject(CGameObject* pPlayer) { m_pPlayer = pPlayer; }
+	virtual void HandleMessage(const Message& message, const MonsterParams& params);
 };
 
 class UpdateDynamicTimeScaleListener : public IMessageListener {

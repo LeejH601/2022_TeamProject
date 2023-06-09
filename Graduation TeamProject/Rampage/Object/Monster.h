@@ -82,6 +82,7 @@ public:
 			BoundingOrientedBox* TargetBoundingBox = pTargetObject->GetBoundingBox();
 			if (m_TransformedWeaponBoundingBox.Intersects(*TargetBoundingBox)) {
 				pTargetObject->SetHit(this);
+				OutputDebugString(L"Hit Player");
 				return true;
 			}
 		}

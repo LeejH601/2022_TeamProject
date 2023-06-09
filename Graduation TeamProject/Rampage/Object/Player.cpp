@@ -33,6 +33,12 @@ CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 
 	m_fTotalStamina = 100.f;
 	m_fStamina = 100.f;
+
+	std::unique_ptr<MonsterAttackListener> pMonsterAttackListener = std::make_unique<MonsterAttackListener>();
+	pMonsterAttackListener->SetObject(this);
+	m_pListeners.push_back(std::move(pMonsterAttackListener));
+
+	CMessageDispatcher::GetInst()->RegisterListener(MessageType::MONSTER_ATTACK, m_pListeners.back().get());
 }
 
 CPlayer::~CPlayer()
@@ -277,12 +283,11 @@ bool CKnightPlayer::CheckCollision(CGameObject* pTargetObject)
 		SoundPlayParam.sound_category = SOUND_CATEGORY::SOUND_SHOCK;
 		CMessageDispatcher::GetInst()->Dispatch_Message<SoundPlayParams>(MessageType::PLAY_SOUND, &SoundPlayParam, m_pStateMachine->GetCurrentState());
 		
-		TCHAR pstrDebug[256] = { 0 };
+		/*TCHAR pstrDebug[256] = { 0 };
 		_stprintf_s(pstrDebug, 256, _T("CheckCollision\n"));
-		OutputDebugString(pstrDebug);
+		OutputDebugString(pstrDebug);*/
 
 		m_bCombo = true;
-		m_fHP -= 30.f;
 		if (m_pCamera)
 		{
 			if (m_pStateMachine->GetCurrentState()->GetCameraShakeComponent()->GetEnable())
