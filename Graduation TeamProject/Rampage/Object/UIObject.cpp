@@ -196,7 +196,7 @@ void CHPObject::PreBarUpdate(float fTimeElapsed)
 		m_xmf4x4World._11 = (/*(m_fCurrentHp / m_fTotalHp) * */m_xmf2Size.x) / (FRAME_BUFFER_WIDTH);
 		m_xmf4x4World._22 = m_xmf2Size.y / (FRAME_BUFFER_HEIGHT);
 
-		m_xmf4x4World._33 = 10; // 텍스쳐 인덱스
+		m_xmf4x4World._33 = 12; // 텍스쳐 인덱스
 
 		m_xmf4x4World._12 = m_fPreValue / m_fTotalValue; // U
 		m_xmf4x4World._13 = 1.f; // V

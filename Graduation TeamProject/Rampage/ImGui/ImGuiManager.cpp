@@ -2102,8 +2102,8 @@ void CImGuiManager::ShowHitLagManager(CState<CPlayer>* pCurrentAnimation)
 	ImGui::Checkbox(U8STR("켜기/끄기##HitLag"), &pHitLagComponent->GetEnable());
 
 	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
-	if (ImGui::DragFloat(U8STR("지속시간(초)##Move"), &pHitLagComponent->GetLagScale(), DRAG_FLOAT_UNIT, HIT_LAG_DURATION_MIN, HIT_LAG_DURATION_MAX, "%.2f", 0))
-		pHitLagComponent->GetLagScale() = std::clamp(pHitLagComponent->GetDuration(), HIT_LAG_DURATION_MIN, HIT_LAG_DURATION_MAX);
+	if (ImGui::DragFloat(U8STR("지속시간(초)##Move"), &pHitLagComponent->GetDuration(), DRAG_FLOAT_UNIT, HIT_LAG_DURATION_MIN, HIT_LAG_DURATION_MAX, "%.2f", 0))
+		pHitLagComponent->GetDuration() = std::clamp(pHitLagComponent->GetDuration(), HIT_LAG_DURATION_MIN, HIT_LAG_DURATION_MAX);
 	
 	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
 	if (ImGui::DragFloat(U8STR("역경직 배율##Move"), &pHitLagComponent->GetLagScale(), DRAG_FLOAT_UNIT, HIT_LAG_SCALEWEIGHT_MIN, HIT_LAG_SCALEWEIGHT_MAX, "%.2f", 0))
