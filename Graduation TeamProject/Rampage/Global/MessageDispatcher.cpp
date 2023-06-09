@@ -591,3 +591,7 @@ void RegisterArticulationSleepListener::HandleMessage(const Message& message, co
 {
 	m_pScene->RequestSleepArticulation(params);
 }
+
+void MonsterAttackListener::HandleMessage(const Message& message, const PlayerParams& params)
+{
+}

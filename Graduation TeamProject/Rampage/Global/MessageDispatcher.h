@@ -128,6 +128,7 @@ public:
 	void SetEnable(bool bEnable) { m_bEnable = bEnable; }
 	virtual void Reset() { }
 
+	virtual void HandleMessage(const Message& message, const MonsterParams& params) {}
 	virtual void HandleMessage(const Message& message, const CollideParams& params) {}
 	virtual void HandleMessage(const Message& message, const OnGroundParams& params) {}
 	virtual void HandleMessage(const Message& message, const PlayerParams& params) {}
@@ -147,6 +148,15 @@ public:
 
 	virtual void HandleMessage(const Message& message, const DamageParams& params) {}
 	virtual void HandleMessage(const Message& message, const TimerParams& params) {}
+};
+
+// Define Monster Attack component
+class MonsterAttackListener : public IMessageListener {
+private:
+	CGameObject* m_pObject;
+public:
+	void SetObject(CGameObject* pObject) { m_pObject = pObject; }
+	virtual void HandleMessage(const Message& message, const PlayerParams& params);
 };
 
 class UpdateDynamicTimeScaleListener : public IMessageListener {
