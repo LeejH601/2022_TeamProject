@@ -1308,7 +1308,7 @@ void CMainTMPScene::HandleCollision(const CollideParams& params)
 
 		particle_comp_params.pObject = m_pSlashHitObjects.get();
 		particle_comp_params.pObject = (*it).get();
-		dynamic_cast<CParticleObject*>(m_pSlashHitObjects.get())->SetEmitAxis(((CPlayer*)m_pPlayer)->m_xmf3AtkDirection);
+		dynamic_cast<CParticleObject*>((*it).get())->SetEmitAxis(((CPlayer*)m_pPlayer)->m_xmf3AtkDirection);
 		CMessageDispatcher::GetInst()->Dispatch_Message<ParticleCompParams>(MessageType::UPDATE_SLASHHITPARTICLE, &particle_comp_params, ((CPlayer*)m_pPlayer)->m_pStateMachine->GetCurrentState());
 	}
 
