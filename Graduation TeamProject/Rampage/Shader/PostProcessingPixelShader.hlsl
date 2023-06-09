@@ -5,9 +5,11 @@ cbuffer cbCameraInfo : register(b1)
 {
 	matrix gmtxView : packoffset(c0);
 	matrix gmtxProjection : packoffset(c4);
-	matrix gmtxInverseProjection : packoffset(c8);
-	matrix gmtxInverseView : packoffset(c12);
-	float3 gf3CameraPosition : packoffset(c16);
+	matrix m_xmf4x4OrthoProjection : packoffset(c8);
+	matrix gmtxInverseProjection : packoffset(c12);
+	matrix gmtxInverseView : packoffset(c16);
+	float3 gf3CameraPosition : packoffset(c20);
+	//float3 gf3CameraDirection : packoffset(c17);
 };
 
 Texture2D gtxMultiRenderTargetTextures[7] : register(t35);

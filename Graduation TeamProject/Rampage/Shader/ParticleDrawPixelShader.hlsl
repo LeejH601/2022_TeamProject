@@ -35,6 +35,16 @@ cbuffer cbFrameworkInfo : register(b7)
 
 };
 
+struct GS_PARTICLE_DRAW_OUTPUT
+{
+	float4 position : SV_Position;
+	float4 color : COLOR;
+	float2 uv : TEXTURE;
+	float alpha : ALPHA;
+	uint TextureIndex :TEXTUREINDEX;
+	uint2 SpriteTotalCoord : TEXTURECOORD;
+	uint ParticleType : PARTICLETYPE;
+};
 
 PS_MULTIPLE_RENDER_TARGETS_OUTPUT PSParticleDraw(GS_PARTICLE_DRAW_OUTPUT input)  // SphereTexture t50À» Á¦¿Ü
 {
