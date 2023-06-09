@@ -179,7 +179,7 @@ PS_MULTIPLE_RENDER_TARGETS_OUTPUT PSParallaxTerrain(VS_TERRAIN_OUTPUT input) : S
 	float3 Normal = mul(vFinalNormal, mtxTangentToWorld);
 	/*float3 vAmbient = vFinalColor.rgb * 0.2f;
 	vFinalColor.rgb = vFinalColor.rgb + vAmbient;*/
-	vFinalColor.rgb = vFinalColor.rgb * 2.0f;
+	vFinalColor.rgb = vFinalColor.rgb * 2.0;
 	float4 cIllumination = Lighting(input.positionW, Normal, vFinalColor, true, input.uvs);
 	//float4 cIllumination = Lighting(input.positionW, normalize(Normal), vFinalColor);
 
