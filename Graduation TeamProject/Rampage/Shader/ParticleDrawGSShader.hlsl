@@ -26,7 +26,9 @@ cbuffer cbFrameworkInfo : register(b7)
 #define SMOKE_PARTILCE 2
 #define TRAIL_PARTILCE 3
 #define ATTACK_PARTICLE 4
-#define TERRAIN_PARTICLE 5 /////
+#define SLASHHIT_PARTICLE 6
+#define IMPACT_PARTICLE 7
+#define TERRAIN_PARTICLE 8
 
 struct VS_PARTICLE_DRAW_OUTPUT
 {
@@ -46,16 +48,6 @@ struct VS_PARTICLE_DRAW_OUTPUT
 	uint type : TYPE;
 };
 
-struct GS_PARTICLE_DRAW_OUTPUT
-{
-	float4 position : SV_Position;
-	float4 color : COLOR;
-	float2 uv : TEXTURE;
-	float alpha : ALPHA;
-	uint TextureIndex :TEXTUREINDEX;
-	uint2 TextureCoord : TEXTURECOORD;
-	uint ParticleType : PARTICLETYPE;
-};
 
 
 cbuffer cbGameObjectInfo : register(b0)
@@ -95,7 +87,7 @@ void GSParticleDraw(point VS_PARTICLE_DRAW_OUTPUT input[1], inout TriangleStream
 	xmf4x4Coord._31 = float(input[0].CurrentCoord.x) / float(input[0].TextureCoord.x);
 	xmf4x4Coord._32 = float(input[0].CurrentCoord.y) / float(input[0].TextureCoord.y);
 
-	output.ParticleType = input[0].ParticleType;
+	output.ParticleType = input[0].type;
 	output.alpha = input[0].alpha;
 	output.color = input[0].color;
 	output.TextureIndex = input[0].TextureIndex;

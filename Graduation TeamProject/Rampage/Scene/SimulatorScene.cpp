@@ -700,6 +700,7 @@ void CSimulatorScene::HandleCollision(const CollideParams& params)
 		CMessageDispatcher::GetInst()->Dispatch_Message<ParticleCompParams>(MessageType::UPDATE_PARTICLE, &particle_comp_params, m_pMainCharacter->m_pStateMachine->GetCurrentState());
 
 		particle_comp_params.pObject = m_pSlashHitObjects.get();
+		particle_comp_params.pObject = (*it).get();
 		dynamic_cast<CParticleObject*>(m_pSlashHitObjects.get())->SetEmitAxis(m_pMainCharacter->m_xmf3AtkDirection);
 		CMessageDispatcher::GetInst()->Dispatch_Message<ParticleCompParams>(MessageType::UPDATE_SLASHHITPARTICLE, &particle_comp_params, m_pMainCharacter->m_pStateMachine->GetCurrentState());
 	}

@@ -36,17 +36,7 @@ cbuffer cbFrameworkInfo : register(b7)
 
 };
 
-struct VS_PARTICLE_INPUT
-{
-	float3 position : POSITION;
-	float3 velocity : VELOCITY;
-	float lifetime : LIFETIME;
-	int type : TYPE;
-	float EmitTime : EMITTIME; // 방출 시작 시간 ;
-	uint TextureIndex :TEXTUREINDEX;
-	uint2 SpriteTotalCoord : TEXTURECOORD;
-	uint ParticleType : PARTICLETYPE;
-};
+
 
 cbuffer cbGameObjectInfo : register(b0)
 {
@@ -195,7 +185,6 @@ void ImpactParticles(VS_PARTICLE_INPUT input, inout PointStream<VS_PARTICLE_INPU
 	}
 }
 
-[maxvertexcount(16)]
 void TerrainParticles(VS_PARTICLE_INPUT input, inout PointStream<VS_PARTICLE_INPUT> output)
 {
 	VS_PARTICLE_INPUT particle = input;
@@ -206,7 +195,7 @@ void TerrainParticles(VS_PARTICLE_INPUT input, inout PointStream<VS_PARTICLE_INP
 	}
 }
 
-[maxvertexcount(30)]
+[maxvertexcount(16)]
 void GSParticleStreamOutput(point VS_PARTICLE_INPUT input[1], inout PointStream<VS_PARTICLE_INPUT> output)
 {
 	VS_PARTICLE_INPUT particle = input[0];
@@ -225,6 +214,6 @@ void GSParticleStreamOutput(point VS_PARTICLE_INPUT input[1], inout PointStream<
 	else if (particle.type == IMPACT_PARTICLE) {
 		ImpactParticles(particle, output);
 	}
-	else if (particle.ParticleType == TERRAIN_PARTICLE)
+	else if (particle.type == TERRAIN_PARTICLE)
 		TerrainParticles(particle, output);
 }

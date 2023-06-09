@@ -1,17 +1,6 @@
 #include "InputLayouts.hlsli"
 #include "CurlNoise.hlsl"
 
-struct VS_PARTICLE_INPUT
-{
-	float3 position : POSITION;
-	float3 velocity : VELOCITY;
-	float lifetime : LIFETIME;
-	int type : TYPE;
-	float EmitTime : EMITTIME; // 방출 시작 시간 
-	uint TextureIndex :TEXTUREINDEX;
-	uint2 SpriteTotalCoord : TEXTURECOORD;
-	uint ParticleType : PARTICLETYPE;
-};
 
 struct VS_PARTICLE_DRAW_OUTPUT
 {
@@ -79,7 +68,7 @@ VS_PARTICLE_DRAW_OUTPUT VSParticleDraw(VS_PARTICLE_INPUT input)
 {
 	VS_PARTICLE_DRAW_OUTPUT output = (VS_PARTICLE_DRAW_OUTPUT)0;
 
-	output.ParticleType = input.ParticleType;
+	output.type = input.type;
 	output.position = input.position;
 	output.velocity = input.velocity;
 	//output.velocity += CalculrateCulrNoise(input.position);
