@@ -3,6 +3,9 @@
 #include "Global.h"
 #include "Locator.h"
 #include "..\Object\Player.h"
+#include "..\Shader\Shader.h"
+#include "..\Object\Map.h"
+#include "..\Object\Terrain.h"
 
 CCamera::CCamera()
 {
@@ -118,6 +121,9 @@ void CCamera::ProcessInput(DWORD dwDirection, float cxDelta, float cyDelta, floa
 void CCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
 {
 }
+void CCamera::OnUpdateCallback(float fTimeElapsed)
+{
+}
 void CCamera::SetLookAt(XMFLOAT3& xmf3LookAt)
 {
 	XMFLOAT3 UpVec = XMFLOAT3(0.0f, 1.0f, 0.0f);
@@ -140,8 +146,9 @@ void CCamera::SetViewportsAndScissorRects(ID3D12GraphicsCommandList* pd3dCommand
 CThirdPersonCamera::CThirdPersonCamera() : CCamera()
 {
 	m_pPlayer = nullptr;
-	SetOffset(XMFLOAT3(0.0f, 0.0f,0.0f));
-	m_xmf3Offset = XMFLOAT3(0.0f, 0.0f, -11.0f / 2.0);
+	SetOffset(XMFLOAT3(0.0f, 0.0f, 0.0f));
+
+	m_xmf3Offset = XMFLOAT3(0.0f, 0.0f, MeterToUnit(-3.0f));
 }
 
 CThirdPersonCamera::~CThirdPersonCamera()
@@ -154,11 +161,12 @@ void CThirdPersonCamera::ProcessInput(DWORD dwDirection, float cxDelta, float cy
 
 	GetKeyboardState(pKeysBuffer);
 
-	/*if (pKeysBuffer[VK_RBUTTON] & 0xF0)
-	{*/
-		if (cxDelta || cyDelta)
-			Rotate(cyDelta, cxDelta, 0.0f);
-	//}
+	if (cxDelta || cyDelta)
+		Rotate(cyDelta, cxDelta, 0.0f);
+
+	std::wstring pitchString = { std::to_wstring(m_fPitch) };
+	OutputDebugString(pitchString.c_str());
+	OutputDebugString(L"\n");
 }
 
 void CThirdPersonCamera::Rotate(float fPitch, float fYaw, float fRoll)
@@ -166,8 +174,8 @@ void CThirdPersonCamera::Rotate(float fPitch, float fYaw, float fRoll)
 	if (fPitch != 0.0f)
 	{
 		m_fPitch += fPitch;
-		if (m_fPitch > +45.0f) { fPitch -= (m_fPitch - 45.0f); m_fPitch = +45.0f; }
-		if (m_fPitch < -45.0f) { fPitch -= (m_fPitch + 45.0f); m_fPitch = -45.0f; }
+		if (m_fPitch > +75.0f) { fPitch -= (m_fPitch - 75.0f); m_fPitch = +75.0f; }
+		if (m_fPitch < -75.0f) { fPitch -= (m_fPitch + 75.0f); m_fPitch = -75.0f; }
 	}
 	if (fYaw != 0.0f)
 	{
@@ -228,6 +236,25 @@ void CThirdPersonCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
 	}
 
 	CCamera::Update(XMFLOAT3{ 0.0f, 0.0f, 0.0f }, fTimeElapsed);
+	OnUpdateCallback(fTimeElapsed);
+}
+
+void CThirdPersonCamera::OnUpdateCallback(float fTimeElapsed)
+{
+	if (m_pUpdatedContext)
+	{
+		CMap* pMap = (CMap*)m_pUpdatedContext;
+		CSplatTerrain* pTerrain = (CSplatTerrain*)(pMap->GetTerrain().get());
+		XMFLOAT3 xmf3TerrainPos = pTerrain->GetPosition();
+
+		XMFLOAT3 xmf3CameraPosition = GetPosition();
+		float fTerrainY = pTerrain->GetHeight(xmf3CameraPosition.x - (xmf3TerrainPos.x), xmf3CameraPosition.z - (xmf3TerrainPos.z));
+
+		if (xmf3CameraPosition.y < fTerrainY + xmf3TerrainPos.y)
+			xmf3CameraPosition.y = fTerrainY + xmf3TerrainPos.y;
+
+		SetPosition(xmf3CameraPosition);
+	}
 }
 
 CFloatingCamera::CFloatingCamera() : CCamera()

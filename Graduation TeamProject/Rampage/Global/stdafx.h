@@ -161,6 +161,7 @@ extern physx::PxMat44 convertToPhysXCoordSystem(const DirectX::XMFLOAT4X4& matri
 extern DirectX::XMFLOAT4X4 convertToDirectXCoordSystem(const physx::PxMat44& matrix);
 extern float RandomFloatInRange(float min, float max);
 extern XMFLOAT2 RandomFloatInRangeSeed(float min, float max);
+extern float MeterToUnit(float fMeter);
 
 // Forward declare message handler from imgui_impl_win32.cpp
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);

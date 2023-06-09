@@ -730,6 +730,8 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pMap->GetTerrain()->SetRigidStatic();
 	m_pMap->LoadSceneFromFile(pd3dDevice, pd3dCommandList, "Object/Scene/Scene.bin");
 
+	m_pMainSceneCamera->SetUpdatedContext(m_pMap.get());
+
 	int index = 0;
 
 	m_IObjectIndexs.resize(m_pEnemys.size() + m_pMap->GetMapObjects().size());
@@ -964,11 +966,12 @@ void CMainTMPScene::UpdateObjects(float fTimeElapsed)
 	
 	 
 	// Update Camera
+
 	XMFLOAT3 xmf3PlayerPos = XMFLOAT3{
 		((CKnightPlayer*)m_pPlayer)->m_pSkinnedAnimationController->m_pRootMotionObject->GetWorld()._41,
 		 m_pPlayer->GetPosition().y,
 		((CKnightPlayer*)m_pPlayer)->m_pSkinnedAnimationController->m_pRootMotionObject->GetWorld()._43 };
-	xmf3PlayerPos.y += 8.0f / 2.0;
+	xmf3PlayerPos.y += MeterToUnit(0.9f);
 
 	m_pMainSceneCamera->Update(xmf3PlayerPos, fTimeElapsed);
 

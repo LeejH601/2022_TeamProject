@@ -83,6 +83,8 @@ protected:
 	VS_CB_CAMERA_INFO* m_pcbMappedCamera = NULL;
 
 	std::vector<std::unique_ptr<IMessageListener>> m_pListeners;
+
+	LPVOID m_pUpdatedContext = NULL;
 public:
 	CCamera();
 	virtual ~CCamera();
@@ -112,6 +114,8 @@ public:
 	void SetTimeLag(float fTimeLag) { m_fTimeLag = fTimeLag; }
 	float GetTimeLag() { return(m_fTimeLag); }
 
+	void SetUpdatedContext(LPVOID pContext) { m_pUpdatedContext = pContext; }
+
 	XMFLOAT3& GetRightVector() { return(m_xmf3Right); }
 	XMFLOAT3& GetUpVector() { return(m_xmf3Up); }
 	XMFLOAT3& GetLookVector() { return(m_xmf3Look); }
@@ -135,6 +139,7 @@ public:
 	virtual void Rotate(float fPitch = 0.0f, float fYaw = 0.0f, float fRoll = 0.0f) { }
 	virtual void ProcessInput(DWORD dwDirection, float cxDelta, float cyDelta, float fTimeElapsed);
 	virtual void Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed);
+	virtual void OnUpdateCallback(float fTimeElapsed);
 	virtual void SetLookAt(XMFLOAT3& xmf3LookAt);
 };
 
@@ -154,6 +159,7 @@ public:
 
 	virtual void Rotate(float fPitch = 0.0f, float fYaw = 0.0f, float fRoll = 0.0f);
 	virtual void Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed);
+	virtual void OnUpdateCallback(float fTimeElapsed);
 };
 class CFloatingCamera : public CCamera
 {
