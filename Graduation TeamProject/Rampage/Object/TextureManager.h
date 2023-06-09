@@ -51,7 +51,7 @@ public:
 	void LoadTexture(TextureType eTextureType, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, LPCTSTR pszFileName, int iRow, int Column);
 	
 	int LoadTextureIndex(TextureType eTextureType, LPCTSTR pszFileName);
-
+	int LoadTotalTextureIndex(TextureType eTextureType, LPCTSTR pszFileName);
 	std::shared_ptr<CTexture> GetTexture(TextureType eTextureType);
 
 	UINT GetTextureListIndex(TextureType eTextureType);

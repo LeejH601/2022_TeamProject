@@ -51,8 +51,9 @@ void CUIObject::Update(float fTimeElapsed)
 		m_xmf4x4World._33 = m_iTextureIndex; // TextureIndex
 		//1, 023x((정규 좌표) + 1.0)x0.5
 
-		m_xmf4x4World._12 = 1.f; // U
-		m_xmf4x4World._13 = 1.f; // V
+		m_xmf4x4World._12 = 0.f; // U1
+		m_xmf4x4World._13 = 1.f; // U2
+		m_xmf4x4World._14 = 1.f; // V
 
 		m_xmf4x4World._21 = 1.f; // RGBN
 		// -1 ~ 1
@@ -126,8 +127,9 @@ void CBarObject::Update(float fTimeElapsed)
 
 		m_xmf4x4World._33 = m_iTextureIndex; // 텍스쳐 인덱스
 
-		m_xmf4x4World._12 = m_fCurrentValue / m_fTotalValue; // U
-		m_xmf4x4World._13 = 1.f; // V
+		m_xmf4x4World._12 = 0.f; // U1
+		m_xmf4x4World._13 = m_fCurrentValue / m_fTotalValue; // U2
+		m_xmf4x4World._14 = 1.f; // V
 
 		m_xmf4x4World._21 = 1.f; // RGBN
 		//1, 023x((정규 좌표) + 1.0)x0.5
@@ -196,10 +198,11 @@ void CHPObject::PreBarUpdate(float fTimeElapsed)
 		m_xmf4x4World._11 = (/*(m_fCurrentHp / m_fTotalHp) * */m_xmf2Size.x) / (FRAME_BUFFER_WIDTH);
 		m_xmf4x4World._22 = m_xmf2Size.y / (FRAME_BUFFER_HEIGHT);
 
-		m_xmf4x4World._33 = 12; // 텍스쳐 인덱스
+		m_xmf4x4World._33 = m_iTextureIndex; // 텍스쳐 인덱스
 
-		m_xmf4x4World._12 = m_fPreValue / m_fTotalValue; // U
-		m_xmf4x4World._13 = 1.f; // V
+		m_xmf4x4World._12 = 0.f; // U1
+		m_xmf4x4World._13 = m_fCurrentValue / m_fTotalValue; // U2
+		m_xmf4x4World._14 = 1.f; // V
 
 		m_xmf4x4World._21 = 1.f; // RGBN
 
@@ -221,7 +224,7 @@ void CHPObject::CurBarUpdate(float fTimeElapsed)
 		m_xmf4x4World._11 = (/*(m_fCurrentHp / m_fTotalHp) * */m_xmf2Size.x) / (FRAME_BUFFER_WIDTH);
 		m_xmf4x4World._22 = m_xmf2Size.y / (FRAME_BUFFER_HEIGHT);
 
-		m_xmf4x4World._33 = 8; // 텍스쳐 인덱스
+		m_xmf4x4World._33 = m_iTextureIndex; // 텍스쳐 인덱스
 
 		m_xmf4x4World._12 = m_fCurrentValue / m_fTotalValue; // U
 		m_xmf4x4World._13 = 1.f; // V
@@ -254,10 +257,11 @@ void CSTAMINAObject::PreBarUpdate(float fTimeElapsed)
 		m_xmf4x4World._11 = (/*(m_fCurrentHp / m_fTotalHp) * */m_xmf2Size.x) / (FRAME_BUFFER_WIDTH);
 		m_xmf4x4World._22 = m_xmf2Size.y / (FRAME_BUFFER_HEIGHT);
 
-		m_xmf4x4World._33 = 11; // 텍스쳐 인덱스
+		m_xmf4x4World._33 = m_iTextureIndex; // 텍스쳐 인덱스
 
-		m_xmf4x4World._12 = m_fPreValue / m_fTotalValue; // U
-		m_xmf4x4World._13 = 1.f; // V
+		m_xmf4x4World._12 = 0.f; // U1
+		m_xmf4x4World._13 = m_fCurrentValue / m_fTotalValue; // U2
+		m_xmf4x4World._14 = 1.f; // V
 
 		m_xmf4x4World._21 = 1.f; // RGBN
 
@@ -279,10 +283,11 @@ void CSTAMINAObject::CurBarUpdate(float fTimeElapsed)
 		m_xmf4x4World._11 = (/*(m_fCurrentHp / m_fTotalHp) * */m_xmf2Size.x) / (FRAME_BUFFER_WIDTH);
 		m_xmf4x4World._22 = m_xmf2Size.y / (FRAME_BUFFER_HEIGHT);
 
-		m_xmf4x4World._33 = 9; // 텍스쳐 인덱스
+		m_xmf4x4World._33 = m_iTextureIndex; // 텍스쳐 인덱스
 
-		m_xmf4x4World._12 = m_fCurrentValue / m_fTotalValue; // U
-		m_xmf4x4World._13 = 1.f; // V
+		m_xmf4x4World._12 = 0.f; // U1
+		m_xmf4x4World._13 = m_fCurrentValue / m_fTotalValue; // U2
+		m_xmf4x4World._14 = 1.f; // V
 
 		m_xmf4x4World._21 = 1.f; // RGBN
 
@@ -340,10 +345,11 @@ void CNumberObject::UpdateNumberTexture(UINT N, UINT ORDER)
 		m_xmf4x4World._11 = ((/*(m_fCurrentHp / m_fTotalHp) * */m_xmf2Size.x) / (FRAME_BUFFER_WIDTH)) * m_fAnimationTime;
 		m_xmf4x4World._22 = (m_xmf2Size.y / (FRAME_BUFFER_HEIGHT)); // *m_fAnimationTime;
 
-		m_xmf4x4World._33 = m_iTextureIndex + N; // 텍스쳐 인덱스
+		m_xmf4x4World._33 = m_iTextureIndex; // 텍스쳐 인덱스
 
-		m_xmf4x4World._12 = 1.f; // U
-		m_xmf4x4World._13 = 1.f; // V
+		m_xmf4x4World._12 = N * 0.1f; // U1
+		m_xmf4x4World._13 = N * 0.1f + 0.1f; // U2
+		m_xmf4x4World._14 = 1.f; // V
 
 		float color = 2.8f;
 		m_xmf4x4World._21 = 1.f; // RGBN // 2.8

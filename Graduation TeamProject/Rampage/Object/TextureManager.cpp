@@ -95,6 +95,15 @@ int CTextureManager::LoadTextureIndex(TextureType eTextureType, LPCTSTR pszFileN
 	}
 	return -1;
 }
+int CTextureManager::LoadTotalTextureIndex(TextureType eTextureType, LPCTSTR pszFileName)
+{
+	int iTextureOffSet = GetTextureOffset(eTextureType); // 텍스쳐별로 Offset
+	int iTypeTextureIndex = LoadTextureIndex(eTextureType, pszFileName); // Type별로 텍스쳐 인덱스
+	if (iTypeTextureIndex == -1) // 텍스쳐X
+		return iTypeTextureIndex;
+	
+	return iTextureOffSet - 1 + iTypeTextureIndex;
+}
 std::shared_ptr<CTexture> CTextureManager::GetTexture(TextureType eTextureType)
 {
 	return m_pTextures[(UINT(eTextureType))];

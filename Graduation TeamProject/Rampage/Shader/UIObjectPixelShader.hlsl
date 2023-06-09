@@ -46,7 +46,8 @@ struct VS_TEXTURED_OUTPUT
 PS_MULTIPLE_RENDER_TARGETS_OUTPUT PSUIObject(VS_TEXTURED_OUTPUT input)
 {
 	uint TextureIndex = gmtxGameObject._33; // TextureIndex
-	float2 fUV = gmtxGameObject._12_13;// UV값 조절
+	float2 fU = gmtxGameObject._12_13;// UV값 조절 
+	float fV = gmtxGameObject._14;
 	float3 fRGB = gmtxGameObject._21_31_44;
 	float fAlpha = gmtxGameObject._23;
 
@@ -56,7 +57,7 @@ PS_MULTIPLE_RENDER_TARGETS_OUTPUT PSUIObject(VS_TEXTURED_OUTPUT input)
 	cColor.a *= fAlpha;
 	output.f4Color = cColor;
 	output.f4Scene = cColor;
-	if (fUV.x < input.uv.x || fUV.y < input.uv.y)
+	if ((fU.x > input.uv.x || fU.y < input.uv.x)|| fV < input.uv.y)
 		discard;
 	return(output);
 }
