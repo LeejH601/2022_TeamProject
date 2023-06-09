@@ -10,6 +10,7 @@ enum class TextureType
 	ParticleTexture,
 	TrailBaseTexture,
 	TrailNoiseTexture,
+	UITexture,
 	TextureType_End
 };
 class CTextureManager
@@ -63,6 +64,7 @@ public:
 		m_pTextures[(UINT)TextureType::ParticleTexture] = std::make_shared<CTexture>(30, RESOURCE_TEXTURE2D, 0, 1);
 		m_pTextures[(UINT)TextureType::TrailBaseTexture] = std::make_shared<CTexture>(30, RESOURCE_TEXTURE2D, 0, 1);
 		m_pTextures[(UINT)TextureType::TrailNoiseTexture] = std::make_shared<CTexture>(30, RESOURCE_TEXTURE2D, 0, 1);
+		m_pTextures[(UINT)TextureType::UITexture] = std::make_shared<CTexture>(30, RESOURCE_TEXTURE2D, 0, 1);
 	}
 	~CTextureManager() {}
 };

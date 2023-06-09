@@ -3,6 +3,12 @@ Texture2D gtxtSource : register(t50);
 
 RWTexture2D<float4> gtxtRWOutput : register(u0);
 
+float3 ReinhardTone(float3 hdr) {
+    float3 result = float3(1, 1, 1);
+    result = result - exp(-hdr * 1.0f);
+    return result;
+}
+
 float3 ToneMapACES(float3 hdr) {
 	const float A = 2.51f, B = 0.03f, C = 2.43, D = 0.59, E = 0.14f;
 	return saturate((hdr * (A * hdr + B)) / (hdr * (C * hdr + D) + E));
@@ -40,7 +46,7 @@ float3 uncharted2_filmic(float3 v)
     return curr * white_scale;
 }
 
-#define UNCHARTED2_TONE_MAPPING
+//#define UNCHARTED2_TONE_MAPPING
 #define GAMMA
 
 [numthreads(32, 32, 1)]
@@ -48,7 +54,7 @@ void HDR_CS(int3 nDispatchID : SV_DispatchThreadID)
 {
     float4 SourceColor = gtxtSource[nDispatchID.xy];
     SourceColor = max(0.0f, SourceColor);
-    SourceColor.xyz *= 2.0f;
+    //SourceColor.xyz *= 2.0f;
 
     float4 LDRColor;
 #ifdef UNCHARTED2_TONE_MAPPING
@@ -57,11 +63,13 @@ void HDR_CS(int3 nDispatchID : SV_DispatchThreadID)
 	//gtxtRWOutput[nDispatchID.xy] = lerp(gtxtInputA[nDispatchID.xy], gtxtInputB[nDispatchID.xy], 0.35f);
 	//gtxtRWOutput[nDispatchID.xy] = float4(ToneMapACESSourceColor.xyz), SourceColor.w);
     LDRColor = float4(aces_approx(SourceColor.xyz), SourceColor.w);
+    //LDRColor = float4(ToneMapACES(SourceColor.xyz), SourceColor.w);
+    //LDRColor = float4(ReinhardTone(SourceColor.xyz), SourceColor.w);
 	//gtxtRWOutput[nDispatchID.xy] = float4(1.0f, 0.0f, 0.0f, 1.0f);
 #endif
 
 #ifdef GAMMA
-    float gamma = 0.7; // gamma value to use for correction
+    float gamma = 1.5; // gamma value to use for correction
     float4 correctedColor = float4(pow(LDRColor.xyz, 1.0 / gamma), 1.0f);
     //correctedColor = min(float4(1.0f,1.0f,1.0f,1.0f), correctedColor);
     gtxtRWOutput[nDispatchID.xy] = saturate(correctedColor);

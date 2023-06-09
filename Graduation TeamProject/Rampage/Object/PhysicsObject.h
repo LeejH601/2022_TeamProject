@@ -19,10 +19,13 @@ protected:
 	float m_fRoll;
 	float m_fYaw;
 	float m_fSpeedKperH;
-	float m_fSpeedMperS;
 	float m_fSpeedUperS;
 	LPVOID m_pUpdatedContext = NULL;
 	bool m_bOnGround = false; // ¶¥¿¡ ´êÀºÁö ¿©ºÎ
+
+public:
+	float m_fTotalHP;
+	float m_fHP;
 
 public:
 	virtual void UpdateMatrix();
@@ -56,7 +59,6 @@ public:
 	float& GetYaw() { return(m_fYaw); }
 
 	float& GetSpeedKperH() { return m_fSpeedKperH; }
-	float& GetSpeedMperS() { return m_fSpeedMperS; }
 	float& GetSpeedUperS() { return m_fSpeedUperS; }
 
 	virtual void Animate(float fTimeElapsed);

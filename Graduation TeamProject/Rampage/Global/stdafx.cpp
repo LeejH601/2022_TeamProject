@@ -459,3 +459,10 @@ XMFLOAT2 RandomFloatInRangeSeed(float x, float y)
 
 	return XMFLOAT2(dis(gen), dis(gen));
 }
+
+float MeterToUnit(float fMeter)
+{
+	float fMeterPerUnit = 2.0f / 4.0f;		// (캐릭터 키 - 2m) : (Unit)
+
+	return fMeter * (1.0f / fMeterPerUnit);
+}

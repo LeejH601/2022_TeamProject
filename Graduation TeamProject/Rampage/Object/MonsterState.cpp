@@ -8,7 +8,7 @@ Spawn_Monster::Spawn_Monster()
 	// TERRAIN SPRITE  ANIMATION
 	std::unique_ptr<TerrainSpriteComponent> pTerrainSpriteComponent = std::make_unique<TerrainSpriteComponent>();
 	m_pListeners.push_back(std::move(pTerrainSpriteComponent));
-	CMessageDispatcher::GetInst()->RegisterListener(MessageType::UPDATE_SPRITE, m_pListeners.back().get(), NULL);
+	CMessageDispatcher::GetInst()->RegisterListener(MessageType::UPDATE_SPRITE, m_pListeners.back().get(), this);
 }
 
 Spawn_Monster::~Spawn_Monster()
@@ -27,10 +27,13 @@ void Spawn_Monster::Enter(CMonster* monster)
 	monster->m_fDissolveTime = 0.f;
 	monster->m_fHP = 100.0f;
 	monster->m_fDissolveThrethHold = 0.f;
+	monster->CPhysicsObject::OnUpdateCallback(0.f);
 
+	XMFLOAT3 xmf3Position = monster->GetPosition();
+	//xmf3Position.y -= 10.f;
 	OnGroundParams OnGround_params;
-	OnGround_params.xmf3OnGroundPosition = monster->GetPosition();
-	CMessageDispatcher::GetInst()->Dispatch_Message<OnGroundParams>(MessageType::ONGROUND, &OnGround_params, nullptr);
+	OnGround_params.xmf3OnGroundPosition = xmf3Position;
+	CMessageDispatcher::GetInst()->Dispatch_Message<OnGroundParams>(MessageType::ONGROUND, &OnGround_params, this);
 }
 
 void Spawn_Monster::Execute(CMonster* monster, float fElapsedTime)
@@ -159,7 +162,7 @@ void Damaged_Monster::Execute(CMonster* monster, float fElapsedTime)
 			monster->m_fDamageDistance -= (monster->m_fTotalDamageDistance - monster->m_fMaxDamageDistance);
 	}
 
-	xmf3DamageVec = Vector3::ScalarProduct(XMFLOAT3{ monster->GetHitterVec().x, 0.0f, monster->GetHitterVec().z }, monster->m_fDamageDistance, false);
+	xmf3DamageVec = Vector3::ScalarProduct(XMFLOAT3{ monster->GetHitterVec().x, 0.0f, monster->GetHitterVec().z }, MeterToUnit(monster->m_fDamageDistance), false);
 	monster->Move(xmf3DamageVec, true);
 
 	if (monster->m_fStunStartTime < monster->m_pSkinnedAnimationController->m_fTime && !monster->m_bStunned)
@@ -223,7 +226,7 @@ void Stun_Monster::Execute(CMonster* monster, float fElapsedTime)
 			monster->m_fDamageDistance -= (monster->m_fTotalDamageDistance - monster->m_fMaxDamageDistance);
 	}
 
-	xmf3DamageVec = Vector3::ScalarProduct(XMFLOAT3{ monster->GetHitterVec().x, 0.0f, monster->GetHitterVec().z }, monster->m_fDamageDistance, false);
+	xmf3DamageVec = Vector3::ScalarProduct(XMFLOAT3{ monster->GetHitterVec().x, 0.0f, monster->GetHitterVec().z }, MeterToUnit(monster->m_fDamageDistance), false);
 	monster->Move(xmf3DamageVec, true);
 
 	if (monster->m_fStunTime < monster->m_fMaxStunTime)

@@ -16,6 +16,8 @@
 
 CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks)
 {
+	m_fHP = 100.f;
+	m_fTotalHP = 100.f;
 	m_xmf4x4World = Matrix4x4::Identity();
 	m_xmf4x4Transform = Matrix4x4::Identity();
 	m_xmf4x4Texture = Matrix4x4::Identity();
@@ -26,10 +28,11 @@ CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 	m_pStateMachine->SetCurrentState(Idle_Player::GetInst());
 	m_pStateMachine->SetPreviousState(Idle_Player::GetInst());
 
-	float fMeterPerUnit = 2.0f / 2.0f;
 	m_fSpeedKperH = 44.0f;
-	m_fSpeedMperS = m_fSpeedKperH * 1000.0f / 3600.0f;
-	m_fSpeedUperS = m_fSpeedMperS * (1.0 / fMeterPerUnit);
+	m_fSpeedUperS = MeterToUnit(m_fSpeedKperH * 1000.0f) / 3600.0f;
+
+	m_fTotalStamina = 100.f;
+	m_fStamina = 100.f;
 }
 
 CPlayer::~CPlayer()
@@ -121,6 +124,15 @@ void CPlayer::Update(float fTimeElapsed)
 	CPhysicsObject::Apply_Friction(fTimeElapsed);
 
 	m_xmf3PreviousPos = GetPosition();
+
+	UpdateStamina(fTimeElapsed);
+	//UpdateCombo(fTimeElapsed);
+}
+
+void CPlayer::UpdateStamina(float fTimeElapsed)
+{
+	if ((m_pStateMachine->GetCurrentState() == Idle_Player::GetInst()) || (m_pStateMachine->GetCurrentState() == Run_Player::GetInst()))
+		m_fStamina += 2.f * m_fSpeedUperS * fTimeElapsed * ((m_fTotalStamina - m_fStamina) / m_fTotalStamina);
 }
 
 void CPlayer::ProcessInput(DWORD dwDirection, float cxDelta, float cyDelta, float fTimeElapsed, CCamera* pCamera)
@@ -160,6 +172,25 @@ void CPlayer::Tmp()
 {
 	m_pSkinnedAnimationController->SetTrackAnimationSet(0, m_nAnimationNum++);
 }
+// ui ±¸ÇÏ±â, 
+void CPlayer::UpdateCombo(float fTimeElapsed)
+{
+	m_iCombo++;
+	//m_fComboTime -= fTimeElapsed;
+	//if (m_fComboTime < 0.f)
+	//{
+	//	
+	//	m_fComboTime = m_fComboFullTime;
+	//	
+	//	m_iCombo = 0;
+	//}
+	//else if (m_bCombo)
+	//{
+	//	m_fComboTime = m_fComboFullTime;
+	//	m_iCombo++;
+	//	m_bCombo = false;
+	//}
+}
 
 #define KNIGHT_ROOT_MOTION
 CKnightPlayer::CKnightPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks) : CPlayer(pd3dDevice, pd3dCommandList, nAnimationTracks)
@@ -188,7 +219,6 @@ CKnightPlayer::CKnightPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 	m_pSkinnedAnimationController->m_pRootMotionObject = pKnightModel->m_pModelRootObject->FindFrame("SK_FKnightB");
 	if (m_pSkinnedAnimationController->m_pRootMotionObject) {
 		m_pSkinnedAnimationController->m_bRootMotion = true;
-		m_pSkinnedAnimationController->m_xmf3RootObjectScale = XMFLOAT3(4.0f, 4.0f, 4.0f);
 	}
 #endif // KNIGHT_ROOT_MOTION
 }
@@ -251,6 +281,8 @@ bool CKnightPlayer::CheckCollision(CGameObject* pTargetObject)
 		_stprintf_s(pstrDebug, 256, _T("CheckCollision\n"));
 		OutputDebugString(pstrDebug);
 
+		m_bCombo = true;
+		m_fHP -= 30.f;
 		if (m_pCamera)
 		{
 			if (m_pStateMachine->GetCurrentState()->GetCameraShakeComponent()->GetEnable())
@@ -384,9 +416,10 @@ void CKnightPlayer::PrepareBoundingBox(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 	XMFLOAT3 extent = pWeapon->m_pMesh->GetBoundingExtent();
 	//XMStoreFloat3(&center, XMVector3TransformCoord(XMVECTOR({ center.x, center.y, center.z, 1.0f }), XMLoadFloat4x4(&pWeapon->m_xmf4x4World)));
 	//XMStoreFloat3(&extent, XMVector3TransformCoord(XMVECTOR({ extent.x, extent.y, extent.z, 0.0f }), XMLoadFloat4x4(&pWeapon->m_xmf4x4World)));
-
+#ifdef RENDER_BOUNDING_BOX
 	pBodyBoundingBoxMesh = CBoundingBoxShader::GetInst()->AddBoundingObject(pd3dDevice, pd3dCommandList, this, XMFLOAT3(0.0f, 0.75f, 0.0f), XMFLOAT3(0.35f, 1.0f, 0.35f));
 	pWeaponBoundingBoxMesh = CBoundingBoxShader::GetInst()->AddBoundingObject(pd3dDevice, pd3dCommandList, this, center, extent);
+#endif // RENDER_BOUNDING_BOX
 	m_BodyBoundingBox = BoundingOrientedBox{ XMFLOAT3(0.0f, 0.75f, 0.0f), XMFLOAT3(0.35f, 1.0f, 0.35f), XMFLOAT4{0.0f, 0.0f, 0.0f, 1.0f} };
 	m_WeaponBoundingBox = BoundingOrientedBox{ center, extent, XMFLOAT4{0.0f, 0.0f, 0.0f, 1.0f} };
 }
@@ -483,4 +516,3 @@ void CKightRootMoveAnimationController::OnRootMotion(CGameObject* pRootGameObjec
 		m_pRootMotionObject->m_xmf4x4Transform._43 = 0.f;
 	}
 }
-

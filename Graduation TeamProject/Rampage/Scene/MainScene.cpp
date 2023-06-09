@@ -13,6 +13,8 @@
 #include "..\Object\Monster.h"
 #include "..\Object\TextureManager.h"
 #include "..\Object\PlayerParticleObject.h"
+#include "..\Shader\UIObjectShader.h"
+#include "..\Object\UIObject.h"
 
 #include <PxForceMode.h>
 
@@ -729,6 +731,8 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pMap->GetTerrain()->SetRigidStatic();
 	m_pMap->LoadSceneFromFile(pd3dDevice, pd3dCommandList, "Object/Scene/Scene.bin");
 
+	m_pMainSceneCamera->SetUpdatedContext(m_pMap.get());
+
 	std::shared_ptr<CGameObject> pTestDetail = std::make_shared<CDetailObject>(pd3dDevice, pd3dCommandList, m_pMap->GetTerrain().get());
 
 	int index = 0;
@@ -771,21 +775,7 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 
 	m_pTextureManager = std::make_unique<CTextureManager>();
 	m_pTextureManager->CreateCbvSrvUavDescriptorHeaps(pd3dDevice, 0, 100);
-	m_pTextureManager->LoadSphereBuffer(pd3dDevice, pd3dCommandList);
-	m_pTextureManager->LoadTexture(TextureType::SmokeTexture, pd3dDevice, pd3dCommandList, L"Image/SmokeImages/Smoke2.dds", 1, 1);
-	m_pTextureManager->LoadTexture(TextureType::BillBoardTexture, pd3dDevice, pd3dCommandList, L"Image/BillBoardImages/Explode_8x8.dds", 8, 8);
-	m_pTextureManager->LoadTexture(TextureType::BillBoardTexture, pd3dDevice, pd3dCommandList, L"Image/BillBoardImages/Fire_Effect.dds", 5, 6);
-	m_pTextureManager->LoadTexture(TextureType::BillBoardTexture, pd3dDevice, pd3dCommandList, L"Image/BillBoardImages/Circle1.dds", 1, 1);
-
-	m_pTextureManager->LoadTexture(TextureType::ParticleTexture, pd3dDevice, pd3dCommandList, L"Image/ParticleImages/TextureFlash2.dds", 1, 1);
-	m_pTextureManager->LoadTexture(TextureType::ParticleTexture, pd3dDevice, pd3dCommandList, L"Image/ParticleImages/Meteor.dds", 0, 0);
-	m_pTextureManager->LoadTexture(TextureType::ParticleTexture, pd3dDevice, pd3dCommandList, L"Image/ParticleImages/Effect0.dds", 0, 0);
-
-	m_pTextureManager->LoadTexture(TextureType::TrailBaseTexture, pd3dDevice, pd3dCommandList, L"Image/TrailImages/T_Sword_Slash_11.dds", 1, 1);
-	m_pTextureManager->LoadTexture(TextureType::TrailBaseTexture, pd3dDevice, pd3dCommandList, L"Image/TrailImages/T_Sword_Slash_21.dds", 1, 1);
-	m_pTextureManager->LoadTexture(TextureType::TrailNoiseTexture, pd3dDevice, pd3dCommandList, L"Image/TrailImages/VAP1_Noise_4.dds", 1, 1);
-	m_pTextureManager->LoadTexture(TextureType::TrailNoiseTexture, pd3dDevice, pd3dCommandList, L"Image/TrailImages/VAP1_Noise_14.dds", 1, 1);
-
+	LoadTextureObject(pd3dDevice, pd3dCommandList);
 	m_pTextureManager->CreateResourceView(pd3dDevice, 0);
 
 	m_pParticleShader = std::make_unique<CParticleShader>();
@@ -796,13 +786,13 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 
 	for (int i = 0; i < 1; ++i)
 	{
-		std::unique_ptr<CGameObject> m_pSpriteAttackObject = std::make_unique<CParticleObject>(m_pTextureManager->LoadTextureIndex(TextureType::BillBoardTexture, L"Image/BillBoardImages/Fire_Effect.dds"), pd3dDevice, pd3dCommandList, GetGraphicsRootSignature(), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), 2.0f, XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT2(2.0f, 2.0f), MAX_PARTICLES, m_pParticleShader.get(), SPHERE_PARTICLE);
+		std::unique_ptr<CGameObject> m_pSpriteAttackObject = std::make_unique<CParticleObject>(m_pTextureManager->LoadTextureIndex(TextureType::SmokeTexture, L"Image/SmokeImages/Smoke2.dds"), pd3dDevice, pd3dCommandList, GetGraphicsRootSignature(), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), 2.0f, XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT2(2.0f, 2.0f), MAX_PARTICLES, m_pParticleShader.get(), SPHERE_PARTICLE);
 		m_pSpriteAttackObjects.push_back(std::move(m_pSpriteAttackObject));
 	}
 
 	for (int i = 0; i < 1; ++i)
 	{
-		std::unique_ptr<CGameObject> m_pSpriteObject = std::make_unique<CTerrainSpriteObject>(m_pTextureManager->LoadTextureIndex(TextureType::BillBoardTexture, L"Image/BillBoardImages/Circle1.dds"), pd3dDevice, pd3dCommandList, 0, 0, 15.f, 5.f);
+		std::unique_ptr<CGameObject> m_pSpriteObject = std::make_unique<CParticleObject>(m_pTextureManager->LoadTextureIndex(TextureType::BillBoardTexture, L"Image/BillBoardImages/Circle1.dds"), pd3dDevice, pd3dCommandList, GetGraphicsRootSignature(), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), 2.0f, XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT2(2.0f, 2.0f), MAX_PARTICLES, m_pParticleShader.get(), 5);
 		m_pTerrainSpriteObject.push_back(std::move(m_pSpriteObject));
 	}
 
@@ -813,7 +803,7 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	}
 
 	m_pSlashHitObjects = std::make_unique<CParticleObject>(m_pTextureManager->LoadTextureIndex(TextureType::BillBoardTexture, L"Image/BillBoardImages/Circle1.dds"), pd3dDevice, pd3dCommandList, GetGraphicsRootSignature(), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), 2.0f, XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT2(2.0f, 2.0f), MAX_PARTICLES, m_pSlashHitShader.get(), RECOVERY_PARTICLE);
-	m_pSmokeObject = std::make_unique<CSmokeParticleObject>(L"Image/SmokeImages/Smoke2.dds", pd3dDevice, pd3dCommandList, GetGraphicsRootSignature(), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), 2.0f, XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT2(2.0f, 2.0f), MAX_PARTICLES, m_pParticleShader.get(), SMOKE_PARTICLE);
+	m_pSmokeObject = std::make_unique<CSmokeParticleObject>(m_pTextureManager->LoadTextureIndex(TextureType::SmokeTexture, L"Image/SmokeImages/Smoke2.dds"), pd3dDevice, pd3dCommandList, GetGraphicsRootSignature(), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), 2.0f, XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT2(2.0f, 2.0f), MAX_PARTICLES, m_pParticleShader.get(), SMOKE_PARTICLE);
 
 	m_pVertexPointParticleObject = std::make_unique<CVertexPointParticleObject>(m_pTextureManager->LoadTextureIndex(TextureType::ParticleTexture, L"Image/ParticleImages/RoundSoftParticle.dds"), pd3dDevice, pd3dCommandList, GetGraphicsRootSignature(), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), 2.0f, XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT2(0.5f, 0.5f), MAX_PARTICLES, m_pParticleShader.get(), SPHERE_PARTICLE);
 	//for (int i = 0; i < MAX_UPDOWN_PARTICLE_OBJECT; i++)
@@ -860,6 +850,40 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 		std::unique_ptr<CSwordTrailObject> pSwordtrail = std::make_unique<CSwordTrailObject>(pd3dDevice, pd3dCommandList, GetGraphicsRootSignature(), m_pSwordTrailShader.get());
 		m_pSwordTrailObjects.push_back(std::move(pSwordtrail));
 	}
+
+	int UITextureIndexOffset = m_pTextureManager->GetTextureOffset(TextureType::UITexture) - 1;
+	m_pUIObjectShader = std::make_unique<CUIObjectShader>();
+	m_pUIObjectShader->CreateShader(pd3dDevice, GetGraphicsRootSignature(), 7, pdxgiObjectRtvFormats, DXGI_FORMAT_D32_FLOAT, 0);
+
+	std::unique_ptr<CUIObject> pUIObject = std::make_unique<CUIObject>(2, pd3dDevice, pd3dCommandList, 10.f);
+	pUIObject->SetSize(XMFLOAT2(814.f * 0.7f, 253.f * 0.7f));
+	pUIObject->SetScreenPosition(XMFLOAT2(FRAME_BUFFER_WIDTH * 0.2f, FRAME_BUFFER_HEIGHT * 0.8f));
+	pUIObject->SetTextureIndex(0 + UITextureIndexOffset);
+	m_pUIObject.push_back(std::move(pUIObject));
+
+	pUIObject = std::make_unique<CHPObject>(2, pd3dDevice, pd3dCommandList, 10.f);
+	pUIObject->SetSize(XMFLOAT2(426 * 0.65f, 42 * 0.65f));
+	pUIObject->SetScreenPosition(XMFLOAT2(FRAME_BUFFER_WIDTH * 0.2f + 80.f, FRAME_BUFFER_HEIGHT * 0.8f + 25.f));
+	pUIObject->SetTextureIndex(1 + UITextureIndexOffset);
+	m_pUIObject.push_back(std::move(pUIObject));
+
+	pUIObject = std::make_unique<CSTAMINAObject>(2, pd3dDevice, pd3dCommandList, 10.f);
+	pUIObject->SetSize(XMFLOAT2(426 * 0.48f, 42 * 0.48f));
+	pUIObject->SetScreenPosition(XMFLOAT2(FRAME_BUFFER_WIDTH * 0.2f + 45.f, FRAME_BUFFER_HEIGHT * 0.8f - 10.f));
+	pUIObject->SetTextureIndex(2 + UITextureIndexOffset);
+	m_pUIObject.push_back(std::move(pUIObject));
+
+	pUIObject = std::make_unique<CNumberObject>(14, 35, pd3dDevice, pd3dCommandList, 10.f);
+	pUIObject->SetSize(XMFLOAT2(56.f * 1.5f, 60.f * 1.5f));
+	pUIObject->SetScreenPosition(XMFLOAT2(FRAME_BUFFER_WIDTH * 0.85f, FRAME_BUFFER_HEIGHT * 0.5f));
+	pUIObject->SetTextureIndex(6 + UITextureIndexOffset);
+	m_pUIObject.push_back(std::move(pUIObject));
+
+	pUIObject = std::make_unique<CBloodEffectObject>(2, pd3dDevice, pd3dCommandList, 10.f);
+	pUIObject->SetSize(XMFLOAT2(FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT));
+	pUIObject->SetScreenPosition(XMFLOAT2(FRAME_BUFFER_WIDTH * 0.5f, FRAME_BUFFER_HEIGHT * 0.5f));
+	pUIObject->SetTextureIndex(17 + UITextureIndexOffset);
+	m_pUIObject.push_back(std::move(pUIObject));
 
 }
 bool CMainTMPScene::ProcessInput(HWND hWnd, DWORD dwDirection, float fTimeElapsed)
@@ -942,12 +966,16 @@ void CMainTMPScene::UpdateObjects(float fTimeElapsed)
 	//	isSetVPObject = true;
 	//}
 
+	UIUpdate((CPlayer*)m_pPlayer);
+	
+	 
 	// Update Camera
+
 	XMFLOAT3 xmf3PlayerPos = XMFLOAT3{
 		((CKnightPlayer*)m_pPlayer)->m_pSkinnedAnimationController->m_pRootMotionObject->GetWorld()._41,
 		 m_pPlayer->GetPosition().y,
 		((CKnightPlayer*)m_pPlayer)->m_pSkinnedAnimationController->m_pRootMotionObject->GetWorld()._43 };
-	xmf3PlayerPos.y += 8.0f / 2.0;
+	xmf3PlayerPos.y += MeterToUnit(0.9f);
 
 	m_pMainSceneCamera->Update(xmf3PlayerPos, fTimeElapsed);
 
@@ -1001,13 +1029,22 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 	m_pSkyBoxShader->Render(pd3dCommandList, 0);
 	m_pSkyBoxObject->Render(pd3dCommandList, m_pCurrentCamera);
 
+
+	m_pTextureManager->SetTextureDescriptorHeap(pd3dCommandList);
+	m_pTextureManager->UpdateShaderVariables(pd3dCommandList);
+
+
 	m_pMap->RenderTerrain(pd3dCommandList);
 
-	((CParticleObject*)m_pSmokeObject.get())->Update(fTimeElapsed);
-	((CParticleObject*)m_pSmokeObject.get())->UpdateShaderVariables(pd3dCommandList, fCurrentTime, fTimeElapsed);
-	((CParticleObject*)m_pSmokeObject.get())->Render(pd3dCommandList, nullptr, m_pParticleShader.get());
 
+	for (int i = 0; i < m_pTerrainSpriteObject.size(); ++i)
+	{
+		((CParticleObject*)m_pTerrainSpriteObject[i].get())->Update(fTimeElapsed);
+		((CParticleObject*)(m_pTerrainSpriteObject[i].get()))->UpdateShaderVariables(pd3dCommandList, fCurrentTime, fTimeElapsed);
+		((CParticleObject*)m_pTerrainSpriteObject[i].get())->Render(pd3dCommandList, nullptr, m_pParticleShader.get());
+	}
 
+	
 	//((CParticleObject*)m_pSmokeObject.get())->Update(fTimeElapsed);
 	//((CParticleObject*)m_pSmokeObject.get())->UpdateShaderVariables(pd3dCommandList, fCurrentTime, fTimeElapsed);
 	//((CParticleObject*)m_pSmokeObject.get())->Render(pd3dCommandList, nullptr, m_pParticleShader.get());
@@ -1026,17 +1063,7 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 	((CParticleObject*)m_pTrailParticleObjects.get())->Render(pd3dCommandList, nullptr, m_pParticleShader.get());
 	*/
 	//m_pBillBoardObjectShader->Render(pd3dCommandList, 0);
-	for (int i = 0; i < m_pTerrainSpriteObject.size(); ++i)
-	{
-		//(static_cast<CTerrainSpriteObject*>(m_pTerrainSpriteObject[i].get()))->UpdateShaderVariables(pd3dCommandList, fCurrentTime, fTimeElapsed);
-		//(static_cast<CTerrainSpriteObject*>(m_pTerrainSpriteObject[i].get()))->Animate(m_pTerrain.get(), fTimeElapsed);
-		//m_pTerrainSpriteObject[i]->Render(pd3dCommandList, true);
 
-		((CParticleObject*)m_pTerrainSpriteObject[i].get())->Update(fTimeElapsed);
-		((CParticleObject*)m_pTerrainSpriteObject[i].get())->Animate(fTimeElapsed);
-		((CParticleObject*)m_pTerrainSpriteObject[i].get())->UpdateShaderVariables(pd3dCommandList, fCurrentTime, fTimeElapsed);
-		((CParticleObject*)m_pTerrainSpriteObject[i].get())->Render(pd3dCommandList, nullptr, m_pParticleShader.get());
-	}
 
 
 	CModelShader::GetInst()->Render(pd3dCommandList, 0);
@@ -1111,19 +1138,7 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 #ifdef PostProcessing
 	m_pPostProcessShader->Render(pd3dCommandList, pCamera);
 #endif // PostProcessing
-
-	m_pTextureManager->SetTextureDescriptorHeap(pd3dCommandList);
-	m_pTextureManager->UpdateShaderVariables(pd3dCommandList);
-
-
-	for (int i = 0; i < m_pTerrainSpriteObject.size(); ++i)
-	{
-		(static_cast<CTerrainSpriteObject*>(m_pTerrainSpriteObject[i].get()))->UpdateShaderVariables(pd3dCommandList, fCurrentTime, fTimeElapsed);
-		(static_cast<CTerrainSpriteObject*>(m_pTerrainSpriteObject[i].get()))->Animate(m_pMap->GetTerrain().get(), fTimeElapsed);
-		m_pTerrainSpriteObject[i]->Render(pd3dCommandList, true);
-	}
-
-
+	
 
 	for (int i = 0; i < m_pParticleObjects.size(); ++i)
 	{
@@ -1140,6 +1155,8 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 		((CParticleObject*)m_pSpriteAttackObjects[i].get())->UpdateShaderVariables(pd3dCommandList, fCurrentTime, fTimeElapsed);
 		((CParticleObject*)m_pSpriteAttackObjects[i].get())->Render(pd3dCommandList, nullptr, m_pParticleShader.get());
 	}
+
+
 	//((CParticleObject*)m_pTrailParticleObjects.get())->Update(fTimeElapsed);
 	//((CParticleObject*)m_pTrailParticleObjects.get())->UpdateShaderVariables(pd3dCommandList, fCurrentTime, fTimeElapsed);
 	//((CParticleObject*)m_pTrailParticleObjects.get())->Render(pd3dCommandList, nullptr, m_pParticleShader.get());
@@ -1156,10 +1173,10 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 	}
 
 
-	m_pSlashHitObjects->Update(fTimeElapsed);
-	m_pSlashHitObjects->Animate(fTimeElapsed);
-	m_pSlashHitObjects->UpdateShaderVariables(pd3dCommandList, fCurrentTime, fTimeElapsed);
-	m_pSlashHitObjects->Render(pd3dCommandList, nullptr, m_pSlashHitShader.get());
+	//m_pSlashHitObjects->Update(fTimeElapsed);
+	//m_pSlashHitObjects->Animate(fTimeElapsed);
+	//m_pSlashHitObjects->UpdateShaderVariables(pd3dCommandList, fCurrentTime, fTimeElapsed);
+	//m_pSlashHitObjects->Render(pd3dCommandList, nullptr, m_pSlashHitShader.get());
 
 	/*m_pSwordTrailShader->Render(pd3dCommandList, pCamera, 0);*/
 	for (std::unique_ptr<CGameObject>& obj : m_pSwordTrailObjects) {
@@ -1168,6 +1185,13 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 
 	m_pLensFlareShader->CalculateFlaresPlace(m_pCurrentCamera, &m_pLight->GetLights()[0]);
 	m_pLensFlareShader->Render(pd3dCommandList, 0);
+
+	m_pUIObjectShader->Render(pd3dCommandList, 0);
+	for (int i = 0; i < m_pUIObject.size(); i++)
+	{
+		m_pUIObject[i]->Update(fTimeElapsed);
+		m_pUIObject[i]->Render(pd3dCommandList, false, nullptr);
+	}
 
 	if (m_pd3dComputeRootSignature) pd3dCommandList->SetComputeRootSignature(m_pd3dComputeRootSignature.Get());
 	ID3D12Resource* pd3dSource;
@@ -1197,6 +1221,8 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 	pd3dCommandList->CopyResource(pd3dDestination, pd3dSource);
 	::SynchronizeResourceTransition(pd3dCommandList, pd3dDestination, D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_RENDER_TARGET);
 	::SynchronizeResourceTransition(pd3dCommandList, pd3dSource, D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+
+
 }
 
 void CMainTMPScene::OnPostRender()
@@ -1214,10 +1240,59 @@ void CMainTMPScene::OnPostRender()
 	{
 		((CParticleObject*)m_pSpriteAttackObjects[i].get())->OnPostRender();
 	}
+	for (int i = 0; i < m_pTerrainSpriteObject.size(); ++i)
+	{
+		((CParticleObject*)m_pTerrainSpriteObject[i].get())->OnPostRender();
+	}
 
 	//((CParticleObject*)m_pTrailParticleObjects.get())->OnPostRender();
-	m_pVertexPointParticleObject.get()->OnPostRender();
-	m_pSlashHitObjects.get()->OnPostRender();
+
+}
+
+void CMainTMPScene::UIUpdate(CPlayer* pPlayer)
+{
+	dynamic_cast<CBarObject*>(m_pUIObject[1].get())->Set_Value(((CPhysicsObject*)m_pPlayer)->m_fHP, ((CPhysicsObject*)m_pPlayer)->m_fTotalHP);
+	dynamic_cast<CBarObject*>(m_pUIObject[2].get())->Set_Value(((CPlayer*)m_pPlayer)->m_fStamina, ((CPlayer*)m_pPlayer)->m_fTotalStamina);
+	dynamic_cast<CNumberObject*>(m_pUIObject[3].get())->UpdateNumber(((CPlayer*)m_pPlayer)->m_iCombo);
+}
+
+void CMainTMPScene::LoadTextureObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	m_pTextureManager->LoadSphereBuffer(pd3dDevice, pd3dCommandList);
+	m_pTextureManager->LoadTexture(TextureType::SmokeTexture, pd3dDevice, pd3dCommandList, L"Image/SmokeImages/Smoke2.dds", 1, 1);
+	m_pTextureManager->LoadTexture(TextureType::BillBoardTexture, pd3dDevice, pd3dCommandList, L"Image/BillBoardImages/Explode_8x8.dds", 8, 8);
+	m_pTextureManager->LoadTexture(TextureType::BillBoardTexture, pd3dDevice, pd3dCommandList, L"Image/BillBoardImages/Fire_Effect.dds", 5, 6);
+	m_pTextureManager->LoadTexture(TextureType::BillBoardTexture, pd3dDevice, pd3dCommandList, L"Image/BillBoardImages/Circle1.dds", 1, 1);
+
+	m_pTextureManager->LoadTexture(TextureType::ParticleTexture, pd3dDevice, pd3dCommandList, L"Image/ParticleImages/TextureFlash2.dds", 0, 0);
+	m_pTextureManager->LoadTexture(TextureType::ParticleTexture, pd3dDevice, pd3dCommandList, L"Image/ParticleImages/Meteor.dds", 0, 0);
+	m_pTextureManager->LoadTexture(TextureType::ParticleTexture, pd3dDevice, pd3dCommandList, L"Image/ParticleImages/Effect0.dds", 0, 0);
+
+	m_pTextureManager->LoadTexture(TextureType::TrailBaseTexture, pd3dDevice, pd3dCommandList, L"Image/TrailImages/T_Sword_Slash_11.dds", 1, 1);
+	m_pTextureManager->LoadTexture(TextureType::TrailBaseTexture, pd3dDevice, pd3dCommandList, L"Image/TrailImages/T_Sword_Slash_21.dds", 1, 1);
+	m_pTextureManager->LoadTexture(TextureType::TrailNoiseTexture, pd3dDevice, pd3dCommandList, L"Image/TrailImages/VAP1_Noise_4.dds", 1, 1);
+	m_pTextureManager->LoadTexture(TextureType::TrailNoiseTexture, pd3dDevice, pd3dCommandList, L"Image/TrailImages/VAP1_Noise_14.dds", 1, 1);
+
+	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/Frame.dds", 0, 0);
+	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/Hp.dds", 0, 0);
+	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/Mana.dds", 0, 0);
+	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/Tonus.dds", 0, 0);
+	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/Mana2.dds", 0, 0);
+	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/Blood.dds", 0, 0);
+
+	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/Combo2.dds", 0, 0);
+	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/Number/0.dds", 0, 0);
+	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/Number/1.dds", 0, 0);
+	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/Number/2.dds", 0, 0);
+	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/Number/3.dds", 0, 0);
+	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/Number/4.dds", 0, 0);
+	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/Number/5.dds", 0, 0);
+	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/Number/6.dds", 0, 0);
+	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/Number/7.dds", 0, 0);
+	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/Number/8.dds", 0, 0);
+	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/Number/9.dds", 0, 0);
+
+	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/BloodEffect.dds", 0, 0);
 }
 
 void CMainTMPScene::HandleCollision(const CollideParams& params)
@@ -1236,7 +1311,8 @@ void CMainTMPScene::HandleCollision(const CollideParams& params)
 		CMessageDispatcher::GetInst()->Dispatch_Message<ParticleCompParams>(MessageType::UPDATE_PARTICLE, &particle_comp_params, ((CPlayer*)m_pPlayer)->m_pStateMachine->GetCurrentState());
 
 		particle_comp_params.pObject = m_pSlashHitObjects.get();
-		dynamic_cast<CParticleObject*>(m_pSlashHitObjects.get())->SetEmitAxis(((CPlayer*)m_pPlayer)->m_xmf3AtkDirection);
+		particle_comp_params.pObject = (*it).get();
+		dynamic_cast<CParticleObject*>((*it).get())->SetEmitAxis(((CPlayer*)m_pPlayer)->m_xmf3AtkDirection);
 		CMessageDispatcher::GetInst()->Dispatch_Message<ParticleCompParams>(MessageType::UPDATE_SLASHHITPARTICLE, &particle_comp_params, ((CPlayer*)m_pPlayer)->m_pStateMachine->GetCurrentState());
 	}
 
@@ -1270,30 +1346,6 @@ void CMainTMPScene::HandleCollision(const CollideParams& params)
 	//	particleUpdown_comp_params.xmf3Position = params.xmf3CollidePosition;
 	//	CMessageDispatcher::GetInst()->Dispatch_Message<ParticleUpDownParams>(MessageType::UPDATE_UPDOWNPARTICLE, &particleUpdown_comp_params, Damaged_Monster::GetInst());
 	//}
-
-	//std::vector<std::unique_ptr<CGameObject>>::iterator TerrainSpriteit = std::find_if(m_pTerrainSpriteObject.begin(), m_pTerrainSpriteObject.end(), [](const std::unique_ptr<CGameObject>& pTerrainSpriteObject) {
-	//	if (((CParticleObject*)pTerrainSpriteObject.get())->CheckCapacity())
-	//		return true;
-	//	return false;
-	//	});
-
-	//if (TerrainSpriteit != m_pTerrainSpriteObject.end())
-	//{
-	//	TerrainSpriteCompParams AttackSprite_comp_params;
-	//	AttackSprite_comp_params.pObject = (*TerrainSpriteit).get();
-	//	AttackSprite_comp_params.xmf3Position = params.xmf3CollidePosition;
-	//	CMessageDispatcher::GetInst()->Dispatch_Message<TerrainSpriteCompParams>(MessageType::UPDATE_SPRITE, &AttackSprite_comp_params, Spawn_Monster::GetInst());
-	//	TCHAR pstrDebug[256] = { 0 };
-	//	_stprintf_s(pstrDebug, 256, _T("바닥 충격 출력 %f, %f, %f\n"), params.xmf3CollidePosition.x, params.xmf3CollidePosition.y, params.xmf3CollidePosition.z);
-	//	OutputDebugString(pstrDebug);
-	//}
-	//else
-	//{
-	//	TCHAR pstrDebug[256] = { 0 };
-	//	_stprintf_s(pstrDebug, 256, _T("No바닥 충격 출력 %f, %f, %f\n"), params.xmf3CollidePosition.x, params.xmf3CollidePosition.y, params.xmf3CollidePosition.z);
-	//	OutputDebugString(pstrDebug);
-	//}
-
 
 
 }

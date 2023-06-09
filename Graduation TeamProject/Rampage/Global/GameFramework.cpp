@@ -10,6 +10,7 @@
 #include "..\Shader\PostProcessShader.h"
 #include <windowsx.h>
 #include "..\Sound\SoundManager.h"
+#include "..\Shader\BoundingBoxShader.h"
 
 CLocator Locator;
 
@@ -374,6 +375,9 @@ void CGameFramework::BuildObjects()
 	m_pPlayer->SetScale(2.0f, 2.0f, 2.0f);
 	m_pPlayer->Rotate(0.0f, 90.0f, 0.0f);
 	((CPlayer*)m_pPlayer.get())->m_pStateMachine->ChangeState(Idle_Player::GetInst());
+	
+	CGameObject* RoadBoundingBoxMesh = CBoundingBoxShader::GetInst()->AddBoundingObject(m_pd3dDevice.Get(), m_pd3dCommandList.Get(), NULL, XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1.0f, 1.0f, 1.0f));
+	RoadBoundingBoxMesh->SetPosition(XMFLOAT3(127.0f, -12.0f, -58.0f));
 
 	m_pSceneManager->SetPlayer((CPlayer*)m_pPlayer.get());
 }

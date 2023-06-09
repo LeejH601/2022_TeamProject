@@ -26,4 +26,6 @@ struct GS_PARTICLE_DRAW_OUTPUT
 	float lifetime : LIFETIME;
 	float EmitTime : EMITTIME; // 방출 시작 시간
 	float emissive : EMISSIVE;
+	uint ParticleType : PARTICLETYPE;
 };
+

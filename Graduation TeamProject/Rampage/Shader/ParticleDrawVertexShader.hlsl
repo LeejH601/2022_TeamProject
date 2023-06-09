@@ -1,6 +1,7 @@
 #include "InputLayouts.hlsli"
 #include "CurlNoise.hlsl"
 
+
 struct VS_PARTICLE_DRAW_OUTPUT
 {
 	float3 position : POSITION;
@@ -47,6 +48,11 @@ cbuffer cbGameObjectInfo : register(b0)
 	uint gnTexturesMask : packoffset(c8);
 }
 
+float interpolate(float start, float end, float fraction)
+{
+	return start + (end - start) * fraction;
+}
+
 uint2 SpriteAnimtaion(VS_PARTICLE_INPUT input, float AccumulatedTime, float LifeTime, uint TotalRow, uint TotalCol)
 {
 	float fraction = frac(AccumulatedTime / LifeTime); 
@@ -62,6 +68,7 @@ VS_PARTICLE_DRAW_OUTPUT VSParticleDraw(VS_PARTICLE_INPUT input)
 {
 	VS_PARTICLE_DRAW_OUTPUT output = (VS_PARTICLE_DRAW_OUTPUT)0;
 
+	output.type = input.type;
 	output.position = input.position;
 	output.velocity = input.velocity;
 	//output.velocity += CalculrateCulrNoise(input.position);
@@ -78,28 +85,3 @@ VS_PARTICLE_DRAW_OUTPUT VSParticleDraw(VS_PARTICLE_INPUT input)
 	output.type = input.type;
 	return(output);
 }
-
-
-//if (fTimeElapsed >= 0.0f)
-//{
-//	m_fAccumulatedTime += fTimeElapsed;
-//
-//	float fraction = std::fmodf(m_fAccumulatedTime / m_fLifeTime, 1.0f);
-//	interval = 1.0f / (m_iTotalRow * m_iTotalCol);
-//
-//	m_iCurrentCol = (int)(fraction / (interval * m_iTotalRow));
-//	float remainvalue = (fraction / (interval * m_iTotalRow)) - m_iCurrentCol;
-//	m_iCurrentRow = (int)(remainvalue * m_iTotalRow);
-//
-//	if (m_fAccumulatedTime > m_fLifeTime)
-//	{
-//		m_iCurrentRow = 0;
-//		m_iCurrentCol = 0;
-//		m_fAccumulatedTime = 0.0f;
-//		m_bAnimation = false;
-//	}
-//}
-//m_xmf4x4World._11 = 1.0f / float(m_iTotalRow);
-//m_xmf4x4World._22 = 1.0f / float(m_iTotalCol);
-//m_xmf4x4World._31 = float(m_iCurrentRow) / float(m_iTotalRow);
-//m_xmf4x4World._32 = float(m_iCurrentCol) / float(m_iTotalCol);

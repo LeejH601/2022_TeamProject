@@ -375,11 +375,12 @@ public:
 
 // Define Particle Animation component
 enum ParticleType {
-	SPHERE_PARTICLE,
-	RECOVERY_PARTICLE,
-	SMOKE_PARTICLE,
-	TRAIL_PARTICLE,
-	ATTACK_PARTICLE
+    SPHERE_PARTICLE,
+    RECOVERY_PARTICLE,
+    SMOKE_PARTICLE,
+    TRAIL_PARTICLE,
+    ATTACK_PARTICLE,
+	TERRAIN_PARTICLE
 };
 
 #define MAX_PARTICLES				100000
@@ -615,16 +616,20 @@ enum TerrainSpriteType {
 class TerrainSpriteComponent : public IMessageListener
 {
 private:
+
 	int m_nParticleNumber = MAX_PARTICLES;
-	int m_nEmitParticleNumber = 500;
-	int m_iParticleType = ParticleType::ATTACK_PARTICLE;
+	int m_nEmitParticleNumber = 1.f;
+	int m_iParticleType = ParticleType::TERRAIN_PARTICLE;
 	int m_nParticleIndex = 0;
+	float m_fLifeTime = 5.f;
+	float m_fSpeed = 1.f;
+	float m_fAlpha = 1.f;
+	XMFLOAT2 m_fSize = XMFLOAT2(5.f, 5.f);
 	XMFLOAT3 m_xmf3Color = XMFLOAT3(1.f, 1.f, 1.f);
-	float   m_fSpeed = 5.f;
-	float   m_fAlpha = 1.f;
-	XMFLOAT2   m_fSize = XMFLOAT2(0.5f, 0.5f);
-	float   m_fLifeTime = 6.f;
-	int m_iTerrainSpriteType = TerrainSpriteType::TERRAINSPRITE_CROSS_FADE;
+	XMFLOAT3 m_xmfPosOffset = XMFLOAT3(0.f, 2.f, 0.f);
+	int m_iTextureIndex = 0;
+	int m_iTextureOffset = 0;
+	int m_iTotalRow, m_iTotalColumn;
 
 public:
 	virtual void HandleMessage(const Message& message, const TerrainSpriteCompParams& params);
@@ -632,6 +637,8 @@ public:
 
 // Define Impact Effect component
 class ImpactEffectComponent : public IMessageListener {
+public:
+	ImpactEffectComponent();
 private:
 	int m_nParticleNumber = MAX_PARTICLES;
 	int m_nEmitParticleNumber = 1;
