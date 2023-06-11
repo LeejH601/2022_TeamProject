@@ -128,17 +128,17 @@ D3D12_INPUT_LAYOUT_DESC CBillBoardObjectShader::CreateInputLayout(int nPipelineS
 
 D3D12_SHADER_BYTECODE CTerrainDetailShader::CreateVertexShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
 {
-	return D3D12_SHADER_BYTECODE();
+	return(CShader::ReadCompiledShaderFile(L"TerrainDetailVertexShader.cso", ppd3dShaderBlob));
 }
 
 D3D12_SHADER_BYTECODE CTerrainDetailShader::CreatePixelShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
 {
-	return D3D12_SHADER_BYTECODE();
+	return(CShader::ReadCompiledShaderFile(L"TerrainDetailPixelShader.cso", ppd3dShaderBlob));
 }
 
 D3D12_SHADER_BYTECODE CTerrainDetailShader::CreateGeometryShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
 {
-	return D3D12_SHADER_BYTECODE();
+	return(CShader::ReadCompiledShaderFile(L"TerrainDetailGeometryShader.cso", ppd3dShaderBlob));
 }
 
 D3D12_INPUT_LAYOUT_DESC CTerrainDetailShader::CreateInputLayout(int nPipelineState)

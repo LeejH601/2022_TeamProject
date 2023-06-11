@@ -1,8 +1,19 @@
+cbuffer cbCameraInfo : register(b1)
+{
+	matrix gmtxView : packoffset(c0);
+	matrix gmtxProjection : packoffset(c4);
+	matrix m_xmf4x4OrthoProjection : packoffset(c8);
+	matrix gmtxInverseProjection : packoffset(c12);
+	matrix gmtxInverseView : packoffset(c16);
+	float3 gf3CameraPosition : packoffset(c20);
+	//float3 gf3CameraDirection : packoffset(c17);
+};
 
 struct VS_DETAIL_OUTPUT
 {
 	float4 position : SV_POSITION;
 	float2 size : SIZE;
+	uint nInstanceID : SV_InstanceID;
 };
 
 
@@ -26,16 +37,16 @@ cbuffer cbDetailInfo : register(b7)
 
 [maxvertexcount(4)]
 void GS_Detail(
-	triangle float4 input[1] : SV_POSITION, uint nInstanceID : SV_InstanceID,
-	inout TriangleStream< GSOutput > output
+	point VS_DETAIL_OUTPUT input[1] : SV_POSITION,
+	inout TriangleStream< GS_DETAIL_OUT > outputStream
 )
 {
-	float3 centerW = gmtxGameObject._41_42_43;
+	float3 centerW = gnDetailPoisitions[input[0].nInstanceID];
 	float3 vUp = float3(0.f, 1.0f, 0.0f);
 	float3 vLook = gf3CameraPosition.xyz - centerW;
 
-	float fHalfW = input[0].sizeW.x * 0.5f;
-	float fHalfH = input[0].sizeW.y * 0.5f;
+	float fHalfW = input[0].size.x * 0.5f;
+	float fHalfH = input[0].size.y * 0.5f;
 	float4 pVertices[4];
 
 
@@ -54,7 +65,7 @@ void GS_Detail(
 		output.posW = pVertices[i].xyz;
 		output.posH = mul(pVertices[i], mul(gmtxView, gmtxProjection));
 		output.normalW = vLook;
-		output.uv = mul(float3(pUVs[i], 1.0f), (float3x3)(gmtxGameObject)).xy;
-		outStream.Append(output);
+		output.uv = pUVs[i];
+		outputStream.Append(output);
 	}
 }

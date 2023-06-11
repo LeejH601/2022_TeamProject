@@ -113,12 +113,12 @@ class CDetailObject : public CBillBoardObject
 {
 public:
 	CDetailObject() = default;
-	CDetailObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, void* pContext);
+	CDetailObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, std::shared_ptr<CShader> pShader, void* pContext);
 	virtual void CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList, float fCurrentTime, float fElapsedTime);
 	virtual ~CDetailObject() = default;
 
-	//virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, bool b_UseTexture, CCamera* pCamera = NULL);
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, bool b_UseTexture, CCamera* pCamera = NULL);
 
 protected:
 	ComPtr<ID3D12Resource>			m_pd3dcbDetailInfo = NULL;
@@ -127,5 +127,6 @@ protected:
 	int nDetails = 0;
 	std::vector<XMFLOAT3> m_xmf3DetailPositions;
 
-
+	int nDrawInstanceOffset;
+	int nDrawInstanceRange;
 };

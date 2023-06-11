@@ -733,7 +733,11 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 
 	m_pMainSceneCamera->SetUpdatedContext(m_pMap.get());
 
-	std::shared_ptr<CGameObject> pTestDetail = std::make_shared<CDetailObject>(pd3dDevice, pd3dCommandList, m_pMap->GetTerrain().get());
+	std::shared_ptr<CTerrainDetailShader> pShader = std::make_shared<CTerrainDetailShader>();
+	pShader->CreateShader(pd3dDevice, GetGraphicsRootSignature(), 7, pdxgiObjectRtvFormats, 0);
+	pShader->CreateCbvSrvUavDescriptorHeaps(pd3dDevice, 0, 2);
+	m_pDetailObject = std::make_unique<CDetailObject>(pd3dDevice, pd3dCommandList, pShader, m_pMap->GetTerrain().get());
+	m_pDetailObject->CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
 	int index = 0;
 
@@ -1128,6 +1132,7 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 		m_pEnemys[i]->Render(pd3dCommandList, true);
 	}
 	
+	m_pDetailObject->Render(pd3dCommandList, true);
 
 #ifdef RENDER_BOUNDING_BOX
 	CBoundingBoxShader::GetInst()->Render(pd3dCommandList, 0);

@@ -377,9 +377,9 @@ void CPhysicsObject::CreateArticulation(float meshScale)
 	m_pArticulation = Locator.GetPxPhysics()->createArticulationReducedCoordinate();
 	m_pArticulation->setArticulationFlag(physx::PxArticulationFlag::eDISABLE_SELF_COLLISION, true);
 	//m_pArticulation->setArticulationFlag(physx::PxArticulationFlag::eDRIVE_LIMITS_ARE_FORCES, true);
-	m_pArticulation->setSolverIterationCounts(10, 5);
-	m_pArticulation->setMaxCOMLinearVelocity(30.0f);
-	m_pArticulation->setMaxCOMAngularVelocity(physx::PxPi / 32.0);
+	m_pArticulation->setSolverIterationCounts(5, 3);
+	m_pArticulation->setMaxCOMLinearVelocity(100.0f);
+	//m_pArticulation->setMaxCOMAngularVelocity(physx::PxPi / 32.0);
 
 	JointAxisDesc FixDesc;
 	FixDesc.type = physx::PxArticulationJointType::eFIX;

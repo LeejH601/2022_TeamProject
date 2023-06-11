@@ -55,6 +55,7 @@ void CMesh::Render(ID3D12GraphicsCommandList* pd3dCommandList)
 		pd3dCommandList->DrawInstanced(m_nVertices, 1, m_nOffset, 0);
 	}
 }
+
 void CTexturedModelingMesh::OnPreRender(ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	// 기본도형 위상구조를 삼각형리스트로 설정

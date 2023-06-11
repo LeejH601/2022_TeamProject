@@ -309,7 +309,7 @@ void CTerrainSpriteObject::SetType(TerrainSpriteType eType)
 	m_eTerrainSpriteType = eType;
 }
 
-CDetailObject::CDetailObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, void* pContext)
+CDetailObject::CDetailObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, std::shared_ptr<CShader> pShader, void* pContext)
 {
 	/*std::shared_ptr<CTexture> pDetailMap = std::make_shared<CTexture>(1, RESOURCE_TEXTURE2D, 0, 1);
 
@@ -349,8 +349,7 @@ CDetailObject::CDetailObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 		}
 	}
 
-
-	printf("d");
+	SetShader(pShader);
 }
 
 void CDetailObject::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
@@ -363,9 +362,27 @@ void CDetailObject::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12Graphi
 
 void CDetailObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList, float fCurrentTime, float fElapsedTime)
 {
+	memcpy(m_pcbMappedDetailInfo->m_xmf3WorldPositions, m_xmf3DetailPositions.data() + nDrawInstanceOffset, nDrawInstanceRange * sizeof(XMFLOAT3));
 
 
-
-	D3D12_GPU_VIRTUAL_ADDRESS d3dGpuVirtualAddress = m_pd3dcbFrameworkInfo->GetGPUVirtualAddress();
+	D3D12_GPU_VIRTUAL_ADDRESS d3dGpuVirtualAddress = m_pd3dcbDetailInfo->GetGPUVirtualAddress();
 	pd3dCommandList->SetGraphicsRootConstantBufferView(11, d3dGpuVirtualAddress);
+}
+
+void CDetailObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, bool b_UseTexture, CCamera* pCamera)
+{
+	m_ppMaterials[0]->m_pShader->Render(pd3dCommandList, 0);
+
+	int nDrawInstances = m_xmf3DetailPositions.size();
+	nDrawInstanceOffset = 0;
+	nDrawInstanceRange = 0;
+	while (nDrawInstances > 0)
+	{
+		nDrawInstanceRange = (MAX_DETAILS_INSTANCES_ONE_DRAW_CALL <= nDrawInstances) ? MAX_DETAILS_INSTANCES_ONE_DRAW_CALL : nDrawInstances;
+		UpdateShaderVariables(pd3dCommandList, 0, 0);
+
+		pd3dCommandList->DrawInstanced(1, nDrawInstanceRange, 0, 0);
+		nDrawInstances -= nDrawInstanceRange;
+		nDrawInstanceOffset += nDrawInstanceRange;
+	}
 }
