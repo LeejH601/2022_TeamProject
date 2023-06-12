@@ -1,5 +1,19 @@
 #include "Header.hlsli"
 
+cbuffer cbCameraInfo : register(b1)
+{
+	matrix gmtxView : packoffset(c0);
+	matrix gmtxProjection : packoffset(c4);
+	matrix m_xmf4x4OrthoProjection : packoffset(c8);
+	matrix gmtxInverseProjection : packoffset(c12);
+	matrix gmtxInverseView : packoffset(c16);
+	float3 gf3CameraPosition : packoffset(c20);
+	//float3 gf3CameraDirection : packoffset(c17);
+};
+
+
+#include "Light.hlsl"
+
 struct GS_DETAIL_OUT
 {
 	float4 posH : SV_POSITION;
@@ -34,7 +48,7 @@ PS_MULTIPLE_RENDER_TARGETS_OUTPUT PS_Detail(GS_DETAIL_OUT input)
 	//cColor.a = 1.0f;
 	//float4 cColor = float4(1,1,1,1); //  // cIllumination * cTexture;
 	//cColor.rgb *= gfColor * 2.0f;
-	//float4 cIllumination = Lighting(input.posW, input.normalW, cColor);
+	float4 cIllumination = Lighting(input.posW, input.normalW, cColor);
 
 	if (cColor.a < 0.01f)
 		discard;
