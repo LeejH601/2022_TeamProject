@@ -1103,3 +1103,57 @@ void Atk_Player::CheckEvasion(CPlayer* player, float holdTime)
 			player->m_pStateMachine->ChangeState(Evasion_Player::GetInst());
 	}
 }
+
+Damaged_Player::Damaged_Player()
+{
+}
+
+Damaged_Player::~Damaged_Player()
+{
+}
+
+void Damaged_Player::Enter(CPlayer* player)
+{
+	player->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 32);
+	player->m_pSkinnedAnimationController->m_fTime = 0.0f;
+	player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition = 0.0f;
+	player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_nType = ANIMATION_TYPE_ONCE;
+
+
+	player->m_xmf3RootTransfromPreviousPos = XMFLOAT3{ 0.f, 0.f , 0.f };
+	player->m_bAttack = false; // 사용자가 좌클릭시 true가 되는 변수
+
+	// 플레이어의 체력을 감소
+	player->m_fHP -= 5.f;
+}
+
+void Damaged_Player::Execute(CPlayer* player, float fElapsedTime)
+{
+	CAnimationSet* pAnimationSet = player->m_pSkinnedAnimationController->m_pAnimationSets->m_pAnimationSets[player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_nAnimationSet];
+	if (player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition == pAnimationSet->m_fLength)
+	{
+		CState<CPlayer>& previousState = *player->m_pStateMachine->GetPreviousState();
+		if (dynamic_cast<Idle_Player*>(&previousState)) {
+			player->m_pStateMachine->ChangeState(&previousState);
+		}
+		else if (dynamic_cast<Run_Player*>(&previousState)) {
+			player->m_pStateMachine->ChangeState(&previousState);
+		}
+		else {
+			player->m_pStateMachine->ChangeState(Idle_Player::GetInst());
+		}
+	}
+}
+
+void Damaged_Player::Animate(CPlayer* player, float fElapsedTime)
+{
+	player->Animate(fElapsedTime);
+}
+
+void Damaged_Player::OnRootMotion(CPlayer* player, float fTimeElapsed)
+{
+}
+
+void Damaged_Player::Exit(CPlayer* player)
+{
+}

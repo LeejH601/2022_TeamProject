@@ -187,6 +187,20 @@ public:
     virtual void SetPlayerRootVel(CPlayer* player);
 };
 
+class Damaged_Player : public CState<CPlayer>
+{
+public:
+    DECLARE_SINGLE(Damaged_Player);
+    Damaged_Player();
+    ~Damaged_Player();
+
+    virtual void Enter(CPlayer* player);
+    virtual void Execute(CPlayer* player, float fElapsedTime);
+    virtual void Animate(CPlayer* player, float fElapsedTime);
+    virtual void OnRootMotion(CPlayer* player, float fTimeElapsed);
+    virtual void Exit(CPlayer* player);
+};
+
 template<class entity_type>
 inline IMessageListener* CState<entity_type>::GetShockSoundComponent()
 {

@@ -108,6 +108,15 @@ bool CPlayer::CheckCollision(CGameObject* pTargetObject)
 	return false;
 }
 
+void CPlayer::SetHit(CGameObject* pHitter)
+{
+	// 플레이어 상태를 대미지를 받은 상태로 변경
+	if (m_pStateMachine->GetCurrentState() != Damaged_Player::GetInst())
+	{
+		m_pStateMachine->ChangeState(Damaged_Player::GetInst());
+	}
+}
+
 void CPlayer::Update(float fTimeElapsed)
 {
 	m_fTime += fTimeElapsed;
