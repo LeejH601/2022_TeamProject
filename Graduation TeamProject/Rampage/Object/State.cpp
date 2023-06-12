@@ -1114,11 +1114,51 @@ Damaged_Player::~Damaged_Player()
 
 void Damaged_Player::Enter(CPlayer* player)
 {
-	player->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 32);
+	float degrees = 0.0f;
+
+	XMVECTOR playerLookVec = XMLoadFloat3(&(player->GetLook()));
+	XMVECTOR toHitterVec = XMLoadFloat3(&(player->m_xmf3ToHitterVec));
+
+	playerLookVec = XMVector3Normalize(playerLookVec);
+	toHitterVec = XMVector3Normalize(toHitterVec);
+
+	float dot = XMVectorGetX(XMVector3Dot(toHitterVec, playerLookVec));
+
+	if (dot < -1.0f + FLT_EPSILON || dot > 1.0f - FLT_EPSILON)
+	{
+		dot < -1.0f + FLT_EPSILON ? degrees = 180.0f : degrees = 0.0f;
+	}
+	else
+	{
+		float angle = acosf(dot);
+		degrees = XMConvertToDegrees(angle);
+
+		XMVECTOR cross = XMVector3Cross(toHitterVec, playerLookVec);
+
+		if (XMVectorGetY(cross) > 0.0f)
+			degrees = 360.0f - degrees;
+	}
+
+	if (0.0f <= degrees && degrees < 45.0f)
+	{
+		player->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 32);
+	}
+	else if (degrees <= 180.0f)
+	{
+		player->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 34);
+	}
+	else if (degrees <= 325.0f)
+	{
+		player->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 33);
+	}
+	else
+	{
+		player->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 32);
+	}
+
 	player->m_pSkinnedAnimationController->m_fTime = 0.0f;
 	player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition = 0.0f;
 	player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_nType = ANIMATION_TYPE_ONCE;
-
 
 	player->m_xmf3RootTransfromPreviousPos = XMFLOAT3{ 0.f, 0.f , 0.f };
 	player->m_bAttack = false; // 사용자가 좌클릭시 true가 되는 변수

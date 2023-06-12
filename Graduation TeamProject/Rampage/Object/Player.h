@@ -37,6 +37,8 @@ public:
 	DWORD m_dwDirectionCache;
 	XMFLOAT3 m_xmf3DirectionCache;
 
+	XMFLOAT3 m_xmf3ToHitterVec;
+
 	float m_fStamina;
 	float m_fTotalStamina;
 	UINT m_iCombo = 0;
