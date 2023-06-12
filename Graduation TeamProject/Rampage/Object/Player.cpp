@@ -114,6 +114,7 @@ void CPlayer::SetHit(CGameObject* pHitter)
 	if (m_pStateMachine->GetCurrentState() != Damaged_Player::GetInst())
 	{
 		m_xmf3ToHitterVec = Vector3::Normalize(Vector3::Subtract(pHitter->GetPosition(), GetPosition()));
+		m_xmf3ToHitterVec.y = 0.0f;
 		m_pStateMachine->ChangeState(Damaged_Player::GetInst());
 	}
 }

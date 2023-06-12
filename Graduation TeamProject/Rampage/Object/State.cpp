@@ -1112,8 +1112,14 @@ Damaged_Player::~Damaged_Player()
 {
 }
 
+#define SET_LOOKAT_WHEN_DAMAGED
+
 void Damaged_Player::Enter(CPlayer* player)
 {
+#ifdef SET_LOOKAT_WHEN_DAMAGED
+	player->SetLookAt(Vector3::Add(player->GetPosition(), Vector3::Normalize(player->m_xmf3ToHitterVec)));
+	player->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 32);
+#else
 	float degrees = 0.0f;
 
 	XMVECTOR playerLookVec = XMLoadFloat3(&(player->GetLook()));
@@ -1155,6 +1161,7 @@ void Damaged_Player::Enter(CPlayer* player)
 	{
 		player->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 32);
 	}
+#endif // SET_LOOKAT_WHEN_DAMAGED
 
 	player->m_pSkinnedAnimationController->m_fTime = 0.0f;
 	player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition = 0.0f;
