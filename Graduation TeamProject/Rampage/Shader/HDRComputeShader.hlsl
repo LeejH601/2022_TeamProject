@@ -25,6 +25,34 @@ float3 aces_approx(float3 v)
     return clamp((v * (a * v + b)) / (v * (c * v + d) + e), 0.0f, 1.0f);
 }
 
+float UE4_ACES(float x, float t0, float t1, float S, float Ga, float s0, float s1)
+{
+    float e = 2.7182818284;
+
+    float c = pow(10, x);
+
+    // tone
+    float ta = (1 - t0 - 0.18) / Ga - 0.733;
+    float sa = (s0 - 0.18) / Ga - 0.733;
+    
+    float convert = log(c - 0.0);
+
+    float result;
+    if (convert < ta) {
+        result = S * (Ga * (convert + 0.733) + 0.18);
+    }
+    else if (ta < convert && convert < sa) {
+        float t = 1 + t1 - t0;
+        result = S * ((2 * (t)) / (1 + pow(e, ((-2 * Ga) / (t)) * (convert - ta))) - t1);
+    }
+    else if (convert > sa) {
+        float s = 1 + s1 - s0;
+        result = S * (1 + (s1 - ((2 * s) / (1 + pow(e, ((2 * Ga) / s) * (convert - sa))))));
+    }
+
+    return result;
+}
+
 float3 uncharted2_tonemap_partial(float3 x)
 {
     float A = 0.15f;
@@ -60,12 +88,21 @@ void HDR_CS(int3 nDispatchID : SV_DispatchThreadID)
 #ifdef UNCHARTED2_TONE_MAPPING
     LDRColor = float4(uncharted2_filmic(SourceColor.xyz), SourceColor.w);
 #else
+    float S = 1.0;
+
 	//gtxtRWOutput[nDispatchID.xy] = lerp(gtxtInputA[nDispatchID.xy], gtxtInputB[nDispatchID.xy], 0.35f);
 	//gtxtRWOutput[nDispatchID.xy] = float4(ToneMapACESSourceColor.xyz), SourceColor.w);
-    LDRColor = float4(aces_approx(SourceColor.xyz), SourceColor.w);
+    //LDRColor = float4(aces_approx(SourceColor.xyz), SourceColor.w);
+    LDRColor = float4(S * aces_approx(SourceColor.xyz * 0.8), SourceColor.w); // S * ACES(0.8c)
     //LDRColor = float4(ToneMapACES(SourceColor.xyz), SourceColor.w);
     //LDRColor = float4(ReinhardTone(SourceColor.xyz), SourceColor.w);
 	//gtxtRWOutput[nDispatchID.xy] = float4(1.0f, 0.0f, 0.0f, 1.0f);
+
+    //float S = 1; float Ga = 0.88; float t0 = 0.5; float t1 = 0.0; float s0 = 0.26; float s1 = 0.04;
+    //LDRColor.x = (UE4_ACES(SourceColor.x, t0, t1, S, Ga, s0, s1)); //   t0,  t1,  S,  Ga,  s0,  s1
+    //LDRColor.y = (UE4_ACES(SourceColor.y, t0, t1, S, Ga, s0, s1)); //   t0,  t1,  S,  Ga,  s0,  s1
+    //LDRColor.z = (UE4_ACES(SourceColor.z, t0, t1, S, Ga, s0, s1)); //   t0,  t1,  S,  Ga,  s0,  s1
+
 #endif
 
 #ifdef GAMMA

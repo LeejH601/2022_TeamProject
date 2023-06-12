@@ -1561,7 +1561,7 @@ void CParticleMesh::EmitParticle(int emitType, ParticleEmitDataParam& param)
 			createdParticleBuffer[i].m_iTextureIndex = param.m_iTextureIndex;
 			createdParticleBuffer[i].m_xmf2Size = param.m_xmf2Size;
 			if (emitType == 7)
-				createdParticleBuffer[i].m_xmf2Size = Vector2::ScalarProduct(createdParticleBuffer[i].m_xmf2Size, 1.0f + (urd(dre) / 5.0f));
+				createdParticleBuffer[i].m_xmf2Size = Vector2::ScalarProduct(createdParticleBuffer[i].m_xmf2Size, 1.0f + (urd(dre) / 5.0f), false);
 			createdParticleBuffer[i].m_fEmissive = param.m_fEmissive;
 			createdParticleBuffer[i].m_bSimulateRotate = (int)param.m_bSimulateRotate;
 			createdParticleBuffer[i].m_bScaleFlag = (int)param.m_bScaleFlag;

@@ -83,6 +83,7 @@ PS_MULTIPLE_RENDER_TARGETS_OUTPUT SunLight_PS(VS_SCREEN_RECT_TEXTURED_OUTPUT inp
 		else {
 			//output.f4Illumination = float4(0.1f, 0.1f, 0.1f, 1.0f);
 			cColor = float4(0.05f, 0.05f, 0.05f, 1.0f);
+			//cColor = float4(0, 0, 0, 1.0f);
 
 			//cColor.xyz *= max(0.0f, (1.0f - ((result) / radiusPow)));
 			output.f4Illumination = cColor;

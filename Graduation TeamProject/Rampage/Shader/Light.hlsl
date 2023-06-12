@@ -52,7 +52,10 @@ float4 DirectionalLight(int nIndex, float4 fColor, float3 vNormal, float3 vToCam
 	float3 vToLight = -gLights[nIndex].m_vDirection;
 	float fDiffuseFactor = dot(vToLight, vNormal);
 
-	return(gLights[nIndex].m_cDiffuse * fDiffuseFactor * fColor);
+	float3 proj = ((dot(vNormal, vToLight) / dot(vNormal, vNormal)) * vNormal);
+	float3 vReflection = vNormal - (vToLight - proj);
+
+	return (gLights[nIndex].m_cDiffuse * fDiffuseFactor * fColor) + max(dot(vReflection, vToCamera), 0)*(gLights[nIndex].m_cSpecular* fColor);
 }
 
 float4 PointLight(int nIndex, float3 vPosition, float3 vNormal, float3 vToCamera)
@@ -173,6 +176,7 @@ float4 Lighting(float3 vPosition, float3 vNormal, float4 fColor, bool bShadow, f
 				fShadowFactor = Compute3x3ShadowFactor(uvs[i].xy / uvs[i].ww, uvs[i].z / uvs[i].w, i);
 				fBakedShadowFactor = Compute3x3ShadowFactorFromBaked(uvs[i].xy / uvs[i].ww, uvs[i].z / uvs[i].w, i);
 				fShadowFactor = min(fShadowFactor, fBakedShadowFactor);
+				fShadowFactor = max(0.0f, fShadowFactor);
 			}
 #else
 			if (bShadow) fShadowFactor = gtxtDepthTextures[i].SampleCmpLevelZero(gssComparisonPCFShadow, uvs[i].xy / uvs[i].ww, uvs[i].z / uvs[i].w).r;

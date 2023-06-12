@@ -314,9 +314,12 @@ CDetailObject::CDetailObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 	/*std::shared_ptr<CTexture> pDetailMap = std::make_shared<CTexture>(1, RESOURCE_TEXTURE2D, 0, 1);
 
 	pDetailMap->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Terrain/DetailMap1.dds", 1, 1);*/
+	std::random_device rd;
+	std::default_random_engine dre(rd());
+	std::uniform_real_distribution<float> urd(-1, 1);
 
 	std::shared_ptr<CTexture> GrassTexture = std::make_shared<CTexture>(1, RESOURCE_TEXTURE2D, 0, 1);
-	GrassTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/Grass01.dds", RESOURCE_TEXTURE2D, 0);
+	GrassTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/BillBoardImages/Grass_02.dds", RESOURCE_TEXTURE2D, 0);
 
 	char* buf = new char[1024 * 1024];
 	int* data = new int[1024 * 1024];
@@ -338,6 +341,8 @@ CDetailObject::CDetailObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 
 	m_xmf3DetailPositions.resize(nDetails);
 	m_xmf2DetailSizes.resize(nDetails);
+	m_xmf3DetailColors.resize(nDetails);
+	XMFLOAT3 color = XMFLOAT3(70.f / 255, 82.f / 255, 69.f / 255);
 	int index = 0;
 	for (int i = 0; i < 1024 * 1024; ++i) {
 		if (data[i] > 0) {
@@ -350,15 +355,18 @@ CDetailObject::CDetailObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 
 				pos.y = pTerrain->GetHeight(pos.x, pos.z);
 
+				float randomValue = urd(dre) * 0.1f;
+				m_xmf3DetailColors[index] = Vector3::Add(color, XMFLOAT3(randomValue, randomValue, randomValue));
 				m_xmf3DetailPositions[index] = pos;
 				m_xmf2DetailSizes[index++] = m_xmf2Size;
 			}
 		}
 	}
 
-	m_pd3dVertexBufferViews.resize(2);
+	m_pd3dVertexBufferViews.resize(3);
 	m_pd3dPositionBuffer = CreateBufferResource(pd3dDevice, pd3dCommandList, m_xmf3DetailPositions.data(), sizeof(XMFLOAT3) * nDetails, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dPositionUploadBuffer);
 	m_pd3dSizeBuffer = CreateBufferResource(pd3dDevice, pd3dCommandList, m_xmf2DetailSizes.data(), sizeof(XMFLOAT2) * nDetails, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dSizeUploadBuffer);
+	m_pd3dColorBuffer = CreateBufferResource(pd3dDevice, pd3dCommandList, m_xmf3DetailColors.data(), sizeof(XMFLOAT3) * nDetails, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dColorUploadBuffer);
 
 	m_pd3dVertexBufferViews[0].BufferLocation = m_pd3dPositionBuffer->GetGPUVirtualAddress();
 	m_pd3dVertexBufferViews[0].StrideInBytes = sizeof(XMFLOAT3);
@@ -367,6 +375,10 @@ CDetailObject::CDetailObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 	m_pd3dVertexBufferViews[1].BufferLocation = m_pd3dSizeBuffer->GetGPUVirtualAddress();
 	m_pd3dVertexBufferViews[1].StrideInBytes = sizeof(XMFLOAT2);
 	m_pd3dVertexBufferViews[1].SizeInBytes = sizeof(XMFLOAT2) * nDetails;
+
+	m_pd3dVertexBufferViews[2].BufferLocation = m_pd3dColorBuffer->GetGPUVirtualAddress();
+	m_pd3dVertexBufferViews[2].StrideInBytes = sizeof(XMFLOAT3);
+	m_pd3dVertexBufferViews[2].SizeInBytes = sizeof(XMFLOAT3) * nDetails;
 
 	pShader->CreateShaderResourceViews(pd3dDevice, GrassTexture.get(), 0, 2);
 	SetShader(pShader, GrassTexture);

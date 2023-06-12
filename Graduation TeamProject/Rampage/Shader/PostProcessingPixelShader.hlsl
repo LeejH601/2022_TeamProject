@@ -46,6 +46,7 @@ float3 LightShaft(float2 uv, float2 ScreenLightPos, float Weight, float Exposure
 	for (int i = 0; i < NUM_SAMPLES; i++) {
 		uv -= DeltaUV;
 		float3 sampleColor = gtxMultiRenderTargetTextures[3].Sample(gSamplerState, uv).xyz;
+		//sampleColor = max(0.0f, sampleColor * 10.0f);
 		sampleColor *= illuminationDecay * Weight;
 		color += sampleColor;
 
@@ -77,10 +78,10 @@ float4 PS_PostProcessing(VS_SCREEN_RECT_TEXTURED_OUTPUT input) : SV_Target1
 	float result = pow((input.uv.x - lightPosInScreenSpace.x), 2) + pow((input.uv.y - lightPosInScreenSpace.y), 2);
 
 	// LightShaft Values
-	float weight = 0.8f;
-	float exposure = 0.6f;
-	float Density = 1.0f;
-	float Decay = 0.85f;
+	float weight = 0.6f;
+	float exposure = 1.0f;
+	float Density = 0.6f;
+	float Decay = 0.9f;
 	float radiusPow = pow(radius, 2);
 
 	float4 cColor;
@@ -91,7 +92,7 @@ float4 PS_PostProcessing(VS_SCREEN_RECT_TEXTURED_OUTPUT input) : SV_Target1
 
 
 
-	// 광원이 범위 안쪽에 위치하고, 카메라가 바라보는 방향에 있다면 효과를 적용
+	 //광원이 범위 안쪽에 위치하고, 카메라가 바라보는 방향에 있다면 효과를 적용
 	//if ((lightPosInNDC.z > 1.0f) || Pixelnormal.z > 0.0f) {
 	//	//weight = 0.0f;
 	//	Density = 0.0f;
@@ -121,14 +122,14 @@ float4 PS_PostProcessing(VS_SCREEN_RECT_TEXTURED_OUTPUT input) : SV_Target1
 	}
 
 	cColor = gtxMultiRenderTargetTextures[0].Sample(gSamplerState, input.uv);
+	cColor = Lighting(positionW.xyz, normal, cColor, true, uvs);
 
 	float3 ShaftColor;
 	ShaftColor = LightShaft(input.uv, lightPosInScreenSpace, weight, exposure, Density, Decay);
 	cColor.xyz += ShaftColor.xyz;
 
-	cColor = Lighting(positionW.xyz, normal, cColor, true, uvs);
-	float4 trailColor = gtxMultiRenderTargetTextures[4].Sample(gSamplerState, input.uv);
-	cColor += trailColor;
+	//float4 trailColor = gtxMultiRenderTargetTextures[4].Sample(gSamplerState, input.uv);
+	//cColor += trailColor;
 	cColor.a = saturate(cColor.a);
 
 	return cColor;

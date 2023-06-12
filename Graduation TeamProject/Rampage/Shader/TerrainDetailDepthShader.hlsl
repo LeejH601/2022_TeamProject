@@ -1,11 +1,15 @@
 #include "Header.hlsli"
 
+#define MAX_LIGHTS			4 
+
 struct GS_DETAIL_OUT
 {
 	float4 posH : SV_POSITION;
 	float3 posW : POSITION;
 	float3 normalW : NORMAL;
 	float2 uv : TEXCOORD;
+	float3 color : COLOR;
+	float4 uvs[MAX_LIGHTS] : TEXCOORD2;
 	//uint primID : SV_PrimitiveID;
 	//int textureIndex : TEXTUREINDEX;
 };
@@ -27,7 +31,7 @@ PS_MULTIPLE_RENDER_TARGETS_OUTPUT PS_Detail(GS_DETAIL_OUT input)
 	if (cColor.a < 0.01f)
 		discard;
 
-	float Depth = input.posH.z / input.posH.w;
+	float Depth = input.posH.z;
 
 	//output.f4Scene = cColor;
 	output.f4CameraNormal = float4(Depth, Depth, Depth, Depth);
