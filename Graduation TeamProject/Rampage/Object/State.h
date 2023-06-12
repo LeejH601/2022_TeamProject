@@ -199,6 +199,8 @@ public:
     virtual void Animate(CPlayer* player, float fElapsedTime);
     virtual void OnRootMotion(CPlayer* player, float fTimeElapsed);
     virtual void Exit(CPlayer* player);
+
+    virtual void SetPlayerRootVel(CPlayer* player);
 };
 
 template<class entity_type>

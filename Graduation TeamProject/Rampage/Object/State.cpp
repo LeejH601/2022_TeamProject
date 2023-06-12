@@ -1133,7 +1133,9 @@ void Damaged_Player::Execute(CPlayer* player, float fElapsedTime)
 	if (player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition == pAnimationSet->m_fLength)
 	{
 		CState<CPlayer>& previousState = *player->m_pStateMachine->GetPreviousState();
-		if (dynamic_cast<Idle_Player*>(&previousState)) {
+		if (player->m_bEvasioned)
+			player->m_pStateMachine->ChangeState(Evasion_Player::GetInst());
+		else if (dynamic_cast<Idle_Player*>(&previousState)) {
 			player->m_pStateMachine->ChangeState(&previousState);
 		}
 		else if (dynamic_cast<Run_Player*>(&previousState)) {
@@ -1152,8 +1154,39 @@ void Damaged_Player::Animate(CPlayer* player, float fElapsedTime)
 
 void Damaged_Player::OnRootMotion(CPlayer* player, float fTimeElapsed)
 {
+	CAnimationController* pPlayerController = player->m_pSkinnedAnimationController.get();
+
+	CAnimationSet* pAnimationSet = pPlayerController->m_pAnimationSets->m_pAnimationSets[pPlayerController->m_pAnimationTracks[0].m_nAnimationSet];
+
+	XMFLOAT3 xmf3CurrentPos = XMFLOAT3{ player->m_pChild->m_xmf4x4Transform._41,
+	0.0f,
+	player->m_pChild->m_xmf4x4Transform._43 };
+
+	player->m_pChild->m_xmf4x4Transform._41 -= player->m_xmf3RootTransfromPreviousPos.x;
+	player->m_pChild->m_xmf4x4Transform._42 -= player->m_xmf3RootTransfromPreviousPos.y;
+	player->m_pChild->m_xmf4x4Transform._43 -= player->m_xmf3RootTransfromPreviousPos.z;
+
+	SetPlayerRootVel(player);
+
+	player->m_xmf3RootTransfromPreviousPos = xmf3CurrentPos;
 }
 
 void Damaged_Player::Exit(CPlayer* player)
 {
+}
+
+void Damaged_Player::SetPlayerRootVel(CPlayer* player)
+{
+	CAnimationController* pPlayerController = player->m_pSkinnedAnimationController.get();
+
+	player->UpdateTransform(NULL);
+
+	XMFLOAT3 xmf3Position = XMFLOAT3{ pPlayerController->m_pRootMotionObject->GetWorld()._41,
+		player->GetPosition().y,
+		pPlayerController->m_pRootMotionObject->GetWorld()._43 };
+
+	player->Move(Vector3::Subtract(xmf3Position, player->GetPosition()), true);
+
+	pPlayerController->m_pRootMotionObject->m_xmf4x4Transform._41 = 0.f;
+	pPlayerController->m_pRootMotionObject->m_xmf4x4Transform._43 = 0.f;
 }
