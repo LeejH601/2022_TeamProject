@@ -100,14 +100,14 @@ void CMultiSpriteObject::AnimateRowColumn(float fTimeElapsed)
 	{
 		m_fAccumulatedTime += fTimeElapsed;
 
-		float fraction = std::fmodf(m_fAccumulatedTime/ m_fLifeTime, 1.0f);
+		float fraction = std::fmodf(m_fAccumulatedTime / m_fLifeTime, 1.0f);
 		interval = 1.0f / (m_iTotalRow * m_iTotalCol);
 
 		m_iCurrentCol = (int)(fraction / (interval * m_iTotalRow));
 		float remainvalue = (fraction / (interval * m_iTotalRow)) - m_iCurrentCol;
 		m_iCurrentRow = (int)(remainvalue * m_iTotalRow);
 
-		if(m_fAccumulatedTime > m_fLifeTime)
+		if (m_fAccumulatedTime > m_fLifeTime)
 			m_bEnable = false;
 	}
 	m_xmf4x4World._11 = 1.0f / float(m_iTotalRow);
@@ -197,10 +197,10 @@ void CMultiSpriteObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, bool
 
 				if (b_UseTexture)
 					m_ppMaterials[i]->UpdateShaderVariables(pd3dCommandList);
-				
+
 			}
 		}
-		
+
 		// 여기서 메쉬의 렌더를 한다.
 		m_pMesh->OnPreRender(pd3dCommandList);
 		m_pMesh->Render(pd3dCommandList, 0);
@@ -210,7 +210,7 @@ void CMultiSpriteObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, bool
 	if (m_pSibling) m_pSibling->Render(pd3dCommandList, b_UseTexture, pCamera);
 }
 
-CTerrainSpriteObject::CTerrainSpriteObject(int iTextureIndex, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,  int nRows, int nCols, float fSize, float fSpeed) : CMultiSpriteObject(iTextureIndex, pd3dDevice, pd3dCommandList, nRows, nCols, fSize, false, fSpeed)
+CTerrainSpriteObject::CTerrainSpriteObject(int iTextureIndex, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nRows, int nCols, float fSize, float fSpeed) : CMultiSpriteObject(iTextureIndex, pd3dDevice, pd3dCommandList, nRows, nCols, fSize, false, fSpeed)
 {
 }
 
@@ -223,7 +223,7 @@ void CTerrainSpriteObject::Animate(CHeightMapTerrain* pTerrain, float fTimeElaps
 	if (!m_bEnable)
 		return;
 
-	m_fTime -= fTimeElapsed * m_fSpeed; 
+	m_fTime -= fTimeElapsed * m_fSpeed;
 
 	if (m_fTime < 0.f)
 		SetEnable(false);
@@ -314,7 +314,10 @@ CDetailObject::CDetailObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 	/*std::shared_ptr<CTexture> pDetailMap = std::make_shared<CTexture>(1, RESOURCE_TEXTURE2D, 0, 1);
 
 	pDetailMap->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Terrain/DetailMap1.dds", 1, 1);*/
-	
+
+	std::shared_ptr<CTexture> GrassTexture = std::make_shared<CTexture>(1, RESOURCE_TEXTURE2D, 0, 1);
+	GrassTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/Grass01.dds", RESOURCE_TEXTURE2D, 0);
+
 	char* buf = new char[1024 * 1024];
 	int* data = new int[1024 * 1024];
 	std::ifstream in{ "Terrain/DetailMap1.bin", std::ios_base::binary };
@@ -324,6 +327,8 @@ CDetailObject::CDetailObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 	int terrainLength = pTerrain->GetLength();
 
 	nDetails = 0;
+	m_xmf2Size = XMFLOAT2(2, 2);
+	m_xmf2Offset = XMFLOAT2(m_xmf2Size.y / 2.0f, 0.0f);
 
 	in.read((char*)data, sizeof(int) * 1024 * 1024);
 	for (int i = 0; i < 1024 * 1024; ++i) {
@@ -332,50 +337,84 @@ CDetailObject::CDetailObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 	}
 
 	m_xmf3DetailPositions.resize(nDetails);
+	m_xmf2DetailSizes.resize(nDetails);
 	int index = 0;
 	for (int i = 0; i < 1024 * 1024; ++i) {
 		if (data[i] > 0) {
 			for (int j = 0; j < data[i]; ++j) {
 				XMFLOAT3 pos;
-				pos.x = i / 1024;
-				pos.z = i % 1024;
-				pos.x = pos.x * float(terrainWidth) / 1024;
-				pos.z = pos.z * float(terrainLength) / 1024;
+				pos.z = i / 1024;
+				pos.x = i % 1024;
+				pos.z = pos.z * float(terrainWidth) / 1024;
+				pos.x = pos.x * float(terrainLength) / 1024;
 
 				pos.y = pTerrain->GetHeight(pos.x, pos.z);
 
-				m_xmf3DetailPositions[index++] = pos;
+				m_xmf3DetailPositions[index] = pos;
+				m_xmf2DetailSizes[index++] = m_xmf2Size;
 			}
 		}
 	}
 
-	SetShader(pShader);
+	m_pd3dVertexBufferViews.resize(2);
+	m_pd3dPositionBuffer = CreateBufferResource(pd3dDevice, pd3dCommandList, m_xmf3DetailPositions.data(), sizeof(XMFLOAT3) * nDetails, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dPositionUploadBuffer);
+	m_pd3dSizeBuffer = CreateBufferResource(pd3dDevice, pd3dCommandList, m_xmf2DetailSizes.data(), sizeof(XMFLOAT2) * nDetails, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dSizeUploadBuffer);
+
+	m_pd3dVertexBufferViews[0].BufferLocation = m_pd3dPositionBuffer->GetGPUVirtualAddress();
+	m_pd3dVertexBufferViews[0].StrideInBytes = sizeof(XMFLOAT3);
+	m_pd3dVertexBufferViews[0].SizeInBytes = sizeof(XMFLOAT3) * nDetails;
+
+	m_pd3dVertexBufferViews[1].BufferLocation = m_pd3dSizeBuffer->GetGPUVirtualAddress();
+	m_pd3dVertexBufferViews[1].StrideInBytes = sizeof(XMFLOAT2);
+	m_pd3dVertexBufferViews[1].SizeInBytes = sizeof(XMFLOAT2) * nDetails;
+
+	pShader->CreateShaderResourceViews(pd3dDevice, GrassTexture.get(), 0, 2);
+	SetShader(pShader, GrassTexture);
 }
 
 void CDetailObject::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	UINT ncbElementBytes = ((sizeof(CB_DETAIL_INFO) + 255) & ~255); //256의 배수
-	m_pd3dcbDetailInfo = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, ncbElementBytes, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER | D3D12_RESOURCE_STATE_GENERIC_READ, NULL);
+	int nDrawInstances = m_xmf3DetailPositions.size();
 
-	m_pd3dcbDetailInfo->Map(0, NULL, (void**)&m_pcbMappedDetailInfo);
+	m_ppd3dcbDetailInfo.resize(ceil(nDrawInstances / MAX_DETAILS_INSTANCES_ONE_DRAW_CALL) + 1);
+	m_pcbMappedDetailInfo.resize(ceil(nDrawInstances / MAX_DETAILS_INSTANCES_ONE_DRAW_CALL) + 1);
+	for (int i = 0; i < m_ppd3dcbDetailInfo.size(); ++i) {
+		m_ppd3dcbDetailInfo[i] = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, ncbElementBytes, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER | D3D12_RESOURCE_STATE_GENERIC_READ, NULL);
+
+		m_ppd3dcbDetailInfo[i]->Map(0, NULL, (void**)&m_pcbMappedDetailInfo[i]);
+	}
+
+
 }
 
 void CDetailObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList, float fCurrentTime, float fElapsedTime)
 {
-	memcpy(m_pcbMappedDetailInfo->m_xmf3WorldPositions, m_xmf3DetailPositions.data() + nDrawInstanceOffset, nDrawInstanceRange * sizeof(XMFLOAT3));
+	memcpy(m_pcbMappedDetailInfo[nDrawSetIndex]->m_xmf3WorldPositions, m_xmf3DetailPositions.data() + nDrawInstanceOffset, nDrawInstanceRange * sizeof(XMFLOAT3));
+	XMFLOAT4 xmf4SizeOffset = XMFLOAT4(m_xmf2Size.x, m_xmf2Size.y, m_xmf2Offset.x, m_xmf2Offset.y);
+	m_pcbMappedDetailInfo[nDrawSetIndex]->m_xmf4SizeOffset = xmf4SizeOffset;
 
-
-	D3D12_GPU_VIRTUAL_ADDRESS d3dGpuVirtualAddress = m_pd3dcbDetailInfo->GetGPUVirtualAddress();
+	D3D12_GPU_VIRTUAL_ADDRESS d3dGpuVirtualAddress = m_ppd3dcbDetailInfo[nDrawSetIndex]->GetGPUVirtualAddress();
 	pd3dCommandList->SetGraphicsRootConstantBufferView(11, d3dGpuVirtualAddress);
 }
 
 void CDetailObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, bool b_UseTexture, CCamera* pCamera)
 {
-	m_ppMaterials[0]->m_pShader->Render(pd3dCommandList, 0);
+	m_ppMaterials[0]->m_pShader->Render(pd3dCommandList, (int)b_UseTexture);
+	m_ppMaterials[0]->UpdateShaderVariables(pd3dCommandList);
+	m_ppMaterials[0]->m_pShader->UpdateShaderVariables(pd3dCommandList);
+
+	pd3dCommandList->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_POINTLIST);
+	pd3dCommandList->IASetVertexBuffers(0, m_pd3dVertexBufferViews.size(), m_pd3dVertexBufferViews.data());
 
 	int nDrawInstances = m_xmf3DetailPositions.size();
-	nDrawInstanceOffset = 0;
+
+	pd3dCommandList->DrawInstanced(nDetails, 1, 0, 0);
+
+
+	/*nDrawInstanceOffset = 0;
 	nDrawInstanceRange = 0;
+	nDrawSetIndex = 0;
 	while (nDrawInstances > 0)
 	{
 		nDrawInstanceRange = (MAX_DETAILS_INSTANCES_ONE_DRAW_CALL <= nDrawInstances) ? MAX_DETAILS_INSTANCES_ONE_DRAW_CALL : nDrawInstances;
@@ -384,5 +423,6 @@ void CDetailObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, bool b_Us
 		pd3dCommandList->DrawInstanced(1, nDrawInstanceRange, 0, 0);
 		nDrawInstances -= nDrawInstanceRange;
 		nDrawInstanceOffset += nDrawInstanceRange;
-	}
+		nDrawSetIndex++;
+	}*/
 }

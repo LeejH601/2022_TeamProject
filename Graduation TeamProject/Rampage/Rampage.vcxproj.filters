@@ -505,6 +505,10 @@
     <FxCompile Include="Shader\CurlNoise.hlsl" />
     <FxCompile Include="Shader\UIObjectPixelShader.hlsl" />
     <FxCompile Include="Shader\UIObjectVertexShader.hlsl" />
+    <FxCompile Include="Shader\TerrainDetailGeometryShader.hlsl" />
+    <FxCompile Include="Shader\TerrainDetailPixelShader.hlsl" />
+    <FxCompile Include="Shader\TerrainDetailVertexShader.hlsl" />
+    <FxCompile Include="Shader\TerrainDetailDepthShader.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Shader\Header.hlsli" />

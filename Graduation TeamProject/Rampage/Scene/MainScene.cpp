@@ -59,7 +59,7 @@ void CMainTMPScene::CreateGraphicsRootSignature(ID3D12Device* pd3dDevice)
 	pd3dDescriptorRanges[1].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
 	pd3dDescriptorRanges[2].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
-	pd3dDescriptorRanges[2].NumDescriptors = MAX_DEPTH_TEXTURES;
+	pd3dDescriptorRanges[2].NumDescriptors = MAX_DEPTH_TEXTURES * 2;
 	pd3dDescriptorRanges[2].BaseShaderRegister = 23; //t23: DepthWrite Texture
 	pd3dDescriptorRanges[2].RegisterSpace = 0;
 	pd3dDescriptorRanges[2].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
@@ -647,8 +647,11 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pDepthRenderShader->CreateShader(pd3dDevice, GetGraphicsRootSignature(), 1, pdxgiRtvFormats, DXGI_FORMAT_D32_FLOAT, 0);
 	m_pDepthRenderShader->CreateShader(pd3dDevice, GetGraphicsRootSignature(), 1, pdxgiRtvFormats, DXGI_FORMAT_D32_FLOAT, 1);
 	m_pDepthRenderShader->BuildObjects(pd3dDevice, pd3dCommandList, NULL);
-	m_pDepthRenderShader->CreateCbvSrvUavDescriptorHeaps(pd3dDevice, 0, ((CDepthRenderShader*)m_pDepthRenderShader.get())->GetDepthTexture()->GetTextures());
+	m_pDepthRenderShader->CreateCbvSrvUavDescriptorHeaps(pd3dDevice, 0, 
+		((CDepthRenderShader*)m_pDepthRenderShader.get())->GetDepthTexture()->GetTextures() + ((CDepthRenderShader*)m_pDepthRenderShader.get())->GetBakedDepthTexture()->GetTextures()
+	);
 	m_pDepthRenderShader->CreateShaderResourceViews(pd3dDevice, ((CDepthRenderShader*)m_pDepthRenderShader.get())->GetDepthTexture(), 0, 9);
+	m_pDepthRenderShader->CreateShaderResourceViews(pd3dDevice, ((CDepthRenderShader*)m_pDepthRenderShader.get())->GetBakedDepthTexture(), 0, 9);
 
 	CModelShader::GetInst()->CreateShader(pd3dDevice, GetGraphicsRootSignature(), 7, pdxgiObjectRtvFormats, DXGI_FORMAT_D32_FLOAT, 0);
 	CModelShader::GetInst()->CreateShaderVariables(pd3dDevice, pd3dCommandList);
@@ -1132,7 +1135,7 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 		m_pEnemys[i]->Render(pd3dCommandList, true);
 	}
 	
-	m_pDetailObject->Render(pd3dCommandList, true);
+	m_pDetailObject->Render(pd3dCommandList, false);
 
 #ifdef RENDER_BOUNDING_BOX
 	CBoundingBoxShader::GetInst()->Render(pd3dCommandList, 0);
@@ -1144,6 +1147,7 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 	m_pPostProcessShader->Render(pd3dCommandList, pCamera);
 #endif // PostProcessing
 	
+	m_pDetailObject->Render(pd3dCommandList, true);
 
 	for (int i = 0; i < m_pParticleObjects.size(); ++i)
 	{

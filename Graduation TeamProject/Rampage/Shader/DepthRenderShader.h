@@ -64,6 +64,7 @@ public:
 	void SetTerrain(CGameObject* pTerrain) { m_pTerrain = pTerrain; }
 	void SetLight(LIGHT* pLights) { m_pLights = pLights; }
 	CTexture* GetDepthTexture() { return m_pDepthTexture.get(); }
+	CTexture* GetBakedDepthTexture() { return m_pBakedMapObjectDepthTexture.get(); }
 
 	virtual void CreateShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature, UINT nRenderTargets, DXGI_FORMAT* pdxgiRtvFormats, DXGI_FORMAT dxgiDsvFormat, int nPipelineState);
 	virtual D3D12_INPUT_LAYOUT_DESC CreateInputLayout(int nPipelineState);

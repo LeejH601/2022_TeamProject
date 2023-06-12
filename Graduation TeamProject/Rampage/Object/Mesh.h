@@ -341,14 +341,15 @@ public:
 class CDetailVertex
 {
 public:
+	XMFLOAT3						m_xmf3Positoin;
 	XMFLOAT2						m_xmf2Size;
-	int								m_iBillBoard;
+	//int								m_iBillBoard;
 public:
-	CDetailVertex() { m_xmf2Size = XMFLOAT2(0.f, 0.f), m_iBillBoard = true;}
-	CDetailVertex(XMFLOAT2 xmf2Size, bool bBillBoard)
+	CDetailVertex() { m_xmf3Positoin = XMFLOAT3(0, 0, 0); m_xmf2Size = XMFLOAT2(0.f, 0.f); }
+	CDetailVertex(XMFLOAT3 xmf3Positoin, XMFLOAT2 xmf2Size)
 	{
+		m_xmf3Positoin = xmf3Positoin;
 		m_xmf2Size = xmf2Size;
-		m_iBillBoard = bBillBoard;
 	}
 	~CDetailVertex() { }
 };

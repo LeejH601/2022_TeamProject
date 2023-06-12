@@ -162,19 +162,20 @@ void CDepthRenderShader::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCo
 }
 void CDepthRenderShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, void* pContext)
 {
+	UINT Max_Depth_textures = MAX_DEPTH_TEXTURES;
 	D3D12_DESCRIPTOR_HEAP_DESC d3dDescriptorHeapDesc;
 	::ZeroMemory(&d3dDescriptorHeapDesc, sizeof(D3D12_DESCRIPTOR_HEAP_DESC));
-	d3dDescriptorHeapDesc.NumDescriptors = MAX_DEPTH_TEXTURES;
+	d3dDescriptorHeapDesc.NumDescriptors = Max_Depth_textures;
 	d3dDescriptorHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
 	d3dDescriptorHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
 	d3dDescriptorHeapDesc.NodeMask = 0;
 	HRESULT hResult = pd3dDevice->CreateDescriptorHeap(&d3dDescriptorHeapDesc, __uuidof(ID3D12DescriptorHeap), (void**)&m_pd3dRtvDescriptorHeap);
 
-	m_pDepthTexture = std::make_unique<CTexture>(MAX_DEPTH_TEXTURES, RESOURCE_TEXTURE2D_ARRAY, 0, 1);
-	m_pBakedMapObjectDepthTexture = std::make_unique<CTexture>(MAX_DEPTH_TEXTURES, RESOURCE_TEXTURE2D_ARRAY, 0, 1);
+	m_pDepthTexture = std::make_unique<CTexture>(Max_Depth_textures, RESOURCE_TEXTURE2D_ARRAY, 0, 1);
+	m_pBakedMapObjectDepthTexture = std::make_unique<CTexture>(Max_Depth_textures, RESOURCE_TEXTURE2D_ARRAY, 0, 1);
 
 	D3D12_CLEAR_VALUE d3dClearValue = { DXGI_FORMAT_R32_FLOAT, { 1.0f, 1.0f, 1.0f, 1.0f } };
-	for (UINT i = 0; i < MAX_DEPTH_TEXTURES; i++) {
+	for (UINT i = 0; i < Max_Depth_textures; i++) {
 		m_pDepthTexture->CreateTexture(pd3dDevice, _DEPTH_BUFFER_WIDTH, _DEPTH_BUFFER_HEIGHT, DXGI_FORMAT_R32_FLOAT, D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET, D3D12_RESOURCE_STATE_COMMON, &d3dClearValue, RESOURCE_TEXTURE2D, i);
 		m_pBakedMapObjectDepthTexture->CreateTexture(pd3dDevice, _DEPTH_BUFFER_WIDTH, _DEPTH_BUFFER_HEIGHT, DXGI_FORMAT_R32_FLOAT, D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET, D3D12_RESOURCE_STATE_COMMON, &d3dClearValue, RESOURCE_TEXTURE2D, i);
 	}
@@ -186,7 +187,7 @@ void CDepthRenderShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 	d3dRenderTargetViewDesc.Format = DXGI_FORMAT_R32_FLOAT;
 
 	D3D12_CPU_DESCRIPTOR_HANDLE d3dRtvCPUDescriptorHandle = m_pd3dRtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
-	for (UINT i = 0; i < MAX_DEPTH_TEXTURES; i++)
+	for (UINT i = 0; i < Max_Depth_textures; i++)
 	{
 		ID3D12Resource* pd3dTextureResource = m_pDepthTexture->GetResource(i);
 		pd3dDevice->CreateRenderTargetView(pd3dTextureResource, &d3dRenderTargetViewDesc, d3dRtvCPUDescriptorHandle);
@@ -257,19 +258,27 @@ void CDepthRenderShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCam
 			m_pMapObjects[i]->Render(pd3dCommandList, false);
 		}
 		
-		/*::SynchronizeResourceTransition(pd3dCommandList, m_pBakedMapObjectDepthTexture.get()->GetResource(0), D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_COPY_DEST);
+		/*::SynchronizeResourceTransition(pd3dCommandList, m_pDepthTexture.get()->GetResource(4), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_COPY_DEST);
+		::SynchronizeResourceTransition(pd3dCommandList, m_pDepthTexture.get()->GetResource(0), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_COPY_SOURCE);
+		pd3dCommandList->CopyResource(m_pDepthTexture.get()->GetResource(4), m_pDepthTexture.get()->GetResource(0));
+		::SynchronizeResourceTransition(pd3dCommandList, m_pDepthTexture.get()->GetResource(4), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_RENDER_TARGET);
+		::SynchronizeResourceTransition(pd3dCommandList, m_pDepthTexture.get()->GetResource(0), D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_RENDER_TARGET);
+		
+		m_bisBakedMap = true;*/
+
+		::SynchronizeResourceTransition(pd3dCommandList, m_pBakedMapObjectDepthTexture.get()->GetResource(0), D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_COPY_DEST);
 		::SynchronizeResourceTransition(pd3dCommandList, m_pDepthTexture.get()->GetResource(0), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_COPY_SOURCE);
 		pd3dCommandList->CopyResource(m_pBakedMapObjectDepthTexture.get()->GetResource(0), m_pDepthTexture.get()->GetResource(0));
 		::SynchronizeResourceTransition(pd3dCommandList, m_pBakedMapObjectDepthTexture.get()->GetResource(0), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_COMMON);
 		::SynchronizeResourceTransition(pd3dCommandList, m_pDepthTexture.get()->GetResource(0), D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_RENDER_TARGET);
-		m_bisBakedMap = true;*/
+		m_bisBakedMap = true;
 	}
 	else {
-		::SynchronizeResourceTransition(pd3dCommandList, m_pBakedMapObjectDepthTexture.get()->GetResource(0), D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_COPY_SOURCE);
+		/*::SynchronizeResourceTransition(pd3dCommandList, m_pBakedMapObjectDepthTexture.get()->GetResource(0), D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_COPY_SOURCE);
 		::SynchronizeResourceTransition(pd3dCommandList, m_pDepthTexture.get()->GetResource(0), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_COPY_DEST);
 		pd3dCommandList->CopyResource(m_pDepthTexture.get()->GetResource(0), m_pBakedMapObjectDepthTexture.get()->GetResource(0));
 		::SynchronizeResourceTransition(pd3dCommandList, m_pBakedMapObjectDepthTexture.get()->GetResource(0), D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_COMMON);
-		::SynchronizeResourceTransition(pd3dCommandList, m_pDepthTexture.get()->GetResource(0), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_RENDER_TARGET);
+		::SynchronizeResourceTransition(pd3dCommandList, m_pDepthTexture.get()->GetResource(0), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_RENDER_TARGET);*/
 	}
 	for (int i = 0; i < m_pDynamicObjects.size(); ++i)
 	{
@@ -348,4 +357,5 @@ void CDepthRenderShader::UpdateDepthTexture(ID3D12GraphicsCommandList* pd3dComma
 {
 	if (m_pd3dCbvSrvUavDescriptorHeap) pd3dCommandList->SetDescriptorHeaps(1, m_pd3dCbvSrvUavDescriptorHeap.GetAddressOf());
 	if (m_pDepthTexture) m_pDepthTexture->UpdateShaderVariables(pd3dCommandList);
+	//if (m_pBakedMapObjectDepthTexture) m_pBakedMapObjectDepthTexture->UpdateShaderVariables(pd3dCommandList);
 }

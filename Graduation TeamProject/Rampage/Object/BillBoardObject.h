@@ -27,6 +27,7 @@ struct CB_FRAMEWORK_INFO
 #define MAX_DETAILS_INSTANCES_ONE_DRAW_CALL 4000
 struct CB_DETAIL_INFO
 {
+	XMFLOAT4 m_xmf4SizeOffset;
 	XMFLOAT3 m_xmf3WorldPositions[MAX_DETAILS_INSTANCES_ONE_DRAW_CALL];
 };
 
@@ -109,6 +110,7 @@ private:
 	TerrainSpriteType m_eTerrainSpriteType = TerrainSpriteType::TERRAINSPRITE_CROSS_FADE;
 };
 
+
 class CDetailObject : public CBillBoardObject 
 {
 public:
@@ -121,12 +123,28 @@ public:
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, bool b_UseTexture, CCamera* pCamera = NULL);
 
 protected:
-	ComPtr<ID3D12Resource>			m_pd3dcbDetailInfo = NULL;
-	CB_DETAIL_INFO*				m_pcbMappedDetailInfo = NULL;
+	std::vector<ComPtr<ID3D12Resource>> 		m_ppd3dcbDetailInfo;
+	std::vector<CB_DETAIL_INFO*>			m_pcbMappedDetailInfo;
 
 	int nDetails = 0;
 	std::vector<XMFLOAT3> m_xmf3DetailPositions;
+	std::vector<XMFLOAT2> m_xmf2DetailSizes;
 
+	ComPtr<ID3D12Resource> m_pd3dPositionBuffer = NULL;
+	ComPtr<ID3D12Resource> m_pd3dPositionUploadBuffer = NULL;
+
+	ComPtr<ID3D12Resource> m_pd3dSizeBuffer = NULL;
+	ComPtr<ID3D12Resource> m_pd3dSizeUploadBuffer = NULL;
+
+	UINT m_nVertexBufferViews = 0;
+	std::vector<D3D12_VERTEX_BUFFER_VIEW> m_pd3dVertexBufferViews;
+
+	D3D12_PRIMITIVE_TOPOLOGY        m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_POINTLIST;
+
+	XMFLOAT2 m_xmf2Size;
+	XMFLOAT2 m_xmf2Offset;
+
+	int nDrawSetIndex = 0;
 	int nDrawInstanceOffset;
 	int nDrawInstanceRange;
 };
