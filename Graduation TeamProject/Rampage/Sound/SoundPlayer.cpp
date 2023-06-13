@@ -1,10 +1,14 @@
 #include "SoundPlayer.h"
 
+std::mutex vPlayingSoundsMutex;
+
 void CSoundPlayer::PlaySound(FMOD_SYSTEM* g_sound_system, SoundPlayInfo sound_play_info, FMOD_CHANNELGROUP* channelgroup)
 {
     std::this_thread::sleep_for(std::chrono::milliseconds(static_cast<int>(sound_play_info.fDelay * 1000)));
-    sound_play_info.pSound->play(g_sound_system, channelgroup);
 
+    std::lock_guard<std::mutex> lock(vPlayingSoundsMutex);
+
+    sound_play_info.pSound->play(g_sound_system, channelgroup);
     /*TCHAR pstrDebug[256] = { 0 };
     _stprintf_s(pstrDebug, 256, _T("PlaySound\n"));
     OutputDebugString(pstrDebug);*/
@@ -27,8 +31,10 @@ void CSoundPlayer::PlaySounds(FMOD_SYSTEM* g_sound_system, FMOD_CHANNELGROUP* ch
     }
 }
 
-void CSoundPlayer::CheckSounds()
+void CSoundPlayer::EraseAllPlayedSounds()
 {
+    std::lock_guard<std::mutex> lock(vPlayingSoundsMutex);
+
     auto it = m_vPlayingSounds.begin();
     for (auto it = m_vPlayingSounds.begin(); it != m_vPlayingSounds.end(); ) {
         FMOD_CHANNEL* pChannel = *it;
