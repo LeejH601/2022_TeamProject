@@ -1221,6 +1221,7 @@ void Damaged_Player::OnRootMotion(CPlayer* player, float fTimeElapsed)
 
 void Damaged_Player::Exit(CPlayer* player)
 {
+	player->m_bEvasioned = false;
 	player->m_fInvincibleTime = 1.0f;
 }
 

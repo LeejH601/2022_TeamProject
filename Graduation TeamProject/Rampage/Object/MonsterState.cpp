@@ -351,10 +351,14 @@ void Attack_Monster::Execute(CMonster* monster, float fElapsedTime)
 {
 	CAnimationSet* pAnimationSet = monster->m_pSkinnedAnimationController->m_pAnimationSets->m_pAnimationSets[monster->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_nAnimationSet];
 
-	MonsterParams monsterParams;
-	monsterParams.pMonster = monster;
+	if (monster->m_fAtkStartTime < monster->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition &&
+		monster->m_fAtkEndTime > monster->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition)
+	{
+		MonsterParams monsterParams;
+		monsterParams.pMonster = monster;
 
-	CMessageDispatcher::GetInst()->Dispatch_Message<MonsterParams>(MessageType::MONSTER_ATTACK, &monsterParams, this);
+		CMessageDispatcher::GetInst()->Dispatch_Message<MonsterParams>(MessageType::MONSTER_ATTACK, &monsterParams, this);
+	}
 
 	if (monster->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition == pAnimationSet->m_fLength)
 	{
