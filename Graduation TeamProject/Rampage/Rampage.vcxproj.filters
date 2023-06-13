@@ -509,6 +509,8 @@
     <FxCompile Include="Shader\TerrainDetailPixelShader.hlsl" />
     <FxCompile Include="Shader\TerrainDetailVertexShader.hlsl" />
     <FxCompile Include="Shader\TerrainDetailDepthShader.hlsl" />
+    <FxCompile Include="Shader\TerrainDetailDepthVertexShader.hlsl" />
+    <FxCompile Include="Shader\TerrainDetailDepthGeometryShader.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Shader\Header.hlsli" />

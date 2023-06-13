@@ -52,10 +52,11 @@ float4 DirectionalLight(int nIndex, float4 fColor, float3 vNormal, float3 vToCam
 	float3 vToLight = -gLights[nIndex].m_vDirection;
 	float fDiffuseFactor = dot(vToLight, vNormal);
 
-	float3 proj = ((dot(vNormal, vToLight) / dot(vNormal, vNormal)) * vNormal);
-	float3 vReflection = vNormal - (vToLight - proj);
+	/*float3 proj = ((dot(vNormal, vToLight) / dot(vNormal, vNormal)) * vNormal);
+	float3 vReflection = vNormal - (vToLight - proj);*/
 
-	return (gLights[nIndex].m_cDiffuse * fDiffuseFactor * fColor) + max(dot(vReflection, vToCamera), 0)*(gLights[nIndex].m_cSpecular* fColor);
+	return (gLights[nIndex].m_cDiffuse * fDiffuseFactor * fColor);
+	//return (gLights[nIndex].m_cDiffuse * fDiffuseFactor * fColor) + max(dot(vReflection, vToCamera), 0)*(gLights[nIndex].m_cSpecular* fColor);
 }
 
 float4 PointLight(int nIndex, float3 vPosition, float3 vNormal, float3 vToCamera)

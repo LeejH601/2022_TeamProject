@@ -9,7 +9,6 @@ struct GS_DETAIL_OUT
 	float3 normalW : NORMAL;
 	float2 uv : TEXCOORD;
 	float3 color : COLOR;
-	float4 uvs[MAX_LIGHTS] : TEXCOORD2;
 	//uint primID : SV_PrimitiveID;
 	//int textureIndex : TEXTUREINDEX;
 };

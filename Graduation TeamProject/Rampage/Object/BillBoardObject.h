@@ -128,8 +128,9 @@ protected:
 
 	int nDetails = 0;
 	std::vector<XMFLOAT3> m_xmf3DetailPositions;
-	std::vector<XMFLOAT2> m_xmf2DetailSizes;
+	std::vector<XMFLOAT3> m_xmf3DetailSizesAndWindOffset;
 	std::vector<XMFLOAT3> m_xmf3DetailColors;
+	std::vector<XMFLOAT3> m_xmf3DetailNormals;
 
 	ComPtr<ID3D12Resource> m_pd3dPositionBuffer = NULL;
 	ComPtr<ID3D12Resource> m_pd3dPositionUploadBuffer = NULL;
@@ -139,6 +140,9 @@ protected:
 
 	ComPtr<ID3D12Resource> m_pd3dColorBuffer = NULL;
 	ComPtr<ID3D12Resource> m_pd3dColorUploadBuffer = NULL;
+
+	ComPtr<ID3D12Resource> m_pd3dNormalBuffer = NULL;
+	ComPtr<ID3D12Resource> m_pd3dNormalUploadBuffer = NULL;
 
 	UINT m_nVertexBufferViews = 0;
 	std::vector<D3D12_VERTEX_BUFFER_VIEW> m_pd3dVertexBufferViews;

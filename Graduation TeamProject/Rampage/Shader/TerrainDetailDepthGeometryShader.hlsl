@@ -35,10 +35,8 @@ cbuffer cbCameraInfo : register(b1)
 struct VS_DETAIL_OUTPUT
 {
 	float4 position : SV_POSITION;
-	float3 size : SIZE;
+	float2 size : SIZE;
 	float3 color : COLOR;
-	float3 normal : NORMAL;
-	float4 uvs[MAX_LIGHTS] : TEXCOORD1;
 };
 
 
@@ -49,7 +47,6 @@ struct GS_DETAIL_OUT
 	float3 normalW : NORMAL;
 	float2 uv : TEXCOORD;
 	float3 color : COLOR;
-	float4 uvs[MAX_LIGHTS] : TEXCOORD2;
 	//uint primID : SV_PrimitiveID;
 	//int textureIndex : TEXTUREINDEX;
 };
@@ -72,8 +69,7 @@ void GS_Detail(
 	float3 centerW = input[0].position.xyz;
 	centerW.y += input[0].size.y / 2.0f;
 	float3 vUp = float3(0.f, 1.0f, 0.0f);
-	//float3 vLook = gf3CameraPosition.xyz - centerW;
-	float3 vLook = input[0].normal;
+	float3 vLook = gf3CameraPosition.xyz - centerW;
 
 	float fHalfW = input[0].size.x * 0.5f;
 	float fHalfH = input[0].size.y * 0.5f;
@@ -81,47 +77,33 @@ void GS_Detail(
 
 	vLook = normalize(vLook);
 	float3 vRight = cross(float3(0.f, 1.0f, 0.0f), vLook);
-	float3 vWorldOffsets[4] = { -vRight + vUp, vRight + vUp, -vRight - vUp, vRight - vUp };
 
 	float2 pUVs[4] = { float2(0.f, 0.f), float2(1.f, 0.f), float2(0.f, 1.f), float2(1.f, 1.f) };
 	GS_DETAIL_OUT output;
 	output.color = input[0].color;
-	output.uvs = input[0].uvs;
-
-	float4 projCenter =  mul(mul(float4(centerW, 1.0f), gmtxView), gmtxProjection);
-	float LengthW = projCenter.z / projCenter.w;
-	float sizeLODValue = min(1.0, (1.0 - LengthW) * 30.0f);
-	sizeLODValue = 1.0f;
 
 	/*gf3Positions[0] = float4(center.x + input[0].size.x, center.y, center.z - input[0].size.y, 1.0f);
 	gf3Positions[1] = float4(center.x + input[0].size.x, center.y, center.z + input[0].size.y, 1.0f);
 	gf3Positions[2] = float4(center.x - input[0].size.x, center.y, center.z - input[0].size.y, 1.0f);
 	gf3Positions[3] = float4(center.x - input[0].size.x, center.y, center.z + input[0].size.y, 1.0f);*/
 
-	float3 textDir = float3(1.0f, 0.0f, 0.0f) * input[0].size.z;
+	float3 textDir = float3(1.0f, 0.0f, 0.0f);
 	float value = 0.1f;
 
 	textDir = mul(float4(textDir, 0.0f), gmtxView);
 
 	for (int i = 0; i < 4; i++)
 	{
-		gf3Positions[i].x = gf3Positions[i].x * fHalfW  * sizeLODValue;
-		gf3Positions[i].y = gf3Positions[i].y * fHalfH * sizeLODValue;
-		
-		vWorldOffsets[i].x = vWorldOffsets[i].x * fHalfW  * sizeLODValue;
-		vWorldOffsets[i].y = vWorldOffsets[i].y * fHalfH * sizeLODValue;
+		gf3Positions[i].x = gf3Positions[i].x * fHalfW;
+		gf3Positions[i].y = gf3Positions[i].y * fHalfH;
 
-		//output.posH = mul(float4(centerW, 1.0f), gmtxView);
-		output.posH = float4(centerW, 1.0f);
+		output.posH = mul(float4(centerW, 1.0f), gmtxView);
 		output.posH.xyz += textDir * sin(gfCurrentTime) * value * (1-pUVs[i].y);
-		output.posH.xyz += vWorldOffsets[i];
-		output.posH = mul(float4(output.posH.xyz, 1.0f), gmtxView);
-		output.posW = centerW.xyz;
-
-
+		output.posH.xyz += gf3Positions[i];
 		output.posH = mul(output.posH, gmtxProjection);
 
-		output.normalW = input[0].normal;
+		output.posW = output.posH.xyz;
+		output.normalW = vLook;
 		output.uv = pUVs[i];
 		//output.uv = mul(float3(gf2QuadUVs[i], 1.0f), (float3x3)(xmf4x4Coord)).xy;
 		outputStream.Append(output);

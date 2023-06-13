@@ -2,6 +2,17 @@ SamplerState gSamplerState : register(s0);
 
 #define MAX_LIGHTS 4
 
+cbuffer cbCameraInfo : register(b1)
+{
+	matrix gmtxView : packoffset(c0);
+	matrix gmtxProjection : packoffset(c4);
+	matrix m_xmf4x4OrthoProjection : packoffset(c8);
+	matrix gmtxInverseProjection : packoffset(c12);
+	matrix gmtxInverseView : packoffset(c16);
+	float3 gf3CameraPosition : packoffset(c20);
+	//float3 gf3CameraDirection : packoffset(c17);
+};
+
 struct CB_TOOBJECTSPACE
 {
 	matrix		mtxToTexture;
@@ -11,15 +22,17 @@ struct CB_TOOBJECTSPACE
 struct VS_DETAIL_INPUT
 {
 	float3 position : POSITION;
-	float2 size : SIZE;
+	float3 size : SIZE;
 	float3 color : COLOR;
+	float3 normal : NORMAL;
 };
 
 struct VS_DETAIL_OUTPUT
 {
 	float4 position : SV_POSITION;
-	float2 size : SIZE;
+	float3 size : SIZE;
 	float3 color : COLOR;
+	float3 normal : NORMAL;
 	float4 uvs[MAX_LIGHTS] : TEXCOORD1;
 };
 
@@ -41,6 +54,7 @@ VS_DETAIL_OUTPUT VS_Detail(VS_DETAIL_INPUT input)
 	output.position = float4(input.position, 1.0f);
 	output.size = input.size;
 	output.color = input.color;
+	output.normal = input.normal;
 
 	for (int i = 0; i < MAX_LIGHTS; i++)
 	{

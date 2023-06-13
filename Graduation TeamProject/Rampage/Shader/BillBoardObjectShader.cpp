@@ -167,8 +167,8 @@ D3D12_DEPTH_STENCIL_DESC CTerrainDetailShader::CreateDepthStencilState(int nPipe
 	D3D12_DEPTH_STENCIL_DESC d3dDepthStencilDesc;
 	::ZeroMemory(&d3dDepthStencilDesc, sizeof(D3D12_DEPTH_STENCIL_DESC));
 	d3dDepthStencilDesc.DepthEnable = TRUE;
-	d3dDepthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ZERO;
-	d3dDepthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS;
+	d3dDepthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL;
+	d3dDepthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
 	d3dDepthStencilDesc.StencilEnable = FALSE;
 	d3dDepthStencilDesc.StencilReadMask = 0x00;
 	d3dDepthStencilDesc.StencilWriteMask = 0x00;
@@ -188,7 +188,7 @@ D3D12_BLEND_DESC CTerrainDetailShader::CreateBlendState(int nPipelineState)
 {
 	D3D12_BLEND_DESC d3dBlendDesc;
 	::ZeroMemory(&d3dBlendDesc, sizeof(D3D12_BLEND_DESC));
-	d3dBlendDesc.AlphaToCoverageEnable = FALSE;
+	d3dBlendDesc.AlphaToCoverageEnable = TRUE;
 	d3dBlendDesc.IndependentBlendEnable = FALSE;
 
 
@@ -200,7 +200,7 @@ D3D12_BLEND_DESC CTerrainDetailShader::CreateBlendState(int nPipelineState)
 		d3dBlendDesc.RenderTarget[0].BlendOp = D3D12_BLEND_OP_MIN;
 	}
 	else if (nPipelineState == 1) {
-		d3dBlendDesc.RenderTarget[0].BlendEnable = FALSE;
+		d3dBlendDesc.RenderTarget[0].BlendEnable = TRUE;
 		d3dBlendDesc.RenderTarget[0].LogicOpEnable = FALSE;
 		d3dBlendDesc.RenderTarget[0].SrcBlend = D3D12_BLEND_SRC_ALPHA;
 		d3dBlendDesc.RenderTarget[0].DestBlend = D3D12_BLEND_INV_SRC_ALPHA;
@@ -218,7 +218,17 @@ D3D12_BLEND_DESC CTerrainDetailShader::CreateBlendState(int nPipelineState)
 
 D3D12_SHADER_BYTECODE CTerrainDetailShader::CreateVertexShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
 {
-	return(CShader::ReadCompiledShaderFile(L"TerrainDetailVertexShader.cso", ppd3dShaderBlob));
+	switch (nPipelineState)
+	{
+	case 0:
+		return(CShader::ReadCompiledShaderFile(L"TerrainDetailDepthVertexShader.cso", ppd3dShaderBlob));
+		break;
+	case 1:
+		return(CShader::ReadCompiledShaderFile(L"TerrainDetailVertexShader.cso", ppd3dShaderBlob));
+		break;
+	default:
+		break;
+	}
 }
 
 D3D12_SHADER_BYTECODE CTerrainDetailShader::CreatePixelShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
@@ -238,17 +248,28 @@ D3D12_SHADER_BYTECODE CTerrainDetailShader::CreatePixelShader(ID3DBlob** ppd3dSh
 
 D3D12_SHADER_BYTECODE CTerrainDetailShader::CreateGeometryShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
 {
-	return(CShader::ReadCompiledShaderFile(L"TerrainDetailGeometryShader.cso", ppd3dShaderBlob));
+	switch (nPipelineState)
+	{
+	case 0:
+		return(CShader::ReadCompiledShaderFile(L"TerrainDetailDepthGeometryShader.cso", ppd3dShaderBlob));
+		break;
+	case 1:
+		return(CShader::ReadCompiledShaderFile(L"TerrainDetailGeometryShader.cso", ppd3dShaderBlob));
+		break;
+	default:
+		break;
+	}
 }
 
 D3D12_INPUT_LAYOUT_DESC CTerrainDetailShader::CreateInputLayout(int nPipelineState)
 {
-	UINT nInputElementDescs = 3;
+	UINT nInputElementDescs = 4;
 	D3D12_INPUT_ELEMENT_DESC* pd3dInputElementDescs = new D3D12_INPUT_ELEMENT_DESC[nInputElementDescs];
 
 	pd3dInputElementDescs[0] = { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
-	pd3dInputElementDescs[1] = { "SIZE", 0, DXGI_FORMAT_R32G32_FLOAT, 1, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+	pd3dInputElementDescs[1] = { "SIZE", 0, DXGI_FORMAT_R32G32B32_FLOAT, 1, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
 	pd3dInputElementDescs[2] = { "COLOR", 0, DXGI_FORMAT_R32G32B32_FLOAT, 2, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+	pd3dInputElementDescs[3] = { "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 3, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
 	//pd3dInputElementDescs[3] = { "TEXTUREINDEX", 0, DXGI_FORMAT_R8_SINT, 0, 16, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
 
 	D3D12_INPUT_LAYOUT_DESC d3dInputLayoutDesc;

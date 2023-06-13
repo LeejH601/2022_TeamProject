@@ -1135,7 +1135,8 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 		m_pEnemys[i]->Render(pd3dCommandList, true);
 	}
 	
-	m_pDetailObject->Render(pd3dCommandList, false);
+	//m_pDetailObject->Render(pd3dCommandList, false);
+
 
 #ifdef RENDER_BOUNDING_BOX
 	CBoundingBoxShader::GetInst()->Render(pd3dCommandList, 0);
@@ -1146,8 +1147,8 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 #ifdef PostProcessing
 	m_pPostProcessShader->Render(pd3dCommandList, pCamera);
 #endif // PostProcessing
-	
 	m_pDetailObject->Render(pd3dCommandList, true);
+
 
 	for (int i = 0; i < m_pParticleObjects.size(); ++i)
 	{
