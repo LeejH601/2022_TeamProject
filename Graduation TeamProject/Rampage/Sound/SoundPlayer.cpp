@@ -8,6 +8,7 @@ void CSoundPlayer::PlaySound(FMOD_SYSTEM* g_sound_system, SoundPlayInfo sound_pl
     /*TCHAR pstrDebug[256] = { 0 };
     _stprintf_s(pstrDebug, 256, _T("PlaySound\n"));
     OutputDebugString(pstrDebug);*/
+    m_vPlayingSounds.push_back(sound_play_info.pSound->GetChannel());
 }
 
 void CSoundPlayer::RegisterSound(CSound* pSound, float fDelay)
@@ -23,5 +24,24 @@ void CSoundPlayer::PlaySounds(FMOD_SYSTEM* g_sound_system, FMOD_CHANNELGROUP* ch
         std::thread sound_thread(&CSoundPlayer::PlaySound, this, g_sound_system, *it, channelgroup);
         sound_thread.detach();
         it = m_vSounds.erase(it);
+    }
+}
+
+void CSoundPlayer::CheckSounds()
+{
+    auto it = m_vPlayingSounds.begin();
+    for (auto it = m_vPlayingSounds.begin(); it != m_vPlayingSounds.end(); ) {
+        FMOD_CHANNEL* pChannel = *it;
+
+        FMOD_BOOL bIsPlaying;
+        FMOD_Channel_IsPlaying(pChannel, &bIsPlaying);
+
+        if (!bIsPlaying)
+        {
+            it = m_vPlayingSounds.erase(it);
+            continue;
+        }
+
+        ++it;
     }
 }
