@@ -111,7 +111,7 @@ bool CPlayer::CheckCollision(CGameObject* pTargetObject)
 void CPlayer::SetHit(CGameObject* pHitter)
 {
 	// 플레이어 상태를 대미지를 받은 상태로 변경
-	if (m_pStateMachine->GetCurrentState() != Damaged_Player::GetInst())
+	if (m_fInvincibleTime == 0.0f && m_pStateMachine->GetCurrentState() != Damaged_Player::GetInst())
 	{
 		m_xmf3ToHitterVec = Vector3::Normalize(Vector3::Subtract(pHitter->GetPosition(), GetPosition()));
 		m_xmf3ToHitterVec.y = 0.0f;
@@ -122,6 +122,7 @@ void CPlayer::SetHit(CGameObject* pHitter)
 void CPlayer::Update(float fTimeElapsed)
 {
 	m_fTime += fTimeElapsed;
+	m_fInvincibleTime > 0.0f ? m_fInvincibleTime -= fTimeElapsed : m_fInvincibleTime = 0.0f;
 
 	// 플레이어가 속도를 가진다면 해당 방향을 바라보게 하는 코드
 	if (m_xmf3Velocity.x + m_xmf3Velocity.z)

@@ -48,6 +48,7 @@ public:
 	
 	XMFLOAT3 m_xmf3AtkDirection;
 
+	float m_fInvincibleTime = 0.0f;
 public:
 	CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks);
 	virtual ~CPlayer();

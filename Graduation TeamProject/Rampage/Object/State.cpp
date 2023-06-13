@@ -1030,6 +1030,8 @@ void Evasion_Player::Enter(CPlayer* player)
 	player->m_pSkinnedAnimationController->m_fTime = 0.0f;
 	player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition = 0.0f;
 	player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_nType = ANIMATION_TYPE_ONCE;
+
+	player->m_fInvincibleTime = FLT_MAX;
 }
 
 void Evasion_Player::Execute(CPlayer* player, float fElapsedTime)
@@ -1053,6 +1055,7 @@ void Evasion_Player::Execute(CPlayer* player, float fElapsedTime)
 void Evasion_Player::Exit(CPlayer* player)
 {
 	player->m_bEvasioned = false;
+	player->m_fInvincibleTime = 0.0f;
 }
 
 void Evasion_Player::Animate(CPlayer* player, float fElapsedTime)
@@ -1180,9 +1183,7 @@ void Damaged_Player::Execute(CPlayer* player, float fElapsedTime)
 	if (player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition == pAnimationSet->m_fLength)
 	{
 		CState<CPlayer>& previousState = *player->m_pStateMachine->GetPreviousState();
-		if (player->m_bEvasioned)
-			player->m_pStateMachine->ChangeState(Evasion_Player::GetInst());
-		else if (dynamic_cast<Idle_Player*>(&previousState)) {
+		if (dynamic_cast<Idle_Player*>(&previousState)) {
 			player->m_pStateMachine->ChangeState(&previousState);
 		}
 		else if (dynamic_cast<Run_Player*>(&previousState)) {
@@ -1220,6 +1221,7 @@ void Damaged_Player::OnRootMotion(CPlayer* player, float fTimeElapsed)
 
 void Damaged_Player::Exit(CPlayer* player)
 {
+	player->m_fInvincibleTime = 1.0f;
 }
 
 void Damaged_Player::SetPlayerRootVel(CPlayer* player)
