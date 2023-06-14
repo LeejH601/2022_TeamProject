@@ -47,17 +47,21 @@ PS_MULTIPLE_RENDER_TARGETS_OUTPUT PSUIObject(VS_TEXTURED_OUTPUT input)
 {
 	uint TextureIndex = gmtxGameObject._33; // TextureIndex
 	float2 fU = gmtxGameObject._12_13;// UV값 조절 
-	float fV = gmtxGameObject._14;
+	float2 fV = gmtxGameObject._14_24;
 	float3 fRGB = gmtxGameObject._21_31_44;
 	float fAlpha = gmtxGameObject._23;
 
+	input.uv.x = fU.x + (input.uv.x * (fU.y - fU.x));
+	input.uv.y = fV.x + (input.uv.y * (fV.y - fV.x));
+	// 스프라이트 애니메이션
 	PS_MULTIPLE_RENDER_TARGETS_OUTPUT output;
 	float4 cColor = gtxtTexture[TextureIndex].Sample(gSamplerState, input.uv);
 	cColor.rgb *= fRGB;
 	cColor.a *= fAlpha;
 	output.f4Color = cColor;
 	output.f4Scene = cColor;
-	if ((fU.x > input.uv.x || fU.y < input.uv.x)|| fV < input.uv.y)
-		discard;
+	// 0 ~ 1
+	// size, 시작 위치
+
 	return(output);
 }

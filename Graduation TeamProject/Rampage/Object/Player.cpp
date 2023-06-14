@@ -282,7 +282,10 @@ bool CKnightPlayer::CheckCollision(CGameObject* pTargetObject)
 		OutputDebugString(pstrDebug);
 
 		m_bCombo = true;
+
 		m_fHP -= 30.f;
+		if (m_fHP < 0)
+			m_fHP = 0.f;
 		if (m_pCamera)
 		{
 			if (m_pStateMachine->GetCurrentState()->GetCameraShakeComponent()->GetEnable())

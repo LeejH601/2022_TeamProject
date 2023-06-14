@@ -15,6 +15,9 @@ CUIObject::CUIObject(int iTextureIndex, ID3D12Device* pd3dDevice, ID3D12Graphics
 	m_xmf4x4Transform = Matrix4x4::Identity();
 	m_xmf4x4Texture = Matrix4x4::Identity();
 	m_iTextureIndex = iTextureIndex;
+
+	m_tRect.push_back(RECT(0.f, 0.f, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT));
+
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
 	SetMesh(std::make_shared<CUIRectMesh>(pd3dDevice, pd3dCommandList));
@@ -53,7 +56,8 @@ void CUIObject::Update(float fTimeElapsed)
 
 		m_xmf4x4World._12 = 0.f; // U1
 		m_xmf4x4World._13 = 1.f; // U2
-		m_xmf4x4World._14 = 1.f; // V
+		m_xmf4x4World._14 = 0.f; // V
+		m_xmf4x4World._24 = 1.f;
 
 		m_xmf4x4World._21 = 1.f; // RGBN
 		// -1 ~ 1
@@ -70,12 +74,15 @@ void CUIObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, bool b_UseTex
 		return;
 	if (m_pMesh)
 	{
+			
 		// UI Size 정보 Update
 		// 
 		// CGameObject의 정보를 넘길 버퍼가 있고, 해당 버퍼에 대한 CPU 포인터가 있으면 UpdateShaderVariables 함수를 호출한다.
 		UpdateShaderVariables(pd3dCommandList);
 		// 여기서 메쉬의 렌더를 한다.
 		m_pMesh->OnPreRender(pd3dCommandList);
+		m_tRect[0] = { (LONG)(FRAME_BUFFER_WIDTH * 0.05f), (LONG)(FRAME_BUFFER_HEIGHT * 0.05f) , (LONG)(FRAME_BUFFER_WIDTH * 0.34f) , (LONG)(FRAME_BUFFER_HEIGHT * 0.3f) };
+		pd3dCommandList->RSSetScissorRects(1, &m_tRect[0]);
 		m_pMesh->Render(pd3dCommandList, 0);
 	}
 
@@ -129,7 +136,8 @@ void CBarObject::Update(float fTimeElapsed)
 
 		m_xmf4x4World._12 = 0.f; // U1
 		m_xmf4x4World._13 = m_fCurrentValue / m_fTotalValue; // U2
-		m_xmf4x4World._14 = 1.f; // V
+		m_xmf4x4World._14 = 0.f; // V
+		m_xmf4x4World._24 = 1.f;
 
 		m_xmf4x4World._21 = 1.f; // RGBN
 		//1, 023x((정규 좌표) + 1.0)x0.5
@@ -144,8 +152,10 @@ void CBarObject::Update(float fTimeElapsed)
 
 void CBarObject::Set_Value(float fCurrentValue, float fTotalValue)
 {
+
 	if (fCurrentValue < m_fCurrentValue)
 		m_fPreValue = m_fCurrentValue; // 이전 Value
+
 	m_fCurrentValue = fCurrentValue;
 	m_fTotalValue = fTotalValue;
 }
@@ -166,21 +176,25 @@ void CHPObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, bool b_UseTex
 {
 	if (!m_bEnable)
 		return;
+
 	if (m_pMesh)
 	{
 		// UI Size 정보 Update
 		// 
 		// CGameObject의 정보를 넘길 버퍼가 있고, 해당 버퍼에 대한 CPU 포인터가 있으면 UpdateShaderVariables 함수를 호출한다.
-		PreBarUpdate(0.f);
-		UpdateShaderVariables(pd3dCommandList);
-		// 여기서 메쉬의 렌더를 한다.
-		m_pMesh->OnPreRender(pd3dCommandList);
-		m_pMesh->Render(pd3dCommandList, 0);
+		//PreBarUpdate(0.f);
+		//UpdateShaderVariables(pd3dCommandList);
+		////// 여기서 메쉬의 렌더를 한다.
+		//m_pMesh->OnPreRender(pd3dCommandList);
+		//m_pMesh->Render(pd3dCommandList, 0);
 
 		CurBarUpdate(0.f);
 		UpdateShaderVariables(pd3dCommandList);
 		// 여기서 메쉬의 렌더를 한다.
 		m_pMesh->OnPreRender(pd3dCommandList);
+
+		m_tRect[0] = { (LONG)(FRAME_BUFFER_WIDTH * 0.15f), (LONG)(FRAME_BUFFER_HEIGHT * 0.15f) , (LONG)(FRAME_BUFFER_WIDTH * 0.35f) , (LONG)(FRAME_BUFFER_HEIGHT * 0.2f) };
+		pd3dCommandList->RSSetScissorRects(1, &m_tRect[0]);
 		m_pMesh->Render(pd3dCommandList, 0);
 	}
 
@@ -195,21 +209,22 @@ void CHPObject::PreBarUpdate(float fTimeElapsed)
 			m_fPreValue -= (m_fTotalValue - m_fCurrentValue) * 0.1f;
 		//m_xmf2ScreenPosition5 = XMFLOAT2()
 		// 화면 크기를 기준으로 Size 설정 최대 크기 (MAX WIDTH: FRAME_BUFFER_WIDTH, MAX_HEIGHT: FRAME_BUFFER_HEIGHT)
-		m_xmf4x4World._11 = (/*(m_fCurrentHp / m_fTotalHp) * */m_xmf2Size.x) / (FRAME_BUFFER_WIDTH);
+		m_xmf4x4World._11 = ((m_fPreValue / m_fTotalValue) * m_xmf2Size.x) / (FRAME_BUFFER_WIDTH);
 		m_xmf4x4World._22 = m_xmf2Size.y / (FRAME_BUFFER_HEIGHT);
 
-		m_xmf4x4World._33 = m_iTextureIndex; // 텍스쳐 인덱스
+		m_xmf4x4World._33 = m_iTextureIndex + 2; // 텍스쳐 인덱스
 
-		m_xmf4x4World._12 = 0.f; // U1
-		m_xmf4x4World._13 = m_fCurrentValue / m_fTotalValue; // U2
-		m_xmf4x4World._14 = 1.f; // V
+		m_xmf4x4World._12 = 0.f; // U
+		m_xmf4x4World._13 = m_fPreValue / m_fTotalValue; // U
 
-		m_xmf4x4World._21 = 1.f; // RGBN
+		m_xmf4x4World._14 = 0.f; // V
+		m_xmf4x4World._24 = 1.f;
 
-		//1, 023x((정규 좌표) + 1.0)x0.5
-
+		m_xmf4x4World._21 = 0.5f; // RGBN
+		m_xmf4x4World._21 = 0.6f; // ALPHA
+		
 		// -1 ~ 1
-		m_xmf4x4World._41 = (m_xmf2ScreenPosition.x / FRAME_BUFFER_WIDTH);
+		m_xmf4x4World._41 = (m_xmf2ScreenPosition.x / FRAME_BUFFER_WIDTH) - (((m_fTotalValue - m_fPreValue) / m_fTotalValue) * m_xmf2Size.x * 0.5f) / (FRAME_BUFFER_WIDTH);;
 		m_xmf4x4World._42 = (m_xmf2ScreenPosition.y / FRAME_BUFFER_HEIGHT);
 		//(m_xmf2ScreenPosition.y * 2.f) / (FRAME_BUFFER_HEIGHT); // -1 ~ 1
 		m_xmf4x4World._43 = 0.f;
@@ -221,18 +236,21 @@ void CHPObject::CurBarUpdate(float fTimeElapsed)
 	if (m_bEnable) {
 		//m_xmf2ScreenPosition5 = XMFLOAT2()
 		// 화면 크기를 기준으로 Size 설정 최대 크기 (MAX WIDTH: FRAME_BUFFER_WIDTH, MAX_HEIGHT: FRAME_BUFFER_HEIGHT)
-		m_xmf4x4World._11 = (/*(m_fCurrentHp / m_fTotalHp) * */m_xmf2Size.x) / (FRAME_BUFFER_WIDTH);
+		m_xmf4x4World._11 = ((m_fCurrentValue / m_fTotalValue) * m_xmf2Size.x) / (FRAME_BUFFER_WIDTH);
 		m_xmf4x4World._22 = m_xmf2Size.y / (FRAME_BUFFER_HEIGHT);
 
 		m_xmf4x4World._33 = m_iTextureIndex; // 텍스쳐 인덱스
 
-		m_xmf4x4World._12 = m_fCurrentValue / m_fTotalValue; // U
-		m_xmf4x4World._13 = 1.f; // V
+		m_xmf4x4World._12 = 0.f; // U
+		m_xmf4x4World._13 = m_fCurrentValue / m_fTotalValue; // U
+
+		m_xmf4x4World._14 = 0.f; // V
+		m_xmf4x4World._24 = 1.f;
 
 		m_xmf4x4World._21 = 1.f; // RGBN
 
 		// -1 ~ 1
-		m_xmf4x4World._41 = (m_xmf2ScreenPosition.x / FRAME_BUFFER_WIDTH);
+		m_xmf4x4World._41 = (m_xmf2ScreenPosition.x / FRAME_BUFFER_WIDTH) - (((m_fTotalValue - m_fCurrentValue) / m_fTotalValue) * m_xmf2Size.x * 0.5f) / (FRAME_BUFFER_WIDTH);;
 		m_xmf4x4World._42 = (m_xmf2ScreenPosition.y / FRAME_BUFFER_HEIGHT);
 		//(m_xmf2ScreenPosition.y * 2.f) / (FRAME_BUFFER_HEIGHT); // -1 ~ 1
 		m_xmf4x4World._43 = 0.f;
@@ -254,21 +272,23 @@ void CSTAMINAObject::PreBarUpdate(float fTimeElapsed)
 			m_fPreValue -= (m_fTotalValue - m_fCurrentValue) * 0.1f;
 		//m_xmf2ScreenPosition5 = XMFLOAT2()
 		// 화면 크기를 기준으로 Size 설정 최대 크기 (MAX WIDTH: FRAME_BUFFER_WIDTH, MAX_HEIGHT: FRAME_BUFFER_HEIGHT)
-		m_xmf4x4World._11 = (/*(m_fCurrentHp / m_fTotalHp) * */m_xmf2Size.x) / (FRAME_BUFFER_WIDTH);
+		m_xmf4x4World._11 = ((m_fCurrentValue / m_fPreValue) * m_xmf2Size.x) / (FRAME_BUFFER_WIDTH);
 		m_xmf4x4World._22 = m_xmf2Size.y / (FRAME_BUFFER_HEIGHT);
 
 		m_xmf4x4World._33 = m_iTextureIndex; // 텍스쳐 인덱스
 
 		m_xmf4x4World._12 = 0.f; // U1
-		m_xmf4x4World._13 = m_fCurrentValue / m_fTotalValue; // U2
-		m_xmf4x4World._14 = 1.f; // V
+		m_xmf4x4World._13 = m_fPreValue / m_fTotalValue; // U2
+
+		m_xmf4x4World._14 = 0.f; // V
+		m_xmf4x4World._24 = 1.f; // V
 
 		m_xmf4x4World._21 = 1.f; // RGBN
 
 		//1, 023x((정규 좌표) + 1.0)x0.5
 	
 		// -1 ~ 1
-		m_xmf4x4World._41 = (m_xmf2ScreenPosition.x / FRAME_BUFFER_WIDTH);
+		m_xmf4x4World._41 = (m_xmf2ScreenPosition.x / FRAME_BUFFER_WIDTH) - (((m_fTotalValue - m_fPreValue) / m_fTotalValue) * m_xmf2Size.x * 0.5f) / (FRAME_BUFFER_WIDTH);;
 		m_xmf4x4World._42 = (m_xmf2ScreenPosition.y / FRAME_BUFFER_HEIGHT);
 		//(m_xmf2ScreenPosition.y * 2.f) / (FRAME_BUFFER_HEIGHT); // -1 ~ 1
 		m_xmf4x4World._43 = 0.f;
@@ -280,28 +300,63 @@ void CSTAMINAObject::CurBarUpdate(float fTimeElapsed)
 	if (m_bEnable) {
 		//m_xmf2ScreenPosition5 = XMFLOAT2()
 		// 화면 크기를 기준으로 Size 설정 최대 크기 (MAX WIDTH: FRAME_BUFFER_WIDTH, MAX_HEIGHT: FRAME_BUFFER_HEIGHT)
-		m_xmf4x4World._11 = (/*(m_fCurrentHp / m_fTotalHp) * */m_xmf2Size.x) / (FRAME_BUFFER_WIDTH);
+		m_xmf4x4World._11 = ((m_fCurrentValue / m_fTotalValue) * m_xmf2Size.x) / (FRAME_BUFFER_WIDTH);
 		m_xmf4x4World._22 = m_xmf2Size.y / (FRAME_BUFFER_HEIGHT);
 
 		m_xmf4x4World._33 = m_iTextureIndex; // 텍스쳐 인덱스
 
 		m_xmf4x4World._12 = 0.f; // U1
-		m_xmf4x4World._13 = m_fCurrentValue / m_fTotalValue; // U2
-		m_xmf4x4World._14 = 1.f; // V
+		m_xmf4x4World._13 = 1;  m_fCurrentValue / m_fTotalValue; // U2
+
+		m_xmf4x4World._14 = 0.f; // V
+		m_xmf4x4World._24 = 1.f; // V
 
 		m_xmf4x4World._21 = 1.f; // RGBN
 
 		// -1 ~ 1
-		m_xmf4x4World._41 = (m_xmf2ScreenPosition.x / FRAME_BUFFER_WIDTH);
+		m_xmf4x4World._41 = (m_xmf2ScreenPosition.x / FRAME_BUFFER_WIDTH) - (((m_fTotalValue - m_fCurrentValue) / m_fTotalValue) * m_xmf2Size.x * 0.5f) / (FRAME_BUFFER_WIDTH);;
 		m_xmf4x4World._42 = (m_xmf2ScreenPosition.y / FRAME_BUFFER_HEIGHT);
 		//(m_xmf2ScreenPosition.y * 2.f) / (FRAME_BUFFER_HEIGHT); // -1 ~ 1
 		m_xmf4x4World._43 = 0.f;
+
+
 	}
+}
+
+void CSTAMINAObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, bool b_UseTexture, CCamera* pCamera)
+{
+	if (!m_bEnable)
+		return;
+	if (m_pMesh)
+	{
+		// UI Size 정보 Update
+		// 
+		// CGameObject의 정보를 넘길 버퍼가 있고, 해당 버퍼에 대한 CPU 포인터가 있으면 UpdateShaderVariables 함수를 호출한다.
+		//PreBarUpdate(0.f);
+		//UpdateShaderVariables(pd3dCommandList);
+		//// 여기서 메쉬의 렌더를 한다.
+		//m_pMesh->OnPreRender(pd3dCommandList);
+		//m_pMesh->Render(pd3dCommandList, 0);
+
+
+		CurBarUpdate(0.f);
+		UpdateShaderVariables(pd3dCommandList);
+		// 여기서 메쉬의 렌더를 한다.
+		m_pMesh->OnPreRender(pd3dCommandList);
+
+		m_tRect[0] = { (LONG)(FRAME_BUFFER_WIDTH * 0.15f), (LONG)(FRAME_BUFFER_HEIGHT * 0.2f) , (LONG)(FRAME_BUFFER_WIDTH * 0.35f) , (LONG)(FRAME_BUFFER_HEIGHT * 0.35f) };
+		pd3dCommandList->RSSetScissorRects(1, &m_tRect[0]);
+		m_pMesh->Render(pd3dCommandList, 0);
+
+	}
+
+	if (m_pChild) m_pChild->Render(pd3dCommandList, b_UseTexture, pCamera);
+	if (m_pSibling) m_pSibling->Render(pd3dCommandList, b_UseTexture, pCamera);
 }
 
 CNumberObject::CNumberObject(int iOffsetTextureIndex, int Number, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fSize) : CUIObject(iOffsetTextureIndex, pd3dDevice, pd3dCommandList, fSize)
 {
-
+	//m_tRect.push_back(RECT(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT * 0.12f));
 }
 
 CNumberObject::~CNumberObject()
@@ -349,7 +404,8 @@ void CNumberObject::UpdateNumberTexture(UINT N, UINT ORDER)
 
 		m_xmf4x4World._12 = N * 0.1f; // U1
 		m_xmf4x4World._13 = N * 0.1f + 0.1f; // U2
-		m_xmf4x4World._14 = 1.f; // V
+		m_xmf4x4World._14 = 0.f; // V
+		m_xmf4x4World._24 = 1.f; // V
 
 		float color = 2.8f;
 		m_xmf4x4World._21 = 1.f; // RGBN // 2.8
@@ -403,8 +459,11 @@ void CNumberObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, bool b_Us
 		return;
 	
 	UpdateLifeTime();
+
 	if (m_pMesh)
 	{
+		m_tRect[0] = { (LONG)(FRAME_BUFFER_WIDTH * 0.8f), (LONG)(FRAME_BUFFER_HEIGHT * 0.45f) , (LONG)(FRAME_BUFFER_WIDTH * 0.95f) , (LONG)(FRAME_BUFFER_HEIGHT * 0.55f) };
+		pd3dCommandList->RSSetScissorRects(1, &m_tRect[0]);
 		// UI Size 정보 Update
 		// 
 		// CGameObject의 정보를 넘길 버퍼가 있고, 해당 버퍼에 대한 CPU 포인터가 있으면 UpdateShaderVariables 함수를 호출한다.
@@ -414,6 +473,7 @@ void CNumberObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, bool b_Us
 			UpdateShaderVariables(pd3dCommandList);
 			// 여기서 메쉬의 렌더를 한다.
 			m_pMesh->OnPreRender(pd3dCommandList);
+			
 			m_pMesh->Render(pd3dCommandList, 0);
 		}
 	}
@@ -424,6 +484,10 @@ void CNumberObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, bool b_Us
 
 CBloodEffectObject::CBloodEffectObject(int iTextureIndex, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fSize) : CUIObject(iTextureIndex, pd3dDevice, pd3dCommandList, fSize)
 {
+	m_tRect.push_back(RECT(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT * 0.12f));
+	m_tRect.push_back(RECT(0, FRAME_BUFFER_HEIGHT * 0.88f, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT));
+	m_tRect.push_back(RECT(0, FRAME_BUFFER_HEIGHT * 0.12f, FRAME_BUFFER_WIDTH * 0.12f, FRAME_BUFFER_HEIGHT * 0.88f));
+	m_tRect.push_back(RECT(FRAME_BUFFER_WIDTH * 0.9f, FRAME_BUFFER_HEIGHT * 0.12f, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT * 0.88f));
 }
 
 CBloodEffectObject::~CBloodEffectObject()
@@ -458,8 +522,10 @@ void CBloodEffectObject::Update(float fTimeElapsed)
 
 		m_xmf4x4World._33 = m_iTextureIndex; // 텍스쳐 인덱스
 
-		m_xmf4x4World._12 = 1.f; // U
-		m_xmf4x4World._13 = 1.f; // V
+		m_xmf4x4World._12 = 0.f; // U1
+		m_xmf4x4World._13 = 1.f; // U2
+		m_xmf4x4World._14 = 0.f; // V
+		m_xmf4x4World._24 = 1.f; // V
 
 		m_xmf4x4World._21 = 1.f; // RGBN
 		//1, 023x((정규 좌표) + 1.0)x0.5
@@ -469,8 +535,35 @@ void CBloodEffectObject::Update(float fTimeElapsed)
 		m_xmf4x4World._42 = (m_xmf2ScreenPosition.y / FRAME_BUFFER_HEIGHT);
 		m_xmf4x4World._43 = 0.f;
 
-
+		//gmtxGameObject._21_31_44
+		m_xmf4x4World._21 = 0.5f;
+		m_xmf4x4World._31 = 0.5f;
+		m_xmf4x4World._44 = 0.5f;
 		m_xmf4x4World._23 = m_fLifeTime; // ALPHA
 	}
 
+}
+
+void CBloodEffectObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, bool b_UseTexture, CCamera* pCamera)
+{
+	if (!m_bEnable)
+		return;
+	if (m_pMesh)
+	{
+
+		// UI Size 정보 Update
+		// 
+		// CGameObject의 정보를 넘길 버퍼가 있고, 해당 버퍼에 대한 CPU 포인터가 있으면 UpdateShaderVariables 함수를 호출한다.
+		UpdateShaderVariables(pd3dCommandList);
+		// 여기서 메쉬의 렌더를 한다.
+		m_pMesh->OnPreRender(pd3dCommandList);
+		for (int i = 0; i < m_tRect.size(); i++)
+		{
+			pd3dCommandList->RSSetScissorRects(1, &m_tRect[i]);
+			m_pMesh->Render(pd3dCommandList, 0);
+		}
+	}
+
+	if (m_pChild) m_pChild->Render(pd3dCommandList, b_UseTexture, pCamera);
+	if (m_pSibling) m_pSibling->Render(pd3dCommandList, b_UseTexture, pCamera);
 }

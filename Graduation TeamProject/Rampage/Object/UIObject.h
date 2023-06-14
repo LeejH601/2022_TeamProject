@@ -17,10 +17,12 @@ public:
 	void SetTextureIndex(UINT iTextureIndex);
 
 protected:
+	std::vector<D3D12_RECT> m_tRect;
 	XMFLOAT2 m_xmf2Size = XMFLOAT2(1.f, 1.f);
 	XMFLOAT2 m_xmf2ScreenPosition = XMFLOAT2(0.f, 0.f);
 	UINT	m_iTextureIndex = 0;
 };	
+
 
 class CBarObject : public CUIObject
 {
@@ -59,6 +61,7 @@ class CSTAMINAObject : public CBarObject
 public:
 	CSTAMINAObject(int iTextureIndex, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fSize);
 	virtual ~CSTAMINAObject();
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, bool b_UseTexture, CCamera* pCamera = NULL);
 	virtual void PreBarUpdate(float fTimeElapsed);
 	virtual void CurBarUpdate(float fTimeElapsed);
 protected:
@@ -90,6 +93,7 @@ public:
 
 	virtual void UpdateLifeTime(float fTimeElapsed);
 	virtual void Update(float fTimeElapsed);
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, bool b_UseTexture, CCamera* pCamera = NULL);
 
 private:
 	float m_fSize = 0.5f;

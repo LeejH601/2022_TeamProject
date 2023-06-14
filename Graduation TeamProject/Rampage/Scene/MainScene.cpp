@@ -870,7 +870,7 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pUIObject.push_back(std::move(pUIObject));
 
 	pUIObject = std::make_unique<CNumberObject>(14, 35, pd3dDevice, pd3dCommandList, 10.f);
-	pUIObject->SetSize(XMFLOAT2(64.f * 1.5f * 10.f, 60.f * 1.5f));
+	pUIObject->SetSize(XMFLOAT2(64.f * 1.5f, 60.f * 1.5f));
 	pUIObject->SetScreenPosition(XMFLOAT2(FRAME_BUFFER_WIDTH * 0.85f, FRAME_BUFFER_HEIGHT * 0.5f));
 	pUIObject->SetTextureIndex(m_pTextureManager->LoadTotalTextureIndex(TextureType::UITexture, L"Image/UiImages/Number/Numbers.dds")); // 0
 	m_pUIObject.push_back(std::move(pUIObject));
