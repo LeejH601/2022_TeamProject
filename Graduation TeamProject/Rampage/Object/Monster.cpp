@@ -153,6 +153,7 @@ void CMonster::UpdateTransform(XMFLOAT4X4* pxmf4x4Parent)
 {
 	CPhysicsObject::UpdateTransform(NULL);
 
+
 	m_BodyBoundingBox.Transform(m_TransformedBodyBoundingBox, XMLoadFloat4x4(&m_xmf4x4Transform));
 #ifdef RENDER_BOUNDING_BOX
 	if (pBodyBoundingBoxMesh)
@@ -167,6 +168,11 @@ void CMonster::UpdateTransform(XMFLOAT4X4* pxmf4x4Parent)
 #endif 
 		m_WeaponBoundingBox.Transform(m_TransformedWeaponBoundingBox, XMLoadFloat4x4(&pWeapon->GetWorld()));
 	}
+
+	if (m_bSimulateArticulate) {
+		m_pSkinnedAnimationController->UpdateBoneTransform();
+	}
+
 }
 void CMonster::SetHit(CGameObject* pHitter)
 {

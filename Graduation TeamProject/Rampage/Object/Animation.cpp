@@ -162,7 +162,6 @@ CAnimationController::CAnimationController(ID3D12Device* pd3dDevice, ID3D12Graph
 
 	m_ppd3dcbSkinningBoneTransforms.resize(m_nSkinnedMeshes);
 	m_ppcbxmf4x4MappedSkinningBoneTransforms.resize(m_nSkinnedMeshes);
-	m_pxmf4x4BoneTransforms.resize(SKINNED_ANIMATION_BONES);
 
 	UINT ncbElementBytes = (((sizeof(XMFLOAT4X4) * SKINNED_ANIMATION_BONES) + 255) & ~255); //256ÀÇ ¹è¼ö
 	for (int i = 0; i < m_nSkinnedMeshes; i++)
@@ -185,6 +184,16 @@ void CAnimationController::SetCallbackKey(int nAnimationTrack, int nKeyIndex, fl
 void CAnimationController::SetAnimationCallbackHandler(int nAnimationTrack, CAnimationCallbackHandler* pCallbackHandler)
 {
 	if (m_pAnimationTracks.data()) m_pAnimationTracks[nAnimationTrack].SetAnimationCallbackHandler(pCallbackHandler);
+}
+void CAnimationController::UpdateBoneTransform()
+{
+	for (int i = 0; i < m_nSkinnedMeshes; ++i) {
+		XMFLOAT4X4* p = m_ppcbxmf4x4MappedSkinningBoneTransforms[i];
+
+		for (int j = 0; j < m_ppSkinnedMeshes[i]->m_nSkinningBones; j++) {
+			XMStoreFloat4x4(&p[j], XMMatrixTranspose(XMLoadFloat4x4(&m_ppSkinnedMeshes[i]->m_ppSkinningBoneFrameCaches[j]->m_xmf4x4World)));
+		}
+	}
 }
 void CAnimationController::SetTrackAnimationSet(int nAnimationTrack, int nAnimationSet)
 {
@@ -318,13 +327,7 @@ void CAnimationController::AdvanceTime(float fTimeElapsed, CGameObject* pRootGam
 
 		pRootGameObject->UpdateTransform(NULL);
 
-		for (int i = 0; i < m_nSkinnedMeshes; ++i) {
-			XMFLOAT4X4* p = m_ppcbxmf4x4MappedSkinningBoneTransforms[i];
-
-			for (int j = 0; j < m_ppSkinnedMeshes[i]->m_nSkinningBones; j++) {
-				XMStoreFloat4x4(&p[j], XMMatrixTranspose(XMLoadFloat4x4(&m_ppSkinnedMeshes[i]->m_ppSkinningBoneFrameCaches[j]->m_xmf4x4World)));
-			}
-		}
+		UpdateBoneTransform();
 		
 	}
 }

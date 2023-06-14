@@ -19,6 +19,7 @@ void CPhysicsObject::UpdateTransform(XMFLOAT4X4* pxmf4x4Parent)
 {
 	if (m_bSimulateArticulate) {
 		UpdateTransformFromArticulation(NULL, m_pArtiLinkNames, m_AritculatCacheMatrixs, m_xmf3Scale.x);
+		
 	}
 	else {
 		UpdateMatrix();

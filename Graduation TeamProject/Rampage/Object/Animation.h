@@ -141,6 +141,8 @@ public:
 	void SetCallbackKey(int nAnimationTrack, int nKeyIndex, float fTime, void* pData);
 	void SetAnimationCallbackHandler(int nAnimationTrack, CAnimationCallbackHandler* pCallbackHandler);
 
+	void UpdateBoneTransform();
+
 	void AdvanceTime(float fElapsedTime, CGameObject* pRootGameObject);
 
 	
