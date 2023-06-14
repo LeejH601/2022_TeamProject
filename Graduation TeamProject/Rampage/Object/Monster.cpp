@@ -3,6 +3,7 @@
 #include "ModelManager.h"
 #include "..\Global\Locator.h"
 #include "..\Shader\BoundingBoxShader.h"
+#include "..\Sound\SoundManager.h"
 
 CMonster::CMonster()
 {
@@ -170,8 +171,25 @@ void CMonster::UpdateTransform(XMFLOAT4X4* pxmf4x4Parent)
 		m_WeaponBoundingBox.Transform(m_TransformedWeaponBoundingBox, XMLoadFloat4x4(&pWeapon->GetWorld()));
 	}
 }
-void CMonster::SetHit(CGameObject* pHitter)
+bool CMonster::SetHit(CGameObject* pHitter)
 {
+	return false;
+}
+void CMonster::PlayMonsterEffectSound()
+{
+}
+bool CMonster::CheckCollision(CGameObject* pTargetObject)
+{
+	if (pTargetObject)
+	{
+		BoundingOrientedBox* TargetBoundingBox = pTargetObject->GetBoundingBox();
+		if (m_TransformedWeaponBoundingBox.Intersects(*TargetBoundingBox)) {
+			if(pTargetObject->SetHit(this))
+				PlayMonsterEffectSound();
+			return true;
+		}
+	}
+	return false;
 }
 void CMonster::UpdateTransformFromArticulation(XMFLOAT4X4* pxmf4x4Parent, std::vector<std::string> pArtiLinkNames, std::vector<XMFLOAT4X4>& AritculatCacheMatrixs, float scale)
 {
@@ -201,8 +219,13 @@ void CMonster::UpdateTransformFromArticulation(XMFLOAT4X4* pxmf4x4Parent, std::v
 COrcObject::COrcObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks)
 {
 	m_MonsterType = MONSTER_TYPE::ORC;
-	m_fAtkStartTime = 0.55f;
-	m_fAtkEndTime = 0.92f;
+	m_fAtkStartTime = 0.78f;
+	m_fAtkEndTime = 0.93f;
+
+	m_iAttackAnimationNum = 1;
+	m_fAttackSoundDelay = 0.78f;
+	m_fAttackSoundVolume = 1.5f;
+	m_strAttackSoundPath = "Sound/shoot/Air Cut by Langerium Id-84616.wav";
 
 	CLoadedModelInfo* pOrcModel = CModelManager::GetInst()->GetModelInfo("Object/Orc.bin");;
 	if (!pOrcModel) pOrcModel = CModelManager::GetInst()->LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, "Object/Orc.bin");
@@ -216,6 +239,10 @@ COrcObject::COrcObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3d
 }
 COrcObject::~COrcObject()
 {
+}
+void COrcObject::PlayMonsterEffectSound()
+{
+	CSoundManager::GetInst()->PlaySound("Sound/effect/HammerFlesh5.wav", 1.0f, 0.0f);
 }
 void COrcObject::PrepareBoundingBox(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
@@ -234,8 +261,13 @@ void COrcObject::PrepareBoundingBox(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 CGoblinObject::CGoblinObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks)
 {
 	m_MonsterType = MONSTER_TYPE::GOBLIN;
-	m_fAtkStartTime = 0.65f;
-	m_fAtkEndTime = 1.05f;
+	m_fAtkStartTime = 0.53f;
+	m_fAtkEndTime = 0.69f;
+
+	m_iAttackAnimationNum = 2;
+	m_fAttackSoundDelay = 0.53f;
+	m_fAttackSoundVolume = 1.0f;
+	m_strAttackSoundPath = "Sound/shoot/Air Cut by Langerium Id-84616.wav";
 
 	CLoadedModelInfo* pGoblinModel = CModelManager::GetInst()->GetModelInfo("Object/Goblin.bin");;
 	if (!pGoblinModel) pGoblinModel = CModelManager::GetInst()->LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, "Object/Goblin.bin");
@@ -249,6 +281,10 @@ CGoblinObject::CGoblinObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 }
 CGoblinObject::~CGoblinObject()
 {
+}
+void CGoblinObject::PlayMonsterEffectSound()
+{
+	CSoundManager::GetInst()->PlaySound("Sound/effect/HammerFlesh5.wav", 1.0f, 0.0f);
 }
 void CGoblinObject::PrepareBoundingBox(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
@@ -266,8 +302,13 @@ void CGoblinObject::PrepareBoundingBox(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 CSkeletonObject::CSkeletonObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks)
 {
 	m_MonsterType = MONSTER_TYPE::SKELETON;
-	m_fAtkStartTime = 0.86f;
-	m_fAtkEndTime = 1.37f;
+	m_fAtkStartTime = 1.15f;
+	m_fAtkEndTime = 1.3f;
+
+	m_iAttackAnimationNum = 2;
+	m_fAttackSoundDelay = 1.15f;
+	m_fAttackSoundVolume = 0.35f;
+	m_strAttackSoundPath = "Sound/shoot/ethanchase7744__sword-slash.wav";
 
 	CLoadedModelInfo* pSkeletonModel = CModelManager::GetInst()->GetModelInfo("Object/Skeleton.bin");;
 	if (!pSkeletonModel) pSkeletonModel = CModelManager::GetInst()->LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, "Object/Skeleton.bin");
@@ -281,6 +322,10 @@ CSkeletonObject::CSkeletonObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 }
 CSkeletonObject::~CSkeletonObject()
 {
+}
+void CSkeletonObject::PlayMonsterEffectSound()
+{
+	CSoundManager::GetInst()->PlaySound("Sound/effect/hit-swing-sword.wav", 1.0f, 0.0f);
 }
 void CSkeletonObject::PrepareBoundingBox(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {

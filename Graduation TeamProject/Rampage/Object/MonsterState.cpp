@@ -1,6 +1,7 @@
 #include "MonsterState.h"
 #include "Monster.h"
 #include "..\Global\Locator.h"
+#include "..\Sound\SoundManager.h"
 
 
 Spawn_Monster::Spawn_Monster()
@@ -339,7 +340,7 @@ void Chasing_Monster::Exit(CMonster* monster)
 
 void Attack_Monster::Enter(CMonster* monster)
 {
-	monster->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
+	monster->m_pSkinnedAnimationController->SetTrackAnimationSet(0, monster->m_iAttackAnimationNum);
 	monster->m_pSkinnedAnimationController->m_fTime = 0.0f;
 	monster->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition = 0.0f;
 	monster->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_nType = ANIMATION_TYPE_ONCE;
@@ -376,6 +377,11 @@ void Attack_Monster::Execute(CMonster* monster, float fElapsedTime)
 void Attack_Monster::Animate(CMonster* monster, float fElapsedTime)
 {
 	monster->Animate(fElapsedTime);
+
+	if (IsEqual(monster->m_fAttackSoundDelay, monster->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition, ANIMATION_CALLBACK_EPSILON))
+	{
+		CSoundManager::GetInst()->PlaySound(monster->m_strAttackSoundPath, monster->m_fAttackSoundVolume, 0.0f);
+	}
 }
 
 void Attack_Monster::OnRootMotion(CMonster* monster, float fTimeElapsed)

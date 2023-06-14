@@ -61,7 +61,7 @@ public:
 	virtual void Update(float fTimeElapsed);
 	virtual bool CheckCollision(CGameObject* pTargetObject);
 
-	virtual void SetHit(CGameObject* pHitter);
+	virtual bool SetHit(CGameObject* pHitter);
 
 	void SetCamera(CCamera* pCamera) { m_pCamera = pCamera; }
 	virtual void SetScale(float x, float y, float z);
