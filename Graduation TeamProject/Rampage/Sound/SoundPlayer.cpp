@@ -10,10 +10,17 @@ void CSoundPlayer::PlaySound(FMOD_SYSTEM* g_sound_system, SoundPlayInfo sound_pl
 
     for (auto it = m_vPlayingSounds.begin(); it != m_vPlayingSounds.end(); ++it) {
         FMOD_CHANNEL* pChannel = *it;
+
         FMOD_SOUND* currentSound;
+        float fVolume;
         auto result = FMOD_Channel_GetCurrentSound(pChannel, &currentSound);
+
         if (currentSound == sound_play_info.pSound->GetSound())
-            OutputDebugString(L"SameSound\n");
+        {
+            //OutputDebugString(L"SameSound\n");
+            FMOD_Channel_GetVolume(pChannel, &fVolume);
+            FMOD_Channel_SetVolume(pChannel, fVolume * 0.8f);
+        }
     }
 
     sound_play_info.pSound->play(g_sound_system, channelgroup);
