@@ -203,6 +203,8 @@ CKnightPlayer::CKnightPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 	SetChild(pKnightModel->m_pModelRootObject, true);
 	//m_pSkinnedAnimationController = std::make_unique<CKightNoMoveRootAnimationController>(pd3dDevice, pd3dCommandList, nAnimationTracks, pKnightModel);
 	m_pSkinnedAnimationController = std::make_unique<CKightRootMoveAnimationController>(pd3dDevice, pd3dCommandList, nAnimationTracks, pKnightModel);
+	/*m_pSkinnedAnimationController->SetTrackWeight(0, 0.5f);
+	m_pSkinnedAnimationController->SetTrackWeight(1, 0.5f);*/
 
 	auto Find_Frame_Index = [](std::string& target, std::vector<std::string>& source) {
 		int cnt = 0;
@@ -224,6 +226,7 @@ CKnightPlayer::CKnightPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 }
 CKnightPlayer::~CKnightPlayer()
 {
+
 }
 void CKnightPlayer::SetRigidDynamic()
 {

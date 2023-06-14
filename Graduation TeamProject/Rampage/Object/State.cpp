@@ -673,6 +673,9 @@ void Run_Player::Enter(CPlayer* player)
 {
 	//player->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 19);
 	player->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 16);
+	/*player->m_pSkinnedAnimationController->SetTrackWeight(0, 0.5f);
+	player->m_pSkinnedAnimationController->SetTrackAnimationSet(1, 4);
+	player->m_pSkinnedAnimationController->SetTrackWeight(1, 0.5f);*/
 	player->m_pSkinnedAnimationController->m_fTime = 0.0f;
 	player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition = 0.0f;
 	player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_nType = ANIMATION_TYPE_LOOP;

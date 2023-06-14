@@ -28,6 +28,7 @@ CGameObject::CGameObject(int nMaterials)
 }
 CGameObject::~CGameObject()
 {
+	if (m_pSkinnedAnimationController) m_pSkinnedAnimationController->~CAnimationController();
 }
 void CGameObject::ReleaseShaderVariables()
 {
