@@ -242,7 +242,7 @@ COrcObject::~COrcObject()
 }
 void COrcObject::PlayMonsterEffectSound()
 {
-	CSoundManager::GetInst()->PlaySound("Sound/effect/HammerFlesh5.wav", 1.0f, 0.0f);
+	CSoundManager::GetInst()->PlaySound("Sound/effect/MP_Left Hook.mp3", 2.0f, 0.0f);
 }
 void COrcObject::PrepareBoundingBox(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
@@ -284,7 +284,7 @@ CGoblinObject::~CGoblinObject()
 }
 void CGoblinObject::PlayMonsterEffectSound()
 {
-	CSoundManager::GetInst()->PlaySound("Sound/effect/HammerFlesh5.wav", 1.0f, 0.0f);
+	CSoundManager::GetInst()->PlaySound("Sound/effect/MP_Left Hook.mp3", 1.5f, 0.0f);
 }
 void CGoblinObject::PrepareBoundingBox(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
@@ -325,7 +325,7 @@ CSkeletonObject::~CSkeletonObject()
 }
 void CSkeletonObject::PlayMonsterEffectSound()
 {
-	CSoundManager::GetInst()->PlaySound("Sound/effect/hit-swing-sword.wav", 1.0f, 0.0f);
+	//CSoundManager::GetInst()->PlaySound("Sound/effect/Buffer Spell.wav", 1.0f, 0.0f);
 }
 void CSkeletonObject::PrepareBoundingBox(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
