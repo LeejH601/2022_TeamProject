@@ -302,10 +302,12 @@ void CSkinnedMesh::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandL
 		D3D12_GPU_VIRTUAL_ADDRESS d3dcbBoneTransformsGpuVirtualAddress = m_pd3dcbSkinningBoneTransforms->GetGPUVirtualAddress();
 		pd3dCommandList->SetGraphicsRootConstantBufferView(4, d3dcbBoneTransformsGpuVirtualAddress); //Skinned Bone Transforms
 
-		for (int j = 0; j < m_nSkinningBones; j++)
+		//memcpy(m_pcbxmf4x4MappedSkinningBoneTransforms, m_xmf4x4BoneTransforms, sizeof(XMFLOAT4X4) * SKINNED_ANIMATION_BONES);
+
+		/*for (int j = 0; j < m_nSkinningBones; j++)
 		{
 			XMStoreFloat4x4(&m_pcbxmf4x4MappedSkinningBoneTransforms[j], XMMatrixTranspose(XMLoadFloat4x4(&m_ppSkinningBoneFrameCaches[j]->m_xmf4x4World)));
-		}
+		}*/
 	}
 }
 void CSkinnedMesh::LoadMeshFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, FILE* pInFile)

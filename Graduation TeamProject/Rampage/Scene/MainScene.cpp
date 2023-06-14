@@ -467,6 +467,16 @@ SCENE_RETURN_TYPE CMainTMPScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMe
 				}
 			}
 			break;
+		case VK_CONTROL:
+			if (m_pPlayer)
+			{
+				if (!((CPlayer*)m_pPlayer)->m_bIsDash)
+				{
+					((CPlayer*)m_pPlayer)->m_bIsDash = true;
+					((CPlayer*)m_pPlayer)->SetSpeedUperS(((CPlayer*)m_pPlayer)->GetSpeedUperS() * 2.0f);
+				}
+			}
+			break;
 		case VK_F5:
 		{
 			XMFLOAT3 xmf3MonsterPos[5];
@@ -571,6 +581,16 @@ SCENE_RETURN_TYPE CMainTMPScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMe
 	case WM_KEYUP:
 		switch (wParam)
 		{
+		case VK_CONTROL:
+			if (m_pPlayer)
+			{
+				if (((CPlayer*)m_pPlayer)->m_bIsDash)
+				{
+					((CPlayer*)m_pPlayer)->m_bIsDash = false;
+					((CPlayer*)m_pPlayer)->SetSpeedUperS(((CPlayer*)m_pPlayer)->GetSpeedUperS() / 2.0f);
+				}
+			}
+			break;
 		case 'w':
 		case 'W':
 			if (wParam == 'w' || wParam == 'W') dwDirection &= (~DIR_FORWARD);
@@ -1131,7 +1151,7 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 	for (int i = 0; i < m_pEnemys.size(); ++i)
 	{
 		pd3dCommandList->SetGraphicsRoot32BitConstants(0, 1, &i, 33);
-		m_pEnemys[i]->Animate(0.0f);
+		//m_pEnemys[i]->Animate(0.0f);
 		m_pEnemys[i]->Render(pd3dCommandList, true);
 	}
 	

@@ -78,7 +78,8 @@ public:
 	BOOL 							m_bEnable = true;
 	float 							m_fSpeed = 1.0f;
 	float 							m_fPosition = 0.0f;
-	float 							m_fWeight = 1.0f;
+	float 							m_fWeight = 0.0f;
+	float							m_fSequenceWeight = 0.0f;
 
 	int 							m_nAnimationSet = 0;
 
@@ -96,10 +97,13 @@ public:
 	void SetWeight(float fWeight) { m_fWeight = fWeight; }
 	void SetPosition(float fPosition) { m_fPosition = fPosition; }
 	float UpdatePosition(float fTrackPosition, float fElapsedTime, float fAnimationLength);
+	float UpdateSequence(float fSequence, float fElapsedTime, float fAnimationLength);
 
 	void SetCallbackKeys(int nCallbackKeys);
 	void SetCallbackKey(int nKeyIndex, float fTime, void* pData);
 	void SetAnimationCallbackHandler(CAnimationCallbackHandler* pCallbackHandler);
+	float ConvertSequenceToPosition(float fAnimationLength) { return m_fSequenceWeight * fAnimationLength; };
+	float ConvertPositionToSequence(float fAnimationLength) { return m_fPosition / fAnimationLength; };
 
 	void HandleCallback();
 };

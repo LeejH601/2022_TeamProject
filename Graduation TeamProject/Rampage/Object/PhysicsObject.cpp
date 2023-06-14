@@ -149,6 +149,18 @@ void CPhysicsObject::SetLookAt(XMFLOAT3& xmf3LookAt)
 	m_xmf3Look.x = mtxLookAt._13, m_xmf3Look.y = mtxLookAt._23, m_xmf3Look.z = mtxLookAt._33;
 }
 
+void CPhysicsObject::Acceleration(float fTimeElapsed)
+{
+	if (m_fCurrentSpeedUperS < m_fSpeedUperS) {
+		m_fCurrentSpeedUperS += m_fAccelerationUperS * fTimeElapsed;
+		m_fCurrentSpeedUperS = min(m_fCurrentSpeedUperS, m_fSpeedUperS);
+	}
+	else {
+		m_fCurrentSpeedUperS -= m_fAccelerationUperS * fTimeElapsed * 2.0f;
+		m_fCurrentSpeedUperS = max(m_fCurrentSpeedUperS, m_fSpeedUperS);
+	}
+}
+
 void CPhysicsObject::SetScale(float x, float y, float z)
 {
 	m_xmf3Scale.x = x;

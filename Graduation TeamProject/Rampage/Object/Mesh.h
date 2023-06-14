@@ -130,7 +130,7 @@ public:
 	ComPtr<ID3D12Resource> m_pd3dcbBindPoseBoneOffsets = NULL;
 	XMFLOAT4X4* m_pcbxmf4x4MappedBindPoseBoneOffsets = NULL;
 
-	ComPtr<ID3D12Resource> m_pd3dcbSkinningBoneTransforms = NULL; //Pointer Only
+	ID3D12Resource* m_pd3dcbSkinningBoneTransforms = NULL; //Pointer Only
 	XMFLOAT4X4* m_pcbxmf4x4MappedSkinningBoneTransforms = NULL;
 public:
 	CSkinnedMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList) {}

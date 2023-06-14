@@ -28,8 +28,9 @@ CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 	m_pStateMachine->SetCurrentState(Idle_Player::GetInst());
 	m_pStateMachine->SetPreviousState(Idle_Player::GetInst());
 
-	m_fSpeedKperH = 44.0f;
+	m_fSpeedKperH = 44.0f / 2.0f;
 	m_fSpeedUperS = MeterToUnit(m_fSpeedKperH * 1000.0f) / 3600.0f;
+	m_fAccelerationUperS = m_fSpeedUperS * 3.0f;
 
 	m_fTotalStamina = 100.f;
 	m_fStamina = 100.f;
@@ -116,6 +117,7 @@ void CPlayer::Update(float fTimeElapsed)
 	CPhysicsObject::Apply_Gravity(fTimeElapsed);
 
 	XMFLOAT3 xmf3NewVelocity = Vector3::TransformCoord(m_xmf3Velocity, XMMatrixRotationAxis(XMVECTOR{ 0.0f, 1.0f, 0.0f, 0.0f }, XMConvertToRadians(fDistortionDegree)));
+	
 	CPhysicsObject::Move(xmf3NewVelocity, false);
 
 	// 플레이어가 터레인보다 아래에 있지 않도록 하는 코드
@@ -145,7 +147,7 @@ void CPlayer::ProcessInput(DWORD dwDirection, float cxDelta, float cyDelta, floa
 	{
 		if (dwDirection)
 		{
-			Move(dwDirection, m_fSpeedUperS * fTimeElapsed, true, pCamera);
+			Move(dwDirection, m_fCurrentSpeedUperS * fTimeElapsed + 0.00001f, true, pCamera);
 
 			XMFLOAT3 xmf3Shift = XMFLOAT3{};
 
@@ -158,6 +160,7 @@ void CPlayer::ProcessInput(DWORD dwDirection, float cxDelta, float cyDelta, floa
 			m_dwDirectionCache = dwDirection;
 			m_xmf3DirectionCache = xmf3Shift;
 		}
+		
 	}
 }
 
@@ -202,9 +205,9 @@ CKnightPlayer::CKnightPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 	m_pPelvisObject = pKnightModel->m_pModelRootObject->FindFrame("pelvis");
 	SetChild(pKnightModel->m_pModelRootObject, true);
 	//m_pSkinnedAnimationController = std::make_unique<CKightNoMoveRootAnimationController>(pd3dDevice, pd3dCommandList, nAnimationTracks, pKnightModel);
-	m_pSkinnedAnimationController = std::make_unique<CKightRootMoveAnimationController>(pd3dDevice, pd3dCommandList, nAnimationTracks, pKnightModel);
-	/*m_pSkinnedAnimationController->SetTrackWeight(0, 0.5f);
-	m_pSkinnedAnimationController->SetTrackWeight(1, 0.5f);*/
+	m_pSkinnedAnimationController = std::make_unique<CKightRootMoveAnimationController>(pd3dDevice, pd3dCommandList, 2, pKnightModel); // 애니메이션 트랙 갯수 고정
+	m_pSkinnedAnimationController->SetTrackWeight(0,1.f);
+	m_pSkinnedAnimationController->SetTrackWeight(1, 0.f);
 
 	auto Find_Frame_Index = [](std::string& target, std::vector<std::string>& source) {
 		int cnt = 0;

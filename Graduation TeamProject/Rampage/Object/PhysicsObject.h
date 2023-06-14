@@ -20,6 +20,8 @@ protected:
 	float m_fYaw;
 	float m_fSpeedKperH;
 	float m_fSpeedUperS;
+	float m_fCurrentSpeedUperS;
+	float m_fAccelerationUperS;
 	LPVOID m_pUpdatedContext = NULL;
 	bool m_bOnGround = false; // ¶¥¿¡ ´êÀºÁö ¿©ºÎ
 
@@ -44,6 +46,9 @@ public:
 	virtual void SetPosition(float x, float y, float z);
 	virtual void SetPosition(XMFLOAT3 xmf3Position);
 	void SetLookAt(XMFLOAT3& xmf3LookAt);
+	void SetSpeedUperS(float speed) { m_fSpeedUperS = speed; };
+	void SetCurrSpeed(float speed) { m_fCurrentSpeedUperS = speed; };
+	void Acceleration(float fTimeElapsed);
 
 	virtual XMFLOAT3 GetPosition();
 	virtual XMFLOAT3 GetLook();
@@ -51,6 +56,7 @@ public:
 	virtual XMFLOAT3 GetRight();
 	virtual XMFLOAT3 GetScale() { return m_xmf3Scale; };
 	virtual XMFLOAT3 GetVelocity();
+	float GetCurrSpeed() { return m_fCurrentSpeedUperS; };
 
 	bool GetOnGround();
 

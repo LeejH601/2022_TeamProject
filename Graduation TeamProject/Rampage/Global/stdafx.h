@@ -103,7 +103,7 @@ extern int gnCurrentParticles;
 #define _PLANE_WIDTH			1024
 #define _PLANE_HEIGHT			1024
 
-#define ANIMATION_CALLBACK_EPSILON		0.0165f
+#define ANIMATION_CALLBACK_EPSILON		0.00001f
 #define EPSILON							1.0e-10f
 #define PI								3.14159
 

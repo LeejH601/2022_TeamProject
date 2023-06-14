@@ -24,9 +24,17 @@ Idle_Player::~Idle_Player()
 void Idle_Player::Enter(CPlayer* player)
 {
 	player->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 4);
+	player->m_pSkinnedAnimationController->SetTrackWeight(0, 1.0);
+	player->m_pSkinnedAnimationController->SetTrackAnimationSet(1, 2);
+	player->m_pSkinnedAnimationController->SetTrackWeight(1, 0.0);
 	player->m_pSkinnedAnimationController->m_fTime = 0.0f;
 	player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition = 0.0f;
+	player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fSequenceWeight = 0.0f;
 	player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_nType = ANIMATION_TYPE_LOOP;
+
+	player->m_pSkinnedAnimationController->m_pAnimationTracks[1].m_fPosition = 0.0f;
+	player->m_pSkinnedAnimationController->m_pAnimationTracks[1].m_fSequenceWeight = 0.0f;
+	player->m_pSkinnedAnimationController->m_pAnimationTracks[1].m_nType = ANIMATION_TYPE_LOOP;
 
 
 	player->m_xmf3RootTransfromPreviousPos = XMFLOAT3{ 0.f, 0.f , 0.f };
@@ -328,8 +336,11 @@ void Atk1_Player::Enter(CPlayer* player)
 	player->m_iAttackId += 1;
 
 	player->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
+	player->m_pSkinnedAnimationController->SetTrackWeight(0, 1);
+	player->m_pSkinnedAnimationController->SetTrackWeight(1, 0);
 	player->m_pSkinnedAnimationController->m_fTime = 0.0f;
 	player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition = 0.0f;
+	player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fSequenceWeight = 0.0f;
 	player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_nType = ANIMATION_TYPE_ONCE;
 	player->m_bAttack = false; // 사용자가 좌클릭시 true가 되는 변수
 	player->m_fCMDConstant = 1.0f;
@@ -441,8 +452,11 @@ void Atk2_Player::Enter(CPlayer* player)
 	CLogger::GetInst()->Log(std::string("Player Enter Atk2"));
 	player->m_iAttackId += 1;
 	player->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 1);
+	player->m_pSkinnedAnimationController->SetTrackWeight(0, 1);
+	player->m_pSkinnedAnimationController->SetTrackWeight(1, 0);
 	player->m_pSkinnedAnimationController->m_fTime = 0.0f;
 	player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition = 0.2f;
+	//player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fSequenceWeight = 0.0f / ;
 	player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_nType = ANIMATION_TYPE_ONCE;
 	player->m_bAttack = false; // 사용자가 좌클릭시 true가 되는 변수
 	player->m_fCMDConstant = 1.0f;
@@ -577,8 +591,11 @@ void Atk3_Player::Enter(CPlayer* player)
 	player->m_fCMDConstant = 1.0f;
 
 	player->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 2);
+	player->m_pSkinnedAnimationController->SetTrackWeight(0, 1);
+	player->m_pSkinnedAnimationController->SetTrackWeight(1, 0);
 	player->m_pSkinnedAnimationController->m_fTime = 0.0f;
 	player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition = 0.0f;
+	player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fSequenceWeight = 0.0f;
 	player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_nType = ANIMATION_TYPE_ONCE;
 	player->m_bAttack = false; // 사용자가 좌클릭시 true가 되는 변수
 
@@ -671,11 +688,11 @@ Run_Player::~Run_Player()
 
 void Run_Player::Enter(CPlayer* player)
 {
-	//player->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 19);
-	player->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 16);
-	/*player->m_pSkinnedAnimationController->SetTrackWeight(0, 0.5f);
+	player->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 19);
+	//player->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 16);
+	player->m_pSkinnedAnimationController->SetTrackWeight(0, 1.0f);
 	player->m_pSkinnedAnimationController->SetTrackAnimationSet(1, 4);
-	player->m_pSkinnedAnimationController->SetTrackWeight(1, 0.5f);*/
+	player->m_pSkinnedAnimationController->SetTrackWeight(1, 0.0f);
 	player->m_pSkinnedAnimationController->m_fTime = 0.0f;
 	player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition = 0.0f;
 	player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_nType = ANIMATION_TYPE_LOOP;
@@ -688,7 +705,22 @@ void Run_Player::Enter(CPlayer* player)
 
 void Run_Player::Execute(CPlayer* player, float fElapsedTime)
 {
+	static int animationList[4] = { 4, 19, 16, 0};
+	static float valuePoint[3] = { 0.0f, 12.22222 ,24.44444444 };
 	XMFLOAT3 xmf3PlayerVel = player->GetVelocity();
+
+	player->Acceleration(fElapsedTime);
+
+	float value = player->GetCurrSpeed() / valuePoint[2];
+	value = value * 2.0f;
+	int animSetLow = floor(value);
+	//animSetLow = min(1, animSetLow);
+
+	player->m_pSkinnedAnimationController->m_pAnimationTracks[0].SetAnimationSet(animationList[animSetLow]);
+	player->m_pSkinnedAnimationController->m_pAnimationTracks[1].SetAnimationSet(animationList[animSetLow + 1]);
+
+	player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fWeight = 1.0f - (value - (int)value);
+		player->m_pSkinnedAnimationController->m_pAnimationTracks[1].m_fWeight = 1.0f - player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fWeight;
 
 	if (player->m_bEvasioned)
 		player->m_pStateMachine->ChangeState(Evasion_Player::GetInst());
@@ -699,6 +731,9 @@ void Run_Player::Execute(CPlayer* player, float fElapsedTime)
 	// Idle 상태로 복귀하는 코드
 	else if (Vector3::Length(xmf3PlayerVel) == 0)
 		player->m_pStateMachine->ChangeState(Idle_Player::GetInst());
+
+
+
 
 	// 발바닥 뼈에
 
@@ -734,6 +769,7 @@ void Run_Player::Animate(CPlayer* player, float fTimeElapsed)
 
 void Run_Player::Exit(CPlayer* player)
 {
+	player->SetCurrSpeed(0);
 }
 
 void Run_Player::OnRootMotion(CPlayer* player, float fTimeElapsed)
@@ -938,7 +974,7 @@ void Evasion_Player::Enter(CPlayer* player)
 		if (dwDirection & DIR_BACKWARD)xmf3Direction = Vector3::Add(xmf3Direction, Vector3::Normalize(XMFLOAT3(player->m_pCamera->GetLookVector().x, 0.0f, player->m_pCamera->GetLookVector().z)), -1.0f);
 		if (dwDirection & DIR_RIGHT)xmf3Direction = Vector3::Add(xmf3Direction, Vector3::Normalize(XMFLOAT3(player->m_pCamera->GetRightVector().x, 0.0f, player->m_pCamera->GetRightVector().z)));
 		if (dwDirection & DIR_LEFT)xmf3Direction = Vector3::Add(xmf3Direction, Vector3::Normalize(XMFLOAT3(player->m_pCamera->GetRightVector().x, 0.0f, player->m_pCamera->GetRightVector().z)), -1.0f);
-	
+
 		XMVECTOR playerLookVec = XMLoadFloat3(&(player->GetLook()));
 		XMVECTOR rollVec = XMLoadFloat3(&xmf3Direction);
 
@@ -946,7 +982,7 @@ void Evasion_Player::Enter(CPlayer* player)
 		rollVec = XMVector3Normalize(rollVec);
 
 		float dot = XMVectorGetX(XMVector3Dot(rollVec, playerLookVec));
-		
+
 		if (dot < -1.0f + FLT_EPSILON || dot > 1.0f - FLT_EPSILON)
 		{
 			dot < -1.0f + FLT_EPSILON ? degrees = 180.0f : degrees = 0.0f;
@@ -974,7 +1010,7 @@ void Evasion_Player::Enter(CPlayer* player)
 		//정면 - 오른쪽
 		//OutputDebugString(L"정면 - 오른쪽\n");
 		XMFLOAT3 newLookAt = Vector3::Add(player->GetLook(), player->GetRight());
-		player->SetLookAt(Vector3::Add(player->GetPosition(), 
+		player->SetLookAt(Vector3::Add(player->GetPosition(),
 			Vector3::Normalize(newLookAt)));
 		player->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 12);
 	}
@@ -1032,7 +1068,12 @@ void Evasion_Player::Enter(CPlayer* player)
 
 	player->m_pSkinnedAnimationController->m_fTime = 0.0f;
 	player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition = 0.0f;
+	player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fWeight = 1.0f;
 	player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_nType = ANIMATION_TYPE_ONCE;
+
+	player->m_pSkinnedAnimationController->m_pAnimationTracks[1].m_fPosition = 0.0f;
+	player->m_pSkinnedAnimationController->m_pAnimationTracks[1].m_fWeight = 0.0f;
+	player->m_pSkinnedAnimationController->m_pAnimationTracks[1].m_nType = ANIMATION_TYPE_ONCE;
 }
 
 void Evasion_Player::Execute(CPlayer* player, float fElapsedTime)

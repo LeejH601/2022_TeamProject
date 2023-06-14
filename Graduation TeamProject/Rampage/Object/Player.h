@@ -43,6 +43,7 @@ public:
 	float m_fComboFullTime = 10.f;
 	float m_fComboTime = m_fComboFullTime;
 	bool m_bCombo = false;
+	bool m_bIsDash = false;
 	
 	XMFLOAT3 m_xmf3AtkDirection;
 

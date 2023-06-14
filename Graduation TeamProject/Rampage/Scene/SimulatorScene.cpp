@@ -367,7 +367,7 @@ void CSimulatorScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 
 	// 3->IDLE
 	// 28->Attack
-	m_pMainCharacter = std::make_unique<CKnightPlayer>(pd3dDevice, pd3dCommandList, 1);
+	m_pMainCharacter = std::make_unique<CKnightPlayer>(pd3dDevice, pd3dCommandList, 2);
 	m_pMainCharacter->SetCamera(m_pSimulaterCamera.get());
 	m_pMainCharacter->SetPosition(XMFLOAT3(45 + offset.x, 100, 50 + offset.z));
 	m_pMainCharacter->SetScale(2.0f, 2.0f, 2.0f);

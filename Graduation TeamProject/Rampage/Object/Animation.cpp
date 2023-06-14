@@ -88,7 +88,7 @@ float CAnimationTrack::UpdatePosition(float fTrackPosition, float fElapsedTime, 
 			m_fPosition = fTrackPosition + fTrackElapsedTime;
 			if (m_fPosition > fAnimationLength)
 			{
-				m_fPosition = -ANIMATION_CALLBACK_EPSILON;
+				m_fPosition = 0;
 				return(fAnimationLength);
 			}
 		}
@@ -105,7 +105,43 @@ float CAnimationTrack::UpdatePosition(float fTrackPosition, float fElapsedTime, 
 		break;
 	}
 
+	m_fSequenceWeight = m_fPosition / fAnimationLength;
+
 	return(m_fPosition);
+}
+float CAnimationTrack::UpdateSequence(float fSequence, float fElapsedTime, float fAnimationLength)
+{
+	float fTrackElapsedTime = fElapsedTime * m_fSpeed;
+	float SequenceElapsedTime = (1.0f * fTrackElapsedTime) / fAnimationLength;
+
+	switch (m_nType)
+	{
+	case ANIMATION_TYPE_LOOP:
+	{
+		if (m_fSequenceWeight < 0.0f) m_fSequenceWeight = 0.0f;
+		else
+		{
+			m_fSequenceWeight = m_fSequenceWeight + SequenceElapsedTime;
+			if (m_fSequenceWeight > 1.0f)
+			{
+				m_fSequenceWeight = -ANIMATION_CALLBACK_EPSILON;
+				return(1.0f);
+			}
+		}
+		//			m_fPosition = fmod(fTrackPosition, m_pfKeyFrameTimes[m_nKeyFrames-1]); // m_fPosition = fTrackPosition - int(fTrackPosition / m_pfKeyFrameTimes[m_nKeyFrames-1]) * m_pfKeyFrameTimes[m_nKeyFrames-1];
+		//			m_fPosition = fmod(fTrackPosition, m_fLength); //if (m_fPosition < 0) m_fPosition += m_fLength;
+		//			m_fPosition = fTrackPosition - int(fTrackPosition / m_fLength) * m_fLength;
+		break;
+	}
+	case ANIMATION_TYPE_ONCE:
+		m_fSequenceWeight = m_fSequenceWeight + fTrackElapsedTime;
+		if (m_fSequenceWeight > 1.0f) m_fSequenceWeight = 1.0f;
+		break;
+	case ANIMATION_TYPE_PINGPONG:
+		break;
+	}
+
+	return(m_fSequenceWeight);
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -113,6 +149,10 @@ CAnimationController::CAnimationController(ID3D12Device* pd3dDevice, ID3D12Graph
 {
 	m_nAnimationTracks = nAnimationTracks;
 	m_pAnimationTracks.resize(nAnimationTracks);
+	m_pAnimationTracks[0].m_fWeight = 1.0f;
+	for (int i = 1; i < m_pAnimationTracks.size(); ++i) {
+		m_pAnimationTracks[i].m_fWeight = 0.0f;
+	}
 
 	m_pAnimationSets = pModel->m_pAnimationSets.get();
 
@@ -122,6 +162,7 @@ CAnimationController::CAnimationController(ID3D12Device* pd3dDevice, ID3D12Graph
 
 	m_ppd3dcbSkinningBoneTransforms.resize(m_nSkinnedMeshes);
 	m_ppcbxmf4x4MappedSkinningBoneTransforms.resize(m_nSkinnedMeshes);
+	m_pxmf4x4BoneTransforms.resize(SKINNED_ANIMATION_BONES);
 
 	UINT ncbElementBytes = (((sizeof(XMFLOAT4X4) * SKINNED_ANIMATION_BONES) + 255) & ~255); //256의 배수
 	for (int i = 0; i < m_nSkinnedMeshes; i++)
@@ -173,7 +214,7 @@ void CAnimationController::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3d
 {
 	for (int i = 0; i < m_nSkinnedMeshes; i++)
 	{
-		m_ppSkinnedMeshes[i]->m_pd3dcbSkinningBoneTransforms = m_ppd3dcbSkinningBoneTransforms[i];
+		m_ppSkinnedMeshes[i]->m_pd3dcbSkinningBoneTransforms = m_ppd3dcbSkinningBoneTransforms[i].Get();
 		m_ppSkinnedMeshes[i]->m_pcbxmf4x4MappedSkinningBoneTransforms = m_ppcbxmf4x4MappedSkinningBoneTransforms[i];
 	}
 }
@@ -182,70 +223,108 @@ void CAnimationController::AdvanceTime(float fTimeElapsed, CGameObject* pRootGam
 	m_fTime += fTimeElapsed;
 	if (m_pAnimationTracks.data())
 	{
-		/*for (int j = 0; j < m_pAnimationSets->m_nAnimatedBoneFrames; j++) m_pAnimationSets->m_ppAnimatedBoneFrameCaches[j]->m_xmf4x4Transform = Matrix4x4::Zero();
+		if (m_nAnimationTracks == 1) {
+			for (int j = 0; j < m_pAnimationSets->m_nAnimatedBoneFrames; j++) m_pAnimationSets->m_ppAnimatedBoneFrameCaches[j]->m_xmf4x4Transform = Matrix4x4::Zero();
 
-		for (int k = 0; k < m_nAnimationTracks; k++)
-		{
-			if (m_pAnimationTracks[k].m_bEnable)
+			for (int k = 0; k < m_nAnimationTracks; k++)
 			{
-				CAnimationSet* pAnimationSet = m_pAnimationSets->m_pAnimationSets[m_pAnimationTracks[k].m_nAnimationSet];
-				float fPosition = m_pAnimationTracks[k].UpdatePosition(m_pAnimationTracks[k].m_fPosition, fTimeElapsed, pAnimationSet->m_fLength);
-
-				for (int j = 0; j < m_pAnimationSets->m_nAnimatedBoneFrames; j++)
-				{
-					XMFLOAT4X4 xmf4x4Transform = m_pAnimationSets->m_ppAnimatedBoneFrameCaches[j]->m_xmf4x4Transform;
-					XMFLOAT4X4 xmf4x4TrackTransform = pAnimationSet->GetSRT(j, fPosition);
-					XMVECTOR q = XMQuaternionRotationMatrix(XMLoadFloat4x4(&xmf4x4TrackTransform));
-
-
-					XMFLOAT4X4 xmf4x4ScaledTransform = Matrix4x4::Scale(xmf4x4TrackTransform, m_pAnimationTracks[k].m_fWeight);
-					xmf4x4Transform = Matrix4x4::Add(xmf4x4Transform, xmf4x4ScaledTransform);
-					m_pAnimationSets->m_ppAnimatedBoneFrameCaches[j]->m_xmf4x4Transform = xmf4x4Transform;
-				}
-				m_pAnimationTracks[k].HandleCallback();
-			}
-		}*/
-
-		for (int k = 0; k < m_nAnimationTracks; ++k) {
-			CAnimationSet* pAnimationSet = m_pAnimationSets->m_pAnimationSets[m_pAnimationTracks[k].m_nAnimationSet];
-			m_pAnimationTracks[k].UpdatePosition(m_pAnimationTracks[k].m_fPosition, fTimeElapsed, pAnimationSet->m_fLength);
-		}
-
-		for (int j = 0; j < m_pAnimationSets->m_nAnimatedBoneFrames; j++) {
-			for (int k = 0; k < m_nAnimationTracks; ++k) {
-				XMFLOAT4X4 xmf4x4Transform;
-				XMFLOAT3 transfrom;
-				XMVECTOR q{};
 				if (m_pAnimationTracks[k].m_bEnable)
 				{
 					CAnimationSet* pAnimationSet = m_pAnimationSets->m_pAnimationSets[m_pAnimationTracks[k].m_nAnimationSet];
-					float fPosition = m_pAnimationTracks[k].m_fPosition;
+					float fPosition = m_pAnimationTracks[k].UpdatePosition(m_pAnimationTracks[k].m_fPosition, fTimeElapsed, pAnimationSet->m_fLength);
 
-					xmf4x4Transform = m_pAnimationSets->m_ppAnimatedBoneFrameCaches[j]->m_xmf4x4Transform;
-					XMFLOAT4X4 xmf4x4TrackTransform = pAnimationSet->GetSRT(j, fPosition);
-					XMVECTOR q1 = XMQuaternionRotationMatrix(XMLoadFloat4x4(&xmf4x4TrackTransform));
-					q1 = q1 * m_pAnimationTracks[k].m_fWeight;
+					for (int j = 0; j < m_pAnimationSets->m_nAnimatedBoneFrames; j++)
+					{
+						XMFLOAT4X4 xmf4x4Transform = m_pAnimationSets->m_ppAnimatedBoneFrameCaches[j]->m_xmf4x4Transform;
+						XMFLOAT4X4 xmf4x4TrackTransform = pAnimationSet->GetSRT(j, fPosition);
+						XMVECTOR q = XMQuaternionRotationMatrix(XMLoadFloat4x4(&xmf4x4TrackTransform));
 
-					q += q1;
-					transfrom = XMFLOAT3(xmf4x4TrackTransform._41, xmf4x4TrackTransform._42, xmf4x4TrackTransform._43);
-					XMFLOAT4X4 xmf4x4ScaledTransform = Matrix4x4::Scale(xmf4x4TrackTransform, m_pAnimationTracks[k].m_fWeight);
-					xmf4x4Transform = Matrix4x4::Add(xmf4x4Transform, xmf4x4ScaledTransform);
 
+						XMFLOAT4X4 xmf4x4ScaledTransform = Matrix4x4::Scale(xmf4x4TrackTransform, m_pAnimationTracks[k].m_fWeight);
+						xmf4x4Transform = Matrix4x4::Add(xmf4x4Transform, xmf4x4ScaledTransform);
+						m_pAnimationSets->m_ppAnimatedBoneFrameCaches[j]->m_xmf4x4Transform = xmf4x4Transform;
+					}
 					m_pAnimationTracks[k].HandleCallback();
 				}
+			}
+		}
+		
+		else {
+			/*float MaxAnimationLength = 0.f;
+		for (int k = 0; k < m_nAnimationTracks; ++k) {
+			float length = m_pAnimationSets->m_pAnimationSets[m_pAnimationTracks[k].m_nAnimationSet]->m_fLength;
+			MaxAnimationLength = (length > MaxAnimationLength) ? length : MaxAnimationLength;
+		}
+		MaxAnimationLength = m_pAnimationSets->m_pAnimationSets[m_pAnimationTracks[0].m_nAnimationSet]->m_fLength;*/
+
+			for (int k = 0; k < m_nAnimationTracks; ++k) {
+				CAnimationSet* pAnimationSet = m_pAnimationSets->m_pAnimationSets[m_pAnimationTracks[k].m_nAnimationSet];
+				//m_pAnimationTracks[k].UpdateSequence(m_pAnimationTracks[k].m_fSequenceWeight, fTimeElapsed, MaxAnimationLength);
+				//m_pAnimationTracks[k].UpdatePosition(m_pAnimationTracks[k].m_fPosition, fTimeElapsed, pAnimationSet->m_fLength); // 0번 트랙의 애니메이션 길이에 귀속되도록
+				m_pAnimationTracks[k].UpdatePosition(m_pAnimationTracks[k].m_fPosition, fTimeElapsed, pAnimationSet->m_fLength);
+			}
+
+			for (int j = 0; j < m_pAnimationSets->m_nAnimatedBoneFrames; j++) {
+				XMFLOAT4X4 xmf4x4Transform{};
+				ZeroMemory(&xmf4x4Transform, sizeof(XMFLOAT4X4));
+				XMFLOAT3 transfrom{};
+				XMVECTOR q{};
+				XMVECTOR rotation[2]{};
+				/*xmf4x4Transform = m_pAnimationSets->m_ppAnimatedBoneFrameCaches[j]->m_xmf4x4Transform;
+				q = XMQuaternionRotationMatrix(XMLoadFloat4x4(&xmf4x4Transform));*/
+
+				for (int k = 0; k < m_nAnimationTracks; ++k) {
+					float fScale = m_pAnimationSets->m_ppAnimatedBoneFrameCaches[j]->m_xmf4x4World._44;
+					if (m_pAnimationTracks[k].m_bEnable)
+					{
+						XMFLOAT4X4 xmf4x4Rotation{};
+						CAnimationSet* pAnimationSet = m_pAnimationSets->m_pAnimationSets[m_pAnimationTracks[k].m_nAnimationSet];
+						float fPosition = max(m_pAnimationTracks[k].m_fPosition, 0.0f);
+						//float fPosition = m_pAnimationTracks[k].ConvertSequenceToPosition(pAnimationSet->m_fLength);
+						//m_pAnimationTracks[k].m_fPosition = fPosition;
+
+						XMFLOAT4X4 xmf4x4TrackTransform = pAnimationSet->GetSRT(j, fPosition);
+						XMVECTOR q1 = XMQuaternionRotationMatrix(XMLoadFloat4x4(&xmf4x4TrackTransform));
+						q1 = XMQuaternionNormalize(q1);
+						rotation[k] = q1;
+
+						q1 = q1 * m_pAnimationTracks[k].m_fWeight;
+						q1 = XMQuaternionNormalize(q1);
+						//q = q1 + q;
+
+
+
+						XMFLOAT3 dt = XMFLOAT3(xmf4x4TrackTransform._41, xmf4x4TrackTransform._42, xmf4x4TrackTransform._43);
+						transfrom = Vector3::Add(transfrom, Vector3::ScalarProduct(dt, m_pAnimationTracks[k].m_fWeight, false));
+
+
+						m_pAnimationTracks[k].HandleCallback();
+					}
+				}
+				q = XMQuaternionSlerp(rotation[0], rotation[1], 1.0f - m_pAnimationTracks[0].m_fWeight);
+				//q = XMQuaternionNormalize(q);
 				XMStoreFloat4x4(&xmf4x4Transform, XMMatrixRotationQuaternion(q));
 				xmf4x4Transform._41 = transfrom.x;
 				xmf4x4Transform._42 = transfrom.y;
 				xmf4x4Transform._43 = transfrom.z;
-				//xmf4x4Transform = Matrix4x4::Scale(xmf4x4Transform, 4.0f);
-				m_pAnimationSets->m_ppAnimatedBoneFrameCaches[j]->m_xmf4x4Transform = xmf4x4Transform;
 
+				m_pAnimationSets->m_ppAnimatedBoneFrameCaches[j]->m_xmf4x4Transform = xmf4x4Transform;
 			}
 		}
+		
 
 		OnRootMotion(pRootGameObject, fTimeElapsed);
 		OnAnimationIK(pRootGameObject);
 
 		pRootGameObject->UpdateTransform(NULL);
+
+		for (int i = 0; i < m_nSkinnedMeshes; ++i) {
+			XMFLOAT4X4* p = m_ppcbxmf4x4MappedSkinningBoneTransforms[i];
+
+			for (int j = 0; j < m_ppSkinnedMeshes[i]->m_nSkinningBones; j++) {
+				XMStoreFloat4x4(&p[j], XMMatrixTranspose(XMLoadFloat4x4(&m_ppSkinnedMeshes[i]->m_ppSkinningBoneFrameCaches[j]->m_xmf4x4World)));
+			}
+		}
+		
 	}
 }

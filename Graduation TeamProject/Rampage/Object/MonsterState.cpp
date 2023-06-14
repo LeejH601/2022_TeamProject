@@ -72,6 +72,7 @@ void Idle_Monster::Enter(CMonster* monster)
 	monster->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 5);
 	monster->m_pSkinnedAnimationController->m_fTime = 0.0f;
 	monster->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition = 0.0f;
+	monster->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fSequenceWeight = 0.0f;
 	monster->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_nType = ANIMATION_TYPE_LOOP;
 	monster->m_bCanChase = true;
 	monster->m_fIdleTime = 0.0f;
@@ -254,6 +255,7 @@ void Wander_Monster::Enter(CMonster* monster)
 	monster->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 6);
 	monster->m_pSkinnedAnimationController->m_fTime = 0.0f;
 	monster->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition = 0.0f;
+	monster->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fSequenceWeight = 0.0f;
 	monster->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_nType = ANIMATION_TYPE_LOOP;
 	monster->m_fWanderTime = 0.0f;
 	monster->m_bCanChase = true;
@@ -293,6 +295,7 @@ void Wander_Monster::Exit(CMonster* monster)
 void Chasing_Monster::Enter(CMonster* monster)
 {
 	monster->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 6);
+	//monster->m_pSkinnedAnimationController->SetTrackWeight(0, 1);
 	monster->m_pSkinnedAnimationController->m_fTime = 0.0f;
 	monster->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition = 0.0f;
 	monster->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_nType = ANIMATION_TYPE_LOOP;
@@ -342,6 +345,7 @@ void Attack_Monster::Enter(CMonster* monster)
 	monster->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
 	monster->m_pSkinnedAnimationController->m_fTime = 0.0f;
 	monster->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition = 0.0f;
+	monster->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fSequenceWeight = 0.0f;
 	monster->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_nType = ANIMATION_TYPE_ONCE;
 
 	monster->m_bCanChase = false;
@@ -375,6 +379,7 @@ void Attack_Monster::OnRootMotion(CMonster* monster, float fTimeElapsed)
 
 void Attack_Monster::Exit(CMonster* monster)
 {
+	printf("dsGsdgsd");
 }
 
 void Dead_Monster::Enter(CMonster* monster)
