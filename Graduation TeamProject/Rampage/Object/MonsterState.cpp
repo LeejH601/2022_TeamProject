@@ -6,6 +6,8 @@
 
 Spawn_Monster::Spawn_Monster()
 {
+	m_fMaxSpawnTime = 1.0f;
+
 	// TERRAIN SPRITE  ANIMATION
 	std::unique_ptr<TerrainSpriteComponent> pTerrainSpriteComponent = std::make_unique<TerrainSpriteComponent>();
 	m_pListeners.push_back(std::move(pTerrainSpriteComponent));
