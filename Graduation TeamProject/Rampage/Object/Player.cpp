@@ -346,6 +346,7 @@ void CKnightPlayer::Animate(float fTimeElapsed)
 	}
 }
 
+#define SHOW_COLLIDE_MESH_NAME
 void CKnightPlayer::OnUpdateCallback(float fTimeElapsed)
 {
 	if (m_pUpdatedContext)
@@ -374,8 +375,17 @@ void CKnightPlayer::OnUpdateCallback(float fTimeElapsed)
 		for (int i = 0; i < pMap->GetMapObjects().size(); ++i) {
 			if (pMap->GetMapObjects()[i]->CheckCollision(this))
 			{
-				DistortLookVec(pMap->GetMapObjects()[i].get());
+#ifdef SHOW_COLLIDE_MESH_NAME
+				std::wstring wMeshName;
+				size_t tmp = 0;
+				wMeshName.resize(strlen(pMap->GetMapObjects()[i]->m_pstrFrameName) + 1);
+				mbstowcs_s(&tmp, wMeshName.data(), (size_t)wMeshName.size(),
+					pMap->GetMapObjects()[i]->m_pstrFrameName, (size_t)wMeshName.size());
+				OutputDebugString(wMeshName.c_str());
+				OutputDebugString(L"\n");
 				break;
+#endif // SHOW_COLLIDE_MESH_NAME
+				DistortLookVec(pMap->GetMapObjects()[i].get());
 			}
 		}
 		
