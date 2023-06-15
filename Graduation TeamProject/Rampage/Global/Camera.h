@@ -154,7 +154,7 @@ public:
 
 	virtual void ProcessInput(DWORD dwDirection, float cxDelta, float cyDelta, float fTimeElapsed);
 
-	void SetPlayer(CPlayer* pPlayer) { m_pPlayer = pPlayer; }
+	void SetPlayer(CPlayer* pPlayer);
 	CPlayer* GetPlayer() { return(m_pPlayer); }
 
 	virtual void Rotate(float fPitch = 0.0f, float fYaw = 0.0f, float fRoll = 0.0f);

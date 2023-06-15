@@ -145,6 +145,15 @@ void CPlayer::Update(float fTimeElapsed)
 
 	m_xmf3PreviousPos = GetPosition();
 
+	/*std::wstring location;
+	location.append(std::to_wstring(GetPosition().x));
+	location.append(L", ");
+	location.append(std::to_wstring(GetPosition().y));
+	location.append(L", ");
+	location.append(std::to_wstring(GetPosition().z));
+	location.append(L"\n");
+	OutputDebugString(location.c_str());*/
+
 	UpdateStamina(fTimeElapsed);
 	//UpdateCombo(fTimeElapsed);
 }
@@ -346,7 +355,7 @@ void CKnightPlayer::Animate(float fTimeElapsed)
 	}
 }
 
-#define SHOW_COLLIDE_MESH_NAME
+//#define SHOW_COLLIDE_MESH_NAME
 void CKnightPlayer::OnUpdateCallback(float fTimeElapsed)
 {
 	if (m_pUpdatedContext)
@@ -383,7 +392,6 @@ void CKnightPlayer::OnUpdateCallback(float fTimeElapsed)
 					pMap->GetMapObjects()[i]->m_pstrFrameName, (size_t)wMeshName.size());
 				OutputDebugString(wMeshName.c_str());
 				OutputDebugString(L"\n");
-				break;
 #endif // SHOW_COLLIDE_MESH_NAME
 				DistortLookVec(pMap->GetMapObjects()[i].get());
 			}

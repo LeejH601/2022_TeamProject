@@ -165,6 +165,13 @@ void CThirdPersonCamera::ProcessInput(DWORD dwDirection, float cxDelta, float cy
 		Rotate(cyDelta, cxDelta, 0.0f);
 }
 
+void CThirdPersonCamera::SetPlayer(CPlayer* pPlayer)
+{
+	m_pPlayer = pPlayer;
+	Rotate(40.0f, 90.0f, 0.0f);
+	//SetLookAt(pPlayer->GetPosition());
+}
+
 void CThirdPersonCamera::Rotate(float fPitch, float fYaw, float fRoll)
 {
 	if (fPitch != 0.0f)
