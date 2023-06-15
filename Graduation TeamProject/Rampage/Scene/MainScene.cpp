@@ -674,7 +674,7 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 		m_pMonsterObject->CreateArticulation(1.0f);
 		m_pEnemys.push_back(std::move(m_pMonsterObject));
 
-		/*m_pMonsterObject = std::make_unique<COrcObject>(pd3dDevice, pd3dCommandList, 1);
+		m_pMonsterObject = std::make_unique<COrcObject>(pd3dDevice, pd3dCommandList, 1);
 		m_pMonsterObject->SetPosition(XMFLOAT3(190, 50, 70));
 		m_pMonsterObject->SetScale(2.0f, 2.0f, 2.0f);
 		m_pMonsterObject->Rotate(0.0f, 180.0f, 0.0f);
@@ -682,7 +682,7 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 		m_pMonsterObject->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
 		m_pMonsterObject->m_pSkinnedAnimationController->m_xmf3RootObjectScale = XMFLOAT3(10.0f, 10.0f, 10.0f);
 		m_pMonsterObject->CreateArticulation(1.0f);
-		m_pEnemys.push_back(std::move(m_pMonsterObject));*/
+		m_pEnemys.push_back(std::move(m_pMonsterObject));
 
 		m_pMonsterObject = std::make_unique<COrcObject>(pd3dDevice, pd3dCommandList, 1);
 		m_pMonsterObject->SetPosition(XMFLOAT3(190, 50, 70));
@@ -694,7 +694,7 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 		m_pMonsterObject->CreateArticulation(1.0f);
 		m_pEnemys.push_back(std::move(m_pMonsterObject));
 
-		/*m_pMonsterObject = std::make_unique<CSkeletonObject>(pd3dDevice, pd3dCommandList, 1);
+		m_pMonsterObject = std::make_unique<CSkeletonObject>(pd3dDevice, pd3dCommandList, 1);
 		m_pMonsterObject->SetPosition(XMFLOAT3(190, 50, 70));
 		m_pMonsterObject->SetScale(2.0f, 2.0f, 2.0f);
 		m_pMonsterObject->Rotate(0.0f, 180.0f, 0.0f);
@@ -702,7 +702,7 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 		m_pMonsterObject->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
 		m_pMonsterObject->m_pSkinnedAnimationController->m_xmf3RootObjectScale = XMFLOAT3(10.0f, 10.0f, 10.0f);
 		m_pMonsterObject->CreateArticulation(1.0f);
-		m_pEnemys.push_back(std::move(m_pMonsterObject));*/
+		m_pEnemys.push_back(std::move(m_pMonsterObject));
 
 		m_pMonsterObject = std::make_unique<CSkeletonObject>(pd3dDevice, pd3dCommandList, 1);
 		m_pMonsterObject->SetPosition(XMFLOAT3(190, 50, 70));

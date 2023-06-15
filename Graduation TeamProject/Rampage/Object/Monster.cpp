@@ -121,7 +121,6 @@ void CMonster::Update(float fTimeElapsed)
 		m_fDissolveThrethHold = m_fDissolveTime / m_fMaxDissolveTime;
 		if (m_fDissolveThrethHold > 1.0f && m_bArticulationSleep == false) {
 			m_bArticulationSleep = true;
-			m_bSimulateArticulate = false;
 			RegisterArticulationSleepParams Request_params;
 			Request_params.pObject = this;
 			CMessageDispatcher::GetInst()->Dispatch_Message<RegisterArticulationSleepParams>(MessageType::REQUEST_SLEEPARTI, &Request_params, nullptr);
@@ -145,10 +144,6 @@ void CMonster::Update(float fTimeElapsed)
 
 	XMFLOAT3 xmf3ShakeVec = Vector3::ScalarProduct(Vector3::Normalize(GetRight()), MeterToUnit(m_fShakeDistance), false);
 	m_xmf3CalPos = Vector3::Add(m_xmf3Position, xmf3ShakeVec);
-
-	/*std::wstring debugString{std::to_wstring(m_fShakeDistance)};
-	OutputDebugString(debugString.c_str());
-	OutputDebugString(L"\n");*/
 
 	CPhysicsObject::Apply_Friction(fTimeElapsed);
 }
@@ -219,11 +214,11 @@ void CMonster::UpdateTransformFromArticulation(XMFLOAT4X4* pxmf4x4Parent, std::v
 COrcObject::COrcObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks)
 {
 	m_MonsterType = MONSTER_TYPE::ORC;
-	m_fAtkStartTime = 0.78f;
-	m_fAtkEndTime = 0.93f;
+	m_fAtkStartTime = 0.55f;
+	m_fAtkEndTime = 0.92;
 
-	m_iAttackAnimationNum = 1;
-	m_fAttackSoundDelay = 0.78f;
+	m_iAttackAnimationNum = 0;
+	m_fAttackSoundDelay = 0.55f;
 	m_fAttackSoundVolume = 1.5f;
 	m_strAttackSoundPath = "Sound/shoot/Air Cut by Langerium Id-84616.wav";
 
@@ -249,11 +244,11 @@ void COrcObject::PrepareBoundingBox(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 	pWeapon = CGameObject::FindFrame("SM_Weapon");
 
 	m_BodyBoundingBox = BoundingOrientedBox{ XMFLOAT3(0.0f, 1.05f, 0.0f),  XMFLOAT3(0.6f, 1.0f, 0.6f), XMFLOAT4{0.0f, 0.0f, 0.0f, 1.0f} };
-	m_WeaponBoundingBox = BoundingOrientedBox{ XMFLOAT3(0.0f, 0.0f, 0.85f), XMFLOAT3(0.15f, 0.3f, 0.175f), XMFLOAT4{0.0f, 0.0f, 0.0f, 1.0f} };
+	m_WeaponBoundingBox = BoundingOrientedBox{ XMFLOAT3(0.0f, 0.0f, 0.35f), XMFLOAT3(0.15f, 0.3f, 0.725f), XMFLOAT4{0.0f, 0.0f, 0.0f, 1.0f} };
 #ifdef RENDER_BOUNDING_BOX
 	pBodyBoundingBoxMesh = CBoundingBoxShader::GetInst()->AddBoundingObject(pd3dDevice, pd3dCommandList, this, XMFLOAT3(0.0f, 1.05f, 0.0f), XMFLOAT3(0.6f, 1.0f, 0.6f));
 	//pWeaponBodyBoundingBoxMesh = CBoundingBoxShader::GetInst()->AddBoundingObject(pd3dDevice, pd3dCommandList, pWeapon, XMFLOAT3(0.0f, 0.0f, 0.32f), XMFLOAT3(0.18f, 0.28f, 0.71f));
-	pWeaponBoundingBoxMesh = CBoundingBoxShader::GetInst()->AddBoundingObject(pd3dDevice, pd3dCommandList, pWeapon, XMFLOAT3(0.0f, 0.0f, 0.85f), XMFLOAT3(0.15f, 0.3f, 0.175f));
+	pWeaponBoundingBoxMesh = CBoundingBoxShader::GetInst()->AddBoundingObject(pd3dDevice, pd3dCommandList, pWeapon, XMFLOAT3(0.0f, 0.0f, 0.35f), XMFLOAT3(0.15f, 0.3f, 0.725f));
 #endif
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////
