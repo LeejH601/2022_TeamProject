@@ -98,6 +98,7 @@ void CPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity, CCa
 	}
 }
 
+
 bool CPlayer::CheckCollision(CGameObject* pTargetObject)
 {
 	return false;
@@ -160,7 +161,20 @@ void CPlayer::ProcessInput(DWORD dwDirection, float cxDelta, float cyDelta, floa
 			m_dwDirectionCache = dwDirection;
 			m_xmf3DirectionCache = xmf3Shift;
 		}
-		
+	}
+	if(dwDirection == 0) {
+		//m_dwDirectionCache = 0;
+		TCHAR pstrDebug[256] = { 0 };
+		_stprintf_s(pstrDebug, 256, _T("speed : %f\n"), m_fCurrentSpeedUperS);
+		OutputDebugString(pstrDebug);
+
+		Deceleration(fTimeElapsed);
+
+		m_xmf3Velocity = Vector3::ScalarProduct(m_xmf3Velocity, m_fCurrentSpeedUperS * fTimeElapsed);
+
+		if (m_fCurrentSpeedUperS <= 0.0f) {
+			m_dwDirectionCache = 0;
+		}
 	}
 }
 

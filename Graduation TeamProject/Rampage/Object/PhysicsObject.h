@@ -49,6 +49,7 @@ public:
 	void SetSpeedUperS(float speed) { m_fSpeedUperS = speed; };
 	void SetCurrSpeed(float speed) { m_fCurrentSpeedUperS = speed; };
 	void Acceleration(float fTimeElapsed);
+	void Deceleration(float fTimeElapsed);
 
 	virtual XMFLOAT3 GetPosition();
 	virtual XMFLOAT3 GetLook();

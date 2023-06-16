@@ -92,8 +92,9 @@ void CPhysicsObject::Apply_Friction(float fTimeElapsed)
 	// 이외에는 마찰로 인한 감속
 	if (fDeceleration > fLength)
 		m_xmf3Velocity = XMFLOAT3{};
-	else
+	else {
 		m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, Vector3::ScalarProduct(m_xmf3Velocity, -fDeceleration, true));
+	}
 }
 
 void CPhysicsObject::SetPosition(float x, float y, float z)
@@ -160,6 +161,12 @@ void CPhysicsObject::Acceleration(float fTimeElapsed)
 		m_fCurrentSpeedUperS -= m_fAccelerationUperS * fTimeElapsed * 2.0f;
 		m_fCurrentSpeedUperS = max(m_fCurrentSpeedUperS, m_fSpeedUperS);
 	}
+}
+
+void CPhysicsObject::Deceleration(float fTimeElapsed)
+{
+	m_fCurrentSpeedUperS -= m_fAccelerationUperS * fTimeElapsed * 5.f;
+	m_fCurrentSpeedUperS = max(m_fCurrentSpeedUperS, 0.0f);
 }
 
 void CPhysicsObject::SetScale(float x, float y, float z)

@@ -187,6 +187,7 @@ public:
     virtual void SetPlayerRootVel(CPlayer* player);
 protected:
     XMFLOAT3 m_xmf3VelociyuCache;
+    float m_fSpeedCache;
 };
 
 template<class entity_type>

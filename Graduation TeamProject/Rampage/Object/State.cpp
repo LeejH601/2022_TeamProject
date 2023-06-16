@@ -708,9 +708,15 @@ void Run_Player::Enter(CPlayer* player)
 	player->m_pSkinnedAnimationController->SetTrackWeight(0, 1.0f);
 	player->m_pSkinnedAnimationController->SetTrackAnimationSet(1, 4);
 	player->m_pSkinnedAnimationController->SetTrackWeight(1, 0.0f);
+
+
 	player->m_pSkinnedAnimationController->m_fTime = 0.0f;
 	player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition = 0.0f;
 	player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_nType = ANIMATION_TYPE_LOOP;
+
+	player->m_pSkinnedAnimationController->m_pAnimationTracks[1].m_fPosition = 0.0f;
+	player->m_pSkinnedAnimationController->m_pAnimationTracks[1].m_nType = ANIMATION_TYPE_LOOP;
+
 	player->m_bAttack = false; // 사용자가 좌클릭시 true가 되는 변수
 
 	player->m_xmf3RootTransfromPreviousPos = XMFLOAT3{ 0.f, 0.f , 0.f };
@@ -733,7 +739,7 @@ void Run_Player::Execute(CPlayer* player, float fElapsedTime)
 	player->m_pSkinnedAnimationController->m_pAnimationTracks[1].SetAnimationSet(animationList[animSetLow + 1]);
 
 	player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fWeight = 1.0f - (value - (int)value);
-		player->m_pSkinnedAnimationController->m_pAnimationTracks[1].m_fWeight = 1.0f - player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fWeight;
+	player->m_pSkinnedAnimationController->m_pAnimationTracks[1].m_fWeight = 1.0f - player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fWeight;
 
 	if (player->m_bEvasioned)
 		player->m_pStateMachine->ChangeState(Evasion_Player::GetInst());
@@ -742,8 +748,10 @@ void Run_Player::Execute(CPlayer* player, float fElapsedTime)
 		player->m_pStateMachine->ChangeState(Atk1_Player::GetInst());
 
 	// Idle 상태로 복귀하는 코드
-	else if (Vector3::Length(xmf3PlayerVel) == 0)
+	else if (player->m_dwDirectionCache == 0) {
 		player->m_pStateMachine->ChangeState(Idle_Player::GetInst());
+		player->SetCurrSpeed(0.0f);
+	}
 
 
 
@@ -782,7 +790,7 @@ void Run_Player::Animate(CPlayer* player, float fTimeElapsed)
 
 void Run_Player::Exit(CPlayer* player)
 {
-	player->SetCurrSpeed(0);
+	//player->SetCurrSpeed(0);
 }
 
 void Run_Player::OnRootMotion(CPlayer* player, float fTimeElapsed)
@@ -975,6 +983,7 @@ Evasion_Player::~Evasion_Player()
 void Evasion_Player::Enter(CPlayer* player)
 {
 	m_xmf3VelociyuCache = player->GetVelocity();
+	m_fSpeedCache = player->GetCurrSpeed();
 	player->m_xmf3RootTransfromPreviousPos = XMFLOAT3{ 0.f, 0.f , 0.f };
 
 	player->m_fCMDConstant = 1.0f;
@@ -1097,24 +1106,38 @@ void Evasion_Player::Execute(CPlayer* player, float fElapsedTime)
 	if (player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition == pAnimationSet->m_fLength)
 	{
 		CState<CPlayer>& previousState = *player->m_pStateMachine->GetPreviousState();
+
+
 		if (dynamic_cast<Idle_Player*>(&previousState)) {
 			player->m_pStateMachine->ChangeState(&previousState);
+			player->Move(XMFLOAT3(0,0,0), true);
+			player->SetCurrSpeed(0.0f);
 		}
 		else if (dynamic_cast<Run_Player*>(&previousState)) {
-			player->m_pStateMachine->ChangeState(&previousState);
-			player->Move(m_xmf3VelociyuCache, true);
-			player->SetCurrSpeed(Vector3::Length(m_xmf3VelociyuCache));
+			if (player->m_dwDirectionCache != 0) {
+				player->m_pStateMachine->ChangeState(&previousState);
+				player->Move(m_xmf3VelociyuCache, true);
+				player->SetCurrSpeed(m_fSpeedCache);
+			}
+			else
+				player->m_pStateMachine->ChangeState(Idle_Player::GetInst());
 		}
 		else {
 			player->m_pStateMachine->ChangeState(Idle_Player::GetInst());
+			player->Move(XMFLOAT3(0, 0, 0), true);
+			player->SetCurrSpeed(0.0f);
 		}
+	}
+	if (player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition > pAnimationSet->m_fLength - 0.2f && player->m_dwDirectionCache != 0) {
+		player->m_pStateMachine->ChangeState(Run_Player::GetInst());
+		player->Move(m_xmf3VelociyuCache, true);
+		player->SetCurrSpeed(m_fSpeedCache);
 	}
 }
 
 void Evasion_Player::Exit(CPlayer* player)
 {
 	player->m_bEvasioned = false;
-	
 }
 
 void Evasion_Player::Animate(CPlayer* player, float fElapsedTime)
