@@ -631,7 +631,7 @@ private:
 	int m_nEmitParticleNumber = 1.f;
 	int m_iParticleType = ParticleType::TERRAIN_PARTICLE;
 	int m_nParticleIndex = 0;
-	float m_fLifeTime = 5.f;
+	float m_fLifeTime = 1.5f;
 	float m_fSpeed = 1.f;
 	float m_fAlpha = 1.f;
 	XMFLOAT2 m_fSize = XMFLOAT2(5.f, 5.f);
