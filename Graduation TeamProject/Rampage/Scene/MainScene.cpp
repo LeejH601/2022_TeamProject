@@ -949,6 +949,33 @@ bool CMainTMPScene::ProcessInput(HWND hWnd, DWORD dwDirection, float fTimeElapse
 	return true;
 }
 
+struct ThreadData 
+{
+	std::vector<std::unique_ptr<CGameObject>>* pEnemys;
+	int offset;
+	int range;
+	float fTimeElapsed;
+	DissolveParams* dissolveParams;
+};
+
+DWORD WINAPI AnimateEnemysProcess(LPVOID data) {
+	ThreadData threadData;
+	memcpy(&threadData, data, sizeof(ThreadData));
+
+	std::vector<std::unique_ptr<CGameObject>>* pEnemys = threadData.pEnemys;
+	int offset = threadData.offset;
+	int range = threadData.range;
+	float fTimeElapsed = threadData.fTimeElapsed;
+	DissolveParams* dissolveParams = threadData.dissolveParams;
+
+	for (int i = offset; i < offset + range; ++i) {
+		(*pEnemys)[i]->Update(fTimeElapsed);
+		dissolveParams->dissolveThreshold[i] = (*pEnemys)[i]->m_fDissolveThrethHold;
+	}
+
+	return 0;
+};
+
 void CMainTMPScene::UpdateObjects(float fTimeElapsed)
 {
 	if (m_pPlayer) {
@@ -962,6 +989,38 @@ void CMainTMPScene::UpdateObjects(float fTimeElapsed)
 	CMessageDispatcher::GetInst()->Dispatch_Message<AnimationCompParams>(MessageType::UPDATE_OBJECT, &animation_comp_params, ((CPlayer*)m_pPlayer)->m_pStateMachine->GetCurrentState());
 
 	m_pLight->Update((CPlayer*)m_pPlayer);
+
+	static std::vector<HANDLE> ObjThreadHandles;
+	if (ObjThreadHandles.size() == 0)
+		ObjThreadHandles.resize(10);
+
+	int nThreads = m_pEnemys.size() / 50;
+	nThreads += 1;
+
+	//
+	/*int nRemainEnemys = m_pEnemys.size();
+	int offset = 0;
+	int MaxRange = 50;
+
+	for (int i = 0; i < nThreads; ++i) {
+		ThreadData data;
+		data.fTimeElapsed = fTimeElapsed;
+		data.pEnemys = &m_pEnemys;
+		data.offset = offset;
+		data.range = min(nRemainEnemys, MaxRange);
+		data.dissolveParams = m_pcbMappedDisolveParams;
+
+		HANDLE hGameThread = CreateThread(NULL, 0, AnimateEnemysProcess, (LPVOID)&data, 0, NULL);
+		ObjThreadHandles[i] = hGameThread;
+
+		offset += data.range;
+		nRemainEnemys -= data.range;
+	}
+
+	WaitForMultipleObjects(nThreads, ObjThreadHandles.data(), true, INFINITE);
+	for (int i = 0; i < nThreads; ++i) {
+		CloseHandle(ObjThreadHandles[i]);
+	}*/
 
 	for (int i = 0; i < m_pEnemys.size(); ++i) {
 		m_pEnemys[i]->Update(fTimeElapsed);
@@ -1097,7 +1156,6 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 
 	if (m_pPlayer)
 	{
-		//m_pPlayer->Animate(0.0f);
 		m_pPlayer->Render(pd3dCommandList, true);
 	}
 
@@ -1151,7 +1209,6 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 	for (int i = 0; i < m_pEnemys.size(); ++i)
 	{
 		pd3dCommandList->SetGraphicsRoot32BitConstants(0, 1, &i, 33);
-		//m_pEnemys[i]->Animate(0.0f);
 		m_pEnemys[i]->Render(pd3dCommandList, true);
 	}
 	

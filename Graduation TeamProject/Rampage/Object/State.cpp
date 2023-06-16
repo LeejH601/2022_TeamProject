@@ -451,9 +451,17 @@ void Atk2_Player::Enter(CPlayer* player)
 {
 	CLogger::GetInst()->Log(std::string("Player Enter Atk2"));
 	player->m_iAttackId += 1;
+
+	float prevAnimPosition = player->m_pSkinnedAnimationController->GetTrackPosition(0);
+
 	player->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 1);
-	player->m_pSkinnedAnimationController->SetTrackWeight(0, 1);
-	player->m_pSkinnedAnimationController->SetTrackWeight(1, 0);
+	player->m_pSkinnedAnimationController->SetTrackWeight(0, 0);
+
+	player->m_pSkinnedAnimationController->SetTrackAnimationSet(1, 0);
+	player->m_pSkinnedAnimationController->SetTrackPosition(1, prevAnimPosition);
+	player->m_pSkinnedAnimationController->SetTrackWeight(1, 1);
+	player->m_pSkinnedAnimationController->SetTrackUpdateEnable(1, false);
+
 	player->m_pSkinnedAnimationController->m_fTime = 0.0f;
 	player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition = 0.2f;
 	//player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fSequenceWeight = 0.0f / ;
@@ -483,6 +491,13 @@ void Atk2_Player::Enter(CPlayer* player)
 
 void Atk2_Player::Execute(CPlayer* player, float fElapsedTime)
 {
+	float weight1 = player->m_pSkinnedAnimationController->GetTrackWeight(0);
+	if (weight1 < 1.0f) {
+		weight1 += fElapsedTime * 10.0f;
+		weight1 = min(1.0f, weight1);
+		player->m_pSkinnedAnimationController->SetTrackWeight(0, weight1);
+		player->m_pSkinnedAnimationController->SetTrackWeight(1, 1.0f - weight1);
+	}
 	CAnimationSet* pAnimationSet = player->m_pSkinnedAnimationController->m_pAnimationSets->m_pAnimationSets[player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_nAnimationSet];
 
 	SendCollisionMessage(player);
@@ -699,8 +714,6 @@ void Run_Player::Enter(CPlayer* player)
 	player->m_bAttack = false; // 사용자가 좌클릭시 true가 되는 변수
 
 	player->m_xmf3RootTransfromPreviousPos = XMFLOAT3{ 0.f, 0.f , 0.f };
-
-
 }
 
 void Run_Player::Execute(CPlayer* player, float fElapsedTime)
@@ -961,6 +974,7 @@ Evasion_Player::~Evasion_Player()
 
 void Evasion_Player::Enter(CPlayer* player)
 {
+	m_xmf3VelociyuCache = player->GetVelocity();
 	player->m_xmf3RootTransfromPreviousPos = XMFLOAT3{ 0.f, 0.f , 0.f };
 
 	player->m_fCMDConstant = 1.0f;
@@ -1071,6 +1085,7 @@ void Evasion_Player::Enter(CPlayer* player)
 	player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fWeight = 1.0f;
 	player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_nType = ANIMATION_TYPE_ONCE;
 
+	player->m_pSkinnedAnimationController->SetTrackAnimationSet(1, 4);
 	player->m_pSkinnedAnimationController->m_pAnimationTracks[1].m_fPosition = 0.0f;
 	player->m_pSkinnedAnimationController->m_pAnimationTracks[1].m_fWeight = 0.0f;
 	player->m_pSkinnedAnimationController->m_pAnimationTracks[1].m_nType = ANIMATION_TYPE_ONCE;
@@ -1087,6 +1102,8 @@ void Evasion_Player::Execute(CPlayer* player, float fElapsedTime)
 		}
 		else if (dynamic_cast<Run_Player*>(&previousState)) {
 			player->m_pStateMachine->ChangeState(&previousState);
+			player->Move(m_xmf3VelociyuCache, true);
+			player->SetCurrSpeed(Vector3::Length(m_xmf3VelociyuCache));
 		}
 		else {
 			player->m_pStateMachine->ChangeState(Idle_Player::GetInst());
@@ -1097,6 +1114,7 @@ void Evasion_Player::Execute(CPlayer* player, float fElapsedTime)
 void Evasion_Player::Exit(CPlayer* player)
 {
 	player->m_bEvasioned = false;
+	
 }
 
 void Evasion_Player::Animate(CPlayer* player, float fElapsedTime)

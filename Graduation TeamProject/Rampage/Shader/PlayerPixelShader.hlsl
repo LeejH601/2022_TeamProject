@@ -55,7 +55,7 @@ struct VS_OUTPUT
 	float3 tangentW : TANGENT;
 	float3 bitangentW : BITANGENT;
 	float2 uv : TEXCOORD0;
-	float4 uvs[MAX_LIGHTS] : TEXCOORD1;
+	//float4 uvs[MAX_LIGHTS] : TEXCOORD1;
 	uint instanceID : SV_InstanceID;
 };
 
@@ -104,7 +104,7 @@ float4 CalculateDissolve(float4 color, float2 uv, float ThreshHold) {
 	return color;
 }
 
-//[earlydepthstencil]
+[earlydepthstencil]
 PS_MULTIPLE_RENDER_TARGETS_OUTPUT PS_Player(VS_OUTPUT input)
 {
 	PS_MULTIPLE_RENDER_TARGETS_OUTPUT output;
@@ -153,7 +153,7 @@ PS_MULTIPLE_RENDER_TARGETS_OUTPUT PS_Player(VS_OUTPUT input)
 			output.f4Normal = float4(input.normalW.xyz * 0.5f + 0.5f, Depth);
 		//output.f4Illumination = float4(1.0f, 1.0f, 1.0f, 1.0f);
 
-		float fShadowFactor = gtxtDepthTextures[0].SampleCmpLevelZero(gssComparisonPCFShadow, input.uvs[0].xy / input.uvs[0].ww, input.uvs[0].z / input.uvs[0].w).r;
+		//float fShadowFactor = gtxtDepthTextures[0].SampleCmpLevelZero(gssComparisonPCFShadow, input.uvs[0].xy / input.uvs[0].ww, input.uvs[0].z / input.uvs[0].w).r;
 		output.f4Illumination = float4(0.0f, 0.0f, 0.0f, 1.0f);
 		/*if(fShadowFactor > 0.0f )
 			output.f4Illumination = float4(1.0f, 1.0f, 1.0f, input.instanceID);

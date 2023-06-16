@@ -213,6 +213,8 @@ COrcObject::COrcObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3d
 
 	SetChild(pOrcModel->m_pModelRootObject, true);
 	m_pSkinnedAnimationController = std::make_unique<CAnimationController>(pd3dDevice, pd3dCommandList, nAnimationTracks, pOrcModel);
+	CGameObject* weaponFrame = FindFrame("hand_r");
+	m_pSkinnedAnimationController->SetSocket(0, std::string("hand_r"), weaponFrame);
 
 	PrepareBoundingBox(pd3dDevice, pd3dCommandList);
 }
@@ -244,6 +246,8 @@ CGoblinObject::CGoblinObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 
 	SetChild(pGoblinModel->m_pModelRootObject, true);
 	m_pSkinnedAnimationController = std::make_unique<CAnimationController>(pd3dDevice, pd3dCommandList, nAnimationTracks, pGoblinModel);
+	CGameObject* weaponFrame = FindFrame("hand_r");
+	m_pSkinnedAnimationController->SetSocket(0, std::string("hand_r"), weaponFrame);
 
 	PrepareBoundingBox(pd3dDevice, pd3dCommandList);
 }
@@ -272,6 +276,8 @@ CSkeletonObject::CSkeletonObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 
 	SetChild(pSkeletonModel->m_pModelRootObject, true);
 	m_pSkinnedAnimationController = std::make_unique<CAnimationController>(pd3dDevice, pd3dCommandList, nAnimationTracks, pSkeletonModel);
+	CGameObject* weaponFrame = FindFrame("hand_r");
+	m_pSkinnedAnimationController->SetSocket(1, std::string("hand_r"), weaponFrame);
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 

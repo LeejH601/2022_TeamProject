@@ -76,6 +76,7 @@ public:
 
 public:
 	BOOL 							m_bEnable = true;
+	bool							m_bUpdate = true;
 	float 							m_fSpeed = 1.0f;
 	float 							m_fPosition = 0.0f;
 	float 							m_fWeight = 0.0f;
@@ -96,6 +97,7 @@ public:
 	void SetSpeed(float fSpeed) { m_fSpeed = fSpeed; }
 	void SetWeight(float fWeight) { m_fWeight = fWeight; }
 	void SetPosition(float fPosition) { m_fPosition = fPosition; }
+	void SetUpdateEnable(bool bEnable) { m_bUpdate = bEnable; };
 	float UpdatePosition(float fTrackPosition, float fElapsedTime, float fAnimationLength);
 	float UpdateSequence(float fSequence, float fElapsedTime, float fAnimationLength);
 
@@ -107,6 +109,8 @@ public:
 
 	void HandleCallback();
 };
+
+typedef std::pair<std::pair<int,int>, CGameObject*> Obj_Socket; // <int, int>, CGameObject* : <SkinMeshIndex, BoneTransformIndex>, obj
 
 class CAnimationController
 {
@@ -127,6 +131,9 @@ public:
 
 	std::vector<ComPtr<ID3D12Resource>> m_ppd3dcbSkinningBoneTransforms; //[SkinnedMeshes]
 	std::vector<XMFLOAT4X4*> m_ppcbxmf4x4MappedSkinningBoneTransforms; //[SkinnedMeshes]
+
+	std::vector<Obj_Socket> m_pSockets;
+
 public:
 	void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList);
 
@@ -136,11 +143,18 @@ public:
 	void SetTrackPosition(int nAnimationTrack, float fPosition);
 	void SetTrackSpeed(int nAnimationTrack, float fSpeed);
 	void SetTrackWeight(int nAnimationTrack, float fWeight);
+	void SetTrackUpdateEnable(int nAnimationTrack, bool bEnable);
+
+	float GetTrackPosition(int nAnimationTrack) { return m_pAnimationTracks[nAnimationTrack].m_fPosition; };
+	float GetTrackWeight(int nAnimationTrack) { return m_pAnimationTracks[nAnimationTrack].m_fWeight; };
 
 	void SetCallbackKeys(int nAnimationTrack, int nCallbackKeys);
 	void SetCallbackKey(int nAnimationTrack, int nKeyIndex, float fTime, void* pData);
 	void SetAnimationCallbackHandler(int nAnimationTrack, CAnimationCallbackHandler* pCallbackHandler);
 
+	void SetSocket(int SkinMeshIndex, std::string& FrameName, CGameObject* DestObject);
+
+	void UpdateSocketsTransform();
 	void UpdateBoneTransform();
 
 	void AdvanceTime(float fElapsedTime, CGameObject* pRootGameObject);

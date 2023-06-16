@@ -43,6 +43,7 @@ void CMap::RenderTerrain(ID3D12GraphicsCommandList* pd3dCommandList)
 
 void CMap::RenderMapObjects(ID3D12GraphicsCommandList* pd3dCommandList)
 {
+
 	for (int i = 0; i < m_pMapObjects.size(); ++i) {
 		m_pMapObjects[i]->Render(pd3dCommandList, true);
 	}

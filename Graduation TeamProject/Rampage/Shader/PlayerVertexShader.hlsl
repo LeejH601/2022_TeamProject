@@ -64,7 +64,7 @@ struct VS_OUTPUT
 	float3 tangentW : TANGENT;
 	float3 bitangentW : BITANGENT;
 	float2 uv : TEXCOORD0;
-	float4 uvs[MAX_LIGHTS] : TEXCOORD1;
+	//float4 uvs[MAX_LIGHTS] : TEXCOORD1;
 	uint instanceID : SV_InstanceID;
 };
 
@@ -98,10 +98,10 @@ VS_OUTPUT VS_Player(VS_INPUT input)
 		output.position = mul(mul(float4(output.positionW, 1.0f), gmtxView), gmtxProjection);
 		output.uv = input.uv;
 
-		for (int i = 0; i < MAX_LIGHTS; i++)
-		{
-			if (gcbToLightSpaces[i].f4Position.w != 0.0f) output.uvs[i] = mul(positionW, gcbToLightSpaces[i].mtxToTexture);
-		}
+		//for (int i = 0; i < MAX_LIGHTS; i++)
+		//{
+		//	if (gcbToLightSpaces[i].f4Position.w != 0.0f) output.uvs[i] = mul(positionW, gcbToLightSpaces[i].mtxToTexture);
+		//}
 	}
 	else
 	{
@@ -112,10 +112,10 @@ VS_OUTPUT VS_Player(VS_INPUT input)
 		output.bitangentW = normalize(mul(input.bitangent, (float3x3)gmtxGameObject));
 		output.position = mul(mul(float4(output.positionW, 1.0f), gmtxView), gmtxProjection);
 		output.uv = input.uv;
-		for (int i = 0; i < MAX_LIGHTS; i++)
+		/*for (int i = 0; i < MAX_LIGHTS; i++)
 		{
 			if (gcbToLightSpaces[i].f4Position.w != 0.0f) output.uvs[i] = mul(positionW, gcbToLightSpaces[i].mtxToTexture);
-		}
+		}*/
 	}
 
 	output.instanceID = input.instanceID;

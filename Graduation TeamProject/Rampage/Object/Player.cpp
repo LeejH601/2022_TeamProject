@@ -208,6 +208,12 @@ CKnightPlayer::CKnightPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 	m_pSkinnedAnimationController = std::make_unique<CKightRootMoveAnimationController>(pd3dDevice, pd3dCommandList, 2, pKnightModel); // 애니메이션 트랙 갯수 고정
 	m_pSkinnedAnimationController->SetTrackWeight(0,1.f);
 	m_pSkinnedAnimationController->SetTrackWeight(1, 0.f);
+	CGameObject* weaponFrame = FindFrame("Weapon_r");
+	m_pSkinnedAnimationController->SetSocket(0, std::string("Weapon_r"), weaponFrame);
+	weaponFrame = FindFrame("Weapon_l");
+	m_pSkinnedAnimationController->SetSocket(0, std::string("Weapon_l"), weaponFrame);
+	weaponFrame = FindFrame("head");
+	m_pSkinnedAnimationController->SetSocket(0, std::string("head"), weaponFrame);
 
 	auto Find_Frame_Index = [](std::string& target, std::vector<std::string>& source) {
 		int cnt = 0;

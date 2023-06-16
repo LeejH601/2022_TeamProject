@@ -88,7 +88,7 @@ float CAnimationTrack::UpdatePosition(float fTrackPosition, float fElapsedTime, 
 			m_fPosition = fTrackPosition + fTrackElapsedTime;
 			if (m_fPosition > fAnimationLength)
 			{
-				m_fPosition = 0;
+				m_fPosition = -ANIMATION_CALLBACK_EPSILON;
 				return(fAnimationLength);
 			}
 		}
@@ -185,6 +185,31 @@ void CAnimationController::SetAnimationCallbackHandler(int nAnimationTrack, CAni
 {
 	if (m_pAnimationTracks.data()) m_pAnimationTracks[nAnimationTrack].SetAnimationCallbackHandler(pCallbackHandler);
 }
+void CAnimationController::SetSocket(int SkinMeshIndex, std::string& FrameName, CGameObject* DestObject)
+{
+	if (SkinMeshIndex >= m_nSkinnedMeshes)
+		return;
+
+	CSkinnedMesh* mesh = m_ppSkinnedMeshes[SkinMeshIndex];
+	for (int i = 0; i < mesh->m_nSkinningBones; ++i) {
+		if(strcmp( mesh->m_ppstrSkinningBoneNames[i].data(), FrameName.data()) == 0)
+			m_pSockets.push_back(Obj_Socket(std::pair<int,int>(SkinMeshIndex, i), DestObject));
+	}
+		
+		
+}
+void CAnimationController::UpdateSocketsTransform()
+{
+	for (int i = 0; i < m_pSockets.size(); ++i) {
+		Obj_Socket& Socket = m_pSockets[i];
+		int skinMeshIndex = Socket.first.first;
+		int BondIndex = Socket.first.second;
+		CGameObject* obj = Socket.second;
+
+		XMFLOAT4X4 xmf4x4World; XMStoreFloat4x4(&xmf4x4World, XMMatrixTranspose(XMLoadFloat4x4(&m_ppcbxmf4x4MappedSkinningBoneTransforms[skinMeshIndex][BondIndex])));
+		obj->m_pChild->UpdateTransform(&xmf4x4World);
+	}
+}
 void CAnimationController::UpdateBoneTransform()
 {
 	for (int i = 0; i < m_nSkinnedMeshes; ++i) {
@@ -201,6 +226,7 @@ void CAnimationController::SetTrackAnimationSet(int nAnimationTrack, int nAnimat
 	{
 		m_pAnimationTracks[nAnimationTrack].m_nAnimationSet = nAnimationSet;
 		m_pAnimationTracks[nAnimationTrack].SetPosition(0.0f);
+		m_pAnimationTracks[nAnimationTrack].SetUpdateEnable(true);
 	}
 }
 void CAnimationController::SetTrackEnable(int nAnimationTrack, bool bEnable)
@@ -219,6 +245,10 @@ void CAnimationController::SetTrackWeight(int nAnimationTrack, float fWeight)
 {
 	if (m_pAnimationTracks.data()) m_pAnimationTracks[nAnimationTrack].SetWeight(fWeight);
 }
+void CAnimationController::SetTrackUpdateEnable(int nAnimationTrack, bool bEnable)
+{
+	if (m_pAnimationTracks.data()) m_pAnimationTracks[nAnimationTrack].SetUpdateEnable(bEnable);
+}
 void CAnimationController::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	for (int i = 0; i < m_nSkinnedMeshes; i++)
@@ -226,6 +256,7 @@ void CAnimationController::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3d
 		m_ppSkinnedMeshes[i]->m_pd3dcbSkinningBoneTransforms = m_ppd3dcbSkinningBoneTransforms[i].Get();
 		m_ppSkinnedMeshes[i]->m_pcbxmf4x4MappedSkinningBoneTransforms = m_ppcbxmf4x4MappedSkinningBoneTransforms[i];
 	}
+	UpdateSocketsTransform();
 }
 void CAnimationController::AdvanceTime(float fTimeElapsed, CGameObject* pRootGameObject)
 {
@@ -240,7 +271,11 @@ void CAnimationController::AdvanceTime(float fTimeElapsed, CGameObject* pRootGam
 				if (m_pAnimationTracks[k].m_bEnable)
 				{
 					CAnimationSet* pAnimationSet = m_pAnimationSets->m_pAnimationSets[m_pAnimationTracks[k].m_nAnimationSet];
-					float fPosition = m_pAnimationTracks[k].UpdatePosition(m_pAnimationTracks[k].m_fPosition, fTimeElapsed, pAnimationSet->m_fLength);
+					float fPosition;
+					if (m_pAnimationTracks[k].m_bUpdate)
+						m_pAnimationTracks[k].UpdatePosition(m_pAnimationTracks[k].m_fPosition, fTimeElapsed, pAnimationSet->m_fLength);
+					
+					fPosition = max(m_pAnimationTracks[k].m_fPosition, 0.0f);
 
 					for (int j = 0; j < m_pAnimationSets->m_nAnimatedBoneFrames; j++)
 					{
@@ -270,7 +305,9 @@ void CAnimationController::AdvanceTime(float fTimeElapsed, CGameObject* pRootGam
 				CAnimationSet* pAnimationSet = m_pAnimationSets->m_pAnimationSets[m_pAnimationTracks[k].m_nAnimationSet];
 				//m_pAnimationTracks[k].UpdateSequence(m_pAnimationTracks[k].m_fSequenceWeight, fTimeElapsed, MaxAnimationLength);
 				//m_pAnimationTracks[k].UpdatePosition(m_pAnimationTracks[k].m_fPosition, fTimeElapsed, pAnimationSet->m_fLength); // 0번 트랙의 애니메이션 길이에 귀속되도록
-				m_pAnimationTracks[k].UpdatePosition(m_pAnimationTracks[k].m_fPosition, fTimeElapsed, pAnimationSet->m_fLength);
+				if(m_pAnimationTracks[k].m_bUpdate)
+					m_pAnimationTracks[k].UpdatePosition(m_pAnimationTracks[k].m_fPosition, fTimeElapsed, pAnimationSet->m_fLength);
+				
 			}
 
 			for (int j = 0; j < m_pAnimationSets->m_nAnimatedBoneFrames; j++) {

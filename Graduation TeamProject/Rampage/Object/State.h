@@ -185,6 +185,8 @@ public:
     virtual void Exit(CPlayer* player);
 
     virtual void SetPlayerRootVel(CPlayer* player);
+protected:
+    XMFLOAT3 m_xmf3VelociyuCache;
 };
 
 template<class entity_type>
