@@ -23,7 +23,7 @@ Idle_Player::~Idle_Player()
 
 void Idle_Player::Enter(CPlayer* player)
 {
-	player->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 4);
+	player->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 4); // 36 potion
 	player->m_pSkinnedAnimationController->SetTrackWeight(0, 1.0);
 	player->m_pSkinnedAnimationController->SetTrackAnimationSet(1, 2);
 	player->m_pSkinnedAnimationController->SetTrackWeight(1, 0.0);
@@ -35,6 +35,9 @@ void Idle_Player::Enter(CPlayer* player)
 	player->m_pSkinnedAnimationController->m_pAnimationTracks[1].m_fPosition = 0.0f;
 	player->m_pSkinnedAnimationController->m_pAnimationTracks[1].m_fSequenceWeight = 0.0f;
 	player->m_pSkinnedAnimationController->m_pAnimationTracks[1].m_nType = ANIMATION_TYPE_LOOP;
+
+	//player->m_pSkinnedAnimationController->m_pSubAnimationTracks[0].m_bEnable = TRUE;
+
 
 
 	player->m_xmf3RootTransfromPreviousPos = XMFLOAT3{ 0.f, 0.f , 0.f };
@@ -344,6 +347,7 @@ void Atk1_Player::Enter(CPlayer* player)
 	player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_nType = ANIMATION_TYPE_ONCE;
 	player->m_bAttack = false; // 사용자가 좌클릭시 true가 되는 변수
 	player->m_fCMDConstant = 1.0f;
+
 
 	player->m_xmf3RootTransfromPreviousPos = XMFLOAT3{ 0.f, 0.f , 0.f };
 

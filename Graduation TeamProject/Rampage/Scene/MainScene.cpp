@@ -572,7 +572,14 @@ SCENE_RETURN_TYPE CMainTMPScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMe
 			break;
 		case 'e':
 		case 'E':
-			if (wParam == 'e' || wParam == 'E') dwDirection |= DIR_UP;
+			if (wParam == 'e' || wParam == 'E') {
+				if(m_CurrentMouseCursorMode == MOUSE_CUROSR_MODE::FLOATING_MODE)
+					dwDirection |= DIR_UP;
+				else if (m_CurrentMouseCursorMode == MOUSE_CUROSR_MODE::THIRD_FERSON_MODE) {
+					if (m_pPlayer)
+						dynamic_cast<CKnightPlayer*>(m_pPlayer)->DrinkPotion();
+				}
+			}
 			break;
 		default:
 			break;

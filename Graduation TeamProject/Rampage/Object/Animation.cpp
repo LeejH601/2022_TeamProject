@@ -334,8 +334,8 @@ void CAnimationController::AdvanceTime(float fTimeElapsed, CGameObject* pRootGam
 						q1 = XMQuaternionNormalize(q1);
 						rotation[k] = q1;
 
-						q1 = q1 * m_pAnimationTracks[k].m_fWeight;
-						q1 = XMQuaternionNormalize(q1);
+						/*q1 = q1 * m_pAnimationTracks[k].m_fWeight;
+						q1 = XMQuaternionNormalize(q1);*/
 						//q = q1 + q;
 
 
@@ -355,6 +355,50 @@ void CAnimationController::AdvanceTime(float fTimeElapsed, CGameObject* pRootGam
 				xmf4x4Transform._43 = transfrom.z;
 
 				m_pAnimationSets->m_ppAnimatedBoneFrameCaches[j]->m_xmf4x4Transform = xmf4x4Transform;
+			}
+		}
+
+		for (int k = 0; k < m_nSubAnimationTracks; ++k) {
+			CAnimationSet* pAnimationSet = m_pAnimationSets->m_pAnimationSets[m_pSubAnimationTracks[k].m_nAnimationSet];
+			if (m_pSubAnimationTracks[k].m_bUpdate)
+				m_pSubAnimationTracks[k].UpdatePosition(m_pSubAnimationTracks[k].m_fPosition, fTimeElapsed, pAnimationSet->m_fLength);
+
+			XMFLOAT3 transfrom{};
+			XMFLOAT4X4 xmf4x4Transform{};
+			for (int j = m_nLayerBlendBaseBoneIndex[k]; j < m_nLayerBlendRange[k]; j++) {
+				if (m_pSubAnimationTracks[k].m_bEnable) {
+					XMFLOAT4X4 xmf4x4Rotation{};
+					
+
+					float fPosition = max(m_pSubAnimationTracks[k].m_fPosition, 0.0f);
+
+					transfrom = XMFLOAT3(
+						m_pAnimationSets->m_ppAnimatedBoneFrameCaches[j]->m_xmf4x4Transform._41,
+						m_pAnimationSets->m_ppAnimatedBoneFrameCaches[j]->m_xmf4x4Transform._42,
+						m_pAnimationSets->m_ppAnimatedBoneFrameCaches[j]->m_xmf4x4Transform._43);
+
+					transfrom = Vector3::ScalarProduct(transfrom, 1.0f - m_fLayerBlendWeights[k], false);
+
+					XMFLOAT4X4 xmf4x4TrackTransform = pAnimationSet->GetSRT(j, fPosition);
+					XMVECTOR q1 = XMQuaternionRotationMatrix(XMLoadFloat4x4(&xmf4x4TrackTransform));
+					q1 = XMQuaternionNormalize(q1);
+
+					XMFLOAT3 dt = XMFLOAT3(xmf4x4TrackTransform._41, xmf4x4TrackTransform._42, xmf4x4TrackTransform._43);
+					transfrom = Vector3::Add(transfrom, Vector3::ScalarProduct(dt, m_fLayerBlendWeights[k], false));
+
+					m_pSubAnimationTracks[k].HandleCallback();
+
+					XMVECTOR q = XMQuaternionRotationMatrix(XMLoadFloat4x4(&m_pAnimationSets->m_ppAnimatedBoneFrameCaches[j]->m_xmf4x4Transform));
+					q = XMQuaternionNormalize(q);
+					q = XMQuaternionSlerp(q, q1, m_fLayerBlendWeights[k]);
+
+					XMStoreFloat4x4(&xmf4x4Transform, XMMatrixRotationQuaternion(q));
+					xmf4x4Transform._41 = transfrom.x;
+					xmf4x4Transform._42 = transfrom.y;
+					xmf4x4Transform._43 = transfrom.z;
+
+					m_pAnimationSets->m_ppAnimatedBoneFrameCaches[j]->m_xmf4x4Transform = xmf4x4Transform;
+				}
 			}
 		}
 		

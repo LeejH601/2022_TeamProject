@@ -124,6 +124,13 @@ public:
 	int m_nAnimationTracks = 0;
 	std::vector<CAnimationTrack> m_pAnimationTracks;
 
+	int m_nSubAnimationTracks = 0;
+	std::vector<CAnimationTrack> m_pSubAnimationTracks;
+
+	std::vector<float> m_fLayerBlendWeights;
+	std::vector<int> m_nLayerBlendBaseBoneIndex;
+	std::vector<int> m_nLayerBlendRange;
+
 	CAnimationSets* m_pAnimationSets = NULL;
 
 	int m_nSkinnedMeshes = 0;

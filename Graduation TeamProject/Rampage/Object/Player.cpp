@@ -229,6 +229,22 @@ CKnightPlayer::CKnightPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 	weaponFrame = FindFrame("head");
 	m_pSkinnedAnimationController->SetSocket(0, std::string("head"), weaponFrame);
 
+	int nSubAnimationTrack = 1;
+	m_pSkinnedAnimationController->m_nSubAnimationTracks = nSubAnimationTrack;
+	m_pSkinnedAnimationController->m_pSubAnimationTracks.resize(nSubAnimationTrack);
+	m_pSkinnedAnimationController->m_nLayerBlendBaseBoneIndex.resize(nSubAnimationTrack);
+	m_pSkinnedAnimationController->m_nLayerBlendRange.resize(nSubAnimationTrack);
+	m_pSkinnedAnimationController->m_fLayerBlendWeights.resize(nSubAnimationTrack);
+
+	m_pSkinnedAnimationController->m_pSubAnimationTracks[0].m_bEnable = FALSE;
+	m_pSkinnedAnimationController->m_pSubAnimationTracks[0].SetAnimationSet(36);
+	m_pSkinnedAnimationController->m_pSubAnimationTracks[0].m_fPosition = 0.0f;
+	m_pSkinnedAnimationController->m_pSubAnimationTracks[0].m_fWeight = 0.0f;
+	m_pSkinnedAnimationController->m_pSubAnimationTracks[0].m_nType = ANIMATION_TYPE_ONCE;
+	m_pSkinnedAnimationController->m_nLayerBlendBaseBoneIndex[0] = 10;
+	m_pSkinnedAnimationController->m_nLayerBlendRange[0] = 79;
+	m_pSkinnedAnimationController->m_fLayerBlendWeights[0] = 1.0f;
+
 	auto Find_Frame_Index = [](std::string& target, std::vector<std::string>& source) {
 		int cnt = 0;
 		for (std::string& str : source) {
@@ -448,6 +464,12 @@ void CKnightPlayer::PrepareBoundingBox(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 #endif // RENDER_BOUNDING_BOX
 	m_BodyBoundingBox = BoundingOrientedBox{ XMFLOAT3(0.0f, 0.75f, 0.0f), XMFLOAT3(0.35f, 1.0f, 0.35f), XMFLOAT4{0.0f, 0.0f, 0.0f, 1.0f} };
 	m_WeaponBoundingBox = BoundingOrientedBox{ center, extent, XMFLOAT4{0.0f, 0.0f, 0.0f, 1.0f} };
+}
+
+void CKnightPlayer::DrinkPotion()
+{
+	m_pSkinnedAnimationController->m_pSubAnimationTracks[0].m_bEnable = TRUE;
+	m_pSkinnedAnimationController->m_pSubAnimationTracks[0].m_fPosition = 0.0f;
 }
 
 
