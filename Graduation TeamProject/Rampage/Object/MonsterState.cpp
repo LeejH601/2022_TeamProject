@@ -445,7 +445,7 @@ void Dead_Monster::Execute(CMonster* monster, float fElapsedTime)
 	{
 		if (monster->m_pStateMachine->GetCurrentState() != Spawn_Monster::GetInst())
 		{
-			CMonsterPool::GetInst()->SetNonActiveMonster(monster);
+			CMonsterPool::GetInst()->SetNonActiveMonster(monster->GetMonsterType(), monster);
 			monster->TestDissolvetime = 0.0f;
 		}
 	}

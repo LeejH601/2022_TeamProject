@@ -68,10 +68,10 @@ enum class PARTICLE_CATEGORY
 
 enum class MONSTER_TYPE
 {
-	NONE,
 	GOBLIN,
 	ORC,
-	SKELETON
+	SKELETON,
+	NONE
 };
 
 enum class MAP_OBJ_TYPE

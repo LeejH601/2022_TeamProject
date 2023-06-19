@@ -141,11 +141,11 @@ class CMonsterPool
 	DECLARE_SINGLE(CMonsterPool);
 
 public:
-	void SpawnMonster(int MonsterN, XMFLOAT3* xmfPositions);
+	void SpawnMonster(MONSTER_TYPE monsterType, int MonsterN, XMFLOAT3* xmfPositions);
 
-	bool SetNonActiveMonster(CMonster* pMonster);
-	bool SetActiveMonster(XMFLOAT3 xmfPosition);
+	bool SetNonActiveMonster(MONSTER_TYPE monsterType, CMonster* pMonster);
+	bool SetActiveMonster(MONSTER_TYPE monsterType, XMFLOAT3 xmfPosition);
 
 private:
-	std::vector<CGameObject*> m_pNonActiveMonsters; // 사용 가능한 몬스터
+	std::vector<std::vector<CGameObject*>> m_pNonActiveMonsters; // 사용 가능한 몬스터
 };

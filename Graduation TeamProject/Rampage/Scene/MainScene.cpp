@@ -482,7 +482,7 @@ SCENE_RETURN_TYPE CMainTMPScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMe
 			for (int i = 0; i < 5; i++)
 				xmf3MonsterPos[i] = Vector3::Add(Vector3::Add(Vector3::ScalarProduct(xmf3PlayerRight, -20 + i * 10, false), xmf3PlayerLook), xmf3PlayerPos);
 
-			CMonsterPool::GetInst()->SpawnMonster(7, xmf3MonsterPos);
+			CMonsterPool::GetInst()->SpawnMonster(MONSTER_TYPE::GOBLIN, 5, xmf3MonsterPos);
 			break;
 		}
 		case VK_BACK:
@@ -668,7 +668,7 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 		m_pMonsterObject->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
 		m_pMonsterObject->m_pSkinnedAnimationController->m_xmf3RootObjectScale = XMFLOAT3(10.0f, 10.0f, 10.0f);
 		m_pMonsterObject->CreateArticulation(1.0f);
-		CMonsterPool::GetInst()->SetNonActiveMonster(m_pMonsterObject.get());
+		CMonsterPool::GetInst()->SetNonActiveMonster(MONSTER_TYPE::GOBLIN, m_pMonsterObject.get());
 		m_pEnemys.push_back(std::move(m_pMonsterObject));
 	}
 
@@ -682,7 +682,7 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 		m_pMonsterObject->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
 		m_pMonsterObject->m_pSkinnedAnimationController->m_xmf3RootObjectScale = XMFLOAT3(10.0f, 10.0f, 10.0f);
 		m_pMonsterObject->CreateArticulation(1.0f);
-		CMonsterPool::GetInst()->SetNonActiveMonster(m_pMonsterObject.get());
+		CMonsterPool::GetInst()->SetNonActiveMonster(MONSTER_TYPE::ORC, m_pMonsterObject.get());
 		m_pEnemys.push_back(std::move(m_pMonsterObject));
 	}
 
@@ -696,7 +696,7 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 		m_pMonsterObject->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
 		m_pMonsterObject->m_pSkinnedAnimationController->m_xmf3RootObjectScale = XMFLOAT3(10.0f, 10.0f, 10.0f);
 		m_pMonsterObject->CreateArticulation(1.0f);
-		CMonsterPool::GetInst()->SetNonActiveMonster(m_pMonsterObject.get());
+		CMonsterPool::GetInst()->SetNonActiveMonster(MONSTER_TYPE::SKELETON, m_pMonsterObject.get());
 		m_pEnemys.push_back(std::move(m_pMonsterObject));
 	}
 
