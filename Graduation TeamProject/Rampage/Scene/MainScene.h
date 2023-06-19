@@ -25,6 +25,11 @@ struct DissolveParams {
 	float dissolveThreshold[MAX_OBJECT];
 };
 
+struct StageInfo {
+	int m_iGoblinNum = 0;
+	int m_iOrcNum = 0;
+	int m_iSkeletonNum = 0;
+};
 
 class CMainTMPScene : public CScene
 {
@@ -32,6 +37,9 @@ private:
 	RECT m_ScreendRect;
 
 	bool m_bGameStart = false;
+	int m_iStageNum = 0;
+	std::map<int, StageInfo> m_StageInfoMap;
+
 	BoundingOrientedBox m_MonsterSpawnTriggerBox;
 	
 	std::unique_ptr<CollisionChecker> m_pCollisionChecker = NULL;
@@ -86,6 +94,7 @@ public:
 	CMainTMPScene() {}
 	virtual ~CMainTMPScene() {}
 
+	void AdvanceStage();
 	virtual void SetPlayer(CGameObject* pPlayer);
 
 	virtual void OnPreRender(ID3D12GraphicsCommandList* pd3dCommandList) { }

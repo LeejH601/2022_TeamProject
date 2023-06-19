@@ -22,6 +22,49 @@
 #define MAX_ORC_NUM			50
 #define MAX_SKELETON_NUM	50
 
+XMFLOAT3 RandomMonsterPos() {
+	return XMFLOAT3{ 113.664360f + RandomFloatInRange(-25.0f, 25.0f),
+				3.016271f,
+				123.066483f + RandomFloatInRange(-25.0f, 25.0f) };
+}
+
+void CMainTMPScene::AdvanceStage()
+{
+	m_iStageNum += 1;
+
+	StageInfo stageInfo = m_StageInfoMap.find(m_iStageNum - 1)->second;
+
+	// Spawn Goblin
+	{
+		std::vector<XMFLOAT3> xmf3MonsterPos(stageInfo.m_iGoblinNum);
+
+		for (XMFLOAT3& pos : xmf3MonsterPos)
+			pos = RandomMonsterPos();
+
+		CMonsterPool::GetInst()->SpawnMonster(MONSTER_TYPE::GOBLIN, stageInfo.m_iGoblinNum, xmf3MonsterPos.data());
+	}
+
+	// Spawn Orc
+	{
+		std::vector<XMFLOAT3> xmf3MonsterPos(stageInfo.m_iOrcNum);
+
+		for (XMFLOAT3& pos : xmf3MonsterPos)
+			pos = RandomMonsterPos();
+
+		CMonsterPool::GetInst()->SpawnMonster(MONSTER_TYPE::ORC, stageInfo.m_iOrcNum, xmf3MonsterPos.data());
+	}
+
+	// Spawn Skeleton
+	{
+		std::vector<XMFLOAT3> xmf3MonsterPos(stageInfo.m_iSkeletonNum);
+
+		for (XMFLOAT3& pos : xmf3MonsterPos)
+			pos = RandomMonsterPos();
+
+		CMonsterPool::GetInst()->SpawnMonster(MONSTER_TYPE::SKELETON, stageInfo.m_iSkeletonNum, xmf3MonsterPos.data());
+	}
+}
+
 void CMainTMPScene::SetPlayer(CGameObject* pPlayer)
 {
 	m_pPlayer = pPlayer;
@@ -869,6 +912,10 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	pUIObject->SetTextureIndex(17 + UITextureIndexOffset);
 	m_pUIObject.push_back(std::move(pUIObject));*/
 
+
+	m_StageInfoMap.emplace(std::pair<int, StageInfo>(0, StageInfo{ 5, 0, 0 }));
+	m_StageInfoMap.emplace(std::pair<int, StageInfo>(1, StageInfo{ 0, 5, 0 }));
+	m_StageInfoMap.emplace(std::pair<int, StageInfo>(2, StageInfo{ 0, 0, 5 }));
 }
 bool CMainTMPScene::ProcessInput(HWND hWnd, DWORD dwDirection, float fTimeElapsed)
 {
@@ -966,7 +1013,9 @@ void CMainTMPScene::UpdateObjects(float fTimeElapsed)
 		OutputDebugString(L"Trigger Played");
 
 		m_bGameStart = true;
-		// Spawn Monster
+
+		// 스테이지를 진행시키는 함수
+		AdvanceStage();
 	}
 
 	m_pMainSceneCamera->Update(xmf3PlayerPos, fTimeElapsed);
