@@ -17,17 +17,18 @@ CVertexPointParticleObject::CVertexPointParticleObject(int iTextureIndex, ID3D12
 	this->SetStartAlpha(1.0);
 	this->SetColor(XMFLOAT3(0.3803, 0.9372, 0.1098));
 	//m_f3Color = Vector3::ScalarProduct(m_f3Color, 5.0f, false);
-	this->SetSpeed(10.0f);
-	this->SetLifeTime(2.0f);
+	this->SetSpeed(15.0f);
+	this->SetLifeTime(0.5f);
 	this->SetMaxParticleN(MAX_PARTICLES);
 	this->SetEmitParticleN(100);
 	this->SetParticleType(5);
+	this->SetEmissive(20.0f);
 
 	m_fFieldSpeed = 5.0f;
-	m_fNoiseStrength = 1.0f;;
+	m_fNoiseStrength = 1.2;
 	m_xmf3FieldMainDirection = XMFLOAT3(0.0f, 1.0f, 0.0f);
 	m_fProgressionRate = 1.0f;
-	m_fLengthScale = 1.0f;
+	m_fLengthScale = 1.2;
 }
 
 CVertexPointParticleObject::~CVertexPointParticleObject()
@@ -45,9 +46,9 @@ void CVertexPointParticleObject::EmitParticle(int emitType)
 	switch (emitType)
 	{
 	case 5:
-		param.m_fLifeTime = 0.5f;
-		param.m_fEmitedSpeed = 5.0f;
-		param.m_iTextureIndex = 1;
+		param.m_fLifeTime = m_fLifeTime;
+		param.m_fEmitedSpeed = m_fSpeed;
+		param.m_iTextureIndex = 5;
 		param.m_iTextureCoord[0] = m_iTotalRow; param.m_iTextureCoord[1] = m_iTotalCol;
 
 		/*	param.m_fLifeTime = m_fLifeTime;
@@ -145,7 +146,7 @@ void CVertexPointParticleObject::SetVertexPointsFromSkinnedSubeMeshToRandom(CSki
 
 	std::uniform_int_distribution<int> uid(0, subSetIndices.size() - 1);
 
-	int nVertexPoint = int(meshVertexs.size() / 100);
+	int nVertexPoint = int(meshVertexs.size() / 10);
 	nVertexPoint = nVertexPoint < 1 ? 1 : nVertexPoint; // 반드시 1개는 존재하도록 조정
 
 	m_ivertexPointsIndices.resize(nVertexPoint);

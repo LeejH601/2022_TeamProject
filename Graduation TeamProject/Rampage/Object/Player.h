@@ -3,6 +3,7 @@
 #include "StateMachine.h"
 #include "..\Global\Camera.h"	// 왜 필요하지
 #include "SwordTrailObject.h"
+#include "VertexPointParticleObject.h"
 
 class CCamera;
 class CPlayer : public CPhysicsObject
@@ -47,6 +48,9 @@ public:
 	
 	XMFLOAT3 m_xmf3AtkDirection;
 
+	std::vector<std::shared_ptr<CAnimationCallbackHandler>> m_pAnimationcHandlers;
+
+
 public:
 	CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks);
 	virtual ~CPlayer();
@@ -82,6 +86,9 @@ private:
 	CGameObject* pWeaponBoundingBoxMesh;
 	XMFLOAT4 m_xmf4TrailControllPoints[2];
 	XMFLOAT3 m_xmf4PrevTrailVertexPoint;
+
+public:
+	int m_nRemainPotions;
 
 public:
 	CKnightPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks);
@@ -139,3 +146,14 @@ public:
 };
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+class CDrinkPotionCallbackHandler : public CAnimationCallbackHandler 
+{
+public:
+	CVertexPointParticleObject* m_pVertexPointParticleObject = nullptr;
+	bool m_bEmitedParticle = false;
+	CKnightPlayer* m_pPlayer;
+public:
+	virtual void HandleCallback(void* pCallbackData, float fTrackPosition);
+};

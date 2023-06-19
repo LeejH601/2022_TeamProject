@@ -192,11 +192,11 @@ void CAnimationController::SetSocket(int SkinMeshIndex, std::string& FrameName, 
 
 	CSkinnedMesh* mesh = m_ppSkinnedMeshes[SkinMeshIndex];
 	for (int i = 0; i < mesh->m_nSkinningBones; ++i) {
-		if(strcmp( mesh->m_ppstrSkinningBoneNames[i].data(), FrameName.data()) == 0)
-			m_pSockets.push_back(Obj_Socket(std::pair<int,int>(SkinMeshIndex, i), DestObject));
+		if (strcmp(mesh->m_ppstrSkinningBoneNames[i].data(), FrameName.data()) == 0)
+			m_pSockets.push_back(Obj_Socket(std::pair<int, int>(SkinMeshIndex, i), DestObject));
 	}
-		
-		
+
+
 }
 void CAnimationController::UpdateSocketsTransform()
 {
@@ -274,7 +274,7 @@ void CAnimationController::AdvanceTime(float fTimeElapsed, CGameObject* pRootGam
 					float fPosition;
 					if (m_pAnimationTracks[k].m_bUpdate)
 						m_pAnimationTracks[k].UpdatePosition(m_pAnimationTracks[k].m_fPosition, fTimeElapsed, pAnimationSet->m_fLength);
-					
+
 					fPosition = max(m_pAnimationTracks[k].m_fPosition, 0.0f);
 
 					for (int j = 0; j < m_pAnimationSets->m_nAnimatedBoneFrames; j++)
@@ -292,7 +292,7 @@ void CAnimationController::AdvanceTime(float fTimeElapsed, CGameObject* pRootGam
 				}
 			}
 		}
-		
+
 		else {
 			/*float MaxAnimationLength = 0.f;
 		for (int k = 0; k < m_nAnimationTracks; ++k) {
@@ -305,9 +305,9 @@ void CAnimationController::AdvanceTime(float fTimeElapsed, CGameObject* pRootGam
 				CAnimationSet* pAnimationSet = m_pAnimationSets->m_pAnimationSets[m_pAnimationTracks[k].m_nAnimationSet];
 				//m_pAnimationTracks[k].UpdateSequence(m_pAnimationTracks[k].m_fSequenceWeight, fTimeElapsed, MaxAnimationLength);
 				//m_pAnimationTracks[k].UpdatePosition(m_pAnimationTracks[k].m_fPosition, fTimeElapsed, pAnimationSet->m_fLength); // 0번 트랙의 애니메이션 길이에 귀속되도록
-				if(m_pAnimationTracks[k].m_bUpdate)
+				if (m_pAnimationTracks[k].m_bUpdate)
 					m_pAnimationTracks[k].UpdatePosition(m_pAnimationTracks[k].m_fPosition, fTimeElapsed, pAnimationSet->m_fLength);
-				
+
 			}
 
 			for (int j = 0; j < m_pAnimationSets->m_nAnimatedBoneFrames; j++) {
@@ -359,16 +359,17 @@ void CAnimationController::AdvanceTime(float fTimeElapsed, CGameObject* pRootGam
 		}
 
 		for (int k = 0; k < m_nSubAnimationTracks; ++k) {
-			CAnimationSet* pAnimationSet = m_pAnimationSets->m_pAnimationSets[m_pSubAnimationTracks[k].m_nAnimationSet];
-			if (m_pSubAnimationTracks[k].m_bUpdate)
-				m_pSubAnimationTracks[k].UpdatePosition(m_pSubAnimationTracks[k].m_fPosition, fTimeElapsed, pAnimationSet->m_fLength);
+			if (m_pSubAnimationTracks[k].m_bEnable) {
 
-			XMFLOAT3 transfrom{};
-			XMFLOAT4X4 xmf4x4Transform{};
-			for (int j = m_nLayerBlendBaseBoneIndex[k]; j < m_nLayerBlendRange[k]; j++) {
-				if (m_pSubAnimationTracks[k].m_bEnable) {
+				CAnimationSet* pAnimationSet = m_pAnimationSets->m_pAnimationSets[m_pSubAnimationTracks[k].m_nAnimationSet];
+				if (m_pSubAnimationTracks[k].m_bUpdate)
+					m_pSubAnimationTracks[k].UpdatePosition(m_pSubAnimationTracks[k].m_fPosition, fTimeElapsed, pAnimationSet->m_fLength);
+
+				XMFLOAT3 transfrom{};
+				XMFLOAT4X4 xmf4x4Transform{};
+				for (int j = m_nLayerBlendBaseBoneIndex[k]; j < m_nLayerBlendRange[k]; j++) {
 					XMFLOAT4X4 xmf4x4Rotation{};
-					
+
 
 					float fPosition = max(m_pSubAnimationTracks[k].m_fPosition, 0.0f);
 
@@ -401,7 +402,7 @@ void CAnimationController::AdvanceTime(float fTimeElapsed, CGameObject* pRootGam
 				}
 			}
 		}
-		
+
 
 		OnRootMotion(pRootGameObject, fTimeElapsed);
 		OnAnimationIK(pRootGameObject);
@@ -409,6 +410,6 @@ void CAnimationController::AdvanceTime(float fTimeElapsed, CGameObject* pRootGam
 		pRootGameObject->UpdateTransform(NULL);
 
 		UpdateBoneTransform();
-		
+
 	}
 }

@@ -573,11 +573,23 @@ SCENE_RETURN_TYPE CMainTMPScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMe
 		case 'e':
 		case 'E':
 			if (wParam == 'e' || wParam == 'E') {
-				if(m_CurrentMouseCursorMode == MOUSE_CUROSR_MODE::FLOATING_MODE)
+				if (m_CurrentMouseCursorMode == MOUSE_CUROSR_MODE::FLOATING_MODE)
 					dwDirection |= DIR_UP;
 				else if (m_CurrentMouseCursorMode == MOUSE_CUROSR_MODE::THIRD_FERSON_MODE) {
-					if (m_pPlayer)
-						dynamic_cast<CKnightPlayer*>(m_pPlayer)->DrinkPotion();
+					if (m_pPlayer) {
+						CStateMachine<CPlayer>* stateMachine = dynamic_cast<CStateMachine<CPlayer>*>(dynamic_cast<CKnightPlayer*>(m_pPlayer)->m_pStateMachine.get());
+						if (stateMachine->GetCurrentState() == Idle_Player::GetInst() ||
+							stateMachine->GetCurrentState() == Run_Player::GetInst()) {
+							if (dynamic_cast<CKnightPlayer*>(m_pPlayer)->m_nRemainPotions > 0) {
+								if (((CPlayer*)m_pPlayer)->m_bIsDash)
+								{
+									((CPlayer*)m_pPlayer)->m_bIsDash = false;
+									((CPlayer*)m_pPlayer)->SetSpeedUperS(((CPlayer*)m_pPlayer)->GetSpeedUperS() / 2.0f);
+								}
+								dynamic_cast<CKnightPlayer*>(m_pPlayer)->DrinkPotion();
+							}
+						}
+					}
 				}
 			}
 			break;
@@ -674,7 +686,7 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pDepthRenderShader->CreateShader(pd3dDevice, GetGraphicsRootSignature(), 1, pdxgiRtvFormats, DXGI_FORMAT_D32_FLOAT, 0);
 	m_pDepthRenderShader->CreateShader(pd3dDevice, GetGraphicsRootSignature(), 1, pdxgiRtvFormats, DXGI_FORMAT_D32_FLOAT, 1);
 	m_pDepthRenderShader->BuildObjects(pd3dDevice, pd3dCommandList, NULL);
-	m_pDepthRenderShader->CreateCbvSrvUavDescriptorHeaps(pd3dDevice, 0, 
+	m_pDepthRenderShader->CreateCbvSrvUavDescriptorHeaps(pd3dDevice, 0,
 		((CDepthRenderShader*)m_pDepthRenderShader.get())->GetDepthTexture()->GetTextures() + ((CDepthRenderShader*)m_pDepthRenderShader.get())->GetBakedDepthTexture()->GetTextures()
 	);
 	m_pDepthRenderShader->CreateShaderResourceViews(pd3dDevice, ((CDepthRenderShader*)m_pDepthRenderShader.get())->GetDepthTexture(), 0, 9);
@@ -956,7 +968,7 @@ bool CMainTMPScene::ProcessInput(HWND hWnd, DWORD dwDirection, float fTimeElapse
 	return true;
 }
 
-struct ThreadData 
+struct ThreadData
 {
 	std::vector<std::unique_ptr<CGameObject>>* pEnemys;
 	int offset;
@@ -1033,13 +1045,13 @@ void CMainTMPScene::UpdateObjects(float fTimeElapsed)
 		m_pEnemys[i]->Update(fTimeElapsed);
 		m_pcbMappedDisolveParams->dissolveThreshold[i] = m_pEnemys[i]->m_fDissolveThrethHold;
 	}
-	
+
 
 	m_pMap->Update(fTimeElapsed);
 
 
 	m_pCollisionChecker->UpdateObjects(fTimeElapsed);
-	
+
 
 	for (std::unique_ptr<CGameObject>& obj : m_pSwordTrailObjects) {
 		obj->Update(fTimeElapsed);
@@ -1047,21 +1059,23 @@ void CMainTMPScene::UpdateObjects(float fTimeElapsed)
 
 	m_pPlayer->Update(fTimeElapsed);
 
-	//static bool isSetVPObject = false;
-	//if (!isSetVPObject) {
-	//	CGameObject* obj = m_pPlayer->FindFrame("Sword_low");
-	//	m_pVertexPointParticleObject->SetWorldMatrixReference(&obj->m_xmf4x4World);
-	//	// body
-	//	m_pVertexPointParticleObject->SetVertexPointsFromSkinnedSubeMeshToRandom(m_pPlayer->m_pSkinnedAnimationController->m_ppSkinnedMeshes[0], 6, m_pPlayer->m_pSkinnedAnimationController.get());
-	//	//m_pVertexPointParticleObject->SetVertexPointsFromSkinnedMeshToRandom(m_pPlayer->m_pSkinnedAnimationController->m_ppSkinnedMeshes[0], m_pPlayer->m_pSkinnedAnimationController.get());
-	//	//m_pVertexPointParticleObject->SetVertexPointsFromStaticMeshToUniform(obj->m_pMesh.get());
-	//	//m_pVertexPointParticleObject->SetVertexPointsFromStaticMeshToRandom(obj->m_pMesh.get());
-	//	isSetVPObject = true;
-	//}
+	static bool isSetVPObject = false;
+	if (!isSetVPObject) {
+		CGameObject* obj = m_pPlayer->FindFrame("Sword_low");
+		m_pVertexPointParticleObject->SetWorldMatrixReference(&obj->m_xmf4x4World);
+		// body
+		m_pVertexPointParticleObject->SetVertexPointsFromSkinnedSubeMeshToRandom(m_pPlayer->m_pSkinnedAnimationController->m_ppSkinnedMeshes[0], 6, m_pPlayer->m_pSkinnedAnimationController.get());
+		//m_pVertexPointParticleObject->SetVertexPointsFromSkinnedMeshToRandom(m_pPlayer->m_pSkinnedAnimationController->m_ppSkinnedMeshes[0], m_pPlayer->m_pSkinnedAnimationController.get());
+		//m_pVertexPointParticleObject->SetVertexPointsFromStaticMeshToUniform(obj->m_pMesh.get());
+		//m_pVertexPointParticleObject->SetVertexPointsFromStaticMeshToRandom(obj->m_pMesh.get());
+		isSetVPObject = true;
+		CDrinkPotionCallbackHandler* handler = dynamic_cast<CDrinkPotionCallbackHandler*>((dynamic_cast<CKnightPlayer*>(m_pPlayer)->m_pAnimationcHandlers[0].get()));
+		handler->m_pVertexPointParticleObject = m_pVertexPointParticleObject.get();
+	}
 
 	UIUpdate((CPlayer*)m_pPlayer);
-	
-	 
+
+
 	// Update Camera
 
 	XMFLOAT3 xmf3PlayerPos = XMFLOAT3{
@@ -1137,7 +1151,7 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 		((CParticleObject*)m_pTerrainSpriteObject[i].get())->Render(pd3dCommandList, nullptr, m_pParticleShader.get());
 	}
 
-	
+
 	//((CParticleObject*)m_pSmokeObject.get())->Update(fTimeElapsed);
 	//((CParticleObject*)m_pSmokeObject.get())->UpdateShaderVariables(pd3dCommandList, fCurrentTime, fTimeElapsed);
 	//((CParticleObject*)m_pSmokeObject.get())->Render(pd3dCommandList, nullptr, m_pParticleShader.get());
@@ -1218,7 +1232,7 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 		pd3dCommandList->SetGraphicsRoot32BitConstants(0, 1, &i, 33);
 		m_pEnemys[i]->Render(pd3dCommandList, true);
 	}
-	
+
 	//m_pDetailObject->Render(pd3dCommandList, false);
 
 
@@ -1317,7 +1331,7 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 	::SynchronizeResourceTransition(pd3dCommandList, pd3dSource, D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 
 
-}
+	}
 
 void CMainTMPScene::OnPostRender()
 {
@@ -1338,7 +1352,7 @@ void CMainTMPScene::OnPostRender()
 	{
 		((CParticleObject*)m_pTerrainSpriteObject[i].get())->OnPostRender();
 	}
-
+	m_pVertexPointParticleObject->OnPostRender();
 	//((CParticleObject*)m_pTrailParticleObjects.get())->OnPostRender();
 
 }

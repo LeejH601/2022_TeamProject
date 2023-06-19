@@ -218,6 +218,9 @@ CKnightPlayer::CKnightPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 	CGameObject* obj = pKnightModel->m_pModelRootObject->FindFrame("SK_FKnightB_05");
 	m_pPelvisObject = pKnightModel->m_pModelRootObject->FindFrame("pelvis");
 	SetChild(pKnightModel->m_pModelRootObject, true);
+
+	m_nRemainPotions = 5;
+
 	//m_pSkinnedAnimationController = std::make_unique<CKightNoMoveRootAnimationController>(pd3dDevice, pd3dCommandList, nAnimationTracks, pKnightModel);
 	m_pSkinnedAnimationController = std::make_unique<CKightRootMoveAnimationController>(pd3dDevice, pd3dCommandList, 2, pKnightModel); // 애니메이션 트랙 갯수 고정
 	m_pSkinnedAnimationController->SetTrackWeight(0,1.f);
@@ -244,6 +247,19 @@ CKnightPlayer::CKnightPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 	m_pSkinnedAnimationController->m_nLayerBlendBaseBoneIndex[0] = 10;
 	m_pSkinnedAnimationController->m_nLayerBlendRange[0] = 79;
 	m_pSkinnedAnimationController->m_fLayerBlendWeights[0] = 1.0f;
+
+
+	std::shared_ptr<CDrinkPotionCallbackHandler> pCallbackHandler = std::make_shared<CDrinkPotionCallbackHandler>();
+	pCallbackHandler->m_pPlayer = this;
+	CAnimationTrack* subTrack = &m_pSkinnedAnimationController->m_pSubAnimationTracks[0];
+	subTrack->SetCallbackKeys(3);
+	subTrack->SetCallbackKey(0, 2.5f, (void*)subTrack);
+	subTrack->SetCallbackKey(1, 1.5f, (void*)subTrack);
+	subTrack->SetCallbackKey(2, 0.0f, (void*)subTrack);
+	subTrack->SetAnimationCallbackHandler(pCallbackHandler.get());
+
+	m_pAnimationcHandlers.push_back(std::move(pCallbackHandler));
+
 
 	auto Find_Frame_Index = [](std::string& target, std::vector<std::string>& source) {
 		int cnt = 0;
@@ -468,8 +484,10 @@ void CKnightPlayer::PrepareBoundingBox(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 
 void CKnightPlayer::DrinkPotion()
 {
-	m_pSkinnedAnimationController->m_pSubAnimationTracks[0].m_bEnable = TRUE;
-	m_pSkinnedAnimationController->m_pSubAnimationTracks[0].m_fPosition = 0.0f;
+	if (m_pSkinnedAnimationController->m_pSubAnimationTracks[0].m_bEnable == FALSE) {
+		m_pSkinnedAnimationController->m_pSubAnimationTracks[0].m_bEnable = TRUE;
+		m_pSkinnedAnimationController->m_pSubAnimationTracks[0].m_fPosition = 0.0f;
+	}
 }
 
 
@@ -562,5 +580,30 @@ void CKightRootMoveAnimationController::OnRootMotion(CGameObject* pRootGameObjec
 	{
 		m_pRootMotionObject->m_xmf4x4Transform._41 = 0.f;
 		m_pRootMotionObject->m_xmf4x4Transform._43 = 0.f;
+	}
+}
+
+void CDrinkPotionCallbackHandler::HandleCallback(void* pCallbackData, float fTrackPosition)
+{
+	if (fTrackPosition >= 2.5f - ANIMATION_CALLBACK_EPSILON) {
+		CAnimationTrack* track = (CAnimationTrack*)(pCallbackData);
+		track->m_bEnable = false;
+		m_bEmitedParticle = false;
+	}
+	if (abs(fTrackPosition - 1.5f) < ANIMATION_CALLBACK_EPSILON && m_bEmitedParticle == false) {
+		if (m_pVertexPointParticleObject) {
+			m_pVertexPointParticleObject->EmitParticle(5);
+			m_pVertexPointParticleObject->SetEmit(true);
+			m_bEmitedParticle = true;
+			if (m_pPlayer) {
+				if (m_pPlayer->m_nRemainPotions > 0) {
+					m_pPlayer->m_nRemainPotions--;
+					m_pPlayer->m_nRemainPotions = max(0, m_pPlayer->m_nRemainPotions);
+				}
+			}
+		}
+	}
+	if (abs(fTrackPosition - 0.0f) < ANIMATION_CALLBACK_EPSILON && m_bEmitedParticle == true) {
+		m_bEmitedParticle = false;
 	}
 }

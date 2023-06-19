@@ -70,7 +70,8 @@ void Idle_Player::OnRootMotion(CPlayer* player, float fTimeElapsed)
 
 void Idle_Player::Exit(CPlayer* player)
 {
-
+	/*CAnimationController* pPlayerController = player->m_pSkinnedAnimationController.get();
+	pPlayerController->m_pSubAnimationTracks[0].SetEnable(false);*/
 }
 
 void Atk_Player::InitAtkPlayer()
@@ -336,6 +337,10 @@ void Atk1_Player::SpawnTrailParticle(CPlayer* player)
 void Atk1_Player::Enter(CPlayer* player)
 {
 	CLogger::GetInst()->Log(std::string("Player Enter Atk1"));
+
+	CAnimationController* pPlayerController = player->m_pSkinnedAnimationController.get();
+	pPlayerController->m_pSubAnimationTracks[0].SetEnable(false);
+
 	player->m_iAttackId += 1;
 
 	player->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
@@ -794,7 +799,8 @@ void Run_Player::Animate(CPlayer* player, float fTimeElapsed)
 
 void Run_Player::Exit(CPlayer* player)
 {
-	//player->SetCurrSpeed(0);
+	/*CAnimationController* pPlayerController = player->m_pSkinnedAnimationController.get();
+	pPlayerController->m_pSubAnimationTracks[0].SetEnable(false);*/
 }
 
 void Run_Player::OnRootMotion(CPlayer* player, float fTimeElapsed)
@@ -986,6 +992,9 @@ Evasion_Player::~Evasion_Player()
 
 void Evasion_Player::Enter(CPlayer* player)
 {
+	CAnimationController* pPlayerController = player->m_pSkinnedAnimationController.get();
+	pPlayerController->m_pSubAnimationTracks[0].SetEnable(false);
+
 	m_xmf3VelociyuCache = player->GetVelocity();
 	m_fSpeedCache = player->GetCurrSpeed();
 	player->m_xmf3RootTransfromPreviousPos = XMFLOAT3{ 0.f, 0.f , 0.f };
