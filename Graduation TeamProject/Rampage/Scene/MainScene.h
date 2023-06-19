@@ -38,6 +38,7 @@ private:
 
 	bool m_bGameStart = false;
 	int m_iStageNum = 0;
+	int m_iTotalMonsterNum = 0;
 	std::map<int, StageInfo> m_StageInfoMap;
 
 	BoundingOrientedBox m_MonsterSpawnTriggerBox;
@@ -91,9 +92,10 @@ private:
 	std::list<RegisterArticulationParams> m_lRequestObjects;
 	std::list<RegisterArticulationSleepParams> m_lSleepObjects;
 public:
-	CMainTMPScene() {}
+	CMainTMPScene();
 	virtual ~CMainTMPScene() {}
 
+	void HandleDeadMessage();
 	void AdvanceStage();
 	virtual void SetPlayer(CGameObject* pPlayer);
 

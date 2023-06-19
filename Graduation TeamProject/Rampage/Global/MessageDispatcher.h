@@ -159,6 +159,15 @@ public:
 	virtual void HandleMessage(const Message& message, const MonsterParams& params);
 };
 
+// Define Monster Dead Listener
+class MonsterDeadListener : public IMessageListener {
+private:
+	CMainTMPScene* m_pScene;
+public:
+	void SetScene(CMainTMPScene* pScene) { m_pScene = pScene; };
+	virtual void HandleMessage(const Message& message, const MonsterParams& params);
+};
+
 class UpdateDynamicTimeScaleListener : public IMessageListener {
 	CGameTimer* m_pTimer;
 public:

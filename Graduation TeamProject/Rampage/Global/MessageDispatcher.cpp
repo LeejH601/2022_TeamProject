@@ -599,3 +599,9 @@ void MonsterAttackListener::HandleMessage(const Message& message, const MonsterP
 		params.pMonster->CheckCollision(m_pPlayer);
 	}
 }
+
+void MonsterDeadListener::HandleMessage(const Message& message, const MonsterParams& params)
+{
+	if (message.getType() == MessageType::MONSTER_DEAD)
+		m_pScene->HandleDeadMessage();
+}

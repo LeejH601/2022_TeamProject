@@ -28,14 +28,61 @@ XMFLOAT3 RandomMonsterPos() {
 				123.066483f + RandomFloatInRange(-25.0f, 25.0f) };
 }
 
+CMainTMPScene::CMainTMPScene()
+{
+	std::unique_ptr<RegisterArticulationListener> listener = std::make_unique<RegisterArticulationListener>();
+	listener->SetScene(this);
+	listener->SetEnable(true);
+	m_pListeners.push_back(std::move(listener));
+	CMessageDispatcher::GetInst()->RegisterListener(MessageType::REQUEST_REGISTERARTI, m_pListeners.back().get(), nullptr);
+
+
+	std::unique_ptr<RegisterArticulationSleepListener> slistener = std::make_unique<RegisterArticulationSleepListener>();
+	slistener->SetScene(this);
+	slistener->SetEnable(true);
+	m_pListeners.push_back(std::move(slistener));
+	CMessageDispatcher::GetInst()->RegisterListener(MessageType::REQUEST_SLEEPARTI, m_pListeners.back().get(), nullptr);
+
+	// COLLIDE LISTENER
+	std::unique_ptr<SceneCollideListener> pCollideListener = std::make_unique<SceneCollideListener>();
+	pCollideListener->SetScene(this);
+	m_pListeners.push_back(std::move(pCollideListener));
+	CMessageDispatcher::GetInst()->RegisterListener(MessageType::COLLISION, m_pListeners.back().get(), nullptr);
+
+	// ONGROUND LISTENER
+	std::unique_ptr<SceneOnGroundListener> pOnGroundListener = std::make_unique<SceneOnGroundListener>();
+	pOnGroundListener->SetScene(this);
+	m_pListeners.push_back(std::move(pOnGroundListener));
+	CMessageDispatcher::GetInst()->RegisterListener(MessageType::ONGROUND, m_pListeners.back().get(), nullptr);
+
+	// Monster Dead Listener
+	std::unique_ptr<MonsterDeadListener> pMonsterDeadListener = std::make_unique<MonsterDeadListener>();
+	pMonsterDeadListener->SetScene(this);
+	m_pListeners.push_back(std::move(pMonsterDeadListener));
+	CMessageDispatcher::GetInst()->RegisterListener(MessageType::MONSTER_DEAD, m_pListeners.back().get(), nullptr);
+}
+
+void CMainTMPScene::HandleDeadMessage()
+{
+	m_iTotalMonsterNum -= 1;
+
+	if (m_iTotalMonsterNum == 0)
+		AdvanceStage();
+}
+
 void CMainTMPScene::AdvanceStage()
 {
 	m_iStageNum += 1;
+
+	if (m_iStageNum > 3)
+		return;
 
 	StageInfo stageInfo = m_StageInfoMap.find(m_iStageNum - 1)->second;
 
 	// Spawn Goblin
 	{
+		m_iTotalMonsterNum += stageInfo.m_iGoblinNum;
+
 		std::vector<XMFLOAT3> xmf3MonsterPos(stageInfo.m_iGoblinNum);
 
 		for (XMFLOAT3& pos : xmf3MonsterPos)
@@ -45,7 +92,9 @@ void CMainTMPScene::AdvanceStage()
 	}
 
 	// Spawn Orc
-	{
+	{	
+		m_iTotalMonsterNum += stageInfo.m_iOrcNum;
+
 		std::vector<XMFLOAT3> xmf3MonsterPos(stageInfo.m_iOrcNum);
 
 		for (XMFLOAT3& pos : xmf3MonsterPos)
@@ -56,6 +105,8 @@ void CMainTMPScene::AdvanceStage()
 
 	// Spawn Skeleton
 	{
+		m_iTotalMonsterNum += stageInfo.m_iSkeletonNum;
+
 		std::vector<XMFLOAT3> xmf3MonsterPos(stageInfo.m_iSkeletonNum);
 
 		for (XMFLOAT3& pos : xmf3MonsterPos)
@@ -63,6 +114,7 @@ void CMainTMPScene::AdvanceStage()
 
 		CMonsterPool::GetInst()->SpawnMonster(MONSTER_TYPE::SKELETON, stageInfo.m_iSkeletonNum, xmf3MonsterPos.data());
 	}
+
 }
 
 void CMainTMPScene::SetPlayer(CGameObject* pPlayer)
@@ -655,20 +707,6 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	CreateGraphicsRootSignature(pd3dDevice);
 	CreateComputeRootSignature(pd3dDevice);
 
-	std::unique_ptr<RegisterArticulationListener> listener = std::make_unique<RegisterArticulationListener>();
-	listener->SetScene(this);
-	listener->SetEnable(true);
-	m_pListeners.push_back(std::move(listener));
-	CMessageDispatcher::GetInst()->RegisterListener(MessageType::REQUEST_REGISTERARTI, m_pListeners.back().get(), nullptr);
-
-
-	std::unique_ptr<RegisterArticulationSleepListener> slistener = std::make_unique<RegisterArticulationSleepListener>();
-	slistener->SetScene(this);
-	slistener->SetEnable(true);
-	m_pListeners.push_back(std::move(slistener));
-	CMessageDispatcher::GetInst()->RegisterListener(MessageType::REQUEST_SLEEPARTI, m_pListeners.back().get(), nullptr);
-
-
 	UINT ncbElementBytes = ((sizeof(DissolveParams) + 255) & ~255); //256ÀÇ ¹è¼ö
 	m_pd3dcbDisolveParams = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, ncbElementBytes, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
 	m_pd3dcbDisolveParams->Map(0, NULL, (void**)&m_pcbMappedDisolveParams);
@@ -845,18 +883,6 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	CPlayerParticleObject::GetInst()->SetSmokeObjects(m_pSmokeObject.get());
 	CPlayerParticleObject::GetInst()->SetTrailParticleObjects(m_pTrailParticleObjects.get());
 	CPlayerParticleObject::GetInst()->SetVertexPointParticleObjects(m_pVertexPointParticleObject.get());
-
-	// COLLIDE LISTENER
-	std::unique_ptr<SceneCollideListener> pCollideListener = std::make_unique<SceneCollideListener>();
-	pCollideListener->SetScene(this);
-	m_pListeners.push_back(std::move(pCollideListener));
-	CMessageDispatcher::GetInst()->RegisterListener(MessageType::COLLISION, m_pListeners.back().get(), nullptr);
-
-	// ONGROUND LISTENER
-	std::unique_ptr<SceneOnGroundListener> pOnGroundListener = std::make_unique<SceneOnGroundListener>();
-	pOnGroundListener->SetScene(this);
-	m_pListeners.push_back(std::move(pOnGroundListener));
-	CMessageDispatcher::GetInst()->RegisterListener(MessageType::ONGROUND, m_pListeners.back().get(), nullptr);
 
 	m_pHDRComputeShader = std::make_unique<CHDRComputeShader>();
 	m_pHDRComputeShader->CreateShader(pd3dDevice, pd3dCommandList, GetComputeRootSignature());
