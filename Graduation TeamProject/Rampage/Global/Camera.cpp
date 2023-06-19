@@ -192,7 +192,7 @@ void CThirdPersonCamera::SetPlayer(CPlayer* pPlayer)
 
 		m_xmf3Position = xmf3Position;
 
-		Rotate(30.0f, 0.0f, 0.0f);
+		Rotate(20.0f, 0.0f, 0.0f);
 		SetLookAt(xmf3PlayerPos);
 	}
 

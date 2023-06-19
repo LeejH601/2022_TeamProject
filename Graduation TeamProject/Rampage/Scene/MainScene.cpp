@@ -523,10 +523,11 @@ SCENE_RETURN_TYPE CMainTMPScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMe
 		break;
 		case '2':
 		{
-
 			RECT screenRect;
 			GetWindowRect(hWnd, &screenRect);
 			m_ScreendRect = screenRect;
+			SetCursorPos(screenRect.left + (screenRect.right - screenRect.left) / 2,
+				screenRect.top + (screenRect.bottom - screenRect.top) / 2);
 
 			m_pCurrentCamera = m_pMainSceneCamera.get();
 			Locator.SetMouseCursorMode(MOUSE_CUROSR_MODE::THIRD_FERSON_MODE);
@@ -753,6 +754,8 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 
 	m_pSkyBoxObject = std::make_unique<CSkyBox>(pd3dDevice, pd3dCommandList, GetGraphicsRootSignature(), pSkyBoxTexture);
 
+	CBoundingBoxShader::GetInst()->AddBoundingObject(pd3dDevice, pd3dCommandList, NULL, XMFLOAT3(113.664360f, 3.016271f, 123.066483f), XMFLOAT3(50.0f, 5.0f, 50.0f));
+
 	m_pTextureManager = std::make_unique<CTextureManager>();
 	m_pTextureManager->CreateCbvSrvUavDescriptorHeaps(pd3dDevice, 0, 100);
 	LoadTextureObject(pd3dDevice, pd3dCommandList);
@@ -859,11 +862,11 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	pUIObject->SetTextureIndex(6 + UITextureIndexOffset);
 	m_pUIObject.push_back(std::move(pUIObject));
 
-	pUIObject = std::make_unique<CBloodEffectObject>(2, pd3dDevice, pd3dCommandList, 10.f);
+	/*pUIObject = std::make_unique<CBloodEffectObject>(2, pd3dDevice, pd3dCommandList, 10.f);
 	pUIObject->SetSize(XMFLOAT2(FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT));
 	pUIObject->SetScreenPosition(XMFLOAT2(FRAME_BUFFER_WIDTH * 0.5f, FRAME_BUFFER_HEIGHT * 0.5f));
 	pUIObject->SetTextureIndex(17 + UITextureIndexOffset);
-	m_pUIObject.push_back(std::move(pUIObject));
+	m_pUIObject.push_back(std::move(pUIObject));*/
 
 }
 bool CMainTMPScene::ProcessInput(HWND hWnd, DWORD dwDirection, float fTimeElapsed)
