@@ -74,7 +74,7 @@ void CMainTMPScene::AdvanceStage()
 {
 	m_iStageNum += 1;
 
-	if (m_iStageNum > 3)
+	if (m_StageInfoMap.size() < m_iStageNum)
 		return;
 
 	StageInfo stageInfo = m_StageInfoMap.find(m_iStageNum - 1)->second;
