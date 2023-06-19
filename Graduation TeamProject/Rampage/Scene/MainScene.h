@@ -30,6 +30,9 @@ class CMainTMPScene : public CScene
 {
 private:
 	RECT m_ScreendRect;
+
+	bool m_bGameStart = false;
+	BoundingOrientedBox m_MonsterSpawnTriggerBox;
 	
 	std::unique_ptr<CollisionChecker> m_pCollisionChecker = NULL;
 	std::vector<std::unique_ptr<CGameObject>> m_pEnemys;

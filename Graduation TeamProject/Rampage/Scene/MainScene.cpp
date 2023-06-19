@@ -755,7 +755,8 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pSkyBoxObject = std::make_unique<CSkyBox>(pd3dDevice, pd3dCommandList, GetGraphicsRootSignature(), pSkyBoxTexture);
 
 	CBoundingBoxShader::GetInst()->AddBoundingObject(pd3dDevice, pd3dCommandList, NULL, XMFLOAT3(113.664360f, 3.016271f, 123.066483f), XMFLOAT3(50.0f, 5.0f, 50.0f));
-
+	m_MonsterSpawnTriggerBox = BoundingOrientedBox(XMFLOAT3(113.664360f, 3.016271f, 123.066483f), XMFLOAT3(50.0f, 5.0f, 50.0f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.f));
+	
 	m_pTextureManager = std::make_unique<CTextureManager>();
 	m_pTextureManager->CreateCbvSrvUavDescriptorHeaps(pd3dDevice, 0, 100);
 	LoadTextureObject(pd3dDevice, pd3dCommandList);
@@ -959,6 +960,14 @@ void CMainTMPScene::UpdateObjects(float fTimeElapsed)
 		 m_pPlayer->GetPosition().y,
 		((CKnightPlayer*)m_pPlayer)->m_pSkinnedAnimationController->m_pRootMotionObject->GetWorld()._43 };
 	xmf3PlayerPos.y += MeterToUnit(0.9f);
+
+	if(!m_bGameStart && m_MonsterSpawnTriggerBox.Intersects(*(m_pPlayer->GetBoundingBox())))
+	{
+		OutputDebugString(L"Trigger Played");
+
+		m_bGameStart = true;
+		// Spawn Monster
+	}
 
 	m_pMainSceneCamera->Update(xmf3PlayerPos, fTimeElapsed);
 
