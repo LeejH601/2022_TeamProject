@@ -81,7 +81,7 @@ void CUIObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, bool b_UseTex
 		UpdateShaderVariables(pd3dCommandList);
 		// 여기서 메쉬의 렌더를 한다.
 		m_pMesh->OnPreRender(pd3dCommandList);
-		m_tRect[0] = { (LONG)(FRAME_BUFFER_WIDTH * 0.05f), (LONG)(FRAME_BUFFER_HEIGHT * 0.05f) , (LONG)(FRAME_BUFFER_WIDTH * 0.34f) , (LONG)(FRAME_BUFFER_HEIGHT * 0.3f) };
+
 		pd3dCommandList->RSSetScissorRects(1, &m_tRect[0]);
 		m_pMesh->Render(pd3dCommandList, 0);
 	}
@@ -484,7 +484,7 @@ void CNumberObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, bool b_Us
 
 CBloodEffectObject::CBloodEffectObject(int iTextureIndex, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fSize) : CUIObject(iTextureIndex, pd3dDevice, pd3dCommandList, fSize)
 {
-	m_tRect.push_back(RECT(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT * 0.12f));
+	m_tRect[0] = (RECT(0, -FRAME_BUFFER_HEIGHT * 0.12f, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT * 0.12f));
 	m_tRect.push_back(RECT(0, FRAME_BUFFER_HEIGHT * 0.88f, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT));
 	m_tRect.push_back(RECT(0, FRAME_BUFFER_HEIGHT * 0.12f, FRAME_BUFFER_WIDTH * 0.12f, FRAME_BUFFER_HEIGHT * 0.88f));
 	m_tRect.push_back(RECT(FRAME_BUFFER_WIDTH * 0.9f, FRAME_BUFFER_HEIGHT * 0.12f, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT * 0.88f));
@@ -505,7 +505,7 @@ void CBloodEffectObject::UpdateLifeTime(float fTimeElapsed)
 			m_fLifeTime -= fTimeElapsed * 0.8f;
 		else
 		{
-			m_bEnable = false;
+			//m_bEnable = false;
 			m_bAnimation = false;
 			m_fLifeTime = 0.2f;
 		}

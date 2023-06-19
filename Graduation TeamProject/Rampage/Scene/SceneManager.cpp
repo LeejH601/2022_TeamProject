@@ -78,7 +78,13 @@ bool CSceneManager::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPAR
 	{
 	case SCENE_RETURN_TYPE::NONE:
 		break;
-	case SCENE_RETURN_TYPE::POP_SCENE:
+	case SCENE_RETURN_TYPE::POP_LOGOSCENE:
+		if (m_pCurrentScene == m_pLobbyScene.get()) {
+			if (dynamic_cast<CLobbyScene*>(m_pCurrentScene))
+				dynamic_cast<CLobbyScene*>(m_pCurrentScene)->SetSceneType((UINT)(LobbySceneType::SIMULATOR_Scene));
+		}
+		break;
+	case SCENE_RETURN_TYPE::POP_SIMULATORSCENE:
 		if (m_pCurrentScene == m_pLobbyScene.get()) {
 			m_pCurrentScene = m_pMainScene.get();
 		}
@@ -89,6 +95,11 @@ bool CSceneManager::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPAR
 			m_pCurrentScene = m_pLobbyScene.get();
 			Locator.SetMouseCursorMode(MOUSE_CUROSR_MODE::FLOATING_MODE);
 			PostMessage(hWnd, WM_ACTIVATE, 0, 0);
+		}
+		else
+		{
+			if (dynamic_cast<CLobbyScene*>(m_pCurrentScene)->GetSceneType() == (UINT)LobbySceneType::SIMULATOR_Scene)
+				dynamic_cast<CLobbyScene*>(m_pCurrentScene)->SetSceneType((UINT)LobbySceneType::LOGO_Scene);
 		}
 		break;
 	default:

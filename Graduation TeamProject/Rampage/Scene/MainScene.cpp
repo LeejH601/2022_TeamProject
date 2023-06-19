@@ -755,7 +755,7 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pSunLightShader = std::make_unique<CSunLightShader>();
 	m_pSunLightShader->CreateShader(pd3dDevice, GetGraphicsRootSignature(), 7, pdxgiObjectRtvFormats, DXGI_FORMAT_D32_FLOAT, 0);
 
-	m_pPostProcessShader = std::make_unique<CPostProcessShader>();
+	m_pPostProcessShader = std::make_shared<CPostProcessShader>();
 	m_pPostProcessShader->CreateShader(pd3dDevice, GetGraphicsRootSignature(), 7, pdxgiObjectRtvFormats, DXGI_FORMAT_D32_FLOAT, 0);
 	m_pPostProcessShader->BuildObjects(pd3dDevice, pd3dCommandList);
 
@@ -875,11 +875,6 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	pUIObject->SetTextureIndex(m_pTextureManager->LoadTotalTextureIndex(TextureType::UITexture, L"Image/UiImages/Number/Numbers.dds")); // 0
 	m_pUIObject.push_back(std::move(pUIObject));
 
-	pUIObject = std::make_unique<CBloodEffectObject>(2, pd3dDevice, pd3dCommandList, 10.f);
-	pUIObject->SetSize(XMFLOAT2(FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT));
-	pUIObject->SetScreenPosition(XMFLOAT2(FRAME_BUFFER_WIDTH * 0.5f, FRAME_BUFFER_HEIGHT * 0.5f));
-	pUIObject->SetTextureIndex(m_pTextureManager->LoadTotalTextureIndex(TextureType::UITexture, L"Image/UiImages/BloodEffect.dds"));
-	m_pUIObject.push_back(std::move(pUIObject));
 
 
 }

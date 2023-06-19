@@ -102,7 +102,7 @@ int CTextureManager::LoadTotalTextureIndex(TextureType eTextureType, LPCTSTR psz
 	if (iTypeTextureIndex == -1) // 텍스쳐X
 		return iTypeTextureIndex;
 	
-	return iTextureOffSet - 1 + iTypeTextureIndex;
+	return iTextureOffSet + iTypeTextureIndex;
 }
 std::shared_ptr<CTexture> CTextureManager::GetTexture(TextureType eTextureType)
 {
@@ -117,7 +117,7 @@ UINT CTextureManager::GetTextureListIndex(TextureType eTextureType)
 UINT CTextureManager::GetTextureOffset(TextureType eTextureType)
 {
 	int iOffset = 0;
-	for (int i = 0; i < UINT(eTextureType); i++)
+	for (int i = 1; i < UINT(eTextureType); i++) // Sphere Buffer는 제외 Shader t50 사용
 		iOffset += m_iTextureN[i];
 
 	return iOffset;
