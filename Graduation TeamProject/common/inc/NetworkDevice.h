@@ -169,7 +169,7 @@ public:
 
 	bool SendRequestLogin(Login_Info& logininfo);
 	bool RecvRequesLogin(Login_Info& logininfo);
-	bool SendApproveLogin();
+	bool SendApproveLogin(int bApprove);
 	bool RecvApproveLogin();
 
 	bool SendRequestSineUp(SineUp_Info& sineUpInfo);

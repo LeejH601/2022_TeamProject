@@ -60,7 +60,13 @@ int main()
 			std::cin >> info.Password;
 
 			NetworkDevice.SendRequestLogin(info);
-			isLogin = false; // 로그인 확인 필요
+			bool bApprove = NetworkDevice.RecvApproveLogin();
+			if (bApprove)
+				std::cout << "Login Success!" << std::endl;
+			else
+				std::cout << "Login Failed!" << std::endl;
+
+			isLogin = !bApprove; // 로그인 확인 필요
 		}
 			break;
 		case 1:

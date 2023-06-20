@@ -105,13 +105,16 @@ DWORD WINAPI ProcessClient(LPVOID arg)
 			PreStatement = connection->prepareStatement(query.c_str());
 			result = PreStatement->executeQuery();
 
+			bool bApprove = false;
 			if (result->next()) {
 				if (result->getString("User_Password").asStdString().compare(info.Password) == 0) {
 					isLoginig = false;
 					UserData = info;
 					std::cout << "loginSuccess" << std::endl;
+					bApprove = true;
 				}
 			}
+			Network_Device.SendApproveLogin(bApprove);
 			//isLoginig = false;
 		}
 			break;

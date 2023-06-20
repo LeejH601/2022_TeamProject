@@ -551,6 +551,29 @@ bool CNetworkDevice::RecvRequesLogin(Login_Info& logininfo)
 	return true;
 }
 
+bool CNetworkDevice::SendApproveLogin(int bApprove)
+{
+	int retval;
+
+	retval = send(m_client_sock, (char*)&bApprove, sizeof(int), 0);
+
+	if (retval == 0)
+		return false;
+
+	return true;
+}
+
+bool CNetworkDevice::RecvApproveLogin()
+{
+	int retval;
+
+	int receive;
+
+	retval = recv(m_client_sock, (char*)&receive, sizeof(int), MSG_WAITALL);
+
+	return (receive == 1) ? true : false;
+}
+
 bool CNetworkDevice::SendRequestSineUp(SineUp_Info& sineUpInfo)
 {
 	int retval;
