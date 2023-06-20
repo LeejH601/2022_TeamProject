@@ -364,11 +364,12 @@ void CPath::Reset()
 
 CCinematicCamera::CCinematicCamera()
 {
-	m_xmf3Offset = XMFLOAT3(0.0f, 0.0f, MeterToUnit(3.0f));
 }
 
 void CCinematicCamera::InitToPlayerCameraPos(CGameObject* pPlayer)
 {
+	CThirdPersonCamera* pMainSceneCamera = dynamic_cast<CThirdPersonCamera*>(((CKnightPlayer*)pPlayer)->GetCamera());
+
 	XMFLOAT3 xmf3PlayerPos = XMFLOAT3{
 		((CKnightPlayer*)pPlayer)->m_pSkinnedAnimationController->m_pRootMotionObject->GetWorld()._41,
 		 pPlayer->GetPosition().y,
@@ -384,10 +385,26 @@ void CCinematicCamera::InitToPlayerCameraPos(CGameObject* pPlayer)
 	XMFLOAT3 xmf3YAxis = XMFLOAT3(0.0f, 1.0f, 0.0f);
 	XMFLOAT3 xmf3ZAxis = XMFLOAT3(0.0f, 0.0f, 1.0f);
 
-	xmmtxRotateX = XMMatrixRotationAxis(XMLoadFloat3(&xmf3XAxis), XMConvertToRadians(-20.0f));
+	float fPitch = pMainSceneCamera->GetPitch();
+	float fYaw = pMainSceneCamera->GetYaw();
+	float fRoll = pMainSceneCamera->GetRoll();
+
+	if (fPitch != 0.0f)
+	{
+		xmmtxRotateX = XMMatrixRotationAxis(XMLoadFloat3(&xmf3XAxis), XMConvertToRadians(fPitch));
+	}
+	if (fYaw != 0.0f)
+	{
+		xmmtxRotateY = XMMatrixRotationAxis(XMLoadFloat3(&xmf3YAxis), XMConvertToRadians(fYaw));
+	}
+	if (fRoll != 0.0f)
+	{
+		xmmtxRotateY = XMMatrixRotationAxis(XMLoadFloat3(&xmf3ZAxis), XMConvertToRadians(fRoll));
+	}
+
 	xmmtxRotate = XMMatrixMultiply(xmmtxRotateZ, XMMatrixMultiply(xmmtxRotateX, xmmtxRotateY));
 
-	XMFLOAT3 xmf3Offset = Vector3::TransformNormal(m_xmf3Offset, xmmtxRotate);
+	XMFLOAT3 xmf3Offset = Vector3::TransformNormal(XMFLOAT3(0.0f, 0.0f, MeterToUnit(3.0f)), xmmtxRotate);
 	XMFLOAT3 xmf3Position = Vector3::Add(xmf3PlayerPos, xmf3Offset);
 
 	m_xmf3Position = xmf3Position;

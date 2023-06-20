@@ -63,6 +63,7 @@ public:
 
 	virtual bool SetHit(CGameObject* pHitter);
 
+	CCamera* GetCamera() { return m_pCamera; }
 	void SetCamera(CCamera* pCamera) { m_pCamera = pCamera; }
 	virtual void SetScale(float x, float y, float z);
 	void Tmp();
