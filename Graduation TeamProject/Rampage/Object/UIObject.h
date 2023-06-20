@@ -101,3 +101,16 @@ private:
 	float m_fLifeTime = 0.f;
 	bool m_bAnimation = false;
 };
+
+class CButtonObject : public CUIObject
+{
+public:
+	CButtonObject(int iTextureIndex, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fSize);
+	virtual ~CButtonObject();
+
+public:
+	bool CheckCollisionMouse(POINT ptCursorPo);
+
+private:
+	bool m_bCollision = false;
+};

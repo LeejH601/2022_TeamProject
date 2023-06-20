@@ -567,3 +567,27 @@ void CBloodEffectObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, bool
 	if (m_pChild) m_pChild->Render(pd3dCommandList, b_UseTexture, pCamera);
 	if (m_pSibling) m_pSibling->Render(pd3dCommandList, b_UseTexture, pCamera);
 }
+
+CButtonObject::CButtonObject(int iTextureIndex, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fSize) : CUIObject(iTextureIndex, pd3dDevice, pd3dCommandList, fSize)
+{
+}
+
+
+CButtonObject::~CButtonObject()
+{
+}
+
+
+bool CButtonObject::CheckCollisionMouse(POINT ptCursorPo)
+{
+	if((m_xmf2ScreenPosition.x + m_xmf2Size.x * 0.5f > ptCursorPo.x)  && (m_xmf2ScreenPosition.x - m_xmf2Size.x * 0.5f < ptCursorPo.x)
+		&&
+		((FRAME_BUFFER_HEIGHT - m_xmf2ScreenPosition.y + m_xmf2Size.y * 0.5f) > ptCursorPo.y - 10.f) && ((FRAME_BUFFER_HEIGHT - m_xmf2ScreenPosition.y - m_xmf2Size.y * 0.5f) < ptCursorPo.y - 10.f)
+		)
+		return true;
+
+	TCHAR pstrDebug[256] = { 0 };
+	_stprintf_s(pstrDebug, 256, _T("현재 마우스 위치 = %d %d\n"), ptCursorPo.x, ptCursorPo.y);
+	OutputDebugString(pstrDebug);
+	return false;
+}
