@@ -161,6 +161,16 @@ public:
 	virtual void Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed);
 	virtual void OnUpdateCallback(float fTimeElapsed);
 };
+class CCinematicCamera : public CCamera
+{
+public:
+	CCinematicCamera();
+	virtual ~CCinematicCamera() { }
+
+	void InitToPlayerCameraPos(CGameObject* pPlayer);
+	virtual void Rotate(float fPitch = 0.0f, float fYaw = 0.0f, float fRoll = 0.0f);
+	virtual void Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed);
+};
 class CFloatingCamera : public CCamera
 {
 public:
