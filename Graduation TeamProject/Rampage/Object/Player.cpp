@@ -599,6 +599,8 @@ void CDrinkPotionCallbackHandler::HandleCallback(void* pCallbackData, float fTra
 				if (m_pPlayer->m_nRemainPotions > 0) {
 					m_pPlayer->m_nRemainPotions--;
 					m_pPlayer->m_nRemainPotions = max(0, m_pPlayer->m_nRemainPotions);
+					m_pPlayer->m_fHP += 50.0f;
+					m_pPlayer->m_fHP = min(m_pPlayer->m_fHP, m_pPlayer->m_fTotalHP);
 				}
 			}
 		}
