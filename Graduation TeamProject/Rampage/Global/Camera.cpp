@@ -168,34 +168,7 @@ void CThirdPersonCamera::ProcessInput(DWORD dwDirection, float cxDelta, float cy
 void CThirdPersonCamera::SetPlayer(CPlayer* pPlayer)
 {
 	m_pPlayer = pPlayer;
-
-	XMFLOAT3 xmf3PlayerPos = XMFLOAT3{
-		((CKnightPlayer*)m_pPlayer)->m_pSkinnedAnimationController->m_pRootMotionObject->GetWorld()._41,
-		 m_pPlayer->GetPosition().y,
-		((CKnightPlayer*)m_pPlayer)->m_pSkinnedAnimationController->m_pRootMotionObject->GetWorld()._43 };
-	xmf3PlayerPos.y += MeterToUnit(0.9f);
-
-	if (m_pPlayer)
-	{
-		XMFLOAT4X4 xmf4x4Rotate = Matrix4x4::Identity();
-
-		XMFLOAT3 xmf3Right = m_pPlayer->GetRight();
-		XMFLOAT3 xmf3Up = m_pPlayer->GetUp();
-		XMFLOAT3 xmf3Look = m_pPlayer->GetLook();
-
-		xmf4x4Rotate._11 = xmf3Right.x; xmf4x4Rotate._21 = xmf3Up.x; xmf4x4Rotate._31 = xmf3Look.x;
-		xmf4x4Rotate._12 = xmf3Right.y; xmf4x4Rotate._22 = xmf3Up.y; xmf4x4Rotate._32 = xmf3Look.y;
-		xmf4x4Rotate._13 = xmf3Right.z; xmf4x4Rotate._23 = xmf3Up.z; xmf4x4Rotate._33 = xmf3Look.z;
-
-		XMFLOAT3 xmf3Offset = Vector3::TransformCoord(m_xmf3Offset, xmf4x4Rotate);
-		XMFLOAT3 xmf3Position = Vector3::Add(m_pPlayer->GetPosition(), xmf3Offset);
-
-		m_xmf3Position = xmf3Position;
-
-		Rotate(20.0f, 0.0f, 0.0f);
-		SetLookAt(xmf3PlayerPos);
-	}
-
+	Rotate(20.0f, 0.0f, 0.0f);
 }
 
 void CThirdPersonCamera::Rotate(float fPitch, float fYaw, float fRoll)
@@ -387,4 +360,49 @@ void CPath::Reset()
 	m_ft = 0.0f;
 	m_iIndex = 0;
 	m_bPathEnd = false;
+}
+
+CCinematicCamera::CCinematicCamera()
+{
+	m_xmf3Offset = XMFLOAT3(0.0f, 0.0f, MeterToUnit(3.0f));
+}
+
+void CCinematicCamera::InitToPlayerCameraPos(CGameObject* pPlayer)
+{
+	XMFLOAT3 xmf3PlayerPos = XMFLOAT3{
+		((CKnightPlayer*)pPlayer)->m_pSkinnedAnimationController->m_pRootMotionObject->GetWorld()._41,
+		 pPlayer->GetPosition().y,
+		((CKnightPlayer*)pPlayer)->m_pSkinnedAnimationController->m_pRootMotionObject->GetWorld()._43 };
+	xmf3PlayerPos.y += MeterToUnit(0.9f);
+
+	XMMATRIX xmmtxRotate = XMMatrixIdentity();
+	XMMATRIX xmmtxRotateX = XMMatrixIdentity();
+	XMMATRIX xmmtxRotateY = XMMatrixIdentity();
+	XMMATRIX xmmtxRotateZ = XMMatrixIdentity();
+
+	XMFLOAT3 xmf3XAxis = XMFLOAT3(1.0f, 0.0f, 0.0f);
+	XMFLOAT3 xmf3YAxis = XMFLOAT3(0.0f, 1.0f, 0.0f);
+	XMFLOAT3 xmf3ZAxis = XMFLOAT3(0.0f, 0.0f, 1.0f);
+
+	xmmtxRotateX = XMMatrixRotationAxis(XMLoadFloat3(&xmf3XAxis), XMConvertToRadians(-20.0f));
+	xmmtxRotate = XMMatrixMultiply(xmmtxRotateZ, XMMatrixMultiply(xmmtxRotateX, xmmtxRotateY));
+
+	XMFLOAT3 xmf3Offset = Vector3::TransformNormal(m_xmf3Offset, xmmtxRotate);
+	XMFLOAT3 xmf3Position = Vector3::Add(xmf3PlayerPos, xmf3Offset);
+
+	m_xmf3Position = xmf3Position;
+	m_xmf3CalculatedPosition = xmf3Position;
+
+	SetLookAt(xmf3PlayerPos);
+
+	CCamera::Update(XMFLOAT3{ 0.0f, 0.0f, 0.0f }, 0.0f);
+	OnUpdateCallback(0.0f);
+}
+
+void CCinematicCamera::Rotate(float fPitch, float fYaw, float fRoll)
+{
+}
+
+void CCinematicCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
+{
 }

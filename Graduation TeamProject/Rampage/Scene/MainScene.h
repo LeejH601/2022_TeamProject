@@ -80,11 +80,12 @@ private:
 
 	std::unique_ptr<CCamera> m_pFloatingCamera = NULL;
 	std::unique_ptr<CCamera> m_pMainSceneCamera = NULL;
+	std::unique_ptr<CCamera> m_pCinematicSceneCamera = NULL;
 	CCamera* m_pCurrentCamera = NULL;
 
 	POINT m_ptOldCursorPos;
 
-	MOUSE_CUROSR_MODE m_CurrentMouseCursorMode = MOUSE_CUROSR_MODE::FLOATING_MODE;
+	MOUSE_CUROSR_MODE m_CurrentMouseCursorMode = MOUSE_CUROSR_MODE::THIRD_FERSON_MODE;
 
 	DissolveParams* m_pcbMappedDisolveParams = nullptr;
 	ComPtr<ID3D12Resource> m_pd3dcbDisolveParams = nullptr;
@@ -120,6 +121,7 @@ public:
 	virtual bool ProcessInput(HWND hWnd, DWORD dwDirection, float fTimeElapsed);
 	virtual void UpdateObjects(float fTimeElapsed);
 	virtual void OnPrepareRenderTarget(ID3D12GraphicsCommandList* pd3dCommandList, int nRenderTargets, D3D12_CPU_DESCRIPTOR_HANDLE* pd3dRtvCPUHandles, D3D12_CPU_DESCRIPTOR_HANDLE d3dDepthStencilBufferDSVCPUHandle);
+	virtual void Enter(HWND hWnd);
 	virtual void Update(float fTimeElapsed);
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed, float fCurrentTime, CCamera* pCamera = NULL);
 	virtual void OnPostRender();

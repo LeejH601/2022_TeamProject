@@ -80,6 +80,7 @@ bool CSceneManager::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPAR
 		break;
 	case SCENE_RETURN_TYPE::POP_SCENE:
 		if (m_pCurrentScene == m_pLobbyScene.get()) {
+			m_pMainScene->Enter(hWnd);
 			m_pCurrentScene = m_pMainScene.get();
 		}
 		break;

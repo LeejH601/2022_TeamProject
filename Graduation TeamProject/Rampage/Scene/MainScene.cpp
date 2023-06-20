@@ -721,7 +721,8 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pMainSceneCamera = std::make_unique<CThirdPersonCamera>();
 	m_pMainSceneCamera->Init(pd3dDevice, pd3dCommandList);
 
-	m_pCurrentCamera = m_pFloatingCamera.get();
+	m_pCinematicSceneCamera = std::make_unique<CCinematicCamera>();
+	m_pCinematicSceneCamera->Init(pd3dDevice, pd3dCommandList);
 
 #ifdef RENDER_BOUNDING_BOX
 	CBoundingBoxShader::GetInst()->CreateShader(pd3dDevice, GetGraphicsRootSignature(), 7, pdxgiObjectRtvFormats, DXGI_FORMAT_D32_FLOAT, 0);
@@ -1044,7 +1045,7 @@ void CMainTMPScene::UpdateObjects(float fTimeElapsed)
 		AdvanceStage();
 	}
 
-	m_pMainSceneCamera->Update(xmf3PlayerPos, fTimeElapsed);
+	m_pCurrentCamera->Update(xmf3PlayerPos, fTimeElapsed);
 
 	CameraUpdateParams camera_update_params;
 	camera_update_params.pCamera = m_pMainSceneCamera.get();
@@ -1084,6 +1085,35 @@ void CMainTMPScene::Update(float fTimeElapsed)
 void CMainTMPScene::OnPrepareRenderTarget(ID3D12GraphicsCommandList* pd3dCommandList, int nRenderTargets, D3D12_CPU_DESCRIPTOR_HANDLE* pd3dRtvCPUHandles, D3D12_CPU_DESCRIPTOR_HANDLE d3dDepthStencilBufferDSVCPUHandle)
 {
 	m_pPostProcessShader->OnPrepareRenderTarget(pd3dCommandList, 1, pd3dRtvCPUHandles, d3dDepthStencilBufferDSVCPUHandle);
+}
+void CMainTMPScene::Enter(HWND hWnd)
+{
+	// 3인칭 카메라 모드로 게임을 시작하게 설정
+	static int CursorHideCount = 0;
+
+	RECT screenRect;
+	GetWindowRect(hWnd, &screenRect);
+	m_ScreendRect = screenRect;
+	SetCursorPos(screenRect.left + (screenRect.right - screenRect.left) / 2,
+		screenRect.top + (screenRect.bottom - screenRect.top) / 2);
+
+	m_pCurrentCamera = m_pMainSceneCamera.get();
+	Locator.SetMouseCursorMode(MOUSE_CUROSR_MODE::THIRD_FERSON_MODE);
+	m_CurrentMouseCursorMode = MOUSE_CUROSR_MODE::THIRD_FERSON_MODE;
+	PostMessage(hWnd, WM_ACTIVATE, 0, 0);
+
+	if (CursorHideCount < 1) {
+		CursorHideCount++;
+		ShowCursor(false);
+		ClipCursor(&screenRect);
+	}
+
+	m_pPlayer->Update(0.0f);
+	m_pPlayer->Animate(0.0f);
+
+	// 씨네마틱 카메라로 전개
+	m_pCurrentCamera = m_pCinematicSceneCamera.get();
+	((CCinematicCamera*)m_pCinematicSceneCamera.get())->InitToPlayerCameraPos(m_pPlayer);
 }
 void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed, float fCurrentTime, CCamera* pCamera)
 {
