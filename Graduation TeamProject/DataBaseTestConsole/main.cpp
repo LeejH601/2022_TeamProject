@@ -37,8 +37,11 @@ int main()
 
 	NetworkDevice.init(sock);
 
-	while (true)
+	bool isLogin = true;
+	while (isLogin)
 	{
+		if (isLogin == false)
+			break;
 		int input;
 		std::cout << "Sine in : 0, Sine Up : 1" << std::endl << "input : ";
 		std::cin >> input;
@@ -57,6 +60,7 @@ int main()
 			std::cin >> info.Password;
 
 			NetworkDevice.SendRequestLogin(info);
+			isLogin = false; // 로그인 확인 필요
 		}
 			break;
 		case 1:
@@ -90,7 +94,7 @@ int main()
 
 	}
 
-	std::ifstream in_0{ "Data/Component0.bin", std::ios_base::binary };
+	/*std::ifstream in_0{ "Data/Component0.bin", std::ios_base::binary };
 	std::ifstream in_1{ "Data/Component1.bin", std::ios_base::binary };
 	std::ifstream in_2{ "Data/Component2.bin", std::ios_base::binary };
 
@@ -117,7 +121,7 @@ int main()
 	in_1.read(uploadData.ComponentBlobs[1].data(), in1_Size); 
 
 	uploadData.ComponentBlobs[2].resize(in2_Size);
-	in_2.read(uploadData.ComponentBlobs[2].data(), in2_Size);
+	in_2.read(uploadData.ComponentBlobs[2].data(), in2_Size);*/
 
 
 
@@ -135,7 +139,7 @@ int main()
 		switch (serviceType)
 		{
 		case eSERVICE_TYPE::UPLOAD_RECORD:
-			NetworkDevice.UploadWorkShop(uploadData);
+			//NetworkDevice.UploadWorkShop(uploadData);
 			break;
 		case eSERVICE_TYPE::DOWNLOAD_RECORD:
 		{

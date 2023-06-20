@@ -59,11 +59,14 @@ DWORD WINAPI ProcessClient(LPVOID arg)
 
 	std::cout << "connect client" << std::endl;
 	eSERVICE_TYPE serviceType;
+	Login_Info UserData;
 
 	// login Test
 	bool isLoginig = true;
 	while (isLoginig)
 	{
+		if (isLoginig == false)
+			break;
 		Network_Device.RecvServiceType(serviceType);
 		switch (serviceType)
 		{
@@ -73,13 +76,17 @@ DWORD WINAPI ProcessClient(LPVOID arg)
 			Network_Device.RecvRequestSineUp(info);
 
 			std::string query;
+			std::string value;
+			value = " ('" + std::string(info.UserName) + "', '" + std::string(info.Password) + "', '" + std::string(info.LoginID) + "');";
+			/*query = INSERT + INTO + "user " + "(" + "User_Name, User_Password, User_LoginID" + ") " +
+				VALUE + " (?, ?, ?);";*/
 			query = INSERT + INTO + "user " + "(" + "User_Name, User_Password, User_LoginID" + ") " +
-				VALUE + " (?, ?, ?);";
+				VALUE + value;
 			PreStatement = connection->prepareStatement(query.c_str());
 			//PreStatement->setInt(1, record_ID);
-			PreStatement->setString(1, sql::SQLString(info.UserName));
+			/*PreStatement->setString(1, sql::SQLString(info.UserName));
 			PreStatement->setString(2, sql::SQLString(info.Password));
-			PreStatement->setString(3, sql::SQLString(info.LoginID));
+			PreStatement->setString(3, sql::SQLString(info.LoginID));*/
 			int ret = PreStatement->executeUpdate();
 
 			Network_Device.SendApproveSineUp(ret);
@@ -93,6 +100,18 @@ DWORD WINAPI ProcessClient(LPVOID arg)
 			Login_Info info;
 			Network_Device.RecvRequesLogin(info);
 
+			std::string query;
+			query = SELECT + " " + "*" + " " + FROM + " " + "user" + " " + WHERE + " " + "User_LoginID = '" + std::string(info.LoginID) + "';";
+			PreStatement = connection->prepareStatement(query.c_str());
+			result = PreStatement->executeQuery();
+
+			if (result->next()) {
+				if (result->getString("User_Password").asStdString().compare(info.Password) == 0) {
+					isLoginig = false;
+					UserData = info;
+					std::cout << "loginSuccess" << std::endl;
+				}
+			}
 			//isLoginig = false;
 		}
 			break;
