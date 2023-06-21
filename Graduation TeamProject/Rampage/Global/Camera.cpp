@@ -321,6 +321,19 @@ void CFloatingCamera::Rotate(float fPitch, float fYaw, float fRoll)
 void CFloatingCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
 {
 	RegenerateViewMatrix();
+
+	TCHAR pstrDebug[256] = { 0 };
+	_stprintf_s(pstrDebug, 256, _T("Camera Position: %f, %f, %f\n"), m_xmf3Position.x, m_xmf3Position.y, m_xmf3Position.z);
+	OutputDebugString(pstrDebug);
+
+	_stprintf_s(pstrDebug, 256, _T("Camera Look: %f, %f, %f\n"), m_xmf3Look.x, m_xmf3Look.y, m_xmf3Look.z);
+	OutputDebugString(pstrDebug);
+
+	_stprintf_s(pstrDebug, 256, _T("Camera Up: %f, %f, %f\n"), m_xmf3Up.x, m_xmf3Up.y, m_xmf3Up.z);
+	OutputDebugString(pstrDebug);
+
+	_stprintf_s(pstrDebug, 256, _T("Camera Right: %f, %f, %f\n"), m_xmf3Right.x, m_xmf3Right.y, m_xmf3Right.z);
+	OutputDebugString(pstrDebug);
 }
 
 CSimulatorCamera::CSimulatorCamera() : CCamera()
@@ -418,8 +431,51 @@ void CCinematicCamera::InitToPlayerCameraPos(CGameObject* pPlayer)
 
 void CCinematicCamera::Rotate(float fPitch, float fYaw, float fRoll)
 {
+	if (fPitch != 0.0f)
+	{
+		XMMATRIX xmmtxRotate = XMMatrixRotationAxis(XMLoadFloat3(&m_xmf3Right), XMConvertToRadians(fPitch));
+		m_xmf3Look = Vector3::TransformNormal(m_xmf3Look, xmmtxRotate);
+		m_xmf3Up = Vector3::TransformNormal(m_xmf3Up, xmmtxRotate);
+		m_xmf3Right = Vector3::TransformNormal(m_xmf3Right, xmmtxRotate);
+	}
+	if ((fYaw != 0.0f))
+	{
+		XMFLOAT3 xmf3Up = XMFLOAT3(0.f, 1.0f, 0.f);
+		XMMATRIX xmmtxRotate = XMMatrixRotationAxis(XMLoadFloat3(&xmf3Up), XMConvertToRadians(fYaw));
+		m_xmf3Look = Vector3::TransformNormal(m_xmf3Look, xmmtxRotate);
+		m_xmf3Up = Vector3::TransformNormal(m_xmf3Up, xmmtxRotate);
+		m_xmf3Right = Vector3::TransformNormal(m_xmf3Right, xmmtxRotate);
+	}
+	if ((fRoll != 0.0f))
+	{
+		XMMATRIX xmmtxRotate = XMMatrixRotationAxis(XMLoadFloat3(&m_xmf3Look), XMConvertToRadians(fRoll));
+		m_xmf3Look = Vector3::TransformNormal(m_xmf3Look, xmmtxRotate);
+		m_xmf3Up = Vector3::TransformNormal(m_xmf3Up, xmmtxRotate);
+		m_xmf3Right = Vector3::TransformNormal(m_xmf3Right, xmmtxRotate);
+	}
+
+}
+
+XMFLOAT3 InterpolateXMFLOAT3(XMFLOAT3 xmf3Origin, XMFLOAT3 xmf3Target, float t)
+{
+	XMFLOAT3 xmf3Result;
+
+	xmf3Result.x = xmf3Origin.x * (1.0f - t) + xmf3Target.x * t;
+	xmf3Result.y = xmf3Origin.y * (1.0f - t) + xmf3Target.y * t;
+	xmf3Result.z = xmf3Origin.z * (1.0f - t) + xmf3Target.z * t;
+
+	return xmf3Result;
 }
 
 void CCinematicCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
 {
+	XMFLOAT3 xmf3TargetPosition = XMFLOAT3{ 134.94f, 27.656675f, 176.956421f };
+	XMFLOAT3 xmf3TargetLook = XMFLOAT3{ -0.384055f, -0.417339f, -0.823608f };
+	XMFLOAT3 xmf3TargetUp = XMFLOAT3{ -0.176376f, 0.908751f, -0.378237f };
+	XMFLOAT3 xmf3TargetRight = XMFLOAT3{ -0.906308f, -0.000001f, 0.422619f };
+
+	m_xmf3Look = InterpolateXMFLOAT3(m_xmf3Look, xmf3TargetLook, fTimeElapsed);
+	m_xmf3Up = InterpolateXMFLOAT3(m_xmf3Up, xmf3TargetUp, fTimeElapsed);
+	m_xmf3Right = InterpolateXMFLOAT3(m_xmf3Right, xmf3TargetRight, fTimeElapsed);
+	SetPosition(InterpolateXMFLOAT3(m_xmf3Position, xmf3TargetPosition, fTimeElapsed));
 }

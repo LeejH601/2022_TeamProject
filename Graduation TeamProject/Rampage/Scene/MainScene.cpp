@@ -625,6 +625,17 @@ SCENE_RETURN_TYPE CMainTMPScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMe
 				screenRect.top + (screenRect.bottom - screenRect.top) / 2);
 
 			m_pCurrentCamera = m_pMainSceneCamera.get();
+
+			// Update Camera
+			XMFLOAT3 xmf3PlayerPos = XMFLOAT3{
+				((CKnightPlayer*)m_pPlayer)->m_pSkinnedAnimationController->m_pRootMotionObject->GetWorld()._41,
+				 m_pPlayer->GetPosition().y,
+				((CKnightPlayer*)m_pPlayer)->m_pSkinnedAnimationController->m_pRootMotionObject->GetWorld()._43 };
+			xmf3PlayerPos.y += MeterToUnit(0.9f);
+
+			m_pCurrentCamera->Update(xmf3PlayerPos, 0.0f);
+			m_pCurrentCamera->OnPostRender();
+
 			Locator.SetMouseCursorMode(MOUSE_CUROSR_MODE::THIRD_FERSON_MODE);
 			m_CurrentMouseCursorMode = MOUSE_CUROSR_MODE::THIRD_FERSON_MODE;
 			PostMessage(hWnd, WM_ACTIVATE, 0, 0);
@@ -634,6 +645,13 @@ SCENE_RETURN_TYPE CMainTMPScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMe
 				ShowCursor(false);
 				ClipCursor(&screenRect);
 			}
+		}
+		break;
+		case '3':
+		{
+			// ¾¾³×¸¶Æ½ Ä«¸Þ¶ó·Î Àü°³
+			m_pCurrentCamera = m_pCinematicSceneCamera.get();
+			((CCinematicCamera*)m_pCinematicSceneCamera.get())->InitToPlayerCameraPos(m_pPlayer);
 		}
 		break;
 		case 'f':
