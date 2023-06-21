@@ -76,6 +76,70 @@ void DataLoader::SaveComponentSets(std::wstring wFolderName)
 	}
 }
 
+void DataLoader::SaveComponentSetsForData(std::wstring wFolderName, std::vector<std::vector<char>>& Blobs)
+{
+	FILE* pInFile;
+	std::ofstream out;
+
+	for (int i = 0; i < 3; ++i)
+	{
+		CState<CPlayer>* pCurrentAnimation = Atk1_Player::GetInst();
+
+		// State 선택 로직 생각 필요
+		switch (i) {
+		case 0:
+			pCurrentAnimation = Atk1_Player::GetInst();
+			break;
+		case 1:
+			pCurrentAnimation = Atk2_Player::GetInst();
+			break;
+		case 2:
+			pCurrentAnimation = Atk3_Player::GetInst();
+			break;
+		default:
+			break;
+		}
+
+		std::wstring path;
+		wFolderName.resize(wcslen(wFolderName.c_str()));
+
+		path = file_path + wFolderName + L"\\Component" + std::to_wstring(i) + file_ext;
+
+		std::wstring fp = file_path + wFolderName;
+		if (!CreateDirectoryIfNotExists(fp)) {
+			return;
+		}
+
+		//::_wfopen_s(&pInFile, path.c_str(), L"wb");
+		out.open(path, std::ios_base::binary);
+		out.write(Blobs[i].data(), Blobs[i].size());
+		out.close();
+		//fclose(pInFile);
+	}
+}
+
+void DataLoader::LoadComponentSetsToUploadData(std::wstring wFolderName, UploadData& uploadData)
+{
+	uploadData.RecordTitle = reinterpret_cast<const char*>(wFolderName.c_str());
+	uploadData.ComponentBlobs.resize(3);
+
+	for (int i = 0; i < 3; ++i) {
+		std::wstring path = file_path + wFolderName + L"\\Component" + std::to_wstring(i) + file_ext;
+
+		std::ifstream in;
+		in.open(path.c_str(), std::ios_base::binary);
+
+		in.seekg(0, std::ios::end);
+		size_t in_Size = in.tellg();
+		in.seekg(0, std::ios::beg);
+
+		uploadData.ComponentBlobs[i].resize(in_Size);
+		in.read(uploadData.ComponentBlobs[i].data(), in_Size);
+
+		in.close();
+	}
+}
+
 void DataLoader::LoadComponentSets(std::wstring wFolderName)
 {
 	FILE* pInFile;
@@ -2104,11 +2168,11 @@ void CImGuiManager::ShowHitLagManager(CState<CPlayer>* pCurrentAnimation)
 	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
 	if (ImGui::DragFloat(U8STR("지속시간(초)##Move"), &pHitLagComponent->GetDuration(), DRAG_FLOAT_UNIT, HIT_LAG_DURATION_MIN, HIT_LAG_DURATION_MAX, "%.2f", 0))
 		pHitLagComponent->GetDuration() = std::clamp(pHitLagComponent->GetDuration(), HIT_LAG_DURATION_MIN, HIT_LAG_DURATION_MAX);
-	
+
 	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
 	if (ImGui::DragFloat(U8STR("역경직 배율##Move"), &pHitLagComponent->GetLagScale(), DRAG_FLOAT_UNIT, HIT_LAG_SCALEWEIGHT_MIN, HIT_LAG_SCALEWEIGHT_MAX, "%.2f", 0))
 		pHitLagComponent->GetLagScale() = std::clamp(pHitLagComponent->GetLagScale(), HIT_LAG_SCALEWEIGHT_MIN, HIT_LAG_SCALEWEIGHT_MAX);
-	
+
 	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
 	if (ImGui::DragFloat(U8STR("최소 시간 배율##Move"), &pHitLagComponent->GetMinTimeScale(), DRAG_FLOAT_UNIT, HIT_LAG_MAXTIME_MIN, HIT_LAG_MAXTIME_MAX, "%.2f", 0))
 		pHitLagComponent->GetMinTimeScale() = std::clamp(pHitLagComponent->GetMinTimeScale(), HIT_LAG_MAXTIME_MIN, HIT_LAG_MAXTIME_MAX);
@@ -2316,8 +2380,17 @@ void CImGuiManager::ShowDamageMoanSoundManager(CState<CPlayer>* pCurrentAnimatio
 
 	ImGui::End();
 }
+
+#define MAX_WORKSHOP_SHOW 20
 void CImGuiManager::ShowCreationMenu()
 {
+
+	if (serverConnected == false)
+		ShowWorkshopLoginMenu();
+
+	if (serverConnected == false)
+		return;
+
 	ImGuiWindowFlags my_window_flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_MenuBar;
 	bool* p_open = NULL;
 
@@ -2347,7 +2420,8 @@ void CImGuiManager::ShowCreationMenu()
 			int nBadSign;
 		};
 
-		static std::vector<CreationItem> vCreationItems{
+		static std::vector<CreationItem> vCreationItems;
+		/*static std::vector<CreationItem> vCreationItems{
 			CreationItem{ m_pRTTexture.get(), u8"창작자1", u8"프리셋2", rand() % 1000, rand() % 1000},
 			CreationItem{ m_pRTTexture.get(), u8"창작자2", u8"프리셋1", rand() % 1000, rand() % 1000 },
 			CreationItem{ m_pRTTexture.get(), u8"창작자3", u8"프리셋3", rand() % 1000, rand() % 1000 },
@@ -2360,14 +2434,36 @@ void CImGuiManager::ShowCreationMenu()
 			CreationItem{ m_pRTTexture.get(), u8"창작자6", u8"프리셋10", rand() % 1000, rand() % 1000 },
 			CreationItem{ m_pRTTexture.get(), u8"창작자5", u8"프리셋8", rand() % 1000, rand() % 1000 },
 			CreationItem{ m_pRTTexture.get(), u8"창작자4", u8"프리셋12", rand() % 1000, rand() % 1000 },
+		};*/
+
+		//std::wstring_convert<std::codecvt_utf8<char8_t>, char8_t> converter;
+		//MultiByteToWideChar(CP_UTF8, MB_PRECOMPOSED, )
+
+		auto UpdateTable = [&]() {
+			vCreationItems.resize(records.size());
+			int index = 0;
+			for (WorkShop_Record& record : records) {
+				std::string sId = std::to_string(record.RecordID);
+				std::string stitle(record.RecordTitle);
+
+				std::u8string id(reinterpret_cast<const char8_t*>(sId.c_str()));
+				std::u8string title(reinterpret_cast<const char8_t*>(stitle.c_str()));
+
+				vCreationItems[index++] = CreationItem{ nullptr,  id, title, record.nLike, record.nHate };
+			}
 		};
+
+		if (vCreationItems.size() == 0) {
+			ProcessWorkshop(eSERVICE_TYPE::UPDATE_TABLE);
+			UpdateTable();
+		}
 
 		static int selectedAllignStyle = 0;
 		static int selectedPageNum = 0;
 		static bool upperBound = false;
 
 		// 기준에 따라 정렬
-		switch (selectedAllignStyle)
+		/*switch (selectedAllignStyle)
 		{
 		case 0:
 			std::sort(vCreationItems.begin(), vCreationItems.end(), [](const CreationItem& A, const CreationItem& B)
@@ -2425,11 +2521,11 @@ void CImGuiManager::ShowCreationMenu()
 				}
 			);
 			break;
-		}
+		}*/
 
 		ImGui::Text(U8STR("정렬기준: ")); ImGui::SameLine();
 
-		const char* allignStyle[] = { U8STR("ID(오름차순)"), U8STR("ID(내림차순)"), 
+		const char* allignStyle[] = { U8STR("ID(오름차순)"), U8STR("ID(내림차순)"),
 			U8STR("이름(오름차순)"),  U8STR("이름(내림차순)"),
 			U8STR("좋아요(오름차순)"), U8STR("좋아요(내림차순)"),
 			U8STR("싫어요(오름차순)"), U8STR("싫어요(내림차순)") };
@@ -2438,25 +2534,28 @@ void CImGuiManager::ShowCreationMenu()
 		ImGui::Combo(U8STR("##allignStyle"), &selectedAllignStyle, allignStyle, IM_ARRAYSIZE(allignStyle));
 
 		// Sample 1
-		ImGui::Columns(7, "Creation Column", false);
+		ImGui::Columns(8, "Creation Column", false);
 		ImGui::Separator();
-		ImGui::Text(U8STR("이미지")); ImGui::NextColumn();
+		//ImGui::Text(U8STR("이미지")); ImGui::NextColumn();
 		ImGui::Text(U8STR("ID")); ImGui::NextColumn();
 		ImGui::Text(U8STR("이름")); ImGui::NextColumn();
 		ImGui::Text(U8STR("좋아요")); ImGui::NextColumn();
 		ImGui::Text(U8STR("싫어요")); ImGui::NextColumn();
 		ImGui::Text(U8STR("신고")); ImGui::NextColumn();
 		ImGui::Text(U8STR("불러오기")); ImGui::NextColumn();
+		ImGui::Text(U8STR("다운로드")); ImGui::NextColumn();
 		ImGui::Separator();
 
-		for (int i = 0; i < 3; i++)
+		int nLists = min(MAX_WORKSHOP_SHOW, vCreationItems.size());
+		for (int i = 0; i < nLists; i++)
 		{
 			int my_image_width = 0.05f * m_lDesktopWidth;
 			int my_image_height = 0.05f * m_lDesktopHeight;
-			int index = selectedPageNum * 3 + i;
+			int index = i;
+			//int index = selectedPageNum * 3 + i;
 
-			ImGui::Image((ImTextureID)m_pRTTexture->m_pd3dSrvGpuDescriptorHandles[0].ptr,
-				ImVec2((float)my_image_width, (float)my_image_height));
+			/*ImGui::Image((ImTextureID)m_pRTTexture->m_pd3dSrvGpuDescriptorHandles[0].ptr,
+				ImVec2((float)my_image_width, (float)my_image_height));*/
 			ImGui::NextColumn();
 			ImGui::Text(reinterpret_cast<const char*>(vCreationItems[index].id.c_str())); ImGui::NextColumn();
 			ImGui::Text(reinterpret_cast<const char*>(vCreationItems[index].name.c_str())); ImGui::NextColumn();
@@ -2464,11 +2563,39 @@ void CImGuiManager::ShowCreationMenu()
 			ImGui::Text(std::to_string(vCreationItems[index].nBadSign).c_str()); ImGui::NextColumn();
 			ImGui::Button(U8STR("신고하기"), ImVec2(-FLT_MIN, 0.0f)); ImGui::NextColumn();
 			ImGui::Button(U8STR("불러오기"), ImVec2(-FLT_MIN, 0.0f)); ImGui::NextColumn();
+			if (ImGui::Button(U8STR("다운로드"), ImVec2(-FLT_MIN, 0.0f))) {
+				Download_Info info;
+				info.RecordID = atoi(reinterpret_cast<const char*>(vCreationItems[i].id.c_str()));
+				memcpy(info.RecordTitle, reinterpret_cast<const char*>(vCreationItems[i].name.c_str()), 45);
+				ProcessWorkshop(eSERVICE_TYPE::DOWNLOAD_RECORD, (void*)&info);
+			} ImGui::NextColumn();
 		}
 		ImGui::Columns(1);
 		ImGui::Separator();
 
 		ImGuiStyle& style = ImGui::GetStyle();
+		ImVec4 originalColor = style.Colors[ImGuiCol_Button];
+		style.Colors[ImGuiCol_Button] = ImVec4(0, 0, 0, 0);
+
+		if (ImGui::Button("Prev")) {
+			ProcessWorkshop(eSERVICE_TYPE::PREV_TABLE);
+			UpdateTable();
+		}; ImGui::SameLine();
+		if (ImGui::Button("Next")) {
+			ProcessWorkshop(eSERVICE_TYPE::NEXT_TABLE);
+			UpdateTable();
+		};
+
+		ImGui::SameLine();
+
+		if (ImGui::Button(U8STR("업로드"))) {
+			ProcessWorkshop(eSERVICE_TYPE::UPLOAD_RECORD);
+			//UpdateTable();
+		};
+
+		style.Colors[ImGuiCol_Button] = originalColor;
+
+		/*ImGuiStyle& style = ImGui::GetStyle();
 		ImVec4 originalColor = style.Colors[ImGuiCol_Button];
 		style.Colors[ImGuiCol_Button] = ImVec4(0, 0, 0, 0);
 		for (int i = 0; i < vCreationItems.size() / 3; ++i)
@@ -2486,7 +2613,7 @@ void CImGuiManager::ShowCreationMenu()
 			}
 			ImGui::SameLine();
 		}
-		style.Colors[ImGuiCol_Button] = originalColor;
+		style.Colors[ImGuiCol_Button] = originalColor;*/
 
 		ImGui::EndChild();
 	}
@@ -2516,6 +2643,56 @@ void CImGuiManager::ShowCreationMenu()
 		ImGui::EndChild();
 		ImGui::PopStyleVar();
 	}
+	ImGui::End();
+}
+void CImGuiManager::ShowWorkshopLoginMenu()
+{
+	ImGuiWindowFlags my_window_flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_MenuBar;
+	bool* p_open = NULL;
+
+	ImGui::SetNextWindowSize(ImVec2(m_lDesktopWidth * 0.6f, 0.0f), ImGuiCond_Always);
+	ImGui::Begin(U8STR("창작마당 로그인"), p_open, my_window_flags);
+
+
+	ImGui::Text(U8STR("ID")); ImGui::SameLine();
+	static SineUp_Info LoginInfo{
+		"Please enter your ID", "Please enter your password", " "
+	};
+
+	ImGui::InputText(U8STR(" ##Login"), LoginInfo.LoginID, sizeof(LoginInfo.LoginID));
+	ImGui::Text(U8STR("PASSWORD")); ImGui::SameLine();
+	ImGui::InputText(U8STR(" ##Password"), LoginInfo.Password, sizeof(LoginInfo.Password));
+
+	if (ImGui::Button(U8STR("로그인##SineUp"))) {
+		serverConnected = ConnectServer(eSERVICE_TYPE::SINE_IN, LoginInfo);
+	}
+
+	static bool flag = false;
+	if (ImGui::Button(U8STR("회원가입##Login"))) {
+		flag = !flag;
+	}
+	if (flag) {
+		bool* p_SineUpopen = NULL;
+
+		ImGui::SetNextWindowSize(ImVec2(m_lDesktopWidth * 0.6f, 0.0f), ImGuiCond_Always);
+		ImGui::Begin(U8STR("창작마당 회원가입"), p_SineUpopen, my_window_flags);
+
+		static SineUp_Info SineUpInfo{
+		"Please enter your ID", "Please enter your password", "Please enter your name"
+		};
+
+		ImGui::Text(U8STR("ID")); ImGui::SameLine();
+		ImGui::InputText(U8STR(" ##SineUpLogin"), SineUpInfo.LoginID, sizeof(SineUpInfo.LoginID));
+		ImGui::Text(U8STR("PASSWORD")); ImGui::SameLine();
+		ImGui::InputText(U8STR(" ##SineUpPassword"), SineUpInfo.Password, sizeof(SineUpInfo.Password));
+		ImGui::Text(U8STR("NAME")); ImGui::SameLine();
+		ImGui::InputText(U8STR(" ##SineUpName"), SineUpInfo.UserName, sizeof(SineUpInfo.UserName));
+
+		if (ImGui::Button(U8STR("회원가입##SineUp"))) {
+			ConnectServer(eSERVICE_TYPE::SINE_UP, SineUpInfo);
+		}
+	}
+
 	ImGui::End();
 }
 void CImGuiManager::OnPrepareRender(ID3D12GraphicsCommandList* pd3dCommandList, D3D12_CPU_DESCRIPTOR_HANDLE* d3dDsvDescriptorCPUHandle, float fTimeElapsed, float fCurrentTime, CCamera* pCamera)
@@ -2554,5 +2731,163 @@ void CImGuiManager::OnPostRender()
 }
 void CImGuiManager::OnDestroy()
 {
+}
+
+#define BUFSIZE 4096
+#define SERVERPORT 9000
+char* address = (char*)"127.0.0.1";
+
+bool CImGuiManager::ConnectServer(eSERVICE_TYPE serviceType, SineUp_Info& info)
+{
+	static SOCKET sock;
+	int retval = 0;
+	static WSADATA wsa;
+	static struct sockaddr_in serveraddr;
+
+	if (m_pNetworkDevice == nullptr) {
+		// 윈속 초기화
+
+		if (WSAStartup(MAKEWORD(2, 2), &wsa) != 0)
+			return false;
+
+		// 소켓 생성
+		sock = socket(AF_INET, SOCK_STREAM, 0);
+		//if (sock == INVALID_SOCKET) err_quit("socket()");
+
+		memset(&serveraddr, 0, sizeof(serveraddr));
+		serveraddr.sin_family = AF_INET;
+		inet_pton(AF_INET, address, &serveraddr.sin_addr);
+
+		serveraddr.sin_port = htons(SERVERPORT);
+		retval = connect(sock, (struct sockaddr*)&serveraddr, sizeof(serveraddr));
+		//if (retval == SOCKET_ERROR) err_quit("connect()");
+
+		m_pNetworkDevice = std::make_unique<CNetworkDevice>();
+		m_pNetworkDevice->init(sock);
+	}
+
+	switch (serviceType)
+	{
+	case eSERVICE_TYPE::SINE_IN:
+	{
+		m_pNetworkDevice->SendServiceType(serviceType);
+
+		Login_Info loginInfo;
+		memcpy(loginInfo.LoginID, info.LoginID, sizeof(loginInfo.LoginID));
+		memcpy(loginInfo.Password, info.Password, sizeof(loginInfo.Password));
+
+		m_pNetworkDevice->SendRequestLogin(loginInfo);
+		bool bApprove = m_pNetworkDevice->RecvApproveLogin();
+		if (bApprove)
+			std::cout << "Login Success!" << std::endl;
+		else
+			std::cout << "Login Failed!" << std::endl;
+
+		/*if (bApprove) {
+			m_pNetworkDevice->AccountInfo.UserID = result->getInt("User_ID");
+			memcpy(m_pNetworkDevice->AccountInfo.UserName, result->getString("User_Name").c_str(), sizeof(45));
+		}*/
+
+		//isLogin = !bApprove; // 로그인 확인 필요
+		return bApprove;
+	}
+	break;
+	case eSERVICE_TYPE::SINE_UP:
+	{
+		m_pNetworkDevice->SendServiceType(serviceType);
+
+		m_pNetworkDevice->SendRequestSineUp(info);
+
+		int ret;
+		m_pNetworkDevice->RecvApproveSineUp(ret);
+
+		if (ret == 0)
+			std::cout << "Failed Sine Up" << std::endl;
+		else
+			std::cout << "Success Sine Up" << std::endl;
+
+		return true;
+	}
+	break;
+	default:
+		break;
+	}
+
+	return false;
+}
+
+void CImGuiManager::ProcessWorkshop(eSERVICE_TYPE serviceType, void* pData)
+{
+	/*int input;
+	std::cout << "Upload : 0, DownLoad : 1, UpdateTable : 2, Next : 3, Prev : 4, Like : 5, Hate : 6" << std::endl;
+	std::cin >> input;
+	serviceType = (eSERVICE_TYPE)input;*/
+
+	if (serviceType == eSERVICE_TYPE::DOWNLOAD_RECORD ||
+		serviceType == eSERVICE_TYPE::INCREASE_LIKE ||
+		serviceType == eSERVICE_TYPE::INCREASE_HATE) {
+		if (pData == nullptr)
+			return;
+	}
+
+	m_pNetworkDevice->SendServiceType(serviceType);
+
+	switch (serviceType)
+	{
+	case eSERVICE_TYPE::UPLOAD_RECORD:
+	{
+		UploadData uploadData;
+		uploadData.RecordTitle = "UploadTest";
+		uploadData.UserName = "testUser";
+		std::wstring title; title.assign(uploadData.RecordTitle.begin(), uploadData.RecordTitle.end());
+		m_pDataLoader->LoadComponentSetsToUploadData(title, uploadData);
+		m_pNetworkDevice->UploadWorkShop(uploadData);
+	}
+		break;
+	case eSERVICE_TYPE::DOWNLOAD_RECORD:
+	{
+		Download_Info info;
+		memcpy(&info, pData, sizeof(Download_Info));
+		m_pNetworkDevice->SendRequestDownload(info);
+		std::vector<std::vector<char>> Blobs;
+		m_pNetworkDevice->RecvComponentDataSet(Blobs); // 데이터가 Blobs에 저장됨
+		if (Blobs.size() > 0) {
+			std::string stitle = info.RecordTitle;
+			std::wstring title; title.assign(stitle.begin(), stitle.end());
+			m_pDataLoader->SaveComponentSetsForData(title, Blobs);
+		}
+	}
+	break;
+	case eSERVICE_TYPE::UPDATE_TABLE:
+		records.clear();
+		m_pNetworkDevice->RequestDataTable();
+		m_pNetworkDevice->RecvDataTable(records);
+		//ShowRecords(records);
+		break;
+	case eSERVICE_TYPE::NEXT_TABLE:
+		m_pNetworkDevice->RecvDataTable(records);
+		//ShowRecords(records);
+		break;
+	case eSERVICE_TYPE::PREV_TABLE:
+		m_pNetworkDevice->RecvDataTable(records);
+		//ShowRecords(records);
+		break;
+	case eSERVICE_TYPE::INCREASE_LIKE:
+	{
+		Download_Info info;
+		memcpy(&info, pData, sizeof(Download_Info));
+		m_pNetworkDevice->SendRequestDownload(info);
+	}
+	break;
+	case eSERVICE_TYPE::INCREASE_HATE:
+	{
+		Download_Info info;
+		memcpy(&info, pData, sizeof(Download_Info));
+		m_pNetworkDevice->SendRequestDownload(info);
+	}
+	break;
+	default:
+		break;
+	}
 }
 

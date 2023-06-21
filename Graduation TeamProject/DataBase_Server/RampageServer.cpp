@@ -114,8 +114,12 @@ DWORD WINAPI ProcessClient(LPVOID arg)
 					bApprove = true;
 				}
 			}
-			Network_Device.SendApproveLogin(bApprove);
-			//isLoginig = false;
+			Network_Device.SendApproveLogin((int)bApprove);
+			if (bApprove) {
+				Network_Device.AccountInfo.UserID = result->getInt("User_ID");
+				memcpy(Network_Device.AccountInfo.UserName, result->getString("User_Name").c_str(), sizeof(45));
+			}
+			isLoginig = !bApprove;
 		}
 			break;
 		default:
@@ -135,6 +139,7 @@ DWORD WINAPI ProcessClient(LPVOID arg)
 		{
 		case eSERVICE_TYPE::UPLOAD_RECORD:
 			Network_Device.RecvUploadData(uploadData);
+			uploadData.UserName = Network_Device.AccountInfo.UserName;
 			UploadWorkShop(uploadData);
 
 			/*for (int i = 0; i < 40; ++i) {

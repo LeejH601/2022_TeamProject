@@ -21,6 +21,7 @@ CNetworkDevice::~CNetworkDevice()
 void CNetworkDevice::init(SOCKET sock)
 {
 	m_client_sock = sock;
+	m_bInited = true;
 }
 
 bool CNetworkDevice::RecvServiceType(eSERVICE_TYPE& serviceType)

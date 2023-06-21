@@ -10,12 +10,19 @@ class DataLoader
 	std::wstring file_ext = L".bin";
 public:
 	void SaveComponentSets(std::wstring wFolderName);
+	void SaveComponentSetsForData(std::wstring wFolderName, std::vector<std::vector<char>>& Blobs);
+	void LoadComponentSetsToUploadData(std::wstring wFolderName, UploadData& uploadData);
 	void LoadComponentSets(std::wstring wFolderName);
 
 	void SaveComponentSet(FILE* pInFile, CState<CPlayer>* pState);
 	void LoadComponentSet(FILE* pInFile, CState<CPlayer>* pState);
 };
 
+
+
+enum class eSERVICE_TYPE;
+class CNetworkDevice;
+class WorkShop_Record;
 class CTexture;
 class CCamera;
 class CImGuiManager
@@ -57,6 +64,8 @@ private:
 	bool show_another_window = false;
 	bool show_my_window = true;
 
+	bool serverConnected = false;
+
 	CCamera* m_pCamera = NULL;
 	ImVec2 dearImGuiSize;
 
@@ -76,6 +85,10 @@ private:
 	D3D12_GPU_DESCRIPTOR_HANDLE m_d3dSrvGPUDescriptorHandle_TrailMainTexture;
 	D3D12_GPU_DESCRIPTOR_HANDLE m_d3dSrvGPUDescriptorHandle_TrailNoiseTexture;
 	D3D12_GPU_DESCRIPTOR_HANDLE m_d3dSrvGPUDescriptorHandle_SlashHitTexture;
+
+	std::unique_ptr<CNetworkDevice> m_pNetworkDevice = nullptr;
+	std::vector<WorkShop_Record> records;
+
 
 public:
 	DECLARE_SINGLE(CImGuiManager);
@@ -112,6 +125,7 @@ public:
 	void ShowShootSoundManager(CState<CPlayer>* pCurrentAnimation);
 	void ShowDamageMoanSoundManager(CState<CPlayer>* pCurrentAnimation);
 	void ShowCreationMenu();
+	void ShowWorkshopLoginMenu();
 
 	void OnPrepareRender(ID3D12GraphicsCommandList* pd3dCommandList, D3D12_CPU_DESCRIPTOR_HANDLE* d3dDsvDescriptorCPUHandle, float fTimeElapsed, float fCurrentTime, CCamera* pCamera = NULL);
 	void PrepareRenderTarget(ID3D12GraphicsCommandList* pd3dCommandList, D3D12_CPU_DESCRIPTOR_HANDLE* d3dDsvDescriptorCPUHandle);
@@ -126,4 +140,7 @@ public:
 	float GetParallaxScale() { return ParallaxScale; };
 	float GetParallaxBias() { return ParallaxBias; };
 	int GetTerrainMappingMode() { return Terrain_Mapping_mode; };
+
+	bool ConnectServer(eSERVICE_TYPE serviceType, SineUp_Info& info);
+	void ProcessWorkshop(eSERVICE_TYPE serviceType, void* pData = nullptr);
 };

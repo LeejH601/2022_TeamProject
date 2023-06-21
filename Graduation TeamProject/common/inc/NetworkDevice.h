@@ -70,6 +70,13 @@ public:
 	char UserName[MAX_USERNAME];
 };
 
+class User_Info
+{
+public:
+	int UserID;
+	char UserName[MAX_USERNAME];
+};
+
 enum class SEARCH_METHOD {
 	ASCENDING,
 	DESCENDING,
@@ -148,6 +155,9 @@ public:
 class CNetworkDevice
 {
 	SOCKET m_client_sock;
+public:
+	bool m_bInited = false;
+	User_Info AccountInfo;
 
 public:
 	CNetworkDevice();

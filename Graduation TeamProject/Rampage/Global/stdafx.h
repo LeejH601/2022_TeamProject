@@ -9,6 +9,8 @@
 #define WIN32_LEAN_AND_MEAN		// 거의 사용되지 않는 내용은 Windows 헤더에서 제외합니다.
 // Windows 헤더 파일:
 #include <windows.h>
+#include <WinSock2.h>
+#include <ws2tcpip.h>
 
 // Direct3D와 관련있는 헤더 파일들입니다.
 #include <string>
@@ -58,6 +60,8 @@
 #include "..\ImGui\imgui.h"
 #include "..\ImGui\imgui_impl_dx12.h"
 #include "..\ImGui\imgui_impl_win32.h"
+#include <NetworkDevice.h>
+
 
 using namespace DirectX;
 using namespace DirectX::PackedVector;

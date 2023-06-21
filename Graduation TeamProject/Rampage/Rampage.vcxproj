@@ -156,11 +156,12 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(SolutionDir)common\lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>fmod_vc.lib;fmodL_vc.lib;PhysX_64.lib;PhysXCharacterKinematic_static_64.lib;PhysXCommon_64.lib;PhysXExtensions_static_64.lib;PhysXFoundation_64.lib;PhysXCooking_64.lib;PhysXPvdSDK_static_64.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>fmod_vc.lib;fmodL_vc.lib;PhysX_64.lib;PhysXCharacterKinematic_static_64.lib;PhysXCommon_64.lib;PhysXExtensions_static_64.lib;PhysXFoundation_64.lib;PhysXCooking_64.lib;PhysXPvdSDK_static_64.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <StackReserveSize>4194304</StackReserveSize>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\common\inc\NetworkDevice.cpp" />
     <ClCompile Include="Global\Camera.cpp" />
     <ClCompile Include="Global\DDSTextureLoader12.cpp" />
     <ClCompile Include="Global\GameFramework.cpp" />
@@ -230,6 +231,7 @@
     <ClCompile Include="Sound\SoundPlayer.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\common\inc\NetworkDevice.h" />
     <ClInclude Include="Global\Camera.h" />
     <ClInclude Include="Global\d3dx12.h" />
     <ClInclude Include="Global\DDSTextureLoader12.h" />

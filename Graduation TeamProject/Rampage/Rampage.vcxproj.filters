@@ -238,6 +238,9 @@
     <ClCompile Include="Object\VertexPointParticleObject.cpp">
       <Filter>Object</Filter>
     </ClCompile>
+    <ClCompile Include="..\common\inc\NetworkDevice.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Global\stdafx.h">
@@ -464,6 +467,7 @@
     <ClInclude Include="Object\VertexPointParticleObject.h">
       <Filter>Object</Filter>
     </ClInclude>
+    <ClInclude Include="..\common\inc\NetworkDevice.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shader\PlayerPixelShader.hlsl" />
