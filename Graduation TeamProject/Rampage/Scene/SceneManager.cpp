@@ -64,7 +64,16 @@ bool CSceneManager::ProcessInput(HWND hWnd, DWORD dwDirection, float fTimeElapse
 
 bool CSceneManager::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
 {
-	m_pCurrentScene->OnProcessingMouseMessage(hWnd, nMessageID, wParam, lParam);
+	bool change_scene = m_pCurrentScene->OnProcessingMouseMessage(hWnd, nMessageID, wParam, lParam);
+
+	if (dynamic_cast<CLobbyScene*>(m_pCurrentScene) && change_scene)
+	{
+		if (dynamic_cast<CLobbyScene*>(m_pCurrentScene)->GetSceneType() == (UINT)LobbySceneType::Main_Scene)
+		{
+			dynamic_cast<CLobbyScene*>(m_pCurrentScene)->SetSceneType((UINT)LobbySceneType::SIMULATOR_Scene);
+			m_pCurrentScene = m_pMainScene.get();
+		}
+	}
 
 	return 0;
 }

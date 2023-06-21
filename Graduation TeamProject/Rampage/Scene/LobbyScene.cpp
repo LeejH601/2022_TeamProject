@@ -32,7 +32,15 @@ bool CLobbyScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wP
 		float cxDelta, cyDelta;
 		GetCursorPos(&ptCursorPos);
 		if (dynamic_cast<CButtonObject*>(m_pUIObject[1].get())->CheckCollisionMouse(ptCursorPos))
+		{
 			m_iSceneType = LobbySceneType::SIMULATOR_Scene;
+			return true;
+		}
+		else if (CImGuiManager::GetInst()->GetChangeGameScene())
+		{
+			m_iSceneType = LobbySceneType::Main_Scene;
+			return true;
+		}
 		break;
 	case WM_RBUTTONDOWN:
 
