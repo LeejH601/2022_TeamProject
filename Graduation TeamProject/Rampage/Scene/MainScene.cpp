@@ -548,8 +548,6 @@ bool CMainTMPScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM 
 }
 SCENE_RETURN_TYPE CMainTMPScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam, DWORD& dwDirection)
 {
-	static int CursorHideCount = 0;
-
 	MOUSE_CUROSR_MODE eMouseMode = Locator.GetMouseCursorMode();
 
 	switch (nMessageID)
@@ -588,9 +586,9 @@ SCENE_RETURN_TYPE CMainTMPScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMe
 				m_CurrentMouseCursorMode = MOUSE_CUROSR_MODE::FLOATING_MODE;
 				PostMessage(hWnd, WM_ACTIVATE, 0, 0);
 
-				while (CursorHideCount > 0)
+				while (m_iCursorHideCount > 0)
 				{
-					CursorHideCount--;
+					m_iCursorHideCount--;
 					ShowCursor(true);
 				}
 				ClipCursor(NULL);
@@ -599,31 +597,21 @@ SCENE_RETURN_TYPE CMainTMPScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMe
 			return SCENE_RETURN_TYPE::RETURN_PREVIOUS_SCENE;
 		case '1':
 		{
-			RECT screenRect;
-			GetWindowRect(hWnd, &screenRect);
-			m_ScreendRect = screenRect;
-
 			m_pCurrentCamera = m_pFloatingCamera.get();
+		
 			Locator.SetMouseCursorMode(MOUSE_CUROSR_MODE::FLOATING_MODE);
 			m_CurrentMouseCursorMode = MOUSE_CUROSR_MODE::FLOATING_MODE;
-			PostMessage(hWnd, WM_ACTIVATE, 0, 0);
-
-			while (CursorHideCount > 0)
+			
+			while (m_iCursorHideCount > 0)
 			{
-				CursorHideCount--;
+				m_iCursorHideCount--;
 				ShowCursor(true);
+				ClipCursor(NULL);
 			}
-			ClipCursor(NULL);
 		}
 		break;
 		case '2':
 		{
-			RECT screenRect;
-			GetWindowRect(hWnd, &screenRect);
-			m_ScreendRect = screenRect;
-			SetCursorPos(screenRect.left + (screenRect.right - screenRect.left) / 2,
-				screenRect.top + (screenRect.bottom - screenRect.top) / 2);
-
 			m_pCurrentCamera = m_pMainSceneCamera.get();
 
 			// Update Camera
@@ -640,10 +628,10 @@ SCENE_RETURN_TYPE CMainTMPScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMe
 			m_CurrentMouseCursorMode = MOUSE_CUROSR_MODE::THIRD_FERSON_MODE;
 			PostMessage(hWnd, WM_ACTIVATE, 0, 0);
 
-			if (CursorHideCount < 1) {
-				CursorHideCount++;
+			if (m_iCursorHideCount < 1) {
+				m_iCursorHideCount++;
 				ShowCursor(false);
-				ClipCursor(&screenRect);
+				ClipCursor(&m_ScreendRect);
 			}
 		}
 		break;
@@ -1107,7 +1095,6 @@ void CMainTMPScene::OnPrepareRenderTarget(ID3D12GraphicsCommandList* pd3dCommand
 void CMainTMPScene::Enter(HWND hWnd)
 {
 	// 3인칭 카메라 모드로 게임을 시작하게 설정
-	static int CursorHideCount = 0;
 
 	RECT screenRect;
 	GetWindowRect(hWnd, &screenRect);
@@ -1115,13 +1102,8 @@ void CMainTMPScene::Enter(HWND hWnd)
 	SetCursorPos(screenRect.left + (screenRect.right - screenRect.left) / 2,
 		screenRect.top + (screenRect.bottom - screenRect.top) / 2);
 
-	m_pCurrentCamera = m_pMainSceneCamera.get();
-	Locator.SetMouseCursorMode(MOUSE_CUROSR_MODE::THIRD_FERSON_MODE);
-	m_CurrentMouseCursorMode = MOUSE_CUROSR_MODE::THIRD_FERSON_MODE;
-	PostMessage(hWnd, WM_ACTIVATE, 0, 0);
-
-	if (CursorHideCount < 1) {
-		CursorHideCount++;
+	if (m_iCursorHideCount < 1) {
+		m_iCursorHideCount++;
 		ShowCursor(false);
 		ClipCursor(&screenRect);
 	}

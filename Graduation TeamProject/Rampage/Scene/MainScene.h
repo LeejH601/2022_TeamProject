@@ -34,6 +34,7 @@ struct StageInfo {
 class CMainTMPScene : public CScene
 {
 private:
+	int m_iCursorHideCount = 0;
 	RECT m_ScreendRect;
 
 	bool m_bGameStart = false;
