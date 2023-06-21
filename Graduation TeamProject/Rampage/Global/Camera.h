@@ -163,9 +163,24 @@ public:
 };
 class CCinematicCamera : public CCamera
 {
+	struct CameraInfo {
+		XMFLOAT3 xmf3Look;
+		XMFLOAT3 xmf3Up;
+		XMFLOAT3 xmf3Right;
+
+		XMFLOAT3 xmf3Position;
+
+	};
+
+	CameraInfo m_StartCameraInfo;
+	CameraInfo m_EndCameraInfo;
 public:
 	CCinematicCamera();
 	virtual ~CCinematicCamera() { }
+
+	void SetStartCamera(CCamera* pCamera);
+	void SetEndCamera(CCamera* pCamera);
+	void PlayCinematicCamera();
 
 	void InitToPlayerCameraPos(CGameObject* pPlayer);
 	virtual void Rotate(float fPitch = 0.0f, float fYaw = 0.0f, float fRoll = 0.0f);

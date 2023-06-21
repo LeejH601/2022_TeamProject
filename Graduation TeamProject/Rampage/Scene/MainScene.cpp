@@ -565,19 +565,17 @@ SCENE_RETURN_TYPE CMainTMPScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMe
 			}
 			break;
 		case VK_F5:
-		{
-			XMFLOAT3 xmf3MonsterPos[5];
-			XMFLOAT3 xmf3PlayerPos = m_pPlayer->GetPosition();
-			XMFLOAT3 xmf3PlayerLook = m_pPlayer->GetLook();
-			XMFLOAT3 xmf3PlayerRight = m_pPlayer->GetRight();
-			xmf3PlayerLook = Vector3::ScalarProduct(xmf3PlayerLook, 20.f, false);
-
-			for (int i = 0; i < 5; i++)
-				xmf3MonsterPos[i] = Vector3::Add(Vector3::Add(Vector3::ScalarProduct(xmf3PlayerRight, -20 + i * 10, false), xmf3PlayerLook), xmf3PlayerPos);
-
-			CMonsterPool::GetInst()->SpawnMonster(MONSTER_TYPE::GOBLIN, 5, xmf3MonsterPos);
+			if (m_pCurrentCamera == m_pFloatingCamera.get())
+				((CCinematicCamera*)(m_pCinematicSceneCamera.get()))->SetStartCamera(m_pCurrentCamera);
 			break;
-		}
+		case VK_F6:
+			if (m_pCurrentCamera == m_pFloatingCamera.get())
+				((CCinematicCamera*)(m_pCinematicSceneCamera.get()))->SetEndCamera(m_pCurrentCamera);
+			break;
+		case VK_F7:
+			((CCinematicCamera*)(m_pCinematicSceneCamera.get()))->PlayCinematicCamera();
+			m_pCurrentCamera = m_pCinematicSceneCamera.get();
+			break;
 		case VK_BACK:
 			if (m_CurrentMouseCursorMode == MOUSE_CUROSR_MODE::THIRD_FERSON_MODE)
 			{
@@ -633,13 +631,6 @@ SCENE_RETURN_TYPE CMainTMPScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMe
 				ShowCursor(false);
 				ClipCursor(&m_ScreendRect);
 			}
-		}
-		break;
-		case '3':
-		{
-			// ¾¾³×¸¶Æ½ Ä«¸Þ¶ó·Î Àü°³
-			m_pCurrentCamera = m_pCinematicSceneCamera.get();
-			((CCinematicCamera*)m_pCinematicSceneCamera.get())->InitToPlayerCameraPos(m_pPlayer);
 		}
 		break;
 		case 'f':
