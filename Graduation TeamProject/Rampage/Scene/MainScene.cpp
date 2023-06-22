@@ -1039,7 +1039,7 @@ void CMainTMPScene::UpdateObjects(float fTimeElapsed)
 		m_bGameStart = true;
 
 		// 스테이지를 진행시키는 함수
-		AdvanceStage();
+		//AdvanceStage();
 	}
 
 	m_pCurrentCamera->Update(xmf3PlayerPos, fTimeElapsed);
