@@ -518,17 +518,16 @@ XMFLOAT3 InterpolateXMFLOAT3(XMFLOAT3 xmf3Origin, XMFLOAT3 xmf3Target, float t)
 
 void CCinematicCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
 {
-	float fSpeedKperH = 0.25f;
-	float fSpeedUperS = MeterToUnit(fSpeedKperH * 1000.0f) / 3600.0f;
-
+	float fSpeedUperS = MeterToUnit(10.0f);
 	float fMaxAccel = fSpeedUperS;
 
 	float fLeftDistance = Vector3::Length(Vector3::Subtract(m_EndCameraInfo.xmf3Position, m_xmf3Position));
 	float fLeftDistanceRatio = fLeftDistance / m_fTotalDistance;
 
-	float fMultiRatio = cos((1.0f - fLeftDistanceRatio) * 3.141582f);
+	float fMultiPlyRatio = cos((1.0f - fLeftDistanceRatio) * 3.141582f);
+	float fCurAccel = fMultiPlyRatio * fMaxAccel;
 
-	m_fCurrentSpeed += fMultiRatio * fMaxAccel;
+	m_fCurrentSpeed += fCurAccel * fTimeElapsed;
 	m_fCurrentSpeed = max(m_fCurrentSpeed, 0.0f);
 
 	float fCurrentDistance = m_fCurrentSpeed * fTimeElapsed;
