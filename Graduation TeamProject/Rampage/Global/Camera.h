@@ -175,8 +175,8 @@ class CCinematicCamera : public CCamera
 	CameraInfo m_StartCameraInfo;
 	CameraInfo m_EndCameraInfo;
 
-	float m_fSpeedKperH;
-	float m_fSpeedUperS;
+	float m_fAcceleration;
+	float m_fCurrentSpeed;
 	float m_fTotalDistance;
 	float m_fTotalParamT;
 public:

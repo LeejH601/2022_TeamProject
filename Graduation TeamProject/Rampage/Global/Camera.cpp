@@ -377,8 +377,8 @@ void CPath::Reset()
 
 CCinematicCamera::CCinematicCamera()
 {
-	m_fSpeedKperH = 10.0f;
-	m_fSpeedUperS = MeterToUnit(m_fSpeedKperH * 1000.0f) / 3600.0f;
+	m_fCurrentSpeed = 0.0f;
+	m_fAcceleration = 0.0f;
 }
 
 void CCinematicCamera::SetStartCamera(CCamera* pCamera)
@@ -406,6 +406,10 @@ void CCinematicCamera::PlayCinematicCamera()
 	m_xmf3CalculatedPosition = m_StartCameraInfo.xmf3Position;
 
 	m_fTotalParamT = 0.0f;
+	m_fTotalDistance = Vector3::Length(Vector3::Subtract(m_EndCameraInfo.xmf3Position, m_StartCameraInfo.xmf3Position));
+
+	m_fCurrentSpeed = 0.0f;
+	m_fAcceleration = 0.0f;
 }
 
 void CCinematicCamera::InitToPlayerCameraPos(CGameObject* pPlayer)
@@ -469,6 +473,9 @@ void CCinematicCamera::InitToPlayerCameraPos(CGameObject* pPlayer)
 
 	m_fTotalParamT = 0.0f;
 	m_fTotalDistance = Vector3::Length(Vector3::Subtract(m_EndCameraInfo.xmf3Position, m_StartCameraInfo.xmf3Position));
+
+	m_fCurrentSpeed = 0.0f;
+	m_fAcceleration = 0.0f;
 }
 
 void CCinematicCamera::Rotate(float fPitch, float fYaw, float fRoll)
@@ -511,7 +518,20 @@ XMFLOAT3 InterpolateXMFLOAT3(XMFLOAT3 xmf3Origin, XMFLOAT3 xmf3Target, float t)
 
 void CCinematicCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
 {
-	float fCurrentDistance = m_fSpeedUperS * fTimeElapsed;
+	float fSpeedKperH = 0.25f;
+	float fSpeedUperS = MeterToUnit(fSpeedKperH * 1000.0f) / 3600.0f;
+
+	float fMaxAccel = fSpeedUperS;
+
+	float fLeftDistance = Vector3::Length(Vector3::Subtract(m_EndCameraInfo.xmf3Position, m_xmf3Position));
+	float fLeftDistanceRatio = fLeftDistance / m_fTotalDistance;
+
+	float fMultiRatio = cos((1.0f - fLeftDistanceRatio) * 3.141582f);
+
+	m_fCurrentSpeed += fMultiRatio * fMaxAccel;
+	m_fCurrentSpeed = max(m_fCurrentSpeed, 0.0f);
+
+	float fCurrentDistance = m_fCurrentSpeed * fTimeElapsed;
 
 	// Convert Distance to param(t)
 	float t = fCurrentDistance / m_fTotalDistance;
