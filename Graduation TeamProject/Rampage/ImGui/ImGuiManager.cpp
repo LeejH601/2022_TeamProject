@@ -2563,7 +2563,10 @@ void CImGuiManager::ShowCreationMenu()
 			ImGui::Text(std::to_string(vCreationItems[index].nBadSign).c_str()); ImGui::NextColumn();
 			ImGui::Button(U8STR("신고하기"), ImVec2(-FLT_MIN, 0.0f)); ImGui::NextColumn();
 			ImGui::Button(U8STR("불러오기"), ImVec2(-FLT_MIN, 0.0f)); ImGui::NextColumn();
-			if (ImGui::Button(U8STR("다운로드"), ImVec2(-FLT_MIN, 0.0f))) {
+
+			std::u8string downloadTag = u8"다운로드##download";
+			downloadTag += std::u8string(reinterpret_cast<const char8_t*>(std::to_string(i).c_str()));
+			if (ImGui::Button(reinterpret_cast<const char*>(downloadTag.c_str()), ImVec2(-FLT_MIN, 0.0f))) {
 				Download_Info info;
 				info.RecordID = atoi(reinterpret_cast<const char*>(vCreationItems[i].id.c_str()));
 				memcpy(info.RecordTitle, reinterpret_cast<const char*>(vCreationItems[i].name.c_str()), 45);
@@ -2588,9 +2591,27 @@ void CImGuiManager::ShowCreationMenu()
 
 		ImGui::SameLine();
 
+		static bool UploadWindowFlag = false;
 		if (ImGui::Button(U8STR("업로드"))) {
-			ProcessWorkshop(eSERVICE_TYPE::UPLOAD_RECORD);
+			UploadWindowFlag = !UploadWindowFlag;
+		}
+		if(UploadWindowFlag){
+			ImGuiWindowFlags upload_window_flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_MenuBar;
+			bool* p_Upload_open = NULL;
+
+			ImGui::SetNextWindowSize(ImVec2(m_lDesktopWidth * 0.6f, 0.0f), ImGuiCond_Always);
+			ImGui::Begin(U8STR("창작마당 업로드"), p_Upload_open, upload_window_flags);
+
+			ImGui::Text(U8STR("프리셋 이름")); ImGui::SameLine();
+			static char presetName[45] = " ";
+
+			ImGui::InputText(U8STR(" ##Upload"), presetName, sizeof(presetName));
+
+			if (ImGui::Button(U8STR("업로드##Upload"))) {
+				ProcessWorkshop(eSERVICE_TYPE::UPLOAD_RECORD, (void*)presetName);
+			}
 			//UpdateTable();
+			ImGui::End();
 		};
 
 		style.Colors[ImGuiCol_Button] = originalColor;
@@ -2825,27 +2846,34 @@ void CImGuiManager::ProcessWorkshop(eSERVICE_TYPE serviceType, void* pData)
 
 	if (serviceType == eSERVICE_TYPE::DOWNLOAD_RECORD ||
 		serviceType == eSERVICE_TYPE::INCREASE_LIKE ||
-		serviceType == eSERVICE_TYPE::INCREASE_HATE) {
+		serviceType == eSERVICE_TYPE::INCREASE_HATE ||
+		serviceType == eSERVICE_TYPE::UPLOAD_RECORD) {
 		if (pData == nullptr)
 			return;
 	}
 
-	m_pNetworkDevice->SendServiceType(serviceType);
+	
 
 	switch (serviceType)
 	{
 	case eSERVICE_TYPE::UPLOAD_RECORD:
 	{
 		UploadData uploadData;
-		uploadData.RecordTitle = "UploadTest";
 		uploadData.UserName = "testUser";
-		std::wstring title; title.assign(uploadData.RecordTitle.begin(), uploadData.RecordTitle.end());
+		std::string stitle = (char*)pData;
+		std::wstring title; title.assign(stitle.begin(), stitle.end());
 		m_pDataLoader->LoadComponentSetsToUploadData(title, uploadData);
-		m_pNetworkDevice->UploadWorkShop(uploadData);
+
+		uploadData.RecordTitle = (char*)pData;
+		if (uploadData.ComponentBlobs.size() > 0) {
+			m_pNetworkDevice->SendServiceType(serviceType);
+			m_pNetworkDevice->UploadWorkShop(uploadData);
+		}
 	}
 		break;
 	case eSERVICE_TYPE::DOWNLOAD_RECORD:
 	{
+		m_pNetworkDevice->SendServiceType(serviceType);
 		Download_Info info;
 		memcpy(&info, pData, sizeof(Download_Info));
 		m_pNetworkDevice->SendRequestDownload(info);
@@ -2859,21 +2887,25 @@ void CImGuiManager::ProcessWorkshop(eSERVICE_TYPE serviceType, void* pData)
 	}
 	break;
 	case eSERVICE_TYPE::UPDATE_TABLE:
+		m_pNetworkDevice->SendServiceType(serviceType);
 		records.clear();
 		m_pNetworkDevice->RequestDataTable();
 		m_pNetworkDevice->RecvDataTable(records);
 		//ShowRecords(records);
 		break;
 	case eSERVICE_TYPE::NEXT_TABLE:
+		m_pNetworkDevice->SendServiceType(serviceType);
 		m_pNetworkDevice->RecvDataTable(records);
 		//ShowRecords(records);
 		break;
 	case eSERVICE_TYPE::PREV_TABLE:
+		m_pNetworkDevice->SendServiceType(serviceType);
 		m_pNetworkDevice->RecvDataTable(records);
 		//ShowRecords(records);
 		break;
 	case eSERVICE_TYPE::INCREASE_LIKE:
 	{
+		m_pNetworkDevice->SendServiceType(serviceType);
 		Download_Info info;
 		memcpy(&info, pData, sizeof(Download_Info));
 		m_pNetworkDevice->SendRequestDownload(info);
@@ -2881,6 +2913,7 @@ void CImGuiManager::ProcessWorkshop(eSERVICE_TYPE serviceType, void* pData)
 	break;
 	case eSERVICE_TYPE::INCREASE_HATE:
 	{
+		m_pNetworkDevice->SendServiceType(serviceType);
 		Download_Info info;
 		memcpy(&info, pData, sizeof(Download_Info));
 		m_pNetworkDevice->SendRequestDownload(info);
