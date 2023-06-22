@@ -175,7 +175,10 @@ class CCinematicCamera : public CCamera
 	CameraInfo m_StartCameraInfo;
 	CameraInfo m_EndCameraInfo;
 
-	float m_fTotalElapsedTime;
+	float m_fSpeedKperH;
+	float m_fSpeedUperS;
+	float m_fTotalDistance;
+	float m_fTotalParamT;
 public:
 	CCinematicCamera();
 	virtual ~CCinematicCamera() { }
