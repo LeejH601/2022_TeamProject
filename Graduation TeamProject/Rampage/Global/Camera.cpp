@@ -383,81 +383,22 @@ CCinematicCamera::CCinematicCamera()
 
 void CCinematicCamera::PlayCinematicCamera()
 {
-	m_xmf3Look = m_StartCameraInfo.xmf3Look;
-	m_xmf3Up = m_StartCameraInfo.xmf3Up;
-	m_xmf3Right = m_StartCameraInfo.xmf3Right;
-	m_xmf3Position = m_StartCameraInfo.xmf3Position;
-	m_xmf3CalculatedPosition = m_StartCameraInfo.xmf3Position;
+	if (m_vCameraInfos.size() < 2)
+		return;
+
+	m_xmf3Look = m_vCameraInfos[0].xmf3Look;
+	m_xmf3Up = m_vCameraInfos[0].xmf3Up;
+	m_xmf3Right = m_vCameraInfos[0].xmf3Right;
+	m_xmf3Position = m_vCameraInfos[0].xmf3Position;
+	m_xmf3CalculatedPosition = m_vCameraInfos[0].xmf3Position;
 
 	m_fTotalParamT = 0.0f;
-	m_fTotalDistance = Vector3::Length(Vector3::Subtract(m_EndCameraInfo.xmf3Position, m_StartCameraInfo.xmf3Position));
+	m_fTotalDistance = 0.0f;
+	m_iCurrentCameraInfoIndex = 0;
 
-	m_fCurrentSpeed = 0.0f;
-	m_fAcceleration = 0.0f;
-}
-
-void CCinematicCamera::InitToPlayerCameraPos(CGameObject* pPlayer)
-{
-	CThirdPersonCamera* pMainSceneCamera = dynamic_cast<CThirdPersonCamera*>(((CKnightPlayer*)pPlayer)->GetCamera());
-
-	XMFLOAT3 xmf3PlayerPos = XMFLOAT3{
-		((CKnightPlayer*)pPlayer)->m_pSkinnedAnimationController->m_pRootMotionObject->GetWorld()._41,
-		 pPlayer->GetPosition().y,
-		((CKnightPlayer*)pPlayer)->m_pSkinnedAnimationController->m_pRootMotionObject->GetWorld()._43 };
-	xmf3PlayerPos.y += MeterToUnit(0.9f);
-
-	XMMATRIX xmmtxRotate = XMMatrixIdentity();
-	XMMATRIX xmmtxRotateX = XMMatrixIdentity();
-	XMMATRIX xmmtxRotateY = XMMatrixIdentity();
-	XMMATRIX xmmtxRotateZ = XMMatrixIdentity();
-
-	XMFLOAT3 xmf3XAxis = XMFLOAT3(1.0f, 0.0f, 0.0f);
-	XMFLOAT3 xmf3YAxis = XMFLOAT3(0.0f, 1.0f, 0.0f);
-	XMFLOAT3 xmf3ZAxis = XMFLOAT3(0.0f, 0.0f, 1.0f);
-
-	float fPitch = pMainSceneCamera->GetPitch();
-	float fYaw = pMainSceneCamera->GetYaw();
-	float fRoll = pMainSceneCamera->GetRoll();
-
-	if (fPitch != 0.0f)
-	{
-		xmmtxRotateX = XMMatrixRotationAxis(XMLoadFloat3(&xmf3XAxis), XMConvertToRadians(fPitch));
-	}
-	if (fYaw != 0.0f)
-	{
-		xmmtxRotateY = XMMatrixRotationAxis(XMLoadFloat3(&xmf3YAxis), XMConvertToRadians(fYaw));
-	}
-	if (fRoll != 0.0f)
-	{
-		xmmtxRotateY = XMMatrixRotationAxis(XMLoadFloat3(&xmf3ZAxis), XMConvertToRadians(fRoll));
-	}
-
-	xmmtxRotate = XMMatrixMultiply(xmmtxRotateZ, XMMatrixMultiply(xmmtxRotateX, xmmtxRotateY));
-
-	XMFLOAT3 xmf3Offset = Vector3::TransformNormal(XMFLOAT3(0.0f, 0.0f, MeterToUnit(3.0f)), xmmtxRotate);
-	XMFLOAT3 xmf3Position = Vector3::Add(xmf3PlayerPos, xmf3Offset);
-
-	m_xmf3Position = xmf3Position;
-	m_xmf3CalculatedPosition = xmf3Position;
-
-	SetLookAt(xmf3PlayerPos);
-
-	CCamera::Update(XMFLOAT3{ 0.0f, 0.0f, 0.0f }, 0.0f);
-	OnUpdateCallback(0.0f);
-
-	m_StartCameraInfo.xmf3Look = GetLookVector();
-	m_StartCameraInfo.xmf3Up = GetUpVector();
-	m_StartCameraInfo.xmf3Right = GetRightVector();
-	m_StartCameraInfo.xmf3Position = GetPosition();
-
-	m_EndCameraInfo.xmf3Look = XMFLOAT3{ -0.384055f, -0.417339f, -0.823608f };
-	m_EndCameraInfo.xmf3Up = XMFLOAT3{ -0.176376f, 0.908751f, -0.378237f };
-	m_EndCameraInfo.xmf3Right = XMFLOAT3{ -0.906308f, -0.000001f, 0.422619f };
-	m_EndCameraInfo.xmf3Position = XMFLOAT3{ 134.94f, 27.656675f, 176.956421f };
-
-	m_fTotalParamT = 0.0f;
-	m_fTotalDistance = Vector3::Length(Vector3::Subtract(m_EndCameraInfo.xmf3Position, m_StartCameraInfo.xmf3Position));
-
+	for (int i = 0; i < m_vCameraInfos.size() - 1; ++i)
+		m_fTotalDistance += Vector3::Length(Vector3::Subtract(m_vCameraInfos[i].xmf3Position, m_vCameraInfos[i + 1].xmf3Position));
+	
 	m_fCurrentSpeed = 0.0f;
 	m_fAcceleration = 0.0f;
 }
@@ -525,7 +466,7 @@ void CCinematicCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
 	float fSpeedUperS = MeterToUnit(10.0f);
 	float fMaxAccel = fSpeedUperS;
 
-	float fLeftDistance = Vector3::Length(Vector3::Subtract(m_EndCameraInfo.xmf3Position, m_xmf3Position));
+	float fLeftDistance = Vector3::Length(Vector3::Subtract(m_vCameraInfos[1].xmf3Position, m_xmf3Position));
 	float fLeftDistanceRatio = fLeftDistance / m_fTotalDistance;
 
 	float fMultiPlyRatio = cos((1.0f - fLeftDistanceRatio) * 3.141582f);

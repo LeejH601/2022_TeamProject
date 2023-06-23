@@ -171,10 +171,8 @@ class CCinematicCamera : public CCamera
 		XMFLOAT3 xmf3Position;
 	};
 
+	int m_iCurrentCameraInfoIndex;
 	std::vector<CameraInfo> m_vCameraInfos;
-
-	CameraInfo m_StartCameraInfo;
-	CameraInfo m_EndCameraInfo;
 
 	float m_fAcceleration;
 	float m_fCurrentSpeed;
@@ -188,7 +186,6 @@ public:
 	void ClearCameraInfo();
 	void PlayCinematicCamera();
 
-	void InitToPlayerCameraPos(CGameObject* pPlayer);
 	virtual void Rotate(float fPitch = 0.0f, float fYaw = 0.0f, float fRoll = 0.0f);
 	virtual void Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed);
 };

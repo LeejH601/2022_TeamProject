@@ -611,20 +611,6 @@ SCENE_RETURN_TYPE CMainTMPScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMe
 		{
 			m_pCurrentCamera = m_pMainSceneCamera.get();
 
-			// Update Camera
-			XMFLOAT3 xmf3PlayerPos = XMFLOAT3{
-				((CKnightPlayer*)m_pPlayer)->m_pSkinnedAnimationController->m_pRootMotionObject->GetWorld()._41,
-				 m_pPlayer->GetPosition().y,
-				((CKnightPlayer*)m_pPlayer)->m_pSkinnedAnimationController->m_pRootMotionObject->GetWorld()._43 };
-			xmf3PlayerPos.y += MeterToUnit(0.9f);
-
-			m_pCurrentCamera->Update(xmf3PlayerPos, 0.0f);
-			m_pCurrentCamera->OnPostRender();
-
-			Locator.SetMouseCursorMode(MOUSE_CUROSR_MODE::THIRD_FERSON_MODE);
-			m_CurrentMouseCursorMode = MOUSE_CUROSR_MODE::THIRD_FERSON_MODE;
-			PostMessage(hWnd, WM_ACTIVATE, 0, 0);
-
 			if (m_iCursorHideCount < 1) {
 				m_iCursorHideCount++;
 				ShowCursor(false);
@@ -1101,9 +1087,18 @@ void CMainTMPScene::Enter(HWND hWnd)
 	m_pPlayer->Update(0.0f);
 	m_pPlayer->Animate(0.0f);
 
-	// 씨네마틱 카메라로 전개
-	m_pCurrentCamera = m_pCinematicSceneCamera.get();
-	((CCinematicCamera*)m_pCinematicSceneCamera.get())->InitToPlayerCameraPos(m_pPlayer);
+	// 시작은 플레이어 카메라
+	m_pCurrentCamera = m_pMainSceneCamera.get();
+
+	Locator.SetMouseCursorMode(MOUSE_CUROSR_MODE::THIRD_FERSON_MODE);
+	m_CurrentMouseCursorMode = MOUSE_CUROSR_MODE::THIRD_FERSON_MODE;
+	PostMessage(hWnd, WM_ACTIVATE, 0, 0);
+
+	if (m_iCursorHideCount < 1) {
+		m_iCursorHideCount++;
+		ShowCursor(false);
+		ClipCursor(&m_ScreendRect);
+	}
 }
 void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed, float fCurrentTime, CCamera* pCamera)
 {
@@ -1122,7 +1117,6 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 
 
 	m_pMap->RenderTerrain(pd3dCommandList);
-
 
 	for (int i = 0; i < m_pTerrainSpriteObject.size(); ++i)
 	{
