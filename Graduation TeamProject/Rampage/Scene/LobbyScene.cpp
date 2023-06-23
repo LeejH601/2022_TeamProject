@@ -36,11 +36,7 @@ bool CLobbyScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wP
 			m_iSceneType = LobbySceneType::SIMULATOR_Scene;
 			return true;
 		}
-		else if (CImGuiManager::GetInst()->GetChangeGameScene())
-		{
-			m_iSceneType = LobbySceneType::Main_Scene;
-			return true;
-		}
+
 		break;
 	case WM_RBUTTONDOWN:
 
@@ -65,17 +61,20 @@ SCENE_RETURN_TYPE CLobbyScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMess
 	case WM_KEYDOWN:
 		switch (wParam)
 		{
-		case VK_F5:
-			if(m_iSceneType == LobbySceneType::LOGO_Scene)
-				return SCENE_RETURN_TYPE::POP_LOGOSCENE;
-			else
-				return SCENE_RETURN_TYPE::POP_SIMULATORSCENE;
-		default:
-			break;
+		case VK_ESCAPE:
+			if (m_iSceneType == LobbySceneType::SIMULATOR_Scene)
+				CImGuiManager::GetInst()->SetShowSettingMenu(!CImGuiManager::GetInst()->GetShowSettingMenu());
+		//case VK_F5:
+		//	if(m_iSceneType == LobbySceneType::LOGO_Scene)
+		//		return SCENE_RETURN_TYPE::POP_LOGOSCENE;
+		//	else
+		//		return SCENE_RETURN_TYPE::POP_SIMULATORSCENE;
+		//default:
+		//	break;
 		}
 	case VK_BACK:
-		if(m_iSceneType == LobbySceneType::SIMULATOR_Scene)
-			return SCENE_RETURN_TYPE::RETURN_PREVIOUS_SCENE;
+		//if(m_iSceneType == LobbySceneType::SIMULATOR_Scene)
+		//	return SCENE_RETURN_TYPE::RETURN_PREVIOUS_SCENE;
 		break;
 	case WM_KEYUP:
 		switch (wParam)
@@ -178,6 +177,16 @@ void CLobbyScene::Update(float fTimeElapsed)
 		return;
 	case LobbySceneType::SIMULATOR_Scene:
 		CSimulatorScene::GetInst()->Update(fTimeElapsed);
+		if (CImGuiManager::GetInst()->GetChangeAfterScene())
+		{
+			m_iSceneType = LobbySceneType::Main_Scene;
+			CImGuiManager::GetInst()->GetChangeAfterScene() = false;
+		}
+		else if (CImGuiManager::GetInst()->GetChangeBeforeScene())
+		{
+			m_iSceneType = LobbySceneType::LOGO_Scene;
+			CImGuiManager::GetInst()->GetChangeBeforeScene() = false;
+		}
 		return;
 	}
 }

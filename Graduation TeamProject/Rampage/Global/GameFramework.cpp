@@ -11,6 +11,7 @@
 #include <windowsx.h>
 #include "..\Sound\SoundManager.h"
 #include "..\Shader\BoundingBoxShader.h"
+#include "..\Scene\SceneManager.h"
 
 CLocator Locator;
 
@@ -402,7 +403,6 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 		switch (wParam)
 		{
 		case VK_ESCAPE:
-			::PostQuitMessage(0);
 			break;
 		case VK_F9:
 			ChangeSwapChainState();
@@ -505,9 +505,12 @@ void CGameFramework::RenderObjects()
 	//명령 할당자를 리셋한다.
 	HRESULT hResult = m_pd3dCommandAllocator->Reset();
 
-	if (dynamic_cast<CLobbyScene*>(m_pSceneManager->GetCurrentScene()) 
-		/*&& dynamic_cast<CLobbyScene*>(m_pSceneManager->GetCurrentScene())->GetSceneType() == (UINT)(LobbySceneType::SIMULATOR_Scene)*/)
+	if (dynamic_cast<CLobbyScene*>(m_pSceneManager->GetCurrentScene()))
+	{
 		PrepareImGui();
+	}
+		/*&& dynamic_cast<CLobbyScene*>(m_pSceneManager->GetCurrentScene())->GetSceneType() == (UINT)(LobbySceneType::SIMULATOR_Scene)*/
+
 
 
 	//명령 리스트를 리셋한다.

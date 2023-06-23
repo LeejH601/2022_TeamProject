@@ -64,9 +64,9 @@ bool CSceneManager::ProcessInput(HWND hWnd, DWORD dwDirection, float fTimeElapse
 
 bool CSceneManager::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
 {
-	bool change_scene = m_pCurrentScene->OnProcessingMouseMessage(hWnd, nMessageID, wParam, lParam);
+	m_pCurrentScene->OnProcessingMouseMessage(hWnd, nMessageID, wParam, lParam);
 
-	if (dynamic_cast<CLobbyScene*>(m_pCurrentScene) && change_scene)
+	if (dynamic_cast<CLobbyScene*>(m_pCurrentScene))
 	{
 		if (dynamic_cast<CLobbyScene*>(m_pCurrentScene)->GetSceneType() == (UINT)LobbySceneType::Main_Scene)
 		{
@@ -87,7 +87,7 @@ bool CSceneManager::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPAR
 	{
 	case SCENE_RETURN_TYPE::NONE:
 		break;
-	case SCENE_RETURN_TYPE::POP_LOGOSCENE:
+	/*case SCENE_RETURN_TYPE::POP_LOGOSCENE:
 		if (m_pCurrentScene == m_pLobbyScene.get()) {
 			if (dynamic_cast<CLobbyScene*>(m_pCurrentScene))
 				dynamic_cast<CLobbyScene*>(m_pCurrentScene)->SetSceneType((UINT)(LobbySceneType::SIMULATOR_Scene));
@@ -97,7 +97,7 @@ bool CSceneManager::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPAR
 		if (m_pCurrentScene == m_pLobbyScene.get()) {
 			m_pCurrentScene = m_pMainScene.get();
 		}
-		break;
+		break;*/
 	case SCENE_RETURN_TYPE::RETURN_PREVIOUS_SCENE:
 		if (m_pCurrentScene == m_pMainScene.get())
 		{

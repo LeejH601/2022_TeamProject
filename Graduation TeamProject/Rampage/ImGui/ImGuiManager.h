@@ -57,9 +57,10 @@ private:
 	bool show_another_window = false;
 	bool show_my_window = true;
 
-	bool show_setting_menu = true;
+	bool show_setting_menu = false;
 
-	bool change_gamescene = false;
+	bool change_before = false;
+	bool change_after = false;
 
 	CCamera* m_pCamera = NULL;
 	ImVec2 dearImGuiSize;
@@ -130,5 +131,8 @@ public:
 	float GetParallaxScale() { return ParallaxScale; };
 	float GetParallaxBias() { return ParallaxBias; };
 	int GetTerrainMappingMode() { return Terrain_Mapping_mode; };
-	bool GetChangeGameScene() { return change_gamescene; };
+	bool& GetChangeAfterScene() { return change_after; };
+	bool& GetChangeBeforeScene() { return change_before; };
+	void SetShowSettingMenu(bool bSetting) { show_setting_menu = bSetting; };
+	bool GetShowSettingMenu() { return show_setting_menu; };
 };

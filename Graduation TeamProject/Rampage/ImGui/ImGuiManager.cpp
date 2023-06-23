@@ -1355,9 +1355,12 @@ void CImGuiManager::SetUI()
 			ImGui::SetNextWindowSize(ImVec2(m_lDesktopWidth * 0.15f, 0.0f), ImGuiCond_Always);
 			ImGui::Begin(U8STR("설정 메뉴"), &show_setting_menu, my_window_flags);
 
-			ImVec2 itemSize = ImVec2(100, 80);
+			ImVec2 itemSize = ImVec2(100, 50);
 			if (ImGui::Button(U8STR("넘어가기"), itemSize))
-				change_gamescene = true;
+				change_after = true;
+				
+			if (ImGui::Button(U8STR("되돌아가기"), itemSize))
+				change_before = true;
 
 			ImGui::End();
 		}

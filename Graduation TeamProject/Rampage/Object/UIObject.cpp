@@ -152,12 +152,15 @@ void CBarObject::Update(float fTimeElapsed)
 
 void CBarObject::Set_Value(float fCurrentValue, float fTotalValue)
 {
+	if (fCurrentValue <0 || fTotalValue <0)
+		return;
 
-	if (fCurrentValue < m_fCurrentValue)
-		m_fPreValue = m_fCurrentValue; // 이전 Value
+		if (fCurrentValue < m_fCurrentValue)
+			m_fPreValue = m_fCurrentValue; // 이전 Value
 
-	m_fCurrentValue = fCurrentValue;
-	m_fTotalValue = fTotalValue;
+		m_fCurrentValue = fCurrentValue;
+		m_fTotalValue = fTotalValue;
+	
 }
 
 CHPObject::CHPObject(int iTextureIndex, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fSize) : CBarObject(iTextureIndex, pd3dDevice, pd3dCommandList, fSize)
@@ -590,4 +593,101 @@ bool CButtonObject::CheckCollisionMouse(POINT ptCursorPo)
 	_stprintf_s(pstrDebug, 256, _T("현재 마우스 위치 = %d %d\n"), ptCursorPo.x, ptCursorPo.y);
 	OutputDebugString(pstrDebug);
 	return false;
+}
+
+CMonsterHPObject::CMonsterHPObject(int iTextureIndex, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fSize) : CBarObject(iTextureIndex, pd3dDevice, pd3dCommandList, fSize)
+{
+}
+
+CMonsterHPObject::~CMonsterHPObject()
+{
+}
+
+void CMonsterHPObject::Update(float fTimeElapsed)
+{
+}
+void CMonsterHPObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, bool b_UseTexture, CCamera* pCamera)
+{
+	if (!m_bEnable)
+		return;
+
+	if (m_pMesh)
+	{
+		// UI Size 정보 Update
+		// 
+		// CGameObject의 정보를 넘길 버퍼가 있고, 해당 버퍼에 대한 CPU 포인터가 있으면 UpdateShaderVariables 함수를 호출한다.
+		//PreBarUpdate(0.f);
+		//UpdateShaderVariables(pd3dCommandList);
+		////// 여기서 메쉬의 렌더를 한다.
+		//m_pMesh->OnPreRender(pd3dCommandList);
+		//m_pMesh->Render(pd3dCommandList, 0);
+
+		CurBarUpdate(0.f);
+		UpdateShaderVariables(pd3dCommandList);
+		// 여기서 메쉬의 렌더를 한다.
+		m_pMesh->OnPreRender(pd3dCommandList);
+
+		m_tRect[0] = { (LONG)(FRAME_BUFFER_WIDTH * 0.0f), (LONG)(FRAME_BUFFER_HEIGHT * 0.f) , (LONG)(FRAME_BUFFER_WIDTH * 1.f) , (LONG)(FRAME_BUFFER_HEIGHT * 1.f) };
+		pd3dCommandList->RSSetScissorRects(1, &m_tRect[0]);
+		m_pMesh->Render(pd3dCommandList, 0);
+	}
+
+	if (m_pChild) m_pChild->Render(pd3dCommandList, b_UseTexture, pCamera);
+	if (m_pSibling) m_pSibling->Render(pd3dCommandList, b_UseTexture, pCamera);
+}
+
+
+void CMonsterHPObject::PreBarUpdate(float fTimeElapsed)
+{
+	if (m_bEnable) {
+		if (m_fPreValue && (m_fPreValue > m_fCurrentValue))
+			m_fPreValue -= (m_fTotalValue - m_fCurrentValue) * 0.001f;
+		//m_xmf2ScreenPosition5 = XMFLOAT2()
+		// 화면 크기를 기준으로 Size 설정 최대 크기 (MAX WIDTH: FRAME_BUFFER_WIDTH, MAX_HEIGHT: FRAME_BUFFER_HEIGHT)
+		m_xmf4x4World._11 = ((m_fPreValue / m_fTotalValue) * m_xmf2Size.x) / (FRAME_BUFFER_WIDTH);
+		m_xmf4x4World._22 = m_xmf2Size.y / (FRAME_BUFFER_HEIGHT);
+
+		m_xmf4x4World._33 = m_iTextureIndex + 2; // 텍스쳐 인덱스
+
+		m_xmf4x4World._12 = 0.f; // U
+		m_xmf4x4World._13 = m_fPreValue / m_fTotalValue; // U
+
+		m_xmf4x4World._14 = 0.f; // V
+		m_xmf4x4World._24 = 1.f;
+
+		m_xmf4x4World._21 = 0.5f; // RGBN
+		m_xmf4x4World._21 = 0.6f; // ALPHA
+
+		// -1 ~ 1
+		m_xmf4x4World._41 = (m_xmf2ScreenPosition.x / FRAME_BUFFER_WIDTH) - (((m_fTotalValue - m_fPreValue) / m_fTotalValue) * m_xmf2Size.x * 0.5f) / (FRAME_BUFFER_WIDTH);;
+		m_xmf4x4World._42 = (m_xmf2ScreenPosition.y / FRAME_BUFFER_HEIGHT);
+		//(m_xmf2ScreenPosition.y * 2.f) / (FRAME_BUFFER_HEIGHT); // -1 ~ 1
+		m_xmf4x4World._43 = 0.f;
+	}
+}
+
+void CMonsterHPObject::CurBarUpdate(float fTimeElapsed)
+{
+	if (m_bEnable) {
+		//m_xmf2ScreenPosition5 = XMFLOAT2()
+		// 화면 크기를 기준으로 Size 설정 최대 크기 (MAX WIDTH: FRAME_BUFFER_WIDTH, MAX_HEIGHT: FRAME_BUFFER_HEIGHT)
+		m_xmf4x4World._11 = ((m_fCurrentValue / m_fTotalValue) * m_xmf2Size.x) / (FRAME_BUFFER_WIDTH);
+		m_xmf4x4World._22 = m_xmf2Size.y / (FRAME_BUFFER_HEIGHT);
+
+		m_xmf4x4World._33 = m_iTextureIndex; // 텍스쳐 인덱스
+
+		m_xmf4x4World._12 = 0.f; // U
+		m_xmf4x4World._13 = m_fCurrentValue / m_fTotalValue; // U
+
+		m_xmf4x4World._14 = 0.f; // V
+		m_xmf4x4World._24 = 1.f;
+
+		m_xmf4x4World._21 = 1.f; // RGBN
+
+		// -1 ~ 1
+		m_xmf4x4World._41 = (m_xmf2ScreenPosition.x / FRAME_BUFFER_WIDTH) - (((m_fTotalValue - m_fCurrentValue) / m_fTotalValue) * m_xmf2Size.x * 0.5f) / (FRAME_BUFFER_WIDTH);;
+		m_xmf4x4World._42 = (m_xmf2ScreenPosition.y / FRAME_BUFFER_HEIGHT);
+		//(m_xmf2ScreenPosition.y * 2.f) / (FRAME_BUFFER_HEIGHT); // -1 ~ 1
+		m_xmf4x4World._43 = 0.f;
+	}
 }
