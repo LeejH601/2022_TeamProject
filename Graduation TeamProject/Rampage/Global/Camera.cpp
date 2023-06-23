@@ -381,22 +381,6 @@ CCinematicCamera::CCinematicCamera()
 	m_fAcceleration = 0.0f;
 }
 
-void CCinematicCamera::SetStartCamera(CCamera* pCamera)
-{
-	m_StartCameraInfo.xmf3Look = pCamera->GetLookVector();
-	m_StartCameraInfo.xmf3Up = pCamera->GetUpVector();
-	m_StartCameraInfo.xmf3Right = pCamera->GetRightVector();
-	m_StartCameraInfo.xmf3Position = pCamera->GetPosition();
-}
-
-void CCinematicCamera::SetEndCamera(CCamera* pCamera)
-{
-	m_EndCameraInfo.xmf3Look = pCamera->GetLookVector();
-	m_EndCameraInfo.xmf3Up = pCamera->GetUpVector();
-	m_EndCameraInfo.xmf3Right = pCamera->GetRightVector();
-	m_EndCameraInfo.xmf3Position = pCamera->GetPosition();
-}
-
 void CCinematicCamera::PlayCinematicCamera()
 {
 	m_xmf3Look = m_StartCameraInfo.xmf3Look;
@@ -478,6 +462,18 @@ void CCinematicCamera::InitToPlayerCameraPos(CGameObject* pPlayer)
 	m_fAcceleration = 0.0f;
 }
 
+void CCinematicCamera::AddCameraInfo(CCamera* pCamera)
+{
+	CameraInfo cameraInfo;
+
+	cameraInfo.xmf3Look = pCamera->GetLookVector();
+	cameraInfo.xmf3Up = pCamera->GetUpVector();
+	cameraInfo.xmf3Right = pCamera->GetRightVector();
+	cameraInfo.xmf3Position = pCamera->GetPosition();
+
+	m_vCameraInfos.push_back(cameraInfo);
+}
+
 void CCinematicCamera::Rotate(float fPitch, float fYaw, float fRoll)
 {
 	if (fPitch != 0.0f)
@@ -505,6 +501,11 @@ void CCinematicCamera::Rotate(float fPitch, float fYaw, float fRoll)
 
 }
 
+void CCinematicCamera::ClearCameraInfo()
+{
+	m_vCameraInfos.clear();
+}
+
 XMFLOAT3 InterpolateXMFLOAT3(XMFLOAT3 xmf3Origin, XMFLOAT3 xmf3Target, float t)
 {
 	XMFLOAT3 xmf3Result;
@@ -518,6 +519,9 @@ XMFLOAT3 InterpolateXMFLOAT3(XMFLOAT3 xmf3Origin, XMFLOAT3 xmf3Target, float t)
 
 void CCinematicCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
 {
+	if (m_vCameraInfos.size() < 2)
+		return;
+
 	float fSpeedUperS = MeterToUnit(10.0f);
 	float fMaxAccel = fSpeedUperS;
 
@@ -539,8 +543,8 @@ void CCinematicCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
 
 	m_fTotalParamT = min(m_fTotalParamT, 1.0f);
 
-	m_xmf3Look = InterpolateXMFLOAT3(m_StartCameraInfo.xmf3Look, m_EndCameraInfo.xmf3Look, m_fTotalParamT);
-	m_xmf3Up = InterpolateXMFLOAT3(m_StartCameraInfo.xmf3Up, m_EndCameraInfo.xmf3Up, m_fTotalParamT);
-	m_xmf3Right = InterpolateXMFLOAT3(m_StartCameraInfo.xmf3Right, m_EndCameraInfo.xmf3Right, m_fTotalParamT);
-	SetPosition(InterpolateXMFLOAT3(m_StartCameraInfo.xmf3Position, m_EndCameraInfo.xmf3Position, m_fTotalParamT));
+	m_xmf3Look = InterpolateXMFLOAT3(m_vCameraInfos[0].xmf3Look, m_vCameraInfos[1].xmf3Look, m_fTotalParamT);
+	m_xmf3Up = InterpolateXMFLOAT3(m_vCameraInfos[0].xmf3Up, m_vCameraInfos[1].xmf3Up, m_fTotalParamT);
+	m_xmf3Right = InterpolateXMFLOAT3(m_vCameraInfos[0].xmf3Right, m_vCameraInfos[1].xmf3Right, m_fTotalParamT);
+	SetPosition(InterpolateXMFLOAT3(m_vCameraInfos[0].xmf3Position, m_vCameraInfos[1].xmf3Position, m_fTotalParamT));
 }

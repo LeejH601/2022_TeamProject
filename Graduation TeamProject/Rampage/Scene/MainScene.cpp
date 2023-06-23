@@ -566,11 +566,10 @@ SCENE_RETURN_TYPE CMainTMPScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMe
 			break;
 		case VK_F5:
 			if (m_pCurrentCamera == m_pFloatingCamera.get())
-				((CCinematicCamera*)(m_pCinematicSceneCamera.get()))->SetStartCamera(m_pCurrentCamera);
+				((CCinematicCamera*)(m_pCinematicSceneCamera.get()))->AddCameraInfo(m_pCurrentCamera);
 			break;
 		case VK_F6:
-			if (m_pCurrentCamera == m_pFloatingCamera.get())
-				((CCinematicCamera*)(m_pCinematicSceneCamera.get()))->SetEndCamera(m_pCurrentCamera);
+			((CCinematicCamera*)(m_pCinematicSceneCamera.get()))->ClearCameraInfo();
 			break;
 		case VK_F7:
 			((CCinematicCamera*)(m_pCinematicSceneCamera.get()))->PlayCinematicCamera();

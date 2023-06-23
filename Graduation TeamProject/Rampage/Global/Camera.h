@@ -169,8 +169,9 @@ class CCinematicCamera : public CCamera
 		XMFLOAT3 xmf3Right;
 
 		XMFLOAT3 xmf3Position;
-
 	};
+
+	std::vector<CameraInfo> m_vCameraInfos;
 
 	CameraInfo m_StartCameraInfo;
 	CameraInfo m_EndCameraInfo;
@@ -183,8 +184,8 @@ public:
 	CCinematicCamera();
 	virtual ~CCinematicCamera() { }
 
-	void SetStartCamera(CCamera* pCamera);
-	void SetEndCamera(CCamera* pCamera);
+	void AddCameraInfo(CCamera* pCamera);
+	void ClearCameraInfo();
 	void PlayCinematicCamera();
 
 	void InitToPlayerCameraPos(CGameObject* pPlayer);
