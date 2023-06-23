@@ -347,9 +347,34 @@ sql::ResultSet* SearchDataFromQuery(SearchData& searchData, int currentPage)
 	sql::ResultSet* result;
 	sql::PreparedStatement* PreStatement;
 
-
+	std::string orderByOperate = "Record_ID";
+	switch (searchData.GetSortBy())
+	{
+	case SORT_BY::DATE:
+		orderByOperate = "Last_Upload_Date";
+		break;
+	case SORT_BY::LIKED:
+		orderByOperate = "nlike";
+		break;
+	case SORT_BY::DOWNLOAD:
+		orderByOperate = "Download_Num";
+		break;
+	default:
+		break;
+	}
+	switch (searchData.GetSortinMethod())
+	{
+	case SEARCH_METHOD::ASCENDING:
+		orderByOperate += " ASC";
+		break;
+	case SEARCH_METHOD::DESCENDING:
+		orderByOperate += " DESC";
+		break;
+	default:
+		break;
+	}
 	std::string query;
-	query = SELECT + " " + "*" + " " + FROM + " " + "record" + " " + ORDERBY + " " + "Record_ID" + " limit " + std::to_string(currentPage) + ", 20;";
+	query = SELECT + " " + "*" + " " + FROM + " " + "record" + " " + ORDERBY + " " + orderByOperate + " limit " + std::to_string(currentPage) + ", 20;";
 	//query = SELECT + " " + "Record_ID, Last_Upload_Date, Download_Num, Like, Hate, Record_Title" + " " + FROM + " " + "record" + " " + ORDERBY + " " + "Record_ID";
 	PreStatement = connection->prepareStatement(query.c_str());
 	result = PreStatement->executeQuery();

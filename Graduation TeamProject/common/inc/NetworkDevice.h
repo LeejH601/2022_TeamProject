@@ -88,6 +88,7 @@ enum class SORT_BY {
 	LIKED,
 	DISLIKE,
 	DOWNLOAD,
+	RECORDID,
 };
 
 enum class eSERVICE_TYPE {
@@ -168,7 +169,7 @@ public:
 	bool SendServiceType(eSERVICE_TYPE& serviceType);
 	bool UploadWorkShop(UploadData& uploadData);
 	bool RecvUploadData(UploadData& uploadData);
-	bool RequestDataTable();
+	bool RequestDataTable(SORT_BY sortBy = SORT_BY::RECORDID, SEARCH_METHOD searchMethod = SEARCH_METHOD::ASCENDING);
 	bool ReturnDataTable(std::vector<WorkShop_Record>& records);
 	bool ReceiveRequest(SearchData& searchData);
 	bool RecvDataTable(std::vector<WorkShop_Record>& records);

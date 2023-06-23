@@ -248,10 +248,10 @@ bool CNetworkDevice::RecvUploadData(UploadData& uploadData)
 	return true;
 }
 
-bool CNetworkDevice::RequestDataTable()
+bool CNetworkDevice::RequestDataTable(SORT_BY sortBy, SEARCH_METHOD searchMethod)
 {
 	SearchDataBuilder builder(std::string("TestSearchData"));
-	builder.SetSortingMethod(SEARCH_METHOD(1)).SetSortBy(SORT_BY(3));
+	builder.SetSortingMethod(searchMethod).SetSortBy(sortBy);
 	SearchData searchData = builder.Build();
 
 	int retval;
