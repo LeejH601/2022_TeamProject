@@ -460,14 +460,28 @@ XMFLOAT3 InterpolateXMFLOAT3(XMFLOAT3 xmf3Origin, XMFLOAT3 xmf3Target, float t)
 
 void CCinematicCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
 {
-	if (m_vCameraInfos.size() < 2)
+	if (m_vCameraInfos.size() < 2 || m_vCameraInfos.size() - 1 < m_iCurrentCameraInfoIndex)
 		return;
 
+	// 최대 가속도 설정
 	float fSpeedUperS = MeterToUnit(10.0f);
 	float fMaxAccel = fSpeedUperS;
 
-	float fLeftDistance = Vector3::Length(Vector3::Subtract(m_vCameraInfos[1].xmf3Position, m_xmf3Position));
-	float fLeftDistanceRatio = fLeftDistance / m_fTotalDistance;
+	// 지금까지 온 거리 계산
+	float fTotalDistance = 0.0f;
+
+	for (int i = 0; i < static_cast<int>(m_fTotalParamT); ++i)
+	{
+		XMFLOAT3 fToNextCameraVec = Vector3::Subtract(m_vCameraInfos[i + 1].xmf3Position, m_vCameraInfos[i].xmf3Position);
+		fTotalDistance += Vector3::Length(fToNextCameraVec);
+	}
+	
+	XMFLOAT3 fLeftDistanceVec = Vector3::Subtract(m_vCameraInfos[m_iCurrentCameraInfoIndex + 1].xmf3Position, m_xmf3Position);
+	float fLeftDistance = Vector3::Length(fLeftDistanceVec);
+
+	fTotalDistance += fLeftDistance;
+
+	float fLeftDistanceRatio = fTotalDistance / m_fTotalDistance;
 
 	float fMultiPlyRatio = cos((1.0f - fLeftDistanceRatio) * 3.141582f);
 	float fCurAccel = fMultiPlyRatio * fMaxAccel;
@@ -477,15 +491,37 @@ void CCinematicCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
 
 	float fCurrentDistance = m_fCurrentSpeed * fTimeElapsed;
 
+	XMFLOAT3 fToNextCameraVec = Vector3::Subtract(m_vCameraInfos[m_iCurrentCameraInfoIndex + 1].xmf3Position, m_vCameraInfos[m_iCurrentCameraInfoIndex].xmf3Position);
+	float fCurTotalDistance = Vector3::Length(fToNextCameraVec);
+
 	// Convert Distance to param(t)
-	float t = fCurrentDistance / m_fTotalDistance;
+	float t = fCurrentDistance / fCurTotalDistance;
+
+	int prevParamTUnit = static_cast<int>(floorf(m_fTotalParamT));
 
 	m_fTotalParamT += t;
 
-	m_fTotalParamT = min(m_fTotalParamT, 1.0f);
+	int curParamTUnit = static_cast<int>(floorf(m_fTotalParamT));
+	if (curParamTUnit != prevParamTUnit)
+	{
+		float fParamT = m_fTotalParamT - static_cast<float>(curParamTUnit);
+		float fExceededLength = fParamT * fCurTotalDistance;
 
-	m_xmf3Look = InterpolateXMFLOAT3(m_vCameraInfos[0].xmf3Look, m_vCameraInfos[1].xmf3Look, m_fTotalParamT);
-	m_xmf3Up = InterpolateXMFLOAT3(m_vCameraInfos[0].xmf3Up, m_vCameraInfos[1].xmf3Up, m_fTotalParamT);
-	m_xmf3Right = InterpolateXMFLOAT3(m_vCameraInfos[0].xmf3Right, m_vCameraInfos[1].xmf3Right, m_fTotalParamT);
-	SetPosition(InterpolateXMFLOAT3(m_vCameraInfos[0].xmf3Position, m_vCameraInfos[1].xmf3Position, m_fTotalParamT));
+		m_iCurrentCameraInfoIndex += 1;
+		m_fTotalParamT = static_cast<float>(curParamTUnit);
+
+		XMFLOAT3 fNewToNextCameraVec = Vector3::Subtract(m_vCameraInfos[m_iCurrentCameraInfoIndex + 1].xmf3Position, m_vCameraInfos[m_iCurrentCameraInfoIndex].xmf3Position);
+		float fNewCurTotalDistance = Vector3::Length(fToNextCameraVec);
+		float newT = fExceededLength / fNewCurTotalDistance;
+
+		m_fTotalParamT += t;
+	}
+
+	float div = 0.0f;
+	float resultT = modff(m_fTotalParamT, &div);
+
+	m_xmf3Look = InterpolateXMFLOAT3(m_vCameraInfos[m_iCurrentCameraInfoIndex].xmf3Look, m_vCameraInfos[m_iCurrentCameraInfoIndex + 1].xmf3Look, resultT);
+	m_xmf3Up = InterpolateXMFLOAT3(m_vCameraInfos[m_iCurrentCameraInfoIndex].xmf3Up, m_vCameraInfos[m_iCurrentCameraInfoIndex + 1].xmf3Up, resultT);
+	m_xmf3Right = InterpolateXMFLOAT3(m_vCameraInfos[m_iCurrentCameraInfoIndex].xmf3Right, m_vCameraInfos[m_iCurrentCameraInfoIndex + 1].xmf3Right, resultT);
+	SetPosition(InterpolateXMFLOAT3(m_vCameraInfos[m_iCurrentCameraInfoIndex].xmf3Position, m_vCameraInfos[m_iCurrentCameraInfoIndex + 1].xmf3Position, resultT));
 }
