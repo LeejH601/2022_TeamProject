@@ -83,12 +83,12 @@ enum class SEARCH_METHOD {
 };
 
 enum class SORT_BY {
+	RECORDID,
 	DATE,
-	STAR,
 	LIKED,
+	STAR,
 	DISLIKE,
 	DOWNLOAD,
-	RECORDID,
 };
 
 enum class eSERVICE_TYPE {

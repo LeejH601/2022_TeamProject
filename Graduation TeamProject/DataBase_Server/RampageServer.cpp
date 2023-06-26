@@ -219,6 +219,7 @@ DWORD WINAPI ProcessClient(LPVOID arg)
 				record.nLike = result->getInt("nlike");
 				record.nHate = result->getInt("Hate");
 				records.push_back(record);
+				//std::cout << record.RecordID << " " << record.RecordTitle << " " << record.LastUploadDate << " " << record.nLike << " " << record.nHate << " " << record.DownloadNum << std::endl;
 			}
 			if (result)
 				delete result;
@@ -374,21 +375,23 @@ sql::ResultSet* SearchDataFromQuery(SearchData& searchData, int currentPage)
 		break;
 	}
 	std::string query;
-	query = SELECT + " " + "*" + " " + FROM + " " + "record" + " " + ORDERBY + " " + orderByOperate + " limit " + std::to_string(currentPage) + ", 20;";
+	query = SELECT + " " + "*" + " " + FROM + " " + "record" + " " + ORDERBY + " " + orderByOperate + " LIMIT " + std::to_string(currentPage) + ", 20;";
+	//query = SELECT + " " + "*" + " " + FROM + " " + "record" + " " + ORDERBY + " " + orderByOperate + "; ";
 	//query = SELECT + " " + "Record_ID, Last_Upload_Date, Download_Num, Like, Hate, Record_Title" + " " + FROM + " " + "record" + " " + ORDERBY + " " + "Record_ID";
 	PreStatement = connection->prepareStatement(query.c_str());
 	result = PreStatement->executeQuery();
+	/*sql::ResultSet* Test = result;
 
-	/*while (result->next())
+	while (Test->next())
 	{
-		int WID = result->getInt("WID");
-		sql::SQLString WName_SQL = result->getString("WName");
-		std::string WName = result->getString("WName").c_str();
-		int WGrade = result->getInt("WGrade");
-		int Atk = result->getInt("Atk");
-		int Sharpness = result->getInt("Sharpness");
-		int Critical = result->getInt("Critical");
-		std::string Type = result->getString("Type");
+		int WID = Test->getInt("WID");
+		sql::SQLString WName_SQL = Test->getString("WName");
+		std::string WName = Test->getString("WName").c_str();
+		int WGrade = Test->getInt("WGrade");
+		int Atk = Test->getInt("Atk");
+		int Sharpness = Test->getInt("Sharpness");
+		int Critical = Test->getInt("Critical");
+		std::string Type = Test->getString("Type");
 		std::cout << WID << " " << WName << " " << WGrade << " " << Atk << " " << Sharpness << " " << Critical << " " << Type << std::endl;
 	}*/
 

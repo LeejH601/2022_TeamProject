@@ -18,7 +18,11 @@ public:
 	void LoadComponentSet(FILE* pInFile, CState<CPlayer>* pState);
 };
 
-
+class SortOrder {
+public:
+	SORT_BY sort_By;
+	SEARCH_METHOD search_Method;
+};
 
 enum class eSERVICE_TYPE;
 class CNetworkDevice;

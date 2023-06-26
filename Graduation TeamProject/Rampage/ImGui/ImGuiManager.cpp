@@ -2459,79 +2459,57 @@ void CImGuiManager::ShowCreationMenu()
 		}
 
 		static int selectedAllignStyle = 0;
+		static int selectedSortStyle = 0;
 		static int selectedPageNum = 0;
 		static bool upperBound = false;
 
+		static SortOrder sortOrder;
+
 		// 기준에 따라 정렬
-		/*switch (selectedAllignStyle)
-		{
-		case 0:
-			std::sort(vCreationItems.begin(), vCreationItems.end(), [](const CreationItem& A, const CreationItem& B)
-				{
-					return A.id < B.id;
-				}
-			);
-			break;
-		case 1:
-			std::sort(vCreationItems.begin(), vCreationItems.end(), [](const CreationItem& A, const CreationItem& B)
-				{
-					return A.id > B.id;
-				}
-			);
-			break;
-		case 2:
-			std::sort(vCreationItems.begin(), vCreationItems.end(), [](const CreationItem& A, const CreationItem& B)
-				{
-					return A.name < B.name;
-				}
-			);
-			break;
-		case 3:
-			std::sort(vCreationItems.begin(), vCreationItems.end(), [](const CreationItem& A, const CreationItem& B)
-				{
-					return A.name > B.name;
-				}
-			);
-			break;
-		case 4:
-			std::sort(vCreationItems.begin(), vCreationItems.end(), [](const CreationItem& A, const CreationItem& B)
-				{
-					return A.nGoodSign < B.nGoodSign;
-				}
-			);
-			break;
-		case 5:
-			std::sort(vCreationItems.begin(), vCreationItems.end(), [](const CreationItem& A, const CreationItem& B)
-				{
-					return A.nGoodSign > B.nGoodSign;
-				}
-			);
-			break;
-		case 6:
-			std::sort(vCreationItems.begin(), vCreationItems.end(), [](const CreationItem& A, const CreationItem& B)
-				{
-					return A.nBadSign < B.nBadSign;
-				}
-			);
-			break;
-		case 7:
-			std::sort(vCreationItems.begin(), vCreationItems.end(), [](const CreationItem& A, const CreationItem& B)
-				{
-					return A.nBadSign > B.nBadSign;
-				}
-			);
-			break;
-		}*/
+		
+
+		
 
 		ImGui::Text(U8STR("정렬기준: ")); ImGui::SameLine();
 
-		const char* allignStyle[] = { U8STR("ID(오름차순)"), U8STR("ID(내림차순)"),
-			U8STR("이름(오름차순)"),  U8STR("이름(내림차순)"),
-			U8STR("좋아요(오름차순)"), U8STR("좋아요(내림차순)"),
-			U8STR("싫어요(오름차순)"), U8STR("싫어요(내림차순)") };
+		const char* allignStyle[] = { U8STR("ID"),
+			U8STR("날짜"),  U8STR("좋아요") };
+		const char* SortStyle[] = { U8STR("오름차순"), U8STR("내림차순") };
 		ImGui::SetNextItemWidth(-FLT_MIN);
 
-		ImGui::Combo(U8STR("##allignStyle"), &selectedAllignStyle, allignStyle, IM_ARRAYSIZE(allignStyle));
+		if (ImGui::Combo(U8STR("##allignStyle"), &selectedAllignStyle, allignStyle, IM_ARRAYSIZE(allignStyle))) {
+			switch (selectedAllignStyle)
+			{
+			case 0:
+				sortOrder.sort_By = SORT_BY::RECORDID;
+				break;
+			case 1:
+				sortOrder.sort_By = SORT_BY::DATE;
+				break;
+			case 2:
+				sortOrder.sort_By = SORT_BY::LIKED;
+				break;
+			default:
+				break;
+			}
+			ProcessWorkshop(eSERVICE_TYPE::UPDATE_TABLE, (void*)&sortOrder);
+			UpdateTable();
+		}
+		if (ImGui::Combo(U8STR("##SortStyle"), &selectedSortStyle, SortStyle, IM_ARRAYSIZE(SortStyle))) {
+			switch (selectedSortStyle)
+			{
+			case 0:
+				sortOrder.search_Method = SEARCH_METHOD::ASCENDING;
+				break;
+			case 1:
+				sortOrder.search_Method = SEARCH_METHOD::DESCENDING;
+				break;
+			default:
+				break;
+			}
+			ProcessWorkshop(eSERVICE_TYPE::UPDATE_TABLE, (void*)&sortOrder);
+			UpdateTable();
+		}
 
 		// Sample 1
 		ImGui::Columns(8, "Creation Column", false);
@@ -2581,11 +2559,11 @@ void CImGuiManager::ShowCreationMenu()
 		style.Colors[ImGuiCol_Button] = ImVec4(0, 0, 0, 0);
 
 		if (ImGui::Button("Prev")) {
-			ProcessWorkshop(eSERVICE_TYPE::PREV_TABLE);
+			ProcessWorkshop(eSERVICE_TYPE::PREV_TABLE, (void*)&sortOrder);
 			UpdateTable();
 		}; ImGui::SameLine();
 		if (ImGui::Button("Next")) {
-			ProcessWorkshop(eSERVICE_TYPE::NEXT_TABLE);
+			ProcessWorkshop(eSERVICE_TYPE::NEXT_TABLE, (void*)&sortOrder);
 			UpdateTable();
 		};
 
@@ -2889,7 +2867,13 @@ void CImGuiManager::ProcessWorkshop(eSERVICE_TYPE serviceType, void* pData)
 	case eSERVICE_TYPE::UPDATE_TABLE:
 		m_pNetworkDevice->SendServiceType(serviceType);
 		records.clear();
-		m_pNetworkDevice->RequestDataTable();
+		if (pData) {
+			SortOrder* sortOrder = (SortOrder*)(pData);
+			m_pNetworkDevice->RequestDataTable(sortOrder->sort_By, sortOrder->search_Method);
+		}
+		else {
+			m_pNetworkDevice->RequestDataTable();
+		}
 		m_pNetworkDevice->RecvDataTable(records);
 		//ShowRecords(records);
 		break;
