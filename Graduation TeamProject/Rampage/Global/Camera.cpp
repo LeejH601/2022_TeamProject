@@ -476,14 +476,14 @@ void CCinematicCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
 		fTotalDistance += Vector3::Length(fToNextCameraVec);
 	}
 	
-	XMFLOAT3 fLeftDistanceVec = Vector3::Subtract(m_vCameraInfos[m_iCurrentCameraInfoIndex + 1].xmf3Position, m_xmf3Position);
-	float fLeftDistance = Vector3::Length(fLeftDistanceVec);
+	XMFLOAT3 fDistanceVec = Vector3::Subtract(m_vCameraInfos[m_iCurrentCameraInfoIndex].xmf3Position, m_xmf3Position);
+	float fDistance = Vector3::Length(fDistanceVec);
 
-	fTotalDistance += fLeftDistance;
+	fTotalDistance += fDistance;
 
 	float fLeftDistanceRatio = fTotalDistance / m_fTotalDistance;
 
-	float fMultiPlyRatio = cos((1.0f - fLeftDistanceRatio) * 3.141582f);
+	float fMultiPlyRatio = cos(fLeftDistanceRatio * 3.141582f);
 	float fCurAccel = fMultiPlyRatio * fMaxAccel;
 
 	m_fCurrentSpeed += fCurAccel * fTimeElapsed;
