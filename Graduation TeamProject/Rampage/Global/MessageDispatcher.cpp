@@ -21,7 +21,10 @@ void CMessageDispatcher::RegisterListener(MessageType messageType, IMessageListe
 void PlayerAttackListener::HandleMessage(const Message& message, const PlayerParams& params)
 {
     if (message.getType() == MessageType::PLAYER_ATTACK) {
-		params.pPlayer->CheckCollision(m_pObject);
+		if (params.pPlayer->CheckCollision(m_pObject))
+		{
+			
+		}
     }
 }
 void SoundPlayComponent::HandleMessage(const Message& message, const SoundPlayParams& params)

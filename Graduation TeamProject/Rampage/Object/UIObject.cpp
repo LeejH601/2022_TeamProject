@@ -82,7 +82,7 @@ void CUIObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, bool b_UseTex
 		// 여기서 메쉬의 렌더를 한다.
 		m_pMesh->OnPreRender(pd3dCommandList);
 
-		pd3dCommandList->RSSetScissorRects(1, &m_tRect[0]);
+		//pd3dCommandList->RSSetScissorRects(1, &m_tRect[0]);
 		m_pMesh->Render(pd3dCommandList, 0);
 	}
 
@@ -197,7 +197,7 @@ void CHPObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, bool b_UseTex
 		m_pMesh->OnPreRender(pd3dCommandList);
 
 		m_tRect[0] = { (LONG)(FRAME_BUFFER_WIDTH * 0.15f), (LONG)(FRAME_BUFFER_HEIGHT * 0.15f) , (LONG)(FRAME_BUFFER_WIDTH * 0.35f) , (LONG)(FRAME_BUFFER_HEIGHT * 0.2f) };
-		pd3dCommandList->RSSetScissorRects(1, &m_tRect[0]);
+		//pd3dCommandList->RSSetScissorRects(1, &m_tRect[0]);
 		m_pMesh->Render(pd3dCommandList, 0);
 	}
 
@@ -348,7 +348,7 @@ void CSTAMINAObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, bool b_U
 		m_pMesh->OnPreRender(pd3dCommandList);
 
 		m_tRect[0] = { (LONG)(FRAME_BUFFER_WIDTH * 0.15f), (LONG)(FRAME_BUFFER_HEIGHT * 0.2f) , (LONG)(FRAME_BUFFER_WIDTH * 0.35f) , (LONG)(FRAME_BUFFER_HEIGHT * 0.35f) };
-		pd3dCommandList->RSSetScissorRects(1, &m_tRect[0]);
+		//pd3dCommandList->RSSetScissorRects(1, &m_tRect[0]);
 		m_pMesh->Render(pd3dCommandList, 0);
 
 	}
@@ -466,7 +466,7 @@ void CNumberObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, bool b_Us
 	if (m_pMesh)
 	{
 		m_tRect[0] = { (LONG)(FRAME_BUFFER_WIDTH * 0.8f), (LONG)(FRAME_BUFFER_HEIGHT * 0.45f) , (LONG)(FRAME_BUFFER_WIDTH * 0.95f) , (LONG)(FRAME_BUFFER_HEIGHT * 0.55f) };
-		pd3dCommandList->RSSetScissorRects(1, &m_tRect[0]);
+		//pd3dCommandList->RSSetScissorRects(1, &m_tRect[0]);
 		// UI Size 정보 Update
 		// 
 		// CGameObject의 정보를 넘길 버퍼가 있고, 해당 버퍼에 대한 CPU 포인터가 있으면 UpdateShaderVariables 함수를 호출한다.
@@ -562,7 +562,7 @@ void CBloodEffectObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, bool
 		m_pMesh->OnPreRender(pd3dCommandList);
 		for (int i = 0; i < m_tRect.size(); i++)
 		{
-			pd3dCommandList->RSSetScissorRects(1, &m_tRect[i]);
+			//pd3dCommandList->RSSetScissorRects(1, &m_tRect[i]);
 			m_pMesh->Render(pd3dCommandList, 0);
 		}
 	}
@@ -628,7 +628,7 @@ void CMonsterHPObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, bool b
 		m_pMesh->OnPreRender(pd3dCommandList);
 
 		m_tRect[0] = { (LONG)(FRAME_BUFFER_WIDTH * 0.0f), (LONG)(FRAME_BUFFER_HEIGHT * 0.f) , (LONG)(FRAME_BUFFER_WIDTH * 1.f) , (LONG)(FRAME_BUFFER_HEIGHT * 1.f) };
-		pd3dCommandList->RSSetScissorRects(1, &m_tRect[0]);
+		//pd3dCommandList->RSSetScissorRects(1, &m_tRect[0]);
 		m_pMesh->Render(pd3dCommandList, 0);
 	}
 

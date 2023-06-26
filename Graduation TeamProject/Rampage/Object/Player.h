@@ -81,7 +81,7 @@ private:
 	CGameObject* pWeaponBoundingBoxMesh;
 	XMFLOAT4 m_xmf4TrailControllPoints[2];
 	XMFLOAT3 m_xmf4PrevTrailVertexPoint;
-
+	bool	m_bMonsterAttack = false;
 public:
 	CKnightPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks);
 	virtual ~CKnightPlayer();
@@ -101,6 +101,8 @@ public:
 	virtual void PrepareBoundingBox(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 
 	virtual XMFLOAT4& GetTrailControllPoint(int n) { return m_xmf4TrailControllPoints[n]; };
+	bool& GetMonsterAttack() {return m_bMonsterAttack;}
+	void SetMonsterAttack(bool bMonsterAttack) { m_bMonsterAttack = bMonsterAttack; };
 };
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

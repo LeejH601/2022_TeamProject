@@ -281,9 +281,12 @@ bool CKnightPlayer::CheckCollision(CGameObject* pTargetObject)
 		_stprintf_s(pstrDebug, 256, _T("CheckCollision\n"));
 		OutputDebugString(pstrDebug);
 
+
+		m_bMonsterAttack = true;
 		m_bCombo = true;
 
 		m_fHP -= 30.f;
+
 		if (m_fHP < 0)
 			m_fHP = 0.f;
 		if (m_pCamera)
