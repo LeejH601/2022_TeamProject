@@ -322,7 +322,7 @@ void CFloatingCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
 {
 	RegenerateViewMatrix();
 
-	TCHAR pstrDebug[256] = { 0 };
+	/*TCHAR pstrDebug[256] = { 0 };
 	_stprintf_s(pstrDebug, 256, _T("Camera Position: %f, %f, %f\n"), m_xmf3Position.x, m_xmf3Position.y, m_xmf3Position.z);
 	OutputDebugString(pstrDebug);
 
@@ -333,7 +333,7 @@ void CFloatingCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
 	OutputDebugString(pstrDebug);
 
 	_stprintf_s(pstrDebug, 256, _T("Camera Right: %f, %f, %f\n"), m_xmf3Right.x, m_xmf3Right.y, m_xmf3Right.z);
-	OutputDebugString(pstrDebug);
+	OutputDebugString(pstrDebug);*/
 }
 
 CSimulatorCamera::CSimulatorCamera() : CCamera()
@@ -458,6 +458,18 @@ XMFLOAT3 InterpolateXMFLOAT3(XMFLOAT3 xmf3Origin, XMFLOAT3 xmf3Target, float t)
 	return xmf3Result;
 }
 
+XMFLOAT3 CatMullXMFLOAT3(XMFLOAT3 xmf3Pos1, XMFLOAT3 xmf3Pos2, XMFLOAT3 xmf3Pos3, XMFLOAT3 xmf3Pos4, float t)
+{
+	std::vector<XMVECTOR> v_Pos{ XMLoadFloat3(&xmf3Pos1), XMLoadFloat3(&xmf3Pos2), XMLoadFloat3(&xmf3Pos3), XMLoadFloat3(&xmf3Pos4) };
+	
+	XMVECTOR resultPos = XMVectorCatmullRom(v_Pos[0], v_Pos[1], v_Pos[2], v_Pos[3], t);
+	
+	XMFLOAT3 xmf3Result;
+	XMStoreFloat3(&xmf3Result, resultPos);
+
+	return xmf3Result;
+}
+
 void CCinematicCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
 {
 	if (m_vCameraInfos.size() < 2 || m_vCameraInfos.size() - 1 < m_iCurrentCameraInfoIndex)
@@ -513,15 +525,66 @@ void CCinematicCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
 		XMFLOAT3 fNewToNextCameraVec = Vector3::Subtract(m_vCameraInfos[m_iCurrentCameraInfoIndex + 1].xmf3Position, m_vCameraInfos[m_iCurrentCameraInfoIndex].xmf3Position);
 		float fNewCurTotalDistance = Vector3::Length(fToNextCameraVec);
 		float newT = fExceededLength / fNewCurTotalDistance;
-
-		m_fTotalParamT += t;
+		
+		m_fTotalParamT += newT;
 	}
 
 	float div = 0.0f;
 	float resultT = modff(m_fTotalParamT, &div);
 
-	m_xmf3Look = InterpolateXMFLOAT3(m_vCameraInfos[m_iCurrentCameraInfoIndex].xmf3Look, m_vCameraInfos[m_iCurrentCameraInfoIndex + 1].xmf3Look, resultT);
+	
+	/*m_xmf3Look = InterpolateXMFLOAT3(m_vCameraInfos[m_iCurrentCameraInfoIndex].xmf3Look, m_vCameraInfos[m_iCurrentCameraInfoIndex + 1].xmf3Look, resultT);
 	m_xmf3Up = InterpolateXMFLOAT3(m_vCameraInfos[m_iCurrentCameraInfoIndex].xmf3Up, m_vCameraInfos[m_iCurrentCameraInfoIndex + 1].xmf3Up, resultT);
-	m_xmf3Right = InterpolateXMFLOAT3(m_vCameraInfos[m_iCurrentCameraInfoIndex].xmf3Right, m_vCameraInfos[m_iCurrentCameraInfoIndex + 1].xmf3Right, resultT);
-	SetPosition(InterpolateXMFLOAT3(m_vCameraInfos[m_iCurrentCameraInfoIndex].xmf3Position, m_vCameraInfos[m_iCurrentCameraInfoIndex + 1].xmf3Position, resultT));
+	m_xmf3Right = InterpolateXMFLOAT3(m_vCameraInfos[m_iCurrentCameraInfoIndex].xmf3Right, m_vCameraInfos[m_iCurrentCameraInfoIndex + 1].xmf3Right, resultT);*/
+	
+	/*SetPosition(InterpolateXMFLOAT3(m_vCameraInfos[m_iCurrentCameraInfoIndex].xmf3Position, m_vCameraInfos[m_iCurrentCameraInfoIndex + 1].xmf3Position, resultT)); */
+	
+	{
+		std::vector<int> xmf3InterpolateIndex;
+		int iIndex = m_iCurrentCameraInfoIndex - 1;
+
+		if (iIndex < 0)
+			iIndex = m_vCameraInfos.size() - 1;
+
+		xmf3InterpolateIndex.push_back(iIndex++);
+
+		if (iIndex == m_vCameraInfos.size())
+			iIndex = 0;
+
+		xmf3InterpolateIndex.push_back(iIndex++);
+
+		if (iIndex == m_vCameraInfos.size())
+			iIndex = 0;
+
+		xmf3InterpolateIndex.push_back(iIndex++);
+
+		if (iIndex == m_vCameraInfos.size())
+			iIndex = 0;
+
+		xmf3InterpolateIndex.push_back(iIndex++);
+
+		m_xmf3Look = CatMullXMFLOAT3(m_vCameraInfos[xmf3InterpolateIndex[0]].xmf3Look,
+			m_vCameraInfos[xmf3InterpolateIndex[1]].xmf3Look,
+			m_vCameraInfos[xmf3InterpolateIndex[2]].xmf3Look,
+			m_vCameraInfos[xmf3InterpolateIndex[3]].xmf3Look,
+			resultT);
+
+		m_xmf3Up = CatMullXMFLOAT3(m_vCameraInfos[xmf3InterpolateIndex[0]].xmf3Up,
+			m_vCameraInfos[xmf3InterpolateIndex[1]].xmf3Up,
+			m_vCameraInfos[xmf3InterpolateIndex[2]].xmf3Up,
+			m_vCameraInfos[xmf3InterpolateIndex[3]].xmf3Up,
+			resultT);
+
+		m_xmf3Right = CatMullXMFLOAT3(m_vCameraInfos[xmf3InterpolateIndex[0]].xmf3Right,
+			m_vCameraInfos[xmf3InterpolateIndex[1]].xmf3Right,
+			m_vCameraInfos[xmf3InterpolateIndex[2]].xmf3Right,
+			m_vCameraInfos[xmf3InterpolateIndex[3]].xmf3Right,
+			resultT);
+
+		SetPosition(CatMullXMFLOAT3(m_vCameraInfos[xmf3InterpolateIndex[0]].xmf3Position,
+			m_vCameraInfos[xmf3InterpolateIndex[1]].xmf3Position,
+			m_vCameraInfos[xmf3InterpolateIndex[2]].xmf3Position,
+			m_vCameraInfos[xmf3InterpolateIndex[3]].xmf3Position,
+			resultT));
+	}
 }
