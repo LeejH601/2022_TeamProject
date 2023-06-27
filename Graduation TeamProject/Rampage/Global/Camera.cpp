@@ -470,13 +470,15 @@ XMFLOAT3 CatMullXMFLOAT3(XMFLOAT3 xmf3Pos1, XMFLOAT3 xmf3Pos2, XMFLOAT3 xmf3Pos3
 	return xmf3Result;
 }
 
+//#define LERP_QUARTARNION
+
 void CCinematicCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
 {
-	if (m_vCameraInfos.size() < 2 || m_vCameraInfos.size() - 1 < m_iCurrentCameraInfoIndex)
+	if (m_vCameraInfos.size() < 2 || m_iCurrentCameraInfoIndex == m_vCameraInfos.size() - 1)
 		return;
 
 	// 최대 가속도 설정
-	float fSpeedUperS = MeterToUnit(10.0f);
+	float fSpeedUperS = MeterToUnit(30.0f);
 	float fMaxAccel = fSpeedUperS;
 
 	// 지금까지 온 거리 계산
@@ -488,7 +490,7 @@ void CCinematicCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
 		fTotalDistance += Vector3::Length(fToNextCameraVec);
 	}
 	
-	XMFLOAT3 fDistanceVec = Vector3::Subtract(m_vCameraInfos[m_iCurrentCameraInfoIndex].xmf3Position, m_xmf3Position);
+	XMFLOAT3 fDistanceVec = Vector3::Subtract(m_xmf3Position, m_vCameraInfos[m_iCurrentCameraInfoIndex].xmf3Position);
 	float fDistance = Vector3::Length(fDistanceVec);
 
 	fTotalDistance += fDistance;
@@ -510,16 +512,27 @@ void CCinematicCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
 	float t = fCurrentDistance / fCurTotalDistance;
 
 	int prevParamTUnit = static_cast<int>(floorf(m_fTotalParamT));
-
 	m_fTotalParamT += t;
 
 	int curParamTUnit = static_cast<int>(floorf(m_fTotalParamT));
+
 	if (curParamTUnit != prevParamTUnit)
 	{
-		float fParamT = m_fTotalParamT - static_cast<float>(curParamTUnit);
-		float fExceededLength = fParamT * fCurTotalDistance;
+		float div = 0.0f;
+		float fParamT = modff(m_fTotalParamT, &div);
 
+		float fExceededLength = fParamT * fCurTotalDistance;
 		m_iCurrentCameraInfoIndex += 1;
+
+		if (m_iCurrentCameraInfoIndex == m_vCameraInfos.size() - 1)
+		{
+			m_xmf3Look = m_vCameraInfos.back().xmf3Look;
+			m_xmf3Up = m_vCameraInfos.back().xmf3Up;
+			m_xmf3Right = m_vCameraInfos.back().xmf3Right;
+			SetPosition(m_vCameraInfos.back().xmf3Position);
+			return;
+		}
+
 		m_fTotalParamT = static_cast<float>(curParamTUnit);
 
 		XMFLOAT3 fNewToNextCameraVec = Vector3::Subtract(m_vCameraInfos[m_iCurrentCameraInfoIndex + 1].xmf3Position, m_vCameraInfos[m_iCurrentCameraInfoIndex].xmf3Position);
@@ -532,13 +545,6 @@ void CCinematicCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
 	float div = 0.0f;
 	float resultT = modff(m_fTotalParamT, &div);
 
-	
-	/*m_xmf3Look = InterpolateXMFLOAT3(m_vCameraInfos[m_iCurrentCameraInfoIndex].xmf3Look, m_vCameraInfos[m_iCurrentCameraInfoIndex + 1].xmf3Look, resultT);
-	m_xmf3Up = InterpolateXMFLOAT3(m_vCameraInfos[m_iCurrentCameraInfoIndex].xmf3Up, m_vCameraInfos[m_iCurrentCameraInfoIndex + 1].xmf3Up, resultT);
-	m_xmf3Right = InterpolateXMFLOAT3(m_vCameraInfos[m_iCurrentCameraInfoIndex].xmf3Right, m_vCameraInfos[m_iCurrentCameraInfoIndex + 1].xmf3Right, resultT);*/
-	
-	/*SetPosition(InterpolateXMFLOAT3(m_vCameraInfos[m_iCurrentCameraInfoIndex].xmf3Position, m_vCameraInfos[m_iCurrentCameraInfoIndex + 1].xmf3Position, resultT)); */
-	
 	{
 		std::vector<int> xmf3InterpolateIndex;
 		int iIndex = m_iCurrentCameraInfoIndex - 1;
@@ -563,18 +569,64 @@ void CCinematicCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
 
 		xmf3InterpolateIndex.push_back(iIndex++);
 
+#ifdef LERP_QUARTARNION
+		XMFLOAT4X4 preInterpolate = { m_vCameraInfos[m_iCurrentCameraInfoIndex].xmf3Right.x,
+		m_vCameraInfos[m_iCurrentCameraInfoIndex].xmf3Right.y,
+		m_vCameraInfos[m_iCurrentCameraInfoIndex].xmf3Right.z,
+		0.0f,
+		m_vCameraInfos[m_iCurrentCameraInfoIndex].xmf3Up.x,
+		m_vCameraInfos[m_iCurrentCameraInfoIndex].xmf3Up.y,
+		m_vCameraInfos[m_iCurrentCameraInfoIndex].xmf3Up.z,
+		0.0f,
+		m_vCameraInfos[m_iCurrentCameraInfoIndex].xmf3Look.x,
+		m_vCameraInfos[m_iCurrentCameraInfoIndex].xmf3Look.y,
+		m_vCameraInfos[m_iCurrentCameraInfoIndex].xmf3Look.z,
+		0.0f,
+		m_vCameraInfos[m_iCurrentCameraInfoIndex].xmf3Position.x,
+		m_vCameraInfos[m_iCurrentCameraInfoIndex].xmf3Position.y,
+		m_vCameraInfos[m_iCurrentCameraInfoIndex].xmf3Position.z,
+		1.0f
+		};
+
+		XMFLOAT4X4 postInterpolate = { m_vCameraInfos[m_iCurrentCameraInfoIndex + 1].xmf3Right.x,
+		m_vCameraInfos[m_iCurrentCameraInfoIndex + 1].xmf3Right.y,
+		m_vCameraInfos[m_iCurrentCameraInfoIndex + 1].xmf3Right.z,
+		0.0f,
+		m_vCameraInfos[m_iCurrentCameraInfoIndex + 1].xmf3Up.x,
+		m_vCameraInfos[m_iCurrentCameraInfoIndex + 1].xmf3Up.y,
+		m_vCameraInfos[m_iCurrentCameraInfoIndex + 1].xmf3Up.z,
+		0.0f,
+		m_vCameraInfos[m_iCurrentCameraInfoIndex + 1].xmf3Look.x,
+		m_vCameraInfos[m_iCurrentCameraInfoIndex + 1].xmf3Look.y,
+		m_vCameraInfos[m_iCurrentCameraInfoIndex + 1].xmf3Look.z,
+		0.0f,
+		m_vCameraInfos[m_iCurrentCameraInfoIndex + 1].xmf3Position.x,
+		m_vCameraInfos[m_iCurrentCameraInfoIndex + 1].xmf3Position.y,
+		m_vCameraInfos[m_iCurrentCameraInfoIndex + 1].xmf3Position.z,
+		1.0f
+		};
+
+		XMFLOAT4X4 resultMatrix = Matrix4x4::Interpolate(preInterpolate, postInterpolate, resultT);
+
+		m_xmf3Look = XMFLOAT3{ resultMatrix._31, resultMatrix._32, resultMatrix._33 };
+		m_xmf3Up = XMFLOAT3{ resultMatrix._21, resultMatrix._22, resultMatrix._23 };
+		m_xmf3Right = XMFLOAT3{ resultMatrix._11, resultMatrix._12, resultMatrix._13 };
+		SetPosition(XMFLOAT3{
+			resultMatrix._41,
+			resultMatrix._42,
+			resultMatrix._43,
+			});
+#else
 		m_xmf3Look = CatMullXMFLOAT3(m_vCameraInfos[xmf3InterpolateIndex[0]].xmf3Look,
 			m_vCameraInfos[xmf3InterpolateIndex[1]].xmf3Look,
 			m_vCameraInfos[xmf3InterpolateIndex[2]].xmf3Look,
 			m_vCameraInfos[xmf3InterpolateIndex[3]].xmf3Look,
 			resultT);
-
 		m_xmf3Up = CatMullXMFLOAT3(m_vCameraInfos[xmf3InterpolateIndex[0]].xmf3Up,
 			m_vCameraInfos[xmf3InterpolateIndex[1]].xmf3Up,
 			m_vCameraInfos[xmf3InterpolateIndex[2]].xmf3Up,
 			m_vCameraInfos[xmf3InterpolateIndex[3]].xmf3Up,
 			resultT);
-
 		m_xmf3Right = CatMullXMFLOAT3(m_vCameraInfos[xmf3InterpolateIndex[0]].xmf3Right,
 			m_vCameraInfos[xmf3InterpolateIndex[1]].xmf3Right,
 			m_vCameraInfos[xmf3InterpolateIndex[2]].xmf3Right,
@@ -586,5 +638,6 @@ void CCinematicCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
 			m_vCameraInfos[xmf3InterpolateIndex[2]].xmf3Position,
 			m_vCameraInfos[xmf3InterpolateIndex[3]].xmf3Position,
 			resultT));
+#endif
 	}
 }
