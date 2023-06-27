@@ -410,21 +410,9 @@ void CNumberObject::UpdateNumberTexture(UINT N, UINT ORDER)
 		m_xmf4x4World._14 = 0.f; // V
 		m_xmf4x4World._24 = 1.f; // V
 
-		float color = 2.8f;
 		m_xmf4x4World._21 = 1.f; // RGBN // 2.8
 		m_xmf4x4World._31 = 1.f;// +(m_iNumber % 10) * 0.1f;
 		m_xmf4x4World._44 = 1.f;// +(m_iNumber % 10) * 0.1f;
-		if ((m_iNumber / 3) % 3 == 0) // 0. 3, 6
-			m_xmf4x4World._21 = color;
-		else if ((m_iNumber / 3) % 3 == 1) // 1, 4, 7 -> 보라색
-		{
-			m_xmf4x4World._44 = color;
-		}
-		else if ((m_iNumber / 3) % 3 == 2) // 2, 5, 8
-		{
-			m_xmf4x4World._21 = color;
-			m_xmf4x4World._44 = color;
-		}
 
 		m_xmf4x4World._23 = m_fAlpha; // ALPHA
 		//1, 023x((정규 좌표) + 1.0)x0.5
@@ -484,6 +472,60 @@ void CNumberObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, bool b_Us
 	if (m_pChild) m_pChild->Render(pd3dCommandList, b_UseTexture, pCamera);
 	if (m_pSibling) m_pSibling->Render(pd3dCommandList, b_UseTexture, pCamera);
 }
+
+CComboNumberObject::CComboNumberObject(int iOffsetTextureIndex, int Number, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fSize) : CNumberObject(iOffsetTextureIndex, Number, pd3dDevice, pd3dCommandList, fSize)
+{
+}
+
+CComboNumberObject::~CComboNumberObject()
+{
+}
+
+void CComboNumberObject::UpdateNumberTexture(UINT N, UINT ORDER)
+{
+	if (m_bEnable) {
+
+		if (m_fAlpha <= 1.5f)
+			m_fAlpha += 0.03f;
+		//m_xmf2ScreenPosition5 = XMFLOAT2()
+		// 화면 크기를 기준으로 Size 설정 최대 크기 (MAX WIDTH: FRAME_BUFFER_WIDTH, MAX_HEIGHT: FRAME_BUFFER_HEIGHT)
+		m_xmf4x4World._11 = ((/*(m_fCurrentHp / m_fTotalHp) * */m_xmf2Size.x) / (FRAME_BUFFER_WIDTH)) * m_fAnimationTime;
+		m_xmf4x4World._22 = (m_xmf2Size.y / (FRAME_BUFFER_HEIGHT)); // *m_fAnimationTime;
+
+		m_xmf4x4World._33 = m_iTextureIndex; // 텍스쳐 인덱스
+
+		m_xmf4x4World._12 = N * 0.1f; // U1
+		m_xmf4x4World._13 = N * 0.1f + 0.1f; // U2
+		m_xmf4x4World._14 = 0.f; // V
+		m_xmf4x4World._24 = 1.f; // V
+
+		float color = 2.8f;
+		m_xmf4x4World._21 = 1.f; // RGBN // 2.8
+		m_xmf4x4World._31 = 1.f;// +(m_iNumber % 10) * 0.1f;
+		m_xmf4x4World._44 = 1.f;// +(m_iNumber % 10) * 0.1f;
+		if ((m_iNumber / 3) % 3 == 0) // 0. 3, 6
+			m_xmf4x4World._21 = color;
+		else if ((m_iNumber / 3) % 3 == 1) // 1, 4, 7 -> 보라색
+		{
+			m_xmf4x4World._44 = color;
+		}
+		else if ((m_iNumber / 3) % 3 == 2) // 2, 5, 8
+		{
+			m_xmf4x4World._21 = color;
+			m_xmf4x4World._44 = color;
+		}
+
+		m_xmf4x4World._23 = m_fAlpha; // ALPHA
+		//1, 023x((정규 좌표) + 1.0)x0.5
+
+		// -1 ~ 1
+		m_xmf4x4World._41 = (m_xmf2ScreenPosition.x / FRAME_BUFFER_WIDTH) + ((m_xmf2Size.x) / (FRAME_BUFFER_WIDTH) * (0.725f - (1.f - m_fAnimationTime)) * ORDER);
+		m_xmf4x4World._42 = (m_xmf2ScreenPosition.y / FRAME_BUFFER_HEIGHT) + (1.f - m_fAnimationTime) * 0.01f;
+		//(m_xmf2ScreenPosition.y * 2.f) / (FRAME_BUFFER_HEIGHT); // -1 ~ 1
+		m_xmf4x4World._43 = 0.f;
+	}
+}
+
 
 CBloodEffectObject::CBloodEffectObject(int iTextureIndex, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fSize) : CUIObject(iTextureIndex, pd3dDevice, pd3dCommandList, fSize)
 {
@@ -691,3 +733,4 @@ void CMonsterHPObject::CurBarUpdate(float fTimeElapsed)
 		m_xmf4x4World._43 = 0.f;
 	}
 }
+

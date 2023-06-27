@@ -86,9 +86,9 @@ class CNumberObject : public CUIObject
 public:
 	CNumberObject(int iOffsetTextureIndex, int Number, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fSize);
 	virtual ~CNumberObject();
-	void UpdateNumber(UINT iNumber);
-	void UpdateNumberTexture(UINT N, UINT ORDER);
-	void UpdateLifeTime();
+	virtual void UpdateNumber(UINT iNumber);
+	virtual void UpdateNumberTexture(UINT N, UINT ORDER);
+	virtual void UpdateLifeTime();
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, bool b_UseTexture, CCamera* pCamera = NULL);
 protected:
 	std::vector<UINT> m_vecNumObject;
@@ -96,6 +96,15 @@ protected:
 	float m_fAnimationTime = 1.f;
 	bool m_bAnimation = false;
 	float m_fAlpha = 0.f;
+};
+
+class CComboNumberObject : public CNumberObject
+{
+public:
+	CComboNumberObject(int iOffsetTextureIndex, int Number, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fSize);
+	virtual ~CComboNumberObject();
+
+	virtual void UpdateNumberTexture(UINT N, UINT ORDER);
 };
 
 class CBloodEffectObject : public CUIObject
