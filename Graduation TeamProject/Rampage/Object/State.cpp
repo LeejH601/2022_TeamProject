@@ -735,6 +735,7 @@ void Run_Player::Execute(CPlayer* player, float fElapsedTime)
 {
 	static int animationList[4] = { 4, 19, 16, 0};
 	static float valuePoint[3] = { 0.0f, 12.22222 ,24.44444444 };
+	static int prevAnimSetLow = 0;
 	XMFLOAT3 xmf3PlayerVel = player->GetVelocity();
 
 	player->Acceleration(fElapsedTime);
@@ -742,6 +743,14 @@ void Run_Player::Execute(CPlayer* player, float fElapsedTime)
 	float value = player->GetCurrSpeed() / valuePoint[2];
 	value = value * 2.0f;
 	int animSetLow = floor(value);
+
+	if (prevAnimSetLow != animSetLow) {
+		float trackZeroPos = player->m_pSkinnedAnimationController->m_pAnimationTracks[1].m_fPosition;
+		player->m_pSkinnedAnimationController->m_pAnimationTracks[0].SetPosition(trackZeroPos);
+	}
+
+	prevAnimSetLow = animSetLow;
+	
 	//animSetLow = min(1, animSetLow);
 
 	player->m_pSkinnedAnimationController->m_pAnimationTracks[0].SetAnimationSet(animationList[animSetLow]);
