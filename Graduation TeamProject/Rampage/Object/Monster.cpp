@@ -3,6 +3,7 @@
 #include "ModelManager.h"
 #include "..\Global\Locator.h"
 #include "..\Shader\BoundingBoxShader.h"
+#include "Texture.h"
 
 CMonster::CMonster()
 {
@@ -47,6 +48,8 @@ CMonster::CMonster()
 	CMessageDispatcher::GetInst()->RegisterListener(MessageType::APPLY_DAMAGE, m_pListeners.back().get(), this);
 }
 
+
+
 CMonster::~CMonster()
 {
 }
@@ -85,6 +88,33 @@ void CMonster::CalculateResultPosition()
 	XMFLOAT3 xmf3ShakeVec = Vector3::ScalarProduct(Vector3::Normalize(GetRight()), m_fShakeDistance, false);
 
 	m_xmf3CalPos = Vector3::Add(m_xmf3Position, xmf3ShakeVec);
+}
+
+void CMonster::ApplyDamage(float Damage, void* pData)
+{
+	m_fHP -= Damage;
+	m_fHP = max(0.0f, m_fHP);
+
+	m_fCurrShield -= 10.0f;
+	m_fCurrShield = max(0.0f, m_fCurrShield);
+}
+
+void CMonster::SetElite(bool flag)
+{
+	if (m_bElite == flag)
+		return;
+	m_bElite = flag;
+	if (m_bElite) {
+		XMFLOAT3 scale = GetScale();
+		SetScale(scale.x * 1.5f, scale.y * 1.5f, scale.z * 1.5f);
+		m_fCurrShield = m_fMaxShield;
+		/*m_fRimLightFactor = 0.8f;
+		m_xmf3RimLightColor = XMFLOAT3(1.0f, 0.05f, 0.0f);*/
+	}
+	else {
+		XMFLOAT3 scale = GetScale();
+		SetScale(scale.x / 1.5f, scale.y / 1.5f, scale.z / 1.5f);
+	}
 }
 
 void CMonster::UpdateMatrix()
@@ -163,8 +193,8 @@ void CMonster::UpdateTransform(XMFLOAT4X4* pxmf4x4Parent)
 	if (pWeapon)
 	{
 #ifdef RENDER_BOUNDING_BOX
-	if (pWeaponBoundingBoxMesh)
-		pWeaponBoundingBoxMesh->SetWorld(pWeapon->GetWorld());
+		if (pWeaponBoundingBoxMesh)
+			pWeaponBoundingBoxMesh->SetWorld(pWeapon->GetWorld());
 #endif 
 		m_WeaponBoundingBox.Transform(m_TransformedWeaponBoundingBox, XMLoadFloat4x4(&pWeapon->GetWorld()));
 	}
@@ -190,16 +220,25 @@ void CMonster::UpdateTransformFromArticulation(XMFLOAT4X4* pxmf4x4Parent, std::v
 	}
 
 	XMFLOAT3 xAxis = XMFLOAT3(1.0f, 0.0f, 0.0f);
-	
+
 	m_BodyBoundingBox.Transform(m_TransformedBodyBoundingBox, XMLoadFloat4x4(&Matrix4x4::Multiply(XMMatrixRotationAxis(XMLoadFloat3(&xAxis), XMConvertToRadians(90.0f)), AritculatCacheMatrixs[0])));
 #ifdef RENDER_BOUNDING_BOX
-	if(pBodyBoundingBoxMesh)
+	if (pBodyBoundingBoxMesh)
 		pBodyBoundingBoxMesh->SetWorld(Matrix4x4::Multiply(XMMatrixRotationAxis(XMLoadFloat3(&xAxis), XMConvertToRadians(90.0f)), AritculatCacheMatrixs[0]));
 
 #endif // RENDER_BOUNDING_BOX
 	if (m_pSibling) m_pSibling->UpdateTransformFromArticulation(pxmf4x4Parent, pArtiLinkNames, AritculatCacheMatrixs, scale);
 	if (m_pChild) m_pChild->UpdateTransformFromArticulation(&m_xmf4x4World, pArtiLinkNames, AritculatCacheMatrixs, scale);
 }
+
+void CMonster::Render(ID3D12GraphicsCommandList* pd3dCommandList, bool b_UseTexture, CCamera* pCamera)
+{
+	m_bRimLightEnable = (m_bElite && GetHasShield()) ? 1 : 0;
+	pd3dCommandList->SetGraphicsRoot32BitConstants(0, 1, &m_bRimLightEnable, 34);
+	UpdateTransform(NULL);
+	CGameObject::Render(pd3dCommandList, b_UseTexture, pCamera);
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 COrcObject::COrcObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks)
@@ -259,7 +298,7 @@ void CGoblinObject::PrepareBoundingBox(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 	pWeapon = CGameObject::FindFrame("SM_Weapon");
 	m_BodyBoundingBox = BoundingOrientedBox{ XMFLOAT3(0.0f, 0.75f, 0.0f), XMFLOAT3(0.3f, 0.55f, 0.3f), XMFLOAT4{0.0f, 0.0f, 0.0f, 1.0f} };
 	m_WeaponBoundingBox = BoundingOrientedBox{ XMFLOAT3(0.0f, 0.0f, 0.22f), XMFLOAT3(0.07f, 0.07f, 0.415f), XMFLOAT4{0.0f, 0.0f, 0.0f, 1.0f} };
-	
+
 #ifdef RENDER_BOUNDING_BOX
 	pBodyBoundingBoxMesh = CBoundingBoxShader::GetInst()->AddBoundingObject(pd3dDevice, pd3dCommandList, this, XMFLOAT3(0.0f, 0.75f, 0.0f), XMFLOAT3(0.3f, 0.55f, 0.3f));
 	pWeaponBoundingBoxMesh = CBoundingBoxShader::GetInst()->AddBoundingObject(pd3dDevice, pd3dCommandList, pWeapon, XMFLOAT3(0.0f, 0.0f, 0.22f), XMFLOAT3(0.07f, 0.07f, 0.415f));

@@ -4,6 +4,8 @@
 #include "..\Shader\Shader.h"
 #include "..\Global\Locator.h"
 
+
+
 void CPhysicsObject::UpdateMatrix()
 {
 	m_xmf4x4Transform._11 = m_xmf3Right.x; m_xmf4x4Transform._12 = m_xmf3Right.y; m_xmf4x4Transform._13 = m_xmf3Right.z;
@@ -219,6 +221,7 @@ void CPhysicsObject::Animate(float fTimeElapsed)
 void CPhysicsObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, bool b_UseTexture, CCamera* pCamera)
 {
 	UpdateTransform(NULL);
+	//UpdateShaderVariables(pd3dCommandList);
 	CGameObject::Render(pd3dCommandList, b_UseTexture, pCamera);
 }
 

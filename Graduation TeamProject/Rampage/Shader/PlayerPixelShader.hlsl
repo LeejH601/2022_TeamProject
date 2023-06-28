@@ -15,6 +15,7 @@ cbuffer cbGameObjectInfo : register(b0)
 	matrix gmtxTexture : packoffset(c4);
 	uint gnTexturesMask : packoffset(c8.x);
 	uint gnInstanceID : packoffset(c8.y);
+	uint gnRimLightEnable : packoffset(c8.z);
 	//float gfDissolveThreshHold : packoffset(c8.y);
 }
 
@@ -68,6 +69,13 @@ struct CB_TOOBJECTSPACE
 cbuffer cbToLightSpace : register(b6)
 {
 	CB_TOOBJECTSPACE gcbToLightSpaces[MAX_LIGHTS];
+};
+
+
+cbuffer VS_CB_RIMLIGHT_INFO : register(b8)
+{
+	float m_gfRimLightFactor;
+	float3 m_gxmf3RimLightColor;
 };
 
 
@@ -140,9 +148,11 @@ PS_MULTIPLE_RENDER_TARGETS_OUTPUT PS_Player(VS_OUTPUT input)
 
 	if (cColor.a > 0.001f) {
 		float3 toCameraVec = normalize(gf3CameraPosition - input.positionW.xyz);
-		float RimLight = smoothstep(1.0f - 0.15f, 1.0f, 1 - max(0, dot(normalize(input.normalW), toCameraVec)));
+		float RimLight = smoothstep(1.0f - 0.9, 1.0f, 1 - max(0, dot(normalize(input.normalW), toCameraVec)));
+		float3 RimLightColor = float3(2.5f,0.0f,0.0f);
+		RimLight *= float(gnRimLightEnable);
 
-		cColor.xyz += RimLight;
+		cColor.xyz += RimLightColor * RimLight;
 
 		output.f4Color = cColor;
 		output.f4PositoinW = float4(input.positionW, 1.0f);

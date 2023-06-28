@@ -106,6 +106,18 @@ public:
 	int GetRow(int iIndex);
 	int GetColumn(int iIndex);
 };
+
+
+struct VS_CB_MATERIAL_INFO
+{
+	XMFLOAT4 m_cAmbient;
+	XMFLOAT4 m_cDiffuse;
+	XMFLOAT4 m_cSpecular;
+	XMFLOAT4 m_cEmissive;
+	float m_fRimLightFactor;
+	XMFLOAT3 m_xmf3RimLightColor;
+};
+
 class CMaterial
 {
 public:
@@ -118,6 +130,7 @@ public:
 	XMFLOAT4 m_xmf4EmissiveColor = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
 	XMFLOAT4 m_xmf4SpecularColor = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
 	XMFLOAT4 m_xmf4AmbientColor = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
+	
 
 	void SetShader(std::shared_ptr<CShader> pShader);
 	void SetMaterialType(UINT nType) { m_nType |= nType; }
@@ -128,6 +141,7 @@ public:
 
 	virtual void ReleaseUploadBuffers();
 public:
+
 	UINT							m_nType = 0x00;
 
 	float							m_fGlossiness = 0.0f;

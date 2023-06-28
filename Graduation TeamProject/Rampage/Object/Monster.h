@@ -39,6 +39,11 @@ public:
 	float m_fDamageDistance;
 	float m_fMaxDamageDistance;
 	float m_fDamageAnimationSpeed;
+	bool m_bElite = false;
+	float m_fCurrShield;
+	float m_fMaxShield = 100.f;
+	float m_fCurrChargeShieldTime = 0.0f;
+	float m_fMaxChargeShieldTime = 3.0f;
 
 	float m_fTotalDamageDistance;
 	float TestDissolvetime = 0.0f;
@@ -56,6 +61,12 @@ public:
 
 	CGameObject* pBodyBoundingBoxMesh;
 	CGameObject* pWeaponBoundingBoxMesh;
+
+	/*float m_fRimLightFactor;
+	XMFLOAT3 m_xmf3RimLightColor;
+
+	ComPtr<ID3D12Resource> m_pd3dcbRimLightInfo = nullptr;
+	VS_CB_RIMLIGHT_INFO* m_pcbMappedRimLightlInfo = nullptr;*/
 public:
 	CMonster();
 	virtual ~CMonster();
@@ -70,6 +81,9 @@ public:
 	void SetWanderVec();
 	void CheckIsPlayerInFrontOfThis(XMFLOAT3 xmf3PlayerPosition);
 	void CalculateResultPosition();
+	void ApplyDamage(float Damage, void* pData = nullptr);
+	void SetElite(bool flag);
+	bool GetHasShield() { return m_fCurrShield > 0.0f; };
 
 	virtual void UpdateMatrix();
 	virtual void SetScale(float x, float y, float z);
@@ -88,6 +102,7 @@ public:
 		return false;
 	}
 	virtual void UpdateTransformFromArticulation(XMFLOAT4X4* pxmf4x4Parent, std::vector<std::string> pArtiLinkNames, std::vector<XMFLOAT4X4>& AritculatCacheMatrixs, float scale = 1.0f);
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, bool b_UseTexture, CCamera* pCamera = NULL);
 };
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -79,7 +79,7 @@ void CMainTMPScene::CreateGraphicsRootSignature(ID3D12Device* pd3dDevice)
 	D3D12_ROOT_PARAMETER pd3dRootParameters[15];
 
 	pd3dRootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
-	pd3dRootParameters[0].Constants.Num32BitValues = 34;
+	pd3dRootParameters[0].Constants.Num32BitValues = 35;
 	pd3dRootParameters[0].Constants.ShaderRegister = 0; //GameObject
 	pd3dRootParameters[0].Constants.RegisterSpace = 0;
 	pd3dRootParameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
@@ -703,10 +703,11 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pMonsterObject->m_fHP = 1000.f;
 	m_pMonsterObject->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
 	m_pMonsterObject->m_pSkinnedAnimationController->m_xmf3RootObjectScale = XMFLOAT3(10.0f, 10.0f, 10.0f);
+	m_pMonsterObject->SetElite(true);
 	m_pMonsterObject->CreateArticulation(1.0f);
 	m_pEnemys.push_back(std::move(m_pMonsterObject));
 
-	for (int i = 0; i < 15; ++i) {
+	for (int i = 0; i < 1; ++i) {
 		m_pMonsterObject = std::make_unique<CGoblinObject>(pd3dDevice, pd3dCommandList, 1);
 		m_pMonsterObject->SetPosition(XMFLOAT3(190, 50, 70));
 		m_pMonsterObject->SetScale(2.0f, 2.0f, 2.0f);
@@ -724,6 +725,7 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 		m_pMonsterObject->m_fHP = 100;
 		m_pMonsterObject->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
 		m_pMonsterObject->m_pSkinnedAnimationController->m_xmf3RootObjectScale = XMFLOAT3(10.0f, 10.0f, 10.0f);
+		m_pMonsterObject->SetElite(true);
 		m_pMonsterObject->CreateArticulation(1.0f);
 		m_pEnemys.push_back(std::move(m_pMonsterObject));
 

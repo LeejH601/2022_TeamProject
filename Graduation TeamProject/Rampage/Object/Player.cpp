@@ -34,6 +34,7 @@ CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 
 	m_fTotalStamina = 100.f;
 	m_fStamina = 100.f;
+
 }
 
 CPlayer::~CPlayer()
@@ -278,6 +279,8 @@ CKnightPlayer::CKnightPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 		m_pSkinnedAnimationController->m_bRootMotion = true;
 	}
 #endif // KNIGHT_ROOT_MOTION
+	//CreateShaderVariables(pd3dDevice, pd3dCommandList);
+
 }
 CKnightPlayer::~CKnightPlayer()
 {

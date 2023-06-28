@@ -118,7 +118,7 @@ void Damaged_Monster::Enter(CMonster* monster)
 {
 	if (monster->m_pStateMachine->GetPreviousState() != Stun_Monster::GetInst())
 	{
-		monster->m_fHP -= 30.0f; // 몬스터 체력 고정 감소
+		//monster->m_fHP -= 30.0f; // 몬스터 체력 고정 감소 // DamageLisnter로 이동
 
 		monster->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 4);
 		monster->m_pSkinnedAnimationController->m_fTime = 0.0f;
@@ -468,9 +468,18 @@ void Global_Monster::Enter(CMonster* monster)
 
 void Global_Monster::Execute(CMonster* monster, float fElapsedTime)
 {
-	if (monster->m_fHP < 0.0f) {
+	if (monster->m_fHP <= 0.0f) {
 		if(monster->m_pStateMachine->GetCurrentState() != Dead_Monster::GetInst())
 			monster->m_pStateMachine->ChangeState(Dead_Monster::GetInst());
+	}
+	else {
+		if (monster->m_bElite && monster->m_fCurrShield <= 0.0f) {
+			monster->m_fCurrChargeShieldTime += fElapsedTime;
+			if (monster->m_fCurrChargeShieldTime > monster->m_fMaxChargeShieldTime) {
+				monster->m_fCurrChargeShieldTime = 0.0f;
+				monster->m_fCurrShield = monster->m_fMaxShield;
+			}
+		}
 	}
 }
 

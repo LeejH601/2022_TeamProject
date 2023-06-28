@@ -103,6 +103,7 @@ void CMap::LoadSceneFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 
 				int nSkinnedMeshes;
 				std::unique_ptr<CMapObject> pMapObject = std::make_unique<CMapObject>();
+				pMapObject->CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
 				pMapObject->LoadObject(pd3dDevice, pd3dCommandList, objFile);
 

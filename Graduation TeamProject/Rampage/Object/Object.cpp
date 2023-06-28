@@ -38,6 +38,15 @@ void CGameObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandLi
 	XMFLOAT4X4 xmf4x4World;
 	XMStoreFloat4x4(&xmf4x4World, XMMatrixTranspose(XMLoadFloat4x4(&m_xmf4x4World)));
 	pd3dCommandList->SetGraphicsRoot32BitConstants(0, 16, &xmf4x4World, 0);
+	//pd3dCommandList->SetGraphicsRoot32BitConstants(0, 1, &m_bRimLightEnable, 34);
+	
+	/*if (m_pcbMappedRimLightlInfo) {
+		m_pcbMappedRimLightlInfo->m_fRimLightFactor = m_fRimLightFactor;
+		m_pcbMappedRimLightlInfo->m_xmf3RimLightColor = m_xmf3RimLightColor;
+
+		D3D12_GPU_VIRTUAL_ADDRESS d3dGpuVirtualAddress = m_pd3dcbRimLightInfo->GetGPUVirtualAddress();
+		pd3dCommandList->SetGraphicsRootConstantBufferView(14, d3dGpuVirtualAddress);
+	}*/
 }
 void CGameObject::ReleaseUploadBuffers()
 {
@@ -289,6 +298,16 @@ CGameObject* CGameObject::FindFrame(const char* pstrFrameName)
 
 	return(NULL);
 }
+void CGameObject::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	/*m_fRimLightFactor = 0.15f;
+	m_xmf3RimLightColor = XMFLOAT3(1.0f, 1.0f, 1.0f);*/
+
+	//UINT ncbElementBytes = ((sizeof(VS_CB_RIMLIGHT_INFO) + 255) & ~255); //256ÀÇ ¹è¼ö
+	//m_pd3dcbRimLightInfo = ::CreateBufferResource(pd3dDevice, pd3dCommandList, m_pcbMappedRimLightlInfo, ncbElementBytes, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
+
+	//m_pd3dcbRimLightInfo->Map(0, NULL, (void**)&m_pcbMappedRimLightlInfo);
+}
 void CGameObject::LoadFrameHierarchyFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CGameObject* pParent, FILE* pInFile, int* pnSkinnedMeshes)
 {
 	char pstrToken[64] = { '\0' };
@@ -401,7 +420,7 @@ void CGameObject::LoadMaterialsFromFile(ID3D12Device* pd3dDevice, ID3D12Graphics
 
 		if (!strcmp(pstrToken, "<Material>:"))
 		{
-			
+
 			/*if (TextureLoadCnt < 3) {
 				for(int i =0;i< 3 - TextureLoadCnt;++i)
 					CModelShader::GetInst()->DescriptorHandleMoveNext();
@@ -464,7 +483,7 @@ void CGameObject::LoadMaterialsFromFile(ID3D12Device* pd3dDevice, ID3D12Graphics
 		{
 			if (pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, pParent, pInFile, CModelShader::GetInst(), 2)) {
 				pMaterial->SetMaterialType(MATERIAL_NORMAL_MAP);
-				
+
 			}
 			else {
 				CModelShader::GetInst()->DescriptorHandleMoveNext();
@@ -719,37 +738,37 @@ BoundingOrientedBox CMapObject::CreateAAMBB()
 		break;
 	case MAP_OBJ_TYPE::TREE:
 	case MAP_OBJ_TYPE::PROP:
+	{
+		BoundingOrientedBox tmpbox;
+		XMFLOAT3 minCoord = minCoord = { FLT_MAX, FLT_MAX, FLT_MAX };
+		XMFLOAT3 maxCoord = maxCoord = { FLT_MIN, FLT_MIN, FLT_MIN };
+
+		float centerY = m_pMesh->GetBoundingCenter().y;
+
+		for (auto& pos : m_pMesh->GetVertexs())
 		{
-			BoundingOrientedBox tmpbox;
-			XMFLOAT3 minCoord = minCoord = { FLT_MAX, FLT_MAX, FLT_MAX };
-			XMFLOAT3 maxCoord = maxCoord = { FLT_MIN, FLT_MIN, FLT_MIN };
-
-			float centerY = m_pMesh->GetBoundingCenter().y;
-
-			for (auto& pos : m_pMesh->GetVertexs())
+			if (pos.y < centerY * 0.7f)
 			{
-				if (pos.y < centerY * 0.7f)
-				{
-					minCoord.x = min(minCoord.x, pos.x);
-					minCoord.y = min(minCoord.y, pos.y);
-					minCoord.z = min(minCoord.z, pos.z);
+				minCoord.x = min(minCoord.x, pos.x);
+				minCoord.y = min(minCoord.y, pos.y);
+				minCoord.z = min(minCoord.z, pos.z);
 
-					maxCoord.x = max(maxCoord.x, pos.x);
-					maxCoord.y = max(maxCoord.y, pos.y);
-					maxCoord.z = max(maxCoord.z, pos.z);
-				}
+				maxCoord.x = max(maxCoord.x, pos.x);
+				maxCoord.y = max(maxCoord.y, pos.y);
+				maxCoord.z = max(maxCoord.z, pos.z);
 			}
-
-			tmpbox.Extents = XMFLOAT3{ (maxCoord.x - minCoord.x) * 0.5f, (maxCoord.y - minCoord.y) * 0.5f, (maxCoord.z - minCoord.z) * 0.5f };
-			tmpbox.Center = XMFLOAT3{ minCoord.x + tmpbox.Extents.x, minCoord.y + tmpbox.Extents.y, minCoord.z + tmpbox.Extents.z };
-
-			bbox.Center = XMFLOAT3{ tmpbox.Center.x, m_pMesh->GetBoundingCenter().y, tmpbox.Center.z };
-			bbox.Extents = XMFLOAT3{ tmpbox.Extents.x , m_pMesh->GetBoundingExtent().y, tmpbox.Extents.z };
 		}
-		break;
+
+		tmpbox.Extents = XMFLOAT3{ (maxCoord.x - minCoord.x) * 0.5f, (maxCoord.y - minCoord.y) * 0.5f, (maxCoord.z - minCoord.z) * 0.5f };
+		tmpbox.Center = XMFLOAT3{ minCoord.x + tmpbox.Extents.x, minCoord.y + tmpbox.Extents.y, minCoord.z + tmpbox.Extents.z };
+
+		bbox.Center = XMFLOAT3{ tmpbox.Center.x, m_pMesh->GetBoundingCenter().y, tmpbox.Center.z };
+		bbox.Extents = XMFLOAT3{ tmpbox.Extents.x , m_pMesh->GetBoundingExtent().y, tmpbox.Extents.z };
+	}
+	break;
 	}
 
-	
+
 	return bbox;
 }
 

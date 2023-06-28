@@ -14,6 +14,13 @@
 #define MATERIAL_DETAIL_ALBEDO_MAP	0x20
 #define MATERIAL_DETAIL_NORMAL_MAP	0x40
 
+struct VS_CB_RIMLIGHT_INFO
+{
+	float m_fRimLightFactor;
+	XMFLOAT3 m_xmf3RimLightColor;
+};
+
+
 struct MATERIAL
 {
 	XMFLOAT4 m_cAmbient;
@@ -81,8 +88,17 @@ public:
 	float m_fDissolveTime;
 	float m_fMaxDissolveTime;
 
+	UINT m_bRimLightEnable = 0;
+
 	int m_iTextureIndex = 0; // BillBoard, Particle »ç¿ëÁß
 	std::vector<std::unique_ptr<IMessageListener>> m_pListeners;
+protected:
+	/*float m_fRimLightFactor;
+	XMFLOAT3 m_xmf3RimLightColor;
+
+	ComPtr<ID3D12Resource> m_pd3dcbRimLightInfo = nullptr;
+	VS_CB_RIMLIGHT_INFO* m_pcbMappedRimLightlInfo = nullptr;*/
+
 public:
 	std::unique_ptr<CAnimationController> m_pSkinnedAnimationController;
 
@@ -135,7 +151,7 @@ public:
 	virtual void UpdateTransformFromArticulation(XMFLOAT4X4* pxmf4x4Parent, std::vector<std::string> pArtiLinkNames, std::vector<XMFLOAT4X4>& AritculatCacheMatrixs, float scale = 1.0f);
 	void PrintFrameInfo(CGameObject* pGameObject, CGameObject* pParent);
 	CGameObject* FindFrame(const char* pstrFrameName);
-	virtual void CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList) {}
+	virtual void CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	virtual void ReleaseShaderVariables();
 	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList);
 	virtual void ReleaseUploadBuffers();
@@ -177,6 +193,7 @@ private:
 	BoundingOrientedBox m_TransformedObjectBoundingBox = BoundingOrientedBox{ XMFLOAT3{0.0f, 0.0f, 0.0f}, XMFLOAT3{0.0f, 0.0f, 0.0f}, XMFLOAT4{0.0f, 0.0f, 0.0f, 1.0f} };
 
 	CGameObject* pBoundingBoxMesh;
+
 public:
 	CMapObject() { }
 	virtual ~CMapObject() { }

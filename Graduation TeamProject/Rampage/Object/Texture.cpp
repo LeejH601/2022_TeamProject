@@ -420,6 +420,7 @@ D3D12_UNORDERED_ACCESS_VIEW_DESC CTexture::GetUnorderedAccessViewDesc(int nIndex
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 CMaterial::CMaterial()
 {
+	
 }
 CMaterial::~CMaterial()
 {
@@ -441,6 +442,7 @@ void CMaterial::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList
 	if (m_pTexture) m_pTexture->UpdateShaderVariables(pd3dCommandList);
 	pd3dCommandList->SetGraphicsRoot32BitConstants(0, 1, &m_nType, 32);
 }
+
 void CMaterial::ReleaseShaderVariables()
 {
 	if (m_pTexture) m_pTexture->ReleaseShaderVariables();

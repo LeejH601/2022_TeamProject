@@ -1,6 +1,7 @@
 #pragma once
 #include "Object.h"
 
+
 class CPhysicsObject : public CGameObject
 {
 private:
@@ -24,6 +25,8 @@ protected:
 	float m_fAccelerationUperS;
 	LPVOID m_pUpdatedContext = NULL;
 	bool m_bOnGround = false; // ¶¥¿¡ ´êÀºÁö ¿©ºÎ
+
+
 
 public:
 	float m_fTotalHP;

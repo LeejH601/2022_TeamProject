@@ -524,8 +524,20 @@ void DamageListener::HandleMessage(const Message& message, const DamageParams& p
 		OutputDebugString(L"\n");*/
 
 		pMonster->m_fMaxShakeDistance = pShakeAnimationComponent->GetDistance();
-		pMonster->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
-		pMonster->m_pStateMachine->ChangeState(Damaged_Monster::GetInst());
+
+		if (pMonster->m_bElite) {
+			pMonster->ApplyDamage(30.0f);
+			if (!pMonster->GetHasShield()) {
+				pMonster->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
+				pMonster->m_pStateMachine->ChangeState(Damaged_Monster::GetInst());
+			}
+		}
+		else {
+			pMonster->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
+			pMonster->ApplyDamage(30.0f);
+			pMonster->m_pStateMachine->ChangeState(Damaged_Monster::GetInst());
+		}
+		
 		pMonster->m_iPlayerAtkId = pPlayer->GetAtkId();
 	}
 
