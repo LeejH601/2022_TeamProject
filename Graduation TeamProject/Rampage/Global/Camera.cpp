@@ -322,7 +322,7 @@ void CFloatingCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
 {
 	RegenerateViewMatrix();
 
-	/*TCHAR pstrDebug[256] = { 0 };
+	TCHAR pstrDebug[256] = { 0 };
 	_stprintf_s(pstrDebug, 256, _T("Camera Position: %f, %f, %f\n"), m_xmf3Position.x, m_xmf3Position.y, m_xmf3Position.z);
 	OutputDebugString(pstrDebug);
 
@@ -333,7 +333,7 @@ void CFloatingCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
 	OutputDebugString(pstrDebug);
 
 	_stprintf_s(pstrDebug, 256, _T("Camera Right: %f, %f, %f\n"), m_xmf3Right.x, m_xmf3Right.y, m_xmf3Right.z);
-	OutputDebugString(pstrDebug);*/
+	OutputDebugString(pstrDebug);
 }
 
 CSimulatorCamera::CSimulatorCamera() : CCamera()
@@ -558,6 +558,10 @@ void CCinematicCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
 			m_xmf3Up = m_vCameraInfos.back().xmf3Up;
 			m_xmf3Right = m_vCameraInfos.back().xmf3Right;
 			SetPosition(m_vCameraInfos.back().xmf3Position);
+
+			PlayerParams playerParams;
+			playerParams.pPlayer = nullptr;
+			CMessageDispatcher::GetInst()->Dispatch_Message<PlayerParams>(MessageType::CINEMATIC_ALL_UPDATED, &playerParams, this);
 			return;
 		}
 

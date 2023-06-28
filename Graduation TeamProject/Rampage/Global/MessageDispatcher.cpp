@@ -600,6 +600,12 @@ void MonsterAttackListener::HandleMessage(const Message& message, const MonsterP
 	}
 }
 
+void CinematicAllUpdatedListener::HandleMessage(const Message& message, const PlayerParams& params)
+{
+	if (message.getType() == MessageType::CINEMATIC_ALL_UPDATED)
+		m_pScene->AdvanceStage();
+}
+
 void MonsterDeadListener::HandleMessage(const Message& message, const MonsterParams& params)
 {
 	if (message.getType() == MessageType::MONSTER_DEAD)

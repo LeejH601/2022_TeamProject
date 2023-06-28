@@ -116,6 +116,10 @@ public:
 
 	void SetUpdatedContext(LPVOID pContext) { m_pUpdatedContext = pContext; }
 
+	void SetRightVector(XMFLOAT3 xmf3Right) { m_xmf3Right = xmf3Right; }
+	void SetUpVector(XMFLOAT3 xmf3Up) { m_xmf3Up = xmf3Up; }
+	void SetLookVector(XMFLOAT3 xmf3Look) { m_xmf3Look = xmf3Look; }
+
 	XMFLOAT3& GetRightVector() { return(m_xmf3Right); }
 	XMFLOAT3& GetUpVector() { return(m_xmf3Up); }
 	XMFLOAT3& GetLookVector() { return(m_xmf3Look); }

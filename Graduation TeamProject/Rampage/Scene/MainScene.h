@@ -20,7 +20,16 @@
 #include "..\Object\VertexPointParticleObject.h"
 #include "..\Object\CollisionChecker.h"
 
+enum class SCENE_PROCESS_TYPE
+{
+	NORMAL,
+	CINEMATIC,
+	WAITING
+};
+
 #define MAX_OBJECT 1000
+#define MAX_WAIT_TIME 2.5f
+
 struct DissolveParams {
 	float dissolveThreshold[MAX_OBJECT];
 };
@@ -34,6 +43,9 @@ struct StageInfo {
 class CMainTMPScene : public CScene
 {
 private:
+	SCENE_PROCESS_TYPE m_curSceneProcessType = SCENE_PROCESS_TYPE::NORMAL;
+	float m_fWaitingTime;
+
 	int m_iCursorHideCount = 0;
 	RECT m_ScreendRect;
 
@@ -82,6 +94,9 @@ private:
 	std::unique_ptr<CCamera> m_pFloatingCamera = NULL;
 	std::unique_ptr<CCamera> m_pMainSceneCamera = NULL;
 	std::unique_ptr<CCamera> m_pCinematicSceneCamera = NULL;
+
+	std::vector<std::unique_ptr<CCamera>> m_vCinematicCameraLocations;
+
 	CCamera* m_pCurrentCamera = NULL;
 
 	POINT m_ptOldCursorPos;
