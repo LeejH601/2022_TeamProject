@@ -403,6 +403,34 @@ void CCinematicCamera::PlayCinematicCamera()
 	m_fAcceleration = 0.0f;
 }
 
+void CCinematicCamera::AddPlayerCameraInfo(CPlayer* pPlayer, CCamera* pCamera)
+{
+	pPlayer->Update(0.0f);
+	pPlayer->Animate(0.0f);
+
+	XMFLOAT3 xmf3PlayerPos = XMFLOAT3{
+		((CKnightPlayer*)pPlayer)->m_pSkinnedAnimationController->m_pRootMotionObject->GetWorld()._41,
+		 pPlayer->GetPosition().y,
+		((CKnightPlayer*)pPlayer)->m_pSkinnedAnimationController->m_pRootMotionObject->GetWorld()._43 };
+	xmf3PlayerPos.y += MeterToUnit(0.9f);
+
+	CThirdPersonCamera* pPlayerCamera = dynamic_cast<CThirdPersonCamera*>(pCamera);
+	
+	if (!pPlayerCamera)
+		return;
+
+	pPlayerCamera->Update(xmf3PlayerPos, 0.0f);
+
+	CameraInfo cameraInfo;
+
+	cameraInfo.xmf3Look = pCamera->GetLookVector();
+	cameraInfo.xmf3Up = pCamera->GetUpVector();
+	cameraInfo.xmf3Right = pCamera->GetRightVector();
+	cameraInfo.xmf3Position = pCamera->GetPosition();
+
+	m_vCameraInfos.push_back(cameraInfo);
+}
+
 void CCinematicCamera::AddCameraInfo(CCamera* pCamera)
 {
 	CameraInfo cameraInfo;

@@ -182,6 +182,7 @@ public:
 	CCinematicCamera();
 	virtual ~CCinematicCamera() { }
 
+	void AddPlayerCameraInfo(CPlayer* pPlayer, CCamera* pCamera);
 	void AddCameraInfo(CCamera* pCamera);
 	void ClearCameraInfo();
 	void PlayCinematicCamera();

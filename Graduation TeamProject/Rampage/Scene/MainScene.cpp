@@ -575,6 +575,10 @@ SCENE_RETURN_TYPE CMainTMPScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMe
 			((CCinematicCamera*)(m_pCinematicSceneCamera.get()))->PlayCinematicCamera();
 			m_pCurrentCamera = m_pCinematicSceneCamera.get();
 			break;
+		case 'L':
+		case 'l':
+			((CCinematicCamera*)(m_pCinematicSceneCamera.get()))->AddPlayerCameraInfo((CPlayer*)m_pPlayer, m_pMainSceneCamera.get());
+			break;
 		case VK_BACK:
 			if (m_CurrentMouseCursorMode == MOUSE_CUROSR_MODE::THIRD_FERSON_MODE)
 			{
@@ -610,6 +614,9 @@ SCENE_RETURN_TYPE CMainTMPScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMe
 		case '2':
 		{
 			m_pCurrentCamera = m_pMainSceneCamera.get();
+			Locator.SetMouseCursorMode(MOUSE_CUROSR_MODE::THIRD_FERSON_MODE);
+			m_CurrentMouseCursorMode = MOUSE_CUROSR_MODE::THIRD_FERSON_MODE;
+			PostMessage(hWnd, WM_ACTIVATE, 0, 0);
 
 			if (m_iCursorHideCount < 1) {
 				m_iCursorHideCount++;
@@ -622,7 +629,7 @@ SCENE_RETURN_TYPE CMainTMPScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMe
 		case 'F':
 			((CPlayer*)m_pPlayer)->Tmp();
 			break;
-		case 'w':
+		/*case 'w':
 		case 'W':
 			if (wParam == 'w' || wParam == 'W') dwDirection |= DIR_FORWARD;
 			break;
@@ -637,7 +644,7 @@ SCENE_RETURN_TYPE CMainTMPScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMe
 		case 'd':
 		case 'D':
 			if (wParam == 'd' || wParam == 'D') dwDirection |= DIR_RIGHT;
-			break;
+			break;*/
 		case 'q':
 		case 'Q':
 			if (wParam == 'q' || wParam == 'Q')dwDirection |= DIR_DOWN;
@@ -1078,27 +1085,18 @@ void CMainTMPScene::Enter(HWND hWnd)
 	SetCursorPos(screenRect.left + (screenRect.right - screenRect.left) / 2,
 		screenRect.top + (screenRect.bottom - screenRect.top) / 2);
 
+	// 시작은 플레이어 카메라
+	m_pCurrentCamera = m_pMainSceneCamera.get();
+	Locator.SetMouseCursorMode(MOUSE_CUROSR_MODE::THIRD_FERSON_MODE);
+	m_CurrentMouseCursorMode = MOUSE_CUROSR_MODE::THIRD_FERSON_MODE;
+
 	if (m_iCursorHideCount < 1) {
 		m_iCursorHideCount++;
 		ShowCursor(false);
 		ClipCursor(&screenRect);
 	}
 
-	m_pPlayer->Update(0.0f);
-	m_pPlayer->Animate(0.0f);
-
-	// 시작은 플레이어 카메라
-	m_pCurrentCamera = m_pMainSceneCamera.get();
-
-	Locator.SetMouseCursorMode(MOUSE_CUROSR_MODE::THIRD_FERSON_MODE);
-	m_CurrentMouseCursorMode = MOUSE_CUROSR_MODE::THIRD_FERSON_MODE;
 	PostMessage(hWnd, WM_ACTIVATE, 0, 0);
-
-	if (m_iCursorHideCount < 1) {
-		m_iCursorHideCount++;
-		ShowCursor(false);
-		ClipCursor(&m_ScreendRect);
-	}
 }
 void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed, float fCurrentTime, CCamera* pCamera)
 {
