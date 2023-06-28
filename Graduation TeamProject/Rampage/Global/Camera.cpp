@@ -498,7 +498,7 @@ XMFLOAT3 CatMullXMFLOAT3(XMFLOAT3 xmf3Pos1, XMFLOAT3 xmf3Pos2, XMFLOAT3 xmf3Pos3
 	return xmf3Result;
 }
 
-//#define LERP_QUARTARNION
+#define LERP_QUARTARNION
 
 void CCinematicCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
 {
@@ -506,7 +506,7 @@ void CCinematicCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
 		return;
 
 	// 최대 가속도 설정
-	float fSpeedUperS = MeterToUnit(30.0f);
+	float fSpeedUperS = MeterToUnit(15.0f);
 	float fMaxAccel = fSpeedUperS;
 
 	// 지금까지 온 거리 계산
@@ -529,7 +529,7 @@ void CCinematicCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
 	float fCurAccel = fMultiPlyRatio * fMaxAccel;
 
 	m_fCurrentSpeed += fCurAccel * fTimeElapsed;
-	m_fCurrentSpeed = max(m_fCurrentSpeed, 0.0f);
+	m_fCurrentSpeed = max(m_fCurrentSpeed, MeterToUnit(0.1f));
 
 	float fCurrentDistance = m_fCurrentSpeed * fTimeElapsed;
 

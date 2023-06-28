@@ -22,10 +22,10 @@
 #define MAX_ORC_NUM			50
 #define MAX_SKELETON_NUM	50
 
-XMFLOAT3 RandomMonsterPos() {
-	return XMFLOAT3{ 113.664360f + RandomFloatInRange(-25.0f, 25.0f),
-				3.016271f,
-				123.066483f + RandomFloatInRange(-25.0f, 25.0f) };
+XMFLOAT3 RandomMonsterPos(XMFLOAT3 xmf3CenterPos) {
+	return XMFLOAT3{ xmf3CenterPos.x + RandomFloatInRange(-25.0f, 25.0f),
+				xmf3CenterPos.y,
+				xmf3CenterPos.z + RandomFloatInRange(-25.0f, 25.0f) };
 }
 
 CMainTMPScene::CMainTMPScene()
@@ -72,8 +72,17 @@ void CMainTMPScene::HandleDeadMessage()
 {
 	m_iTotalMonsterNum -= 1;
 
-	if (m_iTotalMonsterNum == 0)
-		AdvanceStage();
+	if (m_iTotalMonsterNum == 0 && m_iStageNum != m_vCinematicCameraLocations.size() /* 모든 스테이지 클리어 */)
+	{
+		((CCinematicCamera*)(m_pCinematicSceneCamera.get()))->ClearCameraInfo();
+		((CCinematicCamera*)(m_pCinematicSceneCamera.get()))->AddPlayerCameraInfo((CPlayer*)m_pPlayer, m_pMainSceneCamera.get());
+		((CCinematicCamera*)(m_pCinematicSceneCamera.get()))->AddCameraInfo(m_vCinematicCameraLocations[m_iStageNum].get());
+		((CCinematicCamera*)(m_pCinematicSceneCamera.get()))->PlayCinematicCamera();
+
+		// 시작은 씨네마틱 카메라
+		m_pCurrentCamera = m_pCinematicSceneCamera.get();
+		m_curSceneProcessType = SCENE_PROCESS_TYPE::CINEMATIC;
+	}
 }
 
 void CMainTMPScene::AdvanceStage()
@@ -92,7 +101,7 @@ void CMainTMPScene::AdvanceStage()
 		std::vector<XMFLOAT3> xmf3MonsterPos(stageInfo.m_iGoblinNum);
 
 		for (XMFLOAT3& pos : xmf3MonsterPos)
-			pos = RandomMonsterPos();
+			pos = RandomMonsterPos(stageInfo.m_xmf3StageCenterPos);
 
 		CMonsterPool::GetInst()->SpawnMonster(MONSTER_TYPE::GOBLIN, stageInfo.m_iGoblinNum, xmf3MonsterPos.data());
 	}
@@ -104,7 +113,7 @@ void CMainTMPScene::AdvanceStage()
 		std::vector<XMFLOAT3> xmf3MonsterPos(stageInfo.m_iOrcNum);
 
 		for (XMFLOAT3& pos : xmf3MonsterPos)
-			pos = RandomMonsterPos();
+			pos = RandomMonsterPos(stageInfo.m_xmf3StageCenterPos);
 
 		CMonsterPool::GetInst()->SpawnMonster(MONSTER_TYPE::ORC, stageInfo.m_iOrcNum, xmf3MonsterPos.data());
 	}
@@ -116,7 +125,7 @@ void CMainTMPScene::AdvanceStage()
 		std::vector<XMFLOAT3> xmf3MonsterPos(stageInfo.m_iSkeletonNum);
 
 		for (XMFLOAT3& pos : xmf3MonsterPos)
-			pos = RandomMonsterPos();
+			pos = RandomMonsterPos(stageInfo.m_xmf3StageCenterPos);
 
 		CMonsterPool::GetInst()->SpawnMonster(MONSTER_TYPE::SKELETON, stageInfo.m_iSkeletonNum, xmf3MonsterPos.data());
 	}
@@ -961,10 +970,9 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	pUIObject->SetTextureIndex(17 + UITextureIndexOffset);
 	m_pUIObject.push_back(std::move(pUIObject));*/
 
-
-	m_StageInfoMap.emplace(std::pair<int, StageInfo>(0, StageInfo{ 25, 0, 0 }));
-	m_StageInfoMap.emplace(std::pair<int, StageInfo>(1, StageInfo{ 0, 25, 0 }));
-	m_StageInfoMap.emplace(std::pair<int, StageInfo>(2, StageInfo{ 0, 0, 25 }));
+	m_StageInfoMap.emplace(std::pair<int, StageInfo>(0, StageInfo{ 5, 0, 0, XMFLOAT3{ 113.664360f, 3.016271f, 123.066483f } }));
+	m_StageInfoMap.emplace(std::pair<int, StageInfo>(1, StageInfo{ 0, 5, 0, XMFLOAT3{ 189.830246f, 3.016271f, 47.559467f } }));
+	m_StageInfoMap.emplace(std::pair<int, StageInfo>(2, StageInfo{ 0, 0, 5, XMFLOAT3{ 53.192234f, 3.016271f, 99.847107f } }));
 }
 bool CMainTMPScene::ProcessInput(HWND hWnd, DWORD dwDirection, float fTimeElapsed)
 {
@@ -1069,16 +1077,6 @@ void CMainTMPScene::UpdateObjects(float fTimeElapsed)
 		 m_pPlayer->GetPosition().y,
 		((CKnightPlayer*)m_pPlayer)->m_pSkinnedAnimationController->m_pRootMotionObject->GetWorld()._43 };
 	xmf3PlayerPos.y += MeterToUnit(0.9f);
-
-	if(!m_bGameStart && m_MonsterSpawnTriggerBox.Intersects(*(m_pPlayer->GetBoundingBox())))
-	{
-		OutputDebugString(L"Trigger Played");
-
-		m_bGameStart = true;
-
-		// 스테이지를 진행시키는 함수
-		//AdvanceStage();
-	}
 
 	m_pCurrentCamera->Update(xmf3PlayerPos, fTimeElapsed);
 
