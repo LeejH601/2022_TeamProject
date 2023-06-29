@@ -136,15 +136,20 @@ public:
 	virtual void OnRootMotion(CGameObject* pRootGameObject, float fTimeElapsed);
 };
 
+struct MonsterSpawnInfo {
+	XMFLOAT3 xmf3Position;
+	bool bIsElite;
+};
+
 class CMonsterPool
 {
 	DECLARE_SINGLE(CMonsterPool);
 
 public:
-	void SpawnMonster(MONSTER_TYPE monsterType, int MonsterN, XMFLOAT3* xmfPositions);
+	void SpawnMonster(MONSTER_TYPE monsterType, int MonsterN, MonsterSpawnInfo* monsterSpawnInfo);
 
 	bool SetNonActiveMonster(MONSTER_TYPE monsterType, CMonster* pMonster);
-	bool SetActiveMonster(MONSTER_TYPE monsterType, XMFLOAT3 xmfPosition);
+	bool SetActiveMonster(MONSTER_TYPE monsterType, MonsterSpawnInfo monsterSpawnInfo);
 
 private:
 	std::vector<std::vector<CGameObject*>> m_pNonActiveMonsters; // 사용 가능한 몬스터

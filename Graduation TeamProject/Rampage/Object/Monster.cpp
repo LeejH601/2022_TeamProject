@@ -364,24 +364,28 @@ bool CMonsterPool::SetNonActiveMonster(MONSTER_TYPE monsterType, CMonster* pMons
 	return false;
 }
 
-bool CMonsterPool::SetActiveMonster(MONSTER_TYPE monsterType, XMFLOAT3 xmfPosition)
+bool CMonsterPool::SetActiveMonster(MONSTER_TYPE monsterType, MonsterSpawnInfo monsterSpawnInfo)
 {
 	// NonActiveMonster 있는 몬스터를 Enable true 변경 및 
 	if (m_pNonActiveMonsters[static_cast<int>(monsterType)].size() > 0) {
 		CMonster* pMonster = dynamic_cast<CMonster*>(m_pNonActiveMonsters[static_cast<int>(monsterType)].back());
 		m_pNonActiveMonsters[static_cast<int>(monsterType)].pop_back();
 		pMonster->SetEnable(true);
-		pMonster->SetPosition(xmfPosition);
+		pMonster->SetPosition(monsterSpawnInfo.xmf3Position);
+
+		// 엘리트몬스터면 엘리트인지 확인하는 변수를 true로 변경 아래는 임시 코드
+		monsterSpawnInfo.bIsElite ? pMonster->bHit = true : pMonster->bHit = false;
+
 		pMonster->m_pStateMachine->ChangeState(Spawn_Monster::GetInst());
 		return true;
 	}
 	return false;
 }
 
-void CMonsterPool::SpawnMonster(MONSTER_TYPE monsterType, int MonsterN, XMFLOAT3* xmfPositions)
+void CMonsterPool::SpawnMonster(MONSTER_TYPE monsterType, int MonsterN, MonsterSpawnInfo* monsterSpawnInfo)
 {
 	// 개수, 위치배열, 방향
 	// 플레이어 위치 근처
 	for (int i = 0; i < MonsterN; i++)
-		SetActiveMonster(monsterType, XMFLOAT3(xmfPositions[i]));
+		SetActiveMonster(monsterType, monsterSpawnInfo[i]);
 }

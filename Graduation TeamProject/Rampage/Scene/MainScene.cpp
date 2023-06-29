@@ -98,36 +98,44 @@ void CMainTMPScene::AdvanceStage()
 	{
 		m_iTotalMonsterNum += stageInfo.m_iGoblinNum;
 
-		std::vector<XMFLOAT3> xmf3MonsterPos(stageInfo.m_iGoblinNum);
+		std::vector<MonsterSpawnInfo> xmf3MonsterSpawnInfo(stageInfo.m_iGoblinNum);
 
-		for (XMFLOAT3& pos : xmf3MonsterPos)
-			pos = RandomMonsterPos(stageInfo.m_xmf3StageCenterPos);
-
-		CMonsterPool::GetInst()->SpawnMonster(MONSTER_TYPE::GOBLIN, stageInfo.m_iGoblinNum, xmf3MonsterPos.data());
+		for (MonsterSpawnInfo& spawnInfo : xmf3MonsterSpawnInfo)
+		{
+			spawnInfo.xmf3Position = RandomMonsterPos(stageInfo.m_xmf3StageCenterPos);
+			spawnInfo.bIsElite = false;
+		}
+		CMonsterPool::GetInst()->SpawnMonster(MONSTER_TYPE::GOBLIN, stageInfo.m_iGoblinNum, xmf3MonsterSpawnInfo.data());
 	}
 
 	// Spawn Orc
 	{	
 		m_iTotalMonsterNum += stageInfo.m_iOrcNum;
 
-		std::vector<XMFLOAT3> xmf3MonsterPos(stageInfo.m_iOrcNum);
+		std::vector<MonsterSpawnInfo> xmf3MonsterSpawnInfo(stageInfo.m_iOrcNum);
 
-		for (XMFLOAT3& pos : xmf3MonsterPos)
-			pos = RandomMonsterPos(stageInfo.m_xmf3StageCenterPos);
+		for (MonsterSpawnInfo& spawnInfo : xmf3MonsterSpawnInfo)
+		{
+			spawnInfo.xmf3Position = RandomMonsterPos(stageInfo.m_xmf3StageCenterPos);
+			spawnInfo.bIsElite = false;
+		}
 
-		CMonsterPool::GetInst()->SpawnMonster(MONSTER_TYPE::ORC, stageInfo.m_iOrcNum, xmf3MonsterPos.data());
+		CMonsterPool::GetInst()->SpawnMonster(MONSTER_TYPE::ORC, stageInfo.m_iOrcNum, xmf3MonsterSpawnInfo.data());
 	}
 
 	// Spawn Skeleton
 	{
 		m_iTotalMonsterNum += stageInfo.m_iSkeletonNum;
 
-		std::vector<XMFLOAT3> xmf3MonsterPos(stageInfo.m_iSkeletonNum);
+		std::vector<MonsterSpawnInfo> xmf3MonsterSpawnInfo(stageInfo.m_iSkeletonNum);
 
-		for (XMFLOAT3& pos : xmf3MonsterPos)
-			pos = RandomMonsterPos(stageInfo.m_xmf3StageCenterPos);
+		for (MonsterSpawnInfo& spawnInfo : xmf3MonsterSpawnInfo)
+		{
+			spawnInfo.xmf3Position = RandomMonsterPos(stageInfo.m_xmf3StageCenterPos);
+			spawnInfo.bIsElite = false;
+		}
 
-		CMonsterPool::GetInst()->SpawnMonster(MONSTER_TYPE::SKELETON, stageInfo.m_iSkeletonNum, xmf3MonsterPos.data());
+		CMonsterPool::GetInst()->SpawnMonster(MONSTER_TYPE::SKELETON, stageInfo.m_iSkeletonNum, xmf3MonsterSpawnInfo.data());
 	}
 
 	m_curSceneProcessType = SCENE_PROCESS_TYPE::WAITING;
