@@ -96,46 +96,96 @@ void CMainTMPScene::AdvanceStage()
 
 	// Spawn Goblin
 	{
+
+		// Spawn Normal Golbin
 		m_iTotalMonsterNum += stageInfo.m_iGoblinNum;
 
-		std::vector<MonsterSpawnInfo> xmf3MonsterSpawnInfo(stageInfo.m_iGoblinNum);
-
-		for (MonsterSpawnInfo& spawnInfo : xmf3MonsterSpawnInfo)
 		{
-			spawnInfo.xmf3Position = RandomMonsterPos(stageInfo.m_xmf3StageCenterPos);
-			spawnInfo.bIsElite = false;
+			std::vector<MonsterSpawnInfo> xmf3MonsterSpawnInfo(stageInfo.m_iGoblinNum);
+
+			for (MonsterSpawnInfo& spawnInfo : xmf3MonsterSpawnInfo)
+			{
+				spawnInfo.xmf3Position = RandomMonsterPos(stageInfo.m_xmf3StageCenterPos);
+				spawnInfo.bIsElite = false;
+			}
+			CMonsterPool::GetInst()->SpawnMonster(MONSTER_TYPE::GOBLIN, stageInfo.m_iGoblinNum, xmf3MonsterSpawnInfo.data());
 		}
-		CMonsterPool::GetInst()->SpawnMonster(MONSTER_TYPE::GOBLIN, stageInfo.m_iGoblinNum, xmf3MonsterSpawnInfo.data());
+
+		// Spawn Elite Goblin
+		m_iTotalMonsterNum += stageInfo.m_iEliteGolbinNum;
+
+		{
+			std::vector<MonsterSpawnInfo> xmf3MonsterSpawnInfo(stageInfo.m_iEliteGolbinNum);
+
+			for (MonsterSpawnInfo& spawnInfo : xmf3MonsterSpawnInfo)
+			{
+				spawnInfo.xmf3Position = RandomMonsterPos(stageInfo.m_xmf3StageCenterPos);
+				spawnInfo.bIsElite = true;
+			}
+			CMonsterPool::GetInst()->SpawnMonster(MONSTER_TYPE::GOBLIN, stageInfo.m_iEliteGolbinNum, xmf3MonsterSpawnInfo.data());
+		}
 	}
 
 	// Spawn Orc
 	{	
+		// Spawn Normal Orc
 		m_iTotalMonsterNum += stageInfo.m_iOrcNum;
 
-		std::vector<MonsterSpawnInfo> xmf3MonsterSpawnInfo(stageInfo.m_iOrcNum);
-
-		for (MonsterSpawnInfo& spawnInfo : xmf3MonsterSpawnInfo)
 		{
-			spawnInfo.xmf3Position = RandomMonsterPos(stageInfo.m_xmf3StageCenterPos);
-			spawnInfo.bIsElite = false;
+			std::vector<MonsterSpawnInfo> xmf3MonsterSpawnInfo(stageInfo.m_iOrcNum);
+
+			for (MonsterSpawnInfo& spawnInfo : xmf3MonsterSpawnInfo)
+			{
+				spawnInfo.xmf3Position = RandomMonsterPos(stageInfo.m_xmf3StageCenterPos);
+				spawnInfo.bIsElite = false;
+			}
+
+			CMonsterPool::GetInst()->SpawnMonster(MONSTER_TYPE::ORC, stageInfo.m_iOrcNum, xmf3MonsterSpawnInfo.data());
 		}
 
-		CMonsterPool::GetInst()->SpawnMonster(MONSTER_TYPE::ORC, stageInfo.m_iOrcNum, xmf3MonsterSpawnInfo.data());
+		// Spawn Elite Orc
+		{
+			std::vector<MonsterSpawnInfo> xmf3MonsterSpawnInfo(stageInfo.m_iEliteOrcNum);
+
+			for (MonsterSpawnInfo& spawnInfo : xmf3MonsterSpawnInfo)
+			{
+				spawnInfo.xmf3Position = RandomMonsterPos(stageInfo.m_xmf3StageCenterPos);
+				spawnInfo.bIsElite = true;
+			}
+
+			CMonsterPool::GetInst()->SpawnMonster(MONSTER_TYPE::ORC, stageInfo.m_iEliteOrcNum, xmf3MonsterSpawnInfo.data());
+		}
 	}
 
 	// Spawn Skeleton
 	{
+		// Spawn Normal Skeleton
 		m_iTotalMonsterNum += stageInfo.m_iSkeletonNum;
 
-		std::vector<MonsterSpawnInfo> xmf3MonsterSpawnInfo(stageInfo.m_iSkeletonNum);
-
-		for (MonsterSpawnInfo& spawnInfo : xmf3MonsterSpawnInfo)
 		{
-			spawnInfo.xmf3Position = RandomMonsterPos(stageInfo.m_xmf3StageCenterPos);
-			spawnInfo.bIsElite = false;
+			std::vector<MonsterSpawnInfo> xmf3MonsterSpawnInfo(stageInfo.m_iSkeletonNum);
+
+			for (MonsterSpawnInfo& spawnInfo : xmf3MonsterSpawnInfo)
+			{
+				spawnInfo.xmf3Position = RandomMonsterPos(stageInfo.m_xmf3StageCenterPos);
+				spawnInfo.bIsElite = false;
+			}
+
+			CMonsterPool::GetInst()->SpawnMonster(MONSTER_TYPE::SKELETON, stageInfo.m_iSkeletonNum, xmf3MonsterSpawnInfo.data());
 		}
 
-		CMonsterPool::GetInst()->SpawnMonster(MONSTER_TYPE::SKELETON, stageInfo.m_iSkeletonNum, xmf3MonsterSpawnInfo.data());
+		// Spawn Elite Skeleton
+		{
+			std::vector<MonsterSpawnInfo> xmf3MonsterSpawnInfo(stageInfo.m_iEliteSkeletonNum);
+
+			for (MonsterSpawnInfo& spawnInfo : xmf3MonsterSpawnInfo)
+			{
+				spawnInfo.xmf3Position = RandomMonsterPos(stageInfo.m_xmf3StageCenterPos);
+				spawnInfo.bIsElite = true;
+			}
+
+			CMonsterPool::GetInst()->SpawnMonster(MONSTER_TYPE::SKELETON, stageInfo.m_iEliteSkeletonNum, xmf3MonsterSpawnInfo.data());
+		}
 	}
 
 	m_curSceneProcessType = SCENE_PROCESS_TYPE::WAITING;
@@ -975,9 +1025,24 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	pUIObject->SetTextureIndex(17 + UITextureIndexOffset);
 	m_pUIObject.push_back(std::move(pUIObject));*/
 
-	m_StageInfoMap.emplace(std::pair<int, StageInfo>(0, StageInfo{ 5, 0, 0, XMFLOAT3{ 113.664360f, 3.016271f, 123.066483f } }));
-	m_StageInfoMap.emplace(std::pair<int, StageInfo>(1, StageInfo{ 0, 5, 0, XMFLOAT3{ 189.830246f, 3.016271f, 47.559467f } }));
-	m_StageInfoMap.emplace(std::pair<int, StageInfo>(2, StageInfo{ 0, 0, 5, XMFLOAT3{ 53.192234f, 3.016271f, 99.847107f } }));
+	m_StageInfoMap.emplace(std::pair<int, StageInfo>(0, 
+		StageInfo{ 
+			0, 5, 
+			0, 0,
+			0, 0, 
+			XMFLOAT3{ 113.664360f, 3.016271f, 123.066483f } }));
+	m_StageInfoMap.emplace(std::pair<int, StageInfo>(1,
+		StageInfo{
+			0, 0,
+			5, 0,
+			0, 0,
+			XMFLOAT3{ 189.830246f, 3.016271f, 47.559467f } }));
+	m_StageInfoMap.emplace(std::pair<int, StageInfo>(2,
+		StageInfo{
+			0, 0,
+			0, 0,
+			5, 0,
+			XMFLOAT3{ 53.192234f, 3.016271f, 99.847107f } }));
 }
 bool CMainTMPScene::ProcessInput(HWND hWnd, DWORD dwDirection, float fTimeElapsed)
 {

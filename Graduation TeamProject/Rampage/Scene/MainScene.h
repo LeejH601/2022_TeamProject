@@ -36,8 +36,11 @@ struct DissolveParams {
 
 struct StageInfo {
 	int m_iGoblinNum = 0;
+	int m_iEliteGolbinNum = 0;
 	int m_iOrcNum = 0;
+	int m_iEliteOrcNum = 0;
 	int m_iSkeletonNum = 0;
+	int m_iEliteSkeletonNum = 0;
 	XMFLOAT3 m_xmf3StageCenterPos;
 };
 
