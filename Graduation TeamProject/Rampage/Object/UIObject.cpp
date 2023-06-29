@@ -499,7 +499,7 @@ void CComboNumberObject::UpdateNumberTexture(UINT N, UINT ORDER)
 		m_xmf4x4World._14 = 0.f; // V
 		m_xmf4x4World._24 = 1.f; // V
 
-		float color = 2.8f;
+		float color = 4.5f;
 		m_xmf4x4World._21 = 1.f; // RGBN // 2.8
 		m_xmf4x4World._31 = 1.f;// +(m_iNumber % 10) * 0.1f;
 		m_xmf4x4World._44 = 1.f;// +(m_iNumber % 10) * 0.1f;
