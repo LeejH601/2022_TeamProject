@@ -23,9 +23,9 @@
 #define MAX_SKELETON_NUM	50
 
 XMFLOAT3 RandomMonsterPos(XMFLOAT3 xmf3CenterPos) {
-	return XMFLOAT3{ xmf3CenterPos.x + RandomFloatInRange(-25.0f, 25.0f),
+	return XMFLOAT3{ xmf3CenterPos.x + RandomFloatInRange(-12.5f, 12.5f),
 				xmf3CenterPos.y,
-				xmf3CenterPos.z + RandomFloatInRange(-25.0f, 25.0f) };
+				xmf3CenterPos.z + RandomFloatInRange(-12.5f, 12.5f) };
 }
 
 CMainTMPScene::CMainTMPScene()
@@ -565,9 +565,6 @@ bool CMainTMPScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM 
 }
 SCENE_RETURN_TYPE CMainTMPScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam, DWORD& dwDirection)
 {
-	/*if (m_curSceneProcessType == SCENE_PROCESS_TYPE::CINEMATIC)
-		return SCENE_RETURN_TYPE::NONE;*/
-
 	MOUSE_CUROSR_MODE eMouseMode = Locator.GetMouseCursorMode();
 
 	switch (nMessageID)
@@ -976,8 +973,8 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 }
 bool CMainTMPScene::ProcessInput(HWND hWnd, DWORD dwDirection, float fTimeElapsed)
 {
-	/*if (m_curSceneProcessType == SCENE_PROCESS_TYPE::CINEMATIC)
-		return true;*/
+	if (m_curSceneProcessType == SCENE_PROCESS_TYPE::CINEMATIC)
+		return true;
 
 	POINT ptCursorPos;
 	float cxDelta, cyDelta;
