@@ -368,9 +368,10 @@ void Atk1_Player::Enter(CPlayer* player)
 	if (player->m_pSwordTrailReference) {
 		dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[0].get())->m_faccumulateTime = 0.0f;
 	}
-	if (player->m_fStamina > 0)
-		player->m_fStamina -= player->m_fTotalStamina * 0.2f;
 
+	player->m_fStamina -= player->m_fTotalStamina * 0.2f;
+	if (player->m_fStamina < 0.f)
+		player->m_fStamina = 0.f;
 	player->UpdateCombo(0.f);
 
 }
@@ -492,8 +493,9 @@ void Atk2_Player::Enter(CPlayer* player)
 		dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[1].get())->m_faccumulateTime = 0.0f;
 	}
 
-	if (player->m_fStamina > 0)
-		player->m_fStamina -= player->m_fTotalStamina * 0.2f;
+	player->m_fStamina -= player->m_fTotalStamina * 0.2f;
+	if (player->m_fStamina < 0.f)
+		player->m_fStamina = 0.f;
 
 	player->UpdateCombo(0.f);
 }
@@ -637,8 +639,9 @@ void Atk3_Player::Enter(CPlayer* player)
 		dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[2].get())->m_faccumulateTime = 0.0f;
 	}
 
-	if (player->m_fStamina > 0)
-		player->m_fStamina -= player->m_fTotalStamina * 0.2f;
+	player->m_fStamina -= player->m_fTotalStamina * 0.2f;
+	if (player->m_fStamina < 0.f)
+		player->m_fStamina = 0.f;
 
 	player->UpdateCombo(0.f);
 }
@@ -851,8 +854,9 @@ void Atk4_Player::Enter(CPlayer* player)
 	SoundPlayParam.sound_category = SOUND_CATEGORY::SOUND_SHOOT;
 	CMessageDispatcher::GetInst()->Dispatch_Message<SoundPlayParams>(MessageType::PLAY_SOUND, &SoundPlayParam, this);*/
 
-	if (player->m_fStamina > 0)
-		player->m_fStamina -= player->m_fTotalStamina * 0.2f;
+	player->m_fStamina -= player->m_fTotalStamina * 0.2f;
+	if (player->m_fStamina < 0.f)
+		player->m_fStamina = 0.f;
 
 	player->UpdateCombo(0.f);
 }
@@ -939,8 +943,9 @@ void Atk5_Player::Enter(CPlayer* player)
 	SoundPlayParam.sound_category = SOUND_CATEGORY::SOUND_SHOOT;
 	CMessageDispatcher::GetInst()->Dispatch_Message<SoundPlayParams>(MessageType::PLAY_SOUND, &SoundPlayParam, this);*/
 
-	if (player->m_fStamina > 0)
-		player->m_fStamina -= player->m_fTotalStamina * 0.2f;
+	player->m_fStamina -= player->m_fTotalStamina * 0.2f;
+	if (player->m_fStamina < 0.f)
+		player->m_fStamina = 0.f;
 
 	player->UpdateCombo(0.f);
 }
@@ -1120,6 +1125,8 @@ void Evasion_Player::Enter(CPlayer* player)
 	player->m_pSkinnedAnimationController->m_pAnimationTracks[1].m_fPosition = 0.0f;
 	player->m_pSkinnedAnimationController->m_pAnimationTracks[1].m_fWeight = 0.0f;
 	player->m_pSkinnedAnimationController->m_pAnimationTracks[1].m_nType = ANIMATION_TYPE_ONCE;
+
+	player->m_fInvincibleTime = FLT_MAX;
 }
 
 void Evasion_Player::Execute(CPlayer* player, float fElapsedTime)
@@ -1160,6 +1167,7 @@ void Evasion_Player::Execute(CPlayer* player, float fElapsedTime)
 void Evasion_Player::Exit(CPlayer* player)
 {
 	player->m_bEvasioned = false;
+	player->m_fInvincibleTime = 0.0f;
 }
 
 void Evasion_Player::Animate(CPlayer* player, float fElapsedTime)
@@ -1209,4 +1217,138 @@ void Atk_Player::CheckEvasion(CPlayer* player, float holdTime)
 		if (player->m_bEvasioned)
 			player->m_pStateMachine->ChangeState(Evasion_Player::GetInst());
 	}
+}
+
+Damaged_Player::Damaged_Player()
+{
+}
+
+Damaged_Player::~Damaged_Player()
+{
+}
+
+#define SET_LOOKAT_WHEN_DAMAGED
+
+void Damaged_Player::Enter(CPlayer* player)
+{
+#ifdef SET_LOOKAT_WHEN_DAMAGED
+	player->SetLookAt(Vector3::Add(player->GetPosition(), Vector3::Normalize(player->m_xmf3ToHitterVec)));
+	player->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 32);
+#else
+	float degrees = 0.0f;
+
+	XMVECTOR playerLookVec = XMLoadFloat3(&(player->GetLook()));
+	XMVECTOR toHitterVec = XMLoadFloat3(&(player->m_xmf3ToHitterVec));
+
+	playerLookVec = XMVector3Normalize(playerLookVec);
+	toHitterVec = XMVector3Normalize(toHitterVec);
+
+	float dot = XMVectorGetX(XMVector3Dot(toHitterVec, playerLookVec));
+
+	if (dot < -1.0f + FLT_EPSILON || dot > 1.0f - FLT_EPSILON)
+	{
+		dot < -1.0f + FLT_EPSILON ? degrees = 180.0f : degrees = 0.0f;
+	}
+	else
+	{
+		float angle = acosf(dot);
+		degrees = XMConvertToDegrees(angle);
+
+		XMVECTOR cross = XMVector3Cross(toHitterVec, playerLookVec);
+
+		if (XMVectorGetY(cross) > 0.0f)
+			degrees = 360.0f - degrees;
+	}
+
+	if (0.0f <= degrees && degrees < 45.0f)
+	{
+		player->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 32);
+	}
+	else if (degrees <= 180.0f)
+	{
+		player->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 34);
+	}
+	else if (degrees <= 325.0f)
+	{
+		player->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 33);
+	}
+	else
+	{
+		player->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 32);
+	}
+#endif // SET_LOOKAT_WHEN_DAMAGED
+
+	player->m_pSkinnedAnimationController->m_fTime = 0.0f;
+	player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition = 0.0f;
+	player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_nType = ANIMATION_TYPE_ONCE;
+
+	player->m_xmf3RootTransfromPreviousPos = XMFLOAT3{ 0.f, 0.f , 0.f };
+	player->m_bAttack = false; // 사용자가 좌클릭시 true가 되는 변수
+
+	// 플레이어의 체력을 감소
+	player->m_fHP -= 5.f;
+}
+
+void Damaged_Player::Execute(CPlayer* player, float fElapsedTime)
+{
+	CAnimationSet* pAnimationSet = player->m_pSkinnedAnimationController->m_pAnimationSets->m_pAnimationSets[player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_nAnimationSet];
+	if (player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition == pAnimationSet->m_fLength)
+	{
+		CState<CPlayer>& previousState = *player->m_pStateMachine->GetPreviousState();
+		if (dynamic_cast<Idle_Player*>(&previousState)) {
+			player->m_pStateMachine->ChangeState(&previousState);
+		}
+		else if (dynamic_cast<Run_Player*>(&previousState)) {
+			player->m_pStateMachine->ChangeState(&previousState);
+		}
+		else {
+			player->m_pStateMachine->ChangeState(Idle_Player::GetInst());
+		}
+	}
+}
+
+void Damaged_Player::Animate(CPlayer* player, float fElapsedTime)
+{
+	player->Animate(fElapsedTime);
+}
+
+void Damaged_Player::OnRootMotion(CPlayer* player, float fTimeElapsed)
+{
+	CAnimationController* pPlayerController = player->m_pSkinnedAnimationController.get();
+
+	CAnimationSet* pAnimationSet = pPlayerController->m_pAnimationSets->m_pAnimationSets[pPlayerController->m_pAnimationTracks[0].m_nAnimationSet];
+
+	XMFLOAT3 xmf3CurrentPos = XMFLOAT3{ player->m_pChild->m_xmf4x4Transform._41,
+	0.0f,
+	player->m_pChild->m_xmf4x4Transform._43 };
+
+	player->m_pChild->m_xmf4x4Transform._41 -= player->m_xmf3RootTransfromPreviousPos.x;
+	player->m_pChild->m_xmf4x4Transform._42 -= player->m_xmf3RootTransfromPreviousPos.y;
+	player->m_pChild->m_xmf4x4Transform._43 -= player->m_xmf3RootTransfromPreviousPos.z;
+
+	SetPlayerRootVel(player);
+
+	player->m_xmf3RootTransfromPreviousPos = xmf3CurrentPos;
+}
+
+void Damaged_Player::Exit(CPlayer* player)
+{
+	player->m_bEvasioned = false;
+	player->m_fInvincibleTime = 1.0f;
+}
+
+void Damaged_Player::SetPlayerRootVel(CPlayer* player)
+{
+	CAnimationController* pPlayerController = player->m_pSkinnedAnimationController.get();
+
+	player->UpdateTransform(NULL);
+
+	XMFLOAT3 xmf3Position = XMFLOAT3{ pPlayerController->m_pRootMotionObject->GetWorld()._41,
+		player->GetPosition().y,
+		pPlayerController->m_pRootMotionObject->GetWorld()._43 };
+
+	player->Move(Vector3::Subtract(xmf3Position, player->GetPosition()), true);
+
+	pPlayerController->m_pRootMotionObject->m_xmf4x4Transform._41 = 0.f;
+	pPlayerController->m_pRootMotionObject->m_xmf4x4Transform._43 = 0.f;
 }

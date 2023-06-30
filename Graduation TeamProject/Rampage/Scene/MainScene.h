@@ -20,17 +20,44 @@
 #include "..\Object\VertexPointParticleObject.h"
 #include "..\Object\CollisionChecker.h"
 
+enum class SCENE_PROCESS_TYPE
+{
+	NORMAL,
+	CINEMATIC,
+	WAITING
+};
+
 #define MAX_OBJECT 1000
+#define MAX_WAIT_TIME 2.5f
+
 struct DissolveParams {
 	float dissolveThreshold[MAX_OBJECT];
 };
 
+struct StageInfo {
+	int m_iGoblinNum = 0;
+	int m_iEliteGolbinNum = 0;
+	int m_iOrcNum = 0;
+	int m_iEliteOrcNum = 0;
+	int m_iSkeletonNum = 0;
+	int m_iEliteSkeletonNum = 0;
+	XMFLOAT3 m_xmf3StageCenterPos;
+};
 
 class CMainTMPScene : public CScene
 {
 private:
+	SCENE_PROCESS_TYPE m_curSceneProcessType = SCENE_PROCESS_TYPE::NORMAL;
+	float m_fWaitingTime;
+
+	int m_iCursorHideCount = 0;
 	RECT m_ScreendRect;
-	
+
+	bool m_bGameStart = false;
+	int m_iStageNum = 0;
+	int m_iTotalMonsterNum = 0;
+	std::map<int, StageInfo> m_StageInfoMap;
+
 	std::unique_ptr<CollisionChecker> m_pCollisionChecker = NULL;
 	std::vector<std::unique_ptr<CGameObject>> m_pEnemys;
 	std::unique_ptr<CMap> m_pMap;
@@ -69,11 +96,15 @@ private:
 
 	std::unique_ptr<CCamera> m_pFloatingCamera = NULL;
 	std::unique_ptr<CCamera> m_pMainSceneCamera = NULL;
+	std::unique_ptr<CCamera> m_pCinematicSceneCamera = NULL;
+
+	std::vector<std::unique_ptr<CCamera>> m_vCinematicCameraLocations;
+
 	CCamera* m_pCurrentCamera = NULL;
 
 	POINT m_ptOldCursorPos;
 
-	MOUSE_CUROSR_MODE m_CurrentMouseCursorMode = MOUSE_CUROSR_MODE::FLOATING_MODE;
+	MOUSE_CUROSR_MODE m_CurrentMouseCursorMode = MOUSE_CUROSR_MODE::THIRD_FERSON_MODE;
 
 	DissolveParams* m_pcbMappedDisolveParams = nullptr;
 	ComPtr<ID3D12Resource> m_pd3dcbDisolveParams = nullptr;
@@ -81,9 +112,11 @@ private:
 	std::list<RegisterArticulationParams> m_lRequestObjects;
 	std::list<RegisterArticulationSleepParams> m_lSleepObjects;
 public:
-	CMainTMPScene() {}
+	CMainTMPScene();
 	virtual ~CMainTMPScene() {}
 
+	void HandleDeadMessage();
+	void AdvanceStage();
 	virtual void SetPlayer(CGameObject* pPlayer);
 
 	virtual void OnPreRender(ID3D12GraphicsCommandList* pd3dCommandList) { }
@@ -107,6 +140,7 @@ public:
 	virtual bool ProcessInput(HWND hWnd, DWORD dwDirection, float fTimeElapsed);
 	virtual void UpdateObjects(float fTimeElapsed);
 	virtual void OnPrepareRenderTarget(ID3D12GraphicsCommandList* pd3dCommandList, int nRenderTargets, D3D12_CPU_DESCRIPTOR_HANDLE* pd3dRtvCPUHandles, D3D12_CPU_DESCRIPTOR_HANDLE d3dDepthStencilBufferDSVCPUHandle);
+	virtual void Enter(HWND hWnd);
 	virtual void Update(float fTimeElapsed);
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed, float fCurrentTime, CCamera* pCamera = NULL);
 	virtual void OnPostRender();

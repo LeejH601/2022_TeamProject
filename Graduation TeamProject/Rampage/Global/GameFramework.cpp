@@ -11,6 +11,7 @@
 #include <windowsx.h>
 #include "..\Sound\SoundManager.h"
 #include "..\Shader\BoundingBoxShader.h"
+#include "..\Scene\SceneManager.h"
 
 CLocator Locator;
 
@@ -106,6 +107,8 @@ void CGameFramework::InitSound()
 	CSoundManager::GetInst()->RegisterSound("Sound/effect/herkules92__sword-attack.wav", false, SOUND_CATEGORY::SOUND_SHOCK);
 	CSoundManager::GetInst()->RegisterSound("Sound/effect/hit-swing-sword.wav", false, SOUND_CATEGORY::SOUND_SHOCK);
 	CSoundManager::GetInst()->RegisterSound("Sound/effect/kneeling__cleaver.mp3", false, SOUND_CATEGORY::SOUND_SHOCK);
+	CSoundManager::GetInst()->RegisterSound("Sound/effect/MP_Left Hook.mp3", false, SOUND_CATEGORY::SOUND_SHOCK);
+	CSoundManager::GetInst()->RegisterSound("Sound/effect/Buffer Spell.wav", false, SOUND_CATEGORY::SOUND_SHOCK);
 	CSoundManager::GetInst()->RegisterSound("Sound/effect/shield-guard-6963.mp3", false, SOUND_CATEGORY::SOUND_SHOCK);
 
 
@@ -371,15 +374,12 @@ void CGameFramework::BuildObjects()
 	CSimulatorScene::GetInst()->m_pBloomComputeShader->SetTextureSource(m_pd3dDevice.Get(), CSimulatorScene::GetInst()->m_pPostProcessShader->GetTextureShared());
 
 	CSimulatorScene::GetInst()->m_pHDRComputeShader->SetTextureSource(m_pd3dDevice.Get(), CSimulatorScene::GetInst()->m_pPostProcessShader->GetTextureShared());
-
-	m_pPlayer = std::make_unique<CKnightPlayer>(m_pd3dDevice.Get(), m_pd3dCommandList.Get(), 2); 
-	m_pPlayer->SetPosition(XMFLOAT3(127.0f, 50.0f, -58.0f));
-	m_pPlayer->SetScale(2.0f, 2.0f, 2.0f);
-	m_pPlayer->Rotate(0.0f, 90.0f, 0.0f);
-	((CPlayer*)m_pPlayer.get())->m_pStateMachine->ChangeState(Idle_Player::GetInst());
 	
-	CGameObject* RoadBoundingBoxMesh = CBoundingBoxShader::GetInst()->AddBoundingObject(m_pd3dDevice.Get(), m_pd3dCommandList.Get(), NULL, XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1.0f, 1.0f, 1.0f));
-	RoadBoundingBoxMesh->SetPosition(XMFLOAT3(127.0f, -12.0f, -58.0f));
+	m_pPlayer = std::make_unique<CKnightPlayer>(m_pd3dDevice.Get(), m_pd3dCommandList.Get(), 1); 
+	m_pPlayer->SetPosition(XMFLOAT3(57.0f, 3.5f, 225.0f));
+	m_pPlayer->SetScale(2.0f, 2.0f, 2.0f);
+	m_pPlayer->Rotate(0.0f, 165.0f, 0.0f);
+	((CPlayer*)m_pPlayer.get())->m_pStateMachine->ChangeState(Idle_Player::GetInst());
 
 	m_pSceneManager->SetPlayer((CPlayer*)m_pPlayer.get());
 }
@@ -404,7 +404,6 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 		switch (wParam)
 		{
 		case VK_ESCAPE:
-			::PostQuitMessage(0);
 			break;
 		case VK_F9:
 			ChangeSwapChainState();
@@ -506,10 +505,13 @@ void CGameFramework::RenderObjects()
 {
 	//명령 할당자를 리셋한다.
 	HRESULT hResult = m_pd3dCommandAllocator->Reset();
+	CScene* pScene = m_pSceneManager->GetCurrentScene();
 
-	if (dynamic_cast<CLobbyScene*>(m_pSceneManager->GetCurrentScene())) {
+	if (dynamic_cast<CLobbyScene*>(m_pSceneManager->GetCurrentScene()) && dynamic_cast<CLobbyScene*>(pScene)->GetSceneType() == (UINT)(LobbySceneType::SIMULATOR_Scene))
+	{
 		PrepareImGui();
 	}
+
 
 	//명령 리스트를 리셋한다.
 	hResult = m_pd3dCommandList->Reset(m_pd3dCommandAllocator.Get(), NULL);
@@ -518,7 +520,8 @@ void CGameFramework::RenderObjects()
 
 	m_pSceneManager->PreRender(m_pd3dCommandList.Get(), m_GameTimer.GetFrameTimeElapsed());
 
-	if (dynamic_cast<CMainTMPScene*>(m_pSceneManager->GetCurrentScene())) {
+	if (dynamic_cast<CMainTMPScene*>(pScene) || ((dynamic_cast<CLobbyScene*>(pScene)) && dynamic_cast<CLobbyScene*>(pScene)->GetSceneType() == (UINT)(LobbySceneType::LOGO_Scene)))
+	{
 		m_pSceneManager->GetCurrentScene()->SetHDRRenderSource(m_ppd3dRenderTargetBuffers[m_nSwapChainBufferIndex].Get());
 		m_pSceneManager->OnPrepareRenderTarget(m_pd3dCommandList.Get(), 1, &m_pd3dSwapRTVCPUHandles[m_nSwapChainBufferIndex], m_d3dDsvDescriptorCPUHandle);
 	}

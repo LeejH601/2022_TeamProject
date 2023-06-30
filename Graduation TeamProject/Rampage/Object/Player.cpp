@@ -35,6 +35,11 @@ CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 	m_fTotalStamina = 100.f;
 	m_fStamina = 100.f;
 
+	std::unique_ptr<MonsterAttackListener> pMonsterAttackListener = std::make_unique<MonsterAttackListener>();
+	pMonsterAttackListener->SetObject(this);
+	m_pListeners.push_back(std::move(pMonsterAttackListener));
+
+	CMessageDispatcher::GetInst()->RegisterListener(MessageType::MONSTER_ATTACK, m_pListeners.back().get());
 }
 
 CPlayer::~CPlayer()
@@ -105,9 +110,23 @@ bool CPlayer::CheckCollision(CGameObject* pTargetObject)
 	return false;
 }
 
+bool CPlayer::SetHit(CGameObject* pHitter)
+{
+	// 플레이어 상태를 대미지를 받은 상태로 변경
+	if (m_fInvincibleTime == 0.0f && m_pStateMachine->GetCurrentState() != Damaged_Player::GetInst())
+	{
+		m_xmf3ToHitterVec = Vector3::Normalize(Vector3::Subtract(pHitter->GetPosition(), GetPosition()));
+		m_xmf3ToHitterVec.y = 0.0f;
+		m_pStateMachine->ChangeState(Damaged_Player::GetInst());
+		return true;
+	}
+	return false;
+}
+
 void CPlayer::Update(float fTimeElapsed)
 {
 	m_fTime += fTimeElapsed;
+	m_fInvincibleTime > 0.0f ? m_fInvincibleTime -= fTimeElapsed : m_fInvincibleTime = 0.0f;
 
 	// 플레이어가 속도를 가진다면 해당 방향을 바라보게 하는 코드
 	if (m_xmf3Velocity.x + m_xmf3Velocity.z)
@@ -128,6 +147,15 @@ void CPlayer::Update(float fTimeElapsed)
 	CPhysicsObject::Apply_Friction(fTimeElapsed);
 
 	m_xmf3PreviousPos = GetPosition();
+
+	/*std::wstring location;
+	location.append(std::to_wstring(GetPosition().x));
+	location.append(L", ");
+	location.append(std::to_wstring(GetPosition().y));
+	location.append(L", ");
+	location.append(std::to_wstring(GetPosition().z));
+	location.append(L"\n");
+	OutputDebugString(location.c_str());*/
 
 	UpdateStamina(fTimeElapsed);
 	//UpdateCombo(fTimeElapsed);
@@ -338,12 +366,13 @@ bool CKnightPlayer::CheckCollision(CGameObject* pTargetObject)
 		SoundPlayParam.sound_category = SOUND_CATEGORY::SOUND_SHOCK;
 		CMessageDispatcher::GetInst()->Dispatch_Message<SoundPlayParams>(MessageType::PLAY_SOUND, &SoundPlayParam, m_pStateMachine->GetCurrentState());
 		
-		TCHAR pstrDebug[256] = { 0 };
+		/*TCHAR pstrDebug[256] = { 0 };
 		_stprintf_s(pstrDebug, 256, _T("CheckCollision\n"));
-		OutputDebugString(pstrDebug);
+		OutputDebugString(pstrDebug);*/
 
+
+		m_bMonsterAttack = true;
 		m_bCombo = true;
-		m_fHP -= 30.f;
 		if (m_pCamera)
 		{
 			if (m_pStateMachine->GetCurrentState()->GetCameraShakeComponent()->GetEnable())
@@ -388,6 +417,7 @@ void CKnightPlayer::Animate(float fTimeElapsed)
 	}
 }
 
+//#define SHOW_COLLIDE_MESH_NAME
 void CKnightPlayer::OnUpdateCallback(float fTimeElapsed)
 {
 	if (m_pUpdatedContext)
@@ -416,8 +446,16 @@ void CKnightPlayer::OnUpdateCallback(float fTimeElapsed)
 		for (int i = 0; i < pMap->GetMapObjects().size(); ++i) {
 			if (pMap->GetMapObjects()[i]->CheckCollision(this))
 			{
+#ifdef SHOW_COLLIDE_MESH_NAME
+				std::wstring wMeshName;
+				size_t tmp = 0;
+				wMeshName.resize(strlen(pMap->GetMapObjects()[i]->m_pstrFrameName) + 1);
+				mbstowcs_s(&tmp, wMeshName.data(), (size_t)wMeshName.size(),
+					pMap->GetMapObjects()[i]->m_pstrFrameName, (size_t)wMeshName.size());
+				OutputDebugString(wMeshName.c_str());
+				OutputDebugString(L"\n");
+#endif // SHOW_COLLIDE_MESH_NAME
 				DistortLookVec(pMap->GetMapObjects()[i].get());
-				break;
 			}
 		}
 		

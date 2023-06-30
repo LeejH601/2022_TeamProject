@@ -128,6 +128,7 @@ public:
 	void SetEnable(bool bEnable) { m_bEnable = bEnable; }
 	virtual void Reset() { }
 
+	virtual void HandleMessage(const Message& message, const MonsterParams& params) {}
 	virtual void HandleMessage(const Message& message, const CollideParams& params) {}
 	virtual void HandleMessage(const Message& message, const OnGroundParams& params) {}
 	virtual void HandleMessage(const Message& message, const PlayerParams& params) {}
@@ -147,6 +148,33 @@ public:
 
 	virtual void HandleMessage(const Message& message, const DamageParams& params) {}
 	virtual void HandleMessage(const Message& message, const TimerParams& params) {}
+};
+
+// Define Monster Attack component
+class MonsterAttackListener : public IMessageListener {
+private:
+	CGameObject* m_pPlayer;
+public:
+	void SetObject(CGameObject* pPlayer) { m_pPlayer = pPlayer; }
+	virtual void HandleMessage(const Message& message, const MonsterParams& params);
+};
+
+// Define CinematicAllUpdated Listener
+class CinematicAllUpdatedListener : public IMessageListener {
+private:
+	CMainTMPScene* m_pScene;
+public:
+	void SetScene(CMainTMPScene* pScene) { m_pScene = pScene; };
+	virtual void HandleMessage(const Message& message, const PlayerParams& params);
+};
+
+// Define Monster Dead Listener
+class MonsterDeadListener : public IMessageListener {
+private:
+	CMainTMPScene* m_pScene;
+public:
+	void SetScene(CMainTMPScene* pScene) { m_pScene = pScene; };
+	virtual void HandleMessage(const Message& message, const MonsterParams& params);
 };
 
 class UpdateDynamicTimeScaleListener : public IMessageListener {
@@ -628,7 +656,7 @@ private:
 	int m_nEmitParticleNumber = 1.f;
 	int m_iParticleType = ParticleType::TERRAIN_PARTICLE;
 	int m_nParticleIndex = 0;
-	float m_fLifeTime = 5.f;
+	float m_fLifeTime = 1.5f;
 	float m_fSpeed = 1.f;
 	float m_fAlpha = 1.f;
 	XMFLOAT2 m_fSize = XMFLOAT2(5.f, 5.f);

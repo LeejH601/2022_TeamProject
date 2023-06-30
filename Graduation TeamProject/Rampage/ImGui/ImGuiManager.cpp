@@ -3,6 +3,7 @@
 #include "..\Global\Timer.h"
 #include "..\Global\Camera.h"
 #include "..\Scene\SimulatorScene.h"
+#include "..\Scene\LobbyScene.h"
 #include "..\Object\Texture.h"
 #include "..\Global\GameFramework.h"
 #include "..\Global\Locator.h"
@@ -1412,10 +1413,25 @@ void CImGuiManager::SetUI()
 			ImGui::EndMenuBar();
 		}
 
+		if (show_setting_menu)
+		{
+			ImGuiWindowFlags my_window_flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize;
+			ImGui::SetNextWindowSize(ImVec2(m_lDesktopWidth * 0.15f, 0.0f), ImGuiCond_Always);
+			ImGui::Begin(U8STR("설정 메뉴"), &show_setting_menu, my_window_flags);
+
+			ImVec2 itemSize = ImVec2(100, 50);
+			if (ImGui::Button(U8STR("넘어가기"), itemSize))
+				change_after = true;
+				
+			if (ImGui::Button(U8STR("되돌아가기"), itemSize))
+				change_before = true;
+
+			ImGui::End();
+		}
+
 		// 시뮬레이터 씬 보여주기 여부 설정 ImGui
 		ImGui::Checkbox(U8STR("시뮬레이터"), &show_simulator_scene);
-
-		ImGui::SameLine(m_lDesktopWidth * 0.17f);
+		 ;
 		// 플레이어 애니메이션 출력 버튼
 		if (ImGui::Button(U8STR("공격1")))
 		{

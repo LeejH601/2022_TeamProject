@@ -21,7 +21,10 @@ void CMessageDispatcher::RegisterListener(MessageType messageType, IMessageListe
 void PlayerAttackListener::HandleMessage(const Message& message, const PlayerParams& params)
 {
     if (message.getType() == MessageType::PLAYER_ATTACK) {
-		params.pPlayer->CheckCollision(m_pObject);
+		if (params.pPlayer->CheckCollision(m_pObject))
+		{
+			
+		}
     }
 }
 void SoundPlayComponent::HandleMessage(const Message& message, const SoundPlayParams& params)
@@ -613,6 +616,26 @@ void SlashHitComponent::HandleMessage(const Message& message, const ParticleComp
 void RegisterArticulationSleepListener::HandleMessage(const Message& message, const RegisterArticulationSleepParams& params)
 {
 	m_pScene->RequestSleepArticulation(params);
+}
+
+void MonsterAttackListener::HandleMessage(const Message& message, const MonsterParams& params)
+{
+	if (message.getType() == MessageType::MONSTER_ATTACK)
+	{
+		params.pMonster->CheckCollision(m_pPlayer);
+	}
+}
+
+void CinematicAllUpdatedListener::HandleMessage(const Message& message, const PlayerParams& params)
+{
+	if (message.getType() == MessageType::CINEMATIC_ALL_UPDATED)
+		m_pScene->AdvanceStage();
+}
+
+void MonsterDeadListener::HandleMessage(const Message& message, const MonsterParams& params)
+{
+	if (message.getType() == MessageType::MONSTER_DEAD)
+		m_pScene->HandleDeadMessage();
 }
 
 ShieldHitComponent::ShieldHitComponent()

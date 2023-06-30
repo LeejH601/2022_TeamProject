@@ -12,7 +12,8 @@
 #include "..\Shader\PostProcessShader.h"
 #include "..\Object\MonsterState.h"
 #include "..\Object\SwordTrailObject.h"
-
+#include "..\Object\UIObject.h"
+#include "..\Shader\UIObjectShader.h"
 void CSimulatorScene::OnPreRender(ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed)
 {
 	if (m_pDepthRenderShader)
@@ -325,6 +326,7 @@ void CSimulatorScene::CreateComputeRootSignature(ID3D12Device* pd3dDevice)
 	if (pd3dSignatureBlob) pd3dSignatureBlob->Release();
 	if (pd3dErrorBlob) pd3dErrorBlob->Release();
 }
+
 void CSimulatorScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	CreateGraphicsRootSignature(pd3dDevice);
@@ -633,6 +635,7 @@ void CSimulatorScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float f
 	pd3dCommandList->CopyResource(pd3dDestination, pd3dSource);
 	::SynchronizeResourceTransition(pd3dCommandList, pd3dDestination, D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_RENDER_TARGET);
 	::SynchronizeResourceTransition(pd3dCommandList, pd3dSource, D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+
 }
 void CSimulatorScene::OnPostRender()
 {

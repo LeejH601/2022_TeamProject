@@ -51,3 +51,5 @@ VS_TEXTURED_OUTPUT VSUIObject(uint nVertexID : SV_VertexID)
 	output.position += float4(fScreenPos, 0.f, 0.f);
 	return(output);
 }
+
+

@@ -16,9 +16,9 @@ protected:
 	CGameObject* m_pPlayer = nullptr;
 	std::vector<std::unique_ptr<IMessageListener>> m_pListeners;
 public:
-	std::unique_ptr<CPostProcessShader> m_pPostProcessShader = NULL;
-	std::unique_ptr<CHDRComputeShader> m_pHDRComputeShader;
-	std::unique_ptr<CBloomShader> m_pBloomComputeShader;
+	std::shared_ptr<CPostProcessShader> m_pPostProcessShader = NULL;
+	std::shared_ptr<CHDRComputeShader> m_pHDRComputeShader;
+	std::shared_ptr<CBloomShader> m_pBloomComputeShader;
 
 public:
 	CScene() {}
@@ -49,6 +49,7 @@ public:
 	virtual void ReleaseObjects() {}
 
 	virtual bool ProcessInput(HWND hWnd, DWORD dwDirection, float fTimeElapsed) { return false; }
+	virtual void Enter(HWND hWnd) {}
 	virtual void Update(float fTimeElapsed) {}
 	virtual void OnPrepareRenderTarget(ID3D12GraphicsCommandList* pd3dCommandList, int nRenderTargets, D3D12_CPU_DESCRIPTOR_HANDLE* pd3dRtvCPUHandles, D3D12_CPU_DESCRIPTOR_HANDLE d3dDepthStencilBufferDSVCPUHandle){}
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed, float fCurrentTime, CCamera* pCamera = NULL) {}

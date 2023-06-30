@@ -720,6 +720,13 @@ void CMapObject::UpdateTransform(XMFLOAT4X4* pxmf4x4Parent)
 void CMapObject::PrepareBoundingBox(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	BoundingOrientedBox aambb = CreateAAMBB();
+
+	if (strcmp(m_pstrFrameName, "SM_Tree_Large_01") == 0)
+	{
+		aambb.Extents.x *= 0.35f;
+		aambb.Extents.y *= 1.0f;
+		aambb.Extents.z *= 0.35f;
+	}
 	m_ObjectBoundingBox = BoundingOrientedBox{ aambb.Center, aambb.Extents, XMFLOAT4{0.0f, 0.0f, 0.0f, 1.0f} };
 #ifdef RENDER_BOUNDING_BOX
 	pBoundingBoxMesh = CBoundingBoxShader::GetInst()->AddBoundingObject(pd3dDevice, pd3dCommandList, this, aambb.Center, aambb.Extents);

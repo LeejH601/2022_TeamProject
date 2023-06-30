@@ -82,6 +82,7 @@ void CSoundManager::UpdateSound()
 {
 	FMOD_System_Update(g_sound_system);
 	m_SoundPlayer.PlaySounds(g_sound_system, m_channelgroup);
+	m_SoundPlayer.EraseAllPlayedSounds();
 }
 
 void CSoundManager::PlaySound(std::string path, float volume, float fDelay) {

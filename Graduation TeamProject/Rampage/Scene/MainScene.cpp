@@ -18,6 +18,180 @@
 
 #include <PxForceMode.h>
 
+#define MAX_GOBLIN_NUM		50
+#define MAX_ORC_NUM			50
+#define MAX_SKELETON_NUM	50
+
+XMFLOAT3 RandomMonsterPos(XMFLOAT3 xmf3CenterPos) {
+	return XMFLOAT3{ xmf3CenterPos.x + RandomFloatInRange(-12.5f, 12.5f),
+				xmf3CenterPos.y,
+				xmf3CenterPos.z + RandomFloatInRange(-12.5f, 12.5f) };
+}
+
+CMainTMPScene::CMainTMPScene()
+{
+	std::unique_ptr<RegisterArticulationListener> listener = std::make_unique<RegisterArticulationListener>();
+	listener->SetScene(this);
+	listener->SetEnable(true);
+	m_pListeners.push_back(std::move(listener));
+	CMessageDispatcher::GetInst()->RegisterListener(MessageType::REQUEST_REGISTERARTI, m_pListeners.back().get(), nullptr);
+
+
+	std::unique_ptr<RegisterArticulationSleepListener> slistener = std::make_unique<RegisterArticulationSleepListener>();
+	slistener->SetScene(this);
+	slistener->SetEnable(true);
+	m_pListeners.push_back(std::move(slistener));
+	CMessageDispatcher::GetInst()->RegisterListener(MessageType::REQUEST_SLEEPARTI, m_pListeners.back().get(), nullptr);
+
+	// COLLIDE LISTENER
+	std::unique_ptr<SceneCollideListener> pCollideListener = std::make_unique<SceneCollideListener>();
+	pCollideListener->SetScene(this);
+	m_pListeners.push_back(std::move(pCollideListener));
+	CMessageDispatcher::GetInst()->RegisterListener(MessageType::COLLISION, m_pListeners.back().get(), nullptr);
+
+	// ONGROUND LISTENER
+	std::unique_ptr<SceneOnGroundListener> pOnGroundListener = std::make_unique<SceneOnGroundListener>();
+	pOnGroundListener->SetScene(this);
+	m_pListeners.push_back(std::move(pOnGroundListener));
+	CMessageDispatcher::GetInst()->RegisterListener(MessageType::ONGROUND, m_pListeners.back().get(), nullptr);
+
+	// Monster Dead Listener
+	std::unique_ptr<MonsterDeadListener> pMonsterDeadListener = std::make_unique<MonsterDeadListener>();
+	pMonsterDeadListener->SetScene(this);
+	m_pListeners.push_back(std::move(pMonsterDeadListener));
+	CMessageDispatcher::GetInst()->RegisterListener(MessageType::MONSTER_DEAD, m_pListeners.back().get(), nullptr);
+
+	// Cinematic All Updated Listener
+	std::unique_ptr<CinematicAllUpdatedListener> pCinematicAllUpdatedListener = std::make_unique<CinematicAllUpdatedListener>();
+	pCinematicAllUpdatedListener->SetScene(this);
+	m_pListeners.push_back(std::move(pCinematicAllUpdatedListener));
+	CMessageDispatcher::GetInst()->RegisterListener(MessageType::CINEMATIC_ALL_UPDATED, m_pListeners.back().get(), nullptr);
+}
+
+void CMainTMPScene::HandleDeadMessage()
+{
+	m_iTotalMonsterNum -= 1;
+
+	if (m_iTotalMonsterNum == 0 && m_iStageNum != m_vCinematicCameraLocations.size() /* 모든 스테이지 클리어 */)
+	{
+		((CCinematicCamera*)(m_pCinematicSceneCamera.get()))->ClearCameraInfo();
+		((CCinematicCamera*)(m_pCinematicSceneCamera.get()))->AddPlayerCameraInfo((CPlayer*)m_pPlayer, m_pMainSceneCamera.get());
+		((CCinematicCamera*)(m_pCinematicSceneCamera.get()))->AddCameraInfo(m_vCinematicCameraLocations[m_iStageNum].get());
+		((CCinematicCamera*)(m_pCinematicSceneCamera.get()))->PlayCinematicCamera();
+
+		// 시작은 씨네마틱 카메라
+		m_pCurrentCamera = m_pCinematicSceneCamera.get();
+		m_curSceneProcessType = SCENE_PROCESS_TYPE::CINEMATIC;
+	}
+}
+
+void CMainTMPScene::AdvanceStage()
+{
+	m_iStageNum += 1;
+
+	if (m_StageInfoMap.size() < m_iStageNum)
+		return;
+
+	StageInfo stageInfo = m_StageInfoMap.find(m_iStageNum - 1)->second;
+
+	// Spawn Goblin
+	{
+
+		// Spawn Normal Golbin
+		m_iTotalMonsterNum += stageInfo.m_iGoblinNum;
+
+		{
+			std::vector<MonsterSpawnInfo> xmf3MonsterSpawnInfo(stageInfo.m_iGoblinNum);
+
+			for (MonsterSpawnInfo& spawnInfo : xmf3MonsterSpawnInfo)
+			{
+				spawnInfo.xmf3Position = RandomMonsterPos(stageInfo.m_xmf3StageCenterPos);
+				spawnInfo.bIsElite = false;
+			}
+			CMonsterPool::GetInst()->SpawnMonster(MONSTER_TYPE::GOBLIN, stageInfo.m_iGoblinNum, xmf3MonsterSpawnInfo.data());
+		}
+
+		// Spawn Elite Goblin
+		m_iTotalMonsterNum += stageInfo.m_iEliteGolbinNum;
+
+		{
+			std::vector<MonsterSpawnInfo> xmf3MonsterSpawnInfo(stageInfo.m_iEliteGolbinNum);
+
+			for (MonsterSpawnInfo& spawnInfo : xmf3MonsterSpawnInfo)
+			{
+				spawnInfo.xmf3Position = RandomMonsterPos(stageInfo.m_xmf3StageCenterPos);
+				spawnInfo.bIsElite = true;
+			}
+			CMonsterPool::GetInst()->SpawnMonster(MONSTER_TYPE::GOBLIN, stageInfo.m_iEliteGolbinNum, xmf3MonsterSpawnInfo.data());
+		}
+	}
+
+	// Spawn Orc
+	{	
+		// Spawn Normal Orc
+		m_iTotalMonsterNum += stageInfo.m_iOrcNum;
+
+		{
+			std::vector<MonsterSpawnInfo> xmf3MonsterSpawnInfo(stageInfo.m_iOrcNum);
+
+			for (MonsterSpawnInfo& spawnInfo : xmf3MonsterSpawnInfo)
+			{
+				spawnInfo.xmf3Position = RandomMonsterPos(stageInfo.m_xmf3StageCenterPos);
+				spawnInfo.bIsElite = false;
+			}
+
+			CMonsterPool::GetInst()->SpawnMonster(MONSTER_TYPE::ORC, stageInfo.m_iOrcNum, xmf3MonsterSpawnInfo.data());
+		}
+
+		// Spawn Elite Orc
+		{
+			std::vector<MonsterSpawnInfo> xmf3MonsterSpawnInfo(stageInfo.m_iEliteOrcNum);
+
+			for (MonsterSpawnInfo& spawnInfo : xmf3MonsterSpawnInfo)
+			{
+				spawnInfo.xmf3Position = RandomMonsterPos(stageInfo.m_xmf3StageCenterPos);
+				spawnInfo.bIsElite = true;
+			}
+
+			CMonsterPool::GetInst()->SpawnMonster(MONSTER_TYPE::ORC, stageInfo.m_iEliteOrcNum, xmf3MonsterSpawnInfo.data());
+		}
+	}
+
+	// Spawn Skeleton
+	{
+		// Spawn Normal Skeleton
+		m_iTotalMonsterNum += stageInfo.m_iSkeletonNum;
+
+		{
+			std::vector<MonsterSpawnInfo> xmf3MonsterSpawnInfo(stageInfo.m_iSkeletonNum);
+
+			for (MonsterSpawnInfo& spawnInfo : xmf3MonsterSpawnInfo)
+			{
+				spawnInfo.xmf3Position = RandomMonsterPos(stageInfo.m_xmf3StageCenterPos);
+				spawnInfo.bIsElite = false;
+			}
+
+			CMonsterPool::GetInst()->SpawnMonster(MONSTER_TYPE::SKELETON, stageInfo.m_iSkeletonNum, xmf3MonsterSpawnInfo.data());
+		}
+
+		// Spawn Elite Skeleton
+		{
+			std::vector<MonsterSpawnInfo> xmf3MonsterSpawnInfo(stageInfo.m_iEliteSkeletonNum);
+
+			for (MonsterSpawnInfo& spawnInfo : xmf3MonsterSpawnInfo)
+			{
+				spawnInfo.xmf3Position = RandomMonsterPos(stageInfo.m_xmf3StageCenterPos);
+				spawnInfo.bIsElite = true;
+			}
+
+			CMonsterPool::GetInst()->SpawnMonster(MONSTER_TYPE::SKELETON, stageInfo.m_iEliteSkeletonNum, xmf3MonsterSpawnInfo.data());
+		}
+	}
+
+	m_curSceneProcessType = SCENE_PROCESS_TYPE::WAITING;
+	m_fWaitingTime = 0.0f;
+}
+
 void CMainTMPScene::SetPlayer(CGameObject* pPlayer)
 {
 	m_pPlayer = pPlayer;
@@ -449,8 +623,6 @@ bool CMainTMPScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM 
 }
 SCENE_RETURN_TYPE CMainTMPScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam, DWORD& dwDirection)
 {
-	static int CursorHideCount = 0;
-
 	MOUSE_CUROSR_MODE eMouseMode = Locator.GetMouseCursorMode();
 
 	switch (nMessageID)
@@ -458,6 +630,9 @@ SCENE_RETURN_TYPE CMainTMPScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMe
 	case WM_KEYDOWN:
 		switch (wParam)
 		{
+		case VK_ESCAPE:
+			::PostQuitMessage(0);
+			break;
 		case VK_SHIFT:
 			if (m_pPlayer)
 			{
@@ -478,19 +653,17 @@ SCENE_RETURN_TYPE CMainTMPScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMe
 			}
 			break;
 		case VK_F5:
-		{
-			XMFLOAT3 xmf3MonsterPos[5];
-			XMFLOAT3 xmf3PlayerPos = m_pPlayer->GetPosition();
-			XMFLOAT3 xmf3PlayerLook = m_pPlayer->GetLook();
-			XMFLOAT3 xmf3PlayerRight = m_pPlayer->GetRight();
-			xmf3PlayerLook = Vector3::ScalarProduct(xmf3PlayerLook, 20.f, false);
-
-			for (int i = 0; i < 5; i++)
-				xmf3MonsterPos[i] = Vector3::Add(Vector3::Add(Vector3::ScalarProduct(xmf3PlayerRight, -20 + i * 10, false), xmf3PlayerLook), xmf3PlayerPos);
-
-			CMonsterPool::GetInst()->SpawnMonster(7, xmf3MonsterPos);
+			if (m_pCurrentCamera == m_pFloatingCamera.get())
+				((CCinematicCamera*)(m_pCinematicSceneCamera.get()))->AddCameraInfo(m_pCurrentCamera);
 			break;
-		}
+		case VK_F6:
+			((CCinematicCamera*)(m_pCinematicSceneCamera.get()))->ClearCameraInfo();
+			break;
+		case VK_F7:
+			((CCinematicCamera*)(m_pCinematicSceneCamera.get()))->PlayCinematicCamera();
+			m_pCurrentCamera = m_pCinematicSceneCamera.get();
+			m_curSceneProcessType = SCENE_PROCESS_TYPE::CINEMATIC;
+			break;
 		case VK_BACK:
 			if (m_CurrentMouseCursorMode == MOUSE_CUROSR_MODE::THIRD_FERSON_MODE)
 			{
@@ -499,9 +672,9 @@ SCENE_RETURN_TYPE CMainTMPScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMe
 				m_CurrentMouseCursorMode = MOUSE_CUROSR_MODE::FLOATING_MODE;
 				PostMessage(hWnd, WM_ACTIVATE, 0, 0);
 
-				while (CursorHideCount > 0)
+				while (m_iCursorHideCount > 0)
 				{
-					CursorHideCount--;
+					m_iCursorHideCount--;
 					ShowCursor(true);
 				}
 				ClipCursor(NULL);
@@ -510,39 +683,33 @@ SCENE_RETURN_TYPE CMainTMPScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMe
 			return SCENE_RETURN_TYPE::RETURN_PREVIOUS_SCENE;
 		case '1':
 		{
-			RECT screenRect;
-			GetWindowRect(hWnd, &screenRect);
-			m_ScreendRect = screenRect;
-
 			m_pCurrentCamera = m_pFloatingCamera.get();
+			m_curSceneProcessType = SCENE_PROCESS_TYPE::NORMAL;
+
 			Locator.SetMouseCursorMode(MOUSE_CUROSR_MODE::FLOATING_MODE);
 			m_CurrentMouseCursorMode = MOUSE_CUROSR_MODE::FLOATING_MODE;
-			PostMessage(hWnd, WM_ACTIVATE, 0, 0);
-
-			while (CursorHideCount > 0)
+			
+			while (m_iCursorHideCount > 0)
 			{
-				CursorHideCount--;
+				m_iCursorHideCount--;
 				ShowCursor(true);
+				ClipCursor(NULL);
 			}
-			ClipCursor(NULL);
 		}
 		break;
 		case '2':
 		{
-
-			RECT screenRect;
-			GetWindowRect(hWnd, &screenRect);
-			m_ScreendRect = screenRect;
-
 			m_pCurrentCamera = m_pMainSceneCamera.get();
+			m_curSceneProcessType = SCENE_PROCESS_TYPE::NORMAL;
+
 			Locator.SetMouseCursorMode(MOUSE_CUROSR_MODE::THIRD_FERSON_MODE);
 			m_CurrentMouseCursorMode = MOUSE_CUROSR_MODE::THIRD_FERSON_MODE;
 			PostMessage(hWnd, WM_ACTIVATE, 0, 0);
 
-			if (CursorHideCount < 1) {
-				CursorHideCount++;
+			if (m_iCursorHideCount < 1) {
+				m_iCursorHideCount++;
 				ShowCursor(false);
-				ClipCursor(&screenRect);
+				ClipCursor(&m_ScreendRect);
 			}
 		}
 		break;
@@ -675,7 +842,30 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pMainSceneCamera = std::make_unique<CThirdPersonCamera>();
 	m_pMainSceneCamera->Init(pd3dDevice, pd3dCommandList);
 
-	m_pCurrentCamera = m_pFloatingCamera.get();
+	std::unique_ptr<CCamera> FirstCinematicCamera = std::make_unique<CCamera>();
+	FirstCinematicCamera->SetPosition(XMFLOAT3{ 124.899033, 17.034166, 156.040268 });
+	FirstCinematicCamera->SetLookVector(XMFLOAT3{ -0.097144, -0.369207, -0.924256 });
+	FirstCinematicCamera->SetUpVector(XMFLOAT3{ -0.038593, 0.929347, -0.367184 });
+	FirstCinematicCamera->SetRightVector(XMFLOAT3{ -0.994522, -0.000000, 0.104529 });
+
+	std::unique_ptr<CCamera> SecondCinematicCamera = std::make_unique<CCamera>();
+	SecondCinematicCamera->SetPosition(XMFLOAT3{ 166.397644, 33.010002, 49.103397 });
+	SecondCinematicCamera->SetLookVector(XMFLOAT3{ 0.778753, -0.578334, -0.243052 });
+	SecondCinematicCamera->SetUpVector(XMFLOAT3{ 0.552070, 0.815800, -0.172304 });
+	SecondCinematicCamera->SetRightVector(XMFLOAT3{ -0.297931, -0.000001, -0.954587 });
+
+	std::unique_ptr<CCamera> ThirdCinematicCamera = std::make_unique<CCamera>();
+	ThirdCinematicCamera->SetPosition(XMFLOAT3{ 85.300034, 32.215328, 131.137573 });
+	ThirdCinematicCamera->SetLookVector(XMFLOAT3{ -0.553928, -0.474600, -0.684046 });
+	ThirdCinematicCamera->SetUpVector(XMFLOAT3{ -0.298675, 0.880201, -0.368834 });
+	ThirdCinematicCamera->SetRightVector(XMFLOAT3{ -0.777147, 0.000000, 0.629319 });
+
+	m_vCinematicCameraLocations.push_back(std::move(FirstCinematicCamera));
+	m_vCinematicCameraLocations.push_back(std::move(SecondCinematicCamera));
+	m_vCinematicCameraLocations.push_back(std::move(ThirdCinematicCamera));
+
+	m_pCinematicSceneCamera = std::make_unique<CCinematicCamera>();
+	m_pCinematicSceneCamera->Init(pd3dDevice, pd3dCommandList);
 
 #ifdef RENDER_BOUNDING_BOX
 	CBoundingBoxShader::GetInst()->CreateShader(pd3dDevice, GetGraphicsRootSignature(), 7, pdxgiObjectRtvFormats, DXGI_FORMAT_D32_FLOAT, 0);
@@ -696,70 +886,50 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	CModelShader::GetInst()->CreateShaderVariables(pd3dDevice, pd3dCommandList);
 	CModelShader::GetInst()->CreateCbvSrvUavDescriptorHeaps(pd3dDevice, 0, 1000);
 
-	std::unique_ptr<CMonster> m_pMonsterObject = std::make_unique<CGoblinObject>(pd3dDevice, pd3dCommandList, 1);
-	m_pMonsterObject->SetPosition(XMFLOAT3(190, 50, -70));
-	m_pMonsterObject->SetScale(2.0f, 2.0f, 2.0f);
-	m_pMonsterObject->Rotate(0.0f, 180.0f, 0.0f);
-	m_pMonsterObject->m_fHP = 1000.f;
-	m_pMonsterObject->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
-	m_pMonsterObject->m_pSkinnedAnimationController->m_xmf3RootObjectScale = XMFLOAT3(10.0f, 10.0f, 10.0f);
-	m_pMonsterObject->SetElite(true);
-	m_pMonsterObject->CreateArticulation(1.0f);
-	m_pEnemys.push_back(std::move(m_pMonsterObject));
-
-	for (int i = 0; i < 1; ++i) {
-		m_pMonsterObject = std::make_unique<CGoblinObject>(pd3dDevice, pd3dCommandList, 1);
+	for (int i = 0; i < MAX_GOBLIN_NUM; ++i)
+	{
+		std::unique_ptr<CMonster> m_pMonsterObject = std::make_unique<CGoblinObject>(pd3dDevice, pd3dCommandList, 1);
 		m_pMonsterObject->SetPosition(XMFLOAT3(190, 50, 70));
 		m_pMonsterObject->SetScale(2.0f, 2.0f, 2.0f);
 		m_pMonsterObject->Rotate(0.0f, 180.0f, 0.0f);
-		m_pMonsterObject->m_fHP = 100;
+		m_pMonsterObject->m_fTotalHP = MONSTER_HP;
+		m_pMonsterObject->m_fHP = MONSTER_HP;
 		m_pMonsterObject->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
 		m_pMonsterObject->m_pSkinnedAnimationController->m_xmf3RootObjectScale = XMFLOAT3(10.0f, 10.0f, 10.0f);
 		m_pMonsterObject->CreateArticulation(1.0f);
-		m_pEnemys.push_back(std::move(m_pMonsterObject));
-
-		m_pMonsterObject = std::make_unique<COrcObject>(pd3dDevice, pd3dCommandList, 1);
-		m_pMonsterObject->SetPosition(XMFLOAT3(190, 50, 70));
-		m_pMonsterObject->SetScale(2.0f, 2.0f, 2.0f);
-		m_pMonsterObject->Rotate(0.0f, 180.0f, 0.0f);
-		m_pMonsterObject->m_fHP = 100;
-		m_pMonsterObject->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
-		m_pMonsterObject->m_pSkinnedAnimationController->m_xmf3RootObjectScale = XMFLOAT3(10.0f, 10.0f, 10.0f);
-		m_pMonsterObject->SetElite(true);
-		m_pMonsterObject->CreateArticulation(1.0f);
-		m_pEnemys.push_back(std::move(m_pMonsterObject));
-
-		m_pMonsterObject = std::make_unique<COrcObject>(pd3dDevice, pd3dCommandList, 1);
-		m_pMonsterObject->SetPosition(XMFLOAT3(190, 50, 70));
-		m_pMonsterObject->SetScale(2.0f, 2.0f, 2.0f);
-		m_pMonsterObject->Rotate(0.0f, 180.0f, 0.0f);
-		m_pMonsterObject->m_fHP = 100;
-		m_pMonsterObject->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
-		m_pMonsterObject->m_pSkinnedAnimationController->m_xmf3RootObjectScale = XMFLOAT3(10.0f, 10.0f, 10.0f);
-		m_pMonsterObject->CreateArticulation(1.0f);
-		m_pEnemys.push_back(std::move(m_pMonsterObject));
-
-		m_pMonsterObject = std::make_unique<CSkeletonObject>(pd3dDevice, pd3dCommandList, 1);
-		m_pMonsterObject->SetPosition(XMFLOAT3(190, 50, 70));
-		m_pMonsterObject->SetScale(2.0f, 2.0f, 2.0f);
-		m_pMonsterObject->Rotate(0.0f, 180.0f, 0.0f);
-		m_pMonsterObject->m_fHP = 100;
-		m_pMonsterObject->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
-		m_pMonsterObject->m_pSkinnedAnimationController->m_xmf3RootObjectScale = XMFLOAT3(10.0f, 10.0f, 10.0f);
-		m_pMonsterObject->CreateArticulation(1.0f);
-		m_pEnemys.push_back(std::move(m_pMonsterObject));
-
-		m_pMonsterObject = std::make_unique<CSkeletonObject>(pd3dDevice, pd3dCommandList, 1);
-		m_pMonsterObject->SetPosition(XMFLOAT3(190, 50, 70));
-		m_pMonsterObject->SetScale(2.0f, 2.0f, 2.0f);
-		m_pMonsterObject->Rotate(0.0f, 180.0f, 0.0f);
-		m_pMonsterObject->m_fHP = 100;
-		m_pMonsterObject->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
-		m_pMonsterObject->m_pSkinnedAnimationController->m_xmf3RootObjectScale = XMFLOAT3(10.0f, 10.0f, 10.0f);
-		m_pMonsterObject->CreateArticulation(1.0f);
+		CMonsterPool::GetInst()->SetNonActiveMonster(MONSTER_TYPE::GOBLIN, m_pMonsterObject.get());
 		m_pEnemys.push_back(std::move(m_pMonsterObject));
 	}
 
+	for (int i = 0; i < MAX_ORC_NUM; ++i)
+	{
+		std::unique_ptr<CMonster> m_pMonsterObject = std::make_unique<COrcObject>(pd3dDevice, pd3dCommandList, 1);
+		m_pMonsterObject->SetPosition(XMFLOAT3(190, 50, 70));
+		m_pMonsterObject->SetScale(2.0f, 2.0f, 2.0f);
+		m_pMonsterObject->Rotate(0.0f, 180.0f, 0.0f);
+		m_pMonsterObject->m_fTotalHP = MONSTER_HP;
+		m_pMonsterObject->m_fHP = MONSTER_HP;
+		m_pMonsterObject->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
+		m_pMonsterObject->m_pSkinnedAnimationController->m_xmf3RootObjectScale = XMFLOAT3(10.0f, 10.0f, 10.0f);
+		m_pMonsterObject->CreateArticulation(1.0f);
+		CMonsterPool::GetInst()->SetNonActiveMonster(MONSTER_TYPE::ORC, m_pMonsterObject.get());
+		m_pEnemys.push_back(std::move(m_pMonsterObject));
+	}
+
+	for (int i = 0; i < MAX_SKELETON_NUM; ++i)
+	{
+		std::unique_ptr<CMonster> m_pMonsterObject = std::make_unique<CSkeletonObject>(pd3dDevice, pd3dCommandList, 1);
+		m_pMonsterObject->SetPosition(XMFLOAT3(190, 50, 70));
+		m_pMonsterObject->SetScale(2.0f, 2.0f, 2.0f);
+		m_pMonsterObject->Rotate(0.0f, 180.0f, 0.0f);
+		m_pMonsterObject->m_fTotalHP = MONSTER_HP;
+		m_pMonsterObject->m_fHP = MONSTER_HP;
+		m_pMonsterObject->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
+		m_pMonsterObject->m_pSkinnedAnimationController->m_xmf3RootObjectScale = XMFLOAT3(10.0f, 10.0f, 10.0f);
+		m_pMonsterObject->CreateArticulation(1.0f);
+		CMonsterPool::GetInst()->SetNonActiveMonster(MONSTER_TYPE::SKELETON, m_pMonsterObject.get());
+		m_pEnemys.push_back(std::move(m_pMonsterObject));
+	}
 
 	// CollisionChecker 생성
 	m_pCollisionChecker = std::make_unique<CollisionChecker>();
@@ -806,7 +976,7 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pSunLightShader = std::make_unique<CSunLightShader>();
 	m_pSunLightShader->CreateShader(pd3dDevice, GetGraphicsRootSignature(), 7, pdxgiObjectRtvFormats, DXGI_FORMAT_D32_FLOAT, 0);
 
-	m_pPostProcessShader = std::make_unique<CPostProcessShader>();
+	m_pPostProcessShader = std::make_shared<CPostProcessShader>();
 	m_pPostProcessShader->CreateShader(pd3dDevice, GetGraphicsRootSignature(), 7, pdxgiObjectRtvFormats, DXGI_FORMAT_D32_FLOAT, 0);
 	m_pPostProcessShader->BuildObjects(pd3dDevice, pd3dCommandList);
 
@@ -853,7 +1023,7 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 		dynamic_cast<CMonster*>(m_pEnemys[i].get())->m_ParticleCompParam.pObject = m_pParticleObjects.front().get();
 	}
 
-	m_pSlashHitObjects = std::make_unique<CParticleObject>(m_pTextureManager->LoadTextureIndex(TextureType::BillBoardTexture, L"Image/BillBoardImages/Circle1.dds"), pd3dDevice, pd3dCommandList, GetGraphicsRootSignature(), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), 2.0f, XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT2(2.0f, 2.0f), MAX_PARTICLES, m_pSlashHitShader.get(), RECOVERY_PARTICLE);
+	m_pSlashHitObjects = std::make_unique<CParticleObject>(m_pTextureManager->LoadTextureIndex(TextureType::BillBoardTexture, L"Image/BillBoardImages/TextureFlash2.dds"), pd3dDevice, pd3dCommandList, GetGraphicsRootSignature(), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), 2.0f, XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT2(2.0f, 2.0f), MAX_PARTICLES, m_pSlashHitShader.get(), RECOVERY_PARTICLE);
 	m_pSmokeObject = std::make_unique<CSmokeParticleObject>(m_pTextureManager->LoadTextureIndex(TextureType::SmokeTexture, L"Image/SmokeImages/Smoke2.dds"), pd3dDevice, pd3dCommandList, GetGraphicsRootSignature(), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), 2.0f, XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT2(2.0f, 2.0f), MAX_PARTICLES, m_pParticleShader.get(), SMOKE_PARTICLE);
 
 	m_pVertexPointParticleObject = std::make_unique<CVertexPointParticleObject>(m_pTextureManager->LoadTextureIndex(TextureType::ParticleTexture, L"Image/ParticleImages/RoundSoftParticle.dds"), pd3dDevice, pd3dCommandList, GetGraphicsRootSignature(), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), 2.0f, XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT2(0.5f, 0.5f), MAX_PARTICLES, m_pParticleShader.get(), SPHERE_PARTICLE);
@@ -869,18 +1039,6 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	CPlayerParticleObject::GetInst()->SetSmokeObjects(m_pSmokeObject.get());
 	CPlayerParticleObject::GetInst()->SetTrailParticleObjects(m_pTrailParticleObjects.get());
 	CPlayerParticleObject::GetInst()->SetVertexPointParticleObjects(m_pVertexPointParticleObject.get());
-
-	// COLLIDE LISTENER
-	std::unique_ptr<SceneCollideListener> pCollideListener = std::make_unique<SceneCollideListener>();
-	pCollideListener->SetScene(this);
-	m_pListeners.push_back(std::move(pCollideListener));
-	CMessageDispatcher::GetInst()->RegisterListener(MessageType::COLLISION, m_pListeners.back().get(), nullptr);
-
-	// ONGROUND LISTENER
-	std::unique_ptr<SceneOnGroundListener> pOnGroundListener = std::make_unique<SceneOnGroundListener>();
-	pOnGroundListener->SetScene(this);
-	m_pListeners.push_back(std::move(pOnGroundListener));
-	CMessageDispatcher::GetInst()->RegisterListener(MessageType::ONGROUND, m_pListeners.back().get(), nullptr);
 
 	m_pHDRComputeShader = std::make_unique<CHDRComputeShader>();
 	m_pHDRComputeShader->CreateShader(pd3dDevice, pd3dCommandList, GetComputeRootSignature());
@@ -902,43 +1060,135 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 		m_pSwordTrailObjects.push_back(std::move(pSwordtrail));
 	}
 
-	int UITextureIndexOffset = m_pTextureManager->GetTextureOffset(TextureType::UITexture) - 1;
 	m_pUIObjectShader = std::make_unique<CUIObjectShader>();
 	m_pUIObjectShader->CreateShader(pd3dDevice, GetGraphicsRootSignature(), 7, pdxgiObjectRtvFormats, DXGI_FORMAT_D32_FLOAT, 0);
 
-	std::unique_ptr<CUIObject> pUIObject = std::make_unique<CUIObject>(2, pd3dDevice, pd3dCommandList, 10.f);
-	pUIObject->SetSize(XMFLOAT2(814.f * 0.7f, 253.f * 0.7f));
-	pUIObject->SetScreenPosition(XMFLOAT2(FRAME_BUFFER_WIDTH * 0.2f, FRAME_BUFFER_HEIGHT * 0.8f));
-	pUIObject->SetTextureIndex(0 + UITextureIndexOffset);
+	// 플레이어 UI
+	//std::unique_ptr<CUIObject> pUIObject = std::make_unique<CUIObject>(2, pd3dDevice, pd3dCommandList, 10.f);
+	//pUIObject->SetSize(XMFLOAT2(1281.f * 0.4f, 407.f * 0.4f));
+	//pUIObject->SetScreenPosition(XMFLOAT2(FRAME_BUFFER_WIDTH * 0.15f, FRAME_BUFFER_HEIGHT * 0.9f));
+	//pUIObject->SetTextureIndex(m_pTextureManager->LoadTotalTextureIndex(TextureType::UITexture, L"Image/UiImages/Frame.dds"));
+	//m_pUIObject.push_back(std::move(pUIObject));
+	
+	std::unique_ptr<CUIObject>  pUIObject = std::make_unique<CMonsterHPObject>(2, pd3dDevice, pd3dCommandList, 10.f);
+	pUIObject->SetSize(XMFLOAT2(512.f * 0.16f, 512.f * 0.16f));
+	pUIObject->SetScreenPosition(XMFLOAT2(FRAME_BUFFER_WIDTH * 0.1f - 80.f, FRAME_BUFFER_HEIGHT * 0.878f + 80.f));
+	pUIObject->SetTextureIndex(m_pTextureManager->LoadTotalTextureIndex(TextureType::UITexture, L"Image/UiImages/IconFrame.dds"));
+	m_pUIObject.push_back(std::move(pUIObject));
+
+	pUIObject = std::make_unique<CMonsterHPObject>(2, pd3dDevice, pd3dCommandList, 10.f);
+	pUIObject->SetSize(XMFLOAT2(512.f * 0.15f, 512.f * 0.15f));
+	pUIObject->SetScreenPosition(XMFLOAT2(FRAME_BUFFER_WIDTH * 0.1f - 80.f, FRAME_BUFFER_HEIGHT * 0.878f + 80.f));
+	pUIObject->SetTextureIndex(m_pTextureManager->LoadTotalTextureIndex(TextureType::UITexture, L"Image/UiImages/PlayerIcon.dds"));
+	m_pUIObject.push_back(std::move(pUIObject));
+
+	// Monster UI
+	pUIObject = std::make_unique<CMonsterHPObject>(2, pd3dDevice, pd3dCommandList, 10.f);
+	pUIObject->SetSize(XMFLOAT2(1024.f * 0.443f, 64.f * 0.65f));
+	pUIObject->SetScreenPosition(XMFLOAT2(FRAME_BUFFER_WIDTH * 0.2f - 7.f, FRAME_BUFFER_HEIGHT * 0.878f + 70.f));
+	pUIObject->SetTextureIndex(m_pTextureManager->LoadTotalTextureIndex(TextureType::UITexture, L"Image/UiImages/MonsterHPFrame.dds"));
 	m_pUIObject.push_back(std::move(pUIObject));
 
 	pUIObject = std::make_unique<CHPObject>(2, pd3dDevice, pd3dCommandList, 10.f);
-	pUIObject->SetSize(XMFLOAT2(426 * 0.65f, 42 * 0.65f));
-	pUIObject->SetScreenPosition(XMFLOAT2(FRAME_BUFFER_WIDTH * 0.2f + 80.f, FRAME_BUFFER_HEIGHT * 0.8f + 25.f));
-	pUIObject->SetTextureIndex(1 + UITextureIndexOffset);
+	pUIObject->SetSize(XMFLOAT2(1024.f * 0.44f, 64.f * 0.6f));
+	pUIObject->SetScreenPosition(XMFLOAT2(FRAME_BUFFER_WIDTH * 0.2f - 7.f, FRAME_BUFFER_HEIGHT * 0.878f + 70.f));
+	pUIObject->SetTextureIndex(m_pTextureManager->LoadTotalTextureIndex(TextureType::UITexture, L"Image/UiImages/MonsterHP.dds")); // HP
 	m_pUIObject.push_back(std::move(pUIObject));
+
+	// Monster UI
+	pUIObject = std::make_unique<CMonsterHPObject>(2, pd3dDevice, pd3dCommandList, 10.f);
+	pUIObject->SetSize(XMFLOAT2(1024.f * 0.343f, 64.f * 0.6f));
+	pUIObject->SetScreenPosition(XMFLOAT2(FRAME_BUFFER_WIDTH * 0.17f, FRAME_BUFFER_HEIGHT * 0.86f + 70.f));
+	pUIObject->SetTextureIndex(m_pTextureManager->LoadTotalTextureIndex(TextureType::UITexture, L"Image/UiImages/MonsterHPFrame.dds"));
+	m_pUIObject.push_back(std::move(pUIObject));
+
 
 	pUIObject = std::make_unique<CSTAMINAObject>(2, pd3dDevice, pd3dCommandList, 10.f);
-	pUIObject->SetSize(XMFLOAT2(426 * 0.48f, 42 * 0.48f));
-	pUIObject->SetScreenPosition(XMFLOAT2(FRAME_BUFFER_WIDTH * 0.2f + 45.f, FRAME_BUFFER_HEIGHT * 0.8f - 10.f));
-	pUIObject->SetTextureIndex(2 + UITextureIndexOffset);
+	pUIObject->SetSize(XMFLOAT2(1024.f * 0.34f, 64.f * 0.6f));
+	pUIObject->SetScreenPosition(XMFLOAT2(FRAME_BUFFER_WIDTH * 0.17f, FRAME_BUFFER_HEIGHT * 0.85995f + 70.f));
+	pUIObject->SetTextureIndex(m_pTextureManager->LoadTotalTextureIndex(TextureType::UITexture, L"Image/UiImages/Stamina.dds")); // STAMINA
 	m_pUIObject.push_back(std::move(pUIObject));
+
+
+
+	// Monster UI
+	pUIObject = std::make_unique<CMonsterHPObject>(2, pd3dDevice, pd3dCommandList, 10.f);
+	pUIObject->SetSize(XMFLOAT2(1024.f * 0.8f, 64.f * 0.6f));
+	pUIObject->SetScreenPosition(XMFLOAT2(FRAME_BUFFER_WIDTH * 0.5f, FRAME_BUFFER_HEIGHT * 0.15f));
+	pUIObject->SetTextureIndex(m_pTextureManager->LoadTotalTextureIndex(TextureType::UITexture, L"Image/UiImages/MonsterHPFrame.dds"));
+	m_pUIObject.push_back(std::move(pUIObject));
+
+
+	pUIObject = std::make_unique<CMonsterHPObject>(2, pd3dDevice, pd3dCommandList, 10.f);
+	pUIObject->SetSize(XMFLOAT2(1024.f * 0.8f, 64.f * 0.6f));
+	pUIObject->SetScreenPosition(XMFLOAT2(FRAME_BUFFER_WIDTH * 0.5f, FRAME_BUFFER_HEIGHT * 0.15f));
+	pUIObject->SetTextureIndex(m_pTextureManager->LoadTotalTextureIndex(TextureType::UITexture, L"Image/UiImages/MonsterHP.dds"));
+	m_pUIObject.push_back(std::move(pUIObject));
+
+
+	// Icon Frame
+	pUIObject = std::make_unique<CUIObject>(2, pd3dDevice, pd3dCommandList, 10.f);
+	pUIObject->SetSize(XMFLOAT2(251.f * 0.43f, 254.f * 0.48f));
+	pUIObject->SetScreenPosition(XMFLOAT2(FRAME_BUFFER_WIDTH * 0.1f - 100.f, FRAME_BUFFER_HEIGHT * 0.2f));
+	pUIObject->SetTextureIndex(m_pTextureManager->LoadTotalTextureIndex(TextureType::UITexture, L"Image/UiImages/IconFrame.dds"));
+	m_pUIObject.push_back(std::move(pUIObject));
+
+	// HP Icon
+	pUIObject = std::make_unique<CUIObject>(2, pd3dDevice, pd3dCommandList, 10.f);
+	pUIObject->SetSize(XMFLOAT2(256.f * 0.4f, 256.f * 0.45f));
+	pUIObject->SetScreenPosition(XMFLOAT2(FRAME_BUFFER_WIDTH * 0.1f - 100., FRAME_BUFFER_HEIGHT * 0.2f));
+	pUIObject->SetTextureIndex(m_pTextureManager->LoadTotalTextureIndex(TextureType::UITexture, L"Image/UiImages/HpIcon.dds"));
+	m_pUIObject.push_back(std::move(pUIObject));
+
+	//// Combo UI
+	pUIObject = std::make_unique<CComboNumberObject>(14, 35, pd3dDevice, pd3dCommandList, 10.f);
+	pUIObject->SetSize(XMFLOAT2(64.f * 1.f, 60.f * 1.f));
+	pUIObject->SetScreenPosition(XMFLOAT2(FRAME_BUFFER_WIDTH * 0.88f, FRAME_BUFFER_HEIGHT * 0.5f));
+	pUIObject->SetTextureIndex(m_pTextureManager->LoadTotalTextureIndex(TextureType::UITexture, L"Image/UiImages/Texture2.dds")); // 0
+	m_pUIObject.push_back(std::move(pUIObject));
+
+	// ITEM_N UI
 
 	pUIObject = std::make_unique<CNumberObject>(14, 35, pd3dDevice, pd3dCommandList, 10.f);
-	pUIObject->SetSize(XMFLOAT2(56.f * 1.5f, 60.f * 1.5f));
-	pUIObject->SetScreenPosition(XMFLOAT2(FRAME_BUFFER_WIDTH * 0.85f, FRAME_BUFFER_HEIGHT * 0.5f));
-	pUIObject->SetTextureIndex(6 + UITextureIndexOffset);
+	pUIObject->SetSize(XMFLOAT2(64.f * 0.4f, 60.f * 0.4f));
+	pUIObject->SetScreenPosition(XMFLOAT2(FRAME_BUFFER_WIDTH * 0.065f, FRAME_BUFFER_HEIGHT * 0.16f));
+	pUIObject->SetTextureIndex(m_pTextureManager->LoadTotalTextureIndex(TextureType::UITexture, L"Image/UiImages/Texture2.dds"));
+	dynamic_cast<CNumberObject*>(pUIObject.get())->UpdateNumber(5);
 	m_pUIObject.push_back(std::move(pUIObject));
 
-	pUIObject = std::make_unique<CBloodEffectObject>(2, pd3dDevice, pd3dCommandList, 10.f);
-	pUIObject->SetSize(XMFLOAT2(FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT));
-	pUIObject->SetScreenPosition(XMFLOAT2(FRAME_BUFFER_WIDTH * 0.5f, FRAME_BUFFER_HEIGHT * 0.5f));
-	pUIObject->SetTextureIndex(17 + UITextureIndexOffset);
+
+	// Hits
+	pUIObject = std::make_unique<CUIObject>(2, pd3dDevice, pd3dCommandList, 10.f);
+	pUIObject->SetSize(XMFLOAT2(840.f * 0.15f, 360.f * 0.15f));
+	pUIObject->SetScreenPosition(XMFLOAT2(FRAME_BUFFER_WIDTH * 0.85f + 200.f, FRAME_BUFFER_HEIGHT * 0.5f - 15.f));
+	pUIObject->SetTextureIndex(m_pTextureManager->LoadTotalTextureIndex(TextureType::UITexture, L"Image/UiImages/Hits.dds"));
 	m_pUIObject.push_back(std::move(pUIObject));
 
+
+	m_StageInfoMap.emplace(std::pair<int, StageInfo>(0, 
+		StageInfo{ 
+			0, 5, 
+			0, 0,
+			0, 0, 
+			XMFLOAT3{ 113.664360f, 3.016271f, 123.066483f } }));
+	m_StageInfoMap.emplace(std::pair<int, StageInfo>(1,
+		StageInfo{
+			0, 0,
+			5, 0,
+			0, 0,
+			XMFLOAT3{ 189.830246f, 3.016271f, 47.559467f } }));
+	m_StageInfoMap.emplace(std::pair<int, StageInfo>(2,
+		StageInfo{
+			0, 0,
+			0, 0,
+			5, 0,
+			XMFLOAT3{ 53.192234f, 3.016271f, 99.847107f } }));
 }
 bool CMainTMPScene::ProcessInput(HWND hWnd, DWORD dwDirection, float fTimeElapsed)
 {
+	if (m_curSceneProcessType == SCENE_PROCESS_TYPE::CINEMATIC)
+		return true;
+
 	POINT ptCursorPos;
 	float cxDelta, cyDelta;
 
@@ -1002,6 +1252,16 @@ DWORD WINAPI AnimateEnemysProcess(LPVOID data) {
 
 void CMainTMPScene::UpdateObjects(float fTimeElapsed)
 {
+	if (m_curSceneProcessType == SCENE_PROCESS_TYPE::WAITING)
+	{
+		m_fWaitingTime += fTimeElapsed;
+		if (m_fWaitingTime > MAX_WAIT_TIME)
+		{
+			m_pCurrentCamera = m_pMainSceneCamera.get();
+			m_curSceneProcessType = SCENE_PROCESS_TYPE::NORMAL;
+		}
+	}
+
 	if (m_pPlayer) {
 		if (!dynamic_cast<CPlayer*>(m_pPlayer)->m_pSwordTrailReference)
 			dynamic_cast<CPlayer*>(m_pPlayer)->m_pSwordTrailReference = m_pSwordTrailObjects.data();
@@ -1089,7 +1349,7 @@ void CMainTMPScene::UpdateObjects(float fTimeElapsed)
 		((CKnightPlayer*)m_pPlayer)->m_pSkinnedAnimationController->m_pRootMotionObject->GetWorld()._43 };
 	xmf3PlayerPos.y += MeterToUnit(0.9f);
 
-	m_pMainSceneCamera->Update(xmf3PlayerPos, fTimeElapsed);
+	m_pCurrentCamera->Update(xmf3PlayerPos, fTimeElapsed);
 
 	CameraUpdateParams camera_update_params;
 	camera_update_params.pCamera = m_pMainSceneCamera.get();
@@ -1122,6 +1382,8 @@ void CMainTMPScene::Update(float fTimeElapsed)
 		b_simulation = false;
 	}
 
+
+
 #endif // WITH_LAG_DOLL_SIMULATION
 	UpdateObjects(fTimeElapsed);
 	m_pLensFlareShader->UpdateFlareAlpha(fTimeElapsed);
@@ -1129,6 +1391,34 @@ void CMainTMPScene::Update(float fTimeElapsed)
 void CMainTMPScene::OnPrepareRenderTarget(ID3D12GraphicsCommandList* pd3dCommandList, int nRenderTargets, D3D12_CPU_DESCRIPTOR_HANDLE* pd3dRtvCPUHandles, D3D12_CPU_DESCRIPTOR_HANDLE d3dDepthStencilBufferDSVCPUHandle)
 {
 	m_pPostProcessShader->OnPrepareRenderTarget(pd3dCommandList, 1, pd3dRtvCPUHandles, d3dDepthStencilBufferDSVCPUHandle);
+}
+void CMainTMPScene::Enter(HWND hWnd)
+{
+	// 씨네마틱 카메라로 게임을 시작하게 설정
+	RECT screenRect;
+	GetWindowRect(hWnd, &screenRect);
+	m_ScreendRect = screenRect;
+	SetCursorPos(screenRect.left + (screenRect.right - screenRect.left) / 2,
+		screenRect.top + (screenRect.bottom - screenRect.top) / 2);
+
+	((CCinematicCamera*)(m_pCinematicSceneCamera.get()))->AddPlayerCameraInfo((CPlayer*)m_pPlayer, m_pMainSceneCamera.get());
+	((CCinematicCamera*)(m_pCinematicSceneCamera.get()))->AddCameraInfo(m_vCinematicCameraLocations[0].get());
+	((CCinematicCamera*)(m_pCinematicSceneCamera.get()))->PlayCinematicCamera();
+
+	// 시작은 씨네마틱 카메라
+	m_pCurrentCamera = m_pCinematicSceneCamera.get();
+	m_curSceneProcessType = SCENE_PROCESS_TYPE::CINEMATIC;
+
+	Locator.SetMouseCursorMode(MOUSE_CUROSR_MODE::THIRD_FERSON_MODE);
+	m_CurrentMouseCursorMode = MOUSE_CUROSR_MODE::THIRD_FERSON_MODE;
+
+	if (m_iCursorHideCount < 1) {
+		m_iCursorHideCount++;
+		ShowCursor(false);
+		ClipCursor(&screenRect);
+	}
+
+	PostMessage(hWnd, WM_ACTIVATE, 0, 0);
 }
 void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed, float fCurrentTime, CCamera* pCamera)
 {
@@ -1148,7 +1438,6 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 
 
 	m_pMap->RenderTerrain(pd3dCommandList);
-
 
 	for (int i = 0; i < m_pTerrainSpriteObject.size(); ++i)
 	{
@@ -1363,12 +1652,27 @@ void CMainTMPScene::OnPostRender()
 	//((CParticleObject*)m_pTrailParticleObjects.get())->OnPostRender();
 
 }
-
+#include <functional>
+#include <numeric>
 void CMainTMPScene::UIUpdate(CPlayer* pPlayer)
 {
-	dynamic_cast<CBarObject*>(m_pUIObject[1].get())->Set_Value(((CPhysicsObject*)m_pPlayer)->m_fHP, ((CPhysicsObject*)m_pPlayer)->m_fTotalHP);
-	dynamic_cast<CBarObject*>(m_pUIObject[2].get())->Set_Value(((CPlayer*)m_pPlayer)->m_fStamina, ((CPlayer*)m_pPlayer)->m_fTotalStamina);
-	dynamic_cast<CNumberObject*>(m_pUIObject[3].get())->UpdateNumber(((CPlayer*)m_pPlayer)->m_iCombo);
+	dynamic_cast<CBarObject*>(m_pUIObject[3].get())->Set_Value(((CPhysicsObject*)m_pPlayer)->m_fHP, ((CPhysicsObject*)m_pPlayer)->m_fTotalHP);
+	dynamic_cast<CBarObject*>(m_pUIObject[5].get())->Set_Value(((CPlayer*)m_pPlayer)->m_fStamina, ((CPlayer*)m_pPlayer)->m_fTotalStamina);
+	dynamic_cast<CNumberObject*>(m_pUIObject[10].get())->UpdateNumber(((CPlayer*)m_pPlayer)->m_iCombo);
+
+	dynamic_cast<CUIObject*>(m_pUIObject[12].get())->SetScreenPosition(XMFLOAT2(FRAME_BUFFER_WIDTH * 0.85f + 160.f + (((CPlayer*)m_pPlayer)->m_iCombo / 10) * 55.f, FRAME_BUFFER_HEIGHT * 0.5f - 9.f));
+	// ((CPlayer*)m_pPlayer)->m_iCombo / 10
+
+	if (((CKnightPlayer*)(m_pPlayer))->GetMonsterAttack())
+	{
+		float CurrentHp = 0.f;
+		for (int i = 0; i < m_pEnemys.size(); i++)		
+			CurrentHp += max(0.f, dynamic_cast<CMonster*>(m_pEnemys[i].get())->m_fHP);
+
+		dynamic_cast<CBarObject*>(m_pUIObject[7].get())->Set_Value(CurrentHp, m_pEnemys.size() * MONSTER_HP);
+		((CKnightPlayer*)(m_pPlayer))->SetMonsterAttack(false);
+	}
+		
 }
 
 void CMainTMPScene::LoadTextureObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
@@ -1389,27 +1693,20 @@ void CMainTMPScene::LoadTextureObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 	m_pTextureManager->LoadTexture(TextureType::TrailNoiseTexture, pd3dDevice, pd3dCommandList, L"Image/TrailImages/VAP1_Noise_4.dds", 1, 1);
 	m_pTextureManager->LoadTexture(TextureType::TrailNoiseTexture, pd3dDevice, pd3dCommandList, L"Image/TrailImages/VAP1_Noise_14.dds", 1, 1);
 
-	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/Frame.dds", 0, 0);
-	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/Hp.dds", 0, 0);
-	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/Mana.dds", 0, 0);
-	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/Tonus.dds", 0, 0);
-	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/Mana2.dds", 0, 0);
-	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/Blood.dds", 0, 0);
-
-	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/Combo2.dds", 0, 0);
-	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/Number/0.dds", 0, 0);
-	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/Number/1.dds", 0, 0);
-	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/Number/2.dds", 0, 0);
-	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/Number/3.dds", 0, 0);
-	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/Number/4.dds", 0, 0);
-	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/Number/5.dds", 0, 0);
-	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/Number/6.dds", 0, 0);
-	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/Number/7.dds", 0, 0);
-	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/Number/8.dds", 0, 0);
-	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/Number/9.dds", 0, 0);
+	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/Number/Numbers.dds", 0, 0);
 
 	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/BloodEffect.dds", 0, 0);
 
+	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/MonsterHPFrame.dds", 0, 0);
+	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/MonsterHP.dds", 0, 0);
+	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/Stamina.dds", 0, 0);
+	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/HpIcon.dds", 0, 0);
+	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/IconFrame.dds", 0, 0);
+	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/PlayerIcon.dds", 0, 0);
+	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/MonsterBarFrame.dds", 0, 0);
+	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/Texture2.dds", 0, 0);
+	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/Hits.dds", 0, 0);
+	
 	m_pTextureManager->LoadTexture(TextureType::UniformTexture, pd3dDevice, pd3dCommandList, L"Image/UnifromImages/Cracks_12.dds", 0, 0);
 }
 

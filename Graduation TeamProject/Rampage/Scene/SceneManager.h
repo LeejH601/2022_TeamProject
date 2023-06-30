@@ -12,6 +12,7 @@ private:
 	std::unique_ptr<CScene> m_pMainScene = NULL;
 	std::unique_ptr<CScene> m_pLobbyScene = NULL;
 	std::unique_ptr<CScene> m_pSimulatorScene = NULL;
+	
 public:
 	CSceneManager();
 	CSceneManager(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
