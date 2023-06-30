@@ -58,8 +58,6 @@ private:
 	int m_iTotalMonsterNum = 0;
 	std::map<int, StageInfo> m_StageInfoMap;
 
-	BoundingOrientedBox m_MonsterSpawnTriggerBox;
-	
 	std::unique_ptr<CollisionChecker> m_pCollisionChecker = NULL;
 	std::vector<std::unique_ptr<CGameObject>> m_pEnemys;
 	std::unique_ptr<CMap> m_pMap;

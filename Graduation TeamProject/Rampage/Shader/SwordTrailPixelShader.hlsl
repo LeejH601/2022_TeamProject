@@ -39,8 +39,8 @@ PS_MULTIPLE_RENDER_TARGETS_OUTPUT SwordTrail_PS(GS_OUT input)
 
 	float2 uv = input.uv.xy;
 	//uv.y /= 2.0f;
-	float4 BaseColor = gtxtTexture[gnBaseTextureIndex - 1].Sample(gSamplerState, uv * float2(1.0f, 1.0f));
-	float4 NoiseColor = gtxtTexture[gnNoiseTextureIndex - 1].Sample(gSamplerState, uv * float2(1.0f, 1.0f) - gnOffsetTime);
+	float4 BaseColor = gtxtTexture[gnBaseTextureIndex].Sample(gSamplerState, uv * float2(1.0f, 1.0f));
+	float4 NoiseColor = gtxtTexture[gnNoiseTextureIndex].Sample(gSamplerState, uv * float2(1.0f, 1.0f) - gnOffsetTime);
 
 	float EmissiveFactor = gnEmissiveFactor;
 	//float EmissiveFactor = min(2.0f, uv.x * 4.0f);

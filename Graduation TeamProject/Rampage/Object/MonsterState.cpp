@@ -404,6 +404,8 @@ void Dead_Monster::Enter(CMonster* monster)
 	monster->m_fDeadTime = 0.0f;
 	monster->Animate(0.f);
 	monster->m_bSimulateArticulate = true;
+	monster->m_bStunned = false;
+	monster->m_bCanChase = false;
 	int index = 0;
 	for (XMFLOAT4X4& matrix : monster->m_AritculatCacheMatrixs) {
 		std::string linkName = monster->m_pArtiLinkNames[index];

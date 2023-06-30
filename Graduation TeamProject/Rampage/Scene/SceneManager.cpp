@@ -72,6 +72,7 @@ bool CSceneManager::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM 
 		{
 			dynamic_cast<CLobbyScene*>(m_pCurrentScene)->SetSceneType((UINT)LobbySceneType::SIMULATOR_Scene);
 			m_pCurrentScene = m_pMainScene.get();
+			m_pMainScene->Enter(hWnd);
 		}
 	}
 
