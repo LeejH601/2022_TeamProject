@@ -56,6 +56,11 @@ void CTextureManager::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dComma
 	pd3dCommandList->SetGraphicsRootDescriptorTable(10, m_d3dCbvGPUDescriptorStartHandle);
 }
 
+void CTextureManager::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList, TextureType textureType)
+{
+	pd3dCommandList->SetGraphicsRootDescriptorTable(10, m_pd3dSrvGpuDescriptorHandles[static_cast<int>(textureType)]);
+}
+
 void CTextureManager::LoadSphereBuffer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	XMFLOAT4* pxmf4RandomValues = new XMFLOAT4[1024];

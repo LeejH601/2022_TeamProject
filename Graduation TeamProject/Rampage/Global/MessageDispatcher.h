@@ -465,6 +465,13 @@ public:
 	virtual void HandleMessage(const Message& message, const ParticleCompParams& params);
 };
 
+class ShieldHitComponent : public ParticleComponent
+{
+public:
+	ShieldHitComponent();
+	virtual void HandleMessage(const Message& message, const ParticleCompParams& params);
+};
+
 #define MAX_COLORCURVES 8
 class TrailComponent : public IMessageListener
 {

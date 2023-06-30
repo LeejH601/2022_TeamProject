@@ -44,6 +44,7 @@ cbuffer cbDissolveParam : register(b5)
 }
 
 Texture2D gtxMappedTexture[8] : register(t0);
+Texture2D gtxtTexture[30] : register(t51);
 SamplerState gSamplerState : register(s0);
 
 #include "Light.hlsl"
@@ -150,9 +151,11 @@ PS_MULTIPLE_RENDER_TARGETS_OUTPUT PS_Player(VS_OUTPUT input)
 		float3 toCameraVec = normalize(gf3CameraPosition - input.positionW.xyz);
 		float RimLight = smoothstep(1.0f - 0.9, 1.0f, 1 - max(0, dot(normalize(input.normalW), toCameraVec)));
 		float3 RimLightColor = float3(2.5f,0.0f,0.0f);
+		//float4 CrackColor = gtxtTexture[29].Sample(gSamplerState, input.uv);
 		RimLight *= float(gnRimLightEnable);
 
 		cColor.xyz += RimLightColor * RimLight;
+		//cColor.xyz *= (CrackColor.rgb);
 
 		output.f4Color = cColor;
 		output.f4PositoinW = float4(input.positionW, 1.0f);

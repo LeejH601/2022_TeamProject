@@ -379,11 +379,13 @@ void Attack_Monster::OnRootMotion(CMonster* monster, float fTimeElapsed)
 
 void Attack_Monster::Exit(CMonster* monster)
 {
-	printf("dsGsdgsd");
+
 }
 
 void Dead_Monster::Enter(CMonster* monster)
 {
+	monster->m_bStunned = false;
+	monster->m_bCanChase = false;
 	monster->m_fDeadTime = 0.0f;
 	monster->Animate(0.f);
 	monster->m_bSimulateArticulate = true;

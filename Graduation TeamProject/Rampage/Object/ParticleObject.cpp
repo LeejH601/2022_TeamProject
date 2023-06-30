@@ -217,6 +217,7 @@ void CParticleObject::EmitParticle(int emitType)
 	case 6:
 	case 7:
 	case 8:
+	case 9:
 		param.m_fLifeTime = m_fLifeTime;
 		param.m_nEmitNum = m_iEmitParticleN;
 		param.m_fEmitedSpeed = m_fSpeed;

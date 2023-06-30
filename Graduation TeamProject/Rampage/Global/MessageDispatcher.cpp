@@ -196,6 +196,7 @@ void StunAnimationComponent::HandleMessage(const Message& message, const Animati
 }
 ParticleComponent::ParticleComponent()
 {
+	if(CSimulatorScene::GetInst()->GetTextureManager())
 	m_iTextureOffset = CSimulatorScene::GetInst()->GetTextureManager()->GetTextureOffset(TextureType::ParticleTexture);
 	//m_iTextureOffset = CSimulatorScene::GetInst()->GetTextureManager()->GetTextureOffset(TextureType::ParticleTexture);
 	//std::shared_ptr<CTexture> pTexture = CSimulatorScene::GetInst()->GetTextureManager()->GetTexture(TextureType::ParticleTexture);
@@ -526,10 +527,20 @@ void DamageListener::HandleMessage(const Message& message, const DamageParams& p
 		pMonster->m_fMaxShakeDistance = pShakeAnimationComponent->GetDistance();
 
 		if (pMonster->m_bElite) {
-			pMonster->ApplyDamage(30.0f);
+			pMonster->ApplyDamage(15.0f); // 실드가 있을 시 데미지 감소
 			if (!pMonster->GetHasShield()) {
+				pMonster->ApplyDamage(15.0f);
 				pMonster->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
 				pMonster->m_pStateMachine->ChangeState(Damaged_Monster::GetInst());
+			}
+			else {
+				pMonster->m_ParticleCompParam.xmf3Position = pMonster->GetPosition();
+				pMonster->m_ParticleComponent.HandleMessage(Message(MessageType::MESSAGE_END), pMonster->m_ParticleCompParam);
+				// 실드 충격 사운드 출력 필요
+				/*SoundPlayParams Shieldsound_play_params;
+				Shieldsound_play_params.monster_type = pMonster->GetMonsterType();
+				Shieldsound_play_params.sound_category = SOUND_CATEGORY::SOUND_SHOCK;
+				CMessageDispatcher::GetInst()->Dispatch_Message<SoundPlayParams>(MessageType::PLAY_SOUND, &Shieldsound_play_params, pPlayer->m_pStateMachine->GetCurrentState());*/
 			}
 		}
 		else {
@@ -602,4 +613,47 @@ void SlashHitComponent::HandleMessage(const Message& message, const ParticleComp
 void RegisterArticulationSleepListener::HandleMessage(const Message& message, const RegisterArticulationSleepParams& params)
 {
 	m_pScene->RequestSleepArticulation(params);
+}
+
+ShieldHitComponent::ShieldHitComponent()
+{
+	m_fFieldSpeed = 1.0f;
+	m_fNoiseStrength = 1.0f;;
+	m_xmf3FieldMainDirection = XMFLOAT3(0.0f, 1.0f, 0.0f);
+	m_fProgressionRate = 1.0f;
+	m_fLengthScale = 1.0f;
+
+	m_bSimulateRotate = false;
+}
+
+void ShieldHitComponent::HandleMessage(const Message& message, const ParticleCompParams& params)
+{
+	if (!m_bEnable)
+		return;
+
+	CParticleObject* pParticle = dynamic_cast<CParticleObject*>(params.pObject);
+
+	if (pParticle)
+	{
+		pParticle->SetEmit(true);
+		pParticle->SetSize(m_fSize);
+		pParticle->SetStartAlpha(m_fAlpha);
+		pParticle->SetColor(m_xmf3Color);
+		pParticle->SetSpeed(m_fSpeed);
+		pParticle->SetLifeTime(m_fLifeTime);
+		pParticle->SetMaxParticleN(m_nParticleNumber);
+		pParticle->SetEmitParticleN(m_nEmitParticleNumber);
+		pParticle->SetPosition(params.xmf3Position);
+		pParticle->SetParticleType(m_iParticleType);
+		pParticle->SetFieldSpeed(m_fFieldSpeed);
+		pParticle->SetNoiseStrength(m_fNoiseStrength);
+		pParticle->SetFieldMainDirection(m_xmf3FieldMainDirection);
+		pParticle->SetProgressionRate(m_fProgressionRate);
+		pParticle->SetLengthScale(m_fLengthScale);
+		pParticle->SetTextureIndex(m_iTextureIndex + m_iTextureOffset);
+		pParticle->SetEmissive(m_fEmissive);
+		pParticle->SetRotateFactor(m_bSimulateRotate);
+		pParticle->SetScaleFactor(m_bSimulateRotate);
+		pParticle->EmitParticle(m_iParticleType);
+	}
 }

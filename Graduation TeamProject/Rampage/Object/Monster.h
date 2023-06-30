@@ -3,6 +3,7 @@
 #include "PhysicsObject.h"
 #include "StateMachine.h"
 #include "MonsterState.h"
+#include "..\Global\MessageDispatcher.h"
 
 class CMonster : public CPhysicsObject
 {
@@ -61,6 +62,10 @@ public:
 
 	CGameObject* pBodyBoundingBoxMesh;
 	CGameObject* pWeaponBoundingBoxMesh;
+
+
+	ParticleCompParams m_ParticleCompParam;
+	ShieldHitComponent m_ParticleComponent;
 
 	/*float m_fRimLightFactor;
 	XMFLOAT3 m_xmf3RimLightColor;
