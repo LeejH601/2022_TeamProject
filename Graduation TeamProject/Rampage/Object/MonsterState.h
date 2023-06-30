@@ -19,7 +19,7 @@ public:
 class Spawn_Monster : public CState<CMonster>
 {
 private:
-    float m_fMaxSpawnTime = 100.0f;
+    float m_fMaxSpawnTime;
 public:
     DECLARE_SINGLE(Spawn_Monster);
     Spawn_Monster();

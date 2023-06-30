@@ -606,3 +606,23 @@ void RegisterArticulationSleepListener::HandleMessage(const Message& message, co
 {
 	m_pScene->RequestSleepArticulation(params);
 }
+
+void MonsterAttackListener::HandleMessage(const Message& message, const MonsterParams& params)
+{
+	if (message.getType() == MessageType::MONSTER_ATTACK)
+	{
+		params.pMonster->CheckCollision(m_pPlayer);
+	}
+}
+
+void CinematicAllUpdatedListener::HandleMessage(const Message& message, const PlayerParams& params)
+{
+	if (message.getType() == MessageType::CINEMATIC_ALL_UPDATED)
+		m_pScene->AdvanceStage();
+}
+
+void MonsterDeadListener::HandleMessage(const Message& message, const MonsterParams& params)
+{
+	if (message.getType() == MessageType::MONSTER_DEAD)
+		m_pScene->HandleDeadMessage();
+}

@@ -27,6 +27,8 @@ public:
 	float m_fToPlayerLength;
 
 	float m_fAttackRange;
+	float m_fAtkStartTime;
+	float m_fAtkEndTime;
 	float m_fSensingRange;
 	
 	float m_fStunTime;
@@ -52,6 +54,11 @@ public:
 
 	MONSTER_TYPE m_MonsterType;
 	std::unique_ptr<CStateMachine<CMonster>> m_pStateMachine;
+
+	int m_iAttackAnimationNum;
+	std::string m_strAttackSoundPath;
+	float m_fAttackSoundVolume;
+	float m_fAttackSoundDelay;
 
 	CGameObject* pWeapon;
 	BoundingOrientedBox m_BodyBoundingBox;
@@ -84,23 +91,14 @@ public:
 	void ApplyDamage(float Damage, void* pData = nullptr);
 	void SetElite(bool flag);
 	bool GetHasShield() { return m_fCurrShield > 0.0f; };
+	virtual void PlayMonsterEffectSound();
 
 	virtual void UpdateMatrix();
 	virtual void SetScale(float x, float y, float z);
 	virtual void Update(float fTimeElapsed);
 	virtual void UpdateTransform(XMFLOAT4X4* pxmf4x4Parent = NULL);
-	virtual void SetHit(CGameObject* pHitter);
-	virtual bool CheckCollision(CGameObject* pTargetObject) {
-		if (pTargetObject)
-		{
-			BoundingOrientedBox* TargetBoundingBox = pTargetObject->GetBoundingBox();
-			if (m_TransformedWeaponBoundingBox.Intersects(*TargetBoundingBox)) {
-				pTargetObject->SetHit(this);
-				return true;
-			}
-		}
-		return false;
-	}
+	virtual bool SetHit(CGameObject* pHitter);
+	virtual bool CheckCollision(CGameObject* pTargetObject);
 	virtual void UpdateTransformFromArticulation(XMFLOAT4X4* pxmf4x4Parent, std::vector<std::string> pArtiLinkNames, std::vector<XMFLOAT4X4>& AritculatCacheMatrixs, float scale = 1.0f);
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, bool b_UseTexture, CCamera* pCamera = NULL);
 };
@@ -113,6 +111,7 @@ public:
 	COrcObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks);
 	virtual ~COrcObject();
 
+	virtual void PlayMonsterEffectSound();
 	virtual BoundingOrientedBox* GetBoundingBox() { return &m_TransformedBodyBoundingBox; }
 	virtual void PrepareBoundingBox(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 };
@@ -125,6 +124,7 @@ public:
 	CGoblinObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks);
 	virtual ~CGoblinObject();
 
+	virtual void PlayMonsterEffectSound();
 	virtual BoundingOrientedBox* GetBoundingBox() { return &m_TransformedBodyBoundingBox; }
 	virtual void PrepareBoundingBox(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 };
@@ -137,6 +137,7 @@ public:
 	CSkeletonObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks);
 	virtual ~CSkeletonObject();
 
+	virtual void PlayMonsterEffectSound();
 	virtual BoundingOrientedBox* GetBoundingBox() { return &m_TransformedBodyBoundingBox; }
 	virtual void PrepareBoundingBox(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 };
@@ -150,16 +151,21 @@ public:
 	virtual void OnRootMotion(CGameObject* pRootGameObject, float fTimeElapsed);
 };
 
+struct MonsterSpawnInfo {
+	XMFLOAT3 xmf3Position;
+	bool bIsElite;
+};
+
 class CMonsterPool
 {
 	DECLARE_SINGLE(CMonsterPool);
 
 public:
-	void SpawnMonster(int MonsterN, XMFLOAT3* xmfPositions);
+	void SpawnMonster(MONSTER_TYPE monsterType, int MonsterN, MonsterSpawnInfo* monsterSpawnInfo);
 
-	bool SetNonActiveMonster(CMonster* pMonster);
-	bool SetActiveMonster(XMFLOAT3 xmfPosition);
+	bool SetNonActiveMonster(MONSTER_TYPE monsterType, CMonster* pMonster);
+	bool SetActiveMonster(MONSTER_TYPE monsterType, MonsterSpawnInfo monsterSpawnInfo);
 
 private:
-	std::vector<CGameObject*> m_pNonActiveMonsters; // 사용 가능한 몬스터
+	std::vector<std::vector<CGameObject*>> m_pNonActiveMonsters; // 사용 가능한 몬스터
 };

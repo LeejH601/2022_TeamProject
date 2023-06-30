@@ -4,6 +4,7 @@
 #include "..\Global\Locator.h"
 #include "..\Shader\BoundingBoxShader.h"
 #include "Texture.h"
+#include "..\Sound\SoundManager.h"
 
 CMonster::CMonster()
 {
@@ -27,6 +28,8 @@ CMonster::CMonster()
 	m_fSpeedUperS = MeterToUnit(m_fSpeedKperH * 1000.0f) / 3600.0f;
 
 	m_fAttackRange = MeterToUnit(1.0f);
+	m_fAtkStartTime = 0.0f;
+	m_fAtkEndTime = 0.0f;
 	m_fSensingRange = MeterToUnit(20.0f);
 
 	std::unique_ptr<PlayerAttackListener> pCollisionComponent = std::make_unique<PlayerAttackListener>();
@@ -148,7 +151,6 @@ void CMonster::Update(float fTimeElapsed)
 		m_fDissolveThrethHold = m_fDissolveTime / m_fMaxDissolveTime;
 		if (m_fDissolveThrethHold > 1.0f && m_bArticulationSleep == false) {
 			m_bArticulationSleep = true;
-			m_bSimulateArticulate = false;
 			RegisterArticulationSleepParams Request_params;
 			Request_params.pObject = this;
 			CMessageDispatcher::GetInst()->Dispatch_Message<RegisterArticulationSleepParams>(MessageType::REQUEST_SLEEPARTI, &Request_params, nullptr);
@@ -172,10 +174,6 @@ void CMonster::Update(float fTimeElapsed)
 
 	XMFLOAT3 xmf3ShakeVec = Vector3::ScalarProduct(Vector3::Normalize(GetRight()), MeterToUnit(m_fShakeDistance), false);
 	m_xmf3CalPos = Vector3::Add(m_xmf3Position, xmf3ShakeVec);
-
-	/*std::wstring debugString{std::to_wstring(m_fShakeDistance)};
-	OutputDebugString(debugString.c_str());
-	OutputDebugString(L"\n");*/
 
 	CPhysicsObject::Apply_Friction(fTimeElapsed);
 }
@@ -204,8 +202,26 @@ void CMonster::UpdateTransform(XMFLOAT4X4* pxmf4x4Parent)
 	}
 
 }
-void CMonster::SetHit(CGameObject* pHitter)
+
+bool CMonster::SetHit(CGameObject* pHitter)
 {
+	return false;
+}
+void CMonster::PlayMonsterEffectSound()
+{
+}
+bool CMonster::CheckCollision(CGameObject* pTargetObject)
+{
+	if (pTargetObject)
+	{
+		BoundingOrientedBox* TargetBoundingBox = pTargetObject->GetBoundingBox();
+		if (m_TransformedWeaponBoundingBox.Intersects(*TargetBoundingBox)) {
+			if(pTargetObject->SetHit(this))
+				PlayMonsterEffectSound();
+			return true;
+		}
+	}
+	return false;
 }
 void CMonster::UpdateTransformFromArticulation(XMFLOAT4X4* pxmf4x4Parent, std::vector<std::string> pArtiLinkNames, std::vector<XMFLOAT4X4>& AritculatCacheMatrixs, float scale)
 {
@@ -244,6 +260,13 @@ void CMonster::Render(ID3D12GraphicsCommandList* pd3dCommandList, bool b_UseText
 COrcObject::COrcObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks)
 {
 	m_MonsterType = MONSTER_TYPE::ORC;
+	m_fAtkStartTime = 0.55f;
+	m_fAtkEndTime = 0.92;
+
+	m_iAttackAnimationNum = 0;
+	m_fAttackSoundDelay = 0.55f;
+	m_fAttackSoundVolume = 1.5f;
+	m_strAttackSoundPath = "Sound/shoot/Air Cut by Langerium Id-84616.wav";
 
 	CLoadedModelInfo* pOrcModel = CModelManager::GetInst()->GetModelInfo("Object/Orc.bin");;
 	if (!pOrcModel) pOrcModel = CModelManager::GetInst()->LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, "Object/Orc.bin");
@@ -260,16 +283,20 @@ COrcObject::COrcObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3d
 COrcObject::~COrcObject()
 {
 }
+void COrcObject::PlayMonsterEffectSound()
+{
+	CSoundManager::GetInst()->PlaySound("Sound/effect/MP_Left Hook.mp3", 2.0f, 0.0f);
+}
 void COrcObject::PrepareBoundingBox(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	pWeapon = CGameObject::FindFrame("SM_Weapon");
 
 	m_BodyBoundingBox = BoundingOrientedBox{ XMFLOAT3(0.0f, 1.05f, 0.0f),  XMFLOAT3(0.6f, 1.0f, 0.6f), XMFLOAT4{0.0f, 0.0f, 0.0f, 1.0f} };
-	m_WeaponBoundingBox = BoundingOrientedBox{ XMFLOAT3(0.0f, 0.0f, 0.85f), XMFLOAT3(0.15f, 0.3f, 0.175f), XMFLOAT4{0.0f, 0.0f, 0.0f, 1.0f} };
+	m_WeaponBoundingBox = BoundingOrientedBox{ XMFLOAT3(0.0f, 0.0f, 0.35f), XMFLOAT3(0.15f, 0.3f, 0.725f), XMFLOAT4{0.0f, 0.0f, 0.0f, 1.0f} };
 #ifdef RENDER_BOUNDING_BOX
 	pBodyBoundingBoxMesh = CBoundingBoxShader::GetInst()->AddBoundingObject(pd3dDevice, pd3dCommandList, this, XMFLOAT3(0.0f, 1.05f, 0.0f), XMFLOAT3(0.6f, 1.0f, 0.6f));
 	//pWeaponBodyBoundingBoxMesh = CBoundingBoxShader::GetInst()->AddBoundingObject(pd3dDevice, pd3dCommandList, pWeapon, XMFLOAT3(0.0f, 0.0f, 0.32f), XMFLOAT3(0.18f, 0.28f, 0.71f));
-	pWeaponBoundingBoxMesh = CBoundingBoxShader::GetInst()->AddBoundingObject(pd3dDevice, pd3dCommandList, pWeapon, XMFLOAT3(0.0f, 0.0f, 0.85f), XMFLOAT3(0.15f, 0.3f, 0.175f));
+	pWeaponBoundingBoxMesh = CBoundingBoxShader::GetInst()->AddBoundingObject(pd3dDevice, pd3dCommandList, pWeapon, XMFLOAT3(0.0f, 0.0f, 0.35f), XMFLOAT3(0.15f, 0.3f, 0.725f));
 #endif
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -277,6 +304,13 @@ void COrcObject::PrepareBoundingBox(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 CGoblinObject::CGoblinObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks)
 {
 	m_MonsterType = MONSTER_TYPE::GOBLIN;
+	m_fAtkStartTime = 0.53f;
+	m_fAtkEndTime = 0.69f;
+
+	m_iAttackAnimationNum = 2;
+	m_fAttackSoundDelay = 0.53f;
+	m_fAttackSoundVolume = 1.0f;
+	m_strAttackSoundPath = "Sound/shoot/Air Cut by Langerium Id-84616.wav";
 
 	CLoadedModelInfo* pGoblinModel = CModelManager::GetInst()->GetModelInfo("Object/Goblin.bin");;
 	if (!pGoblinModel) pGoblinModel = CModelManager::GetInst()->LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, "Object/Goblin.bin");
@@ -292,6 +326,10 @@ CGoblinObject::CGoblinObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 }
 CGoblinObject::~CGoblinObject()
 {
+}
+void CGoblinObject::PlayMonsterEffectSound()
+{
+	CSoundManager::GetInst()->PlaySound("Sound/effect/MP_Left Hook.mp3", 1.5f, 0.0f);
 }
 void CGoblinObject::PrepareBoundingBox(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
@@ -309,6 +347,13 @@ void CGoblinObject::PrepareBoundingBox(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 CSkeletonObject::CSkeletonObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks)
 {
 	m_MonsterType = MONSTER_TYPE::SKELETON;
+	m_fAtkStartTime = 1.15f;
+	m_fAtkEndTime = 1.3f;
+
+	m_iAttackAnimationNum = 2;
+	m_fAttackSoundDelay = 1.15f;
+	m_fAttackSoundVolume = 0.35f;
+	m_strAttackSoundPath = "Sound/shoot/ethanchase7744__sword-slash.wav";
 
 	CLoadedModelInfo* pSkeletonModel = CModelManager::GetInst()->GetModelInfo("Object/Skeleton.bin");;
 	if (!pSkeletonModel) pSkeletonModel = CModelManager::GetInst()->LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, "Object/Skeleton.bin");
@@ -324,6 +369,10 @@ CSkeletonObject::CSkeletonObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 }
 CSkeletonObject::~CSkeletonObject()
 {
+}
+void CSkeletonObject::PlayMonsterEffectSound()
+{
+	//CSoundManager::GetInst()->PlaySound("Sound/effect/Buffer Spell.wav", 1.0f, 0.0f);
 }
 void CSkeletonObject::PrepareBoundingBox(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
@@ -349,36 +398,46 @@ void CMonsterRootAnimationController::OnRootMotion(CGameObject* pRootGameObject,
 {
 }
 
-bool CMonsterPool::SetNonActiveMonster(CMonster* pMonster) // Active 여부 반환
+bool CMonsterPool::SetNonActiveMonster(MONSTER_TYPE monsterType, CMonster* pMonster) // Active 여부 반환
 {
+	if(m_pNonActiveMonsters.size() != (static_cast<int>(MONSTER_TYPE::NONE)))
+		m_pNonActiveMonsters.resize(static_cast<int>(MONSTER_TYPE::NONE));
+
 	// NonActiveMonster 있는 몬스터를 Enable true 변경 및 
-	auto it = std::find(m_pNonActiveMonsters.begin(), m_pNonActiveMonsters.end(), pMonster);
-	if ((it == m_pNonActiveMonsters.end())) {
+	auto it = std::find(m_pNonActiveMonsters[static_cast<int>(monsterType)].begin(), 
+		m_pNonActiveMonsters[static_cast<int>(monsterType)].end(), 
+		pMonster);
+
+	if ((it == m_pNonActiveMonsters[static_cast<int>(monsterType)].end())) {
 		pMonster->SetEnable(false);
-		m_pNonActiveMonsters.push_back(pMonster);
+		m_pNonActiveMonsters[static_cast<int>(monsterType)].push_back(pMonster);
 		return true;
 	}
 	return false;
 }
 
-bool CMonsterPool::SetActiveMonster(XMFLOAT3 xmfPosition)
+bool CMonsterPool::SetActiveMonster(MONSTER_TYPE monsterType, MonsterSpawnInfo monsterSpawnInfo)
 {
 	// NonActiveMonster 있는 몬스터를 Enable true 변경 및 
-	if (m_pNonActiveMonsters.size() > 0) {
-		CMonster* pMonster = dynamic_cast<CMonster*>(m_pNonActiveMonsters.back());
-		m_pNonActiveMonsters.pop_back();
+	if (m_pNonActiveMonsters[static_cast<int>(monsterType)].size() > 0) {
+		CMonster* pMonster = dynamic_cast<CMonster*>(m_pNonActiveMonsters[static_cast<int>(monsterType)].back());
+		m_pNonActiveMonsters[static_cast<int>(monsterType)].pop_back();
 		pMonster->SetEnable(true);
-		pMonster->SetPosition(xmfPosition);
+		pMonster->SetPosition(monsterSpawnInfo.xmf3Position);
+
+		// 엘리트몬스터면 엘리트인지 확인하는 변수를 true로 변경 아래는 임시 코드
+		monsterSpawnInfo.bIsElite ? pMonster->bHit = true : pMonster->bHit = false;
+
 		pMonster->m_pStateMachine->ChangeState(Spawn_Monster::GetInst());
 		return true;
 	}
 	return false;
 }
 
-void CMonsterPool::SpawnMonster(int MonsterN, XMFLOAT3* xmfPositions)
+void CMonsterPool::SpawnMonster(MONSTER_TYPE monsterType, int MonsterN, MonsterSpawnInfo* monsterSpawnInfo)
 {
 	// 개수, 위치배열, 방향
 	// 플레이어 위치 근처
 	for (int i = 0; i < MonsterN; i++)
-		SetActiveMonster(XMFLOAT3(xmfPositions[i]));
+		SetActiveMonster(monsterType, monsterSpawnInfo[i]);
 }

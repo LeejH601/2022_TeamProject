@@ -116,6 +116,10 @@ public:
 
 	void SetUpdatedContext(LPVOID pContext) { m_pUpdatedContext = pContext; }
 
+	void SetRightVector(XMFLOAT3 xmf3Right) { m_xmf3Right = xmf3Right; }
+	void SetUpVector(XMFLOAT3 xmf3Up) { m_xmf3Up = xmf3Up; }
+	void SetLookVector(XMFLOAT3 xmf3Look) { m_xmf3Look = xmf3Look; }
+
 	XMFLOAT3& GetRightVector() { return(m_xmf3Right); }
 	XMFLOAT3& GetUpVector() { return(m_xmf3Up); }
 	XMFLOAT3& GetLookVector() { return(m_xmf3Look); }
@@ -154,12 +158,41 @@ public:
 
 	virtual void ProcessInput(DWORD dwDirection, float cxDelta, float cyDelta, float fTimeElapsed);
 
-	void SetPlayer(CPlayer* pPlayer) { m_pPlayer = pPlayer; }
+	void SetPlayer(CPlayer* pPlayer);
 	CPlayer* GetPlayer() { return(m_pPlayer); }
 
 	virtual void Rotate(float fPitch = 0.0f, float fYaw = 0.0f, float fRoll = 0.0f);
 	virtual void Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed);
 	virtual void OnUpdateCallback(float fTimeElapsed);
+};
+class CCinematicCamera : public CCamera
+{
+	struct CameraInfo {
+		XMFLOAT3 xmf3Look;
+		XMFLOAT3 xmf3Up;
+		XMFLOAT3 xmf3Right;
+
+		XMFLOAT3 xmf3Position;
+	};
+
+	int m_iCurrentCameraInfoIndex;
+	std::vector<CameraInfo> m_vCameraInfos;
+
+	float m_fAcceleration;
+	float m_fCurrentSpeed;
+	float m_fTotalDistance;
+	float m_fTotalParamT;
+public:
+	CCinematicCamera();
+	virtual ~CCinematicCamera() { }
+
+	void AddPlayerCameraInfo(CPlayer* pPlayer, CCamera* pCamera);
+	void AddCameraInfo(CCamera* pCamera);
+	void ClearCameraInfo();
+	void PlayCinematicCamera();
+
+	virtual void Rotate(float fPitch = 0.0f, float fYaw = 0.0f, float fRoll = 0.0f);
+	virtual void Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed);
 };
 class CFloatingCamera : public CCamera
 {

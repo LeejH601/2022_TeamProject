@@ -107,6 +107,8 @@ void CGameFramework::InitSound()
 	CSoundManager::GetInst()->RegisterSound("Sound/effect/herkules92__sword-attack.wav", false, SOUND_CATEGORY::SOUND_SHOCK);
 	CSoundManager::GetInst()->RegisterSound("Sound/effect/hit-swing-sword.wav", false, SOUND_CATEGORY::SOUND_SHOCK);
 	CSoundManager::GetInst()->RegisterSound("Sound/effect/kneeling__cleaver.mp3", false, SOUND_CATEGORY::SOUND_SHOCK);
+	CSoundManager::GetInst()->RegisterSound("Sound/effect/MP_Left Hook.mp3", false, SOUND_CATEGORY::SOUND_SHOCK);
+	CSoundManager::GetInst()->RegisterSound("Sound/effect/Buffer Spell.wav", false, SOUND_CATEGORY::SOUND_SHOCK);
 
 	CSoundManager::GetInst()->RegisterSound("Sound/Voice/Goblin/GoblinMoan01.mp3", false, SOUND_CATEGORY::SOUND_VOICE);
 	CSoundManager::GetInst()->RegisterSound("Sound/Voice/Goblin/GoblinMoan02.mp3", false, SOUND_CATEGORY::SOUND_VOICE);
@@ -370,15 +372,12 @@ void CGameFramework::BuildObjects()
 	CSimulatorScene::GetInst()->m_pBloomComputeShader->SetTextureSource(m_pd3dDevice.Get(), CSimulatorScene::GetInst()->m_pPostProcessShader->GetTextureShared());
 
 	CSimulatorScene::GetInst()->m_pHDRComputeShader->SetTextureSource(m_pd3dDevice.Get(), CSimulatorScene::GetInst()->m_pPostProcessShader->GetTextureShared());
-
-	m_pPlayer = std::make_unique<CKnightPlayer>(m_pd3dDevice.Get(), m_pd3dCommandList.Get(), 2); 
-	m_pPlayer->SetPosition(XMFLOAT3(127.0f, 50.0f, -58.0f));
-	m_pPlayer->SetScale(2.0f, 2.0f, 2.0f);
-	m_pPlayer->Rotate(0.0f, 90.0f, 0.0f);
-	((CPlayer*)m_pPlayer.get())->m_pStateMachine->ChangeState(Idle_Player::GetInst());
 	
-	CGameObject* RoadBoundingBoxMesh = CBoundingBoxShader::GetInst()->AddBoundingObject(m_pd3dDevice.Get(), m_pd3dCommandList.Get(), NULL, XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1.0f, 1.0f, 1.0f));
-	RoadBoundingBoxMesh->SetPosition(XMFLOAT3(127.0f, -12.0f, -58.0f));
+	m_pPlayer = std::make_unique<CKnightPlayer>(m_pd3dDevice.Get(), m_pd3dCommandList.Get(), 1); 
+	m_pPlayer->SetPosition(XMFLOAT3(57.0f, 3.5f, 225.0f));
+	m_pPlayer->SetScale(2.0f, 2.0f, 2.0f);
+	m_pPlayer->Rotate(0.0f, 165.0f, 0.0f);
+	((CPlayer*)m_pPlayer.get())->m_pStateMachine->ChangeState(Idle_Player::GetInst());
 
 	m_pSceneManager->SetPlayer((CPlayer*)m_pPlayer.get());
 }

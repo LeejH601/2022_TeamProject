@@ -4,12 +4,15 @@
 #define SKELETON_MOAN_SOUND_NUM 1
 
 enum class MessageType {
+	MONSTER_ATTACK,
+	MONSTER_DEAD,
 	PLAYER_ATTACK,
 	PLAY_SOUND,
 	COLLISION,
 	ONGROUND,
 	CHECK_IS_PLAYER_IN_FRONT_OF_MONSTER,
 	APPLY_DAMAGE,
+	CINEMATIC_ALL_UPDATED,
 	UPDATE_CAMERA,
 	UPDATE_OBJECT,
 	UPDATE_BILLBOARD,
@@ -25,22 +28,6 @@ enum class MessageType {
 	REQUEST_REGISTERARTI,
 	REQUEST_SLEEPARTI,
 	MESSAGE_END,
-};
-
-enum class MESSAGE_TYPE
-{
-	Msg_CameraMoveStart,
-	Msg_CameraShakeStart,
-	Msg_CameraZoomStart,
-	Msg_SoundEffectReady,
-	Msg_SoundDamageReady,
-	Msg_SoundShootReady,
-	Msg_PlaySoundEffect,
-	Msg_PlaySoundDamage,
-	Msg_PlaySoundShoot,
-	Msg_PlaySoundUIButton,
-	Msg_MonsterAttackSprite,
-	END_ENUM
 };
 
 enum class SOUND_CATEGORY
@@ -67,10 +54,10 @@ enum class PARTICLE_CATEGORY
 
 enum class MONSTER_TYPE
 {
-	NONE,
 	GOBLIN,
 	ORC,
-	SKELETON
+	SKELETON,
+	NONE
 };
 
 enum class MAP_OBJ_TYPE

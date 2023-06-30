@@ -1,10 +1,13 @@
 #include "MonsterState.h"
 #include "Monster.h"
 #include "..\Global\Locator.h"
+#include "..\Sound\SoundManager.h"
 
 
 Spawn_Monster::Spawn_Monster()
 {
+	m_fMaxSpawnTime = 1.5f;
+
 	// TERRAIN SPRITE  ANIMATION
 	std::unique_ptr<TerrainSpriteComponent> pTerrainSpriteComponent = std::make_unique<TerrainSpriteComponent>();
 	m_pListeners.push_back(std::move(pTerrainSpriteComponent));
@@ -342,7 +345,7 @@ void Chasing_Monster::Exit(CMonster* monster)
 
 void Attack_Monster::Enter(CMonster* monster)
 {
-	monster->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
+	monster->m_pSkinnedAnimationController->SetTrackAnimationSet(0, monster->m_iAttackAnimationNum);
 	monster->m_pSkinnedAnimationController->m_fTime = 0.0f;
 	monster->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition = 0.0f;
 	monster->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fSequenceWeight = 0.0f;
@@ -354,6 +357,15 @@ void Attack_Monster::Enter(CMonster* monster)
 void Attack_Monster::Execute(CMonster* monster, float fElapsedTime)
 {
 	CAnimationSet* pAnimationSet = monster->m_pSkinnedAnimationController->m_pAnimationSets->m_pAnimationSets[monster->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_nAnimationSet];
+
+	if (monster->m_fAtkStartTime < monster->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition &&
+		monster->m_fAtkEndTime > monster->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition)
+	{
+		MonsterParams monsterParams;
+		monsterParams.pMonster = monster;
+
+		CMessageDispatcher::GetInst()->Dispatch_Message<MonsterParams>(MessageType::MONSTER_ATTACK, &monsterParams, this);
+	}
 
 	if (monster->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition == pAnimationSet->m_fLength)
 	{
@@ -371,6 +383,11 @@ void Attack_Monster::Execute(CMonster* monster, float fElapsedTime)
 void Attack_Monster::Animate(CMonster* monster, float fElapsedTime)
 {
 	monster->Animate(fElapsedTime);
+
+	if (IsEqual(monster->m_fAttackSoundDelay, monster->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition, ANIMATION_CALLBACK_EPSILON))
+	{
+		CSoundManager::GetInst()->PlaySound(monster->m_strAttackSoundPath, monster->m_fAttackSoundVolume, 0.0f);
+	}
 }
 
 void Attack_Monster::OnRootMotion(CMonster* monster, float fTimeElapsed)
@@ -422,7 +439,12 @@ void Dead_Monster::Enter(CMonster* monster)
 		CMessageDispatcher::GetInst()->Dispatch_Message<RegisterArticulationParams>(MessageType::REQUEST_REGISTERARTI, &Request_params, nullptr);
 		monster->m_bArticulationOnPxScene = true;
 	}
+
 	monster->m_bArticulationSleep = false;
+
+	MonsterParams monsterParams;
+	monsterParams.pMonster = monster;
+	CMessageDispatcher::GetInst()->Dispatch_Message<MonsterParams>(MessageType::MONSTER_DEAD, &monsterParams, this);
 }
 
 void Dead_Monster::Execute(CMonster* monster, float fElapsedTime)
@@ -433,10 +455,9 @@ void Dead_Monster::Execute(CMonster* monster, float fElapsedTime)
 	{
 		if (monster->m_pStateMachine->GetCurrentState() != Spawn_Monster::GetInst())
 		{
-			CMonsterPool::GetInst()->SetNonActiveMonster(monster);
+			CMonsterPool::GetInst()->SetNonActiveMonster(monster->GetMonsterType(), monster);
 			monster->TestDissolvetime = 0.0f;
 		}
-
 	}
 }
 

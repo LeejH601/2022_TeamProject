@@ -38,6 +38,8 @@ public:
 	DWORD m_dwDirectionCache;
 	XMFLOAT3 m_xmf3DirectionCache;
 
+	XMFLOAT3 m_xmf3ToHitterVec;
+
 	float m_fStamina;
 	float m_fTotalStamina;
 	UINT m_iCombo = 0;
@@ -48,6 +50,7 @@ public:
 	
 	XMFLOAT3 m_xmf3AtkDirection;
 
+	float m_fInvincibleTime = 0.0f;
 	std::vector<std::shared_ptr<CAnimationCallbackHandler>> m_pAnimationcHandlers;
 
 
@@ -63,6 +66,9 @@ public:
 	virtual void Update(float fTimeElapsed);
 	virtual bool CheckCollision(CGameObject* pTargetObject);
 
+	virtual bool SetHit(CGameObject* pHitter);
+
+	CCamera* GetCamera() { return m_pCamera; }
 	void SetCamera(CCamera* pCamera) { m_pCamera = pCamera; }
 	virtual void SetScale(float x, float y, float z);
 	void Tmp();
