@@ -86,7 +86,7 @@ private:
 	CGameObject* pWeaponBoundingBoxMesh;
 	XMFLOAT4 m_xmf4TrailControllPoints[2];
 	XMFLOAT3 m_xmf4PrevTrailVertexPoint;
-
+	bool	m_bMonsterAttack = false;
 public:
 	int m_nRemainPotions;
 
@@ -111,6 +111,8 @@ public:
 	void DrinkPotion();
 
 	virtual XMFLOAT4& GetTrailControllPoint(int n) { return m_xmf4TrailControllPoints[n]; };
+	bool& GetMonsterAttack() {return m_bMonsterAttack;}
+	void SetMonsterAttack(bool bMonsterAttack) { m_bMonsterAttack = bMonsterAttack; };
 };
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

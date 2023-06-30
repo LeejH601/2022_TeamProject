@@ -458,6 +458,9 @@ SCENE_RETURN_TYPE CMainTMPScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMe
 	case WM_KEYDOWN:
 		switch (wParam)
 		{
+		case VK_ESCAPE:
+			::PostQuitMessage(0);
+			break;
 		case VK_SHIFT:
 			if (m_pPlayer)
 			{
@@ -700,7 +703,8 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pMonsterObject->SetPosition(XMFLOAT3(190, 50, -70));
 	m_pMonsterObject->SetScale(2.0f, 2.0f, 2.0f);
 	m_pMonsterObject->Rotate(0.0f, 180.0f, 0.0f);
-	m_pMonsterObject->m_fHP = 1000.f;
+	m_pMonsterObject->m_fTotalHP = MONSTER_HP;
+	m_pMonsterObject->m_fHP = MONSTER_HP;
 	m_pMonsterObject->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
 	m_pMonsterObject->m_pSkinnedAnimationController->m_xmf3RootObjectScale = XMFLOAT3(10.0f, 10.0f, 10.0f);
 	m_pMonsterObject->SetElite(true);
@@ -712,7 +716,8 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 		m_pMonsterObject->SetPosition(XMFLOAT3(190, 50, 70));
 		m_pMonsterObject->SetScale(2.0f, 2.0f, 2.0f);
 		m_pMonsterObject->Rotate(0.0f, 180.0f, 0.0f);
-		m_pMonsterObject->m_fHP = 100;
+		m_pMonsterObject->m_fTotalHP = MONSTER_HP;
+		m_pMonsterObject->m_fHP = MONSTER_HP;
 		m_pMonsterObject->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
 		m_pMonsterObject->m_pSkinnedAnimationController->m_xmf3RootObjectScale = XMFLOAT3(10.0f, 10.0f, 10.0f);
 		m_pMonsterObject->CreateArticulation(1.0f);
@@ -722,7 +727,8 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 		m_pMonsterObject->SetPosition(XMFLOAT3(190, 50, 70));
 		m_pMonsterObject->SetScale(2.0f, 2.0f, 2.0f);
 		m_pMonsterObject->Rotate(0.0f, 180.0f, 0.0f);
-		m_pMonsterObject->m_fHP = 100;
+		m_pMonsterObject->m_fTotalHP = MONSTER_HP;
+		m_pMonsterObject->m_fHP = MONSTER_HP;
 		m_pMonsterObject->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
 		m_pMonsterObject->m_pSkinnedAnimationController->m_xmf3RootObjectScale = XMFLOAT3(10.0f, 10.0f, 10.0f);
 		m_pMonsterObject->SetElite(true);
@@ -733,7 +739,8 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 		m_pMonsterObject->SetPosition(XMFLOAT3(190, 50, 70));
 		m_pMonsterObject->SetScale(2.0f, 2.0f, 2.0f);
 		m_pMonsterObject->Rotate(0.0f, 180.0f, 0.0f);
-		m_pMonsterObject->m_fHP = 100;
+		m_pMonsterObject->m_fTotalHP = MONSTER_HP;
+		m_pMonsterObject->m_fHP = MONSTER_HP;
 		m_pMonsterObject->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
 		m_pMonsterObject->m_pSkinnedAnimationController->m_xmf3RootObjectScale = XMFLOAT3(10.0f, 10.0f, 10.0f);
 		m_pMonsterObject->CreateArticulation(1.0f);
@@ -743,7 +750,8 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 		m_pMonsterObject->SetPosition(XMFLOAT3(190, 50, 70));
 		m_pMonsterObject->SetScale(2.0f, 2.0f, 2.0f);
 		m_pMonsterObject->Rotate(0.0f, 180.0f, 0.0f);
-		m_pMonsterObject->m_fHP = 100;
+		m_pMonsterObject->m_fTotalHP = MONSTER_HP;
+		m_pMonsterObject->m_fHP = MONSTER_HP;
 		m_pMonsterObject->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
 		m_pMonsterObject->m_pSkinnedAnimationController->m_xmf3RootObjectScale = XMFLOAT3(10.0f, 10.0f, 10.0f);
 		m_pMonsterObject->CreateArticulation(1.0f);
@@ -753,7 +761,8 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 		m_pMonsterObject->SetPosition(XMFLOAT3(190, 50, 70));
 		m_pMonsterObject->SetScale(2.0f, 2.0f, 2.0f);
 		m_pMonsterObject->Rotate(0.0f, 180.0f, 0.0f);
-		m_pMonsterObject->m_fHP = 100;
+		m_pMonsterObject->m_fTotalHP = MONSTER_HP;
+		m_pMonsterObject->m_fHP = MONSTER_HP;
 		m_pMonsterObject->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
 		m_pMonsterObject->m_pSkinnedAnimationController->m_xmf3RootObjectScale = XMFLOAT3(10.0f, 10.0f, 10.0f);
 		m_pMonsterObject->CreateArticulation(1.0f);
@@ -806,7 +815,7 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pSunLightShader = std::make_unique<CSunLightShader>();
 	m_pSunLightShader->CreateShader(pd3dDevice, GetGraphicsRootSignature(), 7, pdxgiObjectRtvFormats, DXGI_FORMAT_D32_FLOAT, 0);
 
-	m_pPostProcessShader = std::make_unique<CPostProcessShader>();
+	m_pPostProcessShader = std::make_shared<CPostProcessShader>();
 	m_pPostProcessShader->CreateShader(pd3dDevice, GetGraphicsRootSignature(), 7, pdxgiObjectRtvFormats, DXGI_FORMAT_D32_FLOAT, 0);
 	m_pPostProcessShader->BuildObjects(pd3dDevice, pd3dCommandList);
 
@@ -899,40 +908,109 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 		m_pSwordTrailObjects.push_back(std::move(pSwordtrail));
 	}
 
-	int UITextureIndexOffset = m_pTextureManager->GetTextureOffset(TextureType::UITexture) - 1;
 	m_pUIObjectShader = std::make_unique<CUIObjectShader>();
 	m_pUIObjectShader->CreateShader(pd3dDevice, GetGraphicsRootSignature(), 7, pdxgiObjectRtvFormats, DXGI_FORMAT_D32_FLOAT, 0);
 
-	std::unique_ptr<CUIObject> pUIObject = std::make_unique<CUIObject>(2, pd3dDevice, pd3dCommandList, 10.f);
-	pUIObject->SetSize(XMFLOAT2(814.f * 0.7f, 253.f * 0.7f));
-	pUIObject->SetScreenPosition(XMFLOAT2(FRAME_BUFFER_WIDTH * 0.2f, FRAME_BUFFER_HEIGHT * 0.8f));
-	pUIObject->SetTextureIndex(0 + UITextureIndexOffset);
+	// 플레이어 UI
+	//std::unique_ptr<CUIObject> pUIObject = std::make_unique<CUIObject>(2, pd3dDevice, pd3dCommandList, 10.f);
+	//pUIObject->SetSize(XMFLOAT2(1281.f * 0.4f, 407.f * 0.4f));
+	//pUIObject->SetScreenPosition(XMFLOAT2(FRAME_BUFFER_WIDTH * 0.15f, FRAME_BUFFER_HEIGHT * 0.9f));
+	//pUIObject->SetTextureIndex(m_pTextureManager->LoadTotalTextureIndex(TextureType::UITexture, L"Image/UiImages/Frame.dds"));
+	//m_pUIObject.push_back(std::move(pUIObject));
+	
+	std::unique_ptr<CUIObject>  pUIObject = std::make_unique<CMonsterHPObject>(2, pd3dDevice, pd3dCommandList, 10.f);
+	pUIObject->SetSize(XMFLOAT2(512.f * 0.16f, 512.f * 0.16f));
+	pUIObject->SetScreenPosition(XMFLOAT2(FRAME_BUFFER_WIDTH * 0.1f - 80.f, FRAME_BUFFER_HEIGHT * 0.878f + 80.f));
+	pUIObject->SetTextureIndex(m_pTextureManager->LoadTotalTextureIndex(TextureType::UITexture, L"Image/UiImages/IconFrame.dds"));
+	m_pUIObject.push_back(std::move(pUIObject));
+
+	pUIObject = std::make_unique<CMonsterHPObject>(2, pd3dDevice, pd3dCommandList, 10.f);
+	pUIObject->SetSize(XMFLOAT2(512.f * 0.15f, 512.f * 0.15f));
+	pUIObject->SetScreenPosition(XMFLOAT2(FRAME_BUFFER_WIDTH * 0.1f - 80.f, FRAME_BUFFER_HEIGHT * 0.878f + 80.f));
+	pUIObject->SetTextureIndex(m_pTextureManager->LoadTotalTextureIndex(TextureType::UITexture, L"Image/UiImages/PlayerIcon.dds"));
+	m_pUIObject.push_back(std::move(pUIObject));
+
+	// Monster UI
+	pUIObject = std::make_unique<CMonsterHPObject>(2, pd3dDevice, pd3dCommandList, 10.f);
+	pUIObject->SetSize(XMFLOAT2(1024.f * 0.443f, 64.f * 0.65f));
+	pUIObject->SetScreenPosition(XMFLOAT2(FRAME_BUFFER_WIDTH * 0.2f - 7.f, FRAME_BUFFER_HEIGHT * 0.878f + 70.f));
+	pUIObject->SetTextureIndex(m_pTextureManager->LoadTotalTextureIndex(TextureType::UITexture, L"Image/UiImages/MonsterHPFrame.dds"));
 	m_pUIObject.push_back(std::move(pUIObject));
 
 	pUIObject = std::make_unique<CHPObject>(2, pd3dDevice, pd3dCommandList, 10.f);
-	pUIObject->SetSize(XMFLOAT2(426 * 0.65f, 42 * 0.65f));
-	pUIObject->SetScreenPosition(XMFLOAT2(FRAME_BUFFER_WIDTH * 0.2f + 80.f, FRAME_BUFFER_HEIGHT * 0.8f + 25.f));
-	pUIObject->SetTextureIndex(1 + UITextureIndexOffset);
+	pUIObject->SetSize(XMFLOAT2(1024.f * 0.44f, 64.f * 0.6f));
+	pUIObject->SetScreenPosition(XMFLOAT2(FRAME_BUFFER_WIDTH * 0.2f - 7.f, FRAME_BUFFER_HEIGHT * 0.878f + 70.f));
+	pUIObject->SetTextureIndex(m_pTextureManager->LoadTotalTextureIndex(TextureType::UITexture, L"Image/UiImages/MonsterHP.dds")); // HP
 	m_pUIObject.push_back(std::move(pUIObject));
+
+	// Monster UI
+	pUIObject = std::make_unique<CMonsterHPObject>(2, pd3dDevice, pd3dCommandList, 10.f);
+	pUIObject->SetSize(XMFLOAT2(1024.f * 0.343f, 64.f * 0.6f));
+	pUIObject->SetScreenPosition(XMFLOAT2(FRAME_BUFFER_WIDTH * 0.17f, FRAME_BUFFER_HEIGHT * 0.86f + 70.f));
+	pUIObject->SetTextureIndex(m_pTextureManager->LoadTotalTextureIndex(TextureType::UITexture, L"Image/UiImages/MonsterHPFrame.dds"));
+	m_pUIObject.push_back(std::move(pUIObject));
+
 
 	pUIObject = std::make_unique<CSTAMINAObject>(2, pd3dDevice, pd3dCommandList, 10.f);
-	pUIObject->SetSize(XMFLOAT2(426 * 0.48f, 42 * 0.48f));
-	pUIObject->SetScreenPosition(XMFLOAT2(FRAME_BUFFER_WIDTH * 0.2f + 45.f, FRAME_BUFFER_HEIGHT * 0.8f - 10.f));
-	pUIObject->SetTextureIndex(2 + UITextureIndexOffset);
+	pUIObject->SetSize(XMFLOAT2(1024.f * 0.34f, 64.f * 0.6f));
+	pUIObject->SetScreenPosition(XMFLOAT2(FRAME_BUFFER_WIDTH * 0.17f, FRAME_BUFFER_HEIGHT * 0.85995f + 70.f));
+	pUIObject->SetTextureIndex(m_pTextureManager->LoadTotalTextureIndex(TextureType::UITexture, L"Image/UiImages/Stamina.dds")); // STAMINA
 	m_pUIObject.push_back(std::move(pUIObject));
+
+
+
+	// Monster UI
+	pUIObject = std::make_unique<CMonsterHPObject>(2, pd3dDevice, pd3dCommandList, 10.f);
+	pUIObject->SetSize(XMFLOAT2(1024.f * 0.8f, 64.f * 0.6f));
+	pUIObject->SetScreenPosition(XMFLOAT2(FRAME_BUFFER_WIDTH * 0.5f, FRAME_BUFFER_HEIGHT * 0.15f));
+	pUIObject->SetTextureIndex(m_pTextureManager->LoadTotalTextureIndex(TextureType::UITexture, L"Image/UiImages/MonsterHPFrame.dds"));
+	m_pUIObject.push_back(std::move(pUIObject));
+
+
+	pUIObject = std::make_unique<CMonsterHPObject>(2, pd3dDevice, pd3dCommandList, 10.f);
+	pUIObject->SetSize(XMFLOAT2(1024.f * 0.8f, 64.f * 0.6f));
+	pUIObject->SetScreenPosition(XMFLOAT2(FRAME_BUFFER_WIDTH * 0.5f, FRAME_BUFFER_HEIGHT * 0.15f));
+	pUIObject->SetTextureIndex(m_pTextureManager->LoadTotalTextureIndex(TextureType::UITexture, L"Image/UiImages/MonsterHP.dds"));
+	m_pUIObject.push_back(std::move(pUIObject));
+
+
+	// Icon Frame
+	pUIObject = std::make_unique<CUIObject>(2, pd3dDevice, pd3dCommandList, 10.f);
+	pUIObject->SetSize(XMFLOAT2(251.f * 0.43f, 254.f * 0.48f));
+	pUIObject->SetScreenPosition(XMFLOAT2(FRAME_BUFFER_WIDTH * 0.1f - 100.f, FRAME_BUFFER_HEIGHT * 0.2f));
+	pUIObject->SetTextureIndex(m_pTextureManager->LoadTotalTextureIndex(TextureType::UITexture, L"Image/UiImages/IconFrame.dds"));
+	m_pUIObject.push_back(std::move(pUIObject));
+
+	// HP Icon
+	pUIObject = std::make_unique<CUIObject>(2, pd3dDevice, pd3dCommandList, 10.f);
+	pUIObject->SetSize(XMFLOAT2(256.f * 0.4f, 256.f * 0.45f));
+	pUIObject->SetScreenPosition(XMFLOAT2(FRAME_BUFFER_WIDTH * 0.1f - 100., FRAME_BUFFER_HEIGHT * 0.2f));
+	pUIObject->SetTextureIndex(m_pTextureManager->LoadTotalTextureIndex(TextureType::UITexture, L"Image/UiImages/HpIcon.dds"));
+	m_pUIObject.push_back(std::move(pUIObject));
+
+	//// Combo UI
+	pUIObject = std::make_unique<CComboNumberObject>(14, 35, pd3dDevice, pd3dCommandList, 10.f);
+	pUIObject->SetSize(XMFLOAT2(64.f * 1.f, 60.f * 1.f));
+	pUIObject->SetScreenPosition(XMFLOAT2(FRAME_BUFFER_WIDTH * 0.88f, FRAME_BUFFER_HEIGHT * 0.5f));
+	pUIObject->SetTextureIndex(m_pTextureManager->LoadTotalTextureIndex(TextureType::UITexture, L"Image/UiImages/Texture2.dds")); // 0
+	m_pUIObject.push_back(std::move(pUIObject));
+
+	// ITEM_N UI
 
 	pUIObject = std::make_unique<CNumberObject>(14, 35, pd3dDevice, pd3dCommandList, 10.f);
-	pUIObject->SetSize(XMFLOAT2(56.f * 1.5f, 60.f * 1.5f));
-	pUIObject->SetScreenPosition(XMFLOAT2(FRAME_BUFFER_WIDTH * 0.85f, FRAME_BUFFER_HEIGHT * 0.5f));
-	pUIObject->SetTextureIndex(6 + UITextureIndexOffset);
+	pUIObject->SetSize(XMFLOAT2(64.f * 0.4f, 60.f * 0.4f));
+	pUIObject->SetScreenPosition(XMFLOAT2(FRAME_BUFFER_WIDTH * 0.065f, FRAME_BUFFER_HEIGHT * 0.16f));
+	pUIObject->SetTextureIndex(m_pTextureManager->LoadTotalTextureIndex(TextureType::UITexture, L"Image/UiImages/Texture2.dds"));
+	dynamic_cast<CNumberObject*>(pUIObject.get())->UpdateNumber(5);
 	m_pUIObject.push_back(std::move(pUIObject));
 
-	pUIObject = std::make_unique<CBloodEffectObject>(2, pd3dDevice, pd3dCommandList, 10.f);
-	pUIObject->SetSize(XMFLOAT2(FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT));
-	pUIObject->SetScreenPosition(XMFLOAT2(FRAME_BUFFER_WIDTH * 0.5f, FRAME_BUFFER_HEIGHT * 0.5f));
-	pUIObject->SetTextureIndex(17 + UITextureIndexOffset);
+	// Hits
+	pUIObject = std::make_unique<CUIObject>(2, pd3dDevice, pd3dCommandList, 10.f);
+	pUIObject->SetSize(XMFLOAT2(840.f * 0.15f, 360.f * 0.15f));
+	pUIObject->SetScreenPosition(XMFLOAT2(FRAME_BUFFER_WIDTH * 0.85f + 200.f, FRAME_BUFFER_HEIGHT * 0.5f - 15.f));
+	pUIObject->SetTextureIndex(m_pTextureManager->LoadTotalTextureIndex(TextureType::UITexture, L"Image/UiImages/Hits.dds"));
 	m_pUIObject.push_back(std::move(pUIObject));
-
+	
 }
 bool CMainTMPScene::ProcessInput(HWND hWnd, DWORD dwDirection, float fTimeElapsed)
 {
@@ -1118,6 +1196,7 @@ void CMainTMPScene::Update(float fTimeElapsed)
 		UpdateObjectArticulation();
 		b_simulation = false;
 	}
+
 
 #endif // WITH_LAG_DOLL_SIMULATION
 	UpdateObjects(fTimeElapsed);
@@ -1358,12 +1437,27 @@ void CMainTMPScene::OnPostRender()
 	//((CParticleObject*)m_pTrailParticleObjects.get())->OnPostRender();
 
 }
-
+#include <functional>
+#include <numeric>
 void CMainTMPScene::UIUpdate(CPlayer* pPlayer)
 {
-	dynamic_cast<CBarObject*>(m_pUIObject[1].get())->Set_Value(((CPhysicsObject*)m_pPlayer)->m_fHP, ((CPhysicsObject*)m_pPlayer)->m_fTotalHP);
-	dynamic_cast<CBarObject*>(m_pUIObject[2].get())->Set_Value(((CPlayer*)m_pPlayer)->m_fStamina, ((CPlayer*)m_pPlayer)->m_fTotalStamina);
-	dynamic_cast<CNumberObject*>(m_pUIObject[3].get())->UpdateNumber(((CPlayer*)m_pPlayer)->m_iCombo);
+	dynamic_cast<CBarObject*>(m_pUIObject[3].get())->Set_Value(((CPhysicsObject*)m_pPlayer)->m_fHP, ((CPhysicsObject*)m_pPlayer)->m_fTotalHP);
+	dynamic_cast<CBarObject*>(m_pUIObject[5].get())->Set_Value(((CPlayer*)m_pPlayer)->m_fStamina, ((CPlayer*)m_pPlayer)->m_fTotalStamina);
+	dynamic_cast<CNumberObject*>(m_pUIObject[10].get())->UpdateNumber(((CPlayer*)m_pPlayer)->m_iCombo);
+
+	dynamic_cast<CUIObject*>(m_pUIObject[12].get())->SetScreenPosition(XMFLOAT2(FRAME_BUFFER_WIDTH * 0.85f + 160.f + (((CPlayer*)m_pPlayer)->m_iCombo / 10) * 55.f, FRAME_BUFFER_HEIGHT * 0.5f - 9.f));
+	// ((CPlayer*)m_pPlayer)->m_iCombo / 10
+
+	if (((CKnightPlayer*)(m_pPlayer))->GetMonsterAttack())
+	{
+		float CurrentHp = 0.f;
+		for (int i = 0; i < m_pEnemys.size(); i++)		
+			CurrentHp += max(0.f, dynamic_cast<CMonster*>(m_pEnemys[i].get())->m_fHP);
+
+		dynamic_cast<CBarObject*>(m_pUIObject[7].get())->Set_Value(CurrentHp, m_pEnemys.size() * MONSTER_HP);
+		((CKnightPlayer*)(m_pPlayer))->SetMonsterAttack(false);
+	}
+		
 }
 
 void CMainTMPScene::LoadTextureObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
@@ -1383,28 +1477,20 @@ void CMainTMPScene::LoadTextureObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 	m_pTextureManager->LoadTexture(TextureType::TrailNoiseTexture, pd3dDevice, pd3dCommandList, L"Image/TrailImages/VAP1_Noise_4.dds", 1, 1);
 	m_pTextureManager->LoadTexture(TextureType::TrailNoiseTexture, pd3dDevice, pd3dCommandList, L"Image/TrailImages/VAP1_Noise_14.dds", 1, 1);
 
-	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/Frame.dds", 0, 0);
-	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/Hp.dds", 0, 0);
-	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/Mana.dds", 0, 0);
-	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/Tonus.dds", 0, 0);
-	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/Mana2.dds", 0, 0);
-	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/Blood.dds", 0, 0);
-
-	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/Combo2.dds", 0, 0);
-	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/Number/0.dds", 0, 0);
-	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/Number/1.dds", 0, 0);
-	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/Number/2.dds", 0, 0);
-	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/Number/3.dds", 0, 0);
-	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/Number/4.dds", 0, 0);
-	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/Number/5.dds", 0, 0);
-	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/Number/6.dds", 0, 0);
-	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/Number/7.dds", 0, 0);
-	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/Number/8.dds", 0, 0);
-	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/Number/9.dds", 0, 0);
+	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/Number/Numbers.dds", 0, 0);
 
 	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/BloodEffect.dds", 0, 0);
 
-	m_pTextureManager->LoadTexture(TextureType::UniformTexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/BloodEffect.dds", 0, 0);
+	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/MonsterHPFrame.dds", 0, 0);
+	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/MonsterHP.dds", 0, 0);
+	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/Stamina.dds", 0, 0);
+	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/HpIcon.dds", 0, 0);
+	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/IconFrame.dds", 0, 0);
+	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/PlayerIcon.dds", 0, 0);
+	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/MonsterBarFrame.dds", 0, 0);
+	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/Texture2.dds", 0, 0);
+	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/Hits.dds", 0, 0);
+	
 }
 
 void CMainTMPScene::HandleCollision(const CollideParams& params)

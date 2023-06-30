@@ -16,9 +16,9 @@ protected:
 	CGameObject* m_pPlayer = nullptr;
 	std::vector<std::unique_ptr<IMessageListener>> m_pListeners;
 public:
-	std::unique_ptr<CPostProcessShader> m_pPostProcessShader = NULL;
-	std::unique_ptr<CHDRComputeShader> m_pHDRComputeShader;
-	std::unique_ptr<CBloomShader> m_pBloomComputeShader;
+	std::shared_ptr<CPostProcessShader> m_pPostProcessShader = NULL;
+	std::shared_ptr<CHDRComputeShader> m_pHDRComputeShader;
+	std::shared_ptr<CBloomShader> m_pBloomComputeShader;
 
 public:
 	CScene() {}

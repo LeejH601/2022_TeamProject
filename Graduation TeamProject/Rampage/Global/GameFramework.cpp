@@ -11,6 +11,7 @@
 #include <windowsx.h>
 #include "..\Sound\SoundManager.h"
 #include "..\Shader\BoundingBoxShader.h"
+#include "..\Scene\SceneManager.h"
 
 CLocator Locator;
 
@@ -402,7 +403,6 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 		switch (wParam)
 		{
 		case VK_ESCAPE:
-			::PostQuitMessage(0);
 			break;
 		case VK_F9:
 			ChangeSwapChainState();
@@ -504,10 +504,13 @@ void CGameFramework::RenderObjects()
 {
 	//명령 할당자를 리셋한다.
 	HRESULT hResult = m_pd3dCommandAllocator->Reset();
+	CScene* pScene = m_pSceneManager->GetCurrentScene();
 
-	if (dynamic_cast<CLobbyScene*>(m_pSceneManager->GetCurrentScene())) {
+	if (dynamic_cast<CLobbyScene*>(m_pSceneManager->GetCurrentScene()) && dynamic_cast<CLobbyScene*>(pScene)->GetSceneType() == (UINT)(LobbySceneType::SIMULATOR_Scene))
+	{
 		PrepareImGui();
 	}
+
 
 	//명령 리스트를 리셋한다.
 	hResult = m_pd3dCommandList->Reset(m_pd3dCommandAllocator.Get(), NULL);
@@ -516,7 +519,8 @@ void CGameFramework::RenderObjects()
 
 	m_pSceneManager->PreRender(m_pd3dCommandList.Get(), m_GameTimer.GetFrameTimeElapsed());
 
-	if (dynamic_cast<CMainTMPScene*>(m_pSceneManager->GetCurrentScene())) {
+	if (dynamic_cast<CMainTMPScene*>(pScene) || ((dynamic_cast<CLobbyScene*>(pScene)) && dynamic_cast<CLobbyScene*>(pScene)->GetSceneType() == (UINT)(LobbySceneType::LOGO_Scene)))
+	{
 		m_pSceneManager->GetCurrentScene()->SetHDRRenderSource(m_ppd3dRenderTargetBuffers[m_nSwapChainBufferIndex].Get());
 		m_pSceneManager->OnPrepareRenderTarget(m_pd3dCommandList.Get(), 1, &m_pd3dSwapRTVCPUHandles[m_nSwapChainBufferIndex], m_d3dDsvDescriptorCPUHandle);
 	}

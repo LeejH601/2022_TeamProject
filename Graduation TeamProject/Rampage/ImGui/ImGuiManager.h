@@ -68,6 +68,11 @@ private:
 	bool show_another_window = false;
 	bool show_my_window = true;
 
+	bool show_setting_menu = false;
+
+	bool change_before = false;
+	bool change_after = false;
+
 	bool serverConnected = false;
 
 	CCamera* m_pCamera = NULL;
@@ -144,6 +149,10 @@ public:
 	float GetParallaxScale() { return ParallaxScale; };
 	float GetParallaxBias() { return ParallaxBias; };
 	int GetTerrainMappingMode() { return Terrain_Mapping_mode; };
+	bool& GetChangeAfterScene() { return change_after; };
+	bool& GetChangeBeforeScene() { return change_before; };
+	void SetShowSettingMenu(bool bSetting) { show_setting_menu = bSetting; };
+	bool GetShowSettingMenu() { return show_setting_menu; };
 
 	bool ConnectServer(eSERVICE_TYPE serviceType, SineUp_Info& info);
 	void ProcessWorkshop(eSERVICE_TYPE serviceType, void* pData = nullptr);

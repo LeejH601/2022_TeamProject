@@ -1,7 +1,6 @@
 #pragma once
 #include "Object.h"
-
-
+#define MONSTER_HP 100
 class CPhysicsObject : public CGameObject
 {
 private:
