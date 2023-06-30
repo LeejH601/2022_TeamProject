@@ -655,15 +655,6 @@ void CMonsterHPObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, bool b
 
 	if (m_pMesh)
 	{
-		// UI Size 정보 Update
-		// 
-		// CGameObject의 정보를 넘길 버퍼가 있고, 해당 버퍼에 대한 CPU 포인터가 있으면 UpdateShaderVariables 함수를 호출한다.
-		//PreBarUpdate(0.f);
-		//UpdateShaderVariables(pd3dCommandList);
-		////// 여기서 메쉬의 렌더를 한다.
-		//m_pMesh->OnPreRender(pd3dCommandList);
-		//m_pMesh->Render(pd3dCommandList, 0);
-
 		CurBarUpdate(0.f);
 		UpdateShaderVariables(pd3dCommandList);
 		// 여기서 메쉬의 렌더를 한다.

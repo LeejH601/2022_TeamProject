@@ -1,6 +1,11 @@
 #pragma once
 #include "Scene.h"
 #include "../Object/TextureManager.h"
+#include "..\Object\Light.h"
+#include "..\Object\Map.h"
+#include "..\Shader\SkyBoxShader.h"
+#include "..\Object\SkyBox.h"
+#include "..\Shader\SunLightShader.h"
 enum class LobbySceneType
 {
 	LOGO_Scene,
@@ -14,9 +19,21 @@ private:
 	std::vector<std::unique_ptr<CGameObject>> m_pUIObject;
 
 	std::unique_ptr<CTextureManager> m_pTextureManager = NULL;
-	CCamera* m_pCamera = NULL;
+
+	std::unique_ptr<CCamera> m_pCamera = NULL;
+
+	std::unique_ptr<CMap> m_pMap;
+
+	std::unique_ptr<CLight> m_pLight;
+
+	std::unique_ptr<CSkyBoxShader> m_pSkyBoxShader;
+	std::unique_ptr<CSkyBox> m_pSkyBoxObject;
+
+	std::unique_ptr<CSunLightShader> m_pSunLightShader;
 
 	LobbySceneType m_iSceneType = LobbySceneType::LOGO_Scene;
+	POINT m_ptOldCursorPos;
+	RECT m_ScreendRect;
 public:
 	DECLARE_SINGLE(CLobbyScene);
 	CLobbyScene() {}

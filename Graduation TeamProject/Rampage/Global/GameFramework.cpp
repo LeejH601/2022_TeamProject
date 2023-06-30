@@ -504,13 +504,12 @@ void CGameFramework::RenderObjects()
 {
 	//명령 할당자를 리셋한다.
 	HRESULT hResult = m_pd3dCommandAllocator->Reset();
+	CScene* pScene = m_pSceneManager->GetCurrentScene();
 
-	if (dynamic_cast<CLobbyScene*>(m_pSceneManager->GetCurrentScene()))
+	if (dynamic_cast<CLobbyScene*>(m_pSceneManager->GetCurrentScene()) && dynamic_cast<CLobbyScene*>(pScene)->GetSceneType() == (UINT)(LobbySceneType::SIMULATOR_Scene))
 	{
 		PrepareImGui();
 	}
-		/*&& dynamic_cast<CLobbyScene*>(m_pSceneManager->GetCurrentScene())->GetSceneType() == (UINT)(LobbySceneType::SIMULATOR_Scene)*/
-
 
 
 	//명령 리스트를 리셋한다.
@@ -520,20 +519,13 @@ void CGameFramework::RenderObjects()
 
 	m_pSceneManager->PreRender(m_pd3dCommandList.Get(), m_GameTimer.GetFrameTimeElapsed());
 
-	if (dynamic_cast<CMainTMPScene*>(m_pSceneManager->GetCurrentScene())) {
+	if (dynamic_cast<CMainTMPScene*>(pScene) || ((dynamic_cast<CLobbyScene*>(pScene)) && dynamic_cast<CLobbyScene*>(pScene)->GetSceneType() == (UINT)(LobbySceneType::LOGO_Scene)))
+	{
 		m_pSceneManager->GetCurrentScene()->SetHDRRenderSource(m_ppd3dRenderTargetBuffers[m_nSwapChainBufferIndex].Get());
 		m_pSceneManager->OnPrepareRenderTarget(m_pd3dCommandList.Get(), 1, &m_pd3dSwapRTVCPUHandles[m_nSwapChainBufferIndex], m_d3dDsvDescriptorCPUHandle);
 	}
 	else
-	{
-		if (dynamic_cast<CLobbyScene*>(m_pSceneManager->GetCurrentScene())->GetSceneType() == (UINT)(LobbySceneType::LOGO_Scene))
-		{
-			m_pSceneManager->GetCurrentScene()->SetHDRRenderSource(m_ppd3dRenderTargetBuffers[m_nSwapChainBufferIndex].Get());
-			m_pSceneManager->OnPrepareRenderTarget(m_pd3dCommandList.Get(), 1, &m_pd3dSwapRTVCPUHandles[m_nSwapChainBufferIndex], m_d3dDsvDescriptorCPUHandle);
-		}
-		else
-			PrepareRenderTarget();
-	}
+		PrepareRenderTarget();
 
 	m_pd3dCommandList->ClearDepthStencilView(m_d3dDsvDescriptorCPUHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
 	UpdateShaderVariables(m_pd3dCommandList.Get());

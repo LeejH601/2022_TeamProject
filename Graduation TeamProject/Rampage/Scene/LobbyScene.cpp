@@ -5,6 +5,7 @@
 #include "..\ImGui\ImGuiManager.h"
 #include "..\Shader\UIObjectShader.h"
 #include "..\Object\UIObject.h"
+#include "..\Shader\ModelShader.h"
 void CLobbyScene::OnPrepareRender(ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	switch (m_iSceneType)
@@ -99,15 +100,23 @@ void CLobbyScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 	m_pHDRComputeShader = CSimulatorScene::GetInst()->m_pHDRComputeShader;
 	m_pBloomComputeShader = CSimulatorScene::GetInst()->m_pBloomComputeShader;
 	m_pPostProcessShader = CSimulatorScene::GetInst()->m_pPostProcessShader;
-	/*m_pHDRComputeShader = std::make_unique<CHDRComputeShader>();
-	m_pHDRComputeShader->CreateShader(pd3dDevice, pd3dCommandList, GetComputeRootSignature());
 
-	m_pBloomComputeShader = std::make_unique<CBloomShader>();
-	m_pBloomComputeShader->CreateShader(pd3dDevice, pd3dCommandList, GetComputeRootSignature());
-	m_pBloomComputeShader->CreateBloomUAVResource(pd3dDevice, pd3dCommandList, 1920, 1080);*/
+	// Light »ý¼º
+	m_pLight = std::make_unique<CLight>();
+	m_pLight->CreateLightVariables(pd3dDevice, pd3dCommandList);
+
 
 	DXGI_FORMAT pdxgiObjectRtvFormats[7] = { DXGI_FORMAT_R8G8B8A8_UNORM, DXGI_FORMAT_R16G16B16A16_FLOAT, DXGI_FORMAT_R16G16B16A16_UNORM, DXGI_FORMAT_R32G32B32A32_FLOAT,
-	DXGI_FORMAT_R16G16B16A16_FLOAT, DXGI_FORMAT_R16G16B16A16_FLOAT, DXGI_FORMAT_R32_FLOAT };
+		DXGI_FORMAT_R16G16B16A16_FLOAT, DXGI_FORMAT_R16G16B16A16_FLOAT, DXGI_FORMAT_R32_FLOAT };
+
+	CModelShader::GetInst()->CreateShader(pd3dDevice, GetGraphicsRootSignature(), 7, pdxgiObjectRtvFormats, DXGI_FORMAT_D32_FLOAT, 1);
+
+	XMFLOAT3 offset{ -86.4804 , 0.0f, -183.7856 };
+
+	m_pMap = std::make_unique<CMap>();
+	m_pMap->Init(pd3dDevice, pd3dCommandList, GetGraphicsRootSignature());
+	m_pMap->GetTerrain()->SetPosition(XMFLOAT3(offset.x, 0, offset.z));
+
 
 	m_pUIObjectShader = std::make_unique<CUIObjectShader>();
 	m_pUIObjectShader->CreateShader(pd3dDevice, GetGraphicsRootSignature(), 7, pdxgiObjectRtvFormats, DXGI_FORMAT_D32_FLOAT, 0);
@@ -115,29 +124,7 @@ void CLobbyScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 	m_pTextureManager = std::make_unique<CTextureManager>();
 	m_pTextureManager->CreateCbvSrvUavDescriptorHeaps(pd3dDevice, 0, 100);
 	m_pTextureManager->LoadSphereBuffer(pd3dDevice, pd3dCommandList);
-	m_pTextureManager->LoadTexture(TextureType::SmokeTexture, pd3dDevice, pd3dCommandList, L"Image/SmokeImages/Smoke2.dds", 1, 1);
-	m_pTextureManager->LoadTexture(TextureType::BillBoardTexture, pd3dDevice, pd3dCommandList, L"Image/BillBoardImages/Explode_8x8.dds", 8, 8);
-	m_pTextureManager->LoadTexture(TextureType::BillBoardTexture, pd3dDevice, pd3dCommandList, L"Image/BillBoardImages/Fire_Effect.dds", 5, 6);
-	m_pTextureManager->LoadTexture(TextureType::BillBoardTexture, pd3dDevice, pd3dCommandList, L"Image/BillBoardImages/Circle1.dds", 1, 1);
 
-	m_pTextureManager->LoadTexture(TextureType::ParticleTexture, pd3dDevice, pd3dCommandList, L"Image/ParticleImages/TextureFlash2.dds", 0, 0);
-	m_pTextureManager->LoadTexture(TextureType::ParticleTexture, pd3dDevice, pd3dCommandList, L"Image/ParticleImages/Meteor.dds", 0, 0);
-	m_pTextureManager->LoadTexture(TextureType::ParticleTexture, pd3dDevice, pd3dCommandList, L"Image/ParticleImages/Effect0.dds", 0, 0);
-
-	m_pTextureManager->LoadTexture(TextureType::TrailBaseTexture, pd3dDevice, pd3dCommandList, L"Image/TrailImages/T_Sword_Slash_11.dds", 1, 1);
-	m_pTextureManager->LoadTexture(TextureType::TrailBaseTexture, pd3dDevice, pd3dCommandList, L"Image/TrailImages/T_Sword_Slash_21.dds", 1, 1);
-	m_pTextureManager->LoadTexture(TextureType::TrailNoiseTexture, pd3dDevice, pd3dCommandList, L"Image/TrailImages/VAP1_Noise_4.dds", 1, 1);
-	m_pTextureManager->LoadTexture(TextureType::TrailNoiseTexture, pd3dDevice, pd3dCommandList, L"Image/TrailImages/VAP1_Noise_14.dds", 1, 1);
-
-	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/Frame.dds", 0, 0);
-	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/Hp.dds", 0, 0);
-	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/Mana.dds", 0, 0);
-	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/Tonus.dds", 0, 0);
-	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/Mana2.dds", 0, 0);
-
-	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/Number/Numbers.dds", 0, 0);
-
-	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/BloodEffect.dds", 0, 0);
 	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/Logo2.dds", 0, 0);
 	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/Button.dds", 0, 0);
 
@@ -147,15 +134,19 @@ void CLobbyScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 	m_pUIObjectShader = std::make_unique<CUIObjectShader>();
 	m_pUIObjectShader->CreateShader(pd3dDevice, GetGraphicsRootSignature(), 7, pdxgiObjectRtvFormats, DXGI_FORMAT_D32_FLOAT, 0);
 
+	m_pSunLightShader = std::make_unique<CSunLightShader>();
+	m_pSunLightShader->CreateShader(pd3dDevice, GetGraphicsRootSignature(), 7, pdxgiObjectRtvFormats, DXGI_FORMAT_D32_FLOAT, 0);
 
+	std::shared_ptr<CTexture> pSkyBoxTexture = std::make_shared<CTexture>(1, RESOURCE_TEXTURE_CUBE, 0, 1);
+	pSkyBoxTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"SkyBox/Epic_BlueSunset.dds", RESOURCE_TEXTURE_CUBE, 0);
 
-	//std::unique_ptr<CUIObject> pUIObject = std::make_unique<CUIObject>(2, pd3dDevice, pd3dCommandList, 10.f);
-	//pUIObject->SetSize(XMFLOAT2(FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT));
-	//pUIObject->SetScreenPosition(XMFLOAT2(FRAME_BUFFER_WIDTH * 0.5f, FRAME_BUFFER_HEIGHT * 0.5f));
-	//pUIObject->SetTextureIndex(m_pTextureManager->LoadTotalTextureIndex(TextureType::UITexture, L"Image/UiImages/Logo.dds"));
-	//m_pUIObject.push_back(std::move(pUIObject));
+	m_pSkyBoxShader = std::make_unique<CSkyBoxShader>();
+	m_pSkyBoxShader->CreateShader(pd3dDevice, GetGraphicsRootSignature(), 7, pdxgiObjectRtvFormats, 0);
+	m_pSkyBoxShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
+	m_pSkyBoxShader->CreateCbvSrvUavDescriptorHeaps(pd3dDevice, 0, 1);
+	m_pSkyBoxShader->CreateShaderResourceViews(pd3dDevice, pSkyBoxTexture.get(), 0, 10);
 
-
+	m_pSkyBoxObject = std::make_unique<CSkyBox>(pd3dDevice, pd3dCommandList, GetGraphicsRootSignature(), pSkyBoxTexture);
 
 	std::unique_ptr<CUIObject> pUIObject = std::make_unique<CButtonObject>(2, pd3dDevice, pd3dCommandList, 10.f);
 	pUIObject->SetSize(XMFLOAT2(FRAME_BUFFER_WIDTH * 0.12f, FRAME_BUFFER_HEIGHT * 0.1f));
@@ -163,20 +154,19 @@ void CLobbyScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 	pUIObject->SetTextureIndex(m_pTextureManager->LoadTotalTextureIndex(TextureType::UITexture, L"Image/UiImages/Button.dds"));
 	m_pUIObject.push_back(std::move(pUIObject));
 
-	//pUIObject = std::make_unique<CHPObject>(2, pd3dDevice, pd3dCommandList, 10.f);
-	//pUIObject->SetSize(XMFLOAT2(426 * 0.65f, 42 * 0.65f));
-	//pUIObject->SetScreenPosition(XMFLOAT2(FRAME_BUFFER_WIDTH * 0.2f + 80.f, FRAME_BUFFER_HEIGHT * 0.8f + 25.f));
-	//pUIObject->SetTextureIndex(m_pTextureManager->LoadTotalTextureIndex(TextureType::UITexture, L"Image/UiImages/Hp.dds"));
-	//m_pUIObject.push_back(std::move(pUIObject));
-
-
 	pUIObject = std::make_unique<CUIObject>(2, pd3dDevice, pd3dCommandList, 10.f);
-	pUIObject->SetSize(XMFLOAT2(1890.f, 1417.f));
-	pUIObject->SetScreenPosition(XMFLOAT2(FRAME_BUFFER_WIDTH * 0.5f, FRAME_BUFFER_HEIGHT * 0.5f));
+	pUIObject->SetSize(XMFLOAT2(1890.f * 0.2f, 1417.f * 0.2f));
+	pUIObject->SetScreenPosition(XMFLOAT2(FRAME_BUFFER_WIDTH * 0.5f, FRAME_BUFFER_HEIGHT * 0.8f));
 	pUIObject->SetTextureIndex(m_pTextureManager->LoadTotalTextureIndex(TextureType::UITexture, L"Image/UiImages/Logo2.dds"));
 	m_pUIObject.push_back(std::move(pUIObject));
 
-	m_pCamera = CSimulatorScene::GetInst()->GetCamera();
+	m_pCamera = std::make_unique<CFloatingCamera>();
+	m_pCamera->Init(pd3dDevice, pd3dCommandList);
+	m_pCamera->SetPosition(XMFLOAT3(0.0f, 400.0f, -100.0f));
+
+	m_pCamera->SetUpdatedContext(m_pMap.get());
+
+
 }
 
 void CLobbyScene::Update(float fTimeElapsed)
@@ -220,8 +210,16 @@ void CLobbyScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTime
 	switch (m_iSceneType)
 	{
 	case LobbySceneType::LOGO_Scene:
-
 		m_pCamera->OnPrepareRender(pd3dCommandList);
+
+		m_pLight->Render(pd3dCommandList);
+
+		m_pSunLightShader->Render(pd3dCommandList, m_pCamera.get());
+
+		m_pSkyBoxShader->Render(pd3dCommandList, 0);
+		m_pSkyBoxObject->Render(pd3dCommandList, m_pCamera.get());
+
+		m_pMap->RenderTerrain(pd3dCommandList); 
 
 		m_pTextureManager->SetTextureDescriptorHeap(pd3dCommandList);
 		m_pTextureManager->UpdateShaderVariables(pd3dCommandList);
@@ -257,5 +255,6 @@ void CLobbyScene::OnPostRender()
 
 bool CLobbyScene::ProcessInput(HWND hWnd, DWORD dwDirection, float fTimeElapsed)
 {
+
 	return false;
 }
