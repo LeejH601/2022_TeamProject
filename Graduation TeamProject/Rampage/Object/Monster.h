@@ -90,6 +90,7 @@ public:
 	void CalculateResultPosition();
 	void ApplyDamage(float Damage, void* pData = nullptr);
 	void SetElite(bool flag);
+	void HandleAllyDamagedMessage(CGameObject* pPlayer);
 	bool GetHasShield() { return m_fCurrShield > 0.0f; };
 	virtual void PlayMonsterEffectSound();
 

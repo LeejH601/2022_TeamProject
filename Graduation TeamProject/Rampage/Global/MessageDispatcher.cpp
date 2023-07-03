@@ -418,20 +418,6 @@ void HitLagComponent::HandleMessage(const Message& message, const PlayerParams& 
 {
 	if (!m_bEnable)
 		return;
-
-	/*if (message.getType() == MessageType::UPDATE_HITLAG) {
-		CPlayer* pPlayer = (CPlayer*)params.pPlayer;
-		if (pPlayer->m_fCurLagTime < m_fMaxLagTime)
-		{
-			pPlayer->m_fAnimationPlayWeight *= m_fLagScale;
-			
-			if (pPlayer->m_fAnimationPlayWeight < pPlayer->m_fAnimationPlayerWeightMin)
-				pPlayer->m_fAnimationPlayWeight = pPlayer->m_fAnimationPlayerWeightMin;
-		}
-		else
-			pPlayer->m_fAnimationPlayWeight = 1.0f;
-
-	}*/
 }
 TrailComponent::TrailComponent()
 {
@@ -476,6 +462,9 @@ void DamageListener::HandleMessage(const Message& message, const DamageParams& p
 {
 	CPlayer* pPlayer = (CPlayer*)params.pPlayer;
 	CMonster* pMonster = (CMonster*)m_pObject;
+
+	if (!pMonster->m_bEnable)
+		return;
 
 	if (pMonster->m_bSimulateArticulate == false) { // 변수 체크가 아닌 현재 상태 체크를 이용하는 것이 좋을듯
 		SoundPlayParams sound_play_params;
@@ -536,6 +525,12 @@ void DamageListener::HandleMessage(const Message& message, const DamageParams& p
 		}
 		
 		pMonster->m_iPlayerAtkId = pPlayer->GetAtkId();
+		pMonster->m_pChasingTargetObject = pPlayer;
+
+		PlayerParams playerParams;
+		playerParams.pPlayer = pPlayer;
+
+		CMessageDispatcher::GetInst()->Dispatch_Message<PlayerParams>(MessageType::ALLY_DAMAGED, &playerParams, nullptr);
 	}
 
 	else {
@@ -623,4 +618,8 @@ void MonsterDeadListener::HandleMessage(const Message& message, const MonsterPar
 
 void AllyDamagedListener::HandleMessage(const Message& message, const PlayerParams& params)
 {
+	CMonster* pMonster = dynamic_cast<CMonster*>(m_pObject);
+
+	if (pMonster->m_bEnable)
+		pMonster->HandleAllyDamagedMessage(params.pPlayer);
 }
