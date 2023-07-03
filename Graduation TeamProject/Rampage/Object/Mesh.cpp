@@ -1552,6 +1552,7 @@ void CParticleMesh::EmitParticle(int emitType, ParticleEmitDataParam& param)
 	case 7:
 	case 8:
 		for (int i = m_ncreatedParticleNum; i < nCreateParticleNum; ++i) {
+			createdParticleBuffer[i].m_xmf4Color = param.m_xmf4Color;
 			createdParticleBuffer[i].m_xmf3Position = param.m_xmf3EmitedPosition; /*XMFLOAT3(45 + offset.x, 60, 50 + offset.z)*/
 			createdParticleBuffer[i].m_xmf3Velocity = XMFLOAT3(urd(dre), urd(dre), urd(dre));
 			createdParticleBuffer[i].m_xmf3Velocity = Vector3::ScalarProduct(Vector3::Normalize(createdParticleBuffer[i].m_xmf3Velocity), param.m_fEmitedSpeed, false);
@@ -1570,6 +1571,7 @@ void CParticleMesh::EmitParticle(int emitType, ParticleEmitDataParam& param)
 		break;
 	case 9:
 		for (int i = m_ncreatedParticleNum; i < nCreateParticleNum; ++i) {
+			createdParticleBuffer[i].m_xmf4Color = param.m_xmf4Color;
 			createdParticleBuffer[i].m_xmf3Position = param.m_xmf3EmitedPosition; /*XMFLOAT3(45 + offset.x, 60, 50 + offset.z)*/
 			createdParticleBuffer[i].m_xmf3Velocity = XMFLOAT3(urd(dre), urd(dre), urd(dre));
 			float speedFactor = 3.0f + urd(dre) * 2.0f;
@@ -1586,8 +1588,38 @@ void CParticleMesh::EmitParticle(int emitType, ParticleEmitDataParam& param)
 			memcpy(createdParticleBuffer[i].m_iTextureCoord, param.m_iTextureCoord, sizeof(UINT) * 2);
 		}
 		break;
+	case 10:
+	{
+		float max_ceta = 30.0f * PI / 180.0f;
+		for (int i = m_ncreatedParticleNum; i < nCreateParticleNum; ++i) {
+			createdParticleBuffer[i].m_xmf4Color = param.m_xmf4Color;
+			createdParticleBuffer[i].m_xmf3Position = param.m_xmf3EmitedPosition; /*XMFLOAT3(45 + offset.x, 60, 50 + offset.z)*/
+
+			float ceta = urd(dre) * max_ceta;
+			float pi = 1.0f * PI * urd(dre);
+			createdParticleBuffer[i].m_xmf3Velocity.x = 1.0f * sin(ceta) * cos(pi);
+			createdParticleBuffer[i].m_xmf3Velocity.y = 1.0f * cos(ceta);
+			createdParticleBuffer[i].m_xmf3Velocity.z = 1.0f * sin(ceta) * sin(pi);
+
+			//createdParticleBuffer[i].m_xmf3Velocity = XMFLOAT3(urd(dre), urd(dre), urd(dre));
+			float speedFactor = 3.0f + urd(dre) * 2.0f;
+			createdParticleBuffer[i].m_xmf3Velocity = Vector3::ScalarProduct(Vector3::Normalize(createdParticleBuffer[i].m_xmf3Velocity), param.m_fEmitedSpeed * speedFactor, false);
+			createdParticleBuffer[i].m_iType = emitType;
+			createdParticleBuffer[i].m_fLifetime = param.m_fLifeTime;
+			createdParticleBuffer[i].m_fEmitTime = param.m_fEmitTime;
+			createdParticleBuffer[i].m_iTextureIndex = param.m_iTextureIndex;
+			createdParticleBuffer[i].m_xmf2Size = param.m_xmf2Size;
+			createdParticleBuffer[i].m_xmf2Size = Vector2::ScalarProduct(createdParticleBuffer[i].m_xmf2Size, 1.5f + (urd(dre)), false);
+			createdParticleBuffer[i].m_fEmissive = param.m_fEmissive;
+			createdParticleBuffer[i].m_bSimulateRotate = (int)param.m_bSimulateRotate;
+			createdParticleBuffer[i].m_bScaleFlag = (int)param.m_bScaleFlag;
+			memcpy(createdParticleBuffer[i].m_iTextureCoord, param.m_iTextureCoord, sizeof(UINT) * 2);
+		}
+	}
+		break;
 	case 2:
 		for (int i = m_ncreatedParticleNum; i < nCreateParticleNum; ++i) {
+			createdParticleBuffer[i].m_xmf4Color = param.m_xmf4Color;
 			createdParticleBuffer[i].m_xmf3Position = param.m_xmf3EmitedPosition; /*XMFLOAT3(45 + offset.x, 60, 50 + offset.z)*/
 			createdParticleBuffer[i].m_xmf3Velocity = XMFLOAT3(urd(dre), urd(dre), urd(dre));
 			createdParticleBuffer[i].m_xmf3Velocity = Vector3::ScalarProduct(Vector3::Normalize(createdParticleBuffer[i].m_xmf3Velocity), param.m_fEmitedSpeed, false);
@@ -1604,6 +1636,7 @@ void CParticleMesh::EmitParticle(int emitType, ParticleEmitDataParam& param)
 		break;
 	case 6:
 		for (int i = m_ncreatedParticleNum; i < nCreateParticleNum; ++i) {
+			createdParticleBuffer[i].m_xmf4Color = param.m_xmf4Color;
 			createdParticleBuffer[i].m_xmf3Position = param.m_xmf3EmitedPosition; /*XMFLOAT3(45 + offset.x, 60, 50 + offset.z)*/
 			
 			createdParticleBuffer[i].m_xmf3Velocity =Vector3::Add(param.m_xmf3EmitAxes, XMFLOAT3(urd(dre) / 5.0f, urd(dre) / 5.0f, urd(dre) / 5.0f));
@@ -1639,6 +1672,7 @@ void CParticleMesh::EmitParticleForVertexData(int emitType, ParticleEmitPosition
 	{
 		int index = 0;
 		for (int i = m_ncreatedParticleNum; i < nCreateParticleNum; ++i) {
+			createdParticleBuffer2[i].m_xmf4Color = param.m_xmf4Color;
 			createdParticleBuffer2[i].m_xmf3Position = param.m_xmf3EmiedPositions[index];
 			createdParticleBuffer2[i].m_xmf3Velocity = param.m_xmf3Velocitys[index];
 			createdParticleBuffer2[i].m_xmf3Velocity = Vector3::ScalarProduct(Vector3::Normalize(createdParticleBuffer2[i].m_xmf3Velocity), param.m_fEmitedSpeed, false);

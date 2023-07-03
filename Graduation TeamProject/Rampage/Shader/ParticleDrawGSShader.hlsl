@@ -30,6 +30,7 @@ cbuffer cbFrameworkInfo : register(b7)
 #define IMPACT_PARTICLE 7
 #define TERRAIN_PARTICLE 8
 #define SHIELDHIT_PARTICLE 9
+#define CONE_PARTICLE 10
 
 struct VS_PARTICLE_DRAW_OUTPUT
 {

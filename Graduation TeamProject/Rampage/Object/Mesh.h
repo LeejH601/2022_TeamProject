@@ -402,6 +402,7 @@ public:
 	float							m_fEmissive = 1.0f;
 	UINT							m_bSimulateRotate = 0;
 	UINT							m_bScaleFlag = 0;
+	XMFLOAT4						m_xmf4Color;
 public:
 	CParticleVertex() { }
 	~CParticleVertex() { }
@@ -421,6 +422,7 @@ struct ParticleEmitDataParam
 	float m_fEmissive;
 	bool							m_bSimulateRotate = false;
 	bool							m_bScaleFlag = false;
+	XMFLOAT4						m_xmf4Color = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 };
 
 struct ParticleEmitPositionlistParam
@@ -438,6 +440,7 @@ struct ParticleEmitPositionlistParam
 	float m_fEmissive;
 	bool							m_bSimulateRotate = false;
 	bool							m_bScaleFlag = false;
+	XMFLOAT4						m_xmf4Color = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 };
 
 #define MAX_PARTICLES				100000

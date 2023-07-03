@@ -13,6 +13,7 @@ Buffer<float4> gRandomSphereBuffer : register(t50);
 #define IMPACT_PARTICLE 7
 #define TERRAIN_PARTICLE 8
 #define SHIELDHIT_PARTICLE 9
+#define CONE_PARTICLE 10
 
 //#define TYPE_DEFAULT -1
 
@@ -241,4 +242,6 @@ void GSParticleStreamOutput(point VS_PARTICLE_INPUT input[1], inout PointStream<
 		TerrainParticles(particle, output);
 	else if (particle.type == SHIELDHIT_PARTICLE)
 		ShieldHitParticles(particle, output);
+	else if (particle.type == CONE_PARTICLE)
+		SphereParticles(particle, output);
 }

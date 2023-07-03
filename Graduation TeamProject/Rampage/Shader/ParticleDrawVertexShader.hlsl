@@ -83,5 +83,6 @@ VS_PARTICLE_DRAW_OUTPUT VSParticleDraw(VS_PARTICLE_INPUT input)
 	output.rotateFlag = input.rotateFlag;
 	output.ScaleFlag = input.ScaleFlag;
 	output.type = input.type;
+	output.color = input.color;
 	return(output);
 }

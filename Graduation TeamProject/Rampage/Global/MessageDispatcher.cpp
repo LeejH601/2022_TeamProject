@@ -239,7 +239,7 @@ void ParticleComponent::HandleMessage(const Message& message, const ParticleComp
 		pParticle->SetEmissive(m_fEmissive);
 		pParticle->SetRotateFactor(m_bSimulateRotate);
 		pParticle->SetScaleFactor(m_bSimulateRotate);
-		pParticle->EmitParticle(0);
+		pParticle->EmitParticle(10);
 	}
 }
 ImpactEffectComponent::ImpactEffectComponent()
@@ -573,7 +573,7 @@ SlashHitComponent::SlashHitComponent()
 	m_bScaleFlag = false;
 	m_fSize.x = 1.0f; m_fSize.y = 20.f;
 	m_nEmitParticleNumber = 1;
-	m_bEnable = true;
+	//m_bEnable = true;
 	m_iTextureOffset = 5;
 	m_iTextureIndex = 0;
 	m_fLifeTime = 0.5f;

@@ -218,6 +218,7 @@ void CParticleObject::EmitParticle(int emitType)
 	case 7:
 	case 8:
 	case 9:
+	case 10:
 		param.m_fLifeTime = m_fLifeTime;
 		param.m_nEmitNum = m_iEmitParticleN;
 		param.m_fEmitedSpeed = m_fSpeed;
@@ -232,6 +233,7 @@ void CParticleObject::EmitParticle(int emitType)
 		param.m_fEmissive = m_fEmissive;
 		param.m_bSimulateRotate = m_bSimulateRotate;
 		param.m_bScaleFlag = m_bScaleFlag;
+		param.m_xmf4Color = XMFLOAT4(m_f3Color.x, m_f3Color.y, m_f3Color.z, 1.0f);
 		break;
 	default:
 		break;
