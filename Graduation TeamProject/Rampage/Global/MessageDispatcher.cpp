@@ -626,3 +626,7 @@ void MonsterDeadListener::HandleMessage(const Message& message, const MonsterPar
 	if (message.getType() == MessageType::MONSTER_DEAD)
 		m_pScene->HandleDeadMessage();
 }
+
+void AllyDamagedListener::HandleMessage(const Message& message, const PlayerParams& params)
+{
+}

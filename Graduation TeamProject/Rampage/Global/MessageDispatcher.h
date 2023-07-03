@@ -168,6 +168,15 @@ public:
 	virtual void HandleMessage(const Message& message, const PlayerParams& params);
 };
 
+// Define Ally Damaged Listener
+class AllyDamagedListener : public IMessageListener {
+private:
+	CGameObject* m_pObject;
+public:
+	void SetObject(CGameObject* pObject) { m_pObject = pObject; }
+	virtual void HandleMessage(const Message& message, const PlayerParams& params);
+};
+
 // Define Monster Dead Listener
 class MonsterDeadListener : public IMessageListener {
 private:

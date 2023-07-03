@@ -321,11 +321,11 @@ void Chasing_Monster::Execute(CMonster* monster, float fElapsedTime)
 		monster->m_pStateMachine->ChangeState(Attack_Monster::GetInst());
 	}
 
-	if (monster->m_fToPlayerLength > monster->m_fSensingRange)
-	{
-		// 놓침
-		monster->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
-	}
+	//if (monster->m_fToPlayerLength > monster->m_fSensingRange)
+	//{
+	//	// 놓침
+	//	monster->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
+	//}
 
 	monster->Move(xmf3Shift, true);
 }

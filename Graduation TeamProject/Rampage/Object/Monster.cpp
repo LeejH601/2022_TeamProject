@@ -49,6 +49,12 @@ CMonster::CMonster()
 	m_pListeners.push_back(std::move(pDamageListener));
 
 	CMessageDispatcher::GetInst()->RegisterListener(MessageType::APPLY_DAMAGE, m_pListeners.back().get(), this);
+
+	std::unique_ptr<AllyDamagedListener> pAllyDamagedListener = std::make_unique<AllyDamagedListener>();
+	pAllyDamagedListener->SetObject(this);
+	m_pListeners.push_back(std::move(pAllyDamagedListener));
+
+	CMessageDispatcher::GetInst()->RegisterListener(MessageType::ALLY_DAMAGED, m_pListeners.back().get());
 }
 
 
