@@ -71,10 +71,15 @@ void CMonster::SetWanderVec()
 	m_xmf3WanderVec = Vector3::Normalize(m_xmf3WanderVec);
 }
 
-void CMonster::CheckIsPlayerInFrontOfThis(XMFLOAT3 xmf3PlayerPosition)
+void CMonster::CheckIsPlayerInFrontOfThis(CGameObject* pPlayer)
 {
+	XMFLOAT3 xmf3PlayerPos = XMFLOAT3{
+			pPlayer->m_pSkinnedAnimationController->m_pRootMotionObject->GetWorld()._41,
+			pPlayer->GetPosition().y,
+			pPlayer->m_pSkinnedAnimationController->m_pRootMotionObject->GetWorld()._43 };
+
 	XMFLOAT3 xmf3MonsterLook = GetLook();
-	XMFLOAT3 xmf3ToPlayerVec = Vector3::Subtract(xmf3PlayerPosition, GetPosition());
+	XMFLOAT3 xmf3ToPlayerVec = Vector3::Subtract(xmf3PlayerPos, GetPosition());
 
 	float fDotProduct = Vector3::DotProduct(xmf3MonsterLook, xmf3ToPlayerVec);
 	m_fToPlayerLength = Vector3::Length(xmf3ToPlayerVec);
@@ -84,9 +89,9 @@ void CMonster::CheckIsPlayerInFrontOfThis(XMFLOAT3 xmf3PlayerPosition)
 
 	if (/*fDotProduct > 0.0f && */m_fToPlayerLength < 22.5f)
 	{
-		m_xmf3ChasingVec = Vector3::Normalize(xmf3ToPlayerVec);
-
 		// 플레이어가 몬스터의 앞에 있음
+		m_pChasingTargetObject = pPlayer;
+
 		if (m_pStateMachine->GetCurrentState() != Chasing_Monster::GetInst() && m_pStateMachine->GetCurrentState() != Spawn_Monster::GetInst())
 			m_pStateMachine->ChangeState(Chasing_Monster::GetInst());
 	}

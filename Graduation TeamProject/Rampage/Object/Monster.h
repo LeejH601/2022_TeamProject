@@ -7,11 +7,12 @@
 class CMonster : public CPhysicsObject
 {
 public:
+	CGameObject* m_pChasingTargetObject;
+
 	XMFLOAT3 m_xmf3CalPos;
 
 	XMFLOAT3 m_xmf3HitterVec;
 	XMFLOAT3 m_xmf3WanderVec;
-	XMFLOAT3 m_xmf3ChasingVec;
 
 	unsigned int m_iPlayerAtkId = 999;
 
@@ -83,10 +84,9 @@ public:
 	unsigned int GetPlayerAtkId() { return m_iPlayerAtkId; }
 	XMFLOAT3 GetHitterVec() { return m_xmf3HitterVec; }
 	XMFLOAT3 GetWanderVec() { return m_xmf3WanderVec; }
-	XMFLOAT3 GetChasingVec() { return m_xmf3ChasingVec; }
 
 	void SetWanderVec();
-	void CheckIsPlayerInFrontOfThis(XMFLOAT3 xmf3PlayerPosition);
+	void CheckIsPlayerInFrontOfThis(CGameObject* pPlayer);
 	void CalculateResultPosition();
 	void ApplyDamage(float Damage, void* pData = nullptr);
 	void SetElite(bool flag);
