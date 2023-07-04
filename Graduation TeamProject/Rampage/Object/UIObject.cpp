@@ -59,7 +59,8 @@ void CUIObject::Update(float fTimeElapsed)
 		m_xmf4x4World._14 = 0.f; // V
 		m_xmf4x4World._24 = 1.f;
 
-		m_xmf4x4World._21 = 1.f; // RGBN
+		m_xmf4x4World._21 = 1.f;
+		m_xmf4x4World._23 = m_fAlpha; // RGBN // m_xmfColor
 		// -1 ~ 1
 		m_xmf4x4World._41 = (m_xmf2ScreenPosition.x / FRAME_BUFFER_WIDTH);
 		m_xmf4x4World._42 = (m_xmf2ScreenPosition.y / FRAME_BUFFER_HEIGHT);
@@ -359,6 +360,7 @@ void CSTAMINAObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, bool b_U
 
 CNumberObject::CNumberObject(int iOffsetTextureIndex, int Number, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fSize) : CUIObject(iOffsetTextureIndex, pd3dDevice, pd3dCommandList, fSize)
 {
+	m_fAlpha = 0.f;
 	//m_tRect.push_back(RECT(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT * 0.12f));
 }
 
@@ -615,6 +617,7 @@ void CBloodEffectObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, bool
 
 CButtonObject::CButtonObject(int iTextureIndex, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fSize) : CUIObject(iTextureIndex, pd3dDevice, pd3dCommandList, fSize)
 {
+	m_fAlpha = 20.f;
 }
 
 
@@ -625,12 +628,16 @@ CButtonObject::~CButtonObject()
 
 bool CButtonObject::CheckCollisionMouse(POINT ptCursorPo)
 {
-	if((m_xmf2ScreenPosition.x + m_xmf2Size.x * 0.5f > ptCursorPo.x)  && (m_xmf2ScreenPosition.x - m_xmf2Size.x * 0.5f < ptCursorPo.x)
+	if ((m_xmf2ScreenPosition.x + m_xmf2Size.x * 0.5f > ptCursorPo.x) && (m_xmf2ScreenPosition.x - m_xmf2Size.x * 0.5f < ptCursorPo.x)
 		&&
 		((FRAME_BUFFER_HEIGHT - m_xmf2ScreenPosition.y + m_xmf2Size.y * 0.5f) > ptCursorPo.y - 10.f) && ((FRAME_BUFFER_HEIGHT - m_xmf2ScreenPosition.y - m_xmf2Size.y * 0.5f) < ptCursorPo.y - 10.f)
 		)
+	{
+		m_bCollision = true;
 		return true;
-
+	}
+	m_bCollision = false;
+	//m_xmfColor = 1.f;
 	TCHAR pstrDebug[256] = { 0 };
 	_stprintf_s(pstrDebug, 256, _T("현재 마우스 위치 = %d %d\n"), ptCursorPo.x, ptCursorPo.y);
 	OutputDebugString(pstrDebug);
@@ -689,7 +696,7 @@ void CMonsterHPObject::PreBarUpdate(float fTimeElapsed)
 		m_xmf4x4World._24 = 1.f;
 
 		m_xmf4x4World._21 = 0.5f; // RGBN
-		m_xmf4x4World._21 = 0.6f; // ALPHA
+		m_xmf4x4World._23 = 0.6f; // ALPHA
 
 		// -1 ~ 1
 		m_xmf4x4World._41 = (m_xmf2ScreenPosition.x / FRAME_BUFFER_WIDTH) - (((m_fTotalValue - m_fPreValue) / m_fTotalValue) * m_xmf2Size.x * 0.5f) / (FRAME_BUFFER_WIDTH);;
@@ -725,3 +732,27 @@ void CMonsterHPObject::CurBarUpdate(float fTimeElapsed)
 	}
 }
 
+CColorButtonObject::CColorButtonObject(int iTextureIndex, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fSize) : CButtonObject(iTextureIndex, pd3dDevice, pd3dCommandList, fSize)
+{
+}
+
+CColorButtonObject::~CColorButtonObject()
+{
+}
+
+void CColorButtonObject::Update(float fTimeElapsed)
+{
+
+	if (m_bCollision)
+	{
+		if(m_fAlpha <= 0.6f)
+			m_fAlpha += fTimeElapsed * 2.f;
+	}
+	else
+	{
+		if (m_fAlpha > 0.f)
+			m_fAlpha -= fTimeElapsed * 2.f;
+	}
+	CUIObject::Update(fTimeElapsed);
+
+}

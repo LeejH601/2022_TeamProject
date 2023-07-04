@@ -15,12 +15,16 @@ public:
 	void SetSize(XMFLOAT2 xmf2Size);
 	void SetScreenPosition(XMFLOAT2 xmf2ScreenPosition);
 	void SetTextureIndex(UINT iTextureIndex);
+	void SetColor(float fColor) { m_xmfColor = fColor; }
+	void SetAlpha(float fAlpha) { m_fAlpha = fAlpha; }
 
 protected:
 	std::vector<D3D12_RECT> m_tRect;
 	XMFLOAT2 m_xmf2Size = XMFLOAT2(1.f, 1.f);
 	XMFLOAT2 m_xmf2ScreenPosition = XMFLOAT2(0.f, 0.f);
+	float m_xmfColor = 1.f;
 	UINT	m_iTextureIndex = 0;
+	float m_fAlpha = 1.f;
 };	
 
 
@@ -90,12 +94,18 @@ public:
 	virtual void UpdateNumberTexture(UINT N, UINT ORDER);
 	virtual void UpdateLifeTime();
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, bool b_UseTexture, CCamera* pCamera = NULL);
+
+public:
+	UINT GetNumSize() { return m_vecNumObject.size(); };
+
 protected:
 	std::vector<UINT> m_vecNumObject;
 	UINT m_iNumber = 0;
 	float m_fAnimationTime = 1.f;
 	bool m_bAnimation = false;
-	float m_fAlpha = 0.f;
+
+
+
 };
 
 class CComboNumberObject : public CNumberObject
@@ -119,7 +129,6 @@ public:
 
 private:
 	float m_fSize = 0.5f;
-	float m_fAlpha = 1.f;
 	float m_fLifeTime = 0.f;
 	bool m_bAnimation = false;
 };
@@ -133,6 +142,17 @@ public:
 public:
 	bool CheckCollisionMouse(POINT ptCursorPo);
 
-private:
+protected:
 	bool m_bCollision = false;
+};
+
+class CColorButtonObject : public CButtonObject
+{
+public:
+	CColorButtonObject(int iTextureIndex, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fSize);
+	virtual ~CColorButtonObject();
+
+public:
+	virtual void Update(float fTimeElapsed);
+
 };

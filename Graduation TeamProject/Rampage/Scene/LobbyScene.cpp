@@ -25,14 +25,21 @@ void CLobbyScene::CreateGraphicsRootSignature(ID3D12Device* pd3dDevice)
 
 bool CLobbyScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
 {
+	POINT ptCursorPos;
+	float cxDelta, cyDelta;
+	GetCursorPos(&ptCursorPos);
+	m_ptOldCursorPos = ptCursorPos;
 	switch (nMessageID)
 	{
 	case WM_LBUTTONDOWN:
 		// 좌클릭시 사용자가 좌클릭 했음을 표현하는 변수를 true로 바꿔줌
-		POINT ptCursorPos;
-		float cxDelta, cyDelta;
-		GetCursorPos(&ptCursorPos);
-		if (dynamic_cast<CButtonObject*>(m_pUIObject[0].get())->CheckCollisionMouse(ptCursorPos))
+
+		if (dynamic_cast<CButtonObject*>(m_pUIObject[3].get())->CheckCollisionMouse(ptCursorPos))
+		{
+			m_iSceneType = LobbySceneType::SIMULATOR_Scene;
+			return true;
+		}
+		if (dynamic_cast<CButtonObject*>(m_pUIObject[5].get())->CheckCollisionMouse(ptCursorPos))
 		{
 			m_iSceneType = LobbySceneType::SIMULATOR_Scene;
 			return true;
@@ -126,8 +133,14 @@ void CLobbyScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 	m_pTextureManager->LoadSphereBuffer(pd3dDevice, pd3dCommandList);
 
 	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/Logo2.dds", 0, 0);
-	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/Button.dds", 0, 0);
+	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/GameStart.dds", 0, 0);
+	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/GameExit.dds", 0, 0);
+	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/LogoName.dds", 0, 0);
+	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/LogoMenuFrame.dds", 0, 0);
+	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/LogoMenuFrame2.dds", 0, 0);
 
+	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/LogoBackGround.dds", 0, 0);
+	
 
 	m_pTextureManager->CreateResourceView(pd3dDevice, 0);
 
@@ -148,17 +161,73 @@ void CLobbyScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 
 	m_pSkyBoxObject = std::make_unique<CSkyBox>(pd3dDevice, pd3dCommandList, GetGraphicsRootSignature(), pSkyBoxTexture);
 
-	std::unique_ptr<CUIObject> pUIObject = std::make_unique<CButtonObject>(2, pd3dDevice, pd3dCommandList, 10.f);
-	pUIObject->SetSize(XMFLOAT2(FRAME_BUFFER_WIDTH * 0.12f, FRAME_BUFFER_HEIGHT * 0.1f));
-	pUIObject->SetScreenPosition(XMFLOAT2(FRAME_BUFFER_WIDTH * 0.9f, FRAME_BUFFER_HEIGHT * 0.9f));
-	pUIObject->SetTextureIndex(m_pTextureManager->LoadTotalTextureIndex(TextureType::UITexture, L"Image/UiImages/Button.dds"));
+	std::unique_ptr<CUIObject> pUIObject = std::make_unique<CUIObject>(2, pd3dDevice, pd3dCommandList, 10.f);
+	pUIObject->SetSize(XMFLOAT2(FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT));
+	pUIObject->SetScreenPosition(XMFLOAT2(FRAME_BUFFER_WIDTH * 0.5f, FRAME_BUFFER_HEIGHT * 0.5f));
+	pUIObject->SetTextureIndex(m_pTextureManager->LoadTotalTextureIndex(TextureType::UITexture, L"Image/UiImages/LogoBackGround.dds"));
 	m_pUIObject.push_back(std::move(pUIObject));
 
 	pUIObject = std::make_unique<CUIObject>(2, pd3dDevice, pd3dCommandList, 10.f);
-	pUIObject->SetSize(XMFLOAT2(1890.f * 0.2f, 1417.f * 0.2f));
-	pUIObject->SetScreenPosition(XMFLOAT2(FRAME_BUFFER_WIDTH * 0.5f, FRAME_BUFFER_HEIGHT * 0.8f));
-	pUIObject->SetTextureIndex(m_pTextureManager->LoadTotalTextureIndex(TextureType::UITexture, L"Image/UiImages/Logo2.dds"));
+	pUIObject->SetSize(XMFLOAT2(378.f * 2.5f, 283.f * 2.5f));
+	pUIObject->SetScreenPosition(XMFLOAT2(FRAME_BUFFER_WIDTH * 0.31f, FRAME_BUFFER_HEIGHT * 0.78f));
+	pUIObject->SetTextureIndex(m_pTextureManager->LoadTotalTextureIndex(TextureType::UITexture, L"Image/UiImages/LogoName.dds"));
 	m_pUIObject.push_back(std::move(pUIObject));
+
+	//pUIObject = std::make_unique<CUIObject>(2, pd3dDevice, pd3dCommandList, 10.f);
+	//pUIObject->SetSize(XMFLOAT2(251.f * 1.95f, 254.f * 1.6f));
+	//pUIObject->SetScreenPosition(XMFLOAT2(FRAME_BUFFER_WIDTH * 0.3f - 10.f, FRAME_BUFFER_HEIGHT * 0.35f));
+	//pUIObject->SetTextureIndex(m_pTextureManager->LoadTotalTextureIndex(TextureType::UITexture, L"Image/UiImages/LogoMenuFrame.dds"));
+	//m_pUIObject.push_back(std::move(pUIObject));
+
+	pUIObject = std::make_unique<CUIObject>(2, pd3dDevice, pd3dCommandList, 10.f);
+	pUIObject->SetSize(XMFLOAT2(762.f * 0.85f, 173.f * 1.f));
+	pUIObject->SetScreenPosition(XMFLOAT2(FRAME_BUFFER_WIDTH * 0.3f - 10.f, FRAME_BUFFER_HEIGHT * 0.25f));
+	pUIObject->SetTextureIndex(m_pTextureManager->LoadTotalTextureIndex(TextureType::UITexture, L"Image/UiImages/LogoMenuFrame.dds"));
+	m_pUIObject.push_back(std::move(pUIObject));
+
+	pUIObject = std::make_unique<CColorButtonObject>(2, pd3dDevice, pd3dCommandList, 10.f); // 3
+	pUIObject->SetSize(XMFLOAT2(762.f * 0.85f, 173.f * 1.f));
+	pUIObject->SetScreenPosition(XMFLOAT2(FRAME_BUFFER_WIDTH * 0.3f - 10.f, FRAME_BUFFER_HEIGHT * 0.25f));
+	pUIObject->SetAlpha(0.f);
+	pUIObject->SetTextureIndex(m_pTextureManager->LoadTotalTextureIndex(TextureType::UITexture, L"Image/UiImages/LogoMenuFrame2.dds"));
+	m_pUIObject.push_back(std::move(pUIObject));
+
+	pUIObject = std::make_unique<CUIObject>(2, pd3dDevice, pd3dCommandList, 10.f);
+	pUIObject->SetSize(XMFLOAT2(762.f * 1.f, 173.f * 1.f));
+	pUIObject->SetScreenPosition(XMFLOAT2(FRAME_BUFFER_WIDTH * 0.3f, FRAME_BUFFER_HEIGHT * 0.45f));
+	pUIObject->SetTextureIndex(m_pTextureManager->LoadTotalTextureIndex(TextureType::UITexture, L"Image/UiImages/LogoMenuFrame.dds"));
+	m_pUIObject.push_back(std::move(pUIObject));
+
+	pUIObject = std::make_unique<CColorButtonObject>(2, pd3dDevice, pd3dCommandList, 10.f); // 5
+	pUIObject->SetSize(XMFLOAT2(762.f * 1.f, 173.f * 1.f));
+	pUIObject->SetScreenPosition(XMFLOAT2(FRAME_BUFFER_WIDTH * 0.3f, FRAME_BUFFER_HEIGHT * 0.45f));
+	pUIObject->SetAlpha(0.f);
+	pUIObject->SetTextureIndex(m_pTextureManager->LoadTotalTextureIndex(TextureType::UITexture, L"Image/UiImages/LogoMenuFrame2.dds"));
+	m_pUIObject.push_back(std::move(pUIObject));
+
+	pUIObject = std::make_unique<CUIObject>(2, pd3dDevice, pd3dCommandList, 10.f);
+	pUIObject->SetSize(XMFLOAT2(600.f * 0.7f, 120.f * 0.7f));
+	pUIObject->SetScreenPosition(XMFLOAT2(FRAME_BUFFER_WIDTH * 0.3f, FRAME_BUFFER_HEIGHT * 0.45f));
+	pUIObject->SetTextureIndex(m_pTextureManager->LoadTotalTextureIndex(TextureType::UITexture, L"Image/UiImages/GameStart.dds"));
+	m_pUIObject.push_back(std::move(pUIObject));
+
+	pUIObject = std::make_unique<CUIObject>(2, pd3dDevice, pd3dCommandList, 10.f);
+	pUIObject->SetSize(XMFLOAT2(600.f * 0.7f, 120.f * 0.7f));
+	pUIObject->SetScreenPosition(XMFLOAT2(FRAME_BUFFER_WIDTH * 0.3f, FRAME_BUFFER_HEIGHT * 0.25f));
+	pUIObject->SetTextureIndex(m_pTextureManager->LoadTotalTextureIndex(TextureType::UITexture, L"Image/UiImages/GameExit.dds"));
+	m_pUIObject.push_back(std::move(pUIObject));
+
+
+
+
+
+
+
+	//pUIObject = std::make_unique<CUIObject>(2, pd3dDevice, pd3dCommandList, 10.f);
+	//pUIObject->SetSize(XMFLOAT2(1890.f * 0.34f, 1417.f * 0.34f));
+	//pUIObject->SetScreenPosition(XMFLOAT2(FRAME_BUFFER_WIDTH * 0.3f, FRAME_BUFFER_HEIGHT * 0.8f));
+	//pUIObject->SetTextureIndex(m_pTextureManager->LoadTotalTextureIndex(TextureType::UITexture, L"Image/UiImages/Logo2.dds"));
+	//m_pUIObject.push_back(std::move(pUIObject));
 
 	m_pCamera = std::make_unique<CFloatingCamera>();
 	m_pCamera->Init(pd3dDevice, pd3dCommandList);
@@ -171,9 +240,12 @@ void CLobbyScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 
 void CLobbyScene::Update(float fTimeElapsed)
 {
+
 	switch (m_iSceneType)
 	{
 	case LobbySceneType::LOGO_Scene:
+		dynamic_cast<CButtonObject*>(m_pUIObject[3].get())->CheckCollisionMouse(m_ptOldCursorPos);
+		dynamic_cast<CButtonObject*>(m_pUIObject[5].get())->CheckCollisionMouse(m_ptOldCursorPos);
 		CSimulatorScene::GetInst()->Update(fTimeElapsed);
 		return;
 	case LobbySceneType::SIMULATOR_Scene:
@@ -216,10 +288,6 @@ void CLobbyScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTime
 
 		m_pSunLightShader->Render(pd3dCommandList, m_pCamera.get());
 
-		m_pSkyBoxShader->Render(pd3dCommandList, 0);
-		m_pSkyBoxObject->Render(pd3dCommandList, m_pCamera.get());
-
-		m_pMap->RenderTerrain(pd3dCommandList); 
 
 		m_pTextureManager->SetTextureDescriptorHeap(pd3dCommandList);
 		m_pTextureManager->UpdateShaderVariables(pd3dCommandList);

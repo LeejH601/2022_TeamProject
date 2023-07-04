@@ -1159,6 +1159,7 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	pUIObject->SetSize(XMFLOAT2(840.f * 0.15f, 360.f * 0.15f));
 	pUIObject->SetScreenPosition(XMFLOAT2(FRAME_BUFFER_WIDTH * 0.85f + 200.f, FRAME_BUFFER_HEIGHT * 0.5f - 15.f));
 	pUIObject->SetTextureIndex(m_pTextureManager->LoadTotalTextureIndex(TextureType::UITexture, L"Image/UiImages/Hits.dds"));
+	dynamic_cast<CUIObject*>(pUIObject.get())->SetColor(2.1f);
 	m_pUIObject.push_back(std::move(pUIObject));
 
 
@@ -1585,12 +1586,7 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 	m_pLensFlareShader->CalculateFlaresPlace(m_pCurrentCamera, &m_pLight->GetLights()[0]);
 	m_pLensFlareShader->Render(pd3dCommandList, 0);
 
-	m_pUIObjectShader->Render(pd3dCommandList, 0);
-	for (int i = 0; i < m_pUIObject.size(); i++)
-	{
-		m_pUIObject[i]->Update(fTimeElapsed);
-		m_pUIObject[i]->Render(pd3dCommandList, false, nullptr);
-	}
+
 
 	if (m_pd3dComputeRootSignature) pd3dCommandList->SetComputeRootSignature(m_pd3dComputeRootSignature.Get());
 	ID3D12Resource* pd3dSource;
@@ -1609,6 +1605,12 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 		::SynchronizeResourceTransition(pd3dCommandList, pd3dDestination, D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_COMMON);
 	}
 
+	m_pUIObjectShader->Render(pd3dCommandList, 0);
+	for (int i = 0; i < m_pUIObject.size(); i++)
+	{
+		m_pUIObject[i]->Update(fTimeElapsed);
+		m_pUIObject[i]->Render(pd3dCommandList, false, nullptr);
+	}
 
 	m_pHDRComputeShader->Dispatch(pd3dCommandList);
 
@@ -1655,7 +1657,7 @@ void CMainTMPScene::UIUpdate(CPlayer* pPlayer)
 	dynamic_cast<CBarObject*>(m_pUIObject[5].get())->Set_Value(((CPlayer*)m_pPlayer)->m_fStamina, ((CPlayer*)m_pPlayer)->m_fTotalStamina);
 	dynamic_cast<CNumberObject*>(m_pUIObject[10].get())->UpdateNumber(((CPlayer*)m_pPlayer)->m_iCombo);
 
-	dynamic_cast<CUIObject*>(m_pUIObject[12].get())->SetScreenPosition(XMFLOAT2(FRAME_BUFFER_WIDTH * 0.85f + 160.f + (((CPlayer*)m_pPlayer)->m_iCombo / 10) * 55.f, FRAME_BUFFER_HEIGHT * 0.5f - 9.f));
+	dynamic_cast<CUIObject*>(m_pUIObject[12].get())->SetScreenPosition(XMFLOAT2(FRAME_BUFFER_WIDTH * 0.85f + 160.f + (dynamic_cast<CNumberObject*>(m_pUIObject[10].get()))->GetNumSize() * 35.f, FRAME_BUFFER_HEIGHT * 0.5f - 9.f));
 	// ((CPlayer*)m_pPlayer)->m_iCombo / 10
 
 	if (((CKnightPlayer*)(m_pPlayer))->GetMonsterAttack())
