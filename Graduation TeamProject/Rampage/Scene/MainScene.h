@@ -42,6 +42,7 @@ struct StageInfo {
 	int m_iSkeletonNum = 0;
 	int m_iEliteSkeletonNum = 0;
 	XMFLOAT3 m_xmf3StageCenterPos;
+	float m_fMonsterSpawnRange;
 };
 
 class CMainTMPScene : public CScene
