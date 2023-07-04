@@ -72,16 +72,22 @@ void CMainTMPScene::HandleDeadMessage()
 {
 	m_iTotalMonsterNum -= 1;
 
-	if (m_iTotalMonsterNum == 0 && m_iStageNum != m_vCinematicCameraLocations.size() /* 모든 스테이지 클리어 */)
+	if (m_iTotalMonsterNum == 0)
 	{
-		((CCinematicCamera*)(m_pCinematicSceneCamera.get()))->ClearCameraInfo();
-		((CCinematicCamera*)(m_pCinematicSceneCamera.get()))->AddPlayerCameraInfo((CPlayer*)m_pPlayer, m_pMainSceneCamera.get());
-		((CCinematicCamera*)(m_pCinematicSceneCamera.get()))->AddCameraInfo(m_vCinematicCameraLocations[m_iStageNum].get());
-		((CCinematicCamera*)(m_pCinematicSceneCamera.get()))->PlayCinematicCamera();
+		if (m_iStageNum < m_vCinematicCameraLocations.size())
+		{
+			((CCinematicCamera*)(m_pCinematicSceneCamera.get()))->ClearCameraInfo();
+			((CCinematicCamera*)(m_pCinematicSceneCamera.get()))->AddPlayerCameraInfo((CPlayer*)m_pPlayer, m_pMainSceneCamera.get());
+			((CCinematicCamera*)(m_pCinematicSceneCamera.get()))->AddCameraInfo(m_vCinematicCameraLocations[m_iStageNum].get());
+			((CCinematicCamera*)(m_pCinematicSceneCamera.get()))->PlayCinematicCamera();
 
-		// 시작은 씨네마틱 카메라
-		m_pCurrentCamera = m_pCinematicSceneCamera.get();
-		m_curSceneProcessType = SCENE_PROCESS_TYPE::CINEMATIC;
+			// 시작은 씨네마틱 카메라
+			m_pCurrentCamera = m_pCinematicSceneCamera.get();
+			m_curSceneProcessType = SCENE_PROCESS_TYPE::CINEMATIC;
+		}
+
+		else
+			AdvanceStage();
 	}
 }
 
@@ -1164,22 +1170,28 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 
 	m_StageInfoMap.emplace(std::pair<int, StageInfo>(0, 
 		StageInfo{ 
-			0, 5, 
+			1, 0, 
 			0, 0,
 			0, 0, 
 			XMFLOAT3{ 113.664360f, 3.016271f, 123.066483f } }));
 	m_StageInfoMap.emplace(std::pair<int, StageInfo>(1,
 		StageInfo{
 			0, 0,
-			5, 0,
+			1, 0,
 			0, 0,
 			XMFLOAT3{ 189.830246f, 3.016271f, 47.559467f } }));
 	m_StageInfoMap.emplace(std::pair<int, StageInfo>(2,
 		StageInfo{
 			0, 0,
 			0, 0,
-			5, 0,
+			1, 0,
 			XMFLOAT3{ 53.192234f, 3.016271f, 99.847107f } }));
+	m_StageInfoMap.emplace(std::pair<int, StageInfo>(3,
+		StageInfo{
+			0, 1,
+			0, 0,
+			0, 0,
+			XMFLOAT3{ 113.664360f, 3.016271f, 123.066483f } }));
 }
 bool CMainTMPScene::ProcessInput(HWND hWnd, DWORD dwDirection, float fTimeElapsed)
 {

@@ -21,9 +21,14 @@ public:
 	bool m_bStunned;
 	bool m_bCanChase;
 	
+	float m_fMaxIdleTime;
 	float m_fIdleTime;
+
 	float m_fSpawnTime;
+
+	float m_fMaxWanderTime;
 	float m_fWanderTime;
+
 	float m_fDeadTime;
 	float m_fToPlayerLength;
 

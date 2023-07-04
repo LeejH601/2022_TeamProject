@@ -86,7 +86,7 @@ void Idle_Monster::Execute(CMonster* monster, float fElapsedTime)
 {
 	monster->m_fIdleTime += fElapsedTime;
 
-	if (m_fMaxIdleTime < monster->m_fIdleTime && !(monster->m_bIsDummy))
+	if (monster->m_fMaxIdleTime < monster->m_fIdleTime && !(monster->m_bIsDummy))
 	{
 		monster->m_pStateMachine->ChangeState(Wander_Monster::GetInst());
 	}
@@ -277,7 +277,7 @@ void Wander_Monster::Execute(CMonster* monster, float fElapsedTime)
 
 	monster->m_fWanderTime += fElapsedTime;
 
-	if (m_fMaxWanderTime < monster->m_fWanderTime)
+	if (monster->m_fMaxWanderTime < monster->m_fWanderTime)
 	{
 		monster->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
 	}

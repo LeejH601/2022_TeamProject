@@ -27,6 +27,8 @@ CMonster::CMonster()
 	m_fSpeedKperH = 10.0f;
 	m_fSpeedUperS = MeterToUnit(m_fSpeedKperH * 1000.0f) / 3600.0f;
 
+	m_fMaxIdleTime = 2.0f + RandomFloatInRange(-0.8f, 0.8f);
+	m_fMaxWanderTime = 2.0f + RandomFloatInRange(-0.8f, 0.8f);
 	m_fAttackRange = MeterToUnit(1.0f);
 	m_fAtkStartTime = 0.0f;
 	m_fAtkEndTime = 0.0f;
@@ -448,6 +450,7 @@ bool CMonsterPool::SetActiveMonster(MONSTER_TYPE monsterType, MonsterSpawnInfo m
 		m_pNonActiveMonsters[static_cast<int>(monsterType)].pop_back();
 		pMonster->SetEnable(true);
 		pMonster->SetPosition(monsterSpawnInfo.xmf3Position);
+		pMonster->Rotate(0.0f, RandomFloatInRange(0.0f, 360.0f), 0.0f);
 		monsterSpawnInfo.bIsElite ? pMonster->SetElite(true) : pMonster->SetElite(false);
 		pMonster->m_pStateMachine->ChangeState(Spawn_Monster::GetInst());
 		return true;
