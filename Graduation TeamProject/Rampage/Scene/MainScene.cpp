@@ -754,6 +754,7 @@ SCENE_RETURN_TYPE CMainTMPScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMe
 									((CPlayer*)m_pPlayer)->SetSpeedUperS(((CPlayer*)m_pPlayer)->GetSpeedUperS() / 2.0f);
 								}
 								dynamic_cast<CKnightPlayer*>(m_pPlayer)->DrinkPotion();
+								dynamic_cast<CKnightPlayer*>(m_pPlayer)->m_bIsDrinkPotion = true;
 							}
 						}
 					}

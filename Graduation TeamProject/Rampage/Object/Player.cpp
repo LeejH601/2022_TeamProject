@@ -531,6 +531,15 @@ void CKnightPlayer::DrinkPotion()
 	}
 }
 
+void CKnightPlayer::CanclePotion()
+{
+	if (m_pSkinnedAnimationController->m_pSubAnimationTracks[0].m_bEnable == TRUE) {
+		m_pSkinnedAnimationController->m_pSubAnimationTracks[0].m_bEnable = FALSE;
+		m_pSkinnedAnimationController->m_pSubAnimationTracks[0].m_fPosition = 0.0f;
+		m_bIsDrinkPotion = false;
+	}
+}
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -630,6 +639,7 @@ void CDrinkPotionCallbackHandler::HandleCallback(void* pCallbackData, float fTra
 		CAnimationTrack* track = (CAnimationTrack*)(pCallbackData);
 		track->m_bEnable = false;
 		m_bEmitedParticle = false;
+		m_pPlayer->m_bIsDrinkPotion = false;
 	}
 	if (abs(fTrackPosition - 1.5f) < ANIMATION_CALLBACK_EPSILON && m_bEmitedParticle == false) {
 		if (m_pVertexPointParticleObject) {

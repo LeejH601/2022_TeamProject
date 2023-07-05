@@ -48,6 +48,7 @@ public:
 	float m_fComboTime = m_fComboFullTime;
 	bool m_bCombo = false;
 	bool m_bIsDash = false;
+	bool m_bIsDrinkPotion = false;
 	
 	XMFLOAT3 m_xmf3AtkDirection;
 
@@ -116,6 +117,7 @@ public:
 	virtual void PrepareBoundingBox(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 
 	void DrinkPotion();
+	void CanclePotion();
 
 	virtual XMFLOAT4& GetTrailControllPoint(int n) { return m_xmf4TrailControllPoints[n]; };
 	bool& GetMonsterAttack() {return m_bMonsterAttack;}

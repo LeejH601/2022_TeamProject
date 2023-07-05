@@ -1231,6 +1231,7 @@ Damaged_Player::~Damaged_Player()
 
 void Damaged_Player::Enter(CPlayer* player)
 {
+	dynamic_cast<CKnightPlayer*>(player)->CanclePotion();
 #ifdef SET_LOOKAT_WHEN_DAMAGED
 	player->SetLookAt(Vector3::Add(player->GetPosition(), Vector3::Normalize(player->m_xmf3ToHitterVec)));
 	player->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 32);
