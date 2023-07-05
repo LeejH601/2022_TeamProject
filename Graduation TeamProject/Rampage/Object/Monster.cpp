@@ -168,7 +168,13 @@ void CMonster::Update(float fTimeElapsed)
 			if (m_bSimulateArticulate) {
 				TestDissolvetime += fTimeElapsed;
 				if (TestDissolvetime > 5.0f)
+				{
 					m_bDissolved = true;
+
+					MonsterParams monsterParams;
+					monsterParams.pMonster = this;
+					CMessageDispatcher::GetInst()->Dispatch_Message<MonsterParams>(MessageType::MONSTER_DEAD, &monsterParams, this);
+				}
 			}
 		}
 		else {

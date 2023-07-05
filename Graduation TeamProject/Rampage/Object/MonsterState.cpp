@@ -450,10 +450,6 @@ void Dead_Monster::Enter(CMonster* monster)
 	}
 
 	monster->m_bArticulationSleep = false;
-
-	MonsterParams monsterParams;
-	monsterParams.pMonster = monster;
-	CMessageDispatcher::GetInst()->Dispatch_Message<MonsterParams>(MessageType::MONSTER_DEAD, &monsterParams, this);
 }
 
 void Dead_Monster::Execute(CMonster* monster, float fElapsedTime)

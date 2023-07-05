@@ -72,6 +72,9 @@ void CMainTMPScene::HandleDeadMessage()
 {
 	m_iTotalMonsterNum -= 1;
 
+	OutputDebugString(std::to_wstring(m_iTotalMonsterNum).c_str());
+	OutputDebugString(L"\n");
+
 	if (m_iTotalMonsterNum == 0)
 	{
 		if (m_iStageNum < m_vCinematicCameraLocations.size())
@@ -150,6 +153,7 @@ void CMainTMPScene::AdvanceStage()
 		}
 
 		// Spawn Elite Orc
+		m_iTotalMonsterNum += stageInfo.m_iEliteOrcNum;
 		{
 			std::vector<MonsterSpawnInfo> xmf3MonsterSpawnInfo(stageInfo.m_iEliteOrcNum);
 
@@ -181,6 +185,7 @@ void CMainTMPScene::AdvanceStage()
 		}
 
 		// Spawn Elite Skeleton
+		m_iTotalMonsterNum += stageInfo.m_iEliteSkeletonNum;
 		{
 			std::vector<MonsterSpawnInfo> xmf3MonsterSpawnInfo(stageInfo.m_iEliteSkeletonNum);
 
@@ -1215,7 +1220,7 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 			2, 0,
 			5, 1,
 			0, 0,
-			XMFLOAT3{ 113.664360f, 3.016271f, 123.066483f },
+			XMFLOAT3{ 113.664360f, 3.016271f, 123.066483f }, 
 			12.5f }));
 	m_StageInfoMap.emplace(std::pair<int, StageInfo>(6,
 		StageInfo{
