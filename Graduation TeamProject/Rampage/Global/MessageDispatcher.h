@@ -108,8 +108,7 @@ struct RegisterArticulationSleepParams {
 };
 
 struct DamageParams {
-	CGameObject* pPlayer;
-	float fMaxStunTime;
+	CGameObject* pAttacker;
 	float fDamage;
 };
 

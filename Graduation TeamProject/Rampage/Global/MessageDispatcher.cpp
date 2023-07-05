@@ -460,83 +460,25 @@ void SceneOnGroundListener::HandleMessage(const Message& message, const OnGround
 
 void DamageListener::HandleMessage(const Message& message, const DamageParams& params)
 {
-	CPlayer* pPlayer = (CPlayer*)params.pPlayer;
-	CMonster* pMonster = (CMonster*)m_pObject;
+	CPlayer* pPlayer = dynamic_cast<CPlayer*>(m_pObject);
+	CMonster* pMonster = dynamic_cast<CMonster*>(m_pObject);
 
-	if (!pMonster->m_bEnable)
-		return;
+	if (pMonster)
+	{
+		if (!pMonster->m_bEnable)
+			return;
 
-	if (pMonster->m_bSimulateArticulate == false) { // 변수 체크가 아닌 현재 상태 체크를 이용하는 것이 좋을듯
-		SoundPlayParams sound_play_params;
-		sound_play_params.monster_type = pMonster->GetMonsterType();
-		sound_play_params.sound_category = SOUND_CATEGORY::SOUND_VOICE;
-		CMessageDispatcher::GetInst()->Dispatch_Message<SoundPlayParams>(MessageType::PLAY_SOUND, &sound_play_params, pPlayer->m_pStateMachine->GetCurrentState());
-
-		// Update Hit Lag
-		HitLagComponent* pHitLagComponent = dynamic_cast<HitLagComponent*>(pPlayer->m_pStateMachine->GetCurrentState()->GetHitLagComponent());
-
-		if (pHitLagComponent->GetEnable())
-		{
-			TimerParams timerParams;
-			timerParams.fDynamicTimeScale = pHitLagComponent->GetLagScale();
-			timerParams.fDuration = pHitLagComponent->GetDuration();
-			timerParams.fMinTimeScale = pHitLagComponent->GetMinTimeScale();
-			CMessageDispatcher::GetInst()->Dispatch_Message<TimerParams>(MessageType::SET_DYNAMIC_TIMER_SCALE, &timerParams, nullptr);
-		}
-
-		DamageAnimationComponent* pDamageAnimationComponent = dynamic_cast<DamageAnimationComponent*>(pPlayer->m_pStateMachine->GetCurrentState()->GetDamageAnimationComponent());
-		ShakeAnimationComponent* pShakeAnimationComponent = dynamic_cast<ShakeAnimationComponent*>(pPlayer->m_pStateMachine->GetCurrentState()->GetShakeAnimationComponent());
-		StunAnimationComponent* pStunAnimationComponent = dynamic_cast<StunAnimationComponent*>(pPlayer->m_pStateMachine->GetCurrentState()->GetStunAnimationComponent());
-
-		pMonster->m_xmf3HitterVec = Vector3::Normalize(Vector3::Subtract(pMonster->GetPosition(), pPlayer->GetPosition()));
-
-		pDamageAnimationComponent->GetEnable() ? 
-			pMonster->m_fMaxDamageDistance =pDamageAnimationComponent->GetMaxDistance() 
-			: pMonster->m_fMaxDamageDistance = 0.0f;
-		pDamageAnimationComponent->GetEnable() ? 
-			pMonster->m_fDamageAnimationSpeed = pDamageAnimationComponent->GetSpeed() 
-			: pMonster->m_fDamageAnimationSpeed = pMonster->m_fDamageAnimationSpeed;
-
-		pStunAnimationComponent->GetEnable() ? 
-			pMonster->m_fMaxStunTime = pStunAnimationComponent->GetStunTime() 
-			: pMonster->m_fMaxStunTime = 0.0f;
-		pShakeAnimationComponent->GetEnable() ? 
-			pMonster->m_fShakeDuration = pShakeAnimationComponent->GetDuration() 
-			: pMonster->m_fShakeDuration = FLT_MIN;
-		pMonster->m_fShakeFrequency = pShakeAnimationComponent->GetFrequency();
-
-		/*std::wstring debugString{ std::to_wstring(pMonster->m_fShakeFrequency) };
-		OutputDebugString(debugString.c_str());
-		OutputDebugString(L"\n");*/
-
-		pMonster->m_fMaxShakeDistance = pShakeAnimationComponent->GetDistance();
-
-		if (pMonster->m_bElite) {
-			pMonster->ApplyDamage(30.0f);
-			if (!pMonster->GetHasShield()) {
-				pMonster->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
-				pMonster->m_pStateMachine->ChangeState(Damaged_Monster::GetInst());
-			}
-		}
-		else {
-			pMonster->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
-			pMonster->ApplyDamage(30.0f);
-			pMonster->m_pStateMachine->ChangeState(Damaged_Monster::GetInst());
-		}
-		
-		pMonster->m_iPlayerAtkId = pPlayer->GetAtkId();
-		pMonster->m_pChasingTargetObject = pPlayer;
-
-		PlayerParams playerParams;
-		playerParams.pPlayer = pPlayer;
-
-		CMessageDispatcher::GetInst()->Dispatch_Message<PlayerParams>(MessageType::ALLY_DAMAGED, &playerParams, nullptr);
+		CPlayer* pAttacker = (CPlayer*)params.pAttacker;
+		pMonster->HandleDamage(pAttacker, params.fDamage);
 	}
 
-	else {
-		TCHAR pstrDebug[256] = { 0 };
-		//_stprintf_s(pstrDebug, 256, "Already Dead \n");
-		OutputDebugString(L"Already Dead");
+	if (pPlayer)
+	{
+		if (!pPlayer->m_bEnable)
+			return;
+
+		CMonster* pAttacker = (CMonster*)params.pAttacker;
+		pPlayer->HandleDamage(pAttacker, params.fDamage);
 	}
 }
 
