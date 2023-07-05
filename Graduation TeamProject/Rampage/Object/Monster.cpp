@@ -133,6 +133,78 @@ void CMonster::SetElite(bool flag)
 	}
 }
 
+void CMonster::HandleDamage(CPlayer* pPlayer, float fDamage)
+{
+	if (m_bSimulateArticulate == false) { // 변수 체크가 아닌 현재 상태 체크를 이용하는 것이 좋을듯
+		SoundPlayParams sound_play_params;
+		sound_play_params.monster_type = GetMonsterType();
+		sound_play_params.sound_category = SOUND_CATEGORY::SOUND_VOICE;
+		CMessageDispatcher::GetInst()->Dispatch_Message<SoundPlayParams>(MessageType::PLAY_SOUND, &sound_play_params, pPlayer->m_pStateMachine->GetCurrentState());
+
+		// Update Hit Lag
+		HitLagComponent* pHitLagComponent = dynamic_cast<HitLagComponent*>(pPlayer->m_pStateMachine->GetCurrentState()->GetHitLagComponent());
+
+		if (pHitLagComponent->GetEnable())
+		{
+			TimerParams timerParams;
+			timerParams.fDynamicTimeScale = pHitLagComponent->GetLagScale();
+			timerParams.fDuration = pHitLagComponent->GetDuration();
+			timerParams.fMinTimeScale = pHitLagComponent->GetMinTimeScale();
+			CMessageDispatcher::GetInst()->Dispatch_Message<TimerParams>(MessageType::SET_DYNAMIC_TIMER_SCALE, &timerParams, nullptr);
+		}
+
+		DamageAnimationComponent* pDamageAnimationComponent = dynamic_cast<DamageAnimationComponent*>(pPlayer->m_pStateMachine->GetCurrentState()->GetDamageAnimationComponent());
+		ShakeAnimationComponent* pShakeAnimationComponent = dynamic_cast<ShakeAnimationComponent*>(pPlayer->m_pStateMachine->GetCurrentState()->GetShakeAnimationComponent());
+		StunAnimationComponent* pStunAnimationComponent = dynamic_cast<StunAnimationComponent*>(pPlayer->m_pStateMachine->GetCurrentState()->GetStunAnimationComponent());
+
+		m_xmf3HitterVec = Vector3::Normalize(Vector3::Subtract(GetPosition(), pPlayer->GetPosition()));
+
+		pDamageAnimationComponent->GetEnable() ?
+			m_fMaxDamageDistance = pDamageAnimationComponent->GetMaxDistance()
+			: m_fMaxDamageDistance = 0.0f;
+		pDamageAnimationComponent->GetEnable() ?
+			m_fDamageAnimationSpeed = pDamageAnimationComponent->GetSpeed()
+			: m_fDamageAnimationSpeed = m_fDamageAnimationSpeed;
+
+		pStunAnimationComponent->GetEnable() ?
+			m_fMaxStunTime = pStunAnimationComponent->GetStunTime()
+			: m_fMaxStunTime = 0.0f;
+		pShakeAnimationComponent->GetEnable() ?
+			m_fShakeDuration = pShakeAnimationComponent->GetDuration()
+			: m_fShakeDuration = FLT_MIN;
+		m_fShakeFrequency = pShakeAnimationComponent->GetFrequency();
+
+		m_fMaxShakeDistance = pShakeAnimationComponent->GetDistance();
+
+		if (m_bElite) {
+			ApplyDamage(30.0f);
+			if (!GetHasShield()) {
+				m_pStateMachine->ChangeState(Idle_Monster::GetInst());
+				m_pStateMachine->ChangeState(Damaged_Monster::GetInst());
+			}
+		}
+		else {
+			m_pStateMachine->ChangeState(Idle_Monster::GetInst());
+			ApplyDamage(30.0f);
+			m_pStateMachine->ChangeState(Damaged_Monster::GetInst());
+		}
+
+		m_iPlayerAtkId = pPlayer->GetAtkId();
+		m_pChasingTargetObject = pPlayer;
+
+		PlayerParams playerParams;
+		playerParams.pPlayer = pPlayer;
+
+		CMessageDispatcher::GetInst()->Dispatch_Message<PlayerParams>(MessageType::ALLY_DAMAGED, &playerParams, nullptr);
+	}
+
+	else {
+		TCHAR pstrDebug[256] = { 0 };
+		//_stprintf_s(pstrDebug, 256, "Already Dead \n");
+		OutputDebugString(L"Already Dead");
+	}
+}
+
 void CMonster::HandleAllyDamagedMessage(CGameObject* pPlayer)
 {
 	if (m_pStateMachine->GetCurrentState() == Idle_Monster::GetInst() ||
@@ -235,10 +307,6 @@ void CMonster::UpdateTransform(XMFLOAT4X4* pxmf4x4Parent)
 
 }
 
-bool CMonster::SetHit(CGameObject* pHitter)
-{
-	return false;
-}
 void CMonster::PlayMonsterEffectSound()
 {
 }
@@ -248,8 +316,13 @@ bool CMonster::CheckCollision(CGameObject* pTargetObject)
 	{
 		BoundingOrientedBox* TargetBoundingBox = pTargetObject->GetBoundingBox();
 		if (m_TransformedWeaponBoundingBox.Intersects(*TargetBoundingBox)) {
-			if(pTargetObject->SetHit(this))
-				PlayMonsterEffectSound();
+			DamageParams damageParam;
+			damageParam.fDamage = 30.0f;
+			damageParam.pAttacker = this;
+
+			CMessageDispatcher::GetInst()->Dispatch_Message<DamageParams>(MessageType::APPLY_DAMAGE, &damageParam, pTargetObject);
+			
+			//PlayMonsterEffectSound();
 			return true;
 		}
 	}

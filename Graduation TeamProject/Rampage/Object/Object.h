@@ -54,8 +54,6 @@ struct JointAxisDesc {
 class CGameObject
 {
 public:
-	bool bHit = false;
-
 	char m_pstrFrameName[MAX_FRAMENAME];
 
 	XMFLOAT4X4 m_xmf4x4Transform;
@@ -120,7 +118,6 @@ public:
 	XMFLOAT4X4 GetWorld();
 	CGameObject* GetParent() { return (m_pParent); }
 	UINT GetMeshType();
-	bool GetHit() { return bHit; }
 	virtual BoundingOrientedBox* GetBoundingBox() { return nullptr; }
 	
 	void SetEnable(bool bEnable);
@@ -137,8 +134,6 @@ public:
 	virtual void SetPosition(XMFLOAT3 xmf3Position);
 	void SetTransform(XMFLOAT4X4 xmf4x4Transform) { m_xmf4x4Transform = xmf4x4Transform; }
 	void SetWorld(XMFLOAT4X4 xmf4x4World) { m_xmf4x4World = xmf4x4World; }
-	virtual bool SetHit(CGameObject* pHitter) { bHit = true; return true; }
-	virtual void SetNotHit() { bHit = false; }
 	
 	virtual void Rotate(float fPitch = 10.0f, float fYaw = 10.0f, float fRoll = 10.0f);
 	void Rotate(XMFLOAT3* pxmf3Axis, float fAngle);

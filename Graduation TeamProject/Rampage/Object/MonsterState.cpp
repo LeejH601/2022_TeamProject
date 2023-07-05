@@ -174,11 +174,7 @@ void Damaged_Monster::Execute(CMonster* monster, float fElapsedTime)
 		monster->m_pStateMachine->ChangeState(Stun_Monster::GetInst());
 
 	if (monster->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition == pAnimationSet->m_fLength)
-	{
-		monster->SetNotHit();
 		monster->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
-	}
-
 }
 
 void Damaged_Monster::Animate(CMonster* monster, float fElapsedTime)

@@ -6,6 +6,7 @@
 #include "VertexPointParticleObject.h"
 
 class CCamera;
+class CMonster;
 class CPlayer : public CPhysicsObject
 {
 public:
@@ -66,8 +67,6 @@ public:
 	virtual void Update(float fTimeElapsed);
 	virtual bool CheckCollision(CGameObject* pTargetObject);
 
-	virtual bool SetHit(CGameObject* pHitter);
-
 	CCamera* GetCamera() { return m_pCamera; }
 	void SetCamera(CCamera* pCamera) { m_pCamera = pCamera; }
 	virtual void SetScale(float x, float y, float z);
@@ -75,6 +74,7 @@ public:
 
 	void UpdateStamina(float fTimeElapsed);
 	void UpdateCombo(float fTimeElapsed);
+	void HandleDamage(CMonster* pMonster, float fDamage);
 	virtual void Move(const XMFLOAT3& xmf3Shift, bool bUpdateVelocity);
 	virtual void Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity, CCamera* pCamera);
 	virtual XMFLOAT4& GetTrailControllPoint(int n) { return XMFLOAT4{}; }

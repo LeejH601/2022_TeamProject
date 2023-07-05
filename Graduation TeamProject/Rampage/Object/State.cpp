@@ -1286,7 +1286,7 @@ void Damaged_Player::Enter(CPlayer* player)
 	player->m_bAttack = false; // 사용자가 좌클릭시 true가 되는 변수
 
 	// 플레이어의 체력을 감소
-	player->m_fHP -= 5.f;
+	player->m_fHP -= 35.f;
 }
 
 void Damaged_Player::Execute(CPlayer* player, float fElapsedTime)

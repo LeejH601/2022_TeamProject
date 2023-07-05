@@ -40,6 +40,12 @@ CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 	m_pListeners.push_back(std::move(pMonsterAttackListener));
 
 	CMessageDispatcher::GetInst()->RegisterListener(MessageType::MONSTER_ATTACK, m_pListeners.back().get());
+
+	std::unique_ptr<DamageListener> pDamageListener = std::make_unique<DamageListener>();
+	pDamageListener->SetObject(this);
+	m_pListeners.push_back(std::move(pDamageListener));
+
+	CMessageDispatcher::GetInst()->RegisterListener(MessageType::APPLY_DAMAGE, m_pListeners.back().get(), this);
 }
 
 CPlayer::~CPlayer()
@@ -81,6 +87,19 @@ void CPlayer::Move(const XMFLOAT3& xmf3Shift, bool bUpdateVelocity)
 	CPhysicsObject::Move(xmf3Shift, bUpdateVelocity);
 }
 
+void CPlayer::HandleDamage(CMonster* pMonster, float fDamage)
+{
+	// 플레이어 상태를 대미지를 받은 상태로 변경
+	if (m_fInvincibleTime == 0.0f && m_pStateMachine->GetCurrentState() != Damaged_Player::GetInst())
+	{
+		m_xmf3ToHitterVec = Vector3::Normalize(Vector3::Subtract(pMonster->GetPosition(), GetPosition()));
+		m_xmf3ToHitterVec.y = 0.0f;
+		m_pStateMachine->ChangeState(Damaged_Player::GetInst());
+		
+		pMonster->PlayMonsterEffectSound();
+	}
+}
+
 void CPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity, CCamera* pCamera)
 {
 	if (dwDirection)
@@ -107,19 +126,6 @@ void CPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity, CCa
 
 bool CPlayer::CheckCollision(CGameObject* pTargetObject)
 {
-	return false;
-}
-
-bool CPlayer::SetHit(CGameObject* pHitter)
-{
-	// 플레이어 상태를 대미지를 받은 상태로 변경
-	if (m_fInvincibleTime == 0.0f && m_pStateMachine->GetCurrentState() != Damaged_Player::GetInst())
-	{
-		m_xmf3ToHitterVec = Vector3::Normalize(Vector3::Subtract(pHitter->GetPosition(), GetPosition()));
-		m_xmf3ToHitterVec.y = 0.0f;
-		m_pStateMachine->ChangeState(Damaged_Player::GetInst());
-		return true;
-	}
 	return false;
 }
 
@@ -382,8 +388,7 @@ bool CKnightPlayer::CheckCollision(CGameObject* pTargetObject)
 
 		DamageParams damageParam;
 		damageParam.fDamage = 30.0f;
-		damageParam.fMaxStunTime = 0.0f;
-		damageParam.pPlayer = this;
+		damageParam.pAttacker = this;
 
 		CMessageDispatcher::GetInst()->Dispatch_Message<DamageParams>(MessageType::APPLY_DAMAGE, &damageParam, pTargetObject);
 

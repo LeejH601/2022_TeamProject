@@ -95,6 +95,7 @@ public:
 	void CalculateResultPosition();
 	void ApplyDamage(float Damage, void* pData = nullptr);
 	void SetElite(bool flag);
+	void HandleDamage(CPlayer* pPlayer, float fDamage);
 	void HandleAllyDamagedMessage(CGameObject* pPlayer);
 	bool GetHasShield() { return m_fCurrShield > 0.0f; };
 	virtual void PlayMonsterEffectSound();
@@ -103,7 +104,6 @@ public:
 	virtual void SetScale(float x, float y, float z);
 	virtual void Update(float fTimeElapsed);
 	virtual void UpdateTransform(XMFLOAT4X4* pxmf4x4Parent = NULL);
-	virtual bool SetHit(CGameObject* pHitter);
 	virtual bool CheckCollision(CGameObject* pTargetObject);
 	virtual void UpdateTransformFromArticulation(XMFLOAT4X4* pxmf4x4Parent, std::vector<std::string> pArtiLinkNames, std::vector<XMFLOAT4X4>& AritculatCacheMatrixs, float scale = 1.0f);
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, bool b_UseTexture, CCamera* pCamera = NULL);
