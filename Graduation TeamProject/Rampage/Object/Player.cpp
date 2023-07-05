@@ -633,12 +633,15 @@ void CDrinkPotionCallbackHandler::HandleCallback(void* pCallbackData, float fTra
 	}
 	if (abs(fTrackPosition - 1.5f) < ANIMATION_CALLBACK_EPSILON && m_bEmitedParticle == false) {
 		if (m_pVertexPointParticleObject) {
+			
 			m_pVertexPointParticleObject->EmitParticle(5);
 			m_pVertexPointParticleObject->SetEmit(true);
 			m_bEmitedParticle = true;
 			if (m_pPlayer) {
 				if (m_pPlayer->m_nRemainPotions > 0) {
 					m_pPlayer->m_nRemainPotions--;
+					UpdateNumParams param; param.num = m_pPlayer->m_nRemainPotions;
+					CMessageDispatcher::GetInst()->Dispatch_Message(MessageType::DRINK_POTION, &param, nullptr);
 					m_pPlayer->m_nRemainPotions = max(0, m_pPlayer->m_nRemainPotions);
 					m_pPlayer->m_fHP += 50.0f;
 					m_pPlayer->m_fHP = min(m_pPlayer->m_fHP, m_pPlayer->m_fTotalHP);

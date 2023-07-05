@@ -115,6 +115,11 @@ void CUIObject::SetTextureIndex(UINT iTextureIndex)
 	m_iTextureIndex = iTextureIndex;
 }
 
+void CUIObject::AddMessageListener(std::unique_ptr<IMessageListener> pListener)
+{
+	m_pListeners.push_back(std::move(pListener));
+}
+
 CBarObject::CBarObject(int iTextureIndex, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fSize) : CUIObject(iTextureIndex, pd3dDevice, pd3dCommandList, fSize)
 {
 

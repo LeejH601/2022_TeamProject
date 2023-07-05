@@ -4,6 +4,7 @@
 #include "..\Global\Camera.h"	// 왜 필요하지
 #include "SwordTrailObject.h"
 #include "VertexPointParticleObject.h"
+#include "UIObject.h"
 
 class CCamera;
 class CPlayer : public CPhysicsObject
@@ -162,6 +163,7 @@ public:
 	CVertexPointParticleObject* m_pVertexPointParticleObject = nullptr;
 	bool m_bEmitedParticle = false;
 	CKnightPlayer* m_pPlayer;
+	CUIObject* m_pNumUIObject = nullptr;
 public:
 	virtual void HandleCallback(void* pCallbackData, float fTrackPosition);
 };

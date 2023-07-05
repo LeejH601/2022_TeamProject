@@ -1,6 +1,7 @@
 #pragma once
 #include "stdafx.h"
 #include "Global.h"
+#include "..\Sound\SoundPlayer.h"
 
 class CGameObject;
 class CCamera;
@@ -9,6 +10,7 @@ class CMainTMPScene;
 class CTexture;
 class CShader;
 class CGameTimer;
+class CUIObject;
 
 // Define base message class
 class Message {
@@ -46,6 +48,7 @@ struct AnimationCompParams {
 struct ParticleCompParams {
 	CGameObject* pObject;
 	XMFLOAT3 xmf3Position;
+	XMFLOAT3 xmf3RotationAxis;
 };
 
 struct ImpactCompParams {
@@ -119,6 +122,10 @@ struct TimerParams {
 	float fMinTimeScale;
 };
 
+struct UpdateNumParams {
+	int num;
+};
+
 // Define message listener interface
 class IMessageListener {
 protected:
@@ -148,6 +155,7 @@ public:
 
 	virtual void HandleMessage(const Message& message, const DamageParams& params) {}
 	virtual void HandleMessage(const Message& message, const TimerParams& params) {}
+	virtual void HandleMessage(const Message& message, const UpdateNumParams& params) {}
 };
 
 // Define Monster Attack component
@@ -720,6 +728,15 @@ public:
 	void SetRotateFactor(bool input) { m_bSimulateRotate = input; };
 	void SetLifeTime(float fLifeTime) { m_fLifeTime = fLifeTime; };
 	virtual void HandleMessage(const Message& message, const ImpactCompParams& params);
+};
+
+class PotionRemainUpdateComponent : public IMessageListener {
+	CUIObject* m_pNumUIObject;
+public:
+	PotionRemainUpdateComponent();
+	void SetUIObject(CUIObject* object) { m_pNumUIObject = object; };
+
+	virtual void HandleMessage(const Message& message, const UpdateNumParams& params);
 };
 
 struct ListenerInfo {

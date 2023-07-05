@@ -95,7 +95,7 @@ public:
 	void CalculateResultPosition();
 	void ApplyDamage(float Damage, void* pData = nullptr);
 	void SetElite(bool flag);
-	bool GetHasShield() { return m_fCurrShield > 0.0f; };
+	bool GetHasShield() { return (m_fCurrShield > 0.0f); };
 	virtual void PlayMonsterEffectSound();
 
 	virtual void UpdateMatrix();

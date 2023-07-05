@@ -127,7 +127,7 @@ void CMainTMPScene::AdvanceStage()
 	}
 
 	// Spawn Orc
-	{	
+	{
 		// Spawn Normal Orc
 		m_iTotalMonsterNum += stageInfo.m_iOrcNum;
 
@@ -688,7 +688,7 @@ SCENE_RETURN_TYPE CMainTMPScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMe
 
 			Locator.SetMouseCursorMode(MOUSE_CUROSR_MODE::FLOATING_MODE);
 			m_CurrentMouseCursorMode = MOUSE_CUROSR_MODE::FLOATING_MODE;
-			
+
 			while (m_iCursorHideCount > 0)
 			{
 				m_iCursorHideCount--;
@@ -1069,7 +1069,7 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	//pUIObject->SetScreenPosition(XMFLOAT2(FRAME_BUFFER_WIDTH * 0.15f, FRAME_BUFFER_HEIGHT * 0.9f));
 	//pUIObject->SetTextureIndex(m_pTextureManager->LoadTotalTextureIndex(TextureType::UITexture, L"Image/UiImages/Frame.dds"));
 	//m_pUIObject.push_back(std::move(pUIObject));
-	
+
 	std::unique_ptr<CUIObject>  pUIObject = std::make_unique<CMonsterHPObject>(2, pd3dDevice, pd3dCommandList, 10.f);
 	pUIObject->SetSize(XMFLOAT2(512.f * 0.16f, 512.f * 0.16f));
 	pUIObject->SetScreenPosition(XMFLOAT2(FRAME_BUFFER_WIDTH * 0.1f - 80.f, FRAME_BUFFER_HEIGHT * 0.878f + 80.f));
@@ -1154,7 +1154,15 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	pUIObject->SetScreenPosition(XMFLOAT2(FRAME_BUFFER_WIDTH * 0.065f, FRAME_BUFFER_HEIGHT * 0.16f));
 	pUIObject->SetTextureIndex(m_pTextureManager->LoadTotalTextureIndex(TextureType::UITexture, L"Image/UiImages/Texture2.dds"));
 	dynamic_cast<CNumberObject*>(pUIObject.get())->UpdateNumber(5);
+	std::unique_ptr<PotionRemainUpdateComponent> pUpdateUINumListener = std::make_unique<PotionRemainUpdateComponent>();
+	pUpdateUINumListener->SetEnable(true);
+	(pUpdateUINumListener.get())->SetUIObject(pUIObject.get());
+	CMessageDispatcher::GetInst()->RegisterListener(MessageType::DRINK_POTION, pUpdateUINumListener.get(), nullptr);
+
+
+	m_pListeners.push_back(std::move(pUpdateUINumListener));
 	m_pUIObject.push_back(std::move(pUIObject));
+
 
 
 	// Hits
@@ -1165,11 +1173,11 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pUIObject.push_back(std::move(pUIObject));
 
 
-	m_StageInfoMap.emplace(std::pair<int, StageInfo>(0, 
-		StageInfo{ 
-			0, 5, 
+	m_StageInfoMap.emplace(std::pair<int, StageInfo>(0,
+		StageInfo{
+			0, 5,
 			0, 0,
-			0, 0, 
+			0, 0,
 			XMFLOAT3{ 113.664360f, 3.016271f, 123.066483f } }));
 	m_StageInfoMap.emplace(std::pair<int, StageInfo>(1,
 		StageInfo{
@@ -1627,7 +1635,7 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 	::SynchronizeResourceTransition(pd3dCommandList, pd3dSource, D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 
 
-	}
+}
 
 void CMainTMPScene::OnPostRender()
 {
@@ -1666,13 +1674,13 @@ void CMainTMPScene::UIUpdate(CPlayer* pPlayer)
 	if (((CKnightPlayer*)(m_pPlayer))->GetMonsterAttack())
 	{
 		float CurrentHp = 0.f;
-		for (int i = 0; i < m_pEnemys.size(); i++)		
+		for (int i = 0; i < m_pEnemys.size(); i++)
 			CurrentHp += max(0.f, dynamic_cast<CMonster*>(m_pEnemys[i].get())->m_fHP);
 
 		dynamic_cast<CBarObject*>(m_pUIObject[7].get())->Set_Value(CurrentHp, m_pEnemys.size() * MONSTER_HP);
 		((CKnightPlayer*)(m_pPlayer))->SetMonsterAttack(false);
 	}
-		
+
 }
 
 void CMainTMPScene::LoadTextureObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
@@ -1706,7 +1714,7 @@ void CMainTMPScene::LoadTextureObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/MonsterBarFrame.dds", 0, 0);
 	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/Texture2.dds", 0, 0);
 	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/Hits.dds", 0, 0);
-	
+
 	m_pTextureManager->LoadTexture(TextureType::UniformTexture, pd3dDevice, pd3dCommandList, L"Image/UnifromImages/Cracks_12.dds", 0, 0);
 }
 
@@ -1723,6 +1731,7 @@ void CMainTMPScene::HandleCollision(const CollideParams& params)
 		ParticleCompParams particle_comp_params;
 		particle_comp_params.pObject = (*it).get();
 		particle_comp_params.xmf3Position = params.xmf3CollidePosition;
+		dynamic_cast<CParticleObject*>((*it).get())->SetEmitAxis(((CPlayer*)m_pPlayer)->m_xmf3AtkDirection);
 		CMessageDispatcher::GetInst()->Dispatch_Message<ParticleCompParams>(MessageType::UPDATE_PARTICLE, &particle_comp_params, ((CPlayer*)m_pPlayer)->m_pStateMachine->GetCurrentState());
 
 		particle_comp_params.pObject = m_pSlashHitObjects.get();

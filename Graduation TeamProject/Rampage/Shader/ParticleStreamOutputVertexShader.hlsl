@@ -36,7 +36,8 @@ VS_PARTICLE_INPUT VSParticleStreamOutput(VS_PARTICLE_INPUT input)
 	uint type = input.type;
 	if (type == 0 || type == 5 || type == 9 || type == 10) {
 		float distance = length(input.velocity);
-		input.velocity += CalculrateCulrNoise(input.position).xyz * (1.0f - float(input.rotateFlag));
+		input.velocity += CalculrateCulrNoise(input.position).xyz;
+		//input.velocity += CalculrateCulrNoise(input.position).xyz * (1.0f - float(input.rotateFlag));
 		input.velocity = normalize(input.velocity) * distance;
 	}
 	

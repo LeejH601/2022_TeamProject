@@ -706,6 +706,7 @@ void CSimulatorScene::HandleCollision(const CollideParams& params)
 		ParticleCompParams particle_comp_params;
 		particle_comp_params.pObject = (*it).get();
 		particle_comp_params.xmf3Position = params.xmf3CollidePosition;
+		dynamic_cast<CParticleObject*>((*it).get())->SetEmitAxis(m_pMainCharacter->m_xmf3AtkDirection);
 		CMessageDispatcher::GetInst()->Dispatch_Message<ParticleCompParams>(MessageType::UPDATE_PARTICLE, &particle_comp_params, m_pMainCharacter->m_pStateMachine->GetCurrentState());
 
 		particle_comp_params.pObject = (*it).get();
