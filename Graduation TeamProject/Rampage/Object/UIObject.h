@@ -17,14 +17,15 @@ public:
 	void SetTextureIndex(UINT iTextureIndex);
 	void SetColor(float fColor) { m_xmfColor = fColor; }
 	void SetAlpha(float fAlpha) { m_fAlpha = fAlpha; }
-
+	void SetColor(XMFLOAT3 xmf3Color) { m_xmf3Color = xmf3Color; }
 protected:
 	std::vector<D3D12_RECT> m_tRect;
 	XMFLOAT2 m_xmf2Size = XMFLOAT2(1.f, 1.f);
 	XMFLOAT2 m_xmf2ScreenPosition = XMFLOAT2(0.f, 0.f);
 	float m_xmfColor = 1.f;
-	UINT	m_iTextureIndex = 0;
+	UINT  m_iTextureIndex = 0;
 	float m_fAlpha = 1.f;
+	XMFLOAT3 m_xmf3Color = XMFLOAT3(1.f, 1.f, 1.f);
 };	
 
 
@@ -97,12 +98,15 @@ public:
 
 public:
 	UINT GetNumSize() { return m_vecNumObject.size(); };
-
+	void SetMaxAlpha(float fMaxAlpha) { m_fMaxAlpha = fMaxAlpha; }
+	void SetSpeedAlpha(float fSpeedAlpha) { m_fAlphaSpeed = fSpeedAlpha; }
 protected:
 	std::vector<UINT> m_vecNumObject;
 	UINT m_iNumber = 0;
 	float m_fAnimationTime = 1.f;
 	bool m_bAnimation = false;
+	float m_fMaxAlpha = 1.5f;
+	float m_fAlphaSpeed = 0.05f;
 
 
 

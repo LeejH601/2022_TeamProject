@@ -1162,6 +1162,62 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	dynamic_cast<CUIObject*>(pUIObject.get())->SetColor(2.1f);
 	m_pUIObject.push_back(std::move(pUIObject));
 
+	pUIObject = std::make_unique<CUIObject>(2, pd3dDevice, pd3dCommandList, 10.f);
+	pUIObject->SetSize(XMFLOAT2(FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT));
+	pUIObject->SetScreenPosition(XMFLOAT2(FRAME_BUFFER_WIDTH * 0.5f, FRAME_BUFFER_HEIGHT * 0.5f));
+	pUIObject->SetTextureIndex(m_pTextureManager->LoadTotalTextureIndex(TextureType::UITexture, L"Image/UiImages/ResultBackGround.dds"));
+	m_pUIObject.push_back(std::move(pUIObject));
+
+	pUIObject = std::make_unique<CUIObject>(2, pd3dDevice, pd3dCommandList, 10.f);
+	pUIObject->SetSize(XMFLOAT2(744.f * 1.5f, 459.f * 1.5f));
+	pUIObject->SetScreenPosition(XMFLOAT2(FRAME_BUFFER_WIDTH * 0.5f, FRAME_BUFFER_HEIGHT * 0.55f));
+	pUIObject->SetTextureIndex(m_pTextureManager->LoadTotalTextureIndex(TextureType::UITexture, L"Image/UiImages/ResultFrame.dds"));
+	m_pUIObject.push_back(std::move(pUIObject));
+
+	pUIObject = std::make_unique<CUIObject>(2, pd3dDevice, pd3dCommandList, 10.f);
+	pUIObject->SetSize(XMFLOAT2(673.f * 1.5f, 270.f * 1.5f));
+	pUIObject->SetAlpha(5.f);
+	pUIObject->SetScreenPosition(XMFLOAT2(FRAME_BUFFER_WIDTH * 0.5f, FRAME_BUFFER_HEIGHT * 0.415f));
+	pUIObject->SetTextureIndex(m_pTextureManager->LoadTotalTextureIndex(TextureType::UITexture, L"Image/UiImages/ResultScoreMenu.dds"));
+	m_pUIObject.push_back(std::move(pUIObject));
+
+	// -------------------------------------------------ResultFrame--------------------------------------------------------
+	// MaxCombo -16
+	pUIObject = std::make_unique<CNumberObject>(14, 35, pd3dDevice, pd3dCommandList, 10.f);
+	dynamic_cast<CNumberObject*>(pUIObject.get())->SetMaxAlpha(5.f);
+	dynamic_cast<CNumberObject*>(pUIObject.get())->SetSpeedAlpha(0.15f);
+	pUIObject->SetColor(XMFLOAT3(2.f, 1.f, 1.f));
+	pUIObject->SetSize(XMFLOAT2(64.f * 1.f, 60.f * 1.f));
+	pUIObject->SetAlpha(5.f);
+	pUIObject->SetScreenPosition(XMFLOAT2(FRAME_BUFFER_WIDTH * 0.62f, FRAME_BUFFER_HEIGHT * 0.5f));
+	pUIObject->SetTextureIndex(m_pTextureManager->LoadTotalTextureIndex(TextureType::UITexture, L"Image/UiImages/Texture2.dds"));
+	dynamic_cast<CNumberObject*>(pUIObject.get())->UpdateNumber(5);
+	m_pUIObject.push_back(std::move(pUIObject));
+
+	// PlayTime -17
+	pUIObject = std::make_unique<CNumberObject>(14, 35, pd3dDevice, pd3dCommandList, 10.f);
+	dynamic_cast<CNumberObject*>(pUIObject.get())->SetMaxAlpha(5.f);
+	dynamic_cast<CNumberObject*>(pUIObject.get())->SetSpeedAlpha(0.15f);
+	pUIObject->SetColor(XMFLOAT3(2.f, 2.f, 1.f));
+	pUIObject->SetSize(XMFLOAT2(64.f * 1.f, 60.f * 1.f));
+	pUIObject->SetAlpha(5.f);
+	pUIObject->SetScreenPosition(XMFLOAT2(FRAME_BUFFER_WIDTH * 0.62f, FRAME_BUFFER_HEIGHT * 0.4f + 20.f));
+	pUIObject->SetTextureIndex(m_pTextureManager->LoadTotalTextureIndex(TextureType::UITexture, L"Image/UiImages/Texture2.dds"));
+	dynamic_cast<CNumberObject*>(pUIObject.get())->UpdateNumber(5);
+	m_pUIObject.push_back(std::move(pUIObject));
+
+	// PotionCount -18
+	pUIObject = std::make_unique<CNumberObject>(14, 35, pd3dDevice, pd3dCommandList, 10.f);
+	dynamic_cast<CNumberObject*>(pUIObject.get())->SetMaxAlpha(5.f);
+	dynamic_cast<CNumberObject*>(pUIObject.get())->SetSpeedAlpha(0.15f);
+	pUIObject->SetColor(XMFLOAT3(1.f, 1.f, 2.f));
+	pUIObject->SetSize(XMFLOAT2(64.f * 1.f, 60.f * 1.f));
+	pUIObject->SetAlpha(5.f);
+	pUIObject->SetScreenPosition(XMFLOAT2(FRAME_BUFFER_WIDTH * 0.62f, FRAME_BUFFER_HEIGHT * 0.3f + 30.f));
+	pUIObject->SetTextureIndex(m_pTextureManager->LoadTotalTextureIndex(TextureType::UITexture, L"Image/UiImages/Texture2.dds"));
+	dynamic_cast<CNumberObject*>(pUIObject.get())->UpdateNumber(5);
+	m_pUIObject.push_back(std::move(pUIObject));
+	// -------------------------------------------------ResultFrame - END --------------------------------------------------------
 
 	m_StageInfoMap.emplace(std::pair<int, StageInfo>(0, 
 		StageInfo{ 
@@ -1656,8 +1712,8 @@ void CMainTMPScene::UIUpdate(CPlayer* pPlayer)
 	dynamic_cast<CBarObject*>(m_pUIObject[3].get())->Set_Value(((CPhysicsObject*)m_pPlayer)->m_fHP, ((CPhysicsObject*)m_pPlayer)->m_fTotalHP);
 	dynamic_cast<CBarObject*>(m_pUIObject[5].get())->Set_Value(((CPlayer*)m_pPlayer)->m_fStamina, ((CPlayer*)m_pPlayer)->m_fTotalStamina);
 	dynamic_cast<CNumberObject*>(m_pUIObject[10].get())->UpdateNumber(((CPlayer*)m_pPlayer)->m_iCombo);
-
-	dynamic_cast<CUIObject*>(m_pUIObject[12].get())->SetScreenPosition(XMFLOAT2(FRAME_BUFFER_WIDTH * 0.85f + 160.f + (dynamic_cast<CNumberObject*>(m_pUIObject[10].get()))->GetNumSize() * 35.f, FRAME_BUFFER_HEIGHT * 0.5f - 9.f));
+	dynamic_cast<CNumberObject*>(m_pUIObject[16].get())->UpdateNumber(((CPlayer*)m_pPlayer)->m_iCombo);
+	dynamic_cast<CUIObject*>(m_pUIObject[12].get())->SetScreenPosition(XMFLOAT2(FRAME_BUFFER_WIDTH * 0.85f + 160.f + (dynamic_cast<CNumberObject*>(m_pUIObject[10].get()))->GetNumSize() * 25.f, FRAME_BUFFER_HEIGHT * 0.5f - 9.f));
 	// ((CPlayer*)m_pPlayer)->m_iCombo / 10
 
 	if (((CKnightPlayer*)(m_pPlayer))->GetMonsterAttack())
@@ -1702,6 +1758,10 @@ void CMainTMPScene::LoadTextureObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/MonsterBarFrame.dds", 0, 0);
 	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/Texture2.dds", 0, 0);
 	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/Hits.dds", 0, 0);
+	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/ResultFrame.dds", 0, 0);
+	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/ResultBackGround.dds", 0, 0);
+	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/ResultScoreMenu.dds", 0, 0);
+	
 	
 }
 

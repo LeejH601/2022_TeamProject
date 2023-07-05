@@ -140,7 +140,7 @@ void CLobbyScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/LogoMenuFrame2.dds", 0, 0);
 
 	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/LogoBackGround.dds", 0, 0);
-	
+	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/ResultFrame.dds", 0, 0);
 
 	m_pTextureManager->CreateResourceView(pd3dDevice, 0);
 
@@ -193,13 +193,13 @@ void CLobbyScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 	m_pUIObject.push_back(std::move(pUIObject));
 
 	pUIObject = std::make_unique<CUIObject>(2, pd3dDevice, pd3dCommandList, 10.f);
-	pUIObject->SetSize(XMFLOAT2(762.f * 1.f, 173.f * 1.f));
+	pUIObject->SetSize(XMFLOAT2(762.f * 1.f, 173.f * 0.9f));
 	pUIObject->SetScreenPosition(XMFLOAT2(FRAME_BUFFER_WIDTH * 0.3f, FRAME_BUFFER_HEIGHT * 0.45f));
 	pUIObject->SetTextureIndex(m_pTextureManager->LoadTotalTextureIndex(TextureType::UITexture, L"Image/UiImages/LogoMenuFrame.dds"));
 	m_pUIObject.push_back(std::move(pUIObject));
 
 	pUIObject = std::make_unique<CColorButtonObject>(2, pd3dDevice, pd3dCommandList, 10.f); // 5
-	pUIObject->SetSize(XMFLOAT2(762.f * 1.f, 173.f * 1.f));
+	pUIObject->SetSize(XMFLOAT2(762.f * 1.f, 173.f * 0.9f));
 	pUIObject->SetScreenPosition(XMFLOAT2(FRAME_BUFFER_WIDTH * 0.3f, FRAME_BUFFER_HEIGHT * 0.45f));
 	pUIObject->SetAlpha(0.f);
 	pUIObject->SetTextureIndex(m_pTextureManager->LoadTotalTextureIndex(TextureType::UITexture, L"Image/UiImages/LogoMenuFrame2.dds"));
@@ -218,10 +218,7 @@ void CLobbyScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 	m_pUIObject.push_back(std::move(pUIObject));
 
 
-
-
-
-
+	
 
 	//pUIObject = std::make_unique<CUIObject>(2, pd3dDevice, pd3dCommandList, 10.f);
 	//pUIObject->SetSize(XMFLOAT2(1890.f * 0.34f, 1417.f * 0.34f));
