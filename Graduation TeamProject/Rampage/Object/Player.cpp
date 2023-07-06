@@ -92,6 +92,10 @@ void CPlayer::HandleDamage(CMonster* pMonster, float fDamage)
 	// 플레이어 상태를 대미지를 받은 상태로 변경
 	if (m_fInvincibleTime == 0.0f && m_pStateMachine->GetCurrentState() != Damaged_Player::GetInst())
 	{
+		// 플레이어의 체력을 감소
+		m_fHP -= fDamage;
+		m_fHP = max(m_fHP, 0.0f);
+
 		m_xmf3ToHitterVec = Vector3::Normalize(Vector3::Subtract(pMonster->GetPosition(), GetPosition()));
 		m_xmf3ToHitterVec.y = 0.0f;
 		m_pStateMachine->ChangeState(Damaged_Player::GetInst());

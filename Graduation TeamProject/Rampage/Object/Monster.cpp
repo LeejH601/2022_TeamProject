@@ -14,6 +14,8 @@ CMonster::CMonster()
 	m_pStateMachine->SetGlobalState(Global_Monster::GetInst());
 	m_fShakeDistance = 0.0f;
 
+	m_fStrikingPower = 30.0f;
+
 	m_fStunTime = 0.0f;
 	m_fStunStartTime = 0.2f;
 
@@ -317,12 +319,10 @@ bool CMonster::CheckCollision(CGameObject* pTargetObject)
 		BoundingOrientedBox* TargetBoundingBox = pTargetObject->GetBoundingBox();
 		if (m_TransformedWeaponBoundingBox.Intersects(*TargetBoundingBox)) {
 			DamageParams damageParam;
-			damageParam.fDamage = 30.0f;
+			damageParam.fDamage = m_fStrikingPower;
 			damageParam.pAttacker = this;
 
 			CMessageDispatcher::GetInst()->Dispatch_Message<DamageParams>(MessageType::APPLY_DAMAGE, &damageParam, pTargetObject);
-			
-			//PlayMonsterEffectSound();
 			return true;
 		}
 	}

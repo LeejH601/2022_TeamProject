@@ -21,6 +21,8 @@ public:
 	bool m_bStunned;
 	bool m_bCanChase;
 	
+	float m_fStrikingPower;		// °ø°Ý·Â
+
 	float m_fMaxIdleTime;
 	float m_fIdleTime;
 
