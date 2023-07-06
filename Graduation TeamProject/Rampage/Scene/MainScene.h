@@ -56,6 +56,8 @@ private:
 	bool m_bGameStart = false;
 	int m_iStageNum = 0;
 	int m_iTotalMonsterNum = 0;
+
+	float m_iCurrentTime = 0.f;
 	std::map<int, StageInfo> m_StageInfoMap;
 
 	std::unique_ptr<CollisionChecker> m_pCollisionChecker = NULL;
