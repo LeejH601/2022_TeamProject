@@ -52,6 +52,9 @@ class CSwordTrailObject : public CGameObject
 	float m_fNoiseConstants;
 	float m_fEmissiveFactor;
 
+	float m_fLengthWeight = 1.0f;
+	XMFLOAT4 m_xmf4Offset = XMFLOAT4(0, 0, 0, 0);
+
 public:
 	float m_faccumulateTime;
 	TRAIL_UPDATE_METHOD m_eTrailUpdateMethod = TRAIL_UPDATE_METHOD::NON_UPDATE_NEW_CONTROL_POINT;
@@ -69,6 +72,8 @@ public:
 
 	void SetNextControllPoint(XMFLOAT4* point1, XMFLOAT4* point2);
 	void SetNoiseTextureIndex(int index) { m_iNoiseTextureIndex = index; };
+	void SetLengthWeight(float value) { m_fLengthWeight = value; };
+	void SetOffset(XMFLOAT4 offset) { m_xmf4Offset = offset; };
 };
 
 class CSwordTrailObjectEmitter : public CGameObject {

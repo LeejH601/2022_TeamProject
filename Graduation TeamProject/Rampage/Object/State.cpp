@@ -52,6 +52,8 @@ void Idle_Player::Execute(CPlayer* player, float fElapsedTime)
 	// 사용자가 좌클릭을 했으면 Atk1_Player로 상태 변경
 	else if (player->m_bAttack)
 		player->m_pStateMachine->ChangeState(Atk1_Player::GetInst());
+	else if(player->m_bCharged)
+		player->m_pStateMachine->ChangeState(ChargeStart_Player::GetInst());
 }
 
 void Idle_Player::Animate(CPlayer* player, float fElapsedTime)
@@ -718,6 +720,7 @@ void Run_Player::Enter(CPlayer* player)
 	player->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 19);
 	//player->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 16);
 	player->m_pSkinnedAnimationController->SetTrackWeight(0, 1.0f);
+	player->m_pSkinnedAnimationController->SetTrackEnable(1, true);
 	player->m_pSkinnedAnimationController->SetTrackAnimationSet(1, 4);
 	player->m_pSkinnedAnimationController->SetTrackWeight(1, 0.0f);
 
@@ -767,6 +770,9 @@ void Run_Player::Execute(CPlayer* player, float fElapsedTime)
 
 	else if (player->m_bAttack)
 		player->m_pStateMachine->ChangeState(Atk1_Player::GetInst());
+
+	else if (player->m_bCharged)
+		player->m_pStateMachine->ChangeState(ChargeStart_Player::GetInst());
 
 	// Idle 상태로 복귀하는 코드
 	else if (player->m_dwDirectionCache == 0) {
@@ -996,6 +1002,7 @@ void Atk5_Player::SendCollisionMessage(CPlayer* player)
 {
 }
 
+
 Evasion_Player::Evasion_Player()
 {
 }
@@ -1219,6 +1226,7 @@ void Atk_Player::CheckEvasion(CPlayer* player, float holdTime)
 	}
 }
 
+
 Damaged_Player::Damaged_Player()
 {
 }
@@ -1352,4 +1360,283 @@ void Damaged_Player::SetPlayerRootVel(CPlayer* player)
 
 	pPlayerController->m_pRootMotionObject->m_xmf4x4Transform._41 = 0.f;
 	pPlayerController->m_pRootMotionObject->m_xmf4x4Transform._43 = 0.f;
+}
+
+
+ChargeStart_Player::ChargeStart_Player()
+{
+}
+
+ChargeStart_Player::~ChargeStart_Player()
+{
+}
+
+void ChargeStart_Player::SetPlayerRootVel(CPlayer* player)
+{
+	CAnimationController* pPlayerController = player->m_pSkinnedAnimationController.get();
+
+	player->UpdateTransform(NULL);
+
+	XMFLOAT3 xmf3Position = XMFLOAT3{ pPlayerController->m_pRootMotionObject->GetWorld()._41,
+		player->GetPosition().y,
+		pPlayerController->m_pRootMotionObject->GetWorld()._43 };
+
+	player->Move(Vector3::Subtract(xmf3Position, player->GetPosition()), true);
+
+	pPlayerController->m_pRootMotionObject->m_xmf4x4Transform._41 = 0.f;
+	pPlayerController->m_pRootMotionObject->m_xmf4x4Transform._43 = 0.f;
+}
+
+
+void ChargeStart_Player::Enter(CPlayer* player)
+{
+	player->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 7);
+	player->m_pSkinnedAnimationController->m_fTime = 0.0f;
+	player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition = 0.0f;
+	player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fWeight = 1.0f;
+	player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_nType = ANIMATION_TYPE_ONCE;
+
+	player->m_pSkinnedAnimationController->SetTrackEnable(1, false);
+}
+
+void ChargeStart_Player::Execute(CPlayer* player, float fElapsedTime)
+{
+	CAnimationSet* pAnimationSet = player->m_pSkinnedAnimationController->m_pAnimationSets->m_pAnimationSets[player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_nAnimationSet];
+	if (player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition == pAnimationSet->m_fLength) {
+		player->m_pStateMachine->ChangeState(Charge_Player::GetInst());
+	}
+}
+
+void ChargeStart_Player::Animate(CPlayer* player, float fElapsedTime)
+{
+	player->Animate(fElapsedTime);
+}
+
+void ChargeStart_Player::OnRootMotion(CPlayer* player, float fTimeElapsed)
+{
+	CAnimationController* pPlayerController = player->m_pSkinnedAnimationController.get();
+
+	CAnimationSet* pAnimationSet = pPlayerController->m_pAnimationSets->m_pAnimationSets[pPlayerController->m_pAnimationTracks[0].m_nAnimationSet];
+
+	XMFLOAT3 xmf3CurrentPos = XMFLOAT3{ player->m_pChild->m_xmf4x4Transform._41,
+	0.0f,
+	player->m_pChild->m_xmf4x4Transform._43 };
+
+	player->m_pChild->m_xmf4x4Transform._41 -= player->m_xmf3RootTransfromPreviousPos.x;
+	player->m_pChild->m_xmf4x4Transform._42 -= player->m_xmf3RootTransfromPreviousPos.y;
+	player->m_pChild->m_xmf4x4Transform._43 -= player->m_xmf3RootTransfromPreviousPos.z;
+
+	SetPlayerRootVel(player);
+
+	player->m_xmf3RootTransfromPreviousPos = xmf3CurrentPos;
+}
+
+void ChargeStart_Player::Exit(CPlayer* player)
+{
+	CAnimationController* pPlayerController = player->m_pSkinnedAnimationController.get();
+
+	CAnimationSet* pAnimationSet = pPlayerController->m_pAnimationSets->m_pAnimationSets[pPlayerController->m_pAnimationTracks[0].m_nAnimationSet];
+
+	XMFLOAT3 xmf3CurrentPos = XMFLOAT3{ player->m_pChild->m_xmf4x4Transform._41,
+	0.0f,
+	player->m_pChild->m_xmf4x4Transform._43 };
+
+	player->m_pChild->m_xmf4x4Transform._41 -= player->m_xmf3RootTransfromPreviousPos.x;
+	player->m_pChild->m_xmf4x4Transform._42 -= player->m_xmf3RootTransfromPreviousPos.y;
+	player->m_pChild->m_xmf4x4Transform._43 -= player->m_xmf3RootTransfromPreviousPos.z;
+
+	SetPlayerRootVel(player);
+
+	player->m_xmf3RootTransfromPreviousPos = xmf3CurrentPos;
+}
+
+Charge_Player::Charge_Player()
+{
+}
+
+Charge_Player::~Charge_Player()
+{
+}
+
+
+void Charge_Player::Enter(CPlayer* player)
+{
+	player->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 9);
+	player->m_pSkinnedAnimationController->m_fTime = 0.0f;
+	player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition = 0.0f;
+	player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fWeight = 1.0f;
+	player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_nType = ANIMATION_TYPE_LOOP;
+
+	player->m_pSkinnedAnimationController->SetTrackEnable(1, false);
+	m_fChargedTime = 0.0f;
+}
+
+void Charge_Player::SetPlayerRootVel(CPlayer* player)
+{
+	CAnimationController* pPlayerController = player->m_pSkinnedAnimationController.get();
+
+	player->UpdateTransform(NULL);
+
+	XMFLOAT3 xmf3Position = XMFLOAT3{ pPlayerController->m_pRootMotionObject->GetWorld()._41,
+		player->GetPosition().y,
+		pPlayerController->m_pRootMotionObject->GetWorld()._43 };
+
+	player->Move(Vector3::Subtract(xmf3Position, player->GetPosition()), true);
+
+	pPlayerController->m_pRootMotionObject->m_xmf4x4Transform._41 = 0.f;
+	pPlayerController->m_pRootMotionObject->m_xmf4x4Transform._43 = 0.f;
+}
+
+void Charge_Player::Execute(CPlayer* player, float fElapsedTime)
+{
+	m_fChargedTime += fElapsedTime;
+	if(m_fChargedTime >= m_fChargedEndTime)
+		player->m_pStateMachine->ChangeState(ChargeAttack_Player::GetInst());
+}
+
+void Charge_Player::Animate(CPlayer* player, float fElapsedTime)
+{
+	player->Animate(fElapsedTime);
+}
+
+void Charge_Player::OnRootMotion(CPlayer* player, float fTimeElapsed)
+{
+	CAnimationController* pPlayerController = player->m_pSkinnedAnimationController.get();
+
+	CAnimationSet* pAnimationSet = pPlayerController->m_pAnimationSets->m_pAnimationSets[pPlayerController->m_pAnimationTracks[0].m_nAnimationSet];
+
+	XMFLOAT3 xmf3CurrentPos = XMFLOAT3{ player->m_pChild->m_xmf4x4Transform._41,
+	0.0f,
+	player->m_pChild->m_xmf4x4Transform._43 };
+
+	player->m_pChild->m_xmf4x4Transform._41 -= player->m_xmf3RootTransfromPreviousPos.x;
+	player->m_pChild->m_xmf4x4Transform._42 -= player->m_xmf3RootTransfromPreviousPos.y;
+	player->m_pChild->m_xmf4x4Transform._43 -= player->m_xmf3RootTransfromPreviousPos.z;
+
+	SetPlayerRootVel(player);
+
+	player->m_xmf3RootTransfromPreviousPos = xmf3CurrentPos;
+}
+
+void Charge_Player::Exit(CPlayer* player)
+{
+	player->m_bCharged = false;
+}
+
+ChargeAttack_Player::ChargeAttack_Player()
+{
+	InitAtkPlayer();
+
+	TrailComponent* pTrailComponent = nullptr;
+	for (auto& component : m_pListeners) {
+		if (dynamic_cast<TrailComponent*>(component.get())) {
+			pTrailComponent = dynamic_cast<TrailComponent*>(component.get());
+			break;
+		}
+	}
+	if (pTrailComponent) {
+		pTrailComponent->SetEnable(true);
+		pTrailComponent->m_fEmissiveFactor = 100.0f;
+	}
+}
+
+void ChargeAttack_Player::SetPlayerRootVel(CPlayer* player)
+{
+	CAnimationController* pPlayerController = player->m_pSkinnedAnimationController.get();
+
+	player->UpdateTransform(NULL);
+
+	XMFLOAT3 xmf3Position = XMFLOAT3{ pPlayerController->m_pRootMotionObject->GetWorld()._41,
+		player->GetPosition().y,
+		pPlayerController->m_pRootMotionObject->GetWorld()._43 };
+
+	player->Move(Vector3::Subtract(xmf3Position, player->GetPosition()), true);
+
+	pPlayerController->m_pRootMotionObject->m_xmf4x4Transform._41 = 0.f;
+	pPlayerController->m_pRootMotionObject->m_xmf4x4Transform._43 = 0.f;
+}
+
+ChargeAttack_Player::~ChargeAttack_Player()
+{
+}
+
+void ChargeAttack_Player::Enter(CPlayer* player)
+{
+	player->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 6);
+	player->m_pSkinnedAnimationController->m_fTime = 0.0f;
+	player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition = 0.0f;
+	player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fWeight = 1.0f;
+	player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_nType = ANIMATION_TYPE_ONCE;
+
+	player->m_pSkinnedAnimationController->SetTrackEnable(1, false);
+
+	TrailUpdateParams trailParam;
+	trailParam.pObject = player->m_pSwordTrailReference[3].get();
+	CMessageDispatcher::GetInst()->Dispatch_Message<TrailUpdateParams>(MessageType::UPDATE_SWORDTRAIL, &trailParam, this);
+
+	if (player->m_pSwordTrailReference) {
+		XMFLOAT3 dir = player->m_xmfDirection;
+		dir = XMFLOAT3(-dir.z, dir.y, dir.x);
+		dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[3].get())->m_faccumulateTime = 0.0f;
+		dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[3].get())->SetLengthWeight(4.0f);
+		dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[3].get())->SetOffset(XMFLOAT4(dir.x * 4.0f, 0.0f, dir.z * 4.0f, 0));
+	}
+}
+
+void ChargeAttack_Player::Execute(CPlayer* player, float fElapsedTime)
+{
+	if (player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition < 0.76f) {
+		if (player->m_pSwordTrailReference)
+			dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[3].get())->m_eTrailUpdateMethod = TRAIL_UPDATE_METHOD::NON_UPDATE_NEW_CONTROL_POINT;
+	}
+	else {
+		if (player->m_pSwordTrailReference)
+			dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[3].get())->m_eTrailUpdateMethod = TRAIL_UPDATE_METHOD::UPDATE_NEW_CONTROL_POINT;
+		if (0.83 < player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition) {
+			if (player->m_pSwordTrailReference)
+				dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[3].get())->m_eTrailUpdateMethod = TRAIL_UPDATE_METHOD::NON_UPDATE_NEW_CONTROL_POINT;
+		}
+
+		if (player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition > 2.0f)
+			if (player->m_pSwordTrailReference) {
+				dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[3].get())->m_eTrailUpdateMethod = TRAIL_UPDATE_METHOD::DELETE_CONTROL_POINT;
+			}
+	}
+
+
+	CAnimationSet* pAnimationSet = player->m_pSkinnedAnimationController->m_pAnimationSets->m_pAnimationSets[player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_nAnimationSet];
+	if (player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition == pAnimationSet->m_fLength) {
+		player->m_pStateMachine->ChangeState(Idle_Player::GetInst());
+	}
+}
+
+void ChargeAttack_Player::Animate(CPlayer* player, float fElapsedTime)
+{
+	player->Animate(fElapsedTime);
+}
+
+void ChargeAttack_Player::OnRootMotion(CPlayer* player, float fTimeElapsed)
+{
+	CAnimationController* pPlayerController = player->m_pSkinnedAnimationController.get();
+
+	CAnimationSet* pAnimationSet = pPlayerController->m_pAnimationSets->m_pAnimationSets[pPlayerController->m_pAnimationTracks[0].m_nAnimationSet];
+
+	XMFLOAT3 xmf3CurrentPos = XMFLOAT3{ player->m_pChild->m_xmf4x4Transform._41,
+	0.0f,
+	player->m_pChild->m_xmf4x4Transform._43 };
+
+	player->m_pChild->m_xmf4x4Transform._41 -= player->m_xmf3RootTransfromPreviousPos.x;
+	player->m_pChild->m_xmf4x4Transform._42 -= player->m_xmf3RootTransfromPreviousPos.y;
+	player->m_pChild->m_xmf4x4Transform._43 -= player->m_xmf3RootTransfromPreviousPos.z;
+
+	SetPlayerRootVel(player);
+
+	player->m_xmf3RootTransfromPreviousPos = xmf3CurrentPos;
+}
+
+void ChargeAttack_Player::Exit(CPlayer* player)
+{
+	if (player->m_pSwordTrailReference)
+		dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[3].get())->m_eTrailUpdateMethod = TRAIL_UPDATE_METHOD::DELETE_CONTROL_POINT;
+
 }

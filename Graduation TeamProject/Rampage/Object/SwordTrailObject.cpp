@@ -106,21 +106,29 @@ void CSwordTrailObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, bool 
 
 void CSwordTrailObject::SetNextControllPoint(XMFLOAT4* point1, XMFLOAT4* point2)
 {
+	
 	/*memcpy(&m_xmf4x4SwordTrailControllPointers._31, point2, sizeof(XMFLOAT4));
 	memcpy(&m_xmf4x4SwordTrailControllPointers._41, point1, sizeof(XMFLOAT4));*/
 	int dummy = 1;
 
 	if (point1 != nullptr && point2 != nullptr) {
+		XMFLOAT3 dir; XMStoreFloat3(&dir, XMVectorSubtract(XMLoadFloat4(point2), XMLoadFloat4(point1)));
+		XMFLOAT4 Point1 = *point1;
+		XMFLOAT4 Point2 = *point2;
+		XMStoreFloat4(&Point2, XMVectorAdd(XMLoadFloat4(&Point1), XMVectorScale(XMLoadFloat3(&dir), m_fLengthWeight)));
+		Point1 = Vector4::Add(Point1, m_xmf4Offset);
+		Point2 = Vector4::Add(Point2, m_xmf4Offset);
+
 		if (m_nTrailBasePoints < 10) {
-			m_xmf4TrailBasePoints1[dummy + m_nTrailBasePoints] = *point1;
-			m_xmf4TrailBasePoints2[dummy + m_nTrailBasePoints++] = *point2;
+			m_xmf4TrailBasePoints1[dummy + m_nTrailBasePoints] = Point1;
+			m_xmf4TrailBasePoints2[dummy + m_nTrailBasePoints++] = Point2;
 		}
 		else {
 			memcpy(m_xmf4TrailBasePoints1.data() + dummy, m_xmf4TrailBasePoints1.data() + dummy + 1, (m_nTrailBasePoints - 1) * sizeof(XMFLOAT4));
 			memcpy(m_xmf4TrailBasePoints2.data() + dummy, m_xmf4TrailBasePoints2.data() + dummy + 1, (m_nTrailBasePoints - 1) * sizeof(XMFLOAT4));
 
-			m_xmf4TrailBasePoints1[dummy + m_nTrailBasePoints - 1] = *point1;
-			m_xmf4TrailBasePoints2[dummy + m_nTrailBasePoints - 1] = *point2;
+			m_xmf4TrailBasePoints1[dummy + m_nTrailBasePoints - 1] = Point1;
+			m_xmf4TrailBasePoints2[dummy + m_nTrailBasePoints - 1] = Point2;
 		}
 	}
 	else {

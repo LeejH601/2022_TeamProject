@@ -21,6 +21,7 @@ public:
 	unsigned int m_iAttackId = 0;
 	bool m_bAttack = false;
 	bool m_bEvasioned = false;
+	bool m_bCharged = false;
 
 	LPVOID m_pPlayerUpdatedContext = NULL;
 

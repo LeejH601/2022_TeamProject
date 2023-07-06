@@ -761,6 +761,16 @@ SCENE_RETURN_TYPE CMainTMPScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMe
 				}
 			}
 			break;
+		case 'z':
+		case 'Z':
+			if (m_pPlayer)
+			{
+				if (!((CPlayer*)m_pPlayer)->m_bCharged)
+				{
+					((CPlayer*)m_pPlayer)->m_bCharged = true;
+				}
+			}
+			break;
 		default:
 			break;
 		}
