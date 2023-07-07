@@ -158,6 +158,15 @@ public:
 	virtual void HandleMessage(const Message& message, const MonsterParams& params);
 };
 
+// Define Player Died Listener
+class PlayerDeadListener : public IMessageListener {
+private:
+	CMainTMPScene* m_pScene;
+public:
+	void SetScene(CMainTMPScene* pScene) { m_pScene = pScene; };
+	virtual void HandleMessage(const Message& message, const PlayerParams& params);
+};
+
 // Define CinematicAllUpdated Listener
 class CinematicAllUpdatedListener : public IMessageListener {
 private:

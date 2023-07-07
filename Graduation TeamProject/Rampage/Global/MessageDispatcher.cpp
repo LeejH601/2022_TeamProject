@@ -555,7 +555,7 @@ void CinematicAllUpdatedListener::HandleMessage(const Message& message, const Pl
 void MonsterDeadListener::HandleMessage(const Message& message, const MonsterParams& params)
 {
 	if (message.getType() == MessageType::MONSTER_DEAD)
-		m_pScene->HandleDeadMessage();
+		m_pScene->HandleMonsterDeadMessage();
 }
 
 void AllyDamagedListener::HandleMessage(const Message& message, const PlayerParams& params)
@@ -564,4 +564,10 @@ void AllyDamagedListener::HandleMessage(const Message& message, const PlayerPara
 
 	if (pMonster->m_bEnable)
 		pMonster->HandleAllyDamagedMessage(params.pPlayer);
+}
+
+void PlayerDeadListener::HandleMessage(const Message& message, const PlayerParams& params)
+{
+	if (message.getType() == MessageType::PLAYER_DEAD)
+		m_pScene->HandlePlayerDeadMessage();
 }
