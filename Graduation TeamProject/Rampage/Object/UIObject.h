@@ -26,6 +26,7 @@ protected:
 	UINT  m_iTextureIndex = 0;
 	float m_fAlpha = 1.f;
 	XMFLOAT3 m_xmf3Color = XMFLOAT3(1.f, 1.f, 1.f);
+	std::vector<std::unique_ptr<CUIObject>> m_pChildUI;
 };	
 
 
@@ -159,4 +160,23 @@ public:
 public:
 	virtual void Update(float fTimeElapsed);
 
+};
+
+class CResultFrame : public CUIObject
+{
+public:
+	CResultFrame(int iTextureIndex, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fSize, class CTextureManager* pTextureManager);
+	virtual ~CResultFrame() {};
+
+public:
+	virtual void Update(float fTimeElapsed);
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, bool b_UseTexture, CCamera* pCamera = NULL);
+	void SetResultData(UINT iTotalComboN, float fPlayTime, UINT iPotionN);
+
+private:
+	UINT CalculatePlaytimeScore(float fPlayTime);
+
+private:
+	float m_fTotalEnableTime = 1.f;
+	float m_fEnableTime = 0.f;
 };

@@ -3,6 +3,7 @@
 #include "UIObject.h"
 #include "../Object/Mesh.h"
 #include "../Global/Camera.h"
+#include "../Object/TextureManager.h"
 
 CUIObject::CUIObject(int iTextureIndex, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fSize)
 {
@@ -72,6 +73,8 @@ void CUIObject::Update(float fTimeElapsed)
 		m_xmf4x4World._31 = m_xmf3Color.y;
 		m_xmf4x4World._44 = m_xmf3Color.z;
 
+		for (int i = 0; i < m_pChildUI.size(); i++)
+			m_pChildUI[i]->Update(fTimeElapsed);
 	}
 }
 
@@ -93,8 +96,8 @@ void CUIObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, bool b_UseTex
 		m_pMesh->Render(pd3dCommandList, 0);
 	}
 
-	if (m_pChild) m_pChild->Render(pd3dCommandList, b_UseTexture, pCamera);
-	if (m_pSibling) m_pSibling->Render(pd3dCommandList, b_UseTexture, pCamera);
+	for (int i = 0; i < m_pChildUI.size(); i++)
+		m_pChildUI[i]->Render(pd3dCommandList, b_UseTexture, pCamera);
 }
 
 void CUIObject::SetEnable(bool bEnable)
@@ -762,3 +765,192 @@ void CColorButtonObject::Update(float fTimeElapsed)
 	CUIObject::Update(fTimeElapsed);
 
 }
+
+CResultFrame::CResultFrame(int iTextureIndex, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fSize, CTextureManager* pTextureManager) : CUIObject(iTextureIndex, pd3dDevice, pd3dCommandList, fSize)
+{
+	// -------------------------------------------------ResultFrame--------------------------------------------------------
+
+	std::unique_ptr<CUIObject> pUIObject = std::make_unique<CUIObject>(2, pd3dDevice, pd3dCommandList, 10.f);
+	pUIObject->SetSize(XMFLOAT2(FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT));
+	pUIObject->SetScreenPosition(XMFLOAT2(FRAME_BUFFER_WIDTH * 0.5f, FRAME_BUFFER_HEIGHT * 0.5f));
+	pUIObject->SetTextureIndex(pTextureManager->LoadTotalTextureIndex(TextureType::UITexture, L"Image/UiImages/ResultBackGround.dds"));
+	m_pChildUI.push_back(std::move(pUIObject));
+
+	pUIObject = std::make_unique<CUIObject>(2, pd3dDevice, pd3dCommandList, 10.f);
+	pUIObject->SetSize(XMFLOAT2(744.f * 1.5f, 459.f * 1.5f));
+	pUIObject->SetScreenPosition(XMFLOAT2(FRAME_BUFFER_WIDTH * 0.5f, FRAME_BUFFER_HEIGHT * 0.55f));
+	pUIObject->SetTextureIndex(pTextureManager->LoadTotalTextureIndex(TextureType::UITexture, L"Image/UiImages/ResultFrame.dds"));
+	m_pChildUI.push_back(std::move(pUIObject));
+
+	pUIObject = std::make_unique<CUIObject>(2, pd3dDevice, pd3dCommandList, 10.f);
+	pUIObject->SetSize(XMFLOAT2(744.f * 1.5f, 459.f * 1.5f));
+	pUIObject->SetAlpha(2.f);
+	pUIObject->SetScreenPosition(XMFLOAT2(FRAME_BUFFER_WIDTH * 0.5f, FRAME_BUFFER_HEIGHT * 0.55f));
+	pUIObject->SetTextureIndex(pTextureManager->LoadTotalTextureIndex(TextureType::UITexture, L"Image/UiImages/ResultScoreMenu.dds"));
+	m_pChildUI.push_back(std::move(pUIObject));
+
+	// MaxCombo -16
+	pUIObject = std::make_unique<CNumberObject>(14, 35, pd3dDevice, pd3dCommandList, 10.f);
+	pUIObject->SetEnable(false);
+	dynamic_cast<CNumberObject*>(pUIObject.get())->SetMaxAlpha(1.f);
+	dynamic_cast<CNumberObject*>(pUIObject.get())->SetSpeedAlpha(0.15f);
+	pUIObject->SetColor(XMFLOAT3(1.f, 1.f, 1.f));
+	pUIObject->SetSize(XMFLOAT2(64.f * 0.85f, 60.f * 0.85f));
+	pUIObject->SetScreenPosition(XMFLOAT2(FRAME_BUFFER_WIDTH * 0.46f, FRAME_BUFFER_HEIGHT * 0.5f - 30.f));
+	pUIObject->SetTextureIndex(pTextureManager->LoadTotalTextureIndex(TextureType::UITexture, L"Image/UiImages/Number/Numbers2.dds"));
+	dynamic_cast<CNumberObject*>(pUIObject.get())->UpdateNumber(5);
+	m_pChildUI.push_back(std::move(pUIObject));
+
+	// MaxCombo - Score -20
+	pUIObject = std::make_unique<CNumberObject>(14, 35, pd3dDevice, pd3dCommandList, 10.f);
+	pUIObject->SetEnable(false);
+	dynamic_cast<CNumberObject*>(pUIObject.get())->SetMaxAlpha(1.f);
+	dynamic_cast<CNumberObject*>(pUIObject.get())->SetSpeedAlpha(0.15f);
+	pUIObject->SetColor(XMFLOAT3(1.5f, 1.f, 1.f));
+	pUIObject->SetSize(XMFLOAT2(64.f * 0.85f, 60.f * 0.85f));
+	pUIObject->SetScreenPosition(XMFLOAT2(FRAME_BUFFER_WIDTH * 0.6f, FRAME_BUFFER_HEIGHT * 0.5f - 30.f));
+	pUIObject->SetTextureIndex(pTextureManager->LoadTotalTextureIndex(TextureType::UITexture, L"Image/UiImages/Number/Numbers2.dds"));
+	dynamic_cast<CNumberObject*>(pUIObject.get())->UpdateNumber(5);
+	m_pChildUI.push_back(std::move(pUIObject));
+
+	// PlayTime 
+	// 분-17
+	pUIObject = std::make_unique<CNumberObject>(14, 35, pd3dDevice, pd3dCommandList, 10.f);
+	pUIObject->SetEnable(false);
+	dynamic_cast<CNumberObject*>(pUIObject.get())->SetMaxAlpha(1.f);
+	dynamic_cast<CNumberObject*>(pUIObject.get())->SetSpeedAlpha(0.15f);
+	pUIObject->SetColor(XMFLOAT3(1.f, 1.f, 1.f));
+	pUIObject->SetSize(XMFLOAT2(64.f * 0.85f, 60.f * 0.85f));
+	pUIObject->SetScreenPosition(XMFLOAT2(FRAME_BUFFER_WIDTH * 0.46f, FRAME_BUFFER_HEIGHT * 0.5f - 115.f));
+	pUIObject->SetTextureIndex(pTextureManager->LoadTotalTextureIndex(TextureType::UITexture, L"Image/UiImages/Number/Numbers2.dds"));
+	dynamic_cast<CNumberObject*>(pUIObject.get())->UpdateNumber(50);
+	m_pChildUI.push_back(std::move(pUIObject));
+
+	// 초 - 18
+	pUIObject = std::make_unique<CNumberObject>(14, 35, pd3dDevice, pd3dCommandList, 10.f);
+	pUIObject->SetEnable(false);
+	dynamic_cast<CNumberObject*>(pUIObject.get())->SetMaxAlpha(1.f);
+	dynamic_cast<CNumberObject*>(pUIObject.get())->SetSpeedAlpha(0.15f);
+	pUIObject->SetColor(XMFLOAT3(1.f, 1.f, 1.f));
+	pUIObject->SetSize(XMFLOAT2(64.f * 0.85f, 60.f * 0.85f));
+	pUIObject->SetScreenPosition(XMFLOAT2(FRAME_BUFFER_WIDTH * 0.525f, FRAME_BUFFER_HEIGHT * 0.5f - 115.f));
+	pUIObject->SetTextureIndex(pTextureManager->LoadTotalTextureIndex(TextureType::UITexture, L"Image/UiImages/Number/Numbers2.dds"));
+	dynamic_cast<CNumberObject*>(pUIObject.get())->UpdateNumber(5);
+	m_pChildUI.push_back(std::move(pUIObject));
+
+	// PlayTime  - Score -21
+
+	pUIObject = std::make_unique<CNumberObject>(14, 35, pd3dDevice, pd3dCommandList, 10.f);
+	pUIObject->SetEnable(false);
+	dynamic_cast<CNumberObject*>(pUIObject.get())->SetMaxAlpha(1.f);
+	dynamic_cast<CNumberObject*>(pUIObject.get())->SetSpeedAlpha(0.15f);
+	pUIObject->SetColor(XMFLOAT3(1.f, 1.5f, 1.f));
+	pUIObject->SetSize(XMFLOAT2(64.f * 0.85f, 60.f * 0.85f));
+	pUIObject->SetScreenPosition(XMFLOAT2(FRAME_BUFFER_WIDTH * 0.6f, FRAME_BUFFER_HEIGHT * 0.5f - 115.f));
+	pUIObject->SetTextureIndex(pTextureManager->LoadTotalTextureIndex(TextureType::UITexture, L"Image/UiImages/Number/Numbers2.dds"));
+	dynamic_cast<CNumberObject*>(pUIObject.get())->UpdateNumber(50);
+	m_pChildUI.push_back(std::move(pUIObject));
+
+	// PotionCount -19
+	pUIObject = std::make_unique<CNumberObject>(14, 35, pd3dDevice, pd3dCommandList, 10.f);
+	pUIObject->SetEnable(false);
+	dynamic_cast<CNumberObject*>(pUIObject.get())->SetMaxAlpha(1.f);
+	dynamic_cast<CNumberObject*>(pUIObject.get())->SetSpeedAlpha(0.15f);
+	pUIObject->SetColor(XMFLOAT3(1.f, 1.f, 1.f));
+	pUIObject->SetSize(XMFLOAT2(64.f * 0.85f, 60.f * 0.85f));
+	pUIObject->SetScreenPosition(XMFLOAT2(FRAME_BUFFER_WIDTH * 0.46f, FRAME_BUFFER_HEIGHT * 0.5f - 200.f));
+	pUIObject->SetTextureIndex(pTextureManager->LoadTotalTextureIndex(TextureType::UITexture, L"Image/UiImages/Number/Numbers2.dds"));
+	dynamic_cast<CNumberObject*>(pUIObject.get())->UpdateNumber(5);
+	m_pChildUI.push_back(std::move(pUIObject));
+
+
+	// PotionCount  - Score -22
+	pUIObject = std::make_unique<CNumberObject>(14, 35, pd3dDevice, pd3dCommandList, 10.f);
+	pUIObject->SetEnable(false);
+	dynamic_cast<CNumberObject*>(pUIObject.get())->SetMaxAlpha(1.f);
+	dynamic_cast<CNumberObject*>(pUIObject.get())->SetSpeedAlpha(0.15f);
+	pUIObject->SetColor(XMFLOAT3(1.f, 1.f, 1.5f));
+	pUIObject->SetSize(XMFLOAT2(64.f * 0.85f, 60.f * 0.85f));
+	pUIObject->SetScreenPosition(XMFLOAT2(FRAME_BUFFER_WIDTH * 0.6f, FRAME_BUFFER_HEIGHT * 0.5f - 200.f));
+	pUIObject->SetTextureIndex(pTextureManager->LoadTotalTextureIndex(TextureType::UITexture, L"Image/UiImages/Number/Numbers2.dds"));
+	dynamic_cast<CNumberObject*>(pUIObject.get())->UpdateNumber(5);
+	m_pChildUI.push_back(std::move(pUIObject));
+
+
+	// -------------------------------------------------ResultFrame--------------------------------------------------------
+
+
+	// Total
+	pUIObject = std::make_unique<CNumberObject>(14, 35, pd3dDevice, pd3dCommandList, 10.f);
+	pUIObject->SetEnable(false);
+	dynamic_cast<CNumberObject*>(pUIObject.get())->SetMaxAlpha(3.f);
+	dynamic_cast<CNumberObject*>(pUIObject.get())->SetSpeedAlpha(0.15f);
+	pUIObject->SetColor(XMFLOAT3(1.5f, 1.5f, 1.0f));
+	pUIObject->SetSize(XMFLOAT2(64.f * 1.3f, 60.f * 1.3f));
+	pUIObject->SetScreenPosition(XMFLOAT2(FRAME_BUFFER_WIDTH * 0.63f, FRAME_BUFFER_HEIGHT * 0.65f));
+	pUIObject->SetTextureIndex(pTextureManager->LoadTotalTextureIndex(TextureType::UITexture, L"Image/UiImages/Number/Numbers2.dds"));
+	dynamic_cast<CNumberObject*>(pUIObject.get())->UpdateNumber(100);
+	m_pChildUI.push_back(std::move(pUIObject));
+}
+
+void CResultFrame::Update(float fTimeElapsed)
+{
+	CUIObject::Update(fTimeElapsed);
+	if (m_bEnable)
+	{
+		m_fEnableTime -= fTimeElapsed;
+		if (m_fEnableTime < 0.f)
+		{
+			m_fEnableTime = m_fTotalEnableTime;
+
+			for (int i = 0; i < m_pChildUI.size(); i++)
+			{
+				if (!m_pChildUI[i]->m_bEnable)
+				{
+					if (i == 5)
+						m_pChildUI[i + 1]->m_bEnable = true;
+					m_pChildUI[i]->m_bEnable = true;
+					break;
+				}
+			}
+		}
+	}
+}
+
+void CResultFrame::Render(ID3D12GraphicsCommandList* pd3dCommandList, bool b_UseTexture, CCamera* pCamera)
+{
+	CUIObject::Render(pd3dCommandList, b_UseTexture, pCamera);
+}
+
+void CResultFrame::SetResultData(UINT iTotalComboN, float fPlayTime, UINT iPotionN)
+{
+	
+	dynamic_cast<CNumberObject*>(m_pChildUI[3].get())->UpdateNumber(iTotalComboN);
+	dynamic_cast<CNumberObject*>(m_pChildUI[4].get())->UpdateNumber(100 * iTotalComboN); // 20 // Combo
+
+	dynamic_cast<CNumberObject*>(m_pChildUI[5].get())->UpdateNumber(((UINT)fPlayTime) / 60);
+	dynamic_cast<CNumberObject*>(m_pChildUI[6].get())->UpdateNumber(((UINT)fPlayTime) % 60);
+	dynamic_cast<CNumberObject*>(m_pChildUI[7].get())->UpdateNumber(CalculatePlaytimeScore(fPlayTime)); // 시간 점수
+
+	dynamic_cast<CNumberObject*>(m_pChildUI[8].get())->UpdateNumber(iPotionN); // PotionN
+	dynamic_cast<CNumberObject*>(m_pChildUI[9].get())->UpdateNumber(100 * iPotionN); // 물약 점수
+
+	dynamic_cast<CNumberObject*>(m_pChildUI[10].get())->UpdateNumber(100 * iTotalComboN + CalculatePlaytimeScore(fPlayTime) + 100 * 5); // Total
+	//dynamic_cast<CUIObject*>(m_pChildUI[13].get())->SetScreenPosition(XMFLOAT2(FRAME_BUFFER_WIDTH * 0.85f + 160.f + (dynamic_cast<CNumberObject*>(m_pChildUI[3].get()))->GetNumSize() * 25.f, FRAME_BUFFER_HEIGHT * 0.5f - 9.f));
+}
+
+UINT CResultFrame::CalculatePlaytimeScore(float fPlayTime)
+{
+	UINT IMinute = ((UINT)fPlayTime) / 60;
+	if (IMinute < 5)
+		return 500;
+	else if (IMinute < 10)
+		return 300;
+	else if (IMinute < 15)
+		return 100;
+	else
+		return 50;
+	return 0;
+}
+
+
