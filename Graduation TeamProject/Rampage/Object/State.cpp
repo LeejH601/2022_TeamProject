@@ -1277,31 +1277,26 @@ void Damaged_Player::Enter(CPlayer* player)
 		player->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 32);
 	}
 #endif // SET_LOOKAT_WHEN_DAMAGED
+	player->m_pSkinnedAnimationController->SetTrackWeight(0, 1.0f);
+	player->m_pSkinnedAnimationController->SetTrackWeight(1, 0.0f);
 
 	player->m_pSkinnedAnimationController->m_fTime = 0.0f;
 	player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition = 0.0f;
+	player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fSequenceWeight = 0.0f;
 	player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_nType = ANIMATION_TYPE_ONCE;
-
+	
 	player->m_xmf3RootTransfromPreviousPos = XMFLOAT3{ 0.f, 0.f , 0.f };
 	player->m_bAttack = false; // 사용자가 좌클릭시 true가 되는 변수
 }
 
 void Damaged_Player::Execute(CPlayer* player, float fElapsedTime)
 {
+	player->SetLookAt(Vector3::Add(player->GetPosition(), Vector3::Normalize(player->m_xmf3ToHitterVec)));
+
 	CAnimationSet* pAnimationSet = player->m_pSkinnedAnimationController->m_pAnimationSets->m_pAnimationSets[player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_nAnimationSet];
+	
 	if (player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition == pAnimationSet->m_fLength)
-	{
-		CState<CPlayer>& previousState = *player->m_pStateMachine->GetPreviousState();
-		if (dynamic_cast<Idle_Player*>(&previousState)) {
-			player->m_pStateMachine->ChangeState(&previousState);
-		}
-		else if (dynamic_cast<Run_Player*>(&previousState)) {
-			player->m_pStateMachine->ChangeState(&previousState);
-		}
-		else {
-			player->m_pStateMachine->ChangeState(Idle_Player::GetInst());
-		}
-	}
+		player->m_pStateMachine->ChangeState(Idle_Player::GetInst());
 }
 
 void Damaged_Player::Animate(CPlayer* player, float fElapsedTime)
@@ -1335,6 +1330,63 @@ void Damaged_Player::Exit(CPlayer* player)
 }
 
 void Damaged_Player::SetPlayerRootVel(CPlayer* player)
+{
+	CAnimationController* pPlayerController = player->m_pSkinnedAnimationController.get();
+
+	player->UpdateTransform(NULL);
+
+	XMFLOAT3 xmf3Position = XMFLOAT3{ pPlayerController->m_pRootMotionObject->GetWorld()._41,
+		player->GetPosition().y,
+		pPlayerController->m_pRootMotionObject->GetWorld()._43 };
+
+	player->Move(Vector3::Subtract(xmf3Position, player->GetPosition()), true);
+
+	pPlayerController->m_pRootMotionObject->m_xmf4x4Transform._41 = 0.f;
+	pPlayerController->m_pRootMotionObject->m_xmf4x4Transform._43 = 0.f;
+}
+
+Dead_Player::Dead_Player()
+{
+}
+
+Dead_Player::~Dead_Player()
+{
+}
+
+void Dead_Player::Enter(CPlayer* player)
+{
+	player->SetLookAt(Vector3::Add(player->GetPosition(), Vector3::Normalize(player->m_xmf3ToHitterVec)));
+	player->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 31);
+	player->m_pSkinnedAnimationController->m_fTime = 0.0f;
+	player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition = 0.0f;
+	player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_nType = ANIMATION_TYPE_ONCE;
+
+	player->m_xmf3RootTransfromPreviousPos = XMFLOAT3{ 0.f, 0.f , 0.f };
+	player->m_fHP = 0.0f;
+
+	PlayerParams PlayerParam;
+	PlayerParam.pPlayer = player;
+	CMessageDispatcher::GetInst()->Dispatch_Message<PlayerParams>(MessageType::PLAYER_DEAD, &PlayerParam, nullptr);
+}
+
+void Dead_Player::Execute(CPlayer* player, float fElapsedTime)
+{
+}
+
+void Dead_Player::Animate(CPlayer* player, float fElapsedTime)
+{
+	player->Animate(fElapsedTime);
+}
+
+void Dead_Player::OnRootMotion(CPlayer* player, float fTimeElapsed)
+{
+}
+
+void Dead_Player::Exit(CPlayer* player)
+{
+}
+
+void Dead_Player::SetPlayerRootVel(CPlayer* player)
 {
 	CAnimationController* pPlayerController = player->m_pSkinnedAnimationController.get();
 
