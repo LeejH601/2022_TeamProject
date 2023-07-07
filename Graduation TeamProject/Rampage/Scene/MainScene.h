@@ -120,8 +120,10 @@ public:
 	CMainTMPScene();
 	virtual ~CMainTMPScene() {}
 
-	void HandleDeadMessage();
+	void HandleMonsterDeadMessage();
+	void HandlePlayerDeadMessage();
 	void AdvanceStage();
+	
 	virtual void SetPlayer(CGameObject* pPlayer);
 
 	virtual void OnPreRender(ID3D12GraphicsCommandList* pd3dCommandList) { }

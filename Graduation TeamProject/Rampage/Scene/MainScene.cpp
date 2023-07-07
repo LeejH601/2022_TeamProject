@@ -66,9 +66,15 @@ CMainTMPScene::CMainTMPScene()
 	pCinematicAllUpdatedListener->SetScene(this);
 	m_pListeners.push_back(std::move(pCinematicAllUpdatedListener));
 	CMessageDispatcher::GetInst()->RegisterListener(MessageType::CINEMATIC_ALL_UPDATED, m_pListeners.back().get(), nullptr);
+
+	// Player Dead Listener
+	std::unique_ptr<PlayerDeadListener> pPlayerDeadListener = std::make_unique<PlayerDeadListener>();
+	pPlayerDeadListener->SetScene(this);
+	m_pListeners.push_back(std::move(pPlayerDeadListener));
+	CMessageDispatcher::GetInst()->RegisterListener(MessageType::PLAYER_DEAD, m_pListeners.back().get(), nullptr);
 }
 
-void CMainTMPScene::HandleDeadMessage()
+void CMainTMPScene::HandleMonsterDeadMessage()
 {
 	m_iTotalMonsterNum -= 1;
 
@@ -92,6 +98,13 @@ void CMainTMPScene::HandleDeadMessage()
 		else
 			AdvanceStage();
 	}
+}
+
+void CMainTMPScene::HandlePlayerDeadMessage()
+{
+	OutputDebugString(L"Player Dead\n");
+
+	// 결과창 띄우기
 }
 
 void CMainTMPScene::AdvanceStage()
