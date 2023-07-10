@@ -29,7 +29,6 @@ protected:
 	float m_fAlpha = 1.f;
 	XMFLOAT3 m_xmf3Color = XMFLOAT3(1.f, 1.f, 1.f);
 	std::vector<std::unique_ptr<CUIObject>> m_pChildUI;
-	UINT	m_iTextureIndex = 0;
 	std::vector<std::unique_ptr<IMessageListener>> m_pListeners;
 };	
 
