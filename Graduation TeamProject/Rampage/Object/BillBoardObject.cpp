@@ -241,27 +241,27 @@ void CTerrainSpriteObject::Animate(CHeightMapTerrain* pTerrain, float fTimeElaps
 		Pos.y = fHeight - 46.8876 - 46.8876 * 0.38819 + 6.5f;
 		SetPosition(Pos);
 	}
-	switch (m_eTerrainSpriteType)
-	{
-	case TERRAINSPRITE_CROSS_FADE:
-		if (m_fTime > m_fLifeTime * 0.7f)
-		{
-			if (m_fDeltaSize <= 1.f)
-			{
-				m_fDeltaSize += fTimeElapsed * 5.f;
-			}
-			Rotate(0.f, 0.f, 7.f);
-		}
-		break;
-	case TERRAINSPRITE_FADE_IN:
-		break;
-	case TERRAINSPRITE_FADE_OUT:
-		break;
-	case TERRAINSPRITETYPE_END:
-		break;
-	default:
-		break;
-	}
+	//switch (m_eTerrainSpriteType)
+	//{
+	//case TERRAINSPRITE_CROSS_FADE:
+	//	if (m_fTime > m_fLifeTime * 0.7f)
+	//	{
+	//		if (m_fDeltaSize <= 1.f)
+	//		{
+	//			m_fDeltaSize += fTimeElapsed * 5.f;
+	//		}
+	//		Rotate(0.f, 0.f, 7.f);
+	//	}
+	//	break;
+	//case TERRAINSPRITE_FADE_IN:
+	//	break;
+	//case TERRAINSPRITE_FADE_OUT:
+	//	break;
+	//case TERRAINSPRITETYPE_END:
+	//	break;
+	//default:
+	//	break;
+	//}
 
 }
 
@@ -304,10 +304,6 @@ void CTerrainSpriteObject::SetEnable(bool bEnable)
 
 }
 
-void CTerrainSpriteObject::SetType(TerrainSpriteType eType)
-{
-	m_eTerrainSpriteType = eType;
-}
 
 CDetailObject::CDetailObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, std::shared_ptr<CShader> pShader, void* pContext)
 {

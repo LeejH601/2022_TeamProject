@@ -2750,7 +2750,7 @@ void CImGuiManager::OnDestroy()
 
 #define BUFSIZE 4096
 #define SERVERPORT 9000
-char* address = (char*)"127.0.0.1";
+char* address = (char*)"25.34.202.175";
 
 bool CImGuiManager::ConnectServer(eSERVICE_TYPE serviceType, SineUp_Info& info)
 {

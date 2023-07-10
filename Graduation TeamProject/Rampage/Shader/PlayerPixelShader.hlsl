@@ -44,7 +44,7 @@ cbuffer cbDissolveParam : register(b5)
 }
 
 Texture2D gtxMappedTexture[8] : register(t0);
-Texture2D gtxtTexture[30] : register(t51);
+Texture2D gtxtTexture[29] : register(t51);
 SamplerState gSamplerState : register(s0);
 
 #include "Light.hlsl"

@@ -103,11 +103,9 @@ public:
 
 	virtual void SetEnable(bool bEnable);
 
-	void SetType(TerrainSpriteType eType);
 
 private:
 	float m_fDeltaSize = 0.f;
-	TerrainSpriteType m_eTerrainSpriteType = TerrainSpriteType::TERRAINSPRITE_CROSS_FADE;
 };
 
 

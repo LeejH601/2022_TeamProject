@@ -49,6 +49,7 @@ struct ParticleCompParams {
 	CGameObject* pObject;
 	XMFLOAT3 xmf3Position;
 	XMFLOAT3 xmf3RotationAxis;
+	UINT	 m_iTextureIndex;
 };
 
 struct ImpactCompParams {
@@ -631,6 +632,8 @@ public:
 };
 
 class TrailParticleComponent : public ParticleComponent {
+public:
+	TrailParticleComponent();
 	//int m_nParticleNumber = MAX_PARTICLES;
 	//int m_nEmitMinParticleNumber = 2;
 	//int m_nEmitMaxParticleNumber = 3;
@@ -663,14 +666,6 @@ public:
 	void SetColor(XMFLOAT3 xmf3Color) { m_xmf3Color = xmf3Color; }*/
 
 	virtual void HandleMessage(const Message& message, const ParticleTrailParams& params);
-};
-
-
-enum TerrainSpriteType {
-	TERRAINSPRITE_CROSS_FADE,
-	TERRAINSPRITE_FADE_IN,
-	TERRAINSPRITE_FADE_OUT,
-	TERRAINSPRITETYPE_END
 };
 
 class TerrainSpriteComponent : public IMessageListener

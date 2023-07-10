@@ -929,7 +929,6 @@ void CResultFrame::Render(ID3D12GraphicsCommandList* pd3dCommandList, bool b_Use
 
 void CResultFrame::SetResultData(UINT iTotalComboN, float fPlayTime, UINT iPotionN)
 {
-	
 	dynamic_cast<CNumberObject*>(m_pChildUI[3].get())->UpdateNumber(iTotalComboN);
 	dynamic_cast<CNumberObject*>(m_pChildUI[4].get())->UpdateNumber(100 * iTotalComboN); // 20 // Combo
 

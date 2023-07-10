@@ -307,7 +307,7 @@ void TerrainSpriteComponent::HandleMessage(const Message& message, const Terrain
 		pMultiSpriteParticle->SetEmitParticleN(m_nEmitParticleNumber);
 		pMultiSpriteParticle->SetMaxParticleN(m_nParticleNumber);
 		pMultiSpriteParticle->SetPosition(params.xmf3Position);
-		pMultiSpriteParticle->SetTextureIndex(4);
+		pMultiSpriteParticle->SetTextureIndex(3);
 		pMultiSpriteParticle->SetEmissive(10.0f);
 		pMultiSpriteParticle->EmitParticle(8);
 	}
@@ -382,7 +382,9 @@ void UpDownParticleComponent::HandleMessage(const Message& message, const Partic
 	}
 }
 
-
+TrailParticleComponent::TrailParticleComponent()
+{
+}
 void TrailParticleComponent::HandleMessage(const Message& message, const ParticleTrailParams& params)
 {
 	if (!m_bEnable)
@@ -402,7 +404,7 @@ void TrailParticleComponent::HandleMessage(const Message& message, const Particl
 		pParticle->SetEmitParticleN(m_nEmitParticleNumber);
 		pParticle->SetPosition(params.xmf3Position);
 		pParticle->SetParticleType(m_iParticleType);
-		pParticle->SetTextureIndex(m_iTextureIndex + m_iTextureOffset);
+		pParticle->SetTextureIndex(m_iTextureIndex + CSimulatorScene::GetInst()->GetTextureManager()->GetTextureOffset(TextureType::ParticleTexture));
 		pParticle->SetEmissive(m_fEmissive);
 		pParticle->SetRotateFactor(m_bSimulateRotate);
 		pParticle->SetScaleFactor(m_bSimulateRotate);
@@ -543,7 +545,7 @@ void SlashHitComponent::HandleMessage(const Message& message, const ParticleComp
 		pParticle->SetFieldMainDirection(m_xmf3FieldMainDirection);
 		pParticle->SetProgressionRate(m_fProgressionRate);
 		pParticle->SetLengthScale(m_fLengthScale);*/
-		pParticle->SetTextureIndex(m_iTextureIndex + m_iTextureOffset);
+		pParticle->SetTextureIndex(m_iTextureIndex + CSimulatorScene::GetInst()->GetTextureManager()->GetTextureOffset(TextureType::TrailNoiseTexture));
 		pParticle->SetEmissive(m_fEmissive);
 		pParticle->SetRotateFactor(m_bSimulateRotate);
 		pParticle->SetScaleFactor(m_bScaleFlag);
