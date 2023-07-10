@@ -19,6 +19,7 @@ struct VS_CB_SWTRAIL_INFO
 	float m_fEmissiveFactor;
 	UINT gnBaseTextureIndex;
 	UINT gnNoiseTextureIndex;
+	float gnScale;
 };
 enum class TRAIL_UPDATE_METHOD {
 	UPDATE_NEW_CONTROL_POINT,
@@ -73,6 +74,7 @@ public:
 	void SetNextControllPoint(XMFLOAT4* point1, XMFLOAT4* point2);
 	void SetNoiseTextureIndex(int index) { m_iNoiseTextureIndex = index; };
 	void SetLengthWeight(float value) { m_fLengthWeight = value; };
+	float GetLengthWeight() { return m_fLengthWeight; };
 	void SetOffset(XMFLOAT4 offset) { m_xmf4Offset = offset; };
 };
 

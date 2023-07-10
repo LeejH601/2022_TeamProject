@@ -52,7 +52,7 @@ void Idle_Player::Execute(CPlayer* player, float fElapsedTime)
 	// 사용자가 좌클릭을 했으면 Atk1_Player로 상태 변경
 	else if (player->m_bAttack)
 		player->m_pStateMachine->ChangeState(Atk1_Player::GetInst());
-	else if(player->m_bCharged)
+	else if (player->m_bCharged)
 		player->m_pStateMachine->ChangeState(ChargeStart_Player::GetInst());
 }
 
@@ -207,6 +207,12 @@ void Atk_Player::InitAtkPlayer()
 
 	// TRAIL ANIMATION
 	std::unique_ptr<TrailParticleComponent> pTrailParticlenComponent = std::make_unique<TrailParticleComponent>();
+	pTrailParticlenComponent->SetEnable(true);
+	pTrailParticlenComponent->SetTextureOffset(5);
+	pTrailParticlenComponent->SetSpeed(40.0f);
+	pTrailParticlenComponent->SetSize(XMFLOAT2(0.5,0.5));
+	pTrailParticlenComponent->SetEmitParticleNumber(50);
+	pTrailParticlenComponent->SetEmissive(20.0f);
 	m_pListeners.push_back(std::move(pTrailParticlenComponent));
 	CMessageDispatcher::GetInst()->RegisterListener(MessageType::UPDATE_TRAILPARTICLE, m_pListeners.back().get(), this);
 
@@ -272,8 +278,9 @@ void Atk1_Player::CheckComboAttack(CPlayer* player)
 {
 	// 사용자가 좌클릭을 했으면 애니메이션을 0.7초 진행 후 Atk2_Player로 상태 변경
 	if (0.55 < player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition) {
-		if (player->m_pSwordTrailReference)
+		if (player->m_pSwordTrailReference) {
 			dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[0].get())->m_eTrailUpdateMethod = TRAIL_UPDATE_METHOD::NON_UPDATE_NEW_CONTROL_POINT;
+		}
 	}
 	if (0.7 < player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition) {
 		if (player->m_pSwordTrailReference)
@@ -300,12 +307,14 @@ void Atk1_Player::SendCollisionMessage(CPlayer* player)
 
 void Atk1_Player::SpawnTrailParticle(CPlayer* player)
 {
+	if (m_bEmittedParticle)
+		return;
 	if (player->m_fTime > player->m_fMaxTime)
 	{
 		player->m_fMaxTime = 0.01f;
 		// 0.35 시작
-		if (0.35f < player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition &&
-			0.5f > player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition)
+		if (0.55f < player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition &&
+			0.7f > player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition)
 		{
 			ParticleTrailParams ParticleTrail_comp_params;
 			CGameObject* pWeapon = player->FindFrame("Weapon_r");
@@ -325,11 +334,13 @@ void Atk1_Player::SpawnTrailParticle(CPlayer* player)
 			xmf3Position = Vector3::Add(xmf3Position, Vector3::Normalize(xmf3Direction), -4.f);
 
 			ParticleTrail_comp_params.pObject = CPlayerParticleObject::GetInst()->GetTrailParticleObjects();
+			dynamic_cast<CParticleObject*>(ParticleTrail_comp_params.pObject)->SetEmitAxis(xmf3Direction);
 			ParticleTrail_comp_params.xmf3Position = xmf3Position;
 			ParticleTrail_comp_params.iPlayerAttack = 0;
 			ParticleTrail_comp_params.m_fTime = player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition;
 			ParticleTrail_comp_params.xmf3Velocity = Vector3::Normalize(Vector3::Subtract(xmf3Position, player->GetPosition()));
-			CMessageDispatcher::GetInst()->Dispatch_Message<ParticleTrailParams>(MessageType::UPDATE_TRAILPARTICLE, &ParticleTrail_comp_params, player->m_pStateMachine->GetCurrentState());
+			CMessageDispatcher::GetInst()->Dispatch_Message<ParticleTrailParams>(MessageType::UPDATE_TRAILPARTICLE, &ParticleTrail_comp_params, this);
+			m_bEmittedParticle = true;
 		}
 
 		player->m_fTime = 0.f;
@@ -358,6 +369,8 @@ void Atk1_Player::Enter(CPlayer* player)
 
 	player->m_xmf3RootTransfromPreviousPos = XMFLOAT3{ 0.f, 0.f , 0.f };
 
+	m_bEmittedParticle = false;
+
 	SoundPlayParams SoundPlayParam;
 	SoundPlayParam.sound_category = SOUND_CATEGORY::SOUND_SHOOT;
 	CMessageDispatcher::GetInst()->Dispatch_Message<SoundPlayParams>(MessageType::PLAY_SOUND, &SoundPlayParam, this);
@@ -369,6 +382,7 @@ void Atk1_Player::Enter(CPlayer* player)
 
 	if (player->m_pSwordTrailReference) {
 		dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[0].get())->m_faccumulateTime = 0.0f;
+		dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[0].get())->SetLengthWeight(1.0f);
 	}
 
 	player->m_fStamina -= player->m_fTotalStamina * 0.2f;
@@ -384,6 +398,14 @@ void Atk1_Player::Execute(CPlayer* player, float fElapsedTime)
 
 	SendCollisionMessage(player);
 	CheckComboAttack(player);
+
+	if (0.55 < player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition) {
+		if (player->m_pSwordTrailReference) {
+			float scale = dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[0].get())->GetLengthWeight();
+			scale += fElapsedTime * 1.0f;
+			dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[0].get())->SetLengthWeight(scale);
+		}
+	}
 
 	CheckEvasion(player, 0.7f);
 
@@ -493,6 +515,7 @@ void Atk2_Player::Enter(CPlayer* player)
 
 	if (player->m_pSwordTrailReference) {
 		dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[1].get())->m_faccumulateTime = 0.0f;
+		dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[1].get())->SetLengthWeight(1.0f);
 	}
 
 	player->m_fStamina -= player->m_fTotalStamina * 0.2f;
@@ -515,6 +538,14 @@ void Atk2_Player::Execute(CPlayer* player, float fElapsedTime)
 
 	SendCollisionMessage(player);
 	CheckComboAttack(player);
+
+	if (0.45 < player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition) {
+		if (player->m_pSwordTrailReference) {
+			float scale = dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[1].get())->GetLengthWeight();
+			scale += fElapsedTime * 1.0f;
+			dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[1].get())->SetLengthWeight(scale);
+		}
+	}
 
 	CheckEvasion(player, 0.7f);
 
@@ -639,6 +670,7 @@ void Atk3_Player::Enter(CPlayer* player)
 
 	if (player->m_pSwordTrailReference) {
 		dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[2].get())->m_faccumulateTime = 0.0f;
+		dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[2].get())->SetLengthWeight(1.0f);
 	}
 
 	player->m_fStamina -= player->m_fTotalStamina * 0.2f;
@@ -656,6 +688,14 @@ void Atk3_Player::Execute(CPlayer* player, float fElapsedTime)
 	CheckEvasion(player, 0.7f);
 
 	CAnimationSet* pAnimationSet = player->m_pSkinnedAnimationController->m_pAnimationSets->m_pAnimationSets[player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_nAnimationSet];
+
+	if (0.45 < player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition) {
+		if (player->m_pSwordTrailReference) {
+			float scale = dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[2].get())->GetLengthWeight();
+			scale += fElapsedTime * 1.0f;
+			dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[2].get())->SetLengthWeight(scale);
+		}
+	}
 
 	if (0.45 < player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition) {
 		if (player->m_pSwordTrailReference)
@@ -739,7 +779,7 @@ void Run_Player::Enter(CPlayer* player)
 
 void Run_Player::Execute(CPlayer* player, float fElapsedTime)
 {
-	static int animationList[4] = { 4, 19, 16, 0};
+	static int animationList[4] = { 4, 19, 16, 0 };
 	static float valuePoint[3] = { 0.0f, 12.22222 ,24.44444444 };
 	static int prevAnimSetLow = 0;
 	XMFLOAT3 xmf3PlayerVel = player->GetVelocity();
@@ -756,7 +796,7 @@ void Run_Player::Execute(CPlayer* player, float fElapsedTime)
 	}
 
 	prevAnimSetLow = animSetLow;
-	
+
 	//animSetLow = min(1, animSetLow);
 
 	player->m_pSkinnedAnimationController->m_pAnimationTracks[0].SetAnimationSet(animationList[animSetLow]);
@@ -1146,7 +1186,7 @@ void Evasion_Player::Execute(CPlayer* player, float fElapsedTime)
 
 		if (dynamic_cast<Idle_Player*>(&previousState)) {
 			player->m_pStateMachine->ChangeState(&previousState);
-			player->Move(XMFLOAT3(0,0,0), true);
+			player->Move(XMFLOAT3(0, 0, 0), true);
 			player->SetCurrSpeed(0.0f);
 		}
 		else if (dynamic_cast<Run_Player*>(&previousState)) {
@@ -1490,7 +1530,7 @@ void Charge_Player::SetPlayerRootVel(CPlayer* player)
 void Charge_Player::Execute(CPlayer* player, float fElapsedTime)
 {
 	m_fChargedTime += fElapsedTime;
-	if(m_fChargedTime >= m_fChargedEndTime)
+	if (m_fChargedTime >= m_fChargedEndTime)
 		player->m_pStateMachine->ChangeState(ChargeAttack_Player::GetInst());
 }
 
@@ -1590,17 +1630,27 @@ void ChargeAttack_Player::Execute(CPlayer* player, float fElapsedTime)
 			dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[3].get())->m_eTrailUpdateMethod = TRAIL_UPDATE_METHOD::NON_UPDATE_NEW_CONTROL_POINT;
 	}
 	else {
-		if (player->m_pSwordTrailReference)
+
+		if (player->m_pSwordTrailReference) {
 			dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[3].get())->m_eTrailUpdateMethod = TRAIL_UPDATE_METHOD::UPDATE_NEW_CONTROL_POINT;
-		if (0.83 < player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition) {
-			if (player->m_pSwordTrailReference)
-				dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[3].get())->m_eTrailUpdateMethod = TRAIL_UPDATE_METHOD::NON_UPDATE_NEW_CONTROL_POINT;
+
 		}
 
-		if (player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition > 2.0f)
+		if (player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition > 2.0f) {
 			if (player->m_pSwordTrailReference) {
 				dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[3].get())->m_eTrailUpdateMethod = TRAIL_UPDATE_METHOD::DELETE_CONTROL_POINT;
 			}
+		}
+		else {
+			if (0.83 < player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition) {
+				if (player->m_pSwordTrailReference) {
+					dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[3].get())->m_eTrailUpdateMethod = TRAIL_UPDATE_METHOD::NON_UPDATE_NEW_CONTROL_POINT;
+					float scale = dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[3].get())->GetLengthWeight();
+					scale += fElapsedTime * 5.0f;
+					dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[3].get())->SetLengthWeight(scale);
+				}
+			}
+		}
 	}
 
 

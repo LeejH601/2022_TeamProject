@@ -71,6 +71,7 @@ void CSwordTrailObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCom
 	m_pcbMappedTrail->m_fEmissiveFactor = m_fEmissiveFactor;
 	m_pcbMappedTrail->gnBaseTextureIndex = m_iTextureIndex;
 	m_pcbMappedTrail->gnNoiseTextureIndex = m_iNoiseTextureIndex;
+	m_pcbMappedTrail->gnScale = m_fLengthWeight;
 
 	D3D12_GPU_VIRTUAL_ADDRESS d3dGpuVirtualAddress = m_pd3dcbTrail->GetGPUVirtualAddress();
 	pd3dCommandList->SetGraphicsRootConstantBufferView(7, d3dGpuVirtualAddress);
@@ -115,7 +116,7 @@ void CSwordTrailObject::SetNextControllPoint(XMFLOAT4* point1, XMFLOAT4* point2)
 		XMFLOAT3 dir; XMStoreFloat3(&dir, XMVectorSubtract(XMLoadFloat4(point2), XMLoadFloat4(point1)));
 		XMFLOAT4 Point1 = *point1;
 		XMFLOAT4 Point2 = *point2;
-		XMStoreFloat4(&Point2, XMVectorAdd(XMLoadFloat4(&Point1), XMVectorScale(XMLoadFloat3(&dir), m_fLengthWeight)));
+		//XMStoreFloat4(&Point2, XMVectorAdd(XMLoadFloat4(&Point1), XMVectorScale(XMLoadFloat3(&dir), m_fLengthWeight)));
 		Point1 = Vector4::Add(Point1, m_xmf4Offset);
 		Point2 = Vector4::Add(Point2, m_xmf4Offset);
 

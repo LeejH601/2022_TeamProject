@@ -385,22 +385,29 @@ void UpDownParticleComponent::HandleMessage(const Message& message, const Partic
 
 void TrailParticleComponent::HandleMessage(const Message& message, const ParticleTrailParams& params)
 {
-	CParticleObject* pParticleObject = dynamic_cast<CParticleObject*>(params.pObject);
+	if (!m_bEnable)
+		return;
 
-	if (pParticleObject)
+	CParticleObject* pParticle = dynamic_cast<CParticleObject*>(params.pObject);
+
+	if (pParticle)
 	{
-		pParticleObject->SetParticleType(m_iParticleType);
-		pParticleObject->SetEmit(true);
-		pParticleObject->SetSize(m_fSize);
-		pParticleObject->SetStartAlpha(m_fAlpha);
-		pParticleObject->SetColor(m_xmf3Color);
-		pParticleObject->SetSpeed(m_fSpeed * 300.0f);
-		pParticleObject->SetLifeTime(0.05f);
-		pParticleObject->SetMaxParticleN(m_nParticleNumber);
-		pParticleObject->SetEmitParticleN(m_nEmitMinParticleNumber + rand() % (m_nEmitMaxParticleNumber - m_nEmitMinParticleNumber));
-		pParticleObject->SetPosition(params.xmf3Position);
-		pParticleObject->SetDirection(params.xmf3Velocity);
-		//pParticleObject->ChangeTexture(m_pTexture);
+		pParticle->SetEmit(true);
+		pParticle->SetSize(m_fSize);
+		pParticle->SetStartAlpha(m_fAlpha);
+		pParticle->SetColor(m_xmf3Color);
+		pParticle->SetSpeed(m_fSpeed);
+		pParticle->SetLifeTime(m_fLifeTime);
+		pParticle->SetMaxParticleN(m_nParticleNumber);
+		pParticle->SetEmitParticleN(m_nEmitParticleNumber);
+		pParticle->SetPosition(params.xmf3Position);
+		pParticle->SetParticleType(m_iParticleType);
+		pParticle->SetTextureIndex(m_iTextureIndex + m_iTextureOffset);
+		pParticle->SetEmissive(m_fEmissive);
+		pParticle->SetRotateFactor(m_bSimulateRotate);
+		pParticle->SetScaleFactor(m_bSimulateRotate);
+		//pParticle->SetEmitAxis()
+		pParticle->EmitParticle(10);
 	}
 }
 

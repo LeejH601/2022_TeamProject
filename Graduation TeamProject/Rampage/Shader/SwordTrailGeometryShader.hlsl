@@ -35,6 +35,10 @@ cbuffer cbTrailControllPoints : register(b5)
 	float gfNoiseConstants;
 	uint gnPoints;
 	float gnOffsetTime;
+	float gnEmissiveFactor;
+	uint gnBaseTextureIndex;
+	uint gnNoiseTextureIndex;
+	float gnScale;
 }
 
 struct VS_OUT
@@ -60,6 +64,15 @@ void SwordTrail_GS(
 	float4 pVertices[4];
 
 	uint index = input[0].index;
+	float4 directionToFar1 = gControllpoints2[index] - gControllpoints1[index];
+	float4 directionToFar2 = gControllpoints2[index + 1] - gControllpoints1[index + 1];
+
+	float4 FarPoints[2];
+	FarPoints[0] = gControllpoints1[index];
+	FarPoints[0].xyz += (directionToFar1 * gnScale);
+
+	FarPoints[1] = gControllpoints1[index + 1];
+	FarPoints[1].xyz += (directionToFar2 * gnScale);
 
 	/*float4 dir[2];
 	dir[0] = gControllpoints2[index] - gControllpoints1[index];
@@ -73,8 +86,8 @@ void SwordTrail_GS(
 	/*pVertices[0] = gControllpoints1[index] + float4(crossvec, 0.0f);
 	pVertices[1] = gControllpoints1[index + 1] + float4(crossvec, 0.0f);*/
 
-	pVertices[2] = gControllpoints2[index];
-	pVertices[3] = gControllpoints2[index + 1];
+	pVertices[2] = FarPoints[0];
+	pVertices[3] = FarPoints[1];
 
 	//pVertices[4] = gControllpoints1[index] - float4(crossvec, 0.0f);
 	//pVertices[5] = gControllpoints1[index + 1] - float4(crossvec, 0.0f);
