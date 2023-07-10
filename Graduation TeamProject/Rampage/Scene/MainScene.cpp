@@ -105,6 +105,8 @@ void CMainTMPScene::HandlePlayerDeadMessage()
 	OutputDebugString(L"Player Dead\n");
 
 	// 결과창 띄우기
+	m_pUIObject[13]->SetEnable(true);
+	dynamic_cast<CResultFrame*>(m_pUIObject[13].get())->SetResultData(((CPlayer*)m_pPlayer)->m_iCombo, m_fCurrentTime, ((CPlayer*)m_pPlayer)->m_iPotionN);
 }
 
 void CMainTMPScene::AdvanceStage()
@@ -743,10 +745,6 @@ SCENE_RETURN_TYPE CMainTMPScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMe
 			}
 		}
 		break;
-		case '3':
-			m_pUIObject[13]->SetEnable(true);
-			dynamic_cast<CResultFrame*>(m_pUIObject[13].get())->SetResultData(((CPlayer*)m_pPlayer)->m_iCombo, m_fCurrentTime, ((CPlayer*)m_pPlayer)->m_iPotionN);
-			break;
 		case 'f':
 		case 'F':
 			((CPlayer*)m_pPlayer)->Tmp();
