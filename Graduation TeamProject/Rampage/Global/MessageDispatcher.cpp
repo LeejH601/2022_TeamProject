@@ -407,7 +407,7 @@ void TrailParticleComponent::HandleMessage(const Message& message, const Particl
 		pParticle->SetRotateFactor(m_bSimulateRotate);
 		pParticle->SetScaleFactor(m_bSimulateRotate);
 		//pParticle->SetEmitAxis()
-		pParticle->EmitParticle(10);
+		pParticle->EmitParticle(3);
 	}
 }
 

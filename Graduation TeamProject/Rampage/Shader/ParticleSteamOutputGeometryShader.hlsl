@@ -229,6 +229,8 @@ void GSParticleStreamOutput(point VS_PARTICLE_INPUT input[1], inout PointStream<
 		RecoveryParticles(particle, output);
 	else if (particle.type == SMOKE_PARTILCE)
 		SmokeParticles(particle, output);
+	else if (particle.type == TRAIL_PARTILCE)
+		SphereParticles(particle, output);
 	else if (particle.type == ATTACK_PARTICLE)
 		AttackParticles(particle, output);
 	else if (particle.type == VERTEXPOINT_PARTICLE)

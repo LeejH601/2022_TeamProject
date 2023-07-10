@@ -214,6 +214,7 @@ void CParticleObject::EmitParticle(int emitType)
 	{
 	case 0:
 	case 2:
+	case 3:
 	case 6:
 	case 7:
 	case 8:

@@ -46,7 +46,7 @@ PS_MULTIPLE_RENDER_TARGETS_OUTPUT PSParticleDraw(GS_PARTICLE_DRAW_OUTPUT input) 
 	//cColor.a *= gnTexturesMask * 0.01f; // 0~100으로 받아 0.00 ~1.00으로 변경
 	//cColor.a *= input.alpha; // 사라지는 효과 구현 위해(위 아래로 내려가는 파티클을 위해)
 	//cColor.a = 1.0f - (gfCurrentTime - input.EmitTime) / input.lifetime;
-	if(input.ParticleType == 5)
+	if(input.ParticleType == 5 || input.ParticleType == 3)
 		cColor.a *= 1.0f - (gfCurrentTime - input.EmitTime) / input.lifetime;
 	output.f4Color = cColor;
 

@@ -209,10 +209,12 @@ void Atk_Player::InitAtkPlayer()
 	std::unique_ptr<TrailParticleComponent> pTrailParticlenComponent = std::make_unique<TrailParticleComponent>();
 	pTrailParticlenComponent->SetEnable(true);
 	pTrailParticlenComponent->SetTextureOffset(5);
-	pTrailParticlenComponent->SetSpeed(40.0f);
-	pTrailParticlenComponent->SetSize(XMFLOAT2(0.5,0.5));
+	pTrailParticlenComponent->SetSpeed(10.0f);
+	pTrailParticlenComponent->SetSize(XMFLOAT2(0.2,0.2));
 	pTrailParticlenComponent->SetEmitParticleNumber(50);
 	pTrailParticlenComponent->SetEmissive(20.0f);
+	pTrailParticlenComponent->SetLifeTime(0.4f);
+	pTrailParticlenComponent->SetFieldSpeed(0.5);
 	m_pListeners.push_back(std::move(pTrailParticlenComponent));
 	CMessageDispatcher::GetInst()->RegisterListener(MessageType::UPDATE_TRAILPARTICLE, m_pListeners.back().get(), this);
 
@@ -313,7 +315,7 @@ void Atk1_Player::SpawnTrailParticle(CPlayer* player)
 	{
 		player->m_fMaxTime = 0.01f;
 		// 0.35 시작
-		if (0.55f < player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition &&
+		if (0.45f < player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition &&
 			0.7f > player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition)
 		{
 			ParticleTrailParams ParticleTrail_comp_params;
@@ -323,22 +325,23 @@ void Atk1_Player::SpawnTrailParticle(CPlayer* player)
 			XMFLOAT3 xmf3Position;
 			XMFLOAT3 xmf3Direction;
 			memcpy(&xmf3Position, &(pWeapon->m_xmf4x4World._41), sizeof(XMFLOAT3));
-			memcpy(&xmf3Direction, &(pWeapon->m_xmf4x4World._31), sizeof(XMFLOAT3));
+			memcpy(&xmf3Direction, &(pWeapon->m_xmf4x4World._21), sizeof(XMFLOAT3));
 
 			XMFLOAT4X4 xmf4x4World = pWeapon->GetWorld();
 
 			xmf3Position = XMFLOAT3{ xmf4x4World._41, xmf4x4World._42, xmf4x4World._43 };
-			xmf3Direction = player->GetATKDirection();
+			XMFLOAT4 dir = dynamic_cast<CKnightPlayer*>(player)->GetTrailControllPoint(1);
+
 
 			xmf3Position = ((CKnightPlayer*)player)->GetWeaponMeshBoundingBox().Center;
-			xmf3Position = Vector3::Add(xmf3Position, Vector3::Normalize(xmf3Direction), -4.f);
+			xmf3Position = XMFLOAT3(dir.x, dir.y, dir.z);
 
 			ParticleTrail_comp_params.pObject = CPlayerParticleObject::GetInst()->GetTrailParticleObjects();
 			dynamic_cast<CParticleObject*>(ParticleTrail_comp_params.pObject)->SetEmitAxis(xmf3Direction);
 			ParticleTrail_comp_params.xmf3Position = xmf3Position;
 			ParticleTrail_comp_params.iPlayerAttack = 0;
 			ParticleTrail_comp_params.m_fTime = player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition;
-			ParticleTrail_comp_params.xmf3Velocity = Vector3::Normalize(Vector3::Subtract(xmf3Position, player->GetPosition()));
+			//ParticleTrail_comp_params.xmf3Velocity = Vector3::Normalize(Vector3::Subtract(xmf3Position, player->GetPosition()));
 			CMessageDispatcher::GetInst()->Dispatch_Message<ParticleTrailParams>(MessageType::UPDATE_TRAILPARTICLE, &ParticleTrail_comp_params, this);
 			m_bEmittedParticle = true;
 		}
@@ -505,6 +508,8 @@ void Atk2_Player::Enter(CPlayer* player)
 
 	player->m_xmf3RootTransfromPreviousPos = XMFLOAT3{ 0.f, 0.f , 0.f };
 
+	m_bEmittedParticle = false;
+
 	SoundPlayParams SoundPlayParam;
 	SoundPlayParam.sound_category = SOUND_CATEGORY::SOUND_SHOOT;
 	CMessageDispatcher::GetInst()->Dispatch_Message<SoundPlayParams>(MessageType::PLAY_SOUND, &SoundPlayParam, this);
@@ -582,29 +587,41 @@ void Atk2_Player::Exit(CPlayer* player)
 
 void Atk2_Player::SpawnTrailParticle(CPlayer* player)
 {
+	if (m_bEmittedParticle)
+		return;
 	if (player->m_fTime > player->m_fMaxTime)
 	{
-		player->m_fMaxTime = 0.05f; // 0.05
+		player->m_fMaxTime = 0.01f;
+		// 0.35 시작
 		if (0.3f < player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition &&
-			0.45f > player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition)
+			0.7f > player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition)
 		{
-			//0.3~0.6, 065
 			ParticleTrailParams ParticleTrail_comp_params;
 			CGameObject* pWeapon = player->FindFrame("Weapon_r");
 			pWeapon->FindFrame("Weapon_r");
+
 			XMFLOAT3 xmf3Position;
 			XMFLOAT3 xmf3Direction;
-			XMFLOAT4X4 xmf4x4World = pWeapon->GetWorld();
-			xmf3Position = ((CKnightPlayer*)player)->GetWeaponMeshBoundingBox().Center;
+			memcpy(&xmf3Position, &(pWeapon->m_xmf4x4World._41), sizeof(XMFLOAT3));
+			memcpy(&xmf3Direction, &(pWeapon->m_xmf4x4World._21), sizeof(XMFLOAT3));
+			xmf3Direction = player->GetRight();
 
-			xmf3Direction = player->GetATKDirection();
-			xmf3Position = Vector3::Add(xmf3Position, Vector3::Normalize(xmf3Direction), 4.2f);
+			XMFLOAT4X4 xmf4x4World = pWeapon->GetWorld();
+
+			xmf3Position = XMFLOAT3{ xmf4x4World._41, xmf4x4World._42, xmf4x4World._43 };
+			XMFLOAT4 dir = dynamic_cast<CKnightPlayer*>(player)->GetTrailControllPoint(1);
+
+			XMFLOAT3 center = player->GetBoundingBox()->Center;
+			center = Vector3::Add(center, Vector3::Add(Vector3::ScalarProduct(player->GetLook(), 4.0f), player->GetRight(), 1.f), 1.0f);
 
 			ParticleTrail_comp_params.pObject = CPlayerParticleObject::GetInst()->GetTrailParticleObjects();
-			ParticleTrail_comp_params.xmf3Position = xmf3Position;
-			ParticleTrail_comp_params.iPlayerAttack = 1;
+			dynamic_cast<CParticleObject*>(ParticleTrail_comp_params.pObject)->SetEmitAxis(Vector3::ScalarProduct(xmf3Direction, -1.0f,false));
+			ParticleTrail_comp_params.xmf3Position = center;
+			ParticleTrail_comp_params.iPlayerAttack = 0;
 			ParticleTrail_comp_params.m_fTime = player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition;
-			CMessageDispatcher::GetInst()->Dispatch_Message<ParticleTrailParams>(MessageType::UPDATE_TRAILPARTICLE, &ParticleTrail_comp_params, player->m_pStateMachine->GetCurrentState());
+			//ParticleTrail_comp_params.xmf3Velocity = Vector3::Normalize(Vector3::Subtract(xmf3Position, player->GetPosition()));
+			CMessageDispatcher::GetInst()->Dispatch_Message<ParticleTrailParams>(MessageType::UPDATE_TRAILPARTICLE, &ParticleTrail_comp_params, this);
+			m_bEmittedParticle = true;
 		}
 
 		player->m_fTime = 0.f;
@@ -660,6 +677,8 @@ void Atk3_Player::Enter(CPlayer* player)
 
 	player->m_xmf3RootTransfromPreviousPos = XMFLOAT3{ 0.f, 0.f , 0.f };
 
+	m_bEmittedParticle = false;
+
 	SoundPlayParams SoundPlayParam;
 	SoundPlayParam.sound_category = SOUND_CATEGORY::SOUND_SHOOT;
 	CMessageDispatcher::GetInst()->Dispatch_Message<SoundPlayParams>(MessageType::PLAY_SOUND, &SoundPlayParam, this);
@@ -714,6 +733,8 @@ void Atk3_Player::Execute(CPlayer* player, float fElapsedTime)
 	else if (player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition == pAnimationSet->m_fLength)
 	{
 	}
+
+	SpawnTrailParticle(player);
 }
 
 void Atk3_Player::Animate(CPlayer* player, float fElapsedTime)
@@ -741,6 +762,46 @@ void Atk3_Player::Exit(CPlayer* player)
 
 void Atk3_Player::SpawnTrailParticle(CPlayer* player)
 {
+	if (m_bEmittedParticle)
+		return;
+	if (player->m_fTime > player->m_fMaxTime)
+	{
+		player->m_fMaxTime = 0.01f;
+		// 0.45 시작
+		if (0.35f < player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition &&
+			0.7f > player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition)
+		{
+			ParticleTrailParams ParticleTrail_comp_params;
+			CGameObject* pWeapon = player->FindFrame("Weapon_r");
+			pWeapon->FindFrame("Weapon_r");
+
+			XMFLOAT3 xmf3Position;
+			XMFLOAT3 xmf3Direction;
+			memcpy(&xmf3Position, &(pWeapon->m_xmf4x4World._41), sizeof(XMFLOAT3));
+			memcpy(&xmf3Direction, &(pWeapon->m_xmf4x4World._21), sizeof(XMFLOAT3));
+			xmf3Direction = player->GetRight();
+
+			XMFLOAT4X4 xmf4x4World = pWeapon->GetWorld();
+
+			xmf3Position = XMFLOAT3{ xmf4x4World._41, xmf4x4World._42, xmf4x4World._43 };
+			XMFLOAT4 dir = dynamic_cast<CKnightPlayer*>(player)->GetTrailControllPoint(1);
+
+
+			XMFLOAT3 center = player->GetBoundingBox()->Center;
+			center = Vector3::Add(center, Vector3::Add(Vector3::ScalarProduct(player->GetLook(), 4.0f), player->GetRight(), 1.f), 1.0f);
+
+			ParticleTrail_comp_params.pObject = CPlayerParticleObject::GetInst()->GetTrailParticleObjects();
+			dynamic_cast<CParticleObject*>(ParticleTrail_comp_params.pObject)->SetEmitAxis(Vector3::ScalarProduct(xmf3Direction, -1.0f, false));
+			ParticleTrail_comp_params.xmf3Position = center;
+			ParticleTrail_comp_params.iPlayerAttack = 0;
+			ParticleTrail_comp_params.m_fTime = player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition;
+			//ParticleTrail_comp_params.xmf3Velocity = Vector3::Normalize(Vector3::Subtract(xmf3Position, player->GetPosition()));
+			CMessageDispatcher::GetInst()->Dispatch_Message<ParticleTrailParams>(MessageType::UPDATE_TRAILPARTICLE, &ParticleTrail_comp_params, this);
+			m_bEmittedParticle = true;
+		}
+
+		player->m_fTime = 0.f;
+	}
 }
 
 Run_Player::Run_Player()

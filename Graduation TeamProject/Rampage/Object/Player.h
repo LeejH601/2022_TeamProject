@@ -121,6 +121,7 @@ public:
 	void CanclePotion();
 
 	virtual XMFLOAT4& GetTrailControllPoint(int n) { return m_xmf4TrailControllPoints[n]; };
+	XMFLOAT3 GetTrailPrevControllPoint() { return m_xmf4PrevTrailVertexPoint; };
 	bool& GetMonsterAttack() {return m_bMonsterAttack;}
 	void SetMonsterAttack(bool bMonsterAttack) { m_bMonsterAttack = bMonsterAttack; };
 };

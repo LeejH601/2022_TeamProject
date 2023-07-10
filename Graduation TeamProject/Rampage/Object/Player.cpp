@@ -500,7 +500,9 @@ void CKnightPlayer::UpdateTransform(XMFLOAT4X4* pxmf4x4Parent)
 
 		m_WeaponBoundingBox.Transform(m_TransformedWeaponBoundingBox, XMLoadFloat4x4(&xmf4x4World));
 
-		m_xmf4PrevTrailVertexPoint = XMFLOAT3( m_xmf4TrailControllPoints[1].x, m_xmf4TrailControllPoints[1].y, m_xmf4TrailControllPoints[1].z);
+		XMFLOAT3 prevDir = XMFLOAT3( m_xmf4TrailControllPoints[1].x, m_xmf4TrailControllPoints[1].y, m_xmf4TrailControllPoints[1].z);
+		if(!XMVector3Equal(XMLoadFloat3(&prevDir), XMLoadFloat3(&m_xmf4PrevTrailVertexPoint)))
+			m_xmf4PrevTrailVertexPoint = prevDir;
 
 		m_xmf4TrailControllPoints[0] = XMFLOAT4(controllBasePos.x, controllBasePos.y, controllBasePos.z, 1.0f);
 		m_xmf4TrailControllPoints[1] = XMFLOAT4(offsetPosition.x, offsetPosition.y, offsetPosition.z, 1.0f);
