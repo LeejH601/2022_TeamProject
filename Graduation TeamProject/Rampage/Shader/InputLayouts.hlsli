@@ -19,6 +19,7 @@ struct VS_PARTICLE_INPUT
 struct GS_PARTICLE_DRAW_OUTPUT
 {
 	float4 position : SV_Position;
+	float3 positionW : POSITION;
 	float4 color : COLOR;
 	float2 uv : TEXTURE;
 	float alpha : ALPHA;

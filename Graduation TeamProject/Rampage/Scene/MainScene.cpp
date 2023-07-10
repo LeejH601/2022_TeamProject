@@ -1659,6 +1659,10 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 #endif // PostProcessing
 	m_pDetailObject->Render(pd3dCommandList, true);
 
+	for (std::unique_ptr<CGameObject>& obj : m_pSwordTrailObjects) {
+		obj->Render(pd3dCommandList, true);
+	}
+
 
 	for (int i = 0; i < m_pParticleObjects.size(); ++i)
 	{
@@ -1699,9 +1703,6 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 	//m_pSlashHitObjects->Render(pd3dCommandList, nullptr, m_pSlashHitShader.get());
 
 	/*m_pSwordTrailShader->Render(pd3dCommandList, pCamera, 0);*/
-	for (std::unique_ptr<CGameObject>& obj : m_pSwordTrailObjects) {
-		obj->Render(pd3dCommandList, true);
-	}
 
 	m_pLensFlareShader->CalculateFlaresPlace(m_pCurrentCamera, &m_pLight->GetLights()[0]);
 	m_pLensFlareShader->Render(pd3dCommandList, 0);
