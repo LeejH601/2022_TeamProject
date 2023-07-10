@@ -11,6 +11,7 @@ struct VS_PARTICLE_INPUT
 	float emissive : EMISSIVE;
 	uint rotateFlag : ROTATEFLAG;
 	uint ScaleFlag : SCALEFLAG;
+	float4 color : COLOR;
 };
 
 

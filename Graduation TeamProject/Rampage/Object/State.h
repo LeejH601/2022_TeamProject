@@ -54,6 +54,8 @@ public:
 
 class Atk_Player : public CState<CPlayer>
 {
+protected:
+    bool m_bEmittedParticle = false;
 public:
     virtual void InitAtkPlayer();
     virtual void SetPlayerRootVel(CPlayer* player);
@@ -152,6 +154,58 @@ public:
     virtual void Enter(CPlayer* player);
     virtual void Execute(CPlayer* player, float fElapsedTime);
     virtual void Animate(CPlayer* player, float fElapsedTime);
+    virtual void Exit(CPlayer* player);
+};
+
+class ChargeStart_Player : public CState<CPlayer>
+{
+    virtual void SetPlayerRootVel(CPlayer* player);
+public:
+    DECLARE_SINGLE(ChargeStart_Player);
+    ChargeStart_Player();
+    ~ChargeStart_Player();
+
+    virtual void Enter(CPlayer* player);
+    virtual void Execute(CPlayer* player, float fElapsedTime);
+    virtual void Animate(CPlayer* player, float fElapsedTime);
+    virtual void OnRootMotion(CPlayer* player, float fTimeElapsed);
+    virtual void Exit(CPlayer* player);
+};
+
+class Charge_Player : public CState<CPlayer>
+{
+    float m_fChargedTime = 0.0f;
+    float m_fChargedEndTime = 2.0f;
+
+    virtual void SetPlayerRootVel(CPlayer* player);
+public:
+    DECLARE_SINGLE(Charge_Player);
+    Charge_Player();
+    ~Charge_Player();
+
+    virtual void Enter(CPlayer* player);
+    virtual void Execute(CPlayer* player, float fElapsedTime);
+    virtual void Animate(CPlayer* player, float fElapsedTime);
+    virtual void OnRootMotion(CPlayer* player, float fTimeElapsed);
+    virtual void Exit(CPlayer* player);
+};
+
+class ChargeAttack_Player : public Atk_Player
+{
+    virtual void SetPlayerRootVel(CPlayer* player);
+public:
+    DECLARE_SINGLE(ChargeAttack_Player);
+    ChargeAttack_Player();
+    ~ChargeAttack_Player();
+
+    virtual void CheckComboAttack(CPlayer* player) {};
+    virtual void SendCollisionMessage(CPlayer* player) {};
+    virtual void SpawnTrailParticle(CPlayer* player) {};
+
+    virtual void Enter(CPlayer* player);
+    virtual void Execute(CPlayer* player, float fElapsedTime);
+    virtual void Animate(CPlayer* player, float fElapsedTime);
+    virtual void OnRootMotion(CPlayer* player, float fTimeElapsed);
     virtual void Exit(CPlayer* player);
 };
 

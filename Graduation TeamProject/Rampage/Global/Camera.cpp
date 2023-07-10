@@ -602,7 +602,8 @@ void CCinematicCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
 		xmf3InterpolateIndex.push_back(iIndex++);
 
 #ifdef LERP_QUARTARNION
-		XMFLOAT4X4 preInterpolate = { m_vCameraInfos[m_iCurrentCameraInfoIndex].xmf3Right.x,
+		XMFLOAT4X4 preInterpolate = { 
+		m_vCameraInfos[m_iCurrentCameraInfoIndex].xmf3Right.x,
 		m_vCameraInfos[m_iCurrentCameraInfoIndex].xmf3Right.y,
 		m_vCameraInfos[m_iCurrentCameraInfoIndex].xmf3Right.z,
 		0.0f,
@@ -620,7 +621,8 @@ void CCinematicCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
 		1.0f
 		};
 
-		XMFLOAT4X4 postInterpolate = { m_vCameraInfos[m_iCurrentCameraInfoIndex + 1].xmf3Right.x,
+		XMFLOAT4X4 postInterpolate = { 
+		m_vCameraInfos[m_iCurrentCameraInfoIndex + 1].xmf3Right.x,
 		m_vCameraInfos[m_iCurrentCameraInfoIndex + 1].xmf3Right.y,
 		m_vCameraInfos[m_iCurrentCameraInfoIndex + 1].xmf3Right.z,
 		0.0f,
@@ -638,7 +640,18 @@ void CCinematicCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
 		1.0f
 		};
 
-		XMFLOAT4X4 resultMatrix = Matrix4x4::Interpolate(preInterpolate, postInterpolate, resultT);
+
+		XMVECTOR q1 = XMQuaternionRotationMatrix(XMLoadFloat4x4(&preInterpolate));
+		q1 = XMQuaternionNormalize(q1);
+		XMVECTOR q2 = XMQuaternionRotationMatrix(XMLoadFloat4x4(&postInterpolate));
+		q2 = XMQuaternionNormalize(q2);
+		XMVECTOR resultQ = XMQuaternionSlerp(q1, q2, resultT);
+
+		XMFLOAT4X4 resultMatrix; XMStoreFloat4x4(&resultMatrix, XMMatrixRotationQuaternion(XMQuaternionNormalize(resultQ)));
+		XMFLOAT4X4 resultPosMatrix = Matrix4x4::Interpolate(preInterpolate, postInterpolate, resultT);
+		resultMatrix._41 = resultPosMatrix._41;
+		resultMatrix._42 = resultPosMatrix._42;
+		resultMatrix._43 = resultPosMatrix._43;
 
 		m_xmf3Look = XMFLOAT3{ resultMatrix._31, resultMatrix._32, resultMatrix._33 };
 		m_xmf3Up = XMFLOAT3{ resultMatrix._21, resultMatrix._22, resultMatrix._23 };

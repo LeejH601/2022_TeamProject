@@ -49,6 +49,18 @@ CMonster::CMonster()
 	m_pListeners.push_back(std::move(pDamageListener));
 
 	CMessageDispatcher::GetInst()->RegisterListener(MessageType::APPLY_DAMAGE, m_pListeners.back().get(), this);
+
+	m_ParticleComponent.SetColor(XMFLOAT3(1.0f, 0.05f, 0.05f));
+	m_ParticleComponent.SetAlpha(1.0f);
+	m_ParticleComponent.SetEmissive(10.0f);
+	m_ParticleComponent.SetSize(XMFLOAT2(0.3,0.3));
+	m_ParticleComponent.SetEnable(true);
+	m_ParticleComponent.SetEmitParticleNumber(50);
+	m_ParticleComponent.SetSpeed(10.0f);
+	m_ParticleComponent.SetLifeTime(0.4f);
+	m_ParticleComponent.SetTextureIndex(8);
+	m_ParticleComponent.SetParticleType(9);
+	m_ParticleComponent.SetRotateFacotr(true);
 }
 
 

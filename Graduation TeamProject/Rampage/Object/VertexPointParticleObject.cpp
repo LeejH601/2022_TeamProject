@@ -64,6 +64,7 @@ void CVertexPointParticleObject::EmitParticle(int emitType)
 		param.m_fEmissive = m_fEmissive;
 		param.m_bSimulateRotate = m_bSimulateRotate;
 		param.m_bScaleFlag = m_bScaleFlag;
+		param.m_xmf4Color = XMFLOAT4(m_f3Color.x, m_f3Color.y, m_f3Color.z, 1.0f);
 
 		if (m_pAnimationContoroller)
 		{

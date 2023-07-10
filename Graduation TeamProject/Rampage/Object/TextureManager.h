@@ -14,6 +14,14 @@ enum class TextureType
 	UniformTexture,
 	TextureType_End
 };
+
+#define MAX_UNIFORM_TEXTURES 10
+struct VS_CB_UNIFORM_INFO
+{
+	UINT m_nUniformTextureIndexs[MAX_UNIFORM_TEXTURES];
+};
+
+
 class CTextureManager
 {
 	ComPtr<ID3D12DescriptorHeap> m_pd3dCbvSrvUavDescriptorHeap;
@@ -46,6 +54,7 @@ public:
 	virtual void CreateResourceView(ID3D12Device* pd3dDevice, UINT nDescriptorHeapIndex);
 	virtual void SetTextureDescriptorHeap(ID3D12GraphicsCommandList* pd3dCommandListx);
 	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList);
+	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList, TextureType textureType);
 
 public:
 	void LoadSphereBuffer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);

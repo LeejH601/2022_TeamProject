@@ -12,6 +12,8 @@ Buffer<float4> gRandomSphereBuffer : register(t50);
 #define SLASHHIT_PARTICLE 6
 #define IMPACT_PARTICLE 7
 #define TERRAIN_PARTICLE 8
+#define SHIELDHIT_PARTICLE 9
+#define CONE_PARTICLE 10
 
 //#define TYPE_DEFAULT -1
 
@@ -66,6 +68,16 @@ VS_PARTICLE_INPUT OutputParticleToStream(VS_PARTICLE_INPUT input, inout PointStr
 	return input;
 }
 
+VS_PARTICLE_INPUT OutputParticleToStreamWithGravity(VS_PARTICLE_INPUT input, inout PointStream<VS_PARTICLE_INPUT> output)
+{
+	//input.velocity += CalculrateCulrNoise(input.position).xyz;
+	input.position += gf3Gravity * input.velocity * gfElapsedTime;
+	//input.velocity += gf3Gravity * gfElapsedTime;
+	input.velocity += float3(0.0f, -9.8f*10.0f, 0.0f) * gfElapsedTime;
+	//input.velocity += CalculrateCulrNoise(input.position).xyz;
+	return input;
+}
+
 void OutputRandomParticleToStream(VS_PARTICLE_INPUT input, inout PointStream<VS_PARTICLE_INPUT> output)
 {
 	input.position += gf3Gravity * input.velocity * gfElapsedTime;
@@ -113,6 +125,18 @@ void SphereParticles(VS_PARTICLE_INPUT input, inout PointStream<VS_PARTICLE_INPU
 		/*float distance = length(particle.velocity);
 		particle.velocity += CalculrateCulrNoise(particle.position).xyz;
 		particle.velocity = normalize(particle.velocity) * distance;*/
+		output.Append(particle);
+	}
+}
+
+void ShieldHitParticles(VS_PARTICLE_INPUT input, inout PointStream<VS_PARTICLE_INPUT> output)
+{
+	VS_PARTICLE_INPUT particle = input;
+
+	float lifedTime = gfCurrentTime - particle.EmitTime;
+	if (lifedTime <= particle.lifetime)
+	{
+		particle = OutputParticleToStreamWithGravity(particle, output);
 		output.Append(particle);
 	}
 }
@@ -205,6 +229,8 @@ void GSParticleStreamOutput(point VS_PARTICLE_INPUT input[1], inout PointStream<
 		RecoveryParticles(particle, output);
 	else if (particle.type == SMOKE_PARTILCE)
 		SmokeParticles(particle, output);
+	else if (particle.type == TRAIL_PARTILCE)
+		SphereParticles(particle, output);
 	else if (particle.type == ATTACK_PARTICLE)
 		AttackParticles(particle, output);
 	else if (particle.type == VERTEXPOINT_PARTICLE)
@@ -216,4 +242,8 @@ void GSParticleStreamOutput(point VS_PARTICLE_INPUT input[1], inout PointStream<
 	}
 	else if (particle.type == TERRAIN_PARTICLE)
 		TerrainParticles(particle, output);
+	else if (particle.type == SHIELDHIT_PARTICLE)
+		ShieldHitParticles(particle, output);
+	else if (particle.type == CONE_PARTICLE)
+		SphereParticles(particle, output);
 }

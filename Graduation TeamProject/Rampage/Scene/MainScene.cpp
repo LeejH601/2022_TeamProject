@@ -127,7 +127,7 @@ void CMainTMPScene::AdvanceStage()
 	}
 
 	// Spawn Orc
-	{	
+	{
 		// Spawn Normal Orc
 		m_iTotalMonsterNum += stageInfo.m_iOrcNum;
 
@@ -239,7 +239,7 @@ void CMainTMPScene::CreateGraphicsRootSignature(ID3D12Device* pd3dDevice)
 	pd3dDescriptorRanges[2].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
 	pd3dDescriptorRanges[3].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
-	pd3dDescriptorRanges[3].NumDescriptors = 30;
+	pd3dDescriptorRanges[3].NumDescriptors = 50;
 	pd3dDescriptorRanges[3].BaseShaderRegister = 50; //t50: gtxtTexture
 	pd3dDescriptorRanges[3].RegisterSpace = 0;
 	pd3dDescriptorRanges[3].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
@@ -652,6 +652,7 @@ SCENE_RETURN_TYPE CMainTMPScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMe
 				}
 			}
 			break;
+		case VK_TAB:
 		case VK_F5:
 			if (m_pCurrentCamera == m_pFloatingCamera.get())
 				((CCinematicCamera*)(m_pCinematicSceneCamera.get()))->AddCameraInfo(m_pCurrentCamera);
@@ -688,7 +689,7 @@ SCENE_RETURN_TYPE CMainTMPScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMe
 
 			Locator.SetMouseCursorMode(MOUSE_CUROSR_MODE::FLOATING_MODE);
 			m_CurrentMouseCursorMode = MOUSE_CUROSR_MODE::FLOATING_MODE;
-			
+
 			while (m_iCursorHideCount > 0)
 			{
 				m_iCursorHideCount--;
@@ -758,9 +759,20 @@ SCENE_RETURN_TYPE CMainTMPScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMe
 									((CPlayer*)m_pPlayer)->SetSpeedUperS(((CPlayer*)m_pPlayer)->GetSpeedUperS() / 2.0f);
 								}
 								dynamic_cast<CKnightPlayer*>(m_pPlayer)->DrinkPotion();
+								dynamic_cast<CKnightPlayer*>(m_pPlayer)->m_bIsDrinkPotion = true;
 							}
 						}
 					}
+				}
+			}
+			break;
+		case 'z':
+		case 'Z':
+			if (m_pPlayer)
+			{
+				if (!((CPlayer*)m_pPlayer)->m_bCharged)
+				{
+					((CPlayer*)m_pPlayer)->m_bCharged = true;
 				}
 			}
 			break;
@@ -1022,6 +1034,10 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	{
 		std::unique_ptr<CGameObject> m_pParticleObject = std::make_unique<CParticleObject>(m_pTextureManager->LoadTextureIndex(TextureType::ParticleTexture, L"Image/ParticleImages/RoundSoftParticle.dds"), pd3dDevice, pd3dCommandList, GetGraphicsRootSignature(), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), 2.0f, XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT2(2.0f, 2.0f), MAX_PARTICLES, m_pParticleShader.get(), SPHERE_PARTICLE);
 		m_pParticleObjects.push_back(std::move(m_pParticleObject));
+		//CPlayerParticleObject::GetInst()->SetTrailParticleObjects(m_pParticleObjects.back().get());
+	}
+	for (int i = 0; i < m_pEnemys.size(); ++i) {
+		dynamic_cast<CMonster*>(m_pEnemys[i].get())->m_ParticleCompParam.pObject = m_pParticleObjects.front().get();
 	}
 
 	m_pSlashHitObjects = std::make_unique<CParticleObject>(m_pTextureManager->LoadTextureIndex(TextureType::BillBoardTexture, L"Image/BillBoardImages/TextureFlash2.dds"), pd3dDevice, pd3dCommandList, GetGraphicsRootSignature(), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), 2.0f, XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT2(2.0f, 2.0f), MAX_PARTICLES, m_pSlashHitShader.get(), RECOVERY_PARTICLE);
@@ -1035,7 +1051,7 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	//}
 
 
-	//m_pTrailParticleObjects = std::make_unique<CParticleObject>(m_pTextureManager->LoadTextureIndex(TextureType::ParticleTexture, L"Image/BillBoardImages/Effect3.dds"), pd3dDevice, pd3dCommandList, GetGraphicsRootSignature(), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), 2.0f, XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT2(2.0f, 2.0f), MAX_PARTICLES, m_pParticleShader.get(), SPHERE_PARTICLE);
+	m_pTrailParticleObjects = std::make_unique<CParticleObject>(m_pTextureManager->LoadTextureIndex(TextureType::ParticleTexture, L"Image/BillBoardImages/Effect3.dds"), pd3dDevice, pd3dCommandList, GetGraphicsRootSignature(), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), 2.0f, XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT2(2.0f, 2.0f), MAX_PARTICLES, m_pParticleShader.get(), SPHERE_PARTICLE);
 
 	CPlayerParticleObject::GetInst()->SetSmokeObjects(m_pSmokeObject.get());
 	CPlayerParticleObject::GetInst()->SetTrailParticleObjects(m_pTrailParticleObjects.get());
@@ -1150,7 +1166,15 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	pUIObject->SetScreenPosition(XMFLOAT2(FRAME_BUFFER_WIDTH * 0.065f, FRAME_BUFFER_HEIGHT * 0.16f));
 	pUIObject->SetTextureIndex(m_pTextureManager->LoadTotalTextureIndex(TextureType::UITexture, L"Image/UiImages/Texture2.dds"));
 	dynamic_cast<CNumberObject*>(pUIObject.get())->UpdateNumber(5);
+	std::unique_ptr<PotionRemainUpdateComponent> pUpdateUINumListener = std::make_unique<PotionRemainUpdateComponent>();
+	pUpdateUINumListener->SetEnable(true);
+	(pUpdateUINumListener.get())->SetUIObject(pUIObject.get());
+	CMessageDispatcher::GetInst()->RegisterListener(MessageType::DRINK_POTION, pUpdateUINumListener.get(), nullptr);
+
+
+	m_pListeners.push_back(std::move(pUpdateUINumListener));
 	m_pUIObject.push_back(std::move(pUIObject));
+
 
 
 	// Hits
@@ -1169,11 +1193,11 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 
 	// -------------------------------------------------ResultFrame - END --------------------------------------------------------
 
-	m_StageInfoMap.emplace(std::pair<int, StageInfo>(0, 
-		StageInfo{ 
-			0, 5, 
+	m_StageInfoMap.emplace(std::pair<int, StageInfo>(0,
+		StageInfo{
+			0, 5,
 			0, 0,
-			0, 0, 
+			0, 0,
 			XMFLOAT3{ 113.664360f, 3.016271f, 123.066483f } }));
 	m_StageInfoMap.emplace(std::pair<int, StageInfo>(1,
 		StageInfo{
@@ -1440,6 +1464,7 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 
 	m_pTextureManager->SetTextureDescriptorHeap(pd3dCommandList);
 	m_pTextureManager->UpdateShaderVariables(pd3dCommandList);
+	//m_pTextureManager->UpdateShaderVariables(pd3dCommandList, TextureType::UniformTexture);
 
 
 	m_pMap->RenderTerrain(pd3dCommandList);
@@ -1534,7 +1559,8 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 	}
 
 	//m_pDetailObject->Render(pd3dCommandList, false);
-
+	/*m_pTextureManager->SetTextureDescriptorHeap(pd3dCommandList);
+	m_pTextureManager->UpdateShaderVariables(pd3dCommandList);*/
 
 #ifdef RENDER_BOUNDING_BOX
 	CBoundingBoxShader::GetInst()->Render(pd3dCommandList, 0);
@@ -1565,9 +1591,9 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 	}
 
 
-	//((CParticleObject*)m_pTrailParticleObjects.get())->Update(fTimeElapsed);
-	//((CParticleObject*)m_pTrailParticleObjects.get())->UpdateShaderVariables(pd3dCommandList, fCurrentTime, fTimeElapsed);
-	//((CParticleObject*)m_pTrailParticleObjects.get())->Render(pd3dCommandList, nullptr, m_pParticleShader.get());
+	((CParticleObject*)m_pTrailParticleObjects.get())->Update(fTimeElapsed);
+	((CParticleObject*)m_pTrailParticleObjects.get())->UpdateShaderVariables(pd3dCommandList, fCurrentTime, fTimeElapsed);
+	((CParticleObject*)m_pTrailParticleObjects.get())->Render(pd3dCommandList, nullptr, m_pParticleShader.get());
 
 	((CParticleObject*)m_pSmokeObject.get())->Update(fTimeElapsed);
 	((CParticleObject*)m_pSmokeObject.get())->UpdateShaderVariables(pd3dCommandList, fCurrentTime, fTimeElapsed);
@@ -1632,7 +1658,7 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 	::SynchronizeResourceTransition(pd3dCommandList, pd3dSource, D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 
 
-	}
+}
 
 void CMainTMPScene::OnPostRender()
 {
@@ -1654,7 +1680,7 @@ void CMainTMPScene::OnPostRender()
 		((CParticleObject*)m_pTerrainSpriteObject[i].get())->OnPostRender();
 	}
 	m_pVertexPointParticleObject->OnPostRender();
-	//((CParticleObject*)m_pTrailParticleObjects.get())->OnPostRender();
+	((CParticleObject*)m_pTrailParticleObjects.get())->OnPostRender();
 
 }
 #include <functional>
@@ -1670,13 +1696,13 @@ void CMainTMPScene::UIUpdate(CPlayer* pPlayer)
 	if (((CKnightPlayer*)(m_pPlayer))->GetMonsterAttack())
 	{
 		float CurrentHp = 0.f;
-		for (int i = 0; i < m_pEnemys.size(); i++)		
+		for (int i = 0; i < m_pEnemys.size(); i++)
 			CurrentHp += max(0.f, dynamic_cast<CMonster*>(m_pEnemys[i].get())->m_fHP);
 
 		dynamic_cast<CBarObject*>(m_pUIObject[7].get())->Set_Value(CurrentHp, m_pEnemys.size() * MONSTER_HP);
 		((CKnightPlayer*)(m_pPlayer))->SetMonsterAttack(false);
 	}
-		
+
 }
 
 void CMainTMPScene::LoadTextureObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
@@ -1690,6 +1716,7 @@ void CMainTMPScene::LoadTextureObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 	m_pTextureManager->LoadTexture(TextureType::ParticleTexture, pd3dDevice, pd3dCommandList, L"Image/ParticleImages/TextureFlash2.dds", 0, 0);
 	m_pTextureManager->LoadTexture(TextureType::ParticleTexture, pd3dDevice, pd3dCommandList, L"Image/ParticleImages/Meteor.dds", 0, 0);
 	m_pTextureManager->LoadTexture(TextureType::ParticleTexture, pd3dDevice, pd3dCommandList, L"Image/ParticleImages/Effect0.dds", 0, 0);
+	m_pTextureManager->LoadTexture(TextureType::ParticleTexture, pd3dDevice, pd3dCommandList, L"Image/ParticleImages/T_Impact_33.dds", 0, 0);
 
 	m_pTextureManager->LoadTexture(TextureType::TrailBaseTexture, pd3dDevice, pd3dCommandList, L"Image/TrailImages/T_Sword_Slash_11.dds", 1, 1);
 	m_pTextureManager->LoadTexture(TextureType::TrailBaseTexture, pd3dDevice, pd3dCommandList, L"Image/TrailImages/T_Sword_Slash_21.dds", 1, 1);
@@ -1715,6 +1742,8 @@ void CMainTMPScene::LoadTextureObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/ResultScoreMenu.dds", 0, 0);
 	
 	
+
+	m_pTextureManager->LoadTexture(TextureType::UniformTexture, pd3dDevice, pd3dCommandList, L"Image/UnifromImages/Cracks_12.dds", 0, 0);
 }
 
 void CMainTMPScene::HandleCollision(const CollideParams& params)
@@ -1730,6 +1759,7 @@ void CMainTMPScene::HandleCollision(const CollideParams& params)
 		ParticleCompParams particle_comp_params;
 		particle_comp_params.pObject = (*it).get();
 		particle_comp_params.xmf3Position = params.xmf3CollidePosition;
+		dynamic_cast<CParticleObject*>((*it).get())->SetEmitAxis(((CPlayer*)m_pPlayer)->m_xmf3AtkDirection);
 		CMessageDispatcher::GetInst()->Dispatch_Message<ParticleCompParams>(MessageType::UPDATE_PARTICLE, &particle_comp_params, ((CPlayer*)m_pPlayer)->m_pStateMachine->GetCurrentState());
 
 		particle_comp_params.pObject = m_pSlashHitObjects.get();

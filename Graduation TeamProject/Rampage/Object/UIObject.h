@@ -18,6 +18,8 @@ public:
 	void SetColor(float fColor) { m_xmfColor = fColor; }
 	void SetAlpha(float fAlpha) { m_fAlpha = fAlpha; }
 	void SetColor(XMFLOAT3 xmf3Color) { m_xmf3Color = xmf3Color; }
+	void AddMessageListener(std::unique_ptr<IMessageListener> pListener);
+
 protected:
 	std::vector<D3D12_RECT> m_tRect;
 	XMFLOAT2 m_xmf2Size = XMFLOAT2(1.f, 1.f);
@@ -27,6 +29,8 @@ protected:
 	float m_fAlpha = 1.f;
 	XMFLOAT3 m_xmf3Color = XMFLOAT3(1.f, 1.f, 1.f);
 	std::vector<std::unique_ptr<CUIObject>> m_pChildUI;
+	UINT	m_iTextureIndex = 0;
+	std::vector<std::unique_ptr<IMessageListener>> m_pListeners;
 };	
 
 

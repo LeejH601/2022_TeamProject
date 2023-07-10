@@ -29,6 +29,8 @@ cbuffer cbFrameworkInfo : register(b7)
 #define SLASHHIT_PARTICLE 6
 #define IMPACT_PARTICLE 7
 #define TERRAIN_PARTICLE 8
+#define SHIELDHIT_PARTICLE 9
+#define CONE_PARTICLE 10
 
 struct VS_PARTICLE_DRAW_OUTPUT
 {
@@ -94,6 +96,16 @@ void GSParticleDraw(point VS_PARTICLE_DRAW_OUTPUT input[1], inout TriangleStream
 	output.lifetime = input[0].lifetime;
 	output.EmitTime = input[0].EmitTime;
 	output.emissive = input[0].emissive;
+
+	//if (output.ParticleType == SHIELDHIT_PARTICLE) {
+		/*matrix rotateTex = {
+			cos(gfCurrentTime), -sin(gfCurrentTime), 0, 0,
+			sin(gfCurrentTime), cos(gfCurrentTime), 0, 0,
+			0,0,1,0,
+			0,0,0,1
+		};
+		(float3x3)(xmf4x4Coord) = (float3x3)(rotateTex) * (float3x3)(xmf4x4Coord);*/
+	//}
 
 	float3 positionW;
 

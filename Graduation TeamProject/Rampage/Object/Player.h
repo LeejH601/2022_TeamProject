@@ -4,6 +4,7 @@
 #include "..\Global\Camera.h"	// 왜 필요하지
 #include "SwordTrailObject.h"
 #include "VertexPointParticleObject.h"
+#include "UIObject.h"
 
 class CCamera;
 class CPlayer : public CPhysicsObject
@@ -20,6 +21,7 @@ public:
 	unsigned int m_iAttackId = 0;
 	bool m_bAttack = false;
 	bool m_bEvasioned = false;
+	bool m_bCharged = false;
 
 	LPVOID m_pPlayerUpdatedContext = NULL;
 
@@ -50,6 +52,7 @@ public:
 	UINT m_iPotionN = 5;
 
 	bool m_bIsDash = false;
+	bool m_bIsDrinkPotion = false;
 	
 	XMFLOAT3 m_xmf3AtkDirection;
 
@@ -118,8 +121,10 @@ public:
 	virtual void PrepareBoundingBox(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 
 	void DrinkPotion();
+	void CanclePotion();
 
 	virtual XMFLOAT4& GetTrailControllPoint(int n) { return m_xmf4TrailControllPoints[n]; };
+	XMFLOAT3 GetTrailPrevControllPoint() { return m_xmf4PrevTrailVertexPoint; };
 	bool& GetMonsterAttack() {return m_bMonsterAttack;}
 	void SetMonsterAttack(bool bMonsterAttack) { m_bMonsterAttack = bMonsterAttack; };
 };
@@ -165,6 +170,7 @@ public:
 	CVertexPointParticleObject* m_pVertexPointParticleObject = nullptr;
 	bool m_bEmitedParticle = false;
 	CKnightPlayer* m_pPlayer;
+	CUIObject* m_pNumUIObject = nullptr;
 public:
 	virtual void HandleCallback(void* pCallbackData, float fTrackPosition);
 };

@@ -1,6 +1,7 @@
 #pragma once
 #include "stdafx.h"
 #include "Global.h"
+#include "..\Sound\SoundPlayer.h"
 
 class CGameObject;
 class CCamera;
@@ -9,6 +10,7 @@ class CMainTMPScene;
 class CTexture;
 class CShader;
 class CGameTimer;
+class CUIObject;
 
 // Define base message class
 class Message {
@@ -46,6 +48,7 @@ struct AnimationCompParams {
 struct ParticleCompParams {
 	CGameObject* pObject;
 	XMFLOAT3 xmf3Position;
+	XMFLOAT3 xmf3RotationAxis;
 };
 
 struct ImpactCompParams {
@@ -119,6 +122,10 @@ struct TimerParams {
 	float fMinTimeScale;
 };
 
+struct UpdateNumParams {
+	int num;
+};
+
 // Define message listener interface
 class IMessageListener {
 protected:
@@ -148,6 +155,7 @@ public:
 
 	virtual void HandleMessage(const Message& message, const DamageParams& params) {}
 	virtual void HandleMessage(const Message& message, const TimerParams& params) {}
+	virtual void HandleMessage(const Message& message, const UpdateNumParams& params) {}
 };
 
 // Define Monster Attack component
@@ -493,6 +501,13 @@ public:
 	virtual void HandleMessage(const Message& message, const ParticleCompParams& params);
 };
 
+class ShieldHitComponent : public ParticleComponent
+{
+public:
+	ShieldHitComponent();
+	virtual void HandleMessage(const Message& message, const ParticleCompParams& params);
+};
+
 #define MAX_COLORCURVES 8
 class TrailComponent : public IMessageListener
 {
@@ -598,21 +613,21 @@ public:
 	virtual void HandleMessage(const Message& message, const ParticleUpDownParams& params);
 };
 
-class TrailParticleComponent : public IMessageListener {
-	int m_nParticleNumber = MAX_PARTICLES;
-	int m_nEmitMinParticleNumber = 2;
-	int m_nEmitMaxParticleNumber = 3;
-	int m_iParticleType = ParticleType::SPHERE_PARTICLE;
-	XMFLOAT2   m_fSize = XMFLOAT2(1.f, 1.f);
-	float m_fAlpha = 1.f;
-	float m_fLifeTime = 1.f;
-	float m_fSpeed = 2.f;
-	XMFLOAT3 m_xmf3Color = XMFLOAT3(10.f, 10.f, 10.f);
-	int m_iPlayerAttack = 0;
-	XMFLOAT3 m_xm3Position = XMFLOAT3(0.f, 0.f, 0.f);
+class TrailParticleComponent : public ParticleComponent {
+	//int m_nParticleNumber = MAX_PARTICLES;
+	//int m_nEmitMinParticleNumber = 2;
+	//int m_nEmitMaxParticleNumber = 3;
+	//int m_iParticleType = ParticleType::SPHERE_PARTICLE;
+	//XMFLOAT2   m_fSize = XMFLOAT2(1.f, 1.f);
+	//float m_fAlpha = 1.f;
+	//float m_fLifeTime = 1.f;
+	//float m_fSpeed = 2.f;
+	//XMFLOAT3 m_xmf3Color = XMFLOAT3(10.f, 10.f, 10.f);
+	//int m_iPlayerAttack = 0;
+	//XMFLOAT3 m_xm3Position = XMFLOAT3(0.f, 0.f, 0.f);
 
 public:
-	int& GetParticleNumber() { return m_nParticleNumber; }
+	/*int& GetParticleNumber() { return m_nParticleNumber; }
 	XMFLOAT2& GetSize() { return m_fSize; }
 	float& GetAlpha() { return m_fAlpha; }
 	float& GetLifeTime() { return m_fLifeTime; }
@@ -628,7 +643,7 @@ public:
 	void SetAlpha(float fAlpha) { m_fAlpha = fAlpha; }
 	void SetLifeTime(float fLifeTime) { m_fLifeTime = fLifeTime; }
 	void SetSpeed(float fSpeed) { m_fSpeed = fSpeed; }
-	void SetColor(XMFLOAT3 xmf3Color) { m_xmf3Color = xmf3Color; }
+	void SetColor(XMFLOAT3 xmf3Color) { m_xmf3Color = xmf3Color; }*/
 
 	virtual void HandleMessage(const Message& message, const ParticleTrailParams& params);
 };
@@ -713,6 +728,15 @@ public:
 	void SetRotateFactor(bool input) { m_bSimulateRotate = input; };
 	void SetLifeTime(float fLifeTime) { m_fLifeTime = fLifeTime; };
 	virtual void HandleMessage(const Message& message, const ImpactCompParams& params);
+};
+
+class PotionRemainUpdateComponent : public IMessageListener {
+	CUIObject* m_pNumUIObject;
+public:
+	PotionRemainUpdateComponent();
+	void SetUIObject(CUIObject* object) { m_pNumUIObject = object; };
+
+	virtual void HandleMessage(const Message& message, const UpdateNumParams& params);
 };
 
 struct ListenerInfo {

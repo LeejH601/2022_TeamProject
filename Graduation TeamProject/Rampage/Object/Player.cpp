@@ -500,7 +500,9 @@ void CKnightPlayer::UpdateTransform(XMFLOAT4X4* pxmf4x4Parent)
 
 		m_WeaponBoundingBox.Transform(m_TransformedWeaponBoundingBox, XMLoadFloat4x4(&xmf4x4World));
 
-		m_xmf4PrevTrailVertexPoint = XMFLOAT3( m_xmf4TrailControllPoints[1].x, m_xmf4TrailControllPoints[1].y, m_xmf4TrailControllPoints[1].z);
+		XMFLOAT3 prevDir = XMFLOAT3( m_xmf4TrailControllPoints[1].x, m_xmf4TrailControllPoints[1].y, m_xmf4TrailControllPoints[1].z);
+		if(!XMVector3Equal(XMLoadFloat3(&prevDir), XMLoadFloat3(&m_xmf4PrevTrailVertexPoint)))
+			m_xmf4PrevTrailVertexPoint = prevDir;
 
 		m_xmf4TrailControllPoints[0] = XMFLOAT4(controllBasePos.x, controllBasePos.y, controllBasePos.z, 1.0f);
 		m_xmf4TrailControllPoints[1] = XMFLOAT4(offsetPosition.x, offsetPosition.y, offsetPosition.z, 1.0f);
@@ -528,6 +530,15 @@ void CKnightPlayer::DrinkPotion()
 	if (m_pSkinnedAnimationController->m_pSubAnimationTracks[0].m_bEnable == FALSE) {
 		m_pSkinnedAnimationController->m_pSubAnimationTracks[0].m_bEnable = TRUE;
 		m_pSkinnedAnimationController->m_pSubAnimationTracks[0].m_fPosition = 0.0f;
+	}
+}
+
+void CKnightPlayer::CanclePotion()
+{
+	if (m_pSkinnedAnimationController->m_pSubAnimationTracks[0].m_bEnable == TRUE) {
+		m_pSkinnedAnimationController->m_pSubAnimationTracks[0].m_bEnable = FALSE;
+		m_pSkinnedAnimationController->m_pSubAnimationTracks[0].m_fPosition = 0.0f;
+		m_bIsDrinkPotion = false;
 	}
 }
 
@@ -630,15 +641,19 @@ void CDrinkPotionCallbackHandler::HandleCallback(void* pCallbackData, float fTra
 		CAnimationTrack* track = (CAnimationTrack*)(pCallbackData);
 		track->m_bEnable = false;
 		m_bEmitedParticle = false;
+		m_pPlayer->m_bIsDrinkPotion = false;
 	}
 	if (abs(fTrackPosition - 1.5f) < ANIMATION_CALLBACK_EPSILON && m_bEmitedParticle == false) {
 		if (m_pVertexPointParticleObject) {
+			
 			m_pVertexPointParticleObject->EmitParticle(5);
 			m_pVertexPointParticleObject->SetEmit(true);
 			m_bEmitedParticle = true;
 			if (m_pPlayer) {
 				if (m_pPlayer->m_nRemainPotions > 0) {
 					m_pPlayer->m_nRemainPotions--;
+					UpdateNumParams param; param.num = m_pPlayer->m_nRemainPotions;
+					CMessageDispatcher::GetInst()->Dispatch_Message(MessageType::DRINK_POTION, &param, nullptr);
 					m_pPlayer->m_nRemainPotions = max(0, m_pPlayer->m_nRemainPotions);
 					m_pPlayer->m_fHP += 50.0f;
 					m_pPlayer->m_fHP = min(m_pPlayer->m_fHP, m_pPlayer->m_fTotalHP);

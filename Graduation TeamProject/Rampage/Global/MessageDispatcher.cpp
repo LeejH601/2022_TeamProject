@@ -11,6 +11,7 @@
 #include "..\Scene\MainScene.h"
 #include "..\Scene\SimulatorScene.h"
 #include "..\Object\SwordTrailObject.h"
+#include "..\Object\UIObject.h"
 #include "Logger.h"
 
 void CMessageDispatcher::RegisterListener(MessageType messageType, IMessageListener* listener, void* filterObject)
@@ -20,19 +21,19 @@ void CMessageDispatcher::RegisterListener(MessageType messageType, IMessageListe
 }
 void PlayerAttackListener::HandleMessage(const Message& message, const PlayerParams& params)
 {
-    if (message.getType() == MessageType::PLAYER_ATTACK) {
+	if (message.getType() == MessageType::PLAYER_ATTACK) {
 		if (params.pPlayer->CheckCollision(m_pObject))
 		{
-			
+
 		}
-    }
+	}
 }
 void SoundPlayComponent::HandleMessage(const Message& message, const SoundPlayParams& params)
 {
 	if (!m_bEnable)
 		return;
 
-    if (message.getType() == MessageType::PLAY_SOUND && m_sc == params.sound_category && m_mt == params.monster_type) {
+	if (message.getType() == MessageType::PLAY_SOUND && m_sc == params.sound_category && m_mt == params.monster_type) {
 		std::vector<CSound>::iterator pSound;
 
 		if (m_sc == SOUND_CATEGORY::SOUND_VOICE)
@@ -55,8 +56,8 @@ void SoundPlayComponent::HandleMessage(const Message& message, const SoundPlayPa
 		else
 			pSound = CSoundManager::GetInst()->FindSound(m_nSoundNumber, m_sc);
 
- 		CSoundManager::GetInst()->PlaySound(pSound->GetPath(), m_fVolume, m_fDelay);
-    }
+		CSoundManager::GetInst()->PlaySound(pSound->GetPath(), m_fVolume, m_fDelay);
+	}
 }
 void CameraShakeComponent::Update(CCamera* pCamera, float fElapsedTime)
 {
@@ -72,7 +73,7 @@ void CameraShakeComponent::Update(CCamera* pCamera, float fElapsedTime)
 		CameraDir = Vector3::ScalarProduct(CameraDir, MeterToUnit(fShakeDistance), false);
 		XMMATRIX RotateMatrix = XMMatrixRotationAxis(XMLoadFloat3(&pCamera->GetLookVector()), RotateConstant);
 
-		XMFLOAT3 ShakeOffset; 
+		XMFLOAT3 ShakeOffset;
 		XMStoreFloat3(&ShakeOffset, XMVector3TransformCoord(XMLoadFloat3(&CameraDir), RotateMatrix));
 		pCamera->m_xmf3CalculatedPosition = Vector3::Add(pCamera->m_xmf3CalculatedPosition, ShakeOffset);
 	}
@@ -199,10 +200,11 @@ void StunAnimationComponent::HandleMessage(const Message& message, const Animati
 }
 ParticleComponent::ParticleComponent()
 {
-	m_iTextureOffset = CSimulatorScene::GetInst()->GetTextureManager()->GetTextureOffset(TextureType::ParticleTexture);
+	if (CSimulatorScene::GetInst()->GetTextureManager())
+		m_iTextureOffset = CSimulatorScene::GetInst()->GetTextureManager()->GetTextureOffset(TextureType::ParticleTexture);
 	//m_iTextureOffset = CSimulatorScene::GetInst()->GetTextureManager()->GetTextureOffset(TextureType::ParticleTexture);
 	//std::shared_ptr<CTexture> pTexture = CSimulatorScene::GetInst()->GetTextureManager()->GetTexture(TextureType::ParticleTexture);
-	
+
 	m_fFieldSpeed = 1.0f;
 	m_fNoiseStrength = 1.0f;;
 	m_xmf3FieldMainDirection = XMFLOAT3(0.0f, 1.0f, 0.0f);
@@ -238,7 +240,8 @@ void ParticleComponent::HandleMessage(const Message& message, const ParticleComp
 		pParticle->SetEmissive(m_fEmissive);
 		pParticle->SetRotateFactor(m_bSimulateRotate);
 		pParticle->SetScaleFactor(m_bSimulateRotate);
-		pParticle->EmitParticle(0);
+		//pParticle->SetEmitAxis()
+		pParticle->EmitParticle(10);
 	}
 }
 ImpactEffectComponent::ImpactEffectComponent()
@@ -344,7 +347,7 @@ void TerrainSpriteComponent::HandleMessage(const Message& message, const Terrain
 void SmokeParticleComponent::HandleMessage(const Message& message, const ParticleSmokeParams& params)
 {
 	CParticleObject* pParticleObject = dynamic_cast<CParticleObject*>(params.pObject);
-	
+
 	if (pParticleObject)
 	{
 		pParticleObject->SetParticleType(m_iParticleType);
@@ -382,22 +385,29 @@ void UpDownParticleComponent::HandleMessage(const Message& message, const Partic
 
 void TrailParticleComponent::HandleMessage(const Message& message, const ParticleTrailParams& params)
 {
-	CParticleObject* pParticleObject = dynamic_cast<CParticleObject*>(params.pObject);
+	if (!m_bEnable)
+		return;
 
-	if (pParticleObject)
+	CParticleObject* pParticle = dynamic_cast<CParticleObject*>(params.pObject);
+
+	if (pParticle)
 	{
-		pParticleObject->SetParticleType(m_iParticleType);
-		pParticleObject->SetEmit(true);
-		pParticleObject->SetSize(m_fSize);
-		pParticleObject->SetStartAlpha(m_fAlpha);
-		pParticleObject->SetColor(m_xmf3Color);
-		pParticleObject->SetSpeed(m_fSpeed * 300.0f);
-		pParticleObject->SetLifeTime(0.05f);
-		pParticleObject->SetMaxParticleN(m_nParticleNumber);
-		pParticleObject->SetEmitParticleN(m_nEmitMinParticleNumber + rand() % (m_nEmitMaxParticleNumber - m_nEmitMinParticleNumber));
-		pParticleObject->SetPosition(params.xmf3Position);
-		pParticleObject->SetDirection(params.xmf3Velocity);
-		//pParticleObject->ChangeTexture(m_pTexture);
+		pParticle->SetEmit(true);
+		pParticle->SetSize(m_fSize);
+		pParticle->SetStartAlpha(m_fAlpha);
+		pParticle->SetColor(m_xmf3Color);
+		pParticle->SetSpeed(m_fSpeed);
+		pParticle->SetLifeTime(m_fLifeTime);
+		pParticle->SetMaxParticleN(m_nParticleNumber);
+		pParticle->SetEmitParticleN(m_nEmitParticleNumber);
+		pParticle->SetPosition(params.xmf3Position);
+		pParticle->SetParticleType(m_iParticleType);
+		pParticle->SetTextureIndex(m_iTextureIndex + m_iTextureOffset);
+		pParticle->SetEmissive(m_fEmissive);
+		pParticle->SetRotateFactor(m_bSimulateRotate);
+		pParticle->SetScaleFactor(m_bSimulateRotate);
+		//pParticle->SetEmitAxis()
+		pParticle->EmitParticle(3);
 	}
 }
 
@@ -430,7 +440,7 @@ void HitLagComponent::HandleMessage(const Message& message, const PlayerParams& 
 		if (pPlayer->m_fCurLagTime < m_fMaxLagTime)
 		{
 			pPlayer->m_fAnimationPlayWeight *= m_fLagScale;
-			
+
 			if (pPlayer->m_fAnimationPlayWeight < pPlayer->m_fAnimationPlayerWeightMin)
 				pPlayer->m_fAnimationPlayWeight = pPlayer->m_fAnimationPlayerWeightMin;
 		}
@@ -444,18 +454,20 @@ TrailComponent::TrailComponent()
 	this->m_fR_CurvePoints[0] = 0.0f; this->m_fR_CurvePoints[1] = 0.14; this->m_fR_CurvePoints[2] = 0.459;  this->m_fR_CurvePoints[3] = 1.892;
 	this->m_fG_CurvePoints[0] = 0.0f; this->m_fG_CurvePoints[1] = 0.005; this->m_fG_CurvePoints[2] = 0.067;  this->m_fG_CurvePoints[3] = 0.595;
 	this->m_fB_CurvePoints[0] = 0.0f; this->m_fB_CurvePoints[1] = 0.257; this->m_fB_CurvePoints[2] = 0.26;  this->m_fB_CurvePoints[3] = 0.0f;
-	this->m_fColorCurveTimes_R[0] = 0.0f; this->m_fColorCurveTimes_R[1] = 0.3; this->m_fColorCurveTimes_R[2] = 0.6;  this->m_fColorCurveTimes_R[3] = 1.0;
-	this->m_fColorCurveTimes_G[0] = 0.0f; this->m_fColorCurveTimes_G[1] = 0.3; this->m_fColorCurveTimes_G[2] = 0.6;  this->m_fColorCurveTimes_G[3] = 1.0;
-	this->m_fColorCurveTimes_B[0] = 0.0f; this->m_fColorCurveTimes_B[1] = 0.3; this->m_fColorCurveTimes_B[2] = 0.6;  this->m_fColorCurveTimes_B[3] = 1.0;
+	this->m_fColorCurveTimes_R[0] = 0.0f; this->m_fColorCurveTimes_R[1] = 0.3; this->m_fColorCurveTimes_R[2] = 0.37;  this->m_fColorCurveTimes_R[3] = 1.0;
+	this->m_fColorCurveTimes_G[0] = 0.0f; this->m_fColorCurveTimes_G[1] = 0.3; this->m_fColorCurveTimes_G[2] = 0.37;  this->m_fColorCurveTimes_G[3] = 1.0;
+	this->m_fColorCurveTimes_B[0] = 0.0f; this->m_fColorCurveTimes_B[1] = 0.3; this->m_fColorCurveTimes_B[2] = 0.37;  this->m_fColorCurveTimes_B[3] = 1.0;
 	this->m_nCurves = 4;
 
 	this->SetMainTextureOffset(CSimulatorScene::GetInst()->GetTextureManager()->GetTextureOffset(TextureType::TrailBaseTexture));
 	this->SetNoiseTextureOffset(CSimulatorScene::GetInst()->GetTextureManager()->GetTextureOffset(TextureType::TrailNoiseTexture));
+	/*m_nMainTextureIndex = m_nMainTextureOffset;
+	m_nNoiseTextureIndex = m_nNoiseTextureOffset;*/
 }
 
 void TrailComponent::HandleMessage(const Message& message, const TrailUpdateParams& params)
 {
-	
+
 	if (message.getType() == MessageType::UPDATE_SWORDTRAIL) {
 		CSwordTrailObject* pTrail = dynamic_cast<CSwordTrailObject*>(params.pObject);
 
@@ -507,18 +519,18 @@ void DamageListener::HandleMessage(const Message& message, const DamageParams& p
 
 		pMonster->m_xmf3HitterVec = Vector3::Normalize(Vector3::Subtract(pMonster->GetPosition(), pPlayer->GetPosition()));
 
-		pDamageAnimationComponent->GetEnable() ? 
-			pMonster->m_fMaxDamageDistance =pDamageAnimationComponent->GetMaxDistance() 
+		pDamageAnimationComponent->GetEnable() ?
+			pMonster->m_fMaxDamageDistance = pDamageAnimationComponent->GetMaxDistance()
 			: pMonster->m_fMaxDamageDistance = 0.0f;
-		pDamageAnimationComponent->GetEnable() ? 
-			pMonster->m_fDamageAnimationSpeed = pDamageAnimationComponent->GetSpeed() 
+		pDamageAnimationComponent->GetEnable() ?
+			pMonster->m_fDamageAnimationSpeed = pDamageAnimationComponent->GetSpeed()
 			: pMonster->m_fDamageAnimationSpeed = pMonster->m_fDamageAnimationSpeed;
 
-		pStunAnimationComponent->GetEnable() ? 
-			pMonster->m_fMaxStunTime = pStunAnimationComponent->GetStunTime() 
+		pStunAnimationComponent->GetEnable() ?
+			pMonster->m_fMaxStunTime = pStunAnimationComponent->GetStunTime()
 			: pMonster->m_fMaxStunTime = 0.0f;
-		pShakeAnimationComponent->GetEnable() ? 
-			pMonster->m_fShakeDuration = pShakeAnimationComponent->GetDuration() 
+		pShakeAnimationComponent->GetEnable() ?
+			pMonster->m_fShakeDuration = pShakeAnimationComponent->GetDuration()
 			: pMonster->m_fShakeDuration = FLT_MIN;
 		pMonster->m_fShakeFrequency = pShakeAnimationComponent->GetFrequency();
 
@@ -529,10 +541,27 @@ void DamageListener::HandleMessage(const Message& message, const DamageParams& p
 		pMonster->m_fMaxShakeDistance = pShakeAnimationComponent->GetDistance();
 
 		if (pMonster->m_bElite) {
-			pMonster->ApplyDamage(30.0f);
+			bool isHasShield = pMonster->GetHasShield();
+			pMonster->ApplyDamage(15.0f); // 실드가 있을 시 데미지 감소
+
+			if (pMonster->GetHasShield() == isHasShield)
+				CSoundManager::GetInst()->PlaySound("Sound/effect/shield-guard-6963.mp3", 1.0f, 0.0f);
+			else
+				CSoundManager::GetInst()->PlaySound("Sound/effect/440773__mgamabile__smashing-glass.wav", 1.0f, 0.0f);
+
 			if (!pMonster->GetHasShield()) {
+				pMonster->ApplyDamage(15.0f);
 				pMonster->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
 				pMonster->m_pStateMachine->ChangeState(Damaged_Monster::GetInst());
+			}
+			else {
+				pMonster->m_ParticleCompParam.xmf3Position = pMonster->GetPosition();
+				pMonster->m_ParticleComponent.HandleMessage(Message(MessageType::MESSAGE_END), pMonster->m_ParticleCompParam);
+
+				/*SoundPlayParams Shieldsound_play_params;
+				Shieldsound_play_params.monster_type = pMonster->GetMonsterType();
+				Shieldsound_play_params.sound_category = SOUND_CATEGORY::SOUND_SHOCK;
+				CMessageDispatcher::GetInst()->Dispatch_Message<SoundPlayParams>(MessageType::PLAY_SOUND, &Shieldsound_play_params, pPlayer->m_pStateMachine->GetCurrentState());*/
 			}
 		}
 		else {
@@ -540,7 +569,7 @@ void DamageListener::HandleMessage(const Message& message, const DamageParams& p
 			pMonster->ApplyDamage(30.0f);
 			pMonster->m_pStateMachine->ChangeState(Damaged_Monster::GetInst());
 		}
-		
+
 		pMonster->m_iPlayerAtkId = pPlayer->GetAtkId();
 	}
 
@@ -562,12 +591,18 @@ SlashHitComponent::SlashHitComponent()
 	m_bScaleFlag = false;
 	m_fSize.x = 1.0f; m_fSize.y = 20.f;
 	m_nEmitParticleNumber = 1;
-	m_bEnable = true;
+	//m_bEnable = true;
 	m_iTextureOffset = 5;
 	m_iTextureIndex = 0;
 	m_fLifeTime = 0.5f;
 	m_fEmissive = 2.0f;
 	m_xmf3Color = XMFLOAT3(1.0f, 0.1f, 0.0f);
+
+	//m_fFieldSpeed = 0.0f;
+	//m_fNoiseStrength = 0.0f;;
+	//m_xmf3FieldMainDirection = XMFLOAT3(0.0f, 1.0f, 0.0f);
+	//m_fProgressionRate = 0.0f;
+	//m_fLengthScale = 0.0f;
 }
 
 void SlashHitComponent::HandleMessage(const Message& message, const ParticleCompParams& params)
@@ -589,11 +624,11 @@ void SlashHitComponent::HandleMessage(const Message& message, const ParticleComp
 		pParticle->SetEmitParticleN(m_nEmitParticleNumber);
 		pParticle->SetPosition(params.xmf3Position);
 		pParticle->SetParticleType(m_iParticleType);
-		pParticle->SetFieldSpeed(m_fFieldSpeed);
+		/*pParticle->SetFieldSpeed(m_fFieldSpeed);
 		pParticle->SetNoiseStrength(m_fNoiseStrength);
 		pParticle->SetFieldMainDirection(m_xmf3FieldMainDirection);
 		pParticle->SetProgressionRate(m_fProgressionRate);
-		pParticle->SetLengthScale(m_fLengthScale);
+		pParticle->SetLengthScale(m_fLengthScale);*/
 		pParticle->SetTextureIndex(m_iTextureIndex + m_iTextureOffset);
 		pParticle->SetEmissive(m_fEmissive);
 		pParticle->SetRotateFactor(m_bSimulateRotate);
@@ -625,4 +660,61 @@ void MonsterDeadListener::HandleMessage(const Message& message, const MonsterPar
 {
 	if (message.getType() == MessageType::MONSTER_DEAD)
 		m_pScene->HandleDeadMessage();
+}
+
+ShieldHitComponent::ShieldHitComponent()
+{
+	m_fFieldSpeed = 1.0f;
+	m_fNoiseStrength = 1.0f;;
+	m_xmf3FieldMainDirection = XMFLOAT3(0.0f, 1.0f, 0.0f);
+	m_fProgressionRate = 1.0f;
+	m_fLengthScale = 1.0f;
+
+	m_bSimulateRotate = false;
+}
+
+void ShieldHitComponent::HandleMessage(const Message& message, const ParticleCompParams& params)
+{
+	if (!m_bEnable)
+		return;
+
+	CParticleObject* pParticle = dynamic_cast<CParticleObject*>(params.pObject);
+
+	if (pParticle)
+	{
+		pParticle->SetEmit(true);
+		pParticle->SetSize(m_fSize);
+		pParticle->SetStartAlpha(m_fAlpha);
+		pParticle->SetColor(m_xmf3Color);
+		pParticle->SetSpeed(m_fSpeed);
+		pParticle->SetLifeTime(m_fLifeTime);
+		pParticle->SetMaxParticleN(m_nParticleNumber);
+		pParticle->SetEmitParticleN(m_nEmitParticleNumber);
+		pParticle->SetPosition(params.xmf3Position);
+		pParticle->SetParticleType(m_iParticleType);
+		/*pParticle->SetFieldSpeed(m_fFieldSpeed);
+		pParticle->SetNoiseStrength(m_fNoiseStrength);
+		pParticle->SetFieldMainDirection(m_xmf3FieldMainDirection);
+		pParticle->SetProgressionRate(m_fProgressionRate);
+		pParticle->SetLengthScale(m_fLengthScale);*/
+		pParticle->SetTextureIndex(m_iTextureIndex + m_iTextureOffset);
+		pParticle->SetEmissive(m_fEmissive);
+		pParticle->SetRotateFactor(m_bSimulateRotate);
+		pParticle->SetScaleFactor(m_bSimulateRotate);
+		pParticle->EmitParticle(m_iParticleType);
+	}
+}
+
+PotionRemainUpdateComponent::PotionRemainUpdateComponent()
+{
+}
+
+void PotionRemainUpdateComponent::HandleMessage(const Message& message, const UpdateNumParams& params)
+{
+	if (!m_bEnable)
+		return;
+
+	if (m_pNumUIObject) {
+		dynamic_cast<CNumberObject*>(m_pNumUIObject)->UpdateNumber(params.num);
+	}
 }
