@@ -33,8 +33,6 @@ public:
 
 class Idle_Monster : public CState<CMonster>
 {
-private:
-    float m_fMaxIdleTime = 1.5f;
 public:
     DECLARE_SINGLE(Idle_Monster);
     Idle_Monster();
@@ -48,8 +46,6 @@ public:
 
 class Wander_Monster : public CState<CMonster>
 {
-private:
-    float m_fMaxWanderTime = 1.0f;
 public:
     DECLARE_SINGLE(Wander_Monster);
     virtual void Enter(CMonster* monster);

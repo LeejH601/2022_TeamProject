@@ -34,7 +34,7 @@ struct DissolveParams {
 	float dissolveThreshold[MAX_OBJECT];
 };
 
-struct StageInfo {
+struct SpawnInfo {
 	int m_iGoblinNum = 0;
 	int m_iEliteGolbinNum = 0;
 	int m_iOrcNum = 0;
@@ -42,6 +42,11 @@ struct StageInfo {
 	int m_iSkeletonNum = 0;
 	int m_iEliteSkeletonNum = 0;
 	XMFLOAT3 m_xmf3StageCenterPos;
+	float m_fMonsterSpawnRange;
+};
+
+struct StageInfo {
+	std::vector<SpawnInfo> m_vSpawnInfo;
 };
 
 class CMainTMPScene : public CScene
@@ -117,8 +122,10 @@ public:
 	CMainTMPScene();
 	virtual ~CMainTMPScene() {}
 
-	void HandleDeadMessage();
+	void HandleMonsterDeadMessage();
+	void HandlePlayerDeadMessage();
 	void AdvanceStage();
+	
 	virtual void SetPlayer(CGameObject* pPlayer);
 
 	virtual void OnPreRender(ID3D12GraphicsCommandList* pd3dCommandList) { }

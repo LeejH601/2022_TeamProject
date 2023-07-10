@@ -1,5 +1,6 @@
 #include "MonsterState.h"
 #include "Monster.h"
+#include "Player.h"
 #include "..\Global\Locator.h"
 #include "..\Sound\SoundManager.h"
 
@@ -85,7 +86,7 @@ void Idle_Monster::Execute(CMonster* monster, float fElapsedTime)
 {
 	monster->m_fIdleTime += fElapsedTime;
 
-	if (m_fMaxIdleTime < monster->m_fIdleTime && !(monster->m_bIsDummy))
+	if (monster->m_fMaxIdleTime < monster->m_fIdleTime && !(monster->m_bIsDummy))
 	{
 		monster->m_pStateMachine->ChangeState(Wander_Monster::GetInst());
 	}
@@ -173,11 +174,7 @@ void Damaged_Monster::Execute(CMonster* monster, float fElapsedTime)
 		monster->m_pStateMachine->ChangeState(Stun_Monster::GetInst());
 
 	if (monster->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition == pAnimationSet->m_fLength)
-	{
-		monster->SetNotHit();
 		monster->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
-	}
-
 }
 
 void Damaged_Monster::Animate(CMonster* monster, float fElapsedTime)
@@ -276,7 +273,7 @@ void Wander_Monster::Execute(CMonster* monster, float fElapsedTime)
 
 	monster->m_fWanderTime += fElapsedTime;
 
-	if (m_fMaxWanderTime < monster->m_fWanderTime)
+	if (monster->m_fMaxWanderTime < monster->m_fWanderTime)
 	{
 		monster->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
 	}
@@ -304,15 +301,25 @@ void Chasing_Monster::Enter(CMonster* monster)
 	monster->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_nType = ANIMATION_TYPE_LOOP;
 	monster->m_bCanChase = true;
 
-	XMFLOAT3 xmf3LookVec = Vector3::Add(monster->GetPosition(), monster->GetChasingVec());
+	CPlayer* pPlayer = dynamic_cast<CPlayer*>(monster->m_pChasingTargetObject);
+
+	XMFLOAT3 xmf3LookVec = XMFLOAT3{
+			pPlayer->m_pSkinnedAnimationController->m_pRootMotionObject->GetWorld()._41,
+			monster->GetPosition().y,
+			pPlayer->m_pSkinnedAnimationController->m_pRootMotionObject->GetWorld()._43 };
+
 	monster->SetLookAt(xmf3LookVec);
 }
 
 void Chasing_Monster::Execute(CMonster* monster, float fElapsedTime)
 {
-	XMFLOAT3 xmf3Shift = Vector3::ScalarProduct(monster->GetChasingVec(), monster->GetSpeedUperS() * fElapsedTime, false);
+	CPlayer* pPlayer = dynamic_cast<CPlayer*>(monster->m_pChasingTargetObject);
 
-	XMFLOAT3 xmf3LookVec = Vector3::Add(monster->GetPosition(), monster->GetChasingVec());
+	XMFLOAT3 xmf3LookVec = XMFLOAT3{
+			pPlayer->m_pSkinnedAnimationController->m_pRootMotionObject->GetWorld()._41,
+			monster->GetPosition().y,
+			pPlayer->m_pSkinnedAnimationController->m_pRootMotionObject->GetWorld()._43 };
+
 	monster->SetLookAt(xmf3LookVec);
 
 	if (monster->m_fToPlayerLength < monster->m_fAttackRange)
@@ -321,12 +328,8 @@ void Chasing_Monster::Execute(CMonster* monster, float fElapsedTime)
 		monster->m_pStateMachine->ChangeState(Attack_Monster::GetInst());
 	}
 
-	if (monster->m_fToPlayerLength > monster->m_fSensingRange)
-	{
-		// ³õÄ§
-		monster->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
-	}
-
+	XMFLOAT3 xmf3ChaseVec = Vector3::Normalize(Vector3::Subtract(xmf3LookVec, monster->GetPosition()));
+	XMFLOAT3 xmf3Shift = Vector3::ScalarProduct(xmf3ChaseVec, monster->GetSpeedUperS() * fElapsedTime, false);
 	monster->Move(xmf3Shift, true);
 }
 
@@ -376,7 +379,7 @@ void Attack_Monster::Execute(CMonster* monster, float fElapsedTime)
 		}
 
 		else
-			monster->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
+			monster->m_pStateMachine->ChangeState(Chasing_Monster::GetInst());
 	}
 }
 
@@ -445,10 +448,6 @@ void Dead_Monster::Enter(CMonster* monster)
 	}
 
 	monster->m_bArticulationSleep = false;
-
-	MonsterParams monsterParams;
-	monsterParams.pMonster = monster;
-	CMessageDispatcher::GetInst()->Dispatch_Message<MonsterParams>(MessageType::MONSTER_DEAD, &monsterParams, this);
 }
 
 void Dead_Monster::Execute(CMonster* monster, float fElapsedTime)

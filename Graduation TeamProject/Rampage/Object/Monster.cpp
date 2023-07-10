@@ -14,6 +14,8 @@ CMonster::CMonster()
 	m_pStateMachine->SetGlobalState(Global_Monster::GetInst());
 	m_fShakeDistance = 0.0f;
 
+	m_fStrikingPower = 100.0f;
+
 	m_fStunTime = 0.0f;
 	m_fStunStartTime = 0.2f;
 
@@ -27,6 +29,8 @@ CMonster::CMonster()
 	m_fSpeedKperH = 10.0f;
 	m_fSpeedUperS = MeterToUnit(m_fSpeedKperH * 1000.0f) / 3600.0f;
 
+	m_fMaxIdleTime = 2.0f + RandomFloatInRange(-0.8f, 0.8f);
+	m_fMaxWanderTime = 2.0f + RandomFloatInRange(-0.8f, 0.8f);
 	m_fAttackRange = MeterToUnit(1.0f);
 	m_fAtkStartTime = 0.0f;
 	m_fAtkEndTime = 0.0f;
@@ -49,6 +53,12 @@ CMonster::CMonster()
 	m_pListeners.push_back(std::move(pDamageListener));
 
 	CMessageDispatcher::GetInst()->RegisterListener(MessageType::APPLY_DAMAGE, m_pListeners.back().get(), this);
+
+	std::unique_ptr<AllyDamagedListener> pAllyDamagedListener = std::make_unique<AllyDamagedListener>();
+	pAllyDamagedListener->SetObject(this);
+	m_pListeners.push_back(std::move(pAllyDamagedListener));
+
+	CMessageDispatcher::GetInst()->RegisterListener(MessageType::ALLY_DAMAGED, m_pListeners.back().get());
 
 	m_ParticleComponent.SetColor(XMFLOAT3(1.0f, 0.05f, 0.05f));
 	m_ParticleComponent.SetAlpha(1.0f);
@@ -77,10 +87,15 @@ void CMonster::SetWanderVec()
 	m_xmf3WanderVec = Vector3::Normalize(m_xmf3WanderVec);
 }
 
-void CMonster::CheckIsPlayerInFrontOfThis(XMFLOAT3 xmf3PlayerPosition)
+void CMonster::CheckIsPlayerInFrontOfThis(CGameObject* pPlayer)
 {
+	XMFLOAT3 xmf3PlayerPos = XMFLOAT3{
+			pPlayer->m_pSkinnedAnimationController->m_pRootMotionObject->GetWorld()._41,
+			pPlayer->GetPosition().y,
+			pPlayer->m_pSkinnedAnimationController->m_pRootMotionObject->GetWorld()._43 };
+
 	XMFLOAT3 xmf3MonsterLook = GetLook();
-	XMFLOAT3 xmf3ToPlayerVec = Vector3::Subtract(xmf3PlayerPosition, GetPosition());
+	XMFLOAT3 xmf3ToPlayerVec = Vector3::Subtract(xmf3PlayerPos, GetPosition());
 
 	float fDotProduct = Vector3::DotProduct(xmf3MonsterLook, xmf3ToPlayerVec);
 	m_fToPlayerLength = Vector3::Length(xmf3ToPlayerVec);
@@ -90,9 +105,9 @@ void CMonster::CheckIsPlayerInFrontOfThis(XMFLOAT3 xmf3PlayerPosition)
 
 	if (/*fDotProduct > 0.0f && */m_fToPlayerLength < 22.5f)
 	{
-		m_xmf3ChasingVec = Vector3::Normalize(xmf3ToPlayerVec);
-
 		// 플레이어가 몬스터의 앞에 있음
+		m_pChasingTargetObject = pPlayer;
+
 		if (m_pStateMachine->GetCurrentState() != Chasing_Monster::GetInst() && m_pStateMachine->GetCurrentState() != Spawn_Monster::GetInst())
 			m_pStateMachine->ChangeState(Chasing_Monster::GetInst());
 	}
@@ -132,6 +147,88 @@ void CMonster::SetElite(bool flag)
 	}
 }
 
+void CMonster::HandleDamage(CPlayer* pPlayer, float fDamage)
+{
+	if (m_bSimulateArticulate == false) { // 변수 체크가 아닌 현재 상태 체크를 이용하는 것이 좋을듯
+		SoundPlayParams sound_play_params;
+		sound_play_params.monster_type = GetMonsterType();
+		sound_play_params.sound_category = SOUND_CATEGORY::SOUND_VOICE;
+		CMessageDispatcher::GetInst()->Dispatch_Message<SoundPlayParams>(MessageType::PLAY_SOUND, &sound_play_params, pPlayer->m_pStateMachine->GetCurrentState());
+
+		// Update Hit Lag
+		HitLagComponent* pHitLagComponent = dynamic_cast<HitLagComponent*>(pPlayer->m_pStateMachine->GetCurrentState()->GetHitLagComponent());
+
+		if (pHitLagComponent->GetEnable())
+		{
+			TimerParams timerParams;
+			timerParams.fDynamicTimeScale = pHitLagComponent->GetLagScale();
+			timerParams.fDuration = pHitLagComponent->GetDuration();
+			timerParams.fMinTimeScale = pHitLagComponent->GetMinTimeScale();
+			CMessageDispatcher::GetInst()->Dispatch_Message<TimerParams>(MessageType::SET_DYNAMIC_TIMER_SCALE, &timerParams, nullptr);
+		}
+
+		DamageAnimationComponent* pDamageAnimationComponent = dynamic_cast<DamageAnimationComponent*>(pPlayer->m_pStateMachine->GetCurrentState()->GetDamageAnimationComponent());
+		ShakeAnimationComponent* pShakeAnimationComponent = dynamic_cast<ShakeAnimationComponent*>(pPlayer->m_pStateMachine->GetCurrentState()->GetShakeAnimationComponent());
+		StunAnimationComponent* pStunAnimationComponent = dynamic_cast<StunAnimationComponent*>(pPlayer->m_pStateMachine->GetCurrentState()->GetStunAnimationComponent());
+
+		m_xmf3HitterVec = Vector3::Normalize(Vector3::Subtract(GetPosition(), pPlayer->GetPosition()));
+
+		pDamageAnimationComponent->GetEnable() ?
+			m_fMaxDamageDistance = pDamageAnimationComponent->GetMaxDistance()
+			: m_fMaxDamageDistance = 0.0f;
+		pDamageAnimationComponent->GetEnable() ?
+			m_fDamageAnimationSpeed = pDamageAnimationComponent->GetSpeed()
+			: m_fDamageAnimationSpeed = m_fDamageAnimationSpeed;
+
+		pStunAnimationComponent->GetEnable() ?
+			m_fMaxStunTime = pStunAnimationComponent->GetStunTime()
+			: m_fMaxStunTime = 0.0f;
+		pShakeAnimationComponent->GetEnable() ?
+			m_fShakeDuration = pShakeAnimationComponent->GetDuration()
+			: m_fShakeDuration = FLT_MIN;
+		m_fShakeFrequency = pShakeAnimationComponent->GetFrequency();
+
+		m_fMaxShakeDistance = pShakeAnimationComponent->GetDistance();
+
+		if (m_bElite) {
+			ApplyDamage(30.0f);
+			if (!GetHasShield()) {
+				m_pStateMachine->ChangeState(Idle_Monster::GetInst());
+				m_pStateMachine->ChangeState(Damaged_Monster::GetInst());
+			}
+		}
+		else {
+			m_pStateMachine->ChangeState(Idle_Monster::GetInst());
+			ApplyDamage(30.0f);
+			m_pStateMachine->ChangeState(Damaged_Monster::GetInst());
+		}
+
+		m_iPlayerAtkId = pPlayer->GetAtkId();
+		m_pChasingTargetObject = pPlayer;
+
+		PlayerParams playerParams;
+		playerParams.pPlayer = pPlayer;
+
+		CMessageDispatcher::GetInst()->Dispatch_Message<PlayerParams>(MessageType::ALLY_DAMAGED, &playerParams, nullptr);
+	}
+
+	else {
+		TCHAR pstrDebug[256] = { 0 };
+		//_stprintf_s(pstrDebug, 256, "Already Dead \n");
+		OutputDebugString(L"Already Dead");
+	}
+}
+
+void CMonster::HandleAllyDamagedMessage(CGameObject* pPlayer)
+{
+	if (m_pStateMachine->GetCurrentState() == Idle_Monster::GetInst() ||
+		m_pStateMachine->GetCurrentState() == Wander_Monster::GetInst())
+	{
+		m_pChasingTargetObject = pPlayer;
+		m_pStateMachine->ChangeState(Chasing_Monster::GetInst());
+	}
+}
+
 void CMonster::UpdateMatrix()
 {
 	m_xmf4x4Transform._11 = m_xmf3Right.x; m_xmf4x4Transform._12 = m_xmf3Right.y; m_xmf4x4Transform._13 = m_xmf3Right.z;
@@ -151,43 +248,52 @@ void CMonster::SetScale(float x, float y, float z)
 
 void CMonster::Update(float fTimeElapsed)
 {
-	if (!m_bDissolved) {
-		if (m_bSimulateArticulate) {
-			TestDissolvetime += fTimeElapsed;
-			if (TestDissolvetime > 5.0f)
-				m_bDissolved = true;
+	if (m_bEnable)
+	{
+		if (!m_bDissolved) {
+			if (m_bSimulateArticulate) {
+				TestDissolvetime += fTimeElapsed;
+				if (TestDissolvetime > 5.0f)
+				{
+					m_bDissolved = true;
+
+					MonsterParams monsterParams;
+					monsterParams.pMonster = this;
+					CMessageDispatcher::GetInst()->Dispatch_Message<MonsterParams>(MessageType::MONSTER_DEAD, &monsterParams, this);
+				}
+			}
 		}
-	}
-	else {
-		m_fDissolveTime += fTimeElapsed;
-		m_fDissolveThrethHold = m_fDissolveTime / m_fMaxDissolveTime;
-		if (m_fDissolveThrethHold > 1.0f && m_bArticulationSleep == false) {
-			m_bArticulationSleep = true;
-			RegisterArticulationSleepParams Request_params;
-			Request_params.pObject = this;
-			CMessageDispatcher::GetInst()->Dispatch_Message<RegisterArticulationSleepParams>(MessageType::REQUEST_SLEEPARTI, &Request_params, nullptr);
+		else {
+			m_fDissolveTime += fTimeElapsed;
+			m_fDissolveThrethHold = m_fDissolveTime / m_fMaxDissolveTime;
+			if (m_fDissolveThrethHold > 1.0f && m_bArticulationSleep == false) {
+				m_bArticulationSleep = true;
+				RegisterArticulationSleepParams Request_params;
+				Request_params.pObject = this;
+				CMessageDispatcher::GetInst()->Dispatch_Message<RegisterArticulationSleepParams>(MessageType::REQUEST_SLEEPARTI, &Request_params, nullptr);
+			}
 		}
+
+		if (m_xmf3Velocity.x + m_xmf3Velocity.z)
+			SetLookAt(Vector3::Add(GetPosition(), Vector3::Normalize(XMFLOAT3{ m_xmf3Velocity.x, 0.0f, m_xmf3Velocity.z })));
+
+		// 현재 행동을 선택함
+		m_pStateMachine->Update(fTimeElapsed);
+		m_pStateMachine->Animate(fTimeElapsed);
+
+		CPhysicsObject::Apply_Gravity(fTimeElapsed);
+
+		XMFLOAT3 xmf3NewVelocity = Vector3::TransformCoord(m_xmf3Velocity, XMMatrixRotationAxis(XMVECTOR{ 0.0f, 1.0f, 0.0f, 0.0f }, XMConvertToRadians(fDistortionDegree)));
+		CPhysicsObject::Move(xmf3NewVelocity, false);
+
+		// 플레이어가 터레인보다 아래에 있지 않도록 하는 코드
+		if (m_pUpdatedContext) CPhysicsObject::OnUpdateCallback(fTimeElapsed);
+
+		XMFLOAT3 xmf3ShakeVec = Vector3::ScalarProduct(Vector3::Normalize(GetRight()), MeterToUnit(m_fShakeDistance), false);
+		m_xmf3CalPos = Vector3::Add(m_xmf3Position, xmf3ShakeVec);
+
+		CPhysicsObject::Apply_Friction(fTimeElapsed);
 	}
-
-	if (m_xmf3Velocity.x + m_xmf3Velocity.z)
-		SetLookAt(Vector3::Add(GetPosition(), Vector3::Normalize(XMFLOAT3{ m_xmf3Velocity.x, 0.0f, m_xmf3Velocity.z })));
-
-	// 현재 행동을 선택함
-	m_pStateMachine->Update(fTimeElapsed);
-	m_pStateMachine->Animate(fTimeElapsed);
-
-	CPhysicsObject::Apply_Gravity(fTimeElapsed);
-
-	XMFLOAT3 xmf3NewVelocity = Vector3::TransformCoord(m_xmf3Velocity, XMMatrixRotationAxis(XMVECTOR{ 0.0f, 1.0f, 0.0f, 0.0f }, XMConvertToRadians(fDistortionDegree)));
-	CPhysicsObject::Move(xmf3NewVelocity, false);
-
-	// 플레이어가 터레인보다 아래에 있지 않도록 하는 코드
-	if (m_pUpdatedContext) CPhysicsObject::OnUpdateCallback(fTimeElapsed);
-
-	XMFLOAT3 xmf3ShakeVec = Vector3::ScalarProduct(Vector3::Normalize(GetRight()), MeterToUnit(m_fShakeDistance), false);
-	m_xmf3CalPos = Vector3::Add(m_xmf3Position, xmf3ShakeVec);
-
-	CPhysicsObject::Apply_Friction(fTimeElapsed);
 }
 void CMonster::UpdateTransform(XMFLOAT4X4* pxmf4x4Parent)
 {
@@ -215,10 +321,6 @@ void CMonster::UpdateTransform(XMFLOAT4X4* pxmf4x4Parent)
 
 }
 
-bool CMonster::SetHit(CGameObject* pHitter)
-{
-	return false;
-}
 void CMonster::PlayMonsterEffectSound()
 {
 }
@@ -228,8 +330,11 @@ bool CMonster::CheckCollision(CGameObject* pTargetObject)
 	{
 		BoundingOrientedBox* TargetBoundingBox = pTargetObject->GetBoundingBox();
 		if (m_TransformedWeaponBoundingBox.Intersects(*TargetBoundingBox)) {
-			if(pTargetObject->SetHit(this))
-				PlayMonsterEffectSound();
+			DamageParams damageParam;
+			damageParam.fDamage = m_fStrikingPower;
+			damageParam.pAttacker = this;
+
+			CMessageDispatcher::GetInst()->Dispatch_Message<DamageParams>(MessageType::APPLY_DAMAGE, &damageParam, pTargetObject);
 			return true;
 		}
 	}
@@ -304,11 +409,11 @@ void COrcObject::PrepareBoundingBox(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 	pWeapon = CGameObject::FindFrame("SM_Weapon");
 
 	m_BodyBoundingBox = BoundingOrientedBox{ XMFLOAT3(0.0f, 1.05f, 0.0f),  XMFLOAT3(0.6f, 1.0f, 0.6f), XMFLOAT4{0.0f, 0.0f, 0.0f, 1.0f} };
-	m_WeaponBoundingBox = BoundingOrientedBox{ XMFLOAT3(0.0f, 0.0f, 0.35f), XMFLOAT3(0.15f, 0.3f, 0.725f), XMFLOAT4{0.0f, 0.0f, 0.0f, 1.0f} };
+	m_WeaponBoundingBox = BoundingOrientedBox{ XMFLOAT3(0.0f, 0.0f, 0.35f), XMFLOAT3(0.5f, 0.6f, 0.725f), XMFLOAT4{0.0f, 0.0f, 0.0f, 1.0f} };
 #ifdef RENDER_BOUNDING_BOX
 	pBodyBoundingBoxMesh = CBoundingBoxShader::GetInst()->AddBoundingObject(pd3dDevice, pd3dCommandList, this, XMFLOAT3(0.0f, 1.05f, 0.0f), XMFLOAT3(0.6f, 1.0f, 0.6f));
 	//pWeaponBodyBoundingBoxMesh = CBoundingBoxShader::GetInst()->AddBoundingObject(pd3dDevice, pd3dCommandList, pWeapon, XMFLOAT3(0.0f, 0.0f, 0.32f), XMFLOAT3(0.18f, 0.28f, 0.71f));
-	pWeaponBoundingBoxMesh = CBoundingBoxShader::GetInst()->AddBoundingObject(pd3dDevice, pd3dCommandList, pWeapon, XMFLOAT3(0.0f, 0.0f, 0.35f), XMFLOAT3(0.15f, 0.3f, 0.725f));
+	pWeaponBoundingBoxMesh = CBoundingBoxShader::GetInst()->AddBoundingObject(pd3dDevice, pd3dCommandList, pWeapon, XMFLOAT3(0.0f, 0.0f, 0.35f), XMFLOAT3(0.5f, 0.6f, 0.725f));
 #endif
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -436,6 +541,7 @@ bool CMonsterPool::SetActiveMonster(MONSTER_TYPE monsterType, MonsterSpawnInfo m
 		m_pNonActiveMonsters[static_cast<int>(monsterType)].pop_back();
 		pMonster->SetEnable(true);
 		pMonster->SetPosition(monsterSpawnInfo.xmf3Position);
+		pMonster->Rotate(0.0f, RandomFloatInRange(0.0f, 360.0f), 0.0f);
 		monsterSpawnInfo.bIsElite ? pMonster->SetElite(true) : pMonster->SetElite(false);
 		pMonster->m_pStateMachine->ChangeState(Spawn_Monster::GetInst());
 		return true;

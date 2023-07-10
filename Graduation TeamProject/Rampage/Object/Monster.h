@@ -8,11 +8,12 @@
 class CMonster : public CPhysicsObject
 {
 public:
+	CGameObject* m_pChasingTargetObject;
+
 	XMFLOAT3 m_xmf3CalPos;
 
 	XMFLOAT3 m_xmf3HitterVec;
 	XMFLOAT3 m_xmf3WanderVec;
-	XMFLOAT3 m_xmf3ChasingVec;
 
 	unsigned int m_iPlayerAtkId = 999;
 
@@ -21,9 +22,16 @@ public:
 	bool m_bStunned;
 	bool m_bCanChase;
 	
+	float m_fStrikingPower;		// °ø°Ý·Â
+
+	float m_fMaxIdleTime;
 	float m_fIdleTime;
+
 	float m_fSpawnTime;
+
+	float m_fMaxWanderTime;
 	float m_fWanderTime;
+
 	float m_fDeadTime;
 	float m_fToPlayerLength;
 
@@ -88,21 +96,21 @@ public:
 	unsigned int GetPlayerAtkId() { return m_iPlayerAtkId; }
 	XMFLOAT3 GetHitterVec() { return m_xmf3HitterVec; }
 	XMFLOAT3 GetWanderVec() { return m_xmf3WanderVec; }
-	XMFLOAT3 GetChasingVec() { return m_xmf3ChasingVec; }
 
 	void SetWanderVec();
-	void CheckIsPlayerInFrontOfThis(XMFLOAT3 xmf3PlayerPosition);
+	void CheckIsPlayerInFrontOfThis(CGameObject* pPlayer);
 	void CalculateResultPosition();
 	void ApplyDamage(float Damage, void* pData = nullptr);
 	void SetElite(bool flag);
-	bool GetHasShield() { return (m_fCurrShield > 0.0f); };
+	void HandleDamage(CPlayer* pPlayer, float fDamage);
+	void HandleAllyDamagedMessage(CGameObject* pPlayer);
+	bool GetHasShield() { return m_fCurrShield > 0.0f; };
 	virtual void PlayMonsterEffectSound();
 
 	virtual void UpdateMatrix();
 	virtual void SetScale(float x, float y, float z);
 	virtual void Update(float fTimeElapsed);
 	virtual void UpdateTransform(XMFLOAT4X4* pxmf4x4Parent = NULL);
-	virtual bool SetHit(CGameObject* pHitter);
 	virtual bool CheckCollision(CGameObject* pTargetObject);
 	virtual void UpdateTransformFromArticulation(XMFLOAT4X4* pxmf4x4Parent, std::vector<std::string> pArtiLinkNames, std::vector<XMFLOAT4X4>& AritculatCacheMatrixs, float scale = 1.0f);
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, bool b_UseTexture, CCamera* pCamera = NULL);
