@@ -56,6 +56,7 @@ class Atk_Player : public CState<CPlayer>
 {
 protected:
     bool m_bEmittedParticle = false;
+    TrailComponent* m_pTrailComponent = nullptr;
 public:
     virtual void InitAtkPlayer();
     virtual void SetPlayerRootVel(CPlayer* player);

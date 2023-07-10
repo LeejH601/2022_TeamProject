@@ -1526,6 +1526,9 @@ void CMainTMPScene::Enter(HWND hWnd)
 	Locator.SetMouseCursorMode(MOUSE_CUROSR_MODE::THIRD_FERSON_MODE);
 	m_CurrentMouseCursorMode = MOUSE_CUROSR_MODE::THIRD_FERSON_MODE;
 
+	if (m_pTrailParticleObjects)
+	CPlayerParticleObject::GetInst()->SetTrailParticleObjects(m_pTrailParticleObjects.get());
+
 	if (m_iCursorHideCount < 1) {
 		m_iCursorHideCount++;
 		ShowCursor(false);

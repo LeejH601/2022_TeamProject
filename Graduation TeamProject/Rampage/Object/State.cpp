@@ -220,6 +220,7 @@ void Atk_Player::InitAtkPlayer()
 
 	// TRAIL Swipe
 	std::unique_ptr<TrailComponent> pTrailComponent = std::make_unique<TrailComponent>();
+	m_pTrailComponent = pTrailComponent.get();
 	m_pListeners.push_back(std::move(pTrailComponent));
 	CMessageDispatcher::GetInst()->RegisterListener(MessageType::UPDATE_SWORDTRAIL, m_pListeners.back().get(), this);
 
@@ -417,7 +418,8 @@ void Atk1_Player::Execute(CPlayer* player, float fElapsedTime)
 		player->m_pStateMachine->ChangeState(Idle_Player::GetInst());
 	}
 
-	SpawnTrailParticle(player);
+	if(m_pTrailComponent->GetEnable())
+		SpawnTrailParticle(player);
 
 }
 
@@ -559,7 +561,8 @@ void Atk2_Player::Execute(CPlayer* player, float fElapsedTime)
 		player->m_pStateMachine->ChangeState(Idle_Player::GetInst());
 	}
 
-	SpawnTrailParticle(player);
+	if (m_pTrailComponent->GetEnable())
+		SpawnTrailParticle(player);
 }
 
 void Atk2_Player::Animate(CPlayer* player, float fElapsedTime)
@@ -734,7 +737,8 @@ void Atk3_Player::Execute(CPlayer* player, float fElapsedTime)
 	{
 	}
 
-	SpawnTrailParticle(player);
+	if (m_pTrailComponent->GetEnable())
+		SpawnTrailParticle(player);
 }
 
 void Atk3_Player::Animate(CPlayer* player, float fElapsedTime)
