@@ -4,6 +4,7 @@
 #include "../Object/Mesh.h"
 #include "../Global/Camera.h"
 #include "../Object/TextureManager.h"
+#include "../Sound/SoundManager.h"
 
 CUIObject::CUIObject(int iTextureIndex, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fSize)
 {
@@ -200,11 +201,11 @@ void CHPObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, bool b_UseTex
 		// UI Size 정보 Update
 		// 
 		// CGameObject의 정보를 넘길 버퍼가 있고, 해당 버퍼에 대한 CPU 포인터가 있으면 UpdateShaderVariables 함수를 호출한다.
-		//PreBarUpdate(0.f);
-		//UpdateShaderVariables(pd3dCommandList);
+		PreBarUpdate(0.f);
+		UpdateShaderVariables(pd3dCommandList);
 		////// 여기서 메쉬의 렌더를 한다.
-		//m_pMesh->OnPreRender(pd3dCommandList);
-		//m_pMesh->Render(pd3dCommandList, 0);
+		m_pMesh->OnPreRender(pd3dCommandList);
+		m_pMesh->Render(pd3dCommandList, 0);
 
 		CurBarUpdate(0.f);
 		UpdateShaderVariables(pd3dCommandList);
@@ -230,7 +231,7 @@ void CHPObject::PreBarUpdate(float fTimeElapsed)
 		m_xmf4x4World._11 = ((m_fPreValue / m_fTotalValue) * m_xmf2Size.x) / (FRAME_BUFFER_WIDTH);
 		m_xmf4x4World._22 = m_xmf2Size.y / (FRAME_BUFFER_HEIGHT);
 
-		m_xmf4x4World._33 = m_iTextureIndex + 2; // 텍스쳐 인덱스
+		m_xmf4x4World._33 = m_iTextureIndex; // 텍스쳐 인덱스
 
 		m_xmf4x4World._12 = 0.f; // U
 		m_xmf4x4World._13 = m_fPreValue / m_fTotalValue; // U
@@ -241,6 +242,11 @@ void CHPObject::PreBarUpdate(float fTimeElapsed)
 		m_xmf4x4World._21 = 0.5f; // RGBN
 		m_xmf4x4World._21 = 0.6f; // ALPHA
 		
+
+		m_xmf4x4World._21 = 1.f; // R
+		m_xmf4x4World._31 = 1.f; // G
+		m_xmf4x4World._44 = 1.f; // B
+
 		// -1 ~ 1
 		m_xmf4x4World._41 = (m_xmf2ScreenPosition.x / FRAME_BUFFER_WIDTH) - (((m_fTotalValue - m_fPreValue) / m_fTotalValue) * m_xmf2Size.x * 0.5f) / (FRAME_BUFFER_WIDTH);;
 		m_xmf4x4World._42 = (m_xmf2ScreenPosition.y / FRAME_BUFFER_HEIGHT);
@@ -290,7 +296,7 @@ void CSTAMINAObject::PreBarUpdate(float fTimeElapsed)
 			m_fPreValue -= (m_fTotalValue - m_fCurrentValue) * 0.1f;
 		//m_xmf2ScreenPosition5 = XMFLOAT2()
 		// 화면 크기를 기준으로 Size 설정 최대 크기 (MAX WIDTH: FRAME_BUFFER_WIDTH, MAX_HEIGHT: FRAME_BUFFER_HEIGHT)
-		m_xmf4x4World._11 = ((m_fCurrentValue / m_fPreValue) * m_xmf2Size.x) / (FRAME_BUFFER_WIDTH);
+		m_xmf4x4World._11 = ((m_fPreValue / m_fTotalValue) * m_xmf2Size.x) / (FRAME_BUFFER_WIDTH);
 		m_xmf4x4World._22 = m_xmf2Size.y / (FRAME_BUFFER_HEIGHT);
 
 		m_xmf4x4World._33 = m_iTextureIndex; // 텍스쳐 인덱스
@@ -301,10 +307,16 @@ void CSTAMINAObject::PreBarUpdate(float fTimeElapsed)
 		m_xmf4x4World._14 = 0.f; // V
 		m_xmf4x4World._24 = 1.f; // V
 
-		m_xmf4x4World._21 = 1.f; // RGBN
 
 		//1, 023x((정규 좌표) + 1.0)x0.5
 	
+		m_xmf4x4World._23 = 0.8f; // B
+
+		m_xmf4x4World._21 = 1.f; // R
+		m_xmf4x4World._31 = 1.f; // G
+		m_xmf4x4World._44 = 1.f; // B
+
+
 		// -1 ~ 1
 		m_xmf4x4World._41 = (m_xmf2ScreenPosition.x / FRAME_BUFFER_WIDTH) - (((m_fTotalValue - m_fPreValue) / m_fTotalValue) * m_xmf2Size.x * 0.5f) / (FRAME_BUFFER_WIDTH);;
 		m_xmf4x4World._42 = (m_xmf2ScreenPosition.y / FRAME_BUFFER_HEIGHT);
@@ -331,6 +343,11 @@ void CSTAMINAObject::CurBarUpdate(float fTimeElapsed)
 
 		m_xmf4x4World._21 = 1.f; // RGBN
 
+		m_xmf4x4World._21 = 1.f; // R
+		m_xmf4x4World._31 = 1.f; // G
+		m_xmf4x4World._44 = 1.f; // B
+
+		m_xmf4x4World._23 = 1.f; // B
 		// -1 ~ 1
 		m_xmf4x4World._41 = (m_xmf2ScreenPosition.x / FRAME_BUFFER_WIDTH) - (((m_fTotalValue - m_fCurrentValue) / m_fTotalValue) * m_xmf2Size.x * 0.5f) / (FRAME_BUFFER_WIDTH);;
 		m_xmf4x4World._42 = (m_xmf2ScreenPosition.y / FRAME_BUFFER_HEIGHT);
@@ -350,11 +367,11 @@ void CSTAMINAObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, bool b_U
 		// UI Size 정보 Update
 		// 
 		// CGameObject의 정보를 넘길 버퍼가 있고, 해당 버퍼에 대한 CPU 포인터가 있으면 UpdateShaderVariables 함수를 호출한다.
-		//PreBarUpdate(0.f);
-		//UpdateShaderVariables(pd3dCommandList);
-		//// 여기서 메쉬의 렌더를 한다.
-		//m_pMesh->OnPreRender(pd3dCommandList);
-		//m_pMesh->Render(pd3dCommandList, 0);
+		PreBarUpdate(0.f);
+		UpdateShaderVariables(pd3dCommandList);
+		// 여기서 메쉬의 렌더를 한다.
+		m_pMesh->OnPreRender(pd3dCommandList);
+		m_pMesh->Render(pd3dCommandList, 0);
 
 
 		CurBarUpdate(0.f);
@@ -362,7 +379,7 @@ void CSTAMINAObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, bool b_U
 		// 여기서 메쉬의 렌더를 한다.
 		m_pMesh->OnPreRender(pd3dCommandList);
 
-		m_tRect[0] = { (LONG)(FRAME_BUFFER_WIDTH * 0.15f), (LONG)(FRAME_BUFFER_HEIGHT * 0.2f) , (LONG)(FRAME_BUFFER_WIDTH * 0.35f) , (LONG)(FRAME_BUFFER_HEIGHT * 0.35f) };
+		//m_tRect[0] = { (LONG)(FRAME_BUFFER_WIDTH * 0.15f), (LONG)(FRAME_BUFFER_HEIGHT * 0.2f) , (LONG)(FRAME_BUFFER_WIDTH * 0.35f) , (LONG)(FRAME_BUFFER_HEIGHT * 0.35f) };
 		//pd3dCommandList->RSSetScissorRects(1, &m_tRect[0]);
 		m_pMesh->Render(pd3dCommandList, 0);
 
@@ -647,6 +664,8 @@ bool CButtonObject::CheckCollisionMouse(POINT ptCursorPo)
 		((FRAME_BUFFER_HEIGHT - m_xmf2ScreenPosition.y + m_xmf2Size.y * 0.5f) > ptCursorPo.y - 10.f) && ((FRAME_BUFFER_HEIGHT - m_xmf2ScreenPosition.y - m_xmf2Size.y * 0.5f) < ptCursorPo.y - 10.f)
 		)
 	{
+		if(!m_bCollision)
+			CSoundManager::GetInst()->PlaySound("Sound/UI/Logo Button.wav", 2.f, 0.f);
 		m_bCollision = true;
 		return true;
 	}
@@ -711,6 +730,7 @@ void CMonsterHPObject::PreBarUpdate(float fTimeElapsed)
 
 		m_xmf4x4World._21 = 0.5f; // RGBN
 		m_xmf4x4World._23 = 0.6f; // ALPHA
+
 
 		// -1 ~ 1
 		m_xmf4x4World._41 = (m_xmf2ScreenPosition.x / FRAME_BUFFER_WIDTH) - (((m_fTotalValue - m_fPreValue) / m_fTotalValue) * m_xmf2Size.x * 0.5f) / (FRAME_BUFFER_WIDTH);;
@@ -898,6 +918,25 @@ CResultFrame::CResultFrame(int iTextureIndex, ID3D12Device* pd3dDevice, ID3D12Gr
 	m_pChildUI.push_back(std::move(pUIObject));
 }
 
+void CResultFrame::SetEnable(bool bEnable)
+{
+	if (bEnable)
+	{
+		//CSoundManager::GetInst()->RegisterSound("Sound/Background/Logo Bgm.wav", true, SOUND_CATEGORY::SOUND_BACKGROUND);
+		//CSoundManager::GetInst()->RegisterSound("Sound/Background/GameClear.wav", false, SOUND_CATEGORY::SOUND_BACKGROUND);
+		CSoundManager::GetInst()->PlaySound("Sound/Background/GameClear.wav", 3.f, 0.5f);
+
+
+		//pSound = CSoundManager::GetInst()->FindSound(GOBLIN_MOAN_SOUND_NUM + ORC_MOAN_SOUND_NUM + m_nSoundNumber, m_sc);
+		//break;
+		//	default:
+		//		break;
+
+	}
+	m_bEnable = bEnable;
+
+}
+
 void CResultFrame::Update(float fTimeElapsed)
 {
 	CUIObject::Update(fTimeElapsed);
@@ -915,6 +954,8 @@ void CResultFrame::Update(float fTimeElapsed)
 					if (i == 5)
 						m_pChildUI[i + 1]->m_bEnable = true;
 					m_pChildUI[i]->m_bEnable = true;
+					if(i == 4 || i == 7 || i == 9)
+					CSoundManager::GetInst()->PlaySound("Sound/UI/Up.wav", 3.f, 0.5f);
 					break;
 				}
 			}

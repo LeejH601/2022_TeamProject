@@ -172,6 +172,7 @@ public:
 	virtual ~CResultFrame() {};
 
 public:
+	virtual void SetEnable(bool bEnable);
 	virtual void Update(float fTimeElapsed);
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, bool b_UseTexture, CCamera* pCamera = NULL);
 	void SetResultData(UINT iTotalComboN, float fPlayTime, UINT iPotionN);

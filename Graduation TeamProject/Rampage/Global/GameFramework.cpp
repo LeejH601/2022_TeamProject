@@ -131,6 +131,15 @@ void CGameFramework::InitSound()
 	CSoundManager::GetInst()->RegisterSound("Sound/UI/Menu Selection Click by NenadSimic Id-171697.wav", false, SOUND_CATEGORY::SOUND_UI_BUTTON);
 	CSoundManager::GetInst()->RegisterSound("Sound/UI/Water Click by Mafon2 Id-371274.wav", false, SOUND_CATEGORY::SOUND_UI_BUTTON_CLICK);
 
+	// Logo Sound
+	// BGM
+	// 
+	CSoundManager::GetInst()->RegisterSound("Sound/Background/Logo Bgm.wav", true, SOUND_CATEGORY::SOUND_BACKGROUND);
+	CSoundManager::GetInst()->RegisterSound("Sound/Background/GameClear.wav", false, SOUND_CATEGORY::SOUND_BACKGROUND);
+
+	CSoundManager::GetInst()->RegisterSound("Sound/UI/Up.wav", false, SOUND_CATEGORY::SOUND_VOICE);
+	CSoundManager::GetInst()->RegisterSound("Sound/UI/Logo Button.wav", false, SOUND_CATEGORY::SOUND_VOICE);
+	CSoundManager::GetInst()->RegisterSound("Sound/UI/Metal Click.wav", false, SOUND_CATEGORY::SOUND_VOICE);
 	// 호버링 사운드 리스너 등록
 	std::unique_ptr<SoundPlayComponent> listener = std::make_unique<SoundPlayComponent>();
 	listener->SetDelay(0.0f);

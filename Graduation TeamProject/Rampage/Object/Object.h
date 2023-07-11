@@ -120,7 +120,7 @@ public:
 	UINT GetMeshType();
 	virtual BoundingOrientedBox* GetBoundingBox() { return nullptr; }
 	
-	void SetEnable(bool bEnable);
+	virtual void SetEnable(bool bEnable);
 	void SetChild(std::shared_ptr<CGameObject> pChild, bool bReferenceUpdate = false);
 	void SetShader(std::shared_ptr<CShader> pShader, std::shared_ptr<CTexture> pTexture = NULL);
 	void SetMaterial(int nMaterial, std::shared_ptr<CMaterial> pMaterial);
