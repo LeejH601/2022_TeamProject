@@ -1222,9 +1222,9 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_StageInfoMap.emplace(std::pair<int, StageInfo>(0,
 		StageInfo{
 			std::vector<SpawnInfo>{SpawnInfo{
-			1, 1,
 			0, 0,
 			0, 0,
+			0, 1,
 			XMFLOAT3{ 113.664360f, 3.016271f, 123.066483f },
 			12.5f}} }));
 	m_StageInfoMap.emplace(std::pair<int, StageInfo>(1,

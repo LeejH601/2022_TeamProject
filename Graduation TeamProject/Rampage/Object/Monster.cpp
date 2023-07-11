@@ -484,10 +484,15 @@ CSkeletonObject::CSkeletonObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_fAttackRange = MeterToUnit(1.1f);
 
 	m_MonsterType = MONSTER_TYPE::SKELETON;
+	// When Using ATK3
+	/*m_iAttackAnimationNum = 2;
 	m_fAtkStartTime = 1.15f;
-	m_fAtkEndTime = 1.3f;
+	m_fAtkEndTime = 1.3f;*/
 
-	m_iAttackAnimationNum = 2;
+	m_iAttackAnimationNum = 0;
+	m_fAtkStartTime = 0.86f;
+	m_fAtkEndTime = 1.31f;
+
 	m_fAttackSoundDelay = 1.15f;
 	m_fAttackSoundVolume = 0.35f;
 	m_strAttackSoundPath = "Sound/shoot/ethanchase7744__sword-slash.wav";
@@ -517,8 +522,8 @@ void CSkeletonObject::PrepareBoundingBox(ID3D12Device* pd3dDevice, ID3D12Graphic
 	m_BodyBoundingBox = BoundingOrientedBox{ XMFLOAT3(0.0f, 1.0f, 0.0f), XMFLOAT3(0.35f, 1.0f, 0.35f), XMFLOAT4{0.0f, 0.0f, 0.0f, 1.0f} };
 	m_WeaponBoundingBox = BoundingOrientedBox{ XMFLOAT3(0.0f, 0.0f, 0.48f), XMFLOAT3(0.02f, 0.07f, 0.61f), XMFLOAT4{0.0f, 0.0f, 0.0f, 1.0f} };
 #ifdef RENDER_BOUNDING_BOX
-	pBodyBoundingBoxMesh = CBoundingBoxShader::GetInst()->AddBoundingObject(pd3dDevice, pd3dCommandList, this, XMFLOAT3(0.0f, 1.0f, 0.0f), XMFLOAT3(0.35f, 1.0f, 0.35f));
-	pWeaponBoundingBoxMesh = CBoundingBoxShader::GetInst()->AddBoundingObject(pd3dDevice, pd3dCommandList, pWeapon, XMFLOAT3(0.0f, 0.0f, 0.48f), XMFLOAT3(0.02f, 0.07f, 0.61f));
+	//pBodyBoundingBoxMesh = CBoundingBoxShader::GetInst()->AddBoundingObject(pd3dDevice, pd3dCommandList, this, XMFLOAT3(0.0f, 1.0f, 0.0f), XMFLOAT3(0.35f, 1.0f, 0.35f));
+	pWeaponBoundingBoxMesh = CBoundingBoxShader::GetInst()->AddBoundingObject(pd3dDevice, pd3dCommandList, pWeapon, XMFLOAT3(0.0f, 0.0f, 0.48f), XMFLOAT3(0.10f, 0.21f, 0.801f));
 #endif
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////
