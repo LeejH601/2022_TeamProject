@@ -942,8 +942,6 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 		m_pMonsterObject->SetPosition(XMFLOAT3(190, 50, 70));
 		m_pMonsterObject->SetScale(2.0f, 2.0f, 2.0f);
 		m_pMonsterObject->Rotate(0.0f, 180.0f, 0.0f);
-		m_pMonsterObject->m_fTotalHP = MONSTER_HP;
-		m_pMonsterObject->m_fHP = MONSTER_HP;
 		m_pMonsterObject->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
 		m_pMonsterObject->m_pSkinnedAnimationController->m_xmf3RootObjectScale = XMFLOAT3(10.0f, 10.0f, 10.0f);
 		m_pMonsterObject->CreateArticulation(1.0f);
@@ -957,8 +955,6 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 		m_pMonsterObject->SetPosition(XMFLOAT3(190, 50, 70));
 		m_pMonsterObject->SetScale(2.0f, 2.0f, 2.0f);
 		m_pMonsterObject->Rotate(0.0f, 180.0f, 0.0f);
-		m_pMonsterObject->m_fTotalHP = MONSTER_HP;
-		m_pMonsterObject->m_fHP = MONSTER_HP;
 		m_pMonsterObject->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
 		m_pMonsterObject->m_pSkinnedAnimationController->m_xmf3RootObjectScale = XMFLOAT3(10.0f, 10.0f, 10.0f);
 		m_pMonsterObject->CreateArticulation(1.0f);
@@ -972,8 +968,6 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 		m_pMonsterObject->SetPosition(XMFLOAT3(190, 50, 70));
 		m_pMonsterObject->SetScale(2.0f, 2.0f, 2.0f);
 		m_pMonsterObject->Rotate(0.0f, 180.0f, 0.0f);
-		m_pMonsterObject->m_fTotalHP = MONSTER_HP;
-		m_pMonsterObject->m_fHP = MONSTER_HP;
 		m_pMonsterObject->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
 		m_pMonsterObject->m_pSkinnedAnimationController->m_xmf3RootObjectScale = XMFLOAT3(10.0f, 10.0f, 10.0f);
 		m_pMonsterObject->CreateArticulation(1.0f);
@@ -1228,7 +1222,7 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_StageInfoMap.emplace(std::pair<int, StageInfo>(0,
 		StageInfo{
 			std::vector<SpawnInfo>{SpawnInfo{
-			3, 0,
+			1, 1,
 			0, 0,
 			0, 0,
 			XMFLOAT3{ 113.664360f, 3.016271f, 123.066483f },
@@ -1785,7 +1779,7 @@ void CMainTMPScene::UIUpdate(CPlayer* pPlayer)
 		for (int i = 0; i < m_pEnemys.size(); i++)
 			CurrentHp += max(0.f, dynamic_cast<CMonster*>(m_pEnemys[i].get())->m_fHP);
 
-		dynamic_cast<CBarObject*>(m_pUIObject[7].get())->Set_Value(CurrentHp, m_pEnemys.size() * MONSTER_HP);
+		dynamic_cast<CBarObject*>(m_pUIObject[7].get())->Set_Value(CurrentHp, m_pEnemys.size() * 100.0f);
 		((CKnightPlayer*)(m_pPlayer))->SetMonsterAttack(false);
 	}
 

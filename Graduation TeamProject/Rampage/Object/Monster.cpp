@@ -14,8 +14,6 @@ CMonster::CMonster()
 	m_pStateMachine->SetGlobalState(Global_Monster::GetInst());
 	m_fShakeDistance = 0.0f;
 
-	m_fStrikingPower = 100.0f;
-
 	m_fStunTime = 0.0f;
 	m_fStunStartTime = 0.2f;
 
@@ -24,17 +22,10 @@ CMonster::CMonster()
 	m_fDissolveTime = 0.0f;
 	TestDissolvetime = 0.0f;
 
-	m_fHP = 300.0f;
-
-	m_fSpeedKperH = 10.0f;
-	m_fSpeedUperS = MeterToUnit(m_fSpeedKperH * 1000.0f) / 3600.0f;
-
 	m_fMaxIdleTime = 2.0f + RandomFloatInRange(-0.8f, 0.8f);
 	m_fMaxWanderTime = 2.0f + RandomFloatInRange(-0.8f, 0.8f);
-	m_fAttackRange = MeterToUnit(1.0f);
 	m_fAtkStartTime = 0.0f;
 	m_fAtkEndTime = 0.0f;
-	m_fSensingRange = MeterToUnit(20.0f);
 
 	std::unique_ptr<PlayerAttackListener> pCollisionComponent = std::make_unique<PlayerAttackListener>();
 	pCollisionComponent->SetObject(this);
@@ -124,6 +115,9 @@ void CMonster::ApplyDamage(float Damage, void* pData)
 {
 	m_fHP -= Damage;
 	m_fHP = max(0.0f, m_fHP);
+
+	OutputDebugString(std::to_wstring(m_fHP).c_str());
+	OutputDebugString(L"\n");
 
 	m_fCurrShield -= 10.0f;
 	m_fCurrShield = max(0.0f, m_fCurrShield);
@@ -376,6 +370,13 @@ void CMonster::Render(ID3D12GraphicsCommandList* pd3dCommandList, bool b_UseText
 //
 COrcObject::COrcObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks)
 {
+	m_fHP = 200.0f;
+	m_fTotalHP = 200.0f;
+	m_fStrikingPower = 27.0f;
+	m_fSpeedKperH = 11.5;
+	m_fSpeedUperS = MeterToUnit(m_fSpeedKperH * 1000.0f) / 3600.0f;
+	m_fAttackRange = MeterToUnit(1.25f);
+
 	m_MonsterType = MONSTER_TYPE::ORC;
 	m_fAtkStartTime = 0.55f;
 	m_fAtkEndTime = 0.92;
@@ -420,11 +421,23 @@ void COrcObject::PrepareBoundingBox(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 //
 CGoblinObject::CGoblinObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks)
 {
-	m_MonsterType = MONSTER_TYPE::GOBLIN;
-	m_fAtkStartTime = 0.53f;
-	m_fAtkEndTime = 0.69f;
+	m_fHP = 50.0f;
+	m_fTotalHP = 50.0f;
+	m_fStrikingPower = 10.0f;
+	m_fSpeedKperH = 15.0f;
+	m_fSpeedUperS = MeterToUnit(m_fSpeedKperH * 1000.0f) / 3600.0f;
+	m_fAttackRange = MeterToUnit(0.8f);
 
-	m_iAttackAnimationNum = 2;
+	m_MonsterType = MONSTER_TYPE::GOBLIN;
+
+	// When Using ATK3
+	/*m_fAtkStartTime = 0.53f;
+	m_fAtkEndTime = 0.69f;*/
+
+	m_fAtkStartTime = 0.66f;
+	m_fAtkEndTime = 0.98f;
+
+	m_iAttackAnimationNum = 0;
 	m_fAttackSoundDelay = 0.53f;
 	m_fAttackSoundVolume = 1.0f;
 	m_strAttackSoundPath = "Sound/shoot/Air Cut by Langerium Id-84616.wav";
@@ -463,6 +476,13 @@ void CGoblinObject::PrepareBoundingBox(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 //
 CSkeletonObject::CSkeletonObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks)
 {
+	m_fHP = 135.0f;
+	m_fTotalHP = 135.0f;
+	m_fStrikingPower = 18.0f;
+	m_fSpeedKperH = 8.0f;
+	m_fSpeedUperS = MeterToUnit(m_fSpeedKperH * 1000.0f) / 3600.0f;
+	m_fAttackRange = MeterToUnit(1.1f);
+
 	m_MonsterType = MONSTER_TYPE::SKELETON;
 	m_fAtkStartTime = 1.15f;
 	m_fAtkEndTime = 1.3f;
@@ -540,9 +560,9 @@ bool CMonsterPool::SetActiveMonster(MONSTER_TYPE monsterType, MonsterSpawnInfo m
 		CMonster* pMonster = dynamic_cast<CMonster*>(m_pNonActiveMonsters[static_cast<int>(monsterType)].back());
 		m_pNonActiveMonsters[static_cast<int>(monsterType)].pop_back();
 		pMonster->SetEnable(true);
+		monsterSpawnInfo.bIsElite ? pMonster->SetElite(true) : pMonster->SetElite(false);
 		pMonster->SetPosition(monsterSpawnInfo.xmf3Position);
 		pMonster->Rotate(0.0f, RandomFloatInRange(0.0f, 360.0f), 0.0f);
-		monsterSpawnInfo.bIsElite ? pMonster->SetElite(true) : pMonster->SetElite(false);
 		pMonster->m_pStateMachine->ChangeState(Spawn_Monster::GetInst());
 		return true;
 	}

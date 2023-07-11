@@ -29,7 +29,7 @@ void Spawn_Monster::Enter(CMonster* monster)
 	monster->m_fSpawnTime = 0.0f;
 	monster->m_bDissolved = false;
 	monster->m_fDissolveTime = 0.f;
-	monster->m_fHP = 100.0f;
+	monster->m_fHP = monster->m_fTotalHP;
 	monster->m_fDissolveThrethHold = 0.f;
 	monster->CPhysicsObject::OnUpdateCallback(0.f);
 
@@ -322,7 +322,10 @@ void Chasing_Monster::Execute(CMonster* monster, float fElapsedTime)
 
 	monster->SetLookAt(xmf3LookVec);
 
-	if (monster->m_fToPlayerLength < monster->m_fAttackRange)
+	float fAttackRange = 0.0f;
+	monster->m_bElite ? fAttackRange = monster->m_fAttackRange * 2.25f : fAttackRange = monster->m_fAttackRange;
+
+	if (monster->m_fToPlayerLength < fAttackRange)
 	{
 		// АјАн
 		monster->m_pStateMachine->ChangeState(Attack_Monster::GetInst());
