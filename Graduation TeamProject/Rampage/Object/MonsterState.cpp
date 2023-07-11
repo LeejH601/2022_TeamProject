@@ -377,6 +377,15 @@ void Attack_Monster::Execute(CMonster* monster, float fElapsedTime)
 	{
 		if (monster->m_fToPlayerLength < 5.0f)
 		{
+			CPlayer* pPlayer = dynamic_cast<CPlayer*>(monster->m_pChasingTargetObject);
+
+			XMFLOAT3 xmf3LookVec = XMFLOAT3{
+					pPlayer->m_pSkinnedAnimationController->m_pRootMotionObject->GetWorld()._41,
+					monster->GetPosition().y,
+					pPlayer->m_pSkinnedAnimationController->m_pRootMotionObject->GetWorld()._43 };
+
+			monster->SetLookAt(xmf3LookVec);
+
 			monster->m_pSkinnedAnimationController->m_fTime = 0.0f;
 			monster->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition = 0.0f;
 		}
