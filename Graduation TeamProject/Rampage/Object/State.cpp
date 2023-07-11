@@ -1755,10 +1755,14 @@ Dead_Player::~Dead_Player()
 void Dead_Player::Enter(CPlayer* player)
 {
 	player->SetLookAt(Vector3::Add(player->GetPosition(), Vector3::Normalize(player->m_xmf3ToHitterVec)));
+	
 	player->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 31);
+	player->m_pSkinnedAnimationController->SetTrackWeight(0, 1.0f);
+	player->m_pSkinnedAnimationController->SetTrackWeight(1, 0.0f);
 	player->m_pSkinnedAnimationController->m_fTime = 0.0f;
 	player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition = 0.0f;
 	player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_nType = ANIMATION_TYPE_ONCE;
+	
 
 	player->m_xmf3RootTransfromPreviousPos = XMFLOAT3{ 0.f, 0.f , 0.f };
 	player->m_fHP = 0.0f;
