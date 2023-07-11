@@ -479,6 +479,7 @@ CSkeletonObject::CSkeletonObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_fHP = 135.0f;
 	m_fTotalHP = 135.0f;
 	m_fStrikingPower = 18.0f;
+	m_fStrikingPower = 100.0f;
 	m_fSpeedKperH = 8.0f;
 	m_fSpeedUperS = MeterToUnit(m_fSpeedKperH * 1000.0f) / 3600.0f;
 	m_fAttackRange = MeterToUnit(1.1f);

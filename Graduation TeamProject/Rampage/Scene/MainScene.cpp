@@ -104,9 +104,11 @@ void CMainTMPScene::HandlePlayerDeadMessage()
 {
 	OutputDebugString(L"Player Dead\n");
 
+	float fTotalGameTime = Locator.GetTimer()->GetTotalTime() - m_fGameStartTime;
+
 	// 결과창 띄우기
 	m_pUIObject[13]->SetEnable(true);
-	dynamic_cast<CResultFrame*>(m_pUIObject[13].get())->SetResultData(((CPlayer*)m_pPlayer)->m_iCombo, m_fCurrentTime, ((CPlayer*)m_pPlayer)->m_iPotionN);
+	dynamic_cast<CResultFrame*>(m_pUIObject[13].get())->SetResultData(((CPlayer*)m_pPlayer)->m_iCombo, fTotalGameTime, ((CPlayer*)m_pPlayer)->m_iPotionN);
 }
 
 void CMainTMPScene::AdvanceStage()
@@ -1224,7 +1226,7 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 			std::vector<SpawnInfo>{SpawnInfo{
 			0, 0,
 			0, 0,
-			0, 1,
+			1, 1,
 			XMFLOAT3{ 113.664360f, 3.016271f, 123.066483f },
 			12.5f}} }));
 	m_StageInfoMap.emplace(std::pair<int, StageInfo>(1,
@@ -1502,6 +1504,8 @@ void CMainTMPScene::OnPrepareRenderTarget(ID3D12GraphicsCommandList* pd3dCommand
 }
 void CMainTMPScene::Enter(HWND hWnd)
 {
+	m_fGameStartTime = Locator.GetTimer()->GetTotalTime();
+
 	// 씨네마틱 카메라로 게임을 시작하게 설정
 	RECT screenRect;
 	GetWindowRect(hWnd, &screenRect);
