@@ -167,6 +167,7 @@ public:
 };
 class CCinematicCamera : public CCamera
 {
+protected:
 	struct CameraInfo {
 		XMFLOAT3 xmf3Look;
 		XMFLOAT3 xmf3Up;
@@ -194,6 +195,112 @@ public:
 	virtual void Rotate(float fPitch = 0.0f, float fYaw = 0.0f, float fRoll = 0.0f);
 	virtual void Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed);
 };
+
+class CDollyCamera : public CCinematicCamera
+{
+protected:
+	struct CubicPoly
+	{
+		XMFLOAT3 c0, c1, c2, c3;
+
+		XMFLOAT3 eval(float t)
+		{
+			float t2 = t * t;
+			float t3 = t2 * t;
+
+			XMFLOAT3 term0 = c0;
+			XMFLOAT3 term1 = Vector3::ScalarProduct(c1, t, false);
+			XMFLOAT3 term2 = Vector3::ScalarProduct(c2, t2, false);
+			XMFLOAT3 term3 = Vector3::ScalarProduct(c3, t3, false);
+
+			XMFLOAT3 result;
+			result = Vector3::Add(term0, Vector3::Add(term1, Vector3::Add(term2, term3)));
+
+			return result;
+		}
+	};
+
+	void InitCubicPoly(XMFLOAT3 x0, XMFLOAT3 x1, XMFLOAT3 t0, XMFLOAT3 t1, CubicPoly& p)
+	{
+		p.c0 = x0;
+		p.c1 = t0;
+
+		XMFLOAT3 term0 = Vector3::ScalarProduct(t1, -1, false);
+		XMFLOAT3 term1 = Vector3::ScalarProduct(t0, -2, false);
+		XMFLOAT3 term2 = Vector3::ScalarProduct(x1, 3, false);
+		XMFLOAT3 term3 = Vector3::ScalarProduct(x0, -3, false);
+		p.c2 = Vector3::Add(term0, Vector3::Add(term1, Vector3::Add(term2, term3)));
+
+		term0 = t1;
+		term1 = t0;
+		term2 = Vector3::ScalarProduct(x1, -2, false);
+		term3 = Vector3::ScalarProduct(x0, 2, false);
+		p.c3 = Vector3::Add(term0, Vector3::Add(term1, Vector3::Add(term2, term3)));
+	}
+
+	void InitNonuniformCatmullRom(XMFLOAT3 p0, XMFLOAT3 p1, XMFLOAT3 p2, XMFLOAT3 p3, float dt0, float dt1, float dt2, CubicPoly& p)
+	{
+		// compute tangents when parameterized in [t1,t2]
+		XMFLOAT3 t1, t2;
+
+		t1.x = (p1.x - p0.x) / dt0 - (p2.x - p0.x) / (dt0 + dt1) + (p2.x - p1.x) / dt1;
+		t2.x = (p2.x - p1.x) / dt1 - (p3.x - p1.x) / (dt1 + dt2) + (p3.x - p2.x) / dt2;
+
+		t1.y = (p1.y - p0.y) / dt0 - (p2.y - p0.y) / (dt0 + dt1) + (p2.y - p1.y) / dt1;
+		t2.y = (p2.y - p1.y) / dt1 - (p3.y - p1.y) / (dt1 + dt2) + (p3.y - p2.y) / dt2;
+
+		t1.z = (p1.z - p0.z) / dt0 - (p2.z - p0.z) / (dt0 + dt1) + (p2.z - p1.z) / dt1;
+		t2.z = (p2.z - p1.z) / dt1 - (p3.z - p1.z) / (dt1 + dt2) + (p3.z - p2.z) / dt2;
+
+		// rescale tangents for parametrization in [0,1]
+		t1 = Vector3::ScalarProduct(t1, dt1, false);
+		t2 = Vector3::ScalarProduct(t2, dt1, false);
+
+		InitCubicPoly(p1, p2, t1, t2, p);
+	}
+
+	float VecDistSquared(const XMFLOAT3& p, const XMFLOAT3& q)
+	{
+		float dx = q.x - p.x;
+		float dy = q.y - p.y;
+		float dz = q.z - p.z;
+		return dx * dx + dy * dy + dz * dz;
+	}
+
+	void InitCentripetalCR(const XMFLOAT3& p0, const XMFLOAT3& p1, const XMFLOAT3& p2, const XMFLOAT3& p3,
+		CubicPoly& p)
+	{
+		float dt0 = powf(VecDistSquared(p0, p1), 0.25f);
+		float dt1 = powf(VecDistSquared(p1, p2), 0.25f);
+		float dt2 = powf(VecDistSquared(p2, p3), 0.25f);
+
+		// safety check for repeated points
+		if (dt1 < 1e-4f)    dt1 = 1.0f;
+		if (dt0 < 1e-4f)    dt0 = dt1;
+		if (dt2 < 1e-4f)    dt2 = dt1;
+
+		InitNonuniformCatmullRom(p0, p1, p2, p3, dt0, dt1, dt2, p);
+	}
+
+	struct DollyTrack {
+		XMFLOAT3 xmf3Position;
+	};
+
+	std::vector<DollyTrack> m_vDollyTracks;
+	std::vector<CubicPoly> m_vCubicPolys;
+	float m_fPathLength;
+	int m_nTrackIndex = 0;
+	float m_fDt = 0;
+
+public:
+	CDollyCamera();
+	virtual ~CDollyCamera();
+
+	virtual void Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed);
+
+	void CaculateCubicPolyData();
+};
+
 class CFloatingCamera : public CCamera
 {
 public:

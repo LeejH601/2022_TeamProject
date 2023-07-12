@@ -89,6 +89,11 @@ void CPlayer::Move(const XMFLOAT3& xmf3Shift, bool bUpdateVelocity)
 
 void CPlayer::HandleDamage(CMonster* pMonster, float fDamage)
 {
+	if (m_pStateMachine->GetCurrentState() == ChargeAttack_Player::GetInst()
+		|| m_pStateMachine->GetCurrentState() == ChargeStart_Player::GetInst()
+		|| m_pStateMachine->GetCurrentState() == Charge_Player::GetInst())
+		return;
+
 	// 플레이어 상태를 대미지를 받은 상태로 변경
 	if (m_fInvincibleTime == 0.0f 
 		&& m_pStateMachine->GetCurrentState() != Damaged_Player::GetInst()

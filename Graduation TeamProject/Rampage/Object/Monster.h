@@ -38,7 +38,6 @@ public:
 	float m_fAttackRange;
 	float m_fAtkStartTime;
 	float m_fAtkEndTime;
-	float m_fSensingRange;
 	
 	float m_fStunTime;
 	float m_fMaxStunTime;

@@ -28,7 +28,7 @@ public:
 protected:
 	std::shared_ptr<CTexture> m_pTexture = NULL;
 
-	 D3D12_CPU_DESCRIPTOR_HANDLE* m_pd3dRtvCPUDescriptorHandles = NULL;
+	D3D12_CPU_DESCRIPTOR_HANDLE* m_pd3dRtvCPUDescriptorHandles = NULL;
 
 public:
 	std::shared_ptr<CTexture> m_pHDRTexture = nullptr;
@@ -47,3 +47,50 @@ public:
 	}
 };
 
+enum class BREAKSCREENSEQUENCE {
+	SLASHING,
+	SLIDING,
+	CRACKING,
+	FlASHING,
+	SEQUENCE_END,
+};
+class CPlayer;
+class CBreakScreenEffectShader : public CPostProcessShader
+{
+	bool m_bEnable = false;
+	float m_fSlashWeight = 0.f;
+	float m_fMaxSlashWeight = 15.0f;
+	float m_fSlideWeight = 0.f;
+	float m_fMaxSlideWeight = 80.0f;
+	int m_nCrackLevel = 0;
+	int m_nMaxCrackLevel = 4;
+	std::vector<float> m_fCrackWeights;
+	std::vector<XMFLOAT3> m_xmf3Colors;
+	BREAKSCREENSEQUENCE sequence = BREAKSCREENSEQUENCE::SLASHING;
+
+	float m_fSlashChangeSpeed = 5.0f;
+	float m_fSlideMoveSpeed = 20.0f;
+	XMFLOAT2 m_xmf2UVOffset;
+	XMFLOAT2 m_xmf2UVScale;
+	float m_fCrackEmissive = 1.0f;
+	float m_fGenericAlpha = 1.0f;
+
+	CPlayer* m_pPlayer = nullptr;
+
+public:
+	CBreakScreenEffectShader();
+	~CBreakScreenEffectShader();
+
+	virtual D3D12_SHADER_BYTECODE CreatePixelShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState);
+
+	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList);
+
+	virtual void AnimateObjects(float fTimeElapsed);
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState = 0);
+
+	void Reset();
+	bool GetEnable() { return m_bEnable; };
+	void SetEnable(bool value) { m_bEnable = value; };
+	void SetPlayer(CPlayer* pPlayer) { m_pPlayer = pPlayer; };
+	CPlayer* GetPlayer() { return m_pPlayer; };
+};

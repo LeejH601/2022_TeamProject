@@ -545,7 +545,7 @@ void SlashHitComponent::HandleMessage(const Message& message, const ParticleComp
 		pParticle->SetFieldMainDirection(m_xmf3FieldMainDirection);
 		pParticle->SetProgressionRate(m_fProgressionRate);
 		pParticle->SetLengthScale(m_fLengthScale);*/
-		pParticle->SetTextureIndex(m_iTextureIndex + CSimulatorScene::GetInst()->GetTextureManager()->GetTextureOffset(TextureType::TrailNoiseTexture));
+		pParticle->SetTextureIndex(m_iTextureIndex + CSimulatorScene::GetInst()->GetTextureManager()->GetTextureOffset(TextureType::ParticleTexture));
 		pParticle->SetEmissive(m_fEmissive);
 		pParticle->SetRotateFactor(m_bSimulateRotate);
 		pParticle->SetScaleFactor(m_bScaleFlag);
@@ -646,5 +646,26 @@ void PotionRemainUpdateComponent::HandleMessage(const Message& message, const Up
 
 	if (m_pNumUIObject) {
 		dynamic_cast<CNumberObject*>(m_pNumUIObject)->UpdateNumber(params.num);
+	}
+}
+
+void SpecialMoveListener::HandleMessage(const Message& message, const SpecialMoveUpdateParams& params)
+{
+	if (!m_bEnable)
+		return;
+
+	dynamic_cast<CBreakScreenEffectShader*>(m_pBreakScreenShader)->SetEnable(params.bEnable);
+}
+
+void SpecialMoveDamageListener::HandleMessage(const Message& message, const PlayerParams& params)
+{
+	for (std::unique_ptr<CGameObject>& obj : *m_ppMonsters) {
+		CKnightPlayer* pPlayer = dynamic_cast<CKnightPlayer*>(params.pPlayer);
+		CMonster* pMonster = dynamic_cast<CMonster*>(obj.get());
+
+		if (pMonster->m_bEnable)
+			pMonster->HandleDamage(pPlayer, 1000.0f);
+
+		pPlayer->SetMonsterAttack(true);
 	}
 }

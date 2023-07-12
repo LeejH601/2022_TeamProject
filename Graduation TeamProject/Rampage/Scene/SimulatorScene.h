@@ -32,7 +32,7 @@ private:
 	std::vector<std::unique_ptr<CGameObject>> m_pParticleObjects;
 	//std::vector<std::unique_ptr<CGameObject>> m_pUpDownParticleObjects;
 
-
+	std::unique_ptr<CGameObject> m_pTrailParticleObjects;
 	std::vector<std::unique_ptr<CGameObject>> m_pSpriteAttackObjects;
 	std::vector<std::unique_ptr<CGameObject>> m_pTerrainSpriteObject;
 
@@ -62,6 +62,7 @@ public:
 	virtual void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	virtual void ReleaseObjects() {}
 
+	virtual void Enter(HWND hWnd);
 	virtual void Update(float fTimeElapsed);
 	virtual void UpdateObjects(float fTimeElapsed);
 	virtual void OnPrepareRenderTarget(ID3D12GraphicsCommandList* pd3dCommandList, int nRenderTargets, D3D12_CPU_DESCRIPTOR_HANDLE* pd3dRtvCPUHandles, D3D12_CPU_DESCRIPTOR_HANDLE d3dDepthStencilBufferDSVCPUHandle);

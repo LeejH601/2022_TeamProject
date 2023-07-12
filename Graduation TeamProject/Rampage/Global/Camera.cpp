@@ -205,7 +205,7 @@ void CThirdPersonCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
 		XMFLOAT3 xmf3XAxis = XMFLOAT3(1.0f, 0.0f, 0.0f);
 		XMFLOAT3 xmf3YAxis = XMFLOAT3(0.0f, 1.0f, 0.0f);
 		XMFLOAT3 xmf3ZAxis = XMFLOAT3(0.0f, 0.0f, 1.0f);
-		
+
 		if (m_fPitch != 0.0f)
 		{
 			xmmtxRotateX = XMMatrixRotationAxis(XMLoadFloat3(&xmf3XAxis), XMConvertToRadians(m_fPitch));
@@ -288,7 +288,7 @@ void CFloatingCamera::ProcessInput(DWORD dwDirection, float cxDelta, float cyDel
 			Move(xmf3Shift);
 		}
 	}
-	
+
 }
 
 void CFloatingCamera::Rotate(float fPitch, float fYaw, float fRoll)
@@ -398,7 +398,7 @@ void CCinematicCamera::PlayCinematicCamera()
 
 	for (int i = 0; i < m_vCameraInfos.size() - 1; ++i)
 		m_fTotalDistance += Vector3::Length(Vector3::Subtract(m_vCameraInfos[i].xmf3Position, m_vCameraInfos[i + 1].xmf3Position));
-	
+
 	m_fCurrentSpeed = 0.0f;
 	m_fAcceleration = 0.0f;
 }
@@ -415,7 +415,7 @@ void CCinematicCamera::AddPlayerCameraInfo(CPlayer* pPlayer, CCamera* pCamera)
 	xmf3PlayerPos.y += MeterToUnit(0.9f);
 
 	CThirdPersonCamera* pPlayerCamera = dynamic_cast<CThirdPersonCamera*>(pCamera);
-	
+
 	if (!pPlayerCamera)
 		return;
 
@@ -489,9 +489,9 @@ XMFLOAT3 InterpolateXMFLOAT3(XMFLOAT3 xmf3Origin, XMFLOAT3 xmf3Target, float t)
 XMFLOAT3 CatMullXMFLOAT3(XMFLOAT3 xmf3Pos1, XMFLOAT3 xmf3Pos2, XMFLOAT3 xmf3Pos3, XMFLOAT3 xmf3Pos4, float t)
 {
 	std::vector<XMVECTOR> v_Pos{ XMLoadFloat3(&xmf3Pos1), XMLoadFloat3(&xmf3Pos2), XMLoadFloat3(&xmf3Pos3), XMLoadFloat3(&xmf3Pos4) };
-	
+
 	XMVECTOR resultPos = XMVectorCatmullRom(v_Pos[0], v_Pos[1], v_Pos[2], v_Pos[3], t);
-	
+
 	XMFLOAT3 xmf3Result;
 	XMStoreFloat3(&xmf3Result, resultPos);
 
@@ -517,7 +517,7 @@ void CCinematicCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
 		XMFLOAT3 fToNextCameraVec = Vector3::Subtract(m_vCameraInfos[i + 1].xmf3Position, m_vCameraInfos[i].xmf3Position);
 		fTotalDistance += Vector3::Length(fToNextCameraVec);
 	}
-	
+
 	XMFLOAT3 fDistanceVec = Vector3::Subtract(m_xmf3Position, m_vCameraInfos[m_iCurrentCameraInfoIndex].xmf3Position);
 	float fDistance = Vector3::Length(fDistanceVec);
 
@@ -570,7 +570,7 @@ void CCinematicCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
 		XMFLOAT3 fNewToNextCameraVec = Vector3::Subtract(m_vCameraInfos[m_iCurrentCameraInfoIndex + 1].xmf3Position, m_vCameraInfos[m_iCurrentCameraInfoIndex].xmf3Position);
 		float fNewCurTotalDistance = Vector3::Length(fToNextCameraVec);
 		float newT = fExceededLength / fNewCurTotalDistance;
-		
+
 		m_fTotalParamT += newT;
 	}
 
@@ -602,7 +602,7 @@ void CCinematicCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
 		xmf3InterpolateIndex.push_back(iIndex++);
 
 #ifdef LERP_QUARTARNION
-		XMFLOAT4X4 preInterpolate = { 
+		XMFLOAT4X4 preInterpolate = {
 		m_vCameraInfos[m_iCurrentCameraInfoIndex].xmf3Right.x,
 		m_vCameraInfos[m_iCurrentCameraInfoIndex].xmf3Right.y,
 		m_vCameraInfos[m_iCurrentCameraInfoIndex].xmf3Right.z,
@@ -621,7 +621,7 @@ void CCinematicCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
 		1.0f
 		};
 
-		XMFLOAT4X4 postInterpolate = { 
+		XMFLOAT4X4 postInterpolate = {
 		m_vCameraInfos[m_iCurrentCameraInfoIndex + 1].xmf3Right.x,
 		m_vCameraInfos[m_iCurrentCameraInfoIndex + 1].xmf3Right.y,
 		m_vCameraInfos[m_iCurrentCameraInfoIndex + 1].xmf3Right.z,
@@ -684,5 +684,58 @@ void CCinematicCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
 			m_vCameraInfos[xmf3InterpolateIndex[3]].xmf3Position,
 			resultT));
 #endif
+	}
+}
+
+CDollyCamera::CDollyCamera()
+{
+
+}
+
+CDollyCamera::~CDollyCamera()
+{
+}
+
+void CDollyCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
+{
+	if (m_vCameraInfos.size() < 2 || m_iCurrentCameraInfoIndex == m_vCameraInfos.size() - 1)
+		return;
+
+	m_fDt += fTimeElapsed;
+	m_nTrackIndex = (int)m_fDt;
+
+	if (m_nTrackIndex >= m_vDollyTracks.size() - 1)
+		return;
+
+	float fDt = m_fDt - m_nTrackIndex;
+	SetPosition(m_vCubicPolys[m_nTrackIndex].eval(fDt));
+
+	//SetLookAt(xmf3LookAt);
+}
+
+void CDollyCamera::CaculateCubicPolyData()
+{
+	m_vDollyTracks.resize(m_vCameraInfos.size());
+	for (int i = 0; i < m_vCameraInfos.size(); ++i) {
+		m_vDollyTracks[i].xmf3Position = m_vCameraInfos[i].xmf3Position;
+	}
+
+	int nTrack = m_vDollyTracks.size();
+
+	m_vCubicPolys.resize(nTrack - 1);
+
+	if (nTrack < 3) {
+		InitCentripetalCR(m_vDollyTracks[0].xmf3Position, m_vDollyTracks[0].xmf3Position, m_vDollyTracks[1].xmf3Position, m_vDollyTracks[1].xmf3Position, m_vCubicPolys[0]);
+	}
+	else if (nTrack == 3) {
+		InitCentripetalCR(m_vDollyTracks[0].xmf3Position, m_vDollyTracks[0].xmf3Position, m_vDollyTracks[1].xmf3Position, m_vDollyTracks[2].xmf3Position, m_vCubicPolys[0]);
+		InitCentripetalCR(m_vDollyTracks[0].xmf3Position, m_vDollyTracks[1].xmf3Position, m_vDollyTracks[2].xmf3Position, m_vDollyTracks[2].xmf3Position, m_vCubicPolys[0]);
+	}
+	else {
+		InitCentripetalCR(m_vDollyTracks[0].xmf3Position, m_vDollyTracks[0].xmf3Position, m_vDollyTracks[1].xmf3Position, m_vDollyTracks[2].xmf3Position, m_vCubicPolys[0]);
+		for (int i = 0; i < nTrack - 3; ++i) {
+			InitCentripetalCR(m_vDollyTracks[i].xmf3Position, m_vDollyTracks[i + 1].xmf3Position, m_vDollyTracks[i + 2].xmf3Position, m_vDollyTracks[i + 3].xmf3Position, m_vCubicPolys[i + 1]);
+		}
+		InitCentripetalCR(m_vDollyTracks[nTrack - 3].xmf3Position, m_vDollyTracks[nTrack - 2].xmf3Position, m_vDollyTracks[nTrack - 1].xmf3Position, m_vDollyTracks[nTrack - 1].xmf3Position, m_vCubicPolys[nTrack - 1]);
 	}
 }

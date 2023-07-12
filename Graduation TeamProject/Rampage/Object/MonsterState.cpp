@@ -29,7 +29,8 @@ void Spawn_Monster::Enter(CMonster* monster)
 	monster->m_fSpawnTime = 0.0f;
 	monster->m_bDissolved = false;
 	monster->m_fDissolveTime = 0.f;
-	monster->m_fHP = 100.0f;
+	monster->m_fHP = monster->m_fTotalHP;
+	if (monster->m_bElite) monster->m_fHP *= 2.0f;
 	monster->m_fDissolveThrethHold = 0.f;
 	monster->CPhysicsObject::OnUpdateCallback(0.f);
 
@@ -322,7 +323,10 @@ void Chasing_Monster::Execute(CMonster* monster, float fElapsedTime)
 
 	monster->SetLookAt(xmf3LookVec);
 
-	if (monster->m_fToPlayerLength < monster->m_fAttackRange)
+	float fAttackRange = 0.0f;
+	monster->m_bElite ? fAttackRange = monster->m_fAttackRange * 2.25f : fAttackRange = monster->m_fAttackRange;
+
+	if (monster->m_fToPlayerLength < fAttackRange)
 	{
 		// АјАн
 		monster->m_pStateMachine->ChangeState(Attack_Monster::GetInst());
@@ -372,8 +376,17 @@ void Attack_Monster::Execute(CMonster* monster, float fElapsedTime)
 
 	if (monster->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition == pAnimationSet->m_fLength)
 	{
-		if (monster->m_fToPlayerLength < 5.0f)
+		if (monster->m_fToPlayerLength < monster->m_fAttackRange)
 		{
+			CPlayer* pPlayer = dynamic_cast<CPlayer*>(monster->m_pChasingTargetObject);
+
+			XMFLOAT3 xmf3LookVec = XMFLOAT3{
+					pPlayer->m_pSkinnedAnimationController->m_pRootMotionObject->GetWorld()._41,
+					monster->GetPosition().y,
+					pPlayer->m_pSkinnedAnimationController->m_pRootMotionObject->GetWorld()._43 };
+
+			monster->SetLookAt(xmf3LookVec);
+
 			monster->m_pSkinnedAnimationController->m_fTime = 0.0f;
 			monster->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition = 0.0f;
 		}

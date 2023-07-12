@@ -1,6 +1,7 @@
 #include "VertexPointParticleObject.h"
 #include "../Global/Locator.h"
 #include "../Global/Timer.h"
+#include "../Scene/SimulatorScene.h"
 
 CVertexPointParticleObject::CVertexPointParticleObject() : CParticleObject()
 {
@@ -48,7 +49,7 @@ void CVertexPointParticleObject::EmitParticle(int emitType)
 	case 5:
 		param.m_fLifeTime = m_fLifeTime;
 		param.m_fEmitedSpeed = m_fSpeed;
-		param.m_iTextureIndex = 5;
+		param.m_iTextureIndex = CSimulatorScene::GetInst()->GetTextureManager()->GetTextureOffset(TextureType::ParticleTexture);
 		param.m_iTextureCoord[0] = m_iTotalRow; param.m_iTextureCoord[1] = m_iTotalCol;
 
 		/*	param.m_fLifeTime = m_fLifeTime;

@@ -145,7 +145,7 @@ void DataLoader::LoadComponentSets(std::wstring wFolderName)
 {
 	FILE* pInFile;
 
-	for (int i = 0; i < 3; ++i)
+	for (int i = 0; i < 4; ++i)
 	{
 		CState<CPlayer>* pCurrentAnimation = Atk1_Player::GetInst();
 
@@ -160,6 +160,9 @@ void DataLoader::LoadComponentSets(std::wstring wFolderName)
 		case 2:
 			pCurrentAnimation = Atk3_Player::GetInst();
 			break;
+		case 3:
+			pCurrentAnimation = ChargeAttack_Player::GetInst();
+			break;
 		default:
 			break;
 		}
@@ -167,7 +170,10 @@ void DataLoader::LoadComponentSets(std::wstring wFolderName)
 		std::wstring path;
 		wFolderName.resize(wcslen(wFolderName.c_str()));
 
-		path = file_path + wFolderName + L"\\Component" + std::to_wstring(i) + file_ext;
+		int index = i;
+		index = min(i, 2);
+
+		path = file_path + wFolderName + L"\\Component" + std::to_wstring(index) + file_ext;
 
 		::_wfopen_s(&pInFile, path.c_str(), L"rb");
 		LoadComponentSet(pInFile, pCurrentAnimation);
@@ -2703,9 +2709,38 @@ void CImGuiManager::ShowWorkshopLoginMenu()
 		ImGui::Text(U8STR("NAME")); ImGui::SameLine();
 		ImGui::InputText(U8STR(" ##SineUpName"), SineUpInfo.UserName, sizeof(SineUpInfo.UserName));
 
+		static bool bSuccessConnectMenu = false;
+		static bool bSuccessSineUp = false;
+
 		if (ImGui::Button(U8STR("회원가입##SineUp"))) {
-			ConnectServer(eSERVICE_TYPE::SINE_UP, SineUpInfo);
+			if (!bSuccessConnectMenu) {
+				bSuccessSineUp = ConnectServer(eSERVICE_TYPE::SINE_UP, SineUpInfo);
+				bSuccessConnectMenu = true;
+			}
 		}
+
+		if (bSuccessConnectMenu) {
+			if (bSuccessSineUp) {
+				ImGui::SetNextWindowSize(ImVec2(m_lDesktopWidth * 0.2f, 0.0f), ImGuiCond_Always);
+				ImGui::Begin(U8STR("회원가입 성공"), p_SineUpopen, my_window_flags);
+				if (ImGui::Button(U8STR("확인##SineUpMessage"))) {
+					bSuccessConnectMenu = false;
+					bSuccessSineUp = false;
+				}
+				ImGui::End();
+			}
+			else {
+				ImGui::SetNextWindowSize(ImVec2(m_lDesktopWidth * 0.2f, 0.0f), ImGuiCond_Always);
+				ImGui::Begin(U8STR("회원가입 실패"), p_SineUpopen, my_window_flags);
+				if (ImGui::Button(U8STR("확인##SineUpMessage"))) {
+					bSuccessConnectMenu = false;
+					bSuccessSineUp = false;
+				}
+				ImGui::End();
+			}
+		}
+		ImGui::End();
+
 	}
 
 	ImGui::End();
@@ -2813,7 +2848,7 @@ bool CImGuiManager::ConnectServer(eSERVICE_TYPE serviceType, SineUp_Info& info)
 
 		m_pNetworkDevice->SendRequestSineUp(info);
 
-		int ret;
+		int ret = 0;
 		m_pNetworkDevice->RecvApproveSineUp(ret);
 
 		if (ret == 0)
@@ -2821,7 +2856,7 @@ bool CImGuiManager::ConnectServer(eSERVICE_TYPE serviceType, SineUp_Info& info)
 		else
 			std::cout << "Success Sine Up" << std::endl;
 
-		return true;
+		return ret;
 	}
 	break;
 	default:
