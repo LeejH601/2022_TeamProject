@@ -79,6 +79,7 @@ private:
 
 	std::unique_ptr<CTextureManager> m_pTextureManager = NULL;
 
+	std::shared_ptr<CBreakScreenEffectShader> m_pBreakScreenShader = NULL;
 	std::unique_ptr<CParticleShader> m_pParticleShader;
 	std::unique_ptr<CSlashHitShader> m_pSlashHitShader;
 	std::vector<std::unique_ptr<CGameObject>> m_pParticleObjects;

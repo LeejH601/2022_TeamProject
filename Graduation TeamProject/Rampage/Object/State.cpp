@@ -1635,6 +1635,7 @@ ChargeAttack_Player::ChargeAttack_Player()
 		pTrailComponent->SetEnable(true);
 		pTrailComponent->m_fEmissiveFactor = 100.0f;
 	}
+	m_fPlayerCameraOffset = MeterToUnit(2.0f);
 }
 
 void ChargeAttack_Player::SetPlayerRootVel(CPlayer* player)
@@ -1678,6 +1679,7 @@ void ChargeAttack_Player::Enter(CPlayer* player)
 		dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[3].get())->SetLengthWeight(4.0f);
 		dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[3].get())->SetOffset(XMFLOAT4(dir.x * 4.0f, 0.0f, dir.z * 4.0f, 0));
 	}
+	m_bEnableSpecialMove = false;
 }
 
 void ChargeAttack_Player::Execute(CPlayer* player, float fElapsedTime)
@@ -1687,7 +1689,14 @@ void ChargeAttack_Player::Execute(CPlayer* player, float fElapsedTime)
 			dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[3].get())->m_eTrailUpdateMethod = TRAIL_UPDATE_METHOD::NON_UPDATE_NEW_CONTROL_POINT;
 	}
 	else {
-
+		if (m_bEnableSpecialMove == false) {
+			SpecialMoveUpdateParams param;
+			param.bEnable = true;
+			CMessageDispatcher::GetInst()->Dispatch_Message<SpecialMoveUpdateParams>(MessageType::UPDATE_SPMOVE, &param, nullptr);
+			m_bEnableSpecialMove = true;
+			m_xmf3PlayerCameraOffsetCache = player->m_pCamera->GetOffset();
+			player->m_pCamera->SetOffset(XMFLOAT3(m_xmf3PlayerCameraOffsetCache.x, m_xmf3PlayerCameraOffsetCache.y, m_xmf3PlayerCameraOffsetCache.z + m_fPlayerCameraOffset));
+		}
 		if (player->m_pSwordTrailReference) {
 			dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[3].get())->m_eTrailUpdateMethod = TRAIL_UPDATE_METHOD::UPDATE_NEW_CONTROL_POINT;
 
@@ -1701,11 +1710,14 @@ void ChargeAttack_Player::Execute(CPlayer* player, float fElapsedTime)
 		else {
 			if (0.83 < player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition) {
 				if (player->m_pSwordTrailReference) {
+					static float MaxScale = 10.0f;
 					dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[3].get())->m_eTrailUpdateMethod = TRAIL_UPDATE_METHOD::NON_UPDATE_NEW_CONTROL_POINT;
 					float scale = dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[3].get())->GetLengthWeight();
 					scale += fElapsedTime * 5.0f;
+					scale = min(MaxScale, scale);
 					dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[3].get())->SetLengthWeight(scale);
 				}
+				//m_bPlayingMoveRunning = true;
 			}
 		}
 	}
@@ -1719,7 +1731,8 @@ void ChargeAttack_Player::Execute(CPlayer* player, float fElapsedTime)
 
 void ChargeAttack_Player::Animate(CPlayer* player, float fElapsedTime)
 {
-	player->Animate(fElapsedTime);
+	if(!m_bPlayingMoveRunning)
+		player->Animate(fElapsedTime);
 }
 
 void ChargeAttack_Player::OnRootMotion(CPlayer* player, float fTimeElapsed)
@@ -1745,7 +1758,7 @@ void ChargeAttack_Player::Exit(CPlayer* player)
 {
 	if (player->m_pSwordTrailReference)
 		dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[3].get())->m_eTrailUpdateMethod = TRAIL_UPDATE_METHOD::DELETE_CONTROL_POINT;
-
+	player->m_pCamera->SetOffset(m_xmf3PlayerCameraOffsetCache);
 }
 
 Dead_Player::Dead_Player()

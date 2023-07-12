@@ -646,3 +646,11 @@ void PotionRemainUpdateComponent::HandleMessage(const Message& message, const Up
 		dynamic_cast<CNumberObject*>(m_pNumUIObject)->UpdateNumber(params.num);
 	}
 }
+
+void SpecialMoveListener::HandleMessage(const Message& message, const SpecialMoveUpdateParams& params)
+{
+	if (!m_bEnable)
+		return;
+
+	dynamic_cast<CBreakScreenEffectShader*>(m_pBreakScreenShader)->SetEnable(params.bEnable);
+}

@@ -113,6 +113,7 @@ void CGameFramework::InitSound()
 	CSoundManager::GetInst()->RegisterSound("Sound/effect/Destruction_Sound_Effect_1.wav", false, SOUND_CATEGORY::SOUND_SHOCK);
 	CSoundManager::GetInst()->RegisterSound("Sound/effect/Destruction_Sound_Effect_2.wav", false, SOUND_CATEGORY::SOUND_SHOCK);
 	CSoundManager::GetInst()->RegisterSound("Sound/effect/440773__mgamabile__smashing-glass.wav", false, SOUND_CATEGORY::SOUND_SHOCK);
+	CSoundManager::GetInst()->RegisterSound("Sound/effect/Swoosh Explosion by Electroviolence Id-234555 1.wav", false, SOUND_CATEGORY::SOUND_SHOCK);
 
 
 	CSoundManager::GetInst()->RegisterSound("Sound/Voice/Goblin/GoblinMoan01.mp3", false, SOUND_CATEGORY::SOUND_VOICE);

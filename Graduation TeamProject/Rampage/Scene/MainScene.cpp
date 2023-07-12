@@ -658,6 +658,10 @@ SCENE_RETURN_TYPE CMainTMPScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMe
 	case WM_KEYDOWN:
 		switch (wParam)
 		{
+		case 'm':
+		case 'M':
+			m_pBreakScreenShader->SetEnable(true);
+			break;
 		case 'L':
 			((CPlayer*)m_pPlayer)->Tmp();
 			break;
@@ -692,6 +696,8 @@ SCENE_RETURN_TYPE CMainTMPScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMe
 			((CCinematicCamera*)(m_pCinematicSceneCamera.get()))->ClearCameraInfo();
 			break;
 		case VK_F7:
+			if (dynamic_cast<CDollyCamera*>(m_pCinematicSceneCamera.get()))
+				dynamic_cast<CDollyCamera*>(m_pCinematicSceneCamera.get())->CaculateCubicPolyData();
 			((CCinematicCamera*)(m_pCinematicSceneCamera.get()))->PlayCinematicCamera();
 			m_pCurrentCamera = m_pCinematicSceneCamera.get();
 			m_curSceneProcessType = SCENE_PROCESS_TYPE::CINEMATIC;
@@ -868,6 +874,7 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	slistener->SetEnable(true);
 	m_pListeners.push_back(std::move(slistener));
 	CMessageDispatcher::GetInst()->RegisterListener(MessageType::REQUEST_SLEEPARTI, m_pListeners.back().get(), nullptr);
+
 
 
 
@@ -1101,6 +1108,16 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pLensFlareShader = std::make_unique<CLensFlareShader>();
 	m_pLensFlareShader->CreateShader(pd3dDevice, GetGraphicsRootSignature(), 7, pdxgiObjectRtvFormats, 0);
 	m_pLensFlareShader->BuildObjects(pd3dDevice, pd3dCommandList);
+
+	m_pBreakScreenShader = std::make_unique<CBreakScreenEffectShader>();
+	m_pBreakScreenShader->CreateShader(pd3dDevice, GetGraphicsRootSignature(), 7, pdxgiObjectRtvFormats, DXGI_FORMAT_D32_FLOAT, 0);
+	m_pBreakScreenShader->BuildObjects(pd3dDevice, pd3dCommandList);
+
+	std::unique_ptr<SpecialMoveListener> splistener = std::make_unique<SpecialMoveListener>();
+	splistener->SetShader(m_pBreakScreenShader.get());
+	splistener->SetEnable(true);
+	m_pListeners.push_back(std::move(splistener));
+	CMessageDispatcher::GetInst()->RegisterListener(MessageType::UPDATE_SPMOVE, m_pListeners.back().get(), nullptr);
 
 	/*m_pSwordTrailShader = std::make_unique<CSwordTrailShader>();
 	m_pSwordTrailShader->CreateGraphicsPipelineState(pd3dDevice, GetGraphicsRootSignature(), 0);
@@ -1454,6 +1471,8 @@ void CMainTMPScene::UpdateObjects(float fTimeElapsed)
 
 	UIUpdate((CPlayer*)m_pPlayer);
 
+	m_pBreakScreenShader->AnimateObjects(fTimeElapsed);
+
 
 	// Update Camera
 
@@ -1710,11 +1729,23 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 	m_pLensFlareShader->CalculateFlaresPlace(m_pCurrentCamera, &m_pLight->GetLights()[0]);
 	m_pLensFlareShader->Render(pd3dCommandList, 0);
 
-
-
-	if (m_pd3dComputeRootSignature) pd3dCommandList->SetComputeRootSignature(m_pd3dComputeRootSignature.Get());
 	ID3D12Resource* pd3dSource;
 	ID3D12Resource* pd3dDestination;
+
+	m_pBreakScreenShader->Render(pd3dCommandList, 0);
+
+	if (m_pBreakScreenShader->GetEnable()) {
+		pd3dDestination = m_pPostProcessShader->GetTextureResource(0);
+		pd3dSource = m_pPostProcessShader->GetTextureResource(4);
+		::SynchronizeResourceTransition(pd3dCommandList, pd3dSource, D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_COPY_SOURCE);
+		::SynchronizeResourceTransition(pd3dCommandList, pd3dDestination, D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_COPY_DEST);
+		pd3dCommandList->CopyResource(pd3dDestination, pd3dSource);
+		::SynchronizeResourceTransition(pd3dCommandList, pd3dSource, D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_COMMON);
+		::SynchronizeResourceTransition(pd3dCommandList, pd3dDestination, D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_COMMON);
+	}
+
+	if (m_pd3dComputeRootSignature) pd3dCommandList->SetComputeRootSignature(m_pd3dComputeRootSignature.Get());
+	
 
 	{
 		m_pBloomComputeShader->Dispatch(pd3dCommandList);
@@ -1833,7 +1864,7 @@ void CMainTMPScene::LoadTextureObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 	
 	
 
-	m_pTextureManager->LoadTexture(TextureType::UniformTexture, pd3dDevice, pd3dCommandList, L"Image/UnifromImages/Cracks_12.dds", 0, 0);
+	m_pTextureManager->LoadTexture(TextureType::UniformTexture, pd3dDevice, pd3dCommandList, L"Image/UnifromImages/Cracks 3.dds", 0, 0);
 }
 
 void CMainTMPScene::HandleCollision(const CollideParams& params)

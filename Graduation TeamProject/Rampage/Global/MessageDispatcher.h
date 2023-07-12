@@ -125,6 +125,11 @@ struct UpdateNumParams {
 	int num;
 };
 
+struct SpecialMoveUpdateParams {
+	CShader* m_pShader;
+	bool bEnable;
+};
+
 // Define message listener interface
 class IMessageListener {
 protected:
@@ -155,6 +160,15 @@ public:
 	virtual void HandleMessage(const Message& message, const DamageParams& params) {}
 	virtual void HandleMessage(const Message& message, const TimerParams& params) {}
 	virtual void HandleMessage(const Message& message, const UpdateNumParams& params) {}
+	virtual void HandleMessage(const Message& message, const SpecialMoveUpdateParams& params) {}
+};
+
+class SpecialMoveListener : public IMessageListener {
+	CShader* m_pBreakScreenShader = nullptr;
+public:
+	virtual void HandleMessage(const Message& message, const SpecialMoveUpdateParams& params);
+
+	void SetShader(CShader* pShader) { m_pBreakScreenShader = pShader; };
 };
 
 // Define Monster Attack component

@@ -193,6 +193,11 @@ public:
 
 class ChargeAttack_Player : public Atk_Player
 {
+    bool m_bEnableSpecialMove = false;
+    bool m_bPlayingMoveRunning = false;
+    XMFLOAT3 m_xmf3PlayerCameraOffsetCache;
+    float m_fPlayerCameraOffset;
+
     virtual void SetPlayerRootVel(CPlayer* player);
 public:
     DECLARE_SINGLE(ChargeAttack_Player);
@@ -208,6 +213,8 @@ public:
     virtual void Animate(CPlayer* player, float fElapsedTime);
     virtual void OnRootMotion(CPlayer* player, float fTimeElapsed);
     virtual void Exit(CPlayer* player);
+
+    void SetPlayingMoveRunning(bool value) { m_bPlayingMoveRunning = value; };
 };
 
 class Run_Player : public CState<CPlayer>

@@ -58,7 +58,7 @@ float4 grad4(float j, float4 ip)
 #define F4 0.309016994374947451
 
 
-float snoise(float4 v)
+float snoise(float4 v, float FrequencyValue = 1.0f, float AmplitudeValue = 1.0f)
 {
 	const float4  C = float4(0.138196601125011,  // (5 - sqrt(5))/20  G4
 		0.276393202250021,  // 2 * G4
@@ -67,7 +67,7 @@ float snoise(float4 v)
 
 	// First corner
 	float4 i = floor(v + dot(v, float4(F4, F4, F4, F4)));
-	float4 x0 = v - i + dot(i, C.xxxx);
+	float4 x0 = v - i + dot(i, C.xxxx) * FrequencyValue;
 
 	// Other corners
 
@@ -132,7 +132,7 @@ float snoise(float4 v)
 	m0 = m0 * m0;
 	m1 = m1 * m1;
 	return 49.0 * (dot(m0 * m0, float3(dot(p0, x0), dot(p1, x1), dot(p2, x2)))
-		+ dot(m1 * m1, float2(dot(p3, x3), dot(p4, x4))));
+		+ dot(m1 * m1, float2(dot(p3, x3), dot(p4, x4)))) * AmplitudeValue;
 }
 
 float smoothstep(float edge0, float edge1, float x)

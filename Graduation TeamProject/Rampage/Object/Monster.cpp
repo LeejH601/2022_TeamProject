@@ -191,10 +191,20 @@ void CMonster::HandleDamage(CPlayer* pPlayer, float fDamage)
 		m_fMaxShakeDistance = pShakeAnimationComponent->GetDistance();
 
 		if (m_bElite) {
-			ApplyDamage(30.0f);
+			ApplyDamage(15.0f); 
 			if (!GetHasShield()) {
+				ApplyDamage(15.0f);
 				m_pStateMachine->ChangeState(Idle_Monster::GetInst());
 				m_pStateMachine->ChangeState(Damaged_Monster::GetInst());
+			}
+			else {
+				m_ParticleCompParam.xmf3Position = GetPosition();
+				m_ParticleComponent.HandleMessage(Message(MessageType::MESSAGE_END), m_ParticleCompParam);
+				
+				/*SoundPlayParams Shieldsound_play_params;
+				Shieldsound_play_params.monster_type = pMonster->GetMonsterType();
+				Shieldsound_play_params.sound_category = SOUND_CATEGORY::SOUND_SHOCK;
+				CMessageDispatcher::GetInst()->Dispatch_Message<SoundPlayParams>(MessageType::PLAY_SOUND, &Shieldsound_play_params, pPlayer->m_pStateMachine->GetCurrentState());*/
 			}
 		}
 		else {
