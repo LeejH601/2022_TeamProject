@@ -126,6 +126,7 @@ void GSParticleDraw(point VS_PARTICLE_DRAW_OUTPUT input[1], inout TriangleStream
 		for (int i = 0; i < 4; i++)
 		{
 			output.position = mul(mul(float4((gf3TerrainPositions[i]), 1.0f), gmtxView), gmtxProjection);
+			output.positionW = output.position.xyz;
 			output.uv = mul(float3(gf2QuadUVs[i], 1.0f), (float3x3)(xmf4x4Coord)).xy;
 			outputStream.Append(output);
 		}
@@ -202,6 +203,7 @@ void GSParticleDraw(point VS_PARTICLE_DRAW_OUTPUT input[1], inout TriangleStream
 			output.position = mul(float4(positionW, 1.0f), gmtxView);
 			output.position.xyz += gf3Positions[i];
 			output.position = mul(output.position, gmtxProjection);
+			output.positionW = output.position.xyz;
 
 			/*	float3 positionW = mul((gf3Positions[i]), (float3x3)(gmtxInverseView)) + input[0].position;
 

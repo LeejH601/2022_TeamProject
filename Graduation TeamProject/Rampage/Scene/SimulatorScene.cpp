@@ -14,6 +14,7 @@
 #include "..\Object\SwordTrailObject.h"
 #include "..\Object\UIObject.h"
 #include "..\Shader\UIObjectShader.h"
+#include "..\Object\PlayerParticleObject.h"
 void CSimulatorScene::OnPreRender(ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed)
 {
 	if (m_pDepthRenderShader)
@@ -444,6 +445,9 @@ void CSimulatorScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 		m_pTerrainSpriteObject.push_back(std::move(m_pSpriteObject));
 	}
 
+	m_pTrailParticleObjects = std::make_unique<CParticleObject>(m_pTextureManager->LoadTextureIndex(TextureType::ParticleTexture, L"Image/BillBoardImages/Effect3.dds"), pd3dDevice, pd3dCommandList, GetGraphicsRootSignature(), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), 2.0f, XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT2(2.0f, 2.0f), MAX_PARTICLES, m_pParticleShader.get(), SPHERE_PARTICLE);
+	CPlayerParticleObject::GetInst()->SetTrailParticleObjects(m_pTrailParticleObjects.get());
+
 	m_pSlashHitObjects = std::make_unique<CParticleObject>(m_pTextureManager->LoadTextureIndex(TextureType::BillBoardTexture, L"Image/BillBoardImages/Circle1.dds"), pd3dDevice, pd3dCommandList, GetGraphicsRootSignature(), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), 2.0f, XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT2(2.0f, 2.0f), MAX_PARTICLES, m_pSlashHitShader.get(), RECOVERY_PARTICLE);
 
 
@@ -475,6 +479,11 @@ void CSimulatorScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 	}
 
 	m_pMainCharacter->m_pSwordTrailReference = m_pSwordTrailObjects.data();
+}
+void CSimulatorScene::Enter(HWND hWnd)
+{
+	if(m_pTrailParticleObjects)
+	CPlayerParticleObject::GetInst()->SetTrailParticleObjects(m_pTrailParticleObjects.get());
 }
 void CSimulatorScene::Update(float fTimeElapsed)
 {
@@ -572,7 +581,10 @@ void CSimulatorScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float f
 	m_pTextureManager->SetTextureDescriptorHeap(pd3dCommandList);
 	m_pTextureManager->UpdateShaderVariables(pd3dCommandList);
 
-	
+	for (std::unique_ptr<CGameObject>& obj : m_pSwordTrailObjects) {
+		obj->Render(pd3dCommandList, true);
+	}
+
 	for (int i = 0; i < m_pTerrainSpriteObject.size(); ++i)
 	{
 		((CParticleObject*)m_pTerrainSpriteObject[i].get())->Update(fTimeElapsed);
@@ -597,15 +609,17 @@ void CSimulatorScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float f
 		((CParticleObject*)m_pSpriteAttackObjects[i].get())->Render(pd3dCommandList, nullptr, m_pParticleShader.get());
 	}
 
+	((CParticleObject*)m_pTrailParticleObjects.get())->Update(fTimeElapsed);
+	((CParticleObject*)m_pTrailParticleObjects.get())->UpdateShaderVariables(pd3dCommandList, fCurrentTime, fTimeElapsed);
+	((CParticleObject*)m_pTrailParticleObjects.get())->Render(pd3dCommandList, nullptr, m_pParticleShader.get());
+
 	m_pSlashHitObjects->Update(fTimeElapsed);
 	m_pSlashHitObjects->Animate(fTimeElapsed);
 	m_pSlashHitObjects->UpdateShaderVariables(pd3dCommandList, fCurrentTime, fTimeElapsed);
 	m_pSlashHitObjects->Render(pd3dCommandList, nullptr, m_pSlashHitShader.get());
 
-	m_pSwordTrailShader->Render(pd3dCommandList, pCamera, 0);
-	for (std::unique_ptr<CGameObject>& obj : m_pSwordTrailObjects) {
-		obj->Render(pd3dCommandList, true);
-	}
+	//m_pSwordTrailShader->Render(pd3dCommandList, pCamera, 0);
+	
 
 	if (m_pd3dComputeRootSignature) pd3dCommandList->SetComputeRootSignature(m_pd3dComputeRootSignature.Get());
 
@@ -656,6 +670,7 @@ void CSimulatorScene::OnPostRender()
 		((CParticleObject*)m_pTerrainSpriteObject[i].get())->OnPostRender();
 	}
 	m_pSlashHitObjects.get()->OnPostRender();
+	((CParticleObject*)m_pTrailParticleObjects.get())->OnPostRender();
 }
 
 void CSimulatorScene::ResetMonster()

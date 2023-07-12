@@ -54,7 +54,7 @@ CMonster::CMonster()
 	m_ParticleComponent.SetColor(XMFLOAT3(1.0f, 0.05f, 0.05f));
 	m_ParticleComponent.SetAlpha(1.0f);
 	m_ParticleComponent.SetEmissive(10.0f);
-	m_ParticleComponent.SetSize(XMFLOAT2(0.3,0.3));
+	m_ParticleComponent.SetSize(XMFLOAT2(0.3, 0.3));
 	m_ParticleComponent.SetEnable(true);
 	m_ParticleComponent.SetEmitParticleNumber(50);
 	m_ParticleComponent.SetSpeed(10.0f);
@@ -186,16 +186,28 @@ void CMonster::HandleDamage(CPlayer* pPlayer, float fDamage)
 
 		m_fMaxShakeDistance = pShakeAnimationComponent->GetDistance();
 
+		float damage = fDamage > 0.0001f ? fDamage : 30.0f;
+
 		if (m_bElite) {
-			ApplyDamage(30.0f);
+			ApplyDamage(damage / 2);
 			if (!GetHasShield()) {
+				ApplyDamage(damage / 2);
 				m_pStateMachine->ChangeState(Idle_Monster::GetInst());
 				m_pStateMachine->ChangeState(Damaged_Monster::GetInst());
+			}
+			else {
+				m_ParticleCompParam.xmf3Position = GetPosition();
+				m_ParticleComponent.HandleMessage(Message(MessageType::MESSAGE_END), m_ParticleCompParam);
+
+				/*SoundPlayParams Shieldsound_play_params;
+				Shieldsound_play_params.monster_type = pMonster->GetMonsterType();
+				Shieldsound_play_params.sound_category = SOUND_CATEGORY::SOUND_SHOCK;
+				CMessageDispatcher::GetInst()->Dispatch_Message<SoundPlayParams>(MessageType::PLAY_SOUND, &Shieldsound_play_params, pPlayer->m_pStateMachine->GetCurrentState());*/
 			}
 		}
 		else {
 			m_pStateMachine->ChangeState(Idle_Monster::GetInst());
-			ApplyDamage(30.0f);
+			ApplyDamage(damage);
 			m_pStateMachine->ChangeState(Damaged_Monster::GetInst());
 		}
 
@@ -309,7 +321,7 @@ void CMonster::UpdateTransform(XMFLOAT4X4* pxmf4x4Parent)
 			pWeaponBoundingBoxMesh->SetWorld(pWeapon->GetWorld());
 #endif 
 		m_WeaponBoundingBox.Transform(m_TransformedWeaponBoundingBox, XMLoadFloat4x4(&pWeapon->GetWorld()));
-	}
+}
 
 	if (m_bSimulateArticulate) {
 		m_pSkinnedAnimationController->UpdateBoneTransform();
@@ -544,12 +556,12 @@ void CMonsterRootAnimationController::OnRootMotion(CGameObject* pRootGameObject,
 
 bool CMonsterPool::SetNonActiveMonster(MONSTER_TYPE monsterType, CMonster* pMonster) // Active 여부 반환
 {
-	if(m_pNonActiveMonsters.size() != (static_cast<int>(MONSTER_TYPE::NONE)))
+	if (m_pNonActiveMonsters.size() != (static_cast<int>(MONSTER_TYPE::NONE)))
 		m_pNonActiveMonsters.resize(static_cast<int>(MONSTER_TYPE::NONE));
 
 	// NonActiveMonster 있는 몬스터를 Enable true 변경 및 
-	auto it = std::find(m_pNonActiveMonsters[static_cast<int>(monsterType)].begin(), 
-		m_pNonActiveMonsters[static_cast<int>(monsterType)].end(), 
+	auto it = std::find(m_pNonActiveMonsters[static_cast<int>(monsterType)].begin(),
+		m_pNonActiveMonsters[static_cast<int>(monsterType)].end(),
 		pMonster);
 
 	if ((it == m_pNonActiveMonsters[static_cast<int>(monsterType)].end())) {

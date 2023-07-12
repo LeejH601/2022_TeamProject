@@ -515,6 +515,7 @@
     <FxCompile Include="Shader\TerrainDetailDepthShader.hlsl" />
     <FxCompile Include="Shader\TerrainDetailDepthVertexShader.hlsl" />
     <FxCompile Include="Shader\TerrainDetailDepthGeometryShader.hlsl" />
+    <FxCompile Include="Shader\BreakScreenEffectPixelShader.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Shader\Header.hlsli" />
