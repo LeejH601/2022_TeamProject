@@ -1246,7 +1246,7 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 			std::vector<SpawnInfo>{SpawnInfo{
 			3, 0,
 			0, 0,
-			0, 0,
+			0, 1,
 			XMFLOAT3{ 113.664360f, 3.016271f, 123.066483f },
 			12.5f}} }));
 	m_StageInfoMap.emplace(std::pair<int, StageInfo>(1,
@@ -1570,6 +1570,9 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 	m_pTextureManager->UpdateShaderVariables(pd3dCommandList);
 	//m_pTextureManager->UpdateShaderVariables(pd3dCommandList, TextureType::UniformTexture);
 
+	bool bRimLightEnable = 0;
+	pd3dCommandList->SetGraphicsRoot32BitConstants(0, 1, &bRimLightEnable, 34);
+
 	m_pMap->RenderTerrain(pd3dCommandList);
 
 	for (int i = 0; i < m_pTerrainSpriteObject.size(); ++i)
@@ -1811,6 +1814,7 @@ void CMainTMPScene::UIUpdate(CPlayer* pPlayer)
 		dynamic_cast<CBarObject*>(m_pUIObject[7].get())->Set_Value(CurrentHp, stageInfo.m_fTotalHP);
 
 		((CKnightPlayer*)(m_pPlayer))->SetMonsterAttack(false);
+
 		if (CurrentHp == 0.0f)
 		{
 			m_pUIObject[6]->m_bEnable = false;
