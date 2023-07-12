@@ -47,6 +47,7 @@ struct SpawnInfo {
 
 struct StageInfo {
 	std::vector<SpawnInfo> m_vSpawnInfo;
+	float m_fTotalHP;
 };
 
 class CMainTMPScene : public CScene
@@ -59,6 +60,8 @@ private:
 	RECT m_ScreendRect;
 
 	bool m_bGameStart = false;
+	float m_fGameStartTime;
+
 	int m_iStageNum = 0;
 	int m_iTotalMonsterNum = 0;
 

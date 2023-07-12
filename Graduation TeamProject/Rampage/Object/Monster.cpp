@@ -14,8 +14,6 @@ CMonster::CMonster()
 	m_pStateMachine->SetGlobalState(Global_Monster::GetInst());
 	m_fShakeDistance = 0.0f;
 
-	m_fStrikingPower = 100.0f;
-
 	m_fStunTime = 0.0f;
 	m_fStunStartTime = 0.2f;
 
@@ -24,17 +22,10 @@ CMonster::CMonster()
 	m_fDissolveTime = 0.0f;
 	TestDissolvetime = 0.0f;
 
-	m_fHP = 300.0f;
-
-	m_fSpeedKperH = 10.0f;
-	m_fSpeedUperS = MeterToUnit(m_fSpeedKperH * 1000.0f) / 3600.0f;
-
 	m_fMaxIdleTime = 2.0f + RandomFloatInRange(-0.8f, 0.8f);
 	m_fMaxWanderTime = 2.0f + RandomFloatInRange(-0.8f, 0.8f);
-	m_fAttackRange = MeterToUnit(1.0f);
 	m_fAtkStartTime = 0.0f;
 	m_fAtkEndTime = 0.0f;
-	m_fSensingRange = MeterToUnit(20.0f);
 
 	std::unique_ptr<PlayerAttackListener> pCollisionComponent = std::make_unique<PlayerAttackListener>();
 	pCollisionComponent->SetObject(this);
@@ -122,11 +113,16 @@ void CMonster::CalculateResultPosition()
 
 void CMonster::ApplyDamage(float Damage, void* pData)
 {
-	m_fHP -= Damage;
-	m_fHP = max(0.0f, m_fHP);
+	OutputDebugString(std::to_wstring(m_fHP).c_str());
+	OutputDebugString(L"\n");
 
-	m_fCurrShield -= 10.0f;
+	m_fCurrShield -= Damage;
 	m_fCurrShield = max(0.0f, m_fCurrShield);
+
+		
+	if (m_fCurrShield > 0.0f) m_fHP -= Damage;
+	else m_fHP -= Damage * 0.5f;
+	m_fHP = max(0.0f, m_fHP);
 }
 
 void CMonster::SetElite(bool flag)
@@ -376,6 +372,13 @@ void CMonster::Render(ID3D12GraphicsCommandList* pd3dCommandList, bool b_UseText
 //
 COrcObject::COrcObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks)
 {
+	m_fHP = 200.0f;
+	m_fTotalHP = 200.0f;
+	m_fStrikingPower = 27.0f;
+	m_fSpeedKperH = 11.5;
+	m_fSpeedUperS = MeterToUnit(m_fSpeedKperH * 1000.0f) / 3600.0f;
+	m_fAttackRange = MeterToUnit(1.25f);
+
 	m_MonsterType = MONSTER_TYPE::ORC;
 	m_fAtkStartTime = 0.55f;
 	m_fAtkEndTime = 0.92;
@@ -420,11 +423,23 @@ void COrcObject::PrepareBoundingBox(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 //
 CGoblinObject::CGoblinObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks)
 {
-	m_MonsterType = MONSTER_TYPE::GOBLIN;
-	m_fAtkStartTime = 0.53f;
-	m_fAtkEndTime = 0.69f;
+	m_fHP = 75.0f;
+	m_fTotalHP = 75.0f;
+	m_fStrikingPower = 10.0f;
+	m_fSpeedKperH = 15.0f;
+	m_fSpeedUperS = MeterToUnit(m_fSpeedKperH * 1000.0f) / 3600.0f;
+	m_fAttackRange = MeterToUnit(0.8f);
 
-	m_iAttackAnimationNum = 2;
+	m_MonsterType = MONSTER_TYPE::GOBLIN;
+
+	// When Using ATK3
+	/*m_fAtkStartTime = 0.53f;
+	m_fAtkEndTime = 0.69f;*/
+
+	m_fAtkStartTime = 0.66f;
+	m_fAtkEndTime = 0.98f;
+
+	m_iAttackAnimationNum = 0;
 	m_fAttackSoundDelay = 0.53f;
 	m_fAttackSoundVolume = 1.0f;
 	m_strAttackSoundPath = "Sound/shoot/Air Cut by Langerium Id-84616.wav";
@@ -463,11 +478,23 @@ void CGoblinObject::PrepareBoundingBox(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 //
 CSkeletonObject::CSkeletonObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks)
 {
-	m_MonsterType = MONSTER_TYPE::SKELETON;
-	m_fAtkStartTime = 1.15f;
-	m_fAtkEndTime = 1.3f;
+	m_fHP = 135.0f;
+	m_fTotalHP = 135.0f;
+	m_fStrikingPower = 18.0f;
+	m_fSpeedKperH = 8.0f;
+	m_fSpeedUperS = MeterToUnit(m_fSpeedKperH * 1000.0f) / 3600.0f;
+	m_fAttackRange = MeterToUnit(1.1f);
 
-	m_iAttackAnimationNum = 2;
+	m_MonsterType = MONSTER_TYPE::SKELETON;
+	// When Using ATK3
+	/*m_iAttackAnimationNum = 2;
+	m_fAtkStartTime = 1.15f;
+	m_fAtkEndTime = 1.3f;*/
+
+	m_iAttackAnimationNum = 0;
+	m_fAtkStartTime = 0.86f;
+	m_fAtkEndTime = 1.31f;
+
 	m_fAttackSoundDelay = 1.15f;
 	m_fAttackSoundVolume = 0.35f;
 	m_strAttackSoundPath = "Sound/shoot/ethanchase7744__sword-slash.wav";
@@ -497,8 +524,8 @@ void CSkeletonObject::PrepareBoundingBox(ID3D12Device* pd3dDevice, ID3D12Graphic
 	m_BodyBoundingBox = BoundingOrientedBox{ XMFLOAT3(0.0f, 1.0f, 0.0f), XMFLOAT3(0.35f, 1.0f, 0.35f), XMFLOAT4{0.0f, 0.0f, 0.0f, 1.0f} };
 	m_WeaponBoundingBox = BoundingOrientedBox{ XMFLOAT3(0.0f, 0.0f, 0.48f), XMFLOAT3(0.02f, 0.07f, 0.61f), XMFLOAT4{0.0f, 0.0f, 0.0f, 1.0f} };
 #ifdef RENDER_BOUNDING_BOX
-	pBodyBoundingBoxMesh = CBoundingBoxShader::GetInst()->AddBoundingObject(pd3dDevice, pd3dCommandList, this, XMFLOAT3(0.0f, 1.0f, 0.0f), XMFLOAT3(0.35f, 1.0f, 0.35f));
-	pWeaponBoundingBoxMesh = CBoundingBoxShader::GetInst()->AddBoundingObject(pd3dDevice, pd3dCommandList, pWeapon, XMFLOAT3(0.0f, 0.0f, 0.48f), XMFLOAT3(0.02f, 0.07f, 0.61f));
+	//pBodyBoundingBoxMesh = CBoundingBoxShader::GetInst()->AddBoundingObject(pd3dDevice, pd3dCommandList, this, XMFLOAT3(0.0f, 1.0f, 0.0f), XMFLOAT3(0.35f, 1.0f, 0.35f));
+	pWeaponBoundingBoxMesh = CBoundingBoxShader::GetInst()->AddBoundingObject(pd3dDevice, pd3dCommandList, pWeapon, XMFLOAT3(0.0f, 0.0f, 0.48f), XMFLOAT3(0.10f, 0.21f, 0.801f));
 #endif
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -540,9 +567,9 @@ bool CMonsterPool::SetActiveMonster(MONSTER_TYPE monsterType, MonsterSpawnInfo m
 		CMonster* pMonster = dynamic_cast<CMonster*>(m_pNonActiveMonsters[static_cast<int>(monsterType)].back());
 		m_pNonActiveMonsters[static_cast<int>(monsterType)].pop_back();
 		pMonster->SetEnable(true);
+		monsterSpawnInfo.bIsElite ? pMonster->SetElite(true) : pMonster->SetElite(false);
 		pMonster->SetPosition(monsterSpawnInfo.xmf3Position);
 		pMonster->Rotate(0.0f, RandomFloatInRange(0.0f, 360.0f), 0.0f);
-		monsterSpawnInfo.bIsElite ? pMonster->SetElite(true) : pMonster->SetElite(false);
 		pMonster->m_pStateMachine->ChangeState(Spawn_Monster::GetInst());
 		return true;
 	}
