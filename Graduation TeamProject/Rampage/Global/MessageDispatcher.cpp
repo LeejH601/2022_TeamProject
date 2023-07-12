@@ -663,8 +663,17 @@ void SpecialMoveDamageListener::HandleMessage(const Message& message, const Play
 		CKnightPlayer* pPlayer = dynamic_cast<CKnightPlayer*>(params.pPlayer);
 		CMonster* pMonster = dynamic_cast<CMonster*>(obj.get());
 
-		if (pMonster->m_bEnable)
+		if (pMonster->m_bEnable) {
 			pMonster->HandleDamage(pPlayer, 1000.0f);
+
+			BoundingOrientedBox* TargetBoundingBox = pMonster->GetBoundingBox();
+			pPlayer->SetTargetPosition(*TargetBoundingBox);
+
+			CollideParams colParam;
+			colParam.xmf3CollidePosition = pPlayer->GetTargetPosition();
+			CMessageDispatcher::GetInst()->Dispatch_Message(MessageType::COLLISION, &colParam, nullptr);
+		}
+
 
 		pPlayer->SetMonsterAttack(true);
 	}
