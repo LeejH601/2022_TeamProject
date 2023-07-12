@@ -665,7 +665,7 @@ bool CButtonObject::CheckCollisionMouse(POINT ptCursorPo)
 		)
 	{
 		if(!m_bCollision)
-			CSoundManager::GetInst()->PlaySound("Sound/UI/Logo Button.wav", 2.f, 0.f);
+			CSoundManager::GetInst()->PlaySound("Sound/UI/Logo Button.wav", 0.8f, 0.f);
 		m_bCollision = true;
 		return true;
 	}
@@ -924,7 +924,7 @@ void CResultFrame::SetEnable(bool bEnable)
 	{
 		//CSoundManager::GetInst()->RegisterSound("Sound/Background/Logo Bgm.wav", true, SOUND_CATEGORY::SOUND_BACKGROUND);
 		//CSoundManager::GetInst()->RegisterSound("Sound/Background/GameClear.wav", false, SOUND_CATEGORY::SOUND_BACKGROUND);
-		CSoundManager::GetInst()->PlaySound("Sound/Background/GameClear.wav", 3.f, 0.5f);
+		CSoundManager::GetInst()->PlaySound("Sound/Background/GameClear.wav", 1.f, 0.5f);
 
 
 		//pSound = CSoundManager::GetInst()->FindSound(GOBLIN_MOAN_SOUND_NUM + ORC_MOAN_SOUND_NUM + m_nSoundNumber, m_sc);
@@ -955,7 +955,7 @@ void CResultFrame::Update(float fTimeElapsed)
 						m_pChildUI[i + 1]->m_bEnable = true;
 					m_pChildUI[i]->m_bEnable = true;
 					if(i == 4 || i == 7 || i == 9)
-					CSoundManager::GetInst()->PlaySound("Sound/UI/Up.wav", 3.f, 0.5f);
+					CSoundManager::GetInst()->PlaySound("Sound/UI/Up.wav", 1.f, 0.5f);
 					break;
 				}
 			}
