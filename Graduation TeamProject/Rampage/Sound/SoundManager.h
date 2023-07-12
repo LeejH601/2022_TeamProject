@@ -38,4 +38,5 @@ public:
 
     void UpdateSound();
     void PlaySound(std::string path, float volume, float fDelay);
+    void StopSound(std::string path);
 };

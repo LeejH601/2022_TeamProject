@@ -30,6 +30,22 @@ void CSoundPlayer::PlaySound(FMOD_SYSTEM* g_sound_system, SoundPlayInfo sound_pl
     m_vPlayingSounds.push_back(sound_play_info.pSound->GetChannel());
 }
 
+void CSoundPlayer::StopSound(FMOD_SOUND* pcurrentSound)
+{
+    for (auto it = m_vPlayingSounds.begin(); it != m_vPlayingSounds.end(); ++it) {
+        FMOD_CHANNEL* pChannel = *it;
+
+        FMOD_SOUND* currentSound;
+        auto result = FMOD_Channel_GetCurrentSound(pChannel, &currentSound);
+
+        if (currentSound == pcurrentSound)
+        {
+            FMOD_Channel_Stop(pChannel);
+            return;
+        }
+    }
+}
+
 void CSoundPlayer::RegisterSound(CSound* pSound, float fDelay)
 {
 	SoundPlayInfo sound_play_info{ pSound, fDelay };

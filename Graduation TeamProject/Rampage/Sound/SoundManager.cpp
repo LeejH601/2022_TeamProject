@@ -90,3 +90,11 @@ void CSoundManager::PlaySound(std::string path, float volume, float fDelay) {
 	(*sound).setVolume(volume);
 	m_SoundPlayer.RegisterSound(&(*sound), fDelay);
 }
+
+void CSoundManager::StopSound(std::string path)
+{
+	std::vector<CSound>::iterator sound = FindSound(path);
+	m_SoundPlayer.StopSound(sound->GetSound());
+}
+
+

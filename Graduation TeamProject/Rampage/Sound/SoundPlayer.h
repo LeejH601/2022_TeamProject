@@ -20,4 +20,6 @@ public:
     void RegisterSound(CSound* pSound, float fDelay = 0.0f);
     void PlaySounds(FMOD_SYSTEM* g_sound_system, FMOD_CHANNELGROUP* channelgroup);
     void EraseAllPlayedSounds();
+    void StopSound(FMOD_SOUND* currentSound);
+    void AllStopSound();
 };
