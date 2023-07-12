@@ -119,6 +119,7 @@ void CMainTMPScene::AdvanceStage()
 		return;
 
 	StageInfo stageInfo = m_StageInfoMap.find(m_iStageNum - 1)->second;
+	float fTotalHP = 0.0f;
 
 	for (const SpawnInfo& stageSpawnInfo : stageInfo.m_vSpawnInfo)
 	{
@@ -217,7 +218,24 @@ void CMainTMPScene::AdvanceStage()
 				CMonsterPool::GetInst()->SpawnMonster(MONSTER_TYPE::SKELETON, stageSpawnInfo.m_iEliteSkeletonNum, xmf3MonsterSpawnInfo.data());
 			}
 		}
+
+		fTotalHP += (75.0f * stageSpawnInfo.m_iGoblinNum +
+			75.0f * 2.0f * stageSpawnInfo.m_iEliteGolbinNum +
+			200.0f * stageSpawnInfo.m_iOrcNum +
+			200.0f * 2.0f * stageSpawnInfo.m_iEliteOrcNum +
+			135.0f * stageSpawnInfo.m_iSkeletonNum +
+			135.0f * 2.0f * stageSpawnInfo.m_iEliteSkeletonNum);
 	}
+
+	m_StageInfoMap.find(m_iStageNum - 1)->second.m_fTotalHP = fTotalHP;
+
+	{
+		m_pUIObject[6]->m_bEnable = true;
+		m_pUIObject[7]->m_bEnable = true;
+
+		dynamic_cast<CBarObject*>(m_pUIObject[7].get())->Set_Value(fTotalHP, fTotalHP);
+	}
+
 	m_curSceneProcessType = SCENE_PROCESS_TYPE::WAITING;
 	m_fWaitingTime = 0.0f;
 }
@@ -1155,6 +1173,7 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 
 	// Monster UI
 	pUIObject = std::make_unique<CMonsterHPObject>(2, pd3dDevice, pd3dCommandList, 10.f);
+	pUIObject->SetEnable(false);
 	pUIObject->SetSize(XMFLOAT2(1024.f * 0.8f, 64.f * 0.6f));
 	pUIObject->SetScreenPosition(XMFLOAT2(FRAME_BUFFER_WIDTH * 0.5f, FRAME_BUFFER_HEIGHT * 0.15f));
 	pUIObject->SetTextureIndex(m_pTextureManager->LoadTotalTextureIndex(TextureType::UITexture, L"Image/UiImages/MonsterHPFrame.dds"));
@@ -1162,6 +1181,7 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 
 
 	pUIObject = std::make_unique<CMonsterHPObject>(2, pd3dDevice, pd3dCommandList, 10.f);
+	pUIObject->SetEnable(false);
 	pUIObject->SetSize(XMFLOAT2(1024.f * 0.8f, 64.f * 0.6f));
 	pUIObject->SetScreenPosition(XMFLOAT2(FRAME_BUFFER_WIDTH * 0.5f, FRAME_BUFFER_HEIGHT * 0.15f));
 	pUIObject->SetTextureIndex(m_pTextureManager->LoadTotalTextureIndex(TextureType::UITexture, L"Image/UiImages/MonsterHP.dds"));
@@ -1224,9 +1244,9 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_StageInfoMap.emplace(std::pair<int, StageInfo>(0,
 		StageInfo{
 			std::vector<SpawnInfo>{SpawnInfo{
+			3, 0,
 			0, 0,
 			0, 0,
-			1, 1,
 			XMFLOAT3{ 113.664360f, 3.016271f, 123.066483f },
 			12.5f}} }));
 	m_StageInfoMap.emplace(std::pair<int, StageInfo>(1,
@@ -1550,7 +1570,6 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 	m_pTextureManager->UpdateShaderVariables(pd3dCommandList);
 	//m_pTextureManager->UpdateShaderVariables(pd3dCommandList, TextureType::UniformTexture);
 
-
 	m_pMap->RenderTerrain(pd3dCommandList);
 
 	for (int i = 0; i < m_pTerrainSpriteObject.size(); ++i)
@@ -1780,11 +1799,23 @@ void CMainTMPScene::UIUpdate(CPlayer* pPlayer)
 	if (((CKnightPlayer*)(m_pPlayer))->GetMonsterAttack())
 	{
 		float CurrentHp = 0.f;
-		for (int i = 0; i < m_pEnemys.size(); i++)
-			CurrentHp += max(0.f, dynamic_cast<CMonster*>(m_pEnemys[i].get())->m_fHP);
+		StageInfo stageInfo = m_StageInfoMap.find(m_iStageNum - 1)->second;
 
-		dynamic_cast<CBarObject*>(m_pUIObject[7].get())->Set_Value(CurrentHp, m_pEnemys.size() * 100.0f);
+		for (int i = 0; i < m_pEnemys.size(); i++)
+			if (m_pEnemys[i]->m_bEnable) {
+				CurrentHp += max(0.f, dynamic_cast<CMonster*>(m_pEnemys[i].get())->m_fHP);
+				OutputDebugString(std::to_wstring(dynamic_cast<CMonster*>(m_pEnemys[i].get())->m_fHP).c_str());
+				OutputDebugString(L"\n");
+			}
+
+		dynamic_cast<CBarObject*>(m_pUIObject[7].get())->Set_Value(CurrentHp, stageInfo.m_fTotalHP);
+
 		((CKnightPlayer*)(m_pPlayer))->SetMonsterAttack(false);
+		if (CurrentHp == 0.0f)
+		{
+			m_pUIObject[6]->m_bEnable = false;
+			m_pUIObject[7]->m_bEnable = false;
+		}
 	}
 
 }

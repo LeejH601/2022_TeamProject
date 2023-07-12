@@ -47,6 +47,7 @@ struct SpawnInfo {
 
 struct StageInfo {
 	std::vector<SpawnInfo> m_vSpawnInfo;
+	float m_fTotalHP;
 };
 
 class CMainTMPScene : public CScene

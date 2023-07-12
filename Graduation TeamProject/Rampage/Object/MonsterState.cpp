@@ -30,6 +30,7 @@ void Spawn_Monster::Enter(CMonster* monster)
 	monster->m_bDissolved = false;
 	monster->m_fDissolveTime = 0.f;
 	monster->m_fHP = monster->m_fTotalHP;
+	if (monster->m_bElite) monster->m_fHP *= 2.0f;
 	monster->m_fDissolveThrethHold = 0.f;
 	monster->CPhysicsObject::OnUpdateCallback(0.f);
 

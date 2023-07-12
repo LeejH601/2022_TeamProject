@@ -113,14 +113,14 @@ void CMonster::CalculateResultPosition()
 
 void CMonster::ApplyDamage(float Damage, void* pData)
 {
-	m_fHP -= Damage;
-	m_fHP = max(0.0f, m_fHP);
-
 	OutputDebugString(std::to_wstring(m_fHP).c_str());
 	OutputDebugString(L"\n");
 
 	m_fCurrShield -= 10.0f;
 	m_fCurrShield = max(0.0f, m_fCurrShield);
+
+	m_fHP -= Damage;
+	m_fHP = max(0.0f, m_fHP);
 }
 
 void CMonster::SetElite(bool flag)
@@ -421,8 +421,8 @@ void COrcObject::PrepareBoundingBox(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 //
 CGoblinObject::CGoblinObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks)
 {
-	m_fHP = 50.0f;
-	m_fTotalHP = 50.0f;
+	m_fHP = 75.0f;
+	m_fTotalHP = 75.0f;
 	m_fStrikingPower = 10.0f;
 	m_fSpeedKperH = 15.0f;
 	m_fSpeedUperS = MeterToUnit(m_fSpeedKperH * 1000.0f) / 3600.0f;
