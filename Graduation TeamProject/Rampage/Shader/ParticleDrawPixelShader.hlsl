@@ -59,7 +59,7 @@ PS_MULTIPLE_RENDER_TARGETS_OUTPUT PSParticleDraw(GS_PARTICLE_DRAW_OUTPUT input) 
 {
 	PS_MULTIPLE_RENDER_TARGETS_OUTPUT output;
 	//float4 cColor = gtxtTexture[0].Sample(gSamplerState, input.uv); // 2번이
-	float4 cColor = gtxtTexture[(uint)(input.TextureIndex - 1)].Sample(gSamplerState, input.uv); // 2번이
+	float4 cColor = gtxtTexture[(uint)(input.TextureIndex)].Sample(gSamplerState, input.uv); // 2번이
 	if (input.ParticleType == 3) {
 		int index = 0;
 		float ColorUV = frac(((gfCurrentTime - input.EmitTime) / input.lifetime) + (input.positionW.x * 0.5f + 0.5f));

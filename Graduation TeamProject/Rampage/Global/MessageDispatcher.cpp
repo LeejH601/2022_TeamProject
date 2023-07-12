@@ -545,7 +545,7 @@ void SlashHitComponent::HandleMessage(const Message& message, const ParticleComp
 		pParticle->SetFieldMainDirection(m_xmf3FieldMainDirection);
 		pParticle->SetProgressionRate(m_fProgressionRate);
 		pParticle->SetLengthScale(m_fLengthScale);*/
-		pParticle->SetTextureIndex(m_iTextureIndex + CSimulatorScene::GetInst()->GetTextureManager()->GetTextureOffset(TextureType::TrailNoiseTexture));
+		pParticle->SetTextureIndex(m_iTextureIndex + CSimulatorScene::GetInst()->GetTextureManager()->GetTextureOffset(TextureType::ParticleTexture));
 		pParticle->SetEmissive(m_fEmissive);
 		pParticle->SetRotateFactor(m_bSimulateRotate);
 		pParticle->SetScaleFactor(m_bScaleFlag);
@@ -660,9 +660,12 @@ void SpecialMoveListener::HandleMessage(const Message& message, const SpecialMov
 void SpecialMoveDamageListener::HandleMessage(const Message& message, const PlayerParams& params)
 {
 	for (std::unique_ptr<CGameObject>& obj : *m_ppMonsters) {
+		CKnightPlayer* pPlayer = dynamic_cast<CKnightPlayer*>(params.pPlayer);
 		CMonster* pMonster = dynamic_cast<CMonster*>(obj.get());
 
 		if (pMonster->m_bEnable)
-			pMonster->HandleDamage(dynamic_cast<CPlayer*>(params.pPlayer), 1000.0f);
+			pMonster->HandleDamage(pPlayer, 1000.0f);
+
+		pPlayer->SetMonsterAttack(true);
 	}
 }
