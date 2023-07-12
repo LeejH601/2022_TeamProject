@@ -988,6 +988,13 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 		m_pEnemys.push_back(std::move(m_pMonsterObject));
 	}
 
+	std::unique_ptr<SpecialMoveDamageListener> SPDlistener = std::make_unique<SpecialMoveDamageListener>();
+	SPDlistener->SetEnable(true);
+	SPDlistener->SetObjects(&m_pEnemys);
+	m_pListeners.push_back(std::move(SPDlistener));
+	CMessageDispatcher::GetInst()->RegisterListener(MessageType::SPECIALMOVE_DAMAGED, m_pListeners.back().get(), nullptr);
+
+
 	// CollisionChecker »ý¼º
 	m_pCollisionChecker = std::make_unique<CollisionChecker>();
 
@@ -1396,6 +1403,8 @@ void CMainTMPScene::UpdateObjects(float fTimeElapsed)
 	if (m_pPlayer) {
 		if (!dynamic_cast<CPlayer*>(m_pPlayer)->m_pSwordTrailReference)
 			dynamic_cast<CPlayer*>(m_pPlayer)->m_pSwordTrailReference = m_pSwordTrailObjects.data();
+		if (m_pBreakScreenShader->GetPlayer() == nullptr)
+			m_pBreakScreenShader->SetPlayer(dynamic_cast<CPlayer*>(m_pPlayer));
 	}
 
 	AnimationCompParams animation_comp_params;
@@ -1437,10 +1446,13 @@ void CMainTMPScene::UpdateObjects(float fTimeElapsed)
 		CloseHandle(ObjThreadHandles[i]);
 	}*/
 
-	for (int i = 0; i < m_pEnemys.size(); ++i) {
-		m_pEnemys[i]->Update(fTimeElapsed);
-		m_pcbMappedDisolveParams->dissolveThreshold[i] = m_pEnemys[i]->m_fDissolveThrethHold;
+	if (!m_pBreakScreenShader->GetEnable()) {
+		for (int i = 0; i < m_pEnemys.size(); ++i) {
+			m_pEnemys[i]->Update(fTimeElapsed);
+			m_pcbMappedDisolveParams->dissolveThreshold[i] = m_pEnemys[i]->m_fDissolveThrethHold;
+		}
 	}
+	
 
 
 	m_pMap->Update(fTimeElapsed);

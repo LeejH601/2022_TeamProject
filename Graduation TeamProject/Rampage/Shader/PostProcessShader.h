@@ -54,7 +54,7 @@ enum class BREAKSCREENSEQUENCE {
 	FlASHING,
 	SEQUENCE_END,
 };
-
+class CPlayer;
 class CBreakScreenEffectShader : public CPostProcessShader
 {
 	bool m_bEnable = false;
@@ -75,6 +75,8 @@ class CBreakScreenEffectShader : public CPostProcessShader
 	float m_fCrackEmissive = 1.0f;
 	float m_fGenericAlpha = 1.0f;
 
+	CPlayer* m_pPlayer = nullptr;
+
 public:
 	CBreakScreenEffectShader();
 	~CBreakScreenEffectShader();
@@ -89,4 +91,6 @@ public:
 	void Reset();
 	bool GetEnable() { return m_bEnable; };
 	void SetEnable(bool value) { m_bEnable = value; };
+	void SetPlayer(CPlayer* pPlayer) { m_pPlayer = pPlayer; };
+	CPlayer* GetPlayer() { return m_pPlayer; };
 };

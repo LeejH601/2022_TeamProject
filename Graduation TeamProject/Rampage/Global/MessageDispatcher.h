@@ -207,6 +207,15 @@ public:
 	virtual void HandleMessage(const Message& message, const PlayerParams& params);
 };
 
+class SpecialMoveDamageListener : public IMessageListener {
+private:
+	std::vector<std::unique_ptr<CGameObject>>* m_ppMonsters;
+public:
+	virtual void HandleMessage(const Message& message, const PlayerParams& params);
+
+	void SetObjects(std::vector<std::unique_ptr<CGameObject>>* objects) { m_ppMonsters = objects; };
+};
+
 // Define Monster Dead Listener
 class MonsterDeadListener : public IMessageListener {
 private:

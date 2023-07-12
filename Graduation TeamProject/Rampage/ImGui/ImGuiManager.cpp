@@ -145,7 +145,7 @@ void DataLoader::LoadComponentSets(std::wstring wFolderName)
 {
 	FILE* pInFile;
 
-	for (int i = 0; i < 3; ++i)
+	for (int i = 0; i < 4; ++i)
 	{
 		CState<CPlayer>* pCurrentAnimation = Atk1_Player::GetInst();
 
@@ -160,6 +160,9 @@ void DataLoader::LoadComponentSets(std::wstring wFolderName)
 		case 2:
 			pCurrentAnimation = Atk3_Player::GetInst();
 			break;
+		case 3:
+			pCurrentAnimation = ChargeAttack_Player::GetInst();
+			break;
 		default:
 			break;
 		}
@@ -167,7 +170,10 @@ void DataLoader::LoadComponentSets(std::wstring wFolderName)
 		std::wstring path;
 		wFolderName.resize(wcslen(wFolderName.c_str()));
 
-		path = file_path + wFolderName + L"\\Component" + std::to_wstring(i) + file_ext;
+		int index = i;
+		index = min(i, 2);
+
+		path = file_path + wFolderName + L"\\Component" + std::to_wstring(index) + file_ext;
 
 		::_wfopen_s(&pInFile, path.c_str(), L"rb");
 		LoadComponentSet(pInFile, pCurrentAnimation);

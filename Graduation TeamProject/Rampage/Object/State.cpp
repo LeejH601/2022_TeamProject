@@ -209,7 +209,7 @@ void Atk_Player::InitAtkPlayer()
 	std::unique_ptr<TrailParticleComponent> pTrailParticlenComponent = std::make_unique<TrailParticleComponent>();
 	pTrailParticlenComponent->SetEnable(true);
 	pTrailParticlenComponent->SetTextureOffset(5);
-	pTrailParticlenComponent->SetSpeed(10.0f);
+	pTrailParticlenComponent->SetSpeed(15.0f);
 	pTrailParticlenComponent->SetSize(XMFLOAT2(0.2,0.2));
 	pTrailParticlenComponent->SetEmitParticleNumber(50);
 	pTrailParticlenComponent->SetEmissive(20.0f);

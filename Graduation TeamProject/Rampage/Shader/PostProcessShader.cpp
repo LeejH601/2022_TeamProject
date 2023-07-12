@@ -336,6 +336,11 @@ void CBreakScreenEffectShader::AnimateObjects(float fTimeElapsed)
 			m_FadeOutAcculate = 0.0f;
 			Reset();
 			ChargeAttack_Player::GetInst()->SetPlayingMoveRunning(false);
+			if (m_pPlayer) {
+				PlayerParams param;
+				param.pPlayer = (CGameObject*)(m_pPlayer);
+				CMessageDispatcher::GetInst()->Dispatch_Message(MessageType::SPECIALMOVE_DAMAGED, &param, nullptr);
+			}
 		}
 	}
 		break;

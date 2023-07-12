@@ -654,3 +654,13 @@ void SpecialMoveListener::HandleMessage(const Message& message, const SpecialMov
 
 	dynamic_cast<CBreakScreenEffectShader*>(m_pBreakScreenShader)->SetEnable(params.bEnable);
 }
+
+void SpecialMoveDamageListener::HandleMessage(const Message& message, const PlayerParams& params)
+{
+	for (std::unique_ptr<CGameObject>& obj : *m_ppMonsters) {
+		CMonster* pMonster = dynamic_cast<CMonster*>(obj.get());
+
+		if (pMonster->m_bEnable)
+			pMonster->HandleDamage(dynamic_cast<CPlayer*>(params.pPlayer), 1000.0f);
+	}
+}
