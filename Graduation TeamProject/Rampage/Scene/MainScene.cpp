@@ -15,7 +15,7 @@
 #include "..\Object\PlayerParticleObject.h"
 #include "..\Shader\UIObjectShader.h"
 #include "..\Object\UIObject.h"
-
+#include "SimulatorScene.h"
 #include <PxForceMode.h>
 
 #define MAX_GOBLIN_NUM		50
@@ -826,6 +826,14 @@ SCENE_RETURN_TYPE CMainTMPScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMe
 				if (!((CPlayer*)m_pPlayer)->m_bCharged)
 				{
 					((CPlayer*)m_pPlayer)->m_bCharged = true;
+					m_pVertexPointParticleObject->SetTextureIndex(CSimulatorScene::GetInst()->GetTextureManager()->GetTextureOffset(TextureType::ParticleTexture));
+					m_pVertexPointParticleObject->SetFieldSpeed(0.0f);
+					m_pVertexPointParticleObject->SetColor(XMFLOAT3(0.4745, 0.9254, 1.0));
+					m_pVertexPointParticleObject->SetRotateFactor(true);
+					m_pVertexPointParticleObject->SetSpeed(5.0f);
+					m_pVertexPointParticleObject->SetSize(XMFLOAT2(0.1, 0.3));
+					m_pVertexPointParticleObject->EmitParticle(0);
+					m_pVertexPointParticleObject->SetEmit(true);
 				}
 			}
 			break;
@@ -1679,10 +1687,13 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 
 			count = 100;
 		}
+		
 	}
 
-	//m_pVertexPointParticleObject->EmitParticle(5);
-	//m_pVertexPointParticleObject->SetEmit(true);
+	/*m_pVertexPointParticleObject->SetTextureIndex(CSimulatorScene::GetInst()->GetTextureManager()->GetTextureOffset(TextureType::ParticleTexture));
+	m_pVertexPointParticleObject->SetFieldSpeed(0.0f);
+	m_pVertexPointParticleObject->EmitParticle(5);
+	m_pVertexPointParticleObject->SetEmit(true);*/
 
 	/*std::chrono::system_clock::time_point start = std::chrono::system_clock::now();
 	std::chrono::system_clock::time_point end = std::chrono::system_clock::now();

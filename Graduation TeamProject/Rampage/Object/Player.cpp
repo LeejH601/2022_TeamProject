@@ -12,6 +12,7 @@
 #include "..\Object\ModelManager.h"
 #include "..\Shader\BoundingBoxShader.h"
 #include "..\Global\Logger.h"
+#include "..\Scene\SimulatorScene.h"
 #include <stdio.h>
 
 CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks)
@@ -664,8 +665,13 @@ void CDrinkPotionCallbackHandler::HandleCallback(void* pCallbackData, float fTra
 	}
 	if (abs(fTrackPosition - 1.5f) < ANIMATION_CALLBACK_EPSILON && m_bEmitedParticle == false) {
 		if (m_pVertexPointParticleObject) {
-			
-			m_pVertexPointParticleObject->EmitParticle(5);
+			m_pVertexPointParticleObject->SetTextureIndex(CSimulatorScene::GetInst()->GetTextureManager()->GetTextureOffset(TextureType::ParticleTexture));
+			m_pVertexPointParticleObject->SetFieldSpeed(1.0f);
+			m_pVertexPointParticleObject->SetColor(XMFLOAT3(0.3803, 0.9372, 0.1098));
+			m_pVertexPointParticleObject->SetSpeed(15.0f);
+			m_pVertexPointParticleObject->SetRotateFactor(false);
+			m_pVertexPointParticleObject->SetSize(XMFLOAT2(0.2, 0.2));
+			m_pVertexPointParticleObject->EmitParticle(0);
 			m_pVertexPointParticleObject->SetEmit(true);
 			m_bEmitedParticle = true;
 			if (m_pPlayer) {
