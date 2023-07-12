@@ -376,7 +376,7 @@ void Attack_Monster::Execute(CMonster* monster, float fElapsedTime)
 
 	if (monster->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition == pAnimationSet->m_fLength)
 	{
-		if (monster->m_fToPlayerLength < 5.0f)
+		if (monster->m_fToPlayerLength < monster->m_fAttackRange)
 		{
 			CPlayer* pPlayer = dynamic_cast<CPlayer*>(monster->m_pChasingTargetObject);
 
