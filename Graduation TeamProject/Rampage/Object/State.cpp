@@ -10,6 +10,7 @@
 #include "..\Object\PlayerParticleObject.h"
 #include "SwordTrailObject.h"
 #include "..\Global\Logger.h"
+#include "..\Scene\SimulatorScene.h"
 
 #define ANGLE_MARGIN 22.5f
 
@@ -1501,6 +1502,25 @@ void ChargeStart_Player::Execute(CPlayer* player, float fElapsedTime)
 	CAnimationSet* pAnimationSet = player->m_pSkinnedAnimationController->m_pAnimationSets->m_pAnimationSets[player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_nAnimationSet];
 	if (player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition == pAnimationSet->m_fLength) {
 		player->m_pStateMachine->ChangeState(Charge_Player::GetInst());
+	}
+
+	static float fAcculateTime = 0.0f;
+	static float fSpawnVPParticleTime = 0.032f;
+	CVertexPointParticleObject* vpObj = dynamic_cast<CVertexPointParticleObject*>(CPlayerParticleObject::GetInst()->GetVertexPointParticleObject());
+	if (vpObj) {
+		fAcculateTime += fElapsedTime;
+		if (fAcculateTime >= fSpawnVPParticleTime) {
+			fAcculateTime = 0.0f;
+			vpObj->SetTextureIndex(CSimulatorScene::GetInst()->GetTextureManager()->GetTextureOffset(TextureType::SmokeTexture));
+			vpObj->SetFieldSpeed(0.3f);
+			vpObj->SetColor(XMFLOAT3(0.4745, 0.9254, 1.0));
+			vpObj->SetSpeed(9.0f);
+			vpObj->SetLifeTime(0.2f);
+			vpObj->SetRotateFactor(true);
+			vpObj->SetSize(XMFLOAT2(0.3, 0.3));
+			vpObj->EmitParticle(5);
+			vpObj->SetEmit(true);
+		}
 	}
 }
 

@@ -668,6 +668,7 @@ void CDrinkPotionCallbackHandler::HandleCallback(void* pCallbackData, float fTra
 			m_pVertexPointParticleObject->SetTextureIndex(CSimulatorScene::GetInst()->GetTextureManager()->GetTextureOffset(TextureType::ParticleTexture));
 			m_pVertexPointParticleObject->SetFieldSpeed(1.0f);
 			m_pVertexPointParticleObject->SetColor(XMFLOAT3(0.3803, 0.9372, 0.1098));
+			m_pVertexPointParticleObject->SetLifeTime(0.5f);
 			m_pVertexPointParticleObject->SetSpeed(15.0f);
 			m_pVertexPointParticleObject->SetRotateFactor(false);
 			m_pVertexPointParticleObject->SetSize(XMFLOAT2(0.2, 0.2));

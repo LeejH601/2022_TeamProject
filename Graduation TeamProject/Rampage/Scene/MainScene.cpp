@@ -826,14 +826,14 @@ SCENE_RETURN_TYPE CMainTMPScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMe
 				if (!((CPlayer*)m_pPlayer)->m_bCharged)
 				{
 					((CPlayer*)m_pPlayer)->m_bCharged = true;
-					m_pVertexPointParticleObject->SetTextureIndex(CSimulatorScene::GetInst()->GetTextureManager()->GetTextureOffset(TextureType::ParticleTexture));
+					/*m_pVertexPointParticleObject->SetTextureIndex(CSimulatorScene::GetInst()->GetTextureManager()->GetTextureOffset(TextureType::ParticleTexture));
 					m_pVertexPointParticleObject->SetFieldSpeed(0.0f);
 					m_pVertexPointParticleObject->SetColor(XMFLOAT3(0.4745, 0.9254, 1.0));
 					m_pVertexPointParticleObject->SetRotateFactor(true);
 					m_pVertexPointParticleObject->SetSpeed(5.0f);
 					m_pVertexPointParticleObject->SetSize(XMFLOAT2(0.1, 0.3));
 					m_pVertexPointParticleObject->EmitParticle(0);
-					m_pVertexPointParticleObject->SetEmit(true);
+					m_pVertexPointParticleObject->SetEmit(true);*/
 				}
 			}
 			break;
@@ -1141,6 +1141,7 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pBreakScreenShader = std::make_unique<CBreakScreenEffectShader>();
 	m_pBreakScreenShader->CreateShader(pd3dDevice, GetGraphicsRootSignature(), 7, pdxgiObjectRtvFormats, DXGI_FORMAT_D32_FLOAT, 0);
 	m_pBreakScreenShader->BuildObjects(pd3dDevice, pd3dCommandList);
+	m_pBreakScreenShader->SetCrackIndex(m_pTextureManager->GetTextureOffset(TextureType::UniformTexture));
 
 	std::unique_ptr<SpecialMoveListener> splistener = std::make_unique<SpecialMoveListener>();
 	splistener->SetShader(m_pBreakScreenShader.get());
@@ -1889,6 +1890,9 @@ void CMainTMPScene::LoadTextureObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 	m_pTextureManager->LoadTexture(TextureType::BillBoardTexture, pd3dDevice, pd3dCommandList, L"Image/BillBoardImages/Explode_8x8.dds", 8, 8);
 	m_pTextureManager->LoadTexture(TextureType::BillBoardTexture, pd3dDevice, pd3dCommandList, L"Image/BillBoardImages/Fire_Effect.dds", 5, 6);
 	m_pTextureManager->LoadTexture(TextureType::BillBoardTexture, pd3dDevice, pd3dCommandList, L"Image/BillBoardImages/Circle1.dds", 1, 1);
+	m_pTextureManager->LoadTexture(TextureType::BillBoardTexture, pd3dDevice, pd3dCommandList, L"Image/BillBoardImages/HIE_Hit_02_Flash_4x2_01.dds", 4, 2);
+	m_pTextureManager->LoadTexture(TextureType::BillBoardTexture, pd3dDevice, pd3dCommandList, L"Image/BillBoardImages/HIE_Hit_03_Flash_2x2_01.dds", 2, 2);
+	m_pTextureManager->LoadTexture(TextureType::BillBoardTexture, pd3dDevice, pd3dCommandList, L"Image/BillBoardImages/HIE_Hit_03_Shockwave_2x2_01.dds", 2, 2);
 
 	m_pTextureManager->LoadTexture(TextureType::ParticleTexture, pd3dDevice, pd3dCommandList, L"Image/ParticleImages/TextureFlash2.dds", 0, 0);
 	m_pTextureManager->LoadTexture(TextureType::ParticleTexture, pd3dDevice, pd3dCommandList, L"Image/ParticleImages/Meteor.dds", 0, 0);
@@ -1917,8 +1921,6 @@ void CMainTMPScene::LoadTextureObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/ResultFrame.dds", 0, 0);
 	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/ResultBackGround.dds", 0, 0);
 	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/ResultScoreMenu.dds", 0, 0);
-	
-	
 
 	m_pTextureManager->LoadTexture(TextureType::UniformTexture, pd3dDevice, pd3dCommandList, L"Image/UnifromImages/Cracks 3.dds", 0, 0);
 }

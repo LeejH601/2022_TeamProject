@@ -672,6 +672,10 @@ void SpecialMoveDamageListener::HandleMessage(const Message& message, const Play
 			CollideParams colParam;
 			colParam.xmf3CollidePosition = pPlayer->GetTargetPosition();
 			CMessageDispatcher::GetInst()->Dispatch_Message(MessageType::COLLISION, &colParam, nullptr);
+
+			SoundPlayParams SoundPlayParam;
+			SoundPlayParam.sound_category = SOUND_CATEGORY::SOUND_SHOCK;
+			CMessageDispatcher::GetInst()->Dispatch_Message<SoundPlayParams>(MessageType::PLAY_SOUND, &SoundPlayParam, pPlayer->m_pStateMachine->GetCurrentState());
 		}
 
 
