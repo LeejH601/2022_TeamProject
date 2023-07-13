@@ -1273,6 +1273,12 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	pUIObject->SetAlpha(1.f);
 	m_pUIObject.push_back(std::move(pUIObject));
 
+	//ChargeIcon
+	pUIObject = std::make_unique<CSquareBar>(2, pd3dDevice, pd3dCommandList, 10.f, m_pTextureManager.get());
+	dynamic_cast<CBarObject*>(pUIObject.get())->Set_Value(50.f, 100.f);
+	m_pUIObject.push_back(std::move(pUIObject));
+
+
 
 	m_StageInfoMap.emplace(std::pair<int, StageInfo>(0,
 		StageInfo{
@@ -1916,6 +1922,9 @@ void CMainTMPScene::LoadTextureObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/ResultBackGround.dds", 0, 0);
 	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/ResultScoreMenu.dds", 0, 0);
 	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/ChargeIcon.dds", 0, 0);
+	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/SkillGauge.dds", 0, 0);
+	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/SkillGauge2.dds", 0, 0);
+	
 	m_pTextureManager->LoadTexture(TextureType::UniformTexture, pd3dDevice, pd3dCommandList, L"Image/UnifromImages/Cracks 3.dds", 0, 0);
 }
 

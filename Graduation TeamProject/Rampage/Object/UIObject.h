@@ -184,3 +184,15 @@ private:
 	float m_fTotalEnableTime = 1.f;
 	float m_fEnableTime = 0.f;
 };
+
+class CSquareBar : public CBarObject
+{
+public:
+	CSquareBar(int iTextureIndex, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fSize, class CTextureManager* pTextureManager);
+	virtual ~CSquareBar();
+
+	virtual void Update(float fTimeElapsed);
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, bool b_UseTexture, CCamera* pCamera = NULL);
+	virtual void PreBarUpdate(float fTimeElapsed);
+	virtual void CurBarUpdate(float fTimeElapsed);
+};
