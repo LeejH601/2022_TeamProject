@@ -189,7 +189,10 @@ void CPlayer::Update(float fTimeElapsed)
 void CPlayer::UpdateStamina(float fTimeElapsed)
 {
 	if ((m_pStateMachine->GetCurrentState() == Idle_Player::GetInst()) || (m_pStateMachine->GetCurrentState() == Run_Player::GetInst()))
-		m_fStamina += 2.f * m_fSpeedUperS * fTimeElapsed * ((m_fTotalStamina - m_fStamina) / m_fTotalStamina);
+	{
+		m_fStamina += m_fTotalStamina * 2.0f / 3.0f * fTimeElapsed;
+		m_fStamina = min(m_fTotalStamina, m_fStamina);
+	}
 }
 
 void CPlayer::ProcessInput(DWORD dwDirection, float cxDelta, float cyDelta, float fTimeElapsed, CCamera* pCamera)
