@@ -691,7 +691,7 @@ SCENE_RETURN_TYPE CMainTMPScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMe
 		case VK_SHIFT:
 			if (m_pPlayer)
 			{
-				if (!((CPlayer*)m_pPlayer)->m_bEvasioned)
+				if (!((CPlayer*)m_pPlayer)->m_bEvasioned && ((CPlayer*)m_pPlayer)->m_fStamina >= 20.0f)
 				{
 					((CPlayer*)m_pPlayer)->m_bEvasioned = true;
 				}
@@ -1843,6 +1843,9 @@ void CMainTMPScene::UIUpdate(CPlayer* pPlayer)
 	dynamic_cast<CBarObject*>(m_pUIObject[3].get())->Set_Value(((CPhysicsObject*)m_pPlayer)->m_fHP, ((CPhysicsObject*)m_pPlayer)->m_fTotalHP);
 	dynamic_cast<CBarObject*>(m_pUIObject[5].get())->Set_Value(((CPlayer*)m_pPlayer)->m_fStamina, ((CPlayer*)m_pPlayer)->m_fTotalStamina);
 	dynamic_cast<CNumberObject*>(m_pUIObject[10].get())->UpdateNumber(((CPlayer*)m_pPlayer)->m_iCombo);
+
+	OutputDebugString(std::to_wstring(((CPlayer*)m_pPlayer)->m_fStamina).c_str());
+	OutputDebugString(L"\n");
 
 	// ((CPlayer*)m_pPlayer)->m_iCombo / 10
 
