@@ -16,6 +16,14 @@
 #define MAX_FILENAME_SIZE 100
 #define U8STR(str) reinterpret_cast<const char*>(u8##str)
 
+#define MYSERVERPORT 9000
+#define MYBUFSIZE 512
+char* SERVERIP = (char*)"127.0.0.1";
+int retval;
+WSADATA wsa;
+SOCKET sock;
+struct sockaddr_in serveraddr;
+
 bool CreateDirectoryIfNotExists(const std::wstring& path) {
 	DWORD attr = GetFileAttributesW(path.c_str());
 	if (attr == INVALID_FILE_ATTRIBUTES) {
@@ -2406,12 +2414,11 @@ void CImGuiManager::ShowDamageMoanSoundManager(CState<CPlayer>* pCurrentAnimatio
 #define MAX_WORKSHOP_SHOW 20
 void CImGuiManager::ShowCreationMenu()
 {
-
 	if (serverConnected == false)
 		ShowWorkshopLoginMenu();
 
-	if (serverConnected == false)
-		return;
+	/*if (serverConnected == false)
+		return;*/
 
 	ImGuiWindowFlags my_window_flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_MenuBar;
 	bool* p_open = NULL;
@@ -2443,20 +2450,6 @@ void CImGuiManager::ShowCreationMenu()
 		};
 
 		static std::vector<CreationItem> vCreationItems;
-		/*static std::vector<CreationItem> vCreationItems{
-			CreationItem{ m_pRTTexture.get(), u8"창작자1", u8"프리셋2", rand() % 1000, rand() % 1000},
-			CreationItem{ m_pRTTexture.get(), u8"창작자2", u8"프리셋1", rand() % 1000, rand() % 1000 },
-			CreationItem{ m_pRTTexture.get(), u8"창작자3", u8"프리셋3", rand() % 1000, rand() % 1000 },
-			CreationItem{ m_pRTTexture.get(), u8"창작자12", u8"프리셋4", rand() % 1000, rand() % 1000 },
-			CreationItem{ m_pRTTexture.get(), u8"창작자11", u8"프리셋6", rand() % 1000, rand() % 1000 },
-			CreationItem{ m_pRTTexture.get(), u8"창작자7", u8"프리셋5", rand() % 1000, rand() % 1000 },
-			CreationItem{ m_pRTTexture.get(), u8"창작자8", u8"프리셋7", rand() % 1000, rand() % 1000 },
-			CreationItem{ m_pRTTexture.get(), u8"창작자9", u8"프리셋9", rand() % 1000, rand() % 1000 },
-			CreationItem{ m_pRTTexture.get(), u8"창작자10", u8"프리셋11", rand() % 1000, rand() % 1000 },
-			CreationItem{ m_pRTTexture.get(), u8"창작자6", u8"프리셋10", rand() % 1000, rand() % 1000 },
-			CreationItem{ m_pRTTexture.get(), u8"창작자5", u8"프리셋8", rand() % 1000, rand() % 1000 },
-			CreationItem{ m_pRTTexture.get(), u8"창작자4", u8"프리셋12", rand() % 1000, rand() % 1000 },
-		};*/
 
 		//std::wstring_convert<std::codecvt_utf8<char8_t>, char8_t> converter;
 		//MultiByteToWideChar(CP_UTF8, MB_PRECOMPOSED, )
@@ -2476,8 +2469,8 @@ void CImGuiManager::ShowCreationMenu()
 		};
 
 		if (vCreationItems.size() == 0) {
-			ProcessWorkshop(eSERVICE_TYPE::UPDATE_TABLE);
-			UpdateTable();
+			//ProcessWorkshop(eSERVICE_TYPE::UPDATE_TABLE);
+			//UpdateTable();
 		}
 
 		static int selectedAllignStyle = 0;
@@ -2581,11 +2574,38 @@ void CImGuiManager::ShowCreationMenu()
 		style.Colors[ImGuiCol_Button] = ImVec4(0, 0, 0, 0);
 
 		if (ImGui::Button("Prev")) {
-			ProcessWorkshop(eSERVICE_TYPE::PREV_TABLE, (void*)&sortOrder);
-			UpdateTable();
+			//ProcessWorkshop(eSERVICE_TYPE::PREV_TABLE, (void*)&sortOrder);
+			//UpdateTable();
 		}; ImGui::SameLine();
 		if (ImGui::Button("Next")) {
-			ProcessWorkshop(eSERVICE_TYPE::NEXT_TABLE, (void*)&sortOrder);
+			char buf[MYBUFSIZE + 1];
+			int len;
+
+			strcpy_s(buf, "안녕하세요\n");
+
+			// '\n' 문자 제거
+			len = (int)strlen(buf);
+			if (buf[len - 1] == '\n')
+				buf[len - 1] = '\0';
+
+			// 데이터 보내기
+			retval = send(sock, buf, (int)strlen(buf), 0);
+
+			// 데이터 받기
+			retval = recv(sock, buf, retval, MSG_WAITALL);
+
+			// 받은 데이터 출력
+			buf[retval] = '\0';
+
+			records.push_back(WorkShop_Record{  });
+			records.push_back(WorkShop_Record{  });
+			records.push_back(WorkShop_Record{  });
+			records.push_back(WorkShop_Record{  });
+			records.push_back(WorkShop_Record{  });
+			records.push_back(WorkShop_Record{  });
+
+
+			//ProcessWorkshop(eSERVICE_TYPE::NEXT_TABLE, (void*)&sortOrder);
 			UpdateTable();
 		};
 
@@ -2666,6 +2686,7 @@ void CImGuiManager::ShowCreationMenu()
 	}
 	ImGui::End();
 }
+
 void CImGuiManager::ShowWorkshopLoginMenu()
 {
 	ImGuiWindowFlags my_window_flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_MenuBar;
@@ -2685,7 +2706,17 @@ void CImGuiManager::ShowWorkshopLoginMenu()
 	ImGui::InputText(U8STR(" ##Password"), LoginInfo.Password, sizeof(LoginInfo.Password));
 
 	if (ImGui::Button(U8STR("로그인##SineUp"))) {
-		serverConnected = ConnectServer(eSERVICE_TYPE::SINE_IN, LoginInfo);
+		//serverConnected = ConnectServer(eSERVICE_TYPE::SINE_IN, LoginInfo);
+
+		WSAStartup(MAKEWORD(2, 2), &wsa);
+		sock = socket(AF_INET, SOCK_STREAM, 0);
+		
+		memset(&serveraddr, 0, sizeof(serveraddr));
+		serveraddr.sin_family = AF_INET;
+		inet_pton(AF_INET, SERVERIP, &serveraddr.sin_addr);
+
+		serveraddr.sin_port = htons(MYSERVERPORT);
+		retval = connect(sock, (struct sockaddr*)&serveraddr, sizeof(serveraddr));
 	}
 
 	static bool flag = false;
