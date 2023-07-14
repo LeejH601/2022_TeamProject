@@ -199,6 +199,12 @@ class ChargeAttack_Player : public Atk_Player
     float m_fPlayerCameraOffset;
 
     virtual void SetPlayerRootVel(CPlayer* player);
+
+public:
+    UINT m_nSlashHitIndex = 0;
+    UINT m_nParticleIndex = 0;
+    UINT m_nImpactIndex = 0;
+
 public:
     DECLARE_SINGLE(ChargeAttack_Player);
     ChargeAttack_Player();

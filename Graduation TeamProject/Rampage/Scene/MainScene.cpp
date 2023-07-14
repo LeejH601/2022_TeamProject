@@ -108,7 +108,7 @@ void CMainTMPScene::HandlePlayerDeadMessage()
 
 	// 결과창 띄우기
 	m_pUIObject[13]->SetEnable(true);
-	dynamic_cast<CResultFrame*>(m_pUIObject[13].get())->SetResultData(((CPlayer*)m_pPlayer)->m_iCombo, fTotalGameTime, ((CPlayer*)m_pPlayer)->m_iPotionN);
+	dynamic_cast<CResultFrame*>(m_pUIObject[13].get())->SetResultData(((CPlayer*)m_pPlayer)->m_iCombo, fTotalGameTime, ((CPlayer*)m_pPlayer)->m_nRemainPotions);
 }
 
 void CMainTMPScene::AdvanceStage()
@@ -1010,11 +1010,7 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 		m_pEnemys.push_back(std::move(m_pMonsterObject));
 	}
 
-	std::unique_ptr<SpecialMoveDamageListener> SPDlistener = std::make_unique<SpecialMoveDamageListener>();
-	SPDlistener->SetEnable(true);
-	SPDlistener->SetObjects(&m_pEnemys);
-	m_pListeners.push_back(std::move(SPDlistener));
-	CMessageDispatcher::GetInst()->RegisterListener(MessageType::SPECIALMOVE_DAMAGED, m_pListeners.back().get(), nullptr);
+
 
 
 	// CollisionChecker 생성
@@ -1142,6 +1138,18 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pBreakScreenShader->CreateShader(pd3dDevice, GetGraphicsRootSignature(), 7, pdxgiObjectRtvFormats, DXGI_FORMAT_D32_FLOAT, 0);
 	m_pBreakScreenShader->BuildObjects(pd3dDevice, pd3dCommandList);
 	m_pBreakScreenShader->SetCrackIndex(m_pTextureManager->GetTextureOffset(TextureType::UniformTexture));
+
+	/*dynamic_cast<ImpactEffectComponent*>(ChargeAttack_Player::GetInst()->GetImpactComponent())->SetTextureIndex(m_pTextureManager->GetTextureOffset(TextureType::BillBoardTexture) + 3);
+	dynamic_cast<ParticleComponent*>(ChargeAttack_Player::GetInst()->GetParticleComponent())->SetTextureIndex(m_pTextureManager->GetTextureOffset(TextureType::ParticleTexture));
+	dynamic_cast<SlashHitComponent*>(ChargeAttack_Player::GetInst()->GetSlashHitComponent())->SetTextureIndex(m_pTextureManager->GetTextureOffset(TextureType::ParticleTexture));*/
+
+	std::unique_ptr<SpecialMoveDamageListener> SPDlistener = std::make_unique<SpecialMoveDamageListener>();
+	SPDlistener->SetEnable(true);
+	SPDlistener->SetObjects(&m_pEnemys);
+	SPDlistener->SetParticleObject(m_pParticleObjects.front().get());
+	SPDlistener->SetImpactObject(m_pSpriteAttackObjects.front().get());
+	m_pListeners.push_back(std::move(SPDlistener));
+	CMessageDispatcher::GetInst()->RegisterListener(MessageType::SPECIALMOVE_DAMAGED, m_pListeners.back().get(), nullptr);
 
 	std::unique_ptr<SpecialMoveListener> splistener = std::make_unique<SpecialMoveListener>();
 	splistener->SetShader(m_pBreakScreenShader.get());

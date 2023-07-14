@@ -342,6 +342,16 @@ void CBreakScreenEffectShader::AnimateObjects(float fTimeElapsed)
 				PlayerParams param;
 				param.pPlayer = (CGameObject*)(m_pPlayer);
 				CMessageDispatcher::GetInst()->Dispatch_Message(MessageType::SPECIALMOVE_DAMAGED, &param, nullptr);
+
+				if (m_pPlayer->m_pCamera)
+				{
+					if (m_pPlayer->m_pStateMachine->GetCurrentState()->GetCameraShakeComponent()->GetEnable())
+						m_pPlayer->m_pCamera->m_bCameraShaking = true;
+					if (m_pPlayer->m_pStateMachine->GetCurrentState()->GetCameraZoomerComponent()->GetEnable())
+						m_pPlayer->m_pCamera->m_bCameraZooming = true;
+					if (m_pPlayer->m_pStateMachine->GetCurrentState()->GetCameraMoveComponent()->GetEnable())
+						m_pPlayer->m_pCamera->m_bCameraMoving = true;
+				}
 			}
 		}
 	}
