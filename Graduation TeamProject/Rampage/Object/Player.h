@@ -44,6 +44,7 @@ public:
 	XMFLOAT3 m_xmf3ToHitterVec;
 
 	float m_fStamina;
+	float m_fSkillGauge = 0.f;
 	float m_fTotalStamina;
 	UINT m_iCombo = 0;
 	float m_fComboFullTime = 10.f;

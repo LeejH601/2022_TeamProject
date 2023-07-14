@@ -13,6 +13,8 @@ CUIObject::CUIObject(int iTextureIndex, ID3D12Device* pd3dDevice, ID3D12Graphics
 
 	m_xmf4x4World._21 = 1.f; // RGBN // 2.8
 	m_xmf4x4World._31 = 1.f;
+	m_xmf4x4World._32 = 1.f;
+	m_xmf4x4World._34 = 0.f;
 	m_xmf4x4World._44 = 1.f;
 	m_xmf4x4Transform = Matrix4x4::Identity();
 	m_xmf4x4Texture = Matrix4x4::Identity();
@@ -30,7 +32,7 @@ CUIObject::CUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCo
 	m_xmf4x4World = Matrix4x4::Identity();
 	m_xmf4x4World._21 = 1.f; // RGBN
 	m_xmf4x4World._23 = 1.f; // ALPHA
-
+	m_xmf4x4World._34 = 0.f;
 	m_xmf4x4World._21 = 1.f; // RGBN // 2.8
 	m_xmf4x4World._31 = 1.f;
 	m_xmf4x4World._44 = 1.f;
@@ -74,6 +76,8 @@ void CUIObject::Update(float fTimeElapsed)
 		m_xmf4x4World._31 = m_xmf3Color.y;
 		m_xmf4x4World._44 = m_xmf3Color.z;
 
+
+		m_xmf4x4World._34 = 0.f;
 		for (int i = 0; i < m_pChildUI.size(); i++)
 			m_pChildUI[i]->Update(fTimeElapsed);
 	}
@@ -163,6 +167,8 @@ void CBarObject::Update(float fTimeElapsed)
 		m_xmf4x4World._42 = (m_xmf2ScreenPosition.y / FRAME_BUFFER_HEIGHT);
 		//(m_xmf2ScreenPosition.y * 2.f) / (FRAME_BUFFER_HEIGHT); // -1 ~ 1
 		m_xmf4x4World._43 = 0.f;
+
+		m_xmf4x4World._34 = 0.f;
 	}
 }
 
@@ -252,6 +258,8 @@ void CHPObject::PreBarUpdate(float fTimeElapsed)
 		m_xmf4x4World._42 = (m_xmf2ScreenPosition.y / FRAME_BUFFER_HEIGHT);
 		//(m_xmf2ScreenPosition.y * 2.f) / (FRAME_BUFFER_HEIGHT); // -1 ~ 1
 		m_xmf4x4World._43 = 0.f;
+
+		m_xmf4x4World._34 = 0.f;
 	}
 }
 
@@ -326,6 +334,8 @@ void CSTAMINAObject::PreBarUpdate(float fTimeElapsed)
 		m_xmf4x4World._42 = (m_xmf2ScreenPosition.y / FRAME_BUFFER_HEIGHT);
 		//(m_xmf2ScreenPosition.y * 2.f) / (FRAME_BUFFER_HEIGHT); // -1 ~ 1
 		m_xmf4x4World._43 = 0.f;
+
+		m_xmf4x4World._34 = 0.f;
 	}
 }
 
@@ -358,7 +368,7 @@ void CSTAMINAObject::CurBarUpdate(float fTimeElapsed)
 		//(m_xmf2ScreenPosition.y * 2.f) / (FRAME_BUFFER_HEIGHT); // -1 ~ 1
 		m_xmf4x4World._43 = 0.f;
 
-
+		m_xmf4x4World._34 = 0.f;
 	}
 }
 
@@ -459,6 +469,8 @@ void CNumberObject::UpdateNumberTexture(UINT N, UINT ORDER)
 		m_xmf4x4World._21 = m_xmf3Color.x;
 		m_xmf4x4World._31 = m_xmf3Color.y;
 		m_xmf4x4World._44 = m_xmf3Color.z;
+
+		m_xmf4x4World._34 = 0.f;
 	}
 
 }
@@ -560,6 +572,8 @@ void CComboNumberObject::UpdateNumberTexture(UINT N, UINT ORDER)
 		m_xmf4x4World._42 = (m_xmf2ScreenPosition.y / FRAME_BUFFER_HEIGHT) + (1.f - m_fAnimationTime) * 0.01f;
 		//(m_xmf2ScreenPosition.y * 2.f) / (FRAME_BUFFER_HEIGHT); // -1 ~ 1
 		m_xmf4x4World._43 = 0.f;
+
+		m_xmf4x4World._34 = 0.f;
 	}
 }
 
@@ -622,6 +636,8 @@ void CBloodEffectObject::Update(float fTimeElapsed)
 		m_xmf4x4World._31 = 0.5f;
 		m_xmf4x4World._44 = 0.5f;
 		m_xmf4x4World._23 = m_fLifeTime; // ALPHA
+
+		m_xmf4x4World._34 = 0.f;
 	}
 
 }
@@ -741,6 +757,8 @@ void CMonsterHPObject::PreBarUpdate(float fTimeElapsed)
 		m_xmf4x4World._42 = (m_xmf2ScreenPosition.y / FRAME_BUFFER_HEIGHT);
 		//(m_xmf2ScreenPosition.y * 2.f) / (FRAME_BUFFER_HEIGHT); // -1 ~ 1
 		m_xmf4x4World._43 = 0.f;
+
+		m_xmf4x4World._34 = 0.f;
 	}
 }
 
@@ -767,6 +785,8 @@ void CMonsterHPObject::CurBarUpdate(float fTimeElapsed)
 		m_xmf4x4World._42 = (m_xmf2ScreenPosition.y / FRAME_BUFFER_HEIGHT);
 		//(m_xmf2ScreenPosition.y * 2.f) / (FRAME_BUFFER_HEIGHT); // -1 ~ 1
 		m_xmf4x4World._43 = 0.f;
+
+		m_xmf4x4World._34 = 0.f;
 	}
 }
 
@@ -1004,33 +1024,29 @@ UINT CResultFrame::CalculatePlaytimeScore(float fPlayTime)
 
 CSquareBar::CSquareBar(int iTextureIndex, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fSize, CTextureManager* pTextureManager) : CBarObject(iTextureIndex, pd3dDevice, pd3dCommandList, fSize)
 {
-	std::unique_ptr<CUIObject> pUIObject = std::make_unique<CHPObject>(2, pd3dDevice, pd3dCommandList, 10.f);
-	pUIObject->SetSize(XMFLOAT2(1024.f * 0.18f, 64.f * 0.8f));
-	pUIObject->SetScreenPosition(XMFLOAT2(FRAME_BUFFER_WIDTH * 0.1f, FRAME_BUFFER_HEIGHT * 0.25f - 80.f));
+	//SetTextureIndex(pTextureManager->LoadTotalTextureIndex(TextureType::UITexture, L"Image/UiImages/Gradation.dds")); // 그라데이션 ui
+	//SetScreenPosition(XMFLOAT2(FRAME_BUFFER_WIDTH * 0.1f, FRAME_BUFFER_HEIGHT * 0.25f));
+
+	std::unique_ptr<CUIObject> pUIObject = std::make_unique<CUIObject>(2, pd3dDevice, pd3dCommandList, 10.f);
+	pUIObject->SetSize(XMFLOAT2(1024.f * 0.2f, 1024.f * 0.2f));
+	pUIObject->SetScreenPosition(XMFLOAT2(FRAME_BUFFER_WIDTH * 0.1f, FRAME_BUFFER_HEIGHT * 0.25f));
+	pUIObject->SetTextureIndex(pTextureManager->LoadTotalTextureIndex(TextureType::UITexture, L"Image/UiImages/SkillFrame.dds"));
+	m_pChildUI.push_back(std::move(pUIObject));
+	
+
+	pUIObject = std::make_unique<CUIObject>(2, pd3dDevice, pd3dCommandList, 10.f);
+	pUIObject->SetSize(XMFLOAT2(1024.f * 0.2f, 1024.f * 0.2f));
+	pUIObject->SetScreenPosition(XMFLOAT2(FRAME_BUFFER_WIDTH * 0.1f, FRAME_BUFFER_HEIGHT * 0.25f));
+	pUIObject->SetTextureIndex(pTextureManager->LoadTotalTextureIndex(TextureType::UITexture, L"Image/UiImages/ChargeIcon.dds"));
+	m_pChildUI.push_back(std::move(pUIObject));
+
+	pUIObject = std::make_unique<CGradationObject>(2, pd3dDevice, pd3dCommandList, 10.f);
+	pUIObject->SetSize(XMFLOAT2(1024.f * 0.2f, 1024.f * 0.2f));
+	pUIObject->SetScreenPosition(XMFLOAT2(FRAME_BUFFER_WIDTH * 0.1f, FRAME_BUFFER_HEIGHT * 0.25f));
 	pUIObject->SetTextureIndex(pTextureManager->LoadTotalTextureIndex(TextureType::UITexture, L"Image/UiImages/SkillGauge.dds"));
-	dynamic_cast<CHPObject*>(pUIObject.get())->Set_Value(0.f, 0.f);
+	dynamic_cast<CGradationObject*>(pUIObject.get())->SetGradationValue(0.f);
 	m_pChildUI.push_back(std::move(pUIObject));
 
-	pUIObject = std::make_unique<CHPObject>(2, pd3dDevice, pd3dCommandList, 10.f);
-	pUIObject->SetSize(XMFLOAT2(64.f * 0.8f, 1024.f * 0.14f));
-	pUIObject->SetScreenPosition(XMFLOAT2(FRAME_BUFFER_WIDTH * 0.1f + 80.f, FRAME_BUFFER_HEIGHT * 0.25f + 0.5f));
-	pUIObject->SetTextureIndex(pTextureManager->LoadTotalTextureIndex(TextureType::UITexture, L"Image/UiImages/SkillGauge2.dds"));
-	dynamic_cast<CHPObject*>(pUIObject.get())->Set_Value(0.f, 0.f);
-	m_pChildUI.push_back(std::move(pUIObject));
-
-	pUIObject = std::make_unique<CHPObject>(2, pd3dDevice, pd3dCommandList, 10.f);
-	pUIObject->SetSize(XMFLOAT2(1024.f * 0.18f, 64.f * 0.8f));
-	pUIObject->SetScreenPosition(XMFLOAT2(FRAME_BUFFER_WIDTH * 0.1f, FRAME_BUFFER_HEIGHT * 0.25f + 80.f));
-	pUIObject->SetTextureIndex(pTextureManager->LoadTotalTextureIndex(TextureType::UITexture, L"Image/UiImages/SkillGauge.dds"));
-	dynamic_cast<CHPObject*>(pUIObject.get())->Set_Value(0.f, 0.f);
-	m_pChildUI.push_back(std::move(pUIObject));
-
-	pUIObject = std::make_unique<CHPObject>(2, pd3dDevice, pd3dCommandList, 10.f);
-	pUIObject->SetSize(XMFLOAT2(64.f * 0.8f, 1024.f * 0.14f));
-	pUIObject->SetScreenPosition(XMFLOAT2(FRAME_BUFFER_WIDTH * 0.1f - 80.f, FRAME_BUFFER_HEIGHT * 0.25f + 0.5f));
-	pUIObject->SetTextureIndex(pTextureManager->LoadTotalTextureIndex(TextureType::UITexture, L"Image/UiImages/SkillGauge2.dds"));
-	dynamic_cast<CHPObject*>(pUIObject.get())->Set_Value(0.f, 0.f);
-	m_pChildUI.push_back(std::move(pUIObject));
 }
 
 CSquareBar::~CSquareBar()
@@ -1040,60 +1056,18 @@ CSquareBar::~CSquareBar()
 
 void CSquareBar::Update(float fTimeElapsed)
 {
+	CUIObject::Update(fTimeElapsed);
 
-		if (m_fCurrentValue >= (m_fTotalValue / 4) * 4)
-		{
-			for (int i = 0; i < 4; i++)
-			{
-				dynamic_cast<CBarObject*>(m_pChildUI[i].get())->Set_Value(100.f, 100.f); // 250
-			}
-		}
+	if (m_fCurrentValue >= 85.f)
+	{
+		m_pChildUI[1]->SetColor(XMFLOAT3(10.f, 10.f, 10.f)); // 250
 
-		else if (m_fCurrentValue >= (m_fTotalValue / 4) * 3)
-		{
-			for (int i = 0; i < 3; i++)
-			{
-				dynamic_cast<CBarObject*>(m_pChildUI[i].get())->Set_Value(100.f, 100.f); // 250
-			}
-
-			dynamic_cast<CBarObject*>(m_pChildUI[3].get())->Set_Value(m_fCurrentValue - (m_fTotalValue / 4) * 3, m_fTotalValue / 4); // 250
-		}
-		else if (m_fCurrentValue >= (m_fTotalValue / 4) * 2)
-		{
-			for (int i = 0; i < 2; i++)
-			{
-				dynamic_cast<CBarObject*>(m_pChildUI[i].get())->Set_Value(100.f, 100.f); // 250
-			}
-
-			dynamic_cast<CBarObject*>(m_pChildUI[2].get())->Set_Value(m_fCurrentValue - (m_fTotalValue / 4) * 2, m_fTotalValue / 4); // 250
-
-			for (int i = 3; i < 4; i++)
-			{
-				dynamic_cast<CBarObject*>(m_pChildUI[i].get())->Set_Value(0.f, 100.f); // 250
-			}
-		}
-		else if (m_fCurrentValue >= (m_fTotalValue / 4) * 1)
-		{
-			for (int i = 0; i < 1; i++)
-			{
-				dynamic_cast<CBarObject*>(m_pChildUI[i].get())->Set_Value(100.f, 100.f); // 250
-			}
-
-			dynamic_cast<CBarObject*>(m_pChildUI[1].get())->Set_Value(m_fCurrentValue - (m_fTotalValue / 4) * 1, m_fTotalValue / 4); // 250
-
-			for (int i = 2; i < 4; i++)
-			{
-				dynamic_cast<CBarObject*>(m_pChildUI[i].get())->Set_Value(100.f, 100.f); // 250
-			}
-		}
-		else
-		{
-			for (int i = 0; i < 3; i++)
-			{
-				dynamic_cast<CBarObject*>(m_pChildUI[i].get())->Set_Value(0.f, 1.f); // 250
-			}
-		}
-
+	}
+	else
+	{
+		m_pChildUI[2]->SetColor(XMFLOAT3(10.f, 10.f, 10.f));
+	}
+	dynamic_cast<CGradationObject*>(m_pChildUI[2].get())->SetGradationValue(m_fCurrentValue / m_fTotalValue); // 250
 }
 
 void CSquareBar::Render(ID3D12GraphicsCommandList* pd3dCommandList, bool b_UseTexture, CCamera* pCamera)
@@ -1103,6 +1077,134 @@ void CSquareBar::Render(ID3D12GraphicsCommandList* pd3dCommandList, bool b_UseTe
 
 
 void CSquareBar::PreBarUpdate(float fTimeElapsed)
+{
+	//if (m_bEnable) {
+	//	if (m_fPreValue && (m_fPreValue > m_fCurrentValue))
+	//		m_fPreValue -= (m_fTotalValue - m_fCurrentValue) * 0.1f;
+	//	//m_xmf2ScreenPosition5 = XMFLOAT2()
+	//	// 화면 크기를 기준으로 Size 설정 최대 크기 (MAX WIDTH: FRAME_BUFFER_WIDTH, MAX_HEIGHT: FRAME_BUFFER_HEIGHT)
+	//	m_xmf4x4World._11 = ((m_fPreValue / m_fTotalValue) * m_xmf2Size.x) / (FRAME_BUFFER_WIDTH);
+	//	m_xmf4x4World._22 = m_xmf2Size.y / (FRAME_BUFFER_HEIGHT);
+
+	//	m_xmf4x4World._33 = m_iTextureIndex; // 텍스쳐 인덱스
+
+	//	m_xmf4x4World._12 = 0.f; // U
+	//	m_xmf4x4World._13 = m_fPreValue / m_fTotalValue; // U
+
+	//	m_xmf4x4World._14 = 0.f; // V
+	//	m_xmf4x4World._24 = 1.f;
+
+	//	m_xmf4x4World._21 = 0.5f; // RGBN
+	//	m_xmf4x4World._21 = 0.6f; // ALPHA
+
+
+	//	m_xmf4x4World._21 = 1.f; // R
+	//	m_xmf4x4World._31 = 1.f; // G
+	//	m_xmf4x4World._44 = 1.f; // B
+
+	//	// -1 ~ 1
+	//	m_xmf4x4World._41 = (m_xmf2ScreenPosition.x / FRAME_BUFFER_WIDTH) - (((m_fTotalValue - m_fPreValue) / m_fTotalValue) * m_xmf2Size.x * 0.5f) / (FRAME_BUFFER_WIDTH);;
+	//	m_xmf4x4World._42 = (m_xmf2ScreenPosition.y / FRAME_BUFFER_HEIGHT);
+	//	//(m_xmf2ScreenPosition.y * 2.f) / (FRAME_BUFFER_HEIGHT); // -1 ~ 1
+	//	m_xmf4x4World._43 = 0.f;
+	//}
+}
+
+void CSquareBar::CurBarUpdate(float fTimeElapsed)
+{
+	if (m_bEnable) {
+		//m_xmf2ScreenPosition5 = XMFLOAT2()
+		// 화면 크기를 기준으로 Size 설정 최대 크기 (MAX WIDTH: FRAME_BUFFER_WIDTH, MAX_HEIGHT: FRAME_BUFFER_HEIGHT)
+		m_xmf4x4World._11 = ((m_fCurrentValue / m_fTotalValue) * m_xmf2Size.x) / (FRAME_BUFFER_WIDTH);
+		m_xmf4x4World._22 = m_xmf2Size.y / (FRAME_BUFFER_HEIGHT);
+
+		m_xmf4x4World._33 = m_iTextureIndex; // 텍스쳐 인덱스
+		m_xmf4x4World._34 = 1.f;
+		m_xmf4x4World._12 = 0.f; // U
+		m_xmf4x4World._13 = m_fCurrentValue / m_fTotalValue; // U
+
+		m_xmf4x4World._14 = 0.f; // V
+		m_xmf4x4World._23 = 0.5f; // Alpha
+
+		m_xmf4x4World._24 = 1.f;
+
+		m_xmf4x4World._21 = 1.f; // RGBN
+
+		// -1 ~ 1
+		m_xmf4x4World._41 = (m_xmf2ScreenPosition.x / FRAME_BUFFER_WIDTH) - (((m_fTotalValue - m_fCurrentValue) / m_fTotalValue) * m_xmf2Size.x * 0.5f) / (FRAME_BUFFER_WIDTH);;
+		m_xmf4x4World._42 = (m_xmf2ScreenPosition.y / FRAME_BUFFER_HEIGHT);
+		//(m_xmf2ScreenPosition.y * 2.f) / (FRAME_BUFFER_HEIGHT); // -1 ~ 1
+		m_xmf4x4World._43 = 0.f;
+
+	}
+}
+
+CGradationObject::CGradationObject(int iTextureIndex, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fSize) : CUIObject(pd3dDevice, pd3dCommandList, fSize)
+{
+}
+
+CGradationObject::~CGradationObject()
+{
+}
+
+void CGradationObject::Update(float fTimeElapsed)
+{
+	if (!m_bEnable)
+		return;
+
+	m_xmf4x4World._11 = m_xmf2Size.x / (FRAME_BUFFER_WIDTH);
+	m_xmf4x4World._22 = m_xmf2Size.y / (FRAME_BUFFER_HEIGHT);
+	m_xmf4x4World._33 = m_iTextureIndex; // TextureIndex
+	//1, 023x((정규 좌표) + 1.0)x0.5
+
+	m_xmf4x4World._12 = 0.f; // U1
+	m_xmf4x4World._13 = 1.f; // U2
+	m_xmf4x4World._14 = 0.f; // V
+	m_xmf4x4World._24 = 1.f;
+
+	m_xmf4x4World._21 = 1.f;
+	m_xmf4x4World._23 = m_fAlpha; // RGBN // m_xmfColor
+	// -1 ~ 1
+	m_xmf4x4World._41 = (m_xmf2ScreenPosition.x / FRAME_BUFFER_WIDTH);
+	m_xmf4x4World._42 = (m_xmf2ScreenPosition.y / FRAME_BUFFER_HEIGHT);
+	//(m_xmf2ScreenPosition.y * 2.f) / (FRAME_BUFFER_HEIGHT); // -1 ~ 1
+	m_xmf4x4World._43 = 0.f;
+
+	// Color
+	m_xmf4x4World._21 = m_xmf3Color.x;
+	m_xmf4x4World._31 = m_xmf3Color.y;
+	m_xmf4x4World._44 = m_xmf3Color.z;
+
+	m_xmf4x4World._32 = m_fGradationValue;
+	m_xmf4x4World._34 = 1.f;
+	
+}
+
+void CGradationObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, bool b_UseTexture, CCamera* pCamera)
+{
+	if (!m_bEnable)
+		return;
+
+	if (m_pMesh)
+	{
+		// UI Size 정보 Update
+		// 
+		// CGameObject의 정보를 넘길 버퍼가 있고, 해당 버퍼에 대한 CPU 포인터가 있으면 UpdateShaderVariables 함수를 호출한다.
+
+		UpdateShaderVariables(pd3dCommandList);
+		// 여기서 메쉬의 렌더를 한다.
+		m_pMesh->OnPreRender(pd3dCommandList);
+
+		//m_tRect[0] = { (LONG)(FRAME_BUFFER_WIDTH * 0.15f), (LONG)(FRAME_BUFFER_HEIGHT * 0.15f) , (LONG)(FRAME_BUFFER_WIDTH * 0.35f) , (LONG)(FRAME_BUFFER_HEIGHT * 0.2f) };
+		//pd3dCommandList->RSSetScissorRects(1, &m_tRect[0]);
+		m_pMesh->Render(pd3dCommandList, 0);
+	}
+
+	if (m_pChild) m_pChild->Render(pd3dCommandList, b_UseTexture, pCamera);
+	if (m_pSibling) m_pSibling->Render(pd3dCommandList, b_UseTexture, pCamera);
+}
+
+void CGradationObject::PreBarUpdate(float fTimeElapsed)
 {
 	if (m_bEnable) {
 		if (m_fPreValue && (m_fPreValue > m_fCurrentValue))
@@ -1121,7 +1223,7 @@ void CSquareBar::PreBarUpdate(float fTimeElapsed)
 		m_xmf4x4World._24 = 1.f;
 
 		m_xmf4x4World._21 = 0.5f; // RGBN
-		m_xmf4x4World._21 = 0.6f; // ALPHA
+		m_xmf4x4World._23 = m_fAlpha; // ALPHA
 
 
 		m_xmf4x4World._21 = 1.f; // R
@@ -1133,10 +1235,13 @@ void CSquareBar::PreBarUpdate(float fTimeElapsed)
 		m_xmf4x4World._42 = (m_xmf2ScreenPosition.y / FRAME_BUFFER_HEIGHT);
 		//(m_xmf2ScreenPosition.y * 2.f) / (FRAME_BUFFER_HEIGHT); // -1 ~ 1
 		m_xmf4x4World._43 = 0.f;
+
+		m_xmf4x4World._32 = 1.f; // 실제 알파값
+		m_xmf4x4World._34 = 0.f; // 텍스쳐 알파값 그라데이션 값
 	}
 }
 
-void CSquareBar::CurBarUpdate(float fTimeElapsed)
+void CGradationObject::CurBarUpdate(float fTimeElapsed)
 {
 	if (m_bEnable) {
 		//m_xmf2ScreenPosition5 = XMFLOAT2()
@@ -1146,18 +1251,25 @@ void CSquareBar::CurBarUpdate(float fTimeElapsed)
 
 		m_xmf4x4World._33 = m_iTextureIndex; // 텍스쳐 인덱스
 
-		m_xmf4x4World._12 = 0.f; // U
-		m_xmf4x4World._13 = m_fCurrentValue / m_fTotalValue; // U
+		m_xmf4x4World._12 = 0.f; // U1
+		m_xmf4x4World._13 = 1;  m_fCurrentValue / m_fTotalValue; // U2
 
 		m_xmf4x4World._14 = 0.f; // V
-		m_xmf4x4World._24 = 1.f;
+		m_xmf4x4World._24 = 1.f; // V
 
 		m_xmf4x4World._21 = 1.f; // RGBN
 
+		m_xmf4x4World._21 = 1.f; // R
+		m_xmf4x4World._31 = 1.f; // G
+		m_xmf4x4World._44 = 1.f; // B
+
+		m_xmf4x4World._23 = 1.f; // B
 		// -1 ~ 1
 		m_xmf4x4World._41 = (m_xmf2ScreenPosition.x / FRAME_BUFFER_WIDTH) - (((m_fTotalValue - m_fCurrentValue) / m_fTotalValue) * m_xmf2Size.x * 0.5f) / (FRAME_BUFFER_WIDTH);;
 		m_xmf4x4World._42 = (m_xmf2ScreenPosition.y / FRAME_BUFFER_HEIGHT);
 		//(m_xmf2ScreenPosition.y * 2.f) / (FRAME_BUFFER_HEIGHT); // -1 ~ 1
 		m_xmf4x4World._43 = 0.f;
+
+		m_xmf4x4World._34 = 1.f;
 	}
 }

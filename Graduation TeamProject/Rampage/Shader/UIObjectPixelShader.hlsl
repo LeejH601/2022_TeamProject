@@ -56,8 +56,18 @@ PS_MULTIPLE_RENDER_TARGETS_OUTPUT PSUIObject(VS_TEXTURED_OUTPUT input)
 	// 스프라이트 애니메이션
 	PS_MULTIPLE_RENDER_TARGETS_OUTPUT output;
 	float4 cColor = gtxtTexture[TextureIndex].Sample(gSamplerState, input.uv);
-	cColor.rgb *= fRGB;
+	float4 cAlphaColor = float4(1.f, 1.f, 1.f, 1.f);
+	if (gmtxGameObject._34 >= 1.f) // 다른 텍스쳐 추가 사용
+	{
+		cAlphaColor = gtxtTexture[TextureIndex + 1].Sample(gSamplerState, input.uv);
+		if (cAlphaColor.r < 1.f - gmtxGameObject._32)
+			discard;
+	}
+
 	cColor.a *= fAlpha;
+	cColor.rgb *= fRGB;
+
+
 	output.f4Color = cColor;
 	output.f4Scene = cColor;
 	// 0 ~ 1

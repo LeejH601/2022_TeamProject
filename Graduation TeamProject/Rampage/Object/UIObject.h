@@ -32,6 +32,29 @@ protected:
 	std::vector<std::unique_ptr<IMessageListener>> m_pListeners;
 };	
 
+class CGradationObject : public CUIObject
+{
+public:
+	CGradationObject(int iTextureIndex, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fSize);
+	virtual ~CGradationObject();
+	virtual void Update(float fTimeElapsed);
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, bool b_UseTexture, CCamera* pCamera = NULL);
+	virtual void PreBarUpdate(float fTimeElapsed);
+	virtual void CurBarUpdate(float fTimeElapsed);
+
+	void SetGradationValue(float fGradationValue) { m_fGradationValue = fGradationValue; }
+protected:
+	XMFLOAT2 m_xmf2OffsetPosition = XMFLOAT2(0.f, 0.f);
+	XMFLOAT2 m_xmf2OffsetSize = XMFLOAT2(0.f, 0.f);
+
+	float m_fTotalValue = 100.f;
+	float m_fCurrentValue = 100.f;
+
+	float m_fPreValue = m_fTotalValue; // ¿Ã¿¸ Value
+
+	float m_fGradationValue = 0.f;
+};
+
 
 class CBarObject : public CUIObject
 {

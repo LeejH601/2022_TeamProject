@@ -150,6 +150,7 @@ bool CPlayer::CheckCollision(CGameObject* pTargetObject)
 
 void CPlayer::Update(float fTimeElapsed)
 {
+	m_fSkillGauge += fTimeElapsed * 10.f;
 	m_fTime += fTimeElapsed;
 	m_fInvincibleTime > 0.0f ? m_fInvincibleTime -= fTimeElapsed : m_fInvincibleTime = 0.0f;
 
