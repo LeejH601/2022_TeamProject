@@ -145,7 +145,7 @@ void DataLoader::LoadComponentSets(std::wstring wFolderName)
 {
 	FILE* pInFile;
 
-	for (int i = 0; i < 4; ++i)
+	for (int i = 0; i < 3; ++i)
 	{
 		CState<CPlayer>* pCurrentAnimation = Atk1_Player::GetInst();
 

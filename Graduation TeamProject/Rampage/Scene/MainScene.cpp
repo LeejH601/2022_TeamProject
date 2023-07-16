@@ -1771,10 +1771,10 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 	}
 
 
-	//m_pSlashHitObjects->Update(fTimeElapsed);
-	//m_pSlashHitObjects->Animate(fTimeElapsed);
-	//m_pSlashHitObjects->UpdateShaderVariables(pd3dCommandList, fCurrentTime, fTimeElapsed);
-	//m_pSlashHitObjects->Render(pd3dCommandList, nullptr, m_pSlashHitShader.get());
+	m_pSlashHitObjects->Update(fTimeElapsed);
+	m_pSlashHitObjects->Animate(fTimeElapsed);
+	m_pSlashHitObjects->UpdateShaderVariables(pd3dCommandList, fCurrentTime, fTimeElapsed);
+	m_pSlashHitObjects->Render(pd3dCommandList, nullptr, m_pSlashHitShader.get());
 
 	/*m_pSwordTrailShader->Render(pd3dCommandList, pCamera, 0);*/
 
@@ -1854,6 +1854,7 @@ void CMainTMPScene::OnPostRender()
 	}
 	m_pVertexPointParticleObject->OnPostRender();
 	((CParticleObject*)m_pTrailParticleObjects.get())->OnPostRender();
+	((CParticleObject*)m_pSlashHitObjects.get())->OnPostRender();
 
 }
 #include <functional>

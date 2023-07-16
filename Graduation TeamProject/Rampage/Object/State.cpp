@@ -1688,14 +1688,42 @@ ChargeAttack_Player::ChargeAttack_Player()
 	ImpactEffect->SetTextureIndex(3);
 
 	ParticleComponent* particleComp = dynamic_cast<ParticleComponent*>(GetParticleComponent());
+	particleComp->SetEnable(true);
 	particleComp->SetColor(XMFLOAT3(0.9882, 0.4313, 0.1333));
 	particleComp->SetEmissive(20.0f);
-	particleComp->SetEmitParticleNumber(150);
+	particleComp->SetEmitParticleNumber(100);
 	//particleComp->SetParticleNumber(150);
 	particleComp->SetLifeTime(1.0f);
 	particleComp->SetSize(XMFLOAT2(0.8, 0.8));
 	particleComp->SetTextureIndex(0);
-	particleComp->SetSpeed(30.0f);
+	particleComp->SetSpeed(100.0f);
+
+
+	// ATK SOUND
+	SoundPlayComponent* pAtkSoundComponent = dynamic_cast<SoundPlayComponent*>(GetShootSoundComponent());
+	pAtkSoundComponent->SetEnable(true);
+	pAtkSoundComponent->SetSoundNumber(6);
+	pAtkSoundComponent->SetDelay(0.63f);
+
+	// DAMAGE SOUND
+	SoundPlayComponent* pShockSoundComponent = dynamic_cast<SoundPlayComponent*>(GetShockSoundComponent());
+	pShockSoundComponent->SetEnable(true);
+	pShockSoundComponent->SetSoundNumber(9);
+
+	// GOBLIN MOAN SOUND
+	SoundPlayComponent* pGobSoundComponent = dynamic_cast<SoundPlayComponent*>(GetGoblinMoanComponent());
+	pGobSoundComponent->SetEnable(true);
+	pGobSoundComponent->SetSoundNumber(2);
+
+	// ORC MOAN SOUND
+	SoundPlayComponent* pOrcSoundComponent = dynamic_cast<SoundPlayComponent*>(GetOrcMoanComponent());
+	pOrcSoundComponent->SetEnable(true);
+	pOrcSoundComponent->SetSoundNumber(2);
+
+	// SKELETON MOAN SOUND
+	SoundPlayComponent* pSkelSoundComponent = dynamic_cast<SoundPlayComponent*>(GetSkeletonMoanComponent());
+	pSkelSoundComponent->SetEnable(true);
+	pSkelSoundComponent->SetSoundNumber(0);
 
 	m_fPlayerCameraOffset = MeterToUnit(2.0f);
 }
@@ -1729,6 +1757,10 @@ void ChargeAttack_Player::Enter(CPlayer* player)
 	player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_nType = ANIMATION_TYPE_ONCE;
 
 	player->m_pSkinnedAnimationController->SetTrackEnable(1, false);
+
+	SoundPlayParams SoundPlayParam;
+	SoundPlayParam.sound_category = SOUND_CATEGORY::SOUND_SHOOT;
+	CMessageDispatcher::GetInst()->Dispatch_Message<SoundPlayParams>(MessageType::PLAY_SOUND, &SoundPlayParam, this);
 
 	TrailUpdateParams trailParam;
 	trailParam.pObject = player->m_pSwordTrailReference[3].get();

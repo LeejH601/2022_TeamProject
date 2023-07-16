@@ -352,6 +352,7 @@ void CBreakScreenEffectShader::AnimateObjects(float fTimeElapsed)
 					if (m_pPlayer->m_pStateMachine->GetCurrentState()->GetCameraMoveComponent()->GetEnable())
 						m_pPlayer->m_pCamera->m_bCameraMoving = true;
 				}
+
 			}
 		}
 	}
