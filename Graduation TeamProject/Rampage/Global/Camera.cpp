@@ -431,7 +431,7 @@ void CCinematicCamera::AddPlayerCameraInfo(CPlayer* pPlayer, CCamera* pCamera)
 	m_vCameraInfos.push_back(cameraInfo);
 }
 
-void CCinematicCamera::AddCameraInfo(CCamera* pCamera)
+void CCinematicCamera::AddCameraInfo(CCamera* pCamera, float SegmentTime)
 {
 	CameraInfo cameraInfo;
 
@@ -439,6 +439,8 @@ void CCinematicCamera::AddCameraInfo(CCamera* pCamera)
 	cameraInfo.xmf3Up = pCamera->GetUpVector();
 	cameraInfo.xmf3Right = pCamera->GetRightVector();
 	cameraInfo.xmf3Position = pCamera->GetPosition();
+
+	cameraInfo.fSegmentTime = SegmentTime;
 
 
 	switch (m_Cinematic_Simulation_Dimension)
@@ -795,8 +797,11 @@ void CDollyCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
 {
 	if (m_vCameraInfos.size() < 2 || m_iCurrentCameraInfoIndex == m_vCameraInfos.size() - 1)
 		return;
+	if (m_nTrackIndex >= m_vDollyTracks.size() - 1)
+		return;
 
-	m_fDt += fTimeElapsed;
+
+	m_fDt += fTimeElapsed / m_vDollyTracks[m_nTrackIndex + 1].fSegmentTime;
 	m_nTrackIndex = (int)m_fDt;
 
 	if (m_nTrackIndex >= m_vDollyTracks.size() - 1)
@@ -810,6 +815,10 @@ void CDollyCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
 	case CINEMATIC_SIMULATION_DIMENSION::DIMENSION_WORLD:
 		break;
 	case CINEMATIC_SIMULATION_DIMENSION::DIMENSION_LOCAL:
+		if (dynamic_cast<CPhysicsObject*>(m_LocalBaseObject)) {
+			SetPosition(Vector3::TransformCoord(GetPosition(), dynamic_cast<CPhysicsObject*>(m_LocalBaseObject)->GetWorldMatrixNonScale()));
+		}
+		else
 		SetPosition(Vector3::TransformCoord(GetPosition(), m_LocalBaseObject->m_xmf4x4World));
 		break;
 	case CINEMATIC_SIMULATION_DIMENSION::CINEMATIC_SIMULATION_DIMENSION_END:
@@ -826,7 +835,7 @@ void CDollyCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
 		SetLookAt(m_xmf3FocusPoint);
 		//SetLookAt(m_LocalBaseObject->GetPosition());
 
-		
+
 		break;
 	case CINEMATIC_FOCUSMODE::FOUCS_PLAYER:
 		if (m_LocalBaseObject) {
@@ -852,9 +861,10 @@ void CDollyCamera::CaculateCubicPolyData()
 	m_vDollyTracks.resize(m_vCameraInfos.size());
 	for (int i = 0; i < m_vCameraInfos.size(); ++i) {
 		m_vDollyTracks[i].xmf3Position = m_vCameraInfos[i].xmf3Position;
+		m_vDollyTracks[i].fSegmentTime = m_vCameraInfos[i].fSegmentTime;
 	}
 
-	int nTrack = m_vDollyTracks.size() - 1;
+	int nTrack = m_vDollyTracks.size()-1;
 
 	m_vCubicPolys.clear();
 	m_vCubicPolys.resize(nTrack);

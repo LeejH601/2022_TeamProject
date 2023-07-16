@@ -971,18 +971,23 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	dynamic_cast<CCinematicCamera*>(m_pCinematicPlayerCamera.get())->SetFocusMode(CINEMATIC_FOCUSMODE::FOUCS_PLAYER);
 
 	CCamera camera;
-	camera.SetPosition(XMFLOAT3(0, 0, 0.3));
-	dynamic_cast<CCinematicCamera*>(m_pCinematicPlayerCamera.get())->AddCameraInfo(&camera);
-	camera.SetPosition(XMFLOAT3(1, 2, 0));
-	dynamic_cast<CCinematicCamera*>(m_pCinematicPlayerCamera.get())->AddCameraInfo(&camera);
-	camera.SetPosition(XMFLOAT3(0, 1.0, 2));
-	dynamic_cast<CCinematicCamera*>(m_pCinematicPlayerCamera.get())->AddCameraInfo(&camera);
-	camera.SetPosition(XMFLOAT3(-2.5, 2.0, 1.5));
-	dynamic_cast<CCinematicCamera*>(m_pCinematicPlayerCamera.get())->AddCameraInfo(&camera);
-	camera.SetPosition(XMFLOAT3(-3.5, 2.5, 0));
-	dynamic_cast<CCinematicCamera*>(m_pCinematicPlayerCamera.get())->AddCameraInfo(&camera);
-	camera.SetPosition(XMFLOAT3(0, MeterToUnit(3.0f), -MeterToUnit(3.0f)));
-	dynamic_cast<CCinematicCamera*>(m_pCinematicPlayerCamera.get())->AddCameraInfo(&camera);
+	camera.SetPosition(XMFLOAT3(0, 0, MeterToUnit(0.0f))); // dummy
+	dynamic_cast<CCinematicCamera*>(m_pCinematicPlayerCamera.get())->AddCameraInfo(&camera, 1.9);
+	camera.SetPosition(XMFLOAT3(0, 0, MeterToUnit(1.0f)));
+	dynamic_cast<CCinematicCamera*>(m_pCinematicPlayerCamera.get())->AddCameraInfo(&camera, 0.95);
+	camera.SetPosition(XMFLOAT3(MeterToUnit(1.1f), MeterToUnit(2.0f), 0));
+	dynamic_cast<CCinematicCamera*>(m_pCinematicPlayerCamera.get())->AddCameraInfo(&camera, 0.95);
+	camera.SetPosition(XMFLOAT3(0, MeterToUnit(0.5), MeterToUnit(1.8f)));
+	dynamic_cast<CCinematicCamera*>(m_pCinematicPlayerCamera.get())->AddCameraInfo(&camera, 1.0);
+	camera.SetPosition(XMFLOAT3(MeterToUnit(-2.5f), MeterToUnit(2.0f), MeterToUnit(1.8f)));
+	dynamic_cast<CCinematicCamera*>(m_pCinematicPlayerCamera.get())->AddCameraInfo(&camera, 0.3);
+	camera.SetPosition(XMFLOAT3(MeterToUnit(-3.5f), MeterToUnit(2.5f), 0));
+	dynamic_cast<CCinematicCamera*>(m_pCinematicPlayerCamera.get())->AddCameraInfo(&camera, 0.2);
+	XMFLOAT3 LastOffset = XMFLOAT3(0, 0.5, -1);
+	LastOffset = Vector3::Normalize(LastOffset);
+	LastOffset = Vector3::ScalarProduct(LastOffset, MeterToUnit(3.0f), false);
+	camera.SetPosition(LastOffset);
+	dynamic_cast<CCinematicCamera*>(m_pCinematicPlayerCamera.get())->AddCameraInfo(&camera, 0.3);
 
 	dynamic_cast<CCinematicCamera*>(m_pCinematicPlayerCamera.get())->SetSimulationDimension(CINEMATIC_SIMULATION_DIMENSION::DIMENSION_LOCAL);
 

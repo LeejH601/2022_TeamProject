@@ -188,6 +188,7 @@ protected:
 		XMFLOAT3 xmf3Right;
 
 		XMFLOAT3 xmf3Position;
+		float fSegmentTime;
 	};
 
 	int m_iCurrentCameraInfoIndex;
@@ -209,7 +210,7 @@ public:
 	virtual ~CCinematicCamera() { }
 
 	void AddPlayerCameraInfo(CPlayer* pPlayer, CCamera* pCamera);
-	void AddCameraInfo(CCamera* pCamera);
+	void AddCameraInfo(CCamera* pCamera, float SegmentTime = 1.0f);
 	void ClearCameraInfo();
 	virtual void PlayCinematicCamera();
 	void SetSimulationDimension(CINEMATIC_SIMULATION_DIMENSION dimension) { m_Cinematic_Simulation_Dimension = dimension; };
@@ -309,6 +310,7 @@ protected:
 
 	struct DollyTrack {
 		XMFLOAT3 xmf3Position;
+		float fSegmentTime;
 	};
 
 	std::vector<DollyTrack> m_vDollyTracks;
