@@ -709,8 +709,11 @@ SCENE_RETURN_TYPE CMainTMPScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMe
 			break;
 		case VK_TAB:
 		case VK_F5:
-			if (m_pCurrentCamera == m_pFloatingCamera.get())
+			if (m_pCurrentCamera == m_pFloatingCamera.get()) {
 				((CCinematicCamera*)(m_pCinematicSceneCamera.get()))->AddCameraInfo(m_pCurrentCamera);
+				((CCinematicCamera*)(m_pCinematicPlayerCamera.get()))->AddCameraInfo(m_pCurrentCamera);
+			}
+
 			break;
 		case VK_F6:
 			((CCinematicCamera*)(m_pCinematicSceneCamera.get()))->ClearCameraInfo();
@@ -826,6 +829,17 @@ SCENE_RETURN_TYPE CMainTMPScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMe
 				if (!((CPlayer*)m_pPlayer)->m_bCharged)
 				{
 					((CPlayer*)m_pPlayer)->m_bCharged = true;
+
+
+					
+					
+
+					((CCinematicCamera*)(m_pCinematicPlayerCamera.get()))->SetFocusPoint(m_pPlayer->GetPosition());
+					if (dynamic_cast<CDollyCamera*>(m_pCinematicPlayerCamera.get()))
+						dynamic_cast<CDollyCamera*>(m_pCinematicPlayerCamera.get())->CaculateCubicPolyData();
+					((CCinematicCamera*)(m_pCinematicPlayerCamera.get()))->PlayCinematicCamera();
+					m_pCurrentCamera = m_pCinematicPlayerCamera.get();
+					m_curSceneProcessType = SCENE_PROCESS_TYPE::CINEMATIC;
 					/*m_pVertexPointParticleObject->SetTextureIndex(CSimulatorScene::GetInst()->GetTextureManager()->GetTextureOffset(TextureType::ParticleTexture));
 					m_pVertexPointParticleObject->SetFieldSpeed(0.0f);
 					m_pVertexPointParticleObject->SetColor(XMFLOAT3(0.4745, 0.9254, 1.0));
@@ -951,6 +965,28 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 
 	m_pCinematicSceneCamera = std::make_unique<CCinematicCamera>();
 	m_pCinematicSceneCamera->Init(pd3dDevice, pd3dCommandList);
+
+	m_pCinematicPlayerCamera = std::make_unique<CDollyCamera>();
+	m_pCinematicPlayerCamera->Init(pd3dDevice, pd3dCommandList);
+	dynamic_cast<CCinematicCamera*>(m_pCinematicPlayerCamera.get())->SetFocusMode(CINEMATIC_FOCUSMODE::FOUCS_PLAYER);
+
+	CCamera camera;
+	camera.SetPosition(XMFLOAT3(0, 0, 0.3));
+	dynamic_cast<CCinematicCamera*>(m_pCinematicPlayerCamera.get())->AddCameraInfo(&camera);
+	camera.SetPosition(XMFLOAT3(1, 2, 0));
+	dynamic_cast<CCinematicCamera*>(m_pCinematicPlayerCamera.get())->AddCameraInfo(&camera);
+	camera.SetPosition(XMFLOAT3(0, 1.0, 2));
+	dynamic_cast<CCinematicCamera*>(m_pCinematicPlayerCamera.get())->AddCameraInfo(&camera);
+	camera.SetPosition(XMFLOAT3(-2.5, 2.0, 1.5));
+	dynamic_cast<CCinematicCamera*>(m_pCinematicPlayerCamera.get())->AddCameraInfo(&camera);
+	camera.SetPosition(XMFLOAT3(-3.5, 2.5, 0));
+	dynamic_cast<CCinematicCamera*>(m_pCinematicPlayerCamera.get())->AddCameraInfo(&camera);
+	camera.SetPosition(XMFLOAT3(0, MeterToUnit(3.0f), -MeterToUnit(3.0f)));
+	dynamic_cast<CCinematicCamera*>(m_pCinematicPlayerCamera.get())->AddCameraInfo(&camera);
+
+	dynamic_cast<CCinematicCamera*>(m_pCinematicPlayerCamera.get())->SetSimulationDimension(CINEMATIC_SIMULATION_DIMENSION::DIMENSION_LOCAL);
+
+	
 
 #ifdef RENDER_BOUNDING_BOX
 	CBoundingBoxShader::GetInst()->CreateShader(pd3dDevice, GetGraphicsRootSignature(), 7, pdxgiObjectRtvFormats, DXGI_FORMAT_D32_FLOAT, 0);
@@ -1170,7 +1206,7 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pUIObjectShader->CreateShader(pd3dDevice, GetGraphicsRootSignature(), 7, pdxgiObjectRtvFormats, DXGI_FORMAT_D32_FLOAT, 0);
 
 	// 플레이어 UI
-	
+
 	std::unique_ptr<CUIObject>  pUIObject = std::make_unique<CMonsterHPObject>(2, pd3dDevice, pd3dCommandList, 10.f);
 	pUIObject->SetSize(XMFLOAT2(512.f * 0.16f, 512.f * 0.16f));
 	pUIObject->SetScreenPosition(XMFLOAT2(FRAME_BUFFER_WIDTH * 0.1f - 80.f, FRAME_BUFFER_HEIGHT * 0.878f + 80.f));
@@ -1328,7 +1364,7 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 			2, 0,
 			5, 1,
 			0, 0,
-			XMFLOAT3{ 113.664360f, 3.016271f, 123.066483f }, 
+			XMFLOAT3{ 113.664360f, 3.016271f, 123.066483f },
 			12.5f}} }));
 	m_StageInfoMap.emplace(std::pair<int, StageInfo>(6,
 		StageInfo{
@@ -1485,7 +1521,7 @@ void CMainTMPScene::UpdateObjects(float fTimeElapsed)
 			m_pcbMappedDisolveParams->dissolveThreshold[i] = m_pEnemys[i]->m_fDissolveThrethHold;
 		}
 	}
-	
+
 
 
 	m_pMap->Update(fTimeElapsed);
@@ -1581,8 +1617,14 @@ void CMainTMPScene::Enter(HWND hWnd)
 	SetCursorPos(screenRect.left + (screenRect.right - screenRect.left) / 2,
 		screenRect.top + (screenRect.bottom - screenRect.top) / 2);
 
+	
 	((CCinematicCamera*)(m_pCinematicSceneCamera.get()))->AddPlayerCameraInfo((CPlayer*)m_pPlayer, m_pMainSceneCamera.get());
 	((CCinematicCamera*)(m_pCinematicSceneCamera.get()))->AddCameraInfo(m_vCinematicCameraLocations[0].get());
+
+	if (dynamic_cast<CDollyCamera*>(m_pCinematicSceneCamera.get())) {
+		dynamic_cast<CDollyCamera*>(m_pCinematicSceneCamera.get())->CaculateCubicPolyData();
+	}
+
 	((CCinematicCamera*)(m_pCinematicSceneCamera.get()))->PlayCinematicCamera();
 
 	// 시작은 씨네마틱 카메라
@@ -1592,8 +1634,10 @@ void CMainTMPScene::Enter(HWND hWnd)
 	Locator.SetMouseCursorMode(MOUSE_CUROSR_MODE::THIRD_FERSON_MODE);
 	m_CurrentMouseCursorMode = MOUSE_CUROSR_MODE::THIRD_FERSON_MODE;
 
+	dynamic_cast<CCinematicCamera*>(m_pCinematicPlayerCamera.get())->SetLocalObject(m_pPlayer);
+
 	if (m_pTrailParticleObjects)
-	CPlayerParticleObject::GetInst()->SetTrailParticleObjects(m_pTrailParticleObjects.get());
+		CPlayerParticleObject::GetInst()->SetTrailParticleObjects(m_pTrailParticleObjects.get());
 
 	if (m_iCursorHideCount < 1) {
 		m_iCursorHideCount++;
@@ -1696,7 +1740,7 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 
 			count = 100;
 		}
-		
+
 	}
 
 	/*m_pVertexPointParticleObject->SetTextureIndex(CSimulatorScene::GetInst()->GetTextureManager()->GetTextureOffset(TextureType::ParticleTexture));
@@ -1797,7 +1841,7 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 	}
 
 	if (m_pd3dComputeRootSignature) pd3dCommandList->SetComputeRootSignature(m_pd3dComputeRootSignature.Get());
-	
+
 
 	{
 		m_pBloomComputeShader->Dispatch(pd3dCommandList);

@@ -440,6 +440,59 @@ void CCinematicCamera::AddCameraInfo(CCamera* pCamera)
 	cameraInfo.xmf3Right = pCamera->GetRightVector();
 	cameraInfo.xmf3Position = pCamera->GetPosition();
 
+
+	switch (m_Cinematic_Simulation_Dimension)
+	{
+	case CINEMATIC_SIMULATION_DIMENSION::DIMENSION_WORLD:
+		break;
+	case CINEMATIC_SIMULATION_DIMENSION::DIMENSION_LOCAL:
+		break;
+		if (m_LocalBaseObject) {
+			XMFLOAT4X4 inverseWorld = Matrix4x4::Inverse(m_LocalBaseObject->m_xmf4x4World);
+
+			XMFLOAT4X4 cameraMatrix = {
+					cameraInfo.xmf3Right.x,
+					cameraInfo.xmf3Right.y,
+					cameraInfo.xmf3Right.z,
+					0.0f,
+					cameraInfo.xmf3Up.x,
+					cameraInfo.xmf3Up.y,
+					cameraInfo.xmf3Up.z,
+					0.0f,
+					cameraInfo.xmf3Look.x,
+					cameraInfo.xmf3Look.y,
+					cameraInfo.xmf3Look.z,
+					0.0f,
+					cameraInfo.xmf3Position.x,
+					cameraInfo.xmf3Position.y,
+					cameraInfo.xmf3Position.z,
+					1.0f
+			};
+			cameraMatrix = Matrix4x4::Multiply(cameraMatrix, inverseWorld);
+			cameraInfo.xmf3Look = XMFLOAT3(cameraMatrix._31, cameraMatrix._32, cameraMatrix._33);
+			cameraInfo.xmf3Up = XMFLOAT3(cameraMatrix._21, cameraMatrix._22, cameraMatrix._23);
+			cameraInfo.xmf3Right = XMFLOAT3(cameraMatrix._11, cameraMatrix._12, cameraMatrix._13);
+			cameraInfo.xmf3Position = XMFLOAT3(cameraMatrix._41, cameraMatrix._42, cameraMatrix._43);
+
+			/*XMStoreFloat3(&cameraInfo.xmf3Look,
+				XMVector4Transform(
+					XMVECTOR({ cameraInfo.xmf3Look.x,cameraInfo.xmf3Look.y,cameraInfo.xmf3Look.z,0.0f, }), XMLoadFloat4x4(&inverseWorld)));
+			XMStoreFloat3(&cameraInfo.xmf3Up,
+				XMVector4Transform(
+					XMVECTOR({ cameraInfo.xmf3Up.x,cameraInfo.xmf3Up.y,cameraInfo.xmf3Up.z,0.0f, }), XMLoadFloat4x4(&inverseWorld)));
+			XMStoreFloat3(&cameraInfo.xmf3Right,
+				XMVector4Transform(
+					XMVECTOR({ cameraInfo.xmf3Right.x,cameraInfo.xmf3Right.y,cameraInfo.xmf3Right.z,0.0f, }), XMLoadFloat4x4(&inverseWorld)));
+			XMStoreFloat3(&cameraInfo.xmf3Position,
+				XMVector4Transform(
+					XMVECTOR({ cameraInfo.xmf3Position.x,cameraInfo.xmf3Position.y,cameraInfo.xmf3Position.z,1.0f, }), XMLoadFloat4x4(&inverseWorld)));*/
+
+		}
+		break;
+	default:
+		break;
+	}
+
 	m_vCameraInfos.push_back(cameraInfo);
 }
 
@@ -602,23 +655,24 @@ void CCinematicCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
 		xmf3InterpolateIndex.push_back(iIndex++);
 
 #ifdef LERP_QUARTARNION
+		XMFLOAT4X4 resultMatrix;
 		XMFLOAT4X4 preInterpolate = {
-		m_vCameraInfos[m_iCurrentCameraInfoIndex].xmf3Right.x,
-		m_vCameraInfos[m_iCurrentCameraInfoIndex].xmf3Right.y,
-		m_vCameraInfos[m_iCurrentCameraInfoIndex].xmf3Right.z,
-		0.0f,
-		m_vCameraInfos[m_iCurrentCameraInfoIndex].xmf3Up.x,
-		m_vCameraInfos[m_iCurrentCameraInfoIndex].xmf3Up.y,
-		m_vCameraInfos[m_iCurrentCameraInfoIndex].xmf3Up.z,
-		0.0f,
-		m_vCameraInfos[m_iCurrentCameraInfoIndex].xmf3Look.x,
-		m_vCameraInfos[m_iCurrentCameraInfoIndex].xmf3Look.y,
-		m_vCameraInfos[m_iCurrentCameraInfoIndex].xmf3Look.z,
-		0.0f,
-		m_vCameraInfos[m_iCurrentCameraInfoIndex].xmf3Position.x,
-		m_vCameraInfos[m_iCurrentCameraInfoIndex].xmf3Position.y,
-		m_vCameraInfos[m_iCurrentCameraInfoIndex].xmf3Position.z,
-		1.0f
+					m_vCameraInfos[m_iCurrentCameraInfoIndex].xmf3Right.x,
+					m_vCameraInfos[m_iCurrentCameraInfoIndex].xmf3Right.y,
+					m_vCameraInfos[m_iCurrentCameraInfoIndex].xmf3Right.z,
+					0.0f,
+					m_vCameraInfos[m_iCurrentCameraInfoIndex].xmf3Up.x,
+					m_vCameraInfos[m_iCurrentCameraInfoIndex].xmf3Up.y,
+					m_vCameraInfos[m_iCurrentCameraInfoIndex].xmf3Up.z,
+					0.0f,
+					m_vCameraInfos[m_iCurrentCameraInfoIndex].xmf3Look.x,
+					m_vCameraInfos[m_iCurrentCameraInfoIndex].xmf3Look.y,
+					m_vCameraInfos[m_iCurrentCameraInfoIndex].xmf3Look.z,
+					0.0f,
+					m_vCameraInfos[m_iCurrentCameraInfoIndex].xmf3Position.x,
+					m_vCameraInfos[m_iCurrentCameraInfoIndex].xmf3Position.y,
+					m_vCameraInfos[m_iCurrentCameraInfoIndex].xmf3Position.z,
+					1.0f
 		};
 
 		XMFLOAT4X4 postInterpolate = {
@@ -647,20 +701,54 @@ void CCinematicCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
 		q2 = XMQuaternionNormalize(q2);
 		XMVECTOR resultQ = XMQuaternionSlerp(q1, q2, resultT);
 
-		XMFLOAT4X4 resultMatrix; XMStoreFloat4x4(&resultMatrix, XMMatrixRotationQuaternion(XMQuaternionNormalize(resultQ)));
+		XMStoreFloat4x4(&resultMatrix, XMMatrixRotationQuaternion(XMQuaternionNormalize(resultQ)));
 		XMFLOAT4X4 resultPosMatrix = Matrix4x4::Interpolate(preInterpolate, postInterpolate, resultT);
 		resultMatrix._41 = resultPosMatrix._41;
 		resultMatrix._42 = resultPosMatrix._42;
 		resultMatrix._43 = resultPosMatrix._43;
 
-		m_xmf3Look = XMFLOAT3{ resultMatrix._31, resultMatrix._32, resultMatrix._33 };
-		m_xmf3Up = XMFLOAT3{ resultMatrix._21, resultMatrix._22, resultMatrix._23 };
-		m_xmf3Right = XMFLOAT3{ resultMatrix._11, resultMatrix._12, resultMatrix._13 };
-		SetPosition(XMFLOAT3{
+		switch (m_Cinematic_Simulation_Dimension)
+		{
+		case CINEMATIC_SIMULATION_DIMENSION::DIMENSION_WORLD:
+			break;
+		case CINEMATIC_SIMULATION_DIMENSION::DIMENSION_LOCAL:
+			resultMatrix = Matrix4x4::Multiply(resultMatrix, m_LocalBaseObject->m_xmf4x4World);
+			break;
+		default:
+			break;
+		}
+
+		switch (m_Cinematic_simulation_mode)
+		{
+		case CINEMATIC_FOCUSMODE::FOCUS_SEQUENCE:
+		{
+			m_xmf3Look = XMFLOAT3{ resultMatrix._31, resultMatrix._32, resultMatrix._33 };
+			m_xmf3Up = XMFLOAT3{ resultMatrix._21, resultMatrix._22, resultMatrix._23 };
+			m_xmf3Right = XMFLOAT3{ resultMatrix._11, resultMatrix._12, resultMatrix._13 };
+
+			SetPosition(XMFLOAT3{
 			resultMatrix._41,
 			resultMatrix._42,
 			resultMatrix._43,
-			});
+				});
+		}
+		break;
+		case CINEMATIC_FOCUSMODE::FOCUS_POINT:
+		{
+			SetPosition(XMFLOAT3{
+			resultMatrix._41,
+			resultMatrix._42,
+			resultMatrix._43,
+				});
+
+			SetLookAt(m_xmf3FocusPoint);
+		}
+		break;
+		default:
+			break;
+		}
+
+
 #else
 		m_xmf3Look = CatMullXMFLOAT3(m_vCameraInfos[xmf3InterpolateIndex[0]].xmf3Look,
 			m_vCameraInfos[xmf3InterpolateIndex[1]].xmf3Look,
@@ -696,6 +784,13 @@ CDollyCamera::~CDollyCamera()
 {
 }
 
+void CDollyCamera::PlayCinematicCamera()
+{
+	CCinematicCamera::PlayCinematicCamera();
+	m_nTrackIndex = 0;
+	m_fDt = 0.0f;
+}
+
 void CDollyCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
 {
 	if (m_vCameraInfos.size() < 2 || m_iCurrentCameraInfoIndex == m_vCameraInfos.size() - 1)
@@ -710,32 +805,70 @@ void CDollyCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
 	float fDt = m_fDt - m_nTrackIndex;
 	SetPosition(m_vCubicPolys[m_nTrackIndex].eval(fDt));
 
-	//SetLookAt(xmf3LookAt);
+	switch (m_Cinematic_Simulation_Dimension)
+	{
+	case CINEMATIC_SIMULATION_DIMENSION::DIMENSION_WORLD:
+		break;
+	case CINEMATIC_SIMULATION_DIMENSION::DIMENSION_LOCAL:
+		SetPosition(Vector3::TransformCoord(GetPosition(), m_LocalBaseObject->m_xmf4x4World));
+		break;
+	case CINEMATIC_SIMULATION_DIMENSION::CINEMATIC_SIMULATION_DIMENSION_END:
+		break;
+	default:
+		break;
+	}
+
+	switch (m_Cinematic_simulation_mode)
+	{
+	case CINEMATIC_FOCUSMODE::FOCUS_SEQUENCE:
+		break;
+	case CINEMATIC_FOCUSMODE::FOCUS_POINT:
+		SetLookAt(m_xmf3FocusPoint);
+		//SetLookAt(m_LocalBaseObject->GetPosition());
+
+		
+		break;
+	case CINEMATIC_FOCUSMODE::FOUCS_PLAYER:
+		if (m_LocalBaseObject) {
+			XMFLOAT3 xmf3PlayerPos = XMFLOAT3{
+		((CKnightPlayer*)m_LocalBaseObject)->m_pSkinnedAnimationController->m_pRootMotionObject->GetWorld()._41,
+		 m_LocalBaseObject->GetPosition().y,
+		((CKnightPlayer*)m_LocalBaseObject)->m_pSkinnedAnimationController->m_pRootMotionObject->GetWorld()._43 };
+			xmf3PlayerPos.y += MeterToUnit(0.9f);
+
+			SetLookAt(xmf3PlayerPos);
+		}
+		break;
+	case CINEMATIC_FOCUSMODE::CINEMATIC_FOCUSMODE_END:
+		break;
+	default:
+		break;
+	}
 }
 
 void CDollyCamera::CaculateCubicPolyData()
 {
+	m_vDollyTracks.clear();
 	m_vDollyTracks.resize(m_vCameraInfos.size());
 	for (int i = 0; i < m_vCameraInfos.size(); ++i) {
 		m_vDollyTracks[i].xmf3Position = m_vCameraInfos[i].xmf3Position;
 	}
 
-	int nTrack = m_vDollyTracks.size();
+	int nTrack = m_vDollyTracks.size() - 1;
 
-	m_vCubicPolys.resize(nTrack - 1);
+	m_vCubicPolys.clear();
+	m_vCubicPolys.resize(nTrack);
 
 	if (nTrack < 3) {
-		InitCentripetalCR(m_vDollyTracks[0].xmf3Position, m_vDollyTracks[0].xmf3Position, m_vDollyTracks[1].xmf3Position, m_vDollyTracks[1].xmf3Position, m_vCubicPolys[0]);
+		InitCentripetalCR(m_vDollyTracks[0].xmf3Position, m_vDollyTracks[1].xmf3Position, m_vDollyTracks[1].xmf3Position, m_vDollyTracks[1].xmf3Position, m_vCubicPolys[0]);
 	}
 	else if (nTrack == 3) {
-		InitCentripetalCR(m_vDollyTracks[0].xmf3Position, m_vDollyTracks[0].xmf3Position, m_vDollyTracks[1].xmf3Position, m_vDollyTracks[2].xmf3Position, m_vCubicPolys[0]);
 		InitCentripetalCR(m_vDollyTracks[0].xmf3Position, m_vDollyTracks[1].xmf3Position, m_vDollyTracks[2].xmf3Position, m_vDollyTracks[2].xmf3Position, m_vCubicPolys[0]);
+		InitCentripetalCR(m_vDollyTracks[1].xmf3Position, m_vDollyTracks[2].xmf3Position, m_vDollyTracks[2].xmf3Position, m_vDollyTracks[2].xmf3Position, m_vCubicPolys[0]);
 	}
 	else {
-		InitCentripetalCR(m_vDollyTracks[0].xmf3Position, m_vDollyTracks[0].xmf3Position, m_vDollyTracks[1].xmf3Position, m_vDollyTracks[2].xmf3Position, m_vCubicPolys[0]);
-		for (int i = 0; i < nTrack - 3; ++i) {
-			InitCentripetalCR(m_vDollyTracks[i].xmf3Position, m_vDollyTracks[i + 1].xmf3Position, m_vDollyTracks[i + 2].xmf3Position, m_vDollyTracks[i + 3].xmf3Position, m_vCubicPolys[i + 1]);
+		for (int i = 0; i < nTrack; ++i) {
+			InitCentripetalCR(m_vDollyTracks[i].xmf3Position, m_vDollyTracks[i + 1].xmf3Position, m_vDollyTracks[min(i + 2, nTrack)].xmf3Position, m_vDollyTracks[min(i + 3, nTrack)].xmf3Position, m_vCubicPolys[i]);
 		}
-		InitCentripetalCR(m_vDollyTracks[nTrack - 3].xmf3Position, m_vDollyTracks[nTrack - 2].xmf3Position, m_vDollyTracks[nTrack - 1].xmf3Position, m_vDollyTracks[nTrack - 1].xmf3Position, m_vCubicPolys[nTrack - 1]);
 	}
 }

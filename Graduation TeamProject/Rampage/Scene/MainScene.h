@@ -108,6 +108,7 @@ private:
 	std::unique_ptr<CCamera> m_pFloatingCamera = NULL;
 	std::unique_ptr<CCamera> m_pMainSceneCamera = NULL;
 	std::unique_ptr<CCamera> m_pCinematicSceneCamera = NULL;
+	std::unique_ptr<CCamera> m_pCinematicPlayerCamera = NULL;
 
 	std::vector<std::unique_ptr<CCamera>> m_vCinematicCameraLocations;
 
