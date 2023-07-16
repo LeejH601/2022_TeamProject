@@ -1514,10 +1514,10 @@ void ChargeStart_Player::Execute(CPlayer* player, float fElapsedTime)
 			vpObj->SetTextureIndex(CSimulatorScene::GetInst()->GetTextureManager()->GetTextureOffset(TextureType::SmokeTexture));
 			vpObj->SetFieldSpeed(0.3f);
 			vpObj->SetColor(XMFLOAT3(0.4745, 0.9254, 1.0));
-			vpObj->SetSpeed(9.0f);
-			vpObj->SetLifeTime(0.2f);
+			vpObj->SetSpeed(6.0f);
+			vpObj->SetLifeTime(0.5f);
 			vpObj->SetRotateFactor(true);
-			vpObj->SetSize(XMFLOAT2(0.3, 0.3));
+			vpObj->SetSize(XMFLOAT2(0.2, 0.2));
 			vpObj->EmitParticle(5);
 			vpObj->SetEmit(true);
 		}
@@ -1691,9 +1691,9 @@ ChargeAttack_Player::ChargeAttack_Player()
 	particleComp->SetColor(XMFLOAT3(0.9882, 0.4313, 0.1333));
 	particleComp->SetEmissive(20.0f);
 	particleComp->SetEmitParticleNumber(150);
+	//particleComp->SetParticleNumber(150);
 	particleComp->SetLifeTime(1.0f);
-	particleComp->SetParticleType(10);
-	particleComp->SetSize(XMFLOAT2(0.2, 0.2));
+	particleComp->SetSize(XMFLOAT2(0.8, 0.8));
 	particleComp->SetTextureIndex(0);
 	particleComp->SetSpeed(30.0f);
 

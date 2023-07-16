@@ -236,7 +236,7 @@ void ParticleComponent::HandleMessage(const Message& message, const ParticleComp
 		pParticle->SetFieldMainDirection(m_xmf3FieldMainDirection);
 		pParticle->SetProgressionRate(m_fProgressionRate);
 		pParticle->SetLengthScale(m_fLengthScale);
-		pParticle->SetTextureIndex(m_iTextureIndex + m_iTextureOffset);
+		pParticle->SetTextureIndex(m_iTextureIndex + CSimulatorScene::GetInst()->GetTextureManager()->GetTextureOffset(TextureType::ParticleTexture));
 		pParticle->SetEmissive(m_fEmissive);
 		pParticle->SetRotateFactor(m_bSimulateRotate);
 		pParticle->SetScaleFactor(m_bSimulateRotate);
