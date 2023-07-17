@@ -1844,9 +1844,6 @@ void CMainTMPScene::UIUpdate(CPlayer* pPlayer)
 	dynamic_cast<CBarObject*>(m_pUIObject[5].get())->Set_Value(((CPlayer*)m_pPlayer)->m_fStamina, ((CPlayer*)m_pPlayer)->m_fTotalStamina);
 	dynamic_cast<CNumberObject*>(m_pUIObject[10].get())->UpdateNumber(((CPlayer*)m_pPlayer)->m_iCombo);
 
-	OutputDebugString(std::to_wstring(((CPlayer*)m_pPlayer)->m_fStamina).c_str());
-	OutputDebugString(L"\n");
-
 	// ((CPlayer*)m_pPlayer)->m_iCombo / 10
 
 	if (((CKnightPlayer*)(m_pPlayer))->GetMonsterAttack())
