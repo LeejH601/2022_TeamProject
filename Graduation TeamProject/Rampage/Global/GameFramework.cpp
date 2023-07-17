@@ -419,6 +419,7 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 		case VK_ESCAPE:
 			break;
 		case VK_F9:
+			ChangeSwapChainState();
 			break;
 		default:
 			break;
@@ -435,24 +436,12 @@ LRESULT CALLBACK CGameFramework::OnProcessingWindowMessage(HWND hWnd, UINT nMess
 	switch (nMessageID)
 	{
 	case WM_ACTIVATE:
-	{
-	case WM_ACTIVATEAPP:
-		if (wParam == FALSE)
-		{
-			m_pdxgiSwapChain->SetFullscreenState(false, NULL);
-		}
-		else
-		{
-			m_pdxgiSwapChain->SetFullscreenState(true, NULL);
-		}
-		break;
-	}
+
 		break;
 	case WM_SIZE:
 	{
 		m_nWndClientWidth = LOWORD(lParam);
 		m_nWndClientHeight = HIWORD(lParam);
-		OutputDebugString(L"WM_SIZE\n");
 		break;
 	}
 	case WM_LBUTTONDOWN:
@@ -592,12 +581,14 @@ void CGameFramework::FrameAdvance()
 	m_GameTimer.GetFrameRate(m_pszFrameRate + 34, 15);
 	::SetWindowText(m_hWnd, m_pszFrameRate);
 }
-void CGameFramework::ChangeSwapChainState(bool bFullScreenState)
+void CGameFramework::ChangeSwapChainState()
 {
 	::WaitForGpuComplete(m_pd3dCommandQueue.Get(), m_pd3dFence.Get(), ++m_nFenceValues[m_nSwapChainBufferIndex], m_hFenceEvent);
 
-	// 넘어온 인자대로 젠체화면을 설정한다.
-	m_pdxgiSwapChain->SetFullscreenState(bFullScreenState, NULL);
+	// 현재 전체화면 상태인지 확인하고 ! 연산으로 현재 상태의 반대로 전환한다.
+	BOOL bFullScreenState = FALSE;
+	m_pdxgiSwapChain->GetFullscreenState(&bFullScreenState, NULL);
+	m_pdxgiSwapChain->SetFullscreenState(!bFullScreenState, NULL);
 
 	DXGI_MODE_DESC dxgiTargetParameters;
 	dxgiTargetParameters.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
