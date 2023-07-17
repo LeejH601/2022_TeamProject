@@ -703,5 +703,6 @@ void SpecialMoveDamageListener::HandleMessage(const Message& message, const Play
 
 	}
 	pPlayer->SetMonsterAttack(true);
-
+	dynamic_cast<CMainTMPScene*>(m_pScene)->m_bPlayCutScene = false;
+	dynamic_cast<CMainTMPScene*>(m_pScene)->returnMainCamera();
 }

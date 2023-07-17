@@ -191,6 +191,7 @@ void CThirdPersonCamera::Rotate(float fPitch, float fYaw, float fRoll)
 		if (m_fRoll > +20.0f) { fRoll -= (m_fRoll - 20.0f); m_fRoll = +20.0f; }
 		if (m_fRoll < -20.0f) { fRoll -= (m_fRoll + 20.0f); m_fRoll = -20.0f; }
 	}
+	//XMStoreFloat4(&m_xmf4RotationQuaternion, XMQuaternionNormalize(XMQuaternionRotationRollPitchYaw(fPitch * PI / 180.0f, fYaw * PI / 180.0f, fRoll * PI / 180.0f)));
 }
 
 void CThirdPersonCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
@@ -206,6 +207,7 @@ void CThirdPersonCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
 		XMFLOAT3 xmf3YAxis = XMFLOAT3(0.0f, 1.0f, 0.0f);
 		XMFLOAT3 xmf3ZAxis = XMFLOAT3(0.0f, 0.0f, 1.0f);
 
+
 		if (m_fPitch != 0.0f)
 		{
 			xmmtxRotateX = XMMatrixRotationAxis(XMLoadFloat3(&xmf3XAxis), XMConvertToRadians(m_fPitch));
@@ -220,6 +222,8 @@ void CThirdPersonCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
 		}
 
 		xmmtxRotate = XMMatrixMultiply(xmmtxRotateZ, XMMatrixMultiply(xmmtxRotateX, xmmtxRotateY));
+		XMStoreFloat4(&m_xmf4RotationQuaternion, XMQuaternionRotationRollPitchYaw(m_fPitch, m_fYaw, m_fRoll));
+
 
 		XMFLOAT3 xmf3Offset = Vector3::TransformNormal(m_xmf3Offset, xmmtxRotate);
 		XMFLOAT3 xmf3Position = Vector3::Add(xmf3LookAt, xmf3Offset);
@@ -819,7 +823,7 @@ void CDollyCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
 			SetPosition(Vector3::TransformCoord(GetPosition(), dynamic_cast<CPhysicsObject*>(m_LocalBaseObject)->GetWorldMatrixNonScale()));
 		}
 		else
-		SetPosition(Vector3::TransformCoord(GetPosition(), m_LocalBaseObject->m_xmf4x4World));
+			SetPosition(Vector3::TransformCoord(GetPosition(), m_LocalBaseObject->m_xmf4x4World));
 		break;
 	case CINEMATIC_SIMULATION_DIMENSION::CINEMATIC_SIMULATION_DIMENSION_END:
 		break;
@@ -864,7 +868,7 @@ void CDollyCamera::CaculateCubicPolyData()
 		m_vDollyTracks[i].fSegmentTime = m_vCameraInfos[i].fSegmentTime;
 	}
 
-	int nTrack = m_vDollyTracks.size()-1;
+	int nTrack = m_vDollyTracks.size() - 1;
 
 	m_vCubicPolys.clear();
 	m_vCubicPolys.resize(nTrack);

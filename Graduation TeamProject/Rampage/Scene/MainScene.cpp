@@ -240,6 +240,198 @@ void CMainTMPScene::AdvanceStage()
 	m_fWaitingTime = 0.0f;
 }
 
+void CMainTMPScene::returnMainCamera()
+{
+
+	/*m_pMainSceneCamera->SetPosition(m_pCinematicPlayerCamera->GetPosition());
+	m_pMainSceneCamera->SetLookVector(m_pCinematicPlayerCamera->GetLookVector());
+	m_pMainSceneCamera->SetUpVector(m_pCinematicPlayerCamera->GetUpVector());
+	m_pMainSceneCamera->SetRightVector(m_pCinematicPlayerCamera->GetRightVector());*/
+
+	XMFLOAT3 xmf3PlayerPos = XMFLOAT3{
+		((CKnightPlayer*)m_pPlayer)->m_pSkinnedAnimationController->m_pRootMotionObject->GetWorld()._41,
+		 m_pPlayer->GetPosition().y,
+		((CKnightPlayer*)m_pPlayer)->m_pSkinnedAnimationController->m_pRootMotionObject->GetWorld()._43 };
+	xmf3PlayerPos.y += MeterToUnit(0.9f);
+
+
+	XMFLOAT3 CinematicPos = m_pCinematicPlayerCamera->GetPosition();
+	XMFLOAT3 distanceOffset = Vector3::Subtract(CinematicPos, xmf3PlayerPos);
+	distanceOffset = XMFLOAT3(distanceOffset.x, 0, distanceOffset.z);
+	distanceOffset = Vector3::Normalize(distanceOffset);
+	XMFLOAT3 seekOffset = XMFLOAT3(0, 0, 1);
+
+	//XMFLOAT3 normal = Vector3::CrossProduct(distanceOffset, seekOffset);
+	//float angle = Vector3::Angle(distanceOffset, seekOffset); // eular
+	//XMVECTOR qua = XMQuaternionRotationAxis(XMLoadFloat3(&normal), XMConvertToRadians(angle));
+
+	//auto euler_from_quaternion = [](float x, float y, float z, float w) {
+	//	float t0 = +2.0 * (w * x + y * z);
+	//	float t1 = +1.0 - 2.0 * (x * x + y * y);
+	//	float roll_x = std::atan2(t0, t1);
+
+	//	float t2 = +2.0 * (w * y - z * x);
+	//	t2 = (t2 > +1.0) ? 1.0 : t2;
+	//	t2 = (t2 < -1.0) ? -1.0 : t2;
+	//	float pitch_y = std::asin(t2);
+
+	//	float t3 = +2.0 * (w * z + x * y);
+	//	float t4 = +1.0 - 2.0 * (y * y + z * z);
+	//	float yaw_z = std::atan2(t3, t4);
+
+	//	return XMFLOAT3(roll_x, pitch_y, yaw_z);
+	//};
+
+	/*XMFLOAT3 rpy = euler_from_quaternion(qua.m128_f32[0], qua.m128_f32[1], qua.m128_f32[2], qua.m128_f32[3]);
+	rpy = Vector3::ScalarProduct(rpy, 180 / PI, false);
+	float roll = 0.0f;
+	float yaw = rpy.z;
+	float pitch = rpy.y;
+
+	m_pMainSceneCamera->SetPitch(0.0f);
+	m_pMainSceneCamera->SetYaw(0.0f);
+
+	m_pMainSceneCamera->Rotate(pitch, yaw);
+	m_pMainSceneCamera->Update(xmf3PlayerPos, 0.0f);*/
+
+	//if (m_fPitch != 0.0f)
+	/*{
+		xmmtxRotateX = XMMatrixRotationAxis(XMLoadFloat3(&xmf3XAxis), XMConvertToRadians(m_fPitch));
+	}
+	if (m_fYaw != 0.0f)
+	{
+		xmmtxRotateY = XMMatrixRotationAxis(XMLoadFloat3(&xmf3YAxis), XMConvertToRadians(m_fYaw));
+	}
+	if (m_fRoll != 0.0f)
+	{
+		xmmtxRotateY = XMMatrixRotationAxis(XMLoadFloat3(&xmf3ZAxis), XMConvertToRadians(m_fRoll));
+	}
+
+	xmmtxRotate = XMMatrixMultiply(xmmtxRotateZ, XMMatrixMultiply(xmmtxRotateX, xmmtxRotateY));*/
+
+
+
+
+	XMFLOAT3 look = m_pCinematicPlayerCamera->GetLookVector();
+	XMFLOAT3 right = m_pCinematicPlayerCamera->GetRightVector();
+	XMFLOAT3 up = m_pCinematicPlayerCamera->GetUpVector();
+
+	float pitch = Vector3::Angle(XMFLOAT3(0, 1, 0), up);
+
+	/*float angle = XMVector3AngleBetweenVectors(XMLoadFloat3(&seekOffset), XMLoadFloat3(&distanceOffset)).m128_f32[0];
+	XMFLOAT3 cross = Vector3::CrossProduct(seekOffset, distanceOffset);
+	float CaculateAngle;
+	CaculateAngle = (Vector3::DotProduct(XMFLOAT3(0, 1, 0), cross) < 0.0f) ? angle + PI: angle;
+	CaculateAngle = XMConvertToDegrees(CaculateAngle);
+
+
+	float yaw = CaculateAngle;*/
+
+	m_pMainSceneCamera->SetPitch(0.0f);
+	m_pMainSceneCamera->SetYaw(0.0f);
+
+	m_pMainSceneCamera->Rotate(pitch);
+	//m_pMainSceneCamera->Rotate(0, 180.0f);
+	
+	XMFLOAT3 MainCamOff = m_pMainSceneCamera->GetOffset();
+	float distance = Vector3::Angle(Vector3::Normalize(XMFLOAT3(distanceOffset.x,0, distanceOffset.z)), Vector3::Normalize(XMFLOAT3(MainCamOff.x,0, MainCamOff.z)));
+	float sign = Vector3::DotProduct(XMFLOAT3(0, 1, 0), Vector3::CrossProduct(Vector3::Normalize(XMFLOAT3(distanceOffset.x, 0, distanceOffset.z)), Vector3::Normalize(XMFLOAT3(MainCamOff.x, 0, MainCamOff.z)))) >= 0.0f ? 1.0f : -1.0f;
+	while (distance > 0.1f)
+	{
+		m_pMainSceneCamera->Rotate(0.0f, 0.05f * sign);
+
+		XMMATRIX xmmtxRotate = XMMatrixIdentity();
+		XMMATRIX xmmtxRotateX = XMMatrixIdentity();
+		XMMATRIX xmmtxRotateY = XMMatrixIdentity();
+		XMMATRIX xmmtxRotateZ = XMMatrixIdentity();
+
+		XMFLOAT3 xmf3XAxis = XMFLOAT3(1.0f, 0.0f, 0.0f);
+		XMFLOAT3 xmf3YAxis = XMFLOAT3(0.0f, 1.0f, 0.0f);
+		XMFLOAT3 xmf3ZAxis = XMFLOAT3(0.0f, 0.0f, 1.0f);
+
+
+		if (m_pMainSceneCamera->GetYaw() != 0.0f)
+		{
+			xmmtxRotateY = XMMatrixRotationAxis(XMLoadFloat3(&xmf3YAxis), XMConvertToRadians(m_pMainSceneCamera->GetYaw()));
+		}
+
+		xmmtxRotate = XMMatrixMultiply(xmmtxRotateZ, XMMatrixMultiply(xmmtxRotateX, xmmtxRotateY));
+		XMFLOAT3 xmf3Offset = Vector3::TransformNormal(m_pMainSceneCamera->GetOffset(), xmmtxRotate);
+
+		distance = Vector3::Angle(Vector3::Normalize(XMFLOAT3(distanceOffset.x, 0, distanceOffset.z)), Vector3::Normalize(XMFLOAT3(xmf3Offset.x, 0, xmf3Offset.z)));
+	}
+
+	//float yaw = Vector3::Angle(XMFLOAT3(0, 0, 1), Vector3::Normalize(XMFLOAT3(look.x, 0.0f, look.z)));
+	////yaw = (yaw > 0.0f) ? yaw - 90.0f : yaw;
+	//float roll = Vector3::Angle(XMFLOAT3(0, 0, 1), look);
+
+	//XMFLOAT4X4 cameraMatrix = {
+	//				right.x,
+	//				right.y,
+	//				right.z,
+	//				0.0f,
+	//				up.x,
+	//				up.y,
+	//				up.z,
+	//				0.0f,
+	//				look.x,
+	//				look.y,
+	//				look.z,
+	//				0.0f,
+	//				0.0f,
+	//				0.0f,
+	//				0.0f,
+	//				1.0f
+	//};
+
+	/*XMVECTOR q = XMQuaternionRotationMatrix(XMLoadFloat4x4(&cameraMatrix));
+	XMFLOAT3 test1 = euler_from_quaternion(q.m128_f32[0], q.m128_f32[1], q.m128_f32[2], q.m128_f32[3]);
+	CThirdPersonCamera* testC = dynamic_cast<CThirdPersonCamera*>(m_pMainSceneCamera.get());
+	XMFLOAT3 test2 = euler_from_quaternion(testC->m_xmf4RotationQuaternion.x, testC->m_xmf4RotationQuaternion.y, testC->m_xmf4RotationQuaternion.z, testC->m_xmf4RotationQuaternion.w);
+	printf("dsg");*/
+
+	//XMFLOAT3 resultRot;
+	//XMVECTOR q = XMQuaternionRotationMatrix(XMLoadFloat4x4(&cameraMatrix));
+	//XMFLOAT3 rot = euler_from_quaternion(q.m128_f32[0], q.m128_f32[1], q.m128_f32[2], q.m128_f32[3]);
+	//rot = Vector3::ScalarProduct(rot, 180.0f / PI, false);
+
+	/*XMVECTOR q = XMQuaternionRotationMatrix(XMLoadFloat4x4(&cameraMatrix));
+	q = XMQuaternionRotationRollPitchYaw(XMConvertToRadians(pitch), 0, 0);
+	XMFLOAT3 rot = euler_from_quaternion(q.m128_f32[0], q.m128_f32[1], q.m128_f32[2], q.m128_f32[3]);
+	rot = Vector3::ScalarProduct(rot, 180.0f / PI, false);
+	resultRot.x = rot.x;
+
+	q = XMQuaternionRotationMatrix(XMLoadFloat4x4(&cameraMatrix));
+	q = XMQuaternionRotationRollPitchYaw(XMConvertToRadians(yaw), 0, 0);
+	 rot = euler_from_quaternion(q.m128_f32[0], q.m128_f32[1], q.m128_f32[2], q.m128_f32[3]);
+	rot = Vector3::ScalarProduct(rot, 180.0f / PI, false);
+	resultRot.y = rot.x;
+
+	q = XMQuaternionRotationMatrix(XMLoadFloat4x4(&cameraMatrix));
+	q = XMQuaternionRotationRollPitchYaw(XMConvertToRadians(roll), 0, 0);
+	 rot = euler_from_quaternion(q.m128_f32[0], q.m128_f32[1], q.m128_f32[2], q.m128_f32[3]);
+	rot = Vector3::ScalarProduct(rot, 180.0f / PI, false);
+	resultRot.z = rot.x;*/
+	//q = XMQuaternionRotationMatrix(XMMatrixIdentity());
+	//q = XMQuaternionRotationRollPitchYaw(XMConvertToRadians(20), 0, 0);
+	//q = XMQuaternionNormalize(q);
+	/*CThirdPersonCamera* testC = dynamic_cast<CThirdPersonCamera*>(m_pMainSceneCamera.get());
+	XMFLOAT3 testRot = euler_from_quaternion(testC->m_xmf4RotationQuaternion.x, testC->m_xmf4RotationQuaternion.y, testC->m_xmf4RotationQuaternion.z, testC->m_xmf4RotationQuaternion.w);*/
+	//XMFLOAT3 testEul = Vector3::ScalarProduct(testRot, 180.0f / PI, false);
+
+	/*m_pMainSceneCamera->SetPitch(0.0f);
+	m_pMainSceneCamera->SetYaw(0.0f);
+
+	m_pMainSceneCamera->Rotate(rot.y, rot.x);
+	m_pMainSceneCamera->Rotate(0, 180.0f);
+	m_pMainSceneCamera->Update(xmf3PlayerPos, 0.0f);*/
+
+	m_pMainSceneCamera->RegenerateViewMatrix();
+	m_pCurrentCamera = m_pMainSceneCamera.get();
+	m_CurrentMouseCursorMode = MOUSE_CUROSR_MODE::THIRD_FERSON_MODE;
+	m_curSceneProcessType = SCENE_PROCESS_TYPE::NORMAL;
+}
+
 void CMainTMPScene::SetPlayer(CGameObject* pPlayer)
 {
 	m_pPlayer = pPlayer;
@@ -829,17 +1021,14 @@ SCENE_RETURN_TYPE CMainTMPScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMe
 				if (!((CPlayer*)m_pPlayer)->m_bCharged)
 				{
 					((CPlayer*)m_pPlayer)->m_bCharged = true;
-
-
-					
-					
+					m_bPlayCutScene = true;
 
 					((CCinematicCamera*)(m_pCinematicPlayerCamera.get()))->SetFocusPoint(m_pPlayer->GetPosition());
 					if (dynamic_cast<CDollyCamera*>(m_pCinematicPlayerCamera.get()))
 						dynamic_cast<CDollyCamera*>(m_pCinematicPlayerCamera.get())->CaculateCubicPolyData();
 					((CCinematicCamera*)(m_pCinematicPlayerCamera.get()))->PlayCinematicCamera();
 					m_pCurrentCamera = m_pCinematicPlayerCamera.get();
-					m_curSceneProcessType = SCENE_PROCESS_TYPE::CINEMATIC;
+					//m_curSceneProcessType = SCENE_PROCESS_TYPE::CINEMATIC;
 					/*m_pVertexPointParticleObject->SetTextureIndex(CSimulatorScene::GetInst()->GetTextureManager()->GetTextureOffset(TextureType::ParticleTexture));
 					m_pVertexPointParticleObject->SetFieldSpeed(0.0f);
 					m_pVertexPointParticleObject->SetColor(XMFLOAT3(0.4745, 0.9254, 1.0));
@@ -991,7 +1180,7 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 
 	dynamic_cast<CCinematicCamera*>(m_pCinematicPlayerCamera.get())->SetSimulationDimension(CINEMATIC_SIMULATION_DIMENSION::DIMENSION_LOCAL);
 
-	
+
 
 #ifdef RENDER_BOUNDING_BOX
 	CBoundingBoxShader::GetInst()->CreateShader(pd3dDevice, GetGraphicsRootSignature(), 7, pdxgiObjectRtvFormats, DXGI_FORMAT_D32_FLOAT, 0);
@@ -1189,6 +1378,7 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	SPDlistener->SetObjects(&m_pEnemys);
 	SPDlistener->SetParticleObject(m_pParticleObjects.front().get());
 	SPDlistener->SetImpactObject(m_pSpriteAttackObjects.front().get());
+	SPDlistener->SetScene(this);
 	m_pListeners.push_back(std::move(SPDlistener));
 	CMessageDispatcher::GetInst()->RegisterListener(MessageType::SPECIALMOVE_DAMAGED, m_pListeners.back().get(), nullptr);
 
@@ -1520,7 +1710,7 @@ void CMainTMPScene::UpdateObjects(float fTimeElapsed)
 		CloseHandle(ObjThreadHandles[i]);
 	}*/
 
-	if (!m_pBreakScreenShader->GetEnable()) {
+	if (!m_bPlayCutScene) {
 		for (int i = 0; i < m_pEnemys.size(); ++i) {
 			m_pEnemys[i]->Update(fTimeElapsed);
 			m_pcbMappedDisolveParams->dissolveThreshold[i] = m_pEnemys[i]->m_fDissolveThrethHold;
@@ -1622,7 +1812,7 @@ void CMainTMPScene::Enter(HWND hWnd)
 	SetCursorPos(screenRect.left + (screenRect.right - screenRect.left) / 2,
 		screenRect.top + (screenRect.bottom - screenRect.top) / 2);
 
-	
+
 	((CCinematicCamera*)(m_pCinematicSceneCamera.get()))->AddPlayerCameraInfo((CPlayer*)m_pPlayer, m_pMainSceneCamera.get());
 	((CCinematicCamera*)(m_pCinematicSceneCamera.get()))->AddCameraInfo(m_vCinematicCameraLocations[0].get());
 

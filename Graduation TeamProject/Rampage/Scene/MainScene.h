@@ -114,6 +114,7 @@ private:
 
 	CCamera* m_pCurrentCamera = NULL;
 
+
 	POINT m_ptOldCursorPos;
 
 	MOUSE_CUROSR_MODE m_CurrentMouseCursorMode = MOUSE_CUROSR_MODE::THIRD_FERSON_MODE;
@@ -124,12 +125,16 @@ private:
 	std::list<RegisterArticulationParams> m_lRequestObjects;
 	std::list<RegisterArticulationSleepParams> m_lSleepObjects;
 public:
+	bool m_bPlayCutScene = false;
+
+public:
 	CMainTMPScene();
 	virtual ~CMainTMPScene() {}
 
 	void HandleMonsterDeadMessage();
 	void HandlePlayerDeadMessage();
 	void AdvanceStage();
+	void returnMainCamera();
 	
 	virtual void SetPlayer(CGameObject* pPlayer);
 

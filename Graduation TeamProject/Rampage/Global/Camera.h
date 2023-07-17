@@ -110,6 +110,7 @@ public:
 
 	XMFLOAT3& GetOffset() { return(m_xmf3Offset); }
 	void SetOffset(XMFLOAT3 xmf3Offset) { m_xmf3Offset = xmf3Offset; m_xmf3Position.x += xmf3Offset.x; m_xmf3Position.y += xmf3Offset.y; m_xmf3Position.z += xmf3Offset.z; }
+	void SetOffsetOnly(XMFLOAT3 xmf3Offset) { m_xmf3Offset = xmf3Offset; };
 
 	void SetTimeLag(float fTimeLag) { m_fTimeLag = fTimeLag; }
 	float GetTimeLag() { return(m_fTimeLag); }
@@ -127,6 +128,10 @@ public:
 	float& GetPitch() { return(m_fPitch); }
 	float& GetRoll() { return(m_fRoll); }
 	float& GetYaw() { return(m_fYaw); }
+
+	void SetPitch(float pitch) { m_fPitch = pitch; }
+	void SetRoll(float roll) { m_fRoll = roll; }
+	void SetYaw(float yaw) { m_fYaw = yaw; }
 
 	XMFLOAT4X4& GetViewMatrix() { return(m_xmf4x4View); }
 	XMFLOAT4X4& GetProjectionMatrix() { return(m_xmf4x4Projection); }
@@ -152,6 +157,8 @@ class CThirdPersonCamera : public CCamera
 {
 protected:
 	CPlayer* m_pPlayer;
+public:
+	XMFLOAT4 m_xmf4RotationQuaternion;
 public:
 	CThirdPersonCamera();
 	virtual ~CThirdPersonCamera();

@@ -1725,7 +1725,7 @@ ChargeAttack_Player::ChargeAttack_Player()
 	pSkelSoundComponent->SetEnable(true);
 	pSkelSoundComponent->SetSoundNumber(0);
 
-	m_fPlayerCameraOffset = MeterToUnit(2.0f);
+	//m_fPlayerCameraOffset = MeterToUnit(2.0f);
 }
 
 void ChargeAttack_Player::SetPlayerRootVel(CPlayer* player)
@@ -1852,7 +1852,7 @@ void ChargeAttack_Player::Exit(CPlayer* player)
 {
 	if (player->m_pSwordTrailReference)
 		dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[3].get())->m_eTrailUpdateMethod = TRAIL_UPDATE_METHOD::DELETE_CONTROL_POINT;
-	player->m_pCamera->SetOffset(m_xmf3PlayerCameraOffsetCache);
+	//player->m_pCamera->SetOffset(m_xmf3PlayerCameraOffsetCache);
 }
 
 Dead_Player::Dead_Player()
