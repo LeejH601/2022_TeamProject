@@ -42,7 +42,7 @@ public:
 	virtual void PreBarUpdate(float fTimeElapsed);
 	virtual void CurBarUpdate(float fTimeElapsed);
 
-	void SetGradationValue(float fGradationValue) { m_fGradationValue = fGradationValue; }
+	void SetGradationValue(float fGradationValue) { m_fGradationValue = fGradationValue * 0.7f + 0.1f; } // 0.1 ~ 0.8f
 protected:
 	XMFLOAT2 m_xmf2OffsetPosition = XMFLOAT2(0.f, 0.f);
 	XMFLOAT2 m_xmf2OffsetSize = XMFLOAT2(0.f, 0.f);
@@ -164,6 +164,20 @@ private:
 	bool m_bAnimation = false;
 };
 
+class CAppearObject : public CUIObject
+{
+public:
+	CAppearObject(int iTextureIndex, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fSize);
+	virtual ~CAppearObject();
+
+	virtual void UpdateLifeTime(float fTimeElapsed);
+	virtual void Update(float fTimeElapsed);
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, bool b_UseTexture, CCamera* pCamera = NULL);
+
+	virtual void SetEnable(bool bEnable);
+private:
+};
+
 class CButtonObject : public CUIObject
 {
 public:
@@ -218,4 +232,9 @@ public:
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, bool b_UseTexture, CCamera* pCamera = NULL);
 	virtual void PreBarUpdate(float fTimeElapsed);
 	virtual void CurBarUpdate(float fTimeElapsed);
+
+
+	void ResetSkill();
+private:
+	float m_fTime = 0.f;
 };

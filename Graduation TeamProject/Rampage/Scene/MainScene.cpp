@@ -771,6 +771,9 @@ SCENE_RETURN_TYPE CMainTMPScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMe
 			}
 		}
 		break;
+		case '3':
+			dynamic_cast<CSquareBar*>(m_pUIObject[14].get())->ResetSkill();
+			break;
 		case 'f':
 		case 'F':
 			((CPlayer*)m_pPlayer)->Tmp();
@@ -1914,6 +1917,8 @@ void CMainTMPScene::LoadTextureObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/ResultBackGround.dds", 0, 0);
 	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/ResultScoreMenu.dds", 0, 0);
 	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/ChargeIcon.dds", 0, 0);
+	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/ChargeIcon0.dds", 0, 0);
+	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/ChargeIcon1.dds", 0, 0);
 	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/SkillGauge.dds", 0, 0);
 	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/Gradation.dds", 0, 0);
 	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/SkillFrame.dds", 0, 0);
