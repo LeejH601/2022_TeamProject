@@ -398,8 +398,8 @@ COrcObject::COrcObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3d
 {
 	m_fHP = 200.0f;
 	m_fTotalHP = 200.0f;
-	m_fStrikingPower = 27.0f;
-	m_fSpeedKperH = 11.5;
+	m_fStrikingPower = 27.0f + RandomFloatInRange(-1.5f, 1.5f);;
+	m_fSpeedKperH = 11.5f + RandomFloatInRange(-1.5f, 1.5f);
 	m_fSpeedUperS = MeterToUnit(m_fSpeedKperH * 1000.0f) / 3600.0f;
 	m_fAttackRange = MeterToUnit(1.25f);
 
@@ -449,8 +449,8 @@ CGoblinObject::CGoblinObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 {
 	m_fHP = 75.0f;
 	m_fTotalHP = 75.0f;
-	m_fStrikingPower = 10.0f;
-	m_fSpeedKperH = 15.0f;
+	m_fStrikingPower = 10.0f + RandomFloatInRange(-1.5f, 1.5f);;
+	m_fSpeedKperH = 15.0f + RandomFloatInRange(-1.5f, 1.5f);
 	m_fSpeedUperS = MeterToUnit(m_fSpeedKperH * 1000.0f) / 3600.0f;
 	m_fAttackRange = MeterToUnit(0.8f);
 
@@ -504,8 +504,8 @@ CSkeletonObject::CSkeletonObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 {
 	m_fHP = 135.0f;
 	m_fTotalHP = 135.0f;
-	m_fStrikingPower = 18.0f;
-	m_fSpeedKperH = 8.0f;
+	m_fStrikingPower = 18.0f + RandomFloatInRange(-1.5f, 1.5f);
+	m_fSpeedKperH = 8.0f + RandomFloatInRange(-1.5f, 1.5f);
 	m_fSpeedUperS = MeterToUnit(m_fSpeedKperH * 1000.0f) / 3600.0f;
 	m_fAttackRange = MeterToUnit(1.1f);
 

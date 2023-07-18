@@ -49,9 +49,8 @@ void Idle_Player::Execute(CPlayer* player, float fElapsedTime)
 {
 	if (player->m_bEvasioned)
 		player->m_pStateMachine->ChangeState(Evasion_Player::GetInst());
-
 	// 사용자가 좌클릭을 했으면 Atk1_Player로 상태 변경
-	else if (player->m_bAttack)
+	else if (player->m_bAttack && player->m_fStamina >= 5.0f)
 		player->m_pStateMachine->ChangeState(Atk1_Player::GetInst());
 	else if (player->m_bCharged)
 		player->m_pStateMachine->ChangeState(ChargeStart_Player::GetInst());
@@ -289,7 +288,7 @@ void Atk1_Player::CheckComboAttack(CPlayer* player)
 	if (0.7 < player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition) {
 		if (player->m_pSwordTrailReference)
 			dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[0].get())->m_eTrailUpdateMethod = TRAIL_UPDATE_METHOD::DELETE_CONTROL_POINT;
-		if (player->m_bAttack) {
+		if (player->m_bAttack && player->m_fStamina >= 5.0f) {
 			CAnimationController* pPlayerController = player->m_pSkinnedAnimationController.get();
 			player->m_pStateMachine->ChangeState(Atk2_Player::GetInst());
 		}
@@ -390,11 +389,10 @@ void Atk1_Player::Enter(CPlayer* player)
 		dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[0].get())->SetLengthWeight(1.0f);
 	}
 
-	player->m_fStamina -= player->m_fTotalStamina * 0.2f;
-	if (player->m_fStamina < 0.f)
-		player->m_fStamina = 0.f;
-	player->UpdateCombo(0.f);
+	player->m_fStamina -= 5.0f;
+	player->m_fStamina = max(0.0f, player->m_fStamina);
 
+	player->UpdateCombo(0.f);
 }
 
 void Atk1_Player::Execute(CPlayer* player, float fElapsedTime)
@@ -467,7 +465,7 @@ void Atk2_Player::CheckComboAttack(CPlayer* player)
 	if (0.7 < player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition) {
 		if (player->m_pSwordTrailReference)
 			dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[1].get())->m_eTrailUpdateMethod = TRAIL_UPDATE_METHOD::DELETE_CONTROL_POINT;
-		if (player->m_bAttack)
+		if (player->m_bAttack && player->m_fStamina >= 10.0f)
 		{
 			CAnimationController* pPlayerController = player->m_pSkinnedAnimationController.get();
 			player->m_pStateMachine->ChangeState(Atk3_Player::GetInst());
@@ -526,9 +524,8 @@ void Atk2_Player::Enter(CPlayer* player)
 		dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[1].get())->SetLengthWeight(1.0f);
 	}
 
-	player->m_fStamina -= player->m_fTotalStamina * 0.2f;
-	if (player->m_fStamina < 0.f)
-		player->m_fStamina = 0.f;
+	player->m_fStamina -= 10.0f;
+	player->m_fStamina = max(0.0f, player->m_fStamina);
 
 	player->UpdateCombo(0.f);
 }
@@ -696,9 +693,8 @@ void Atk3_Player::Enter(CPlayer* player)
 		dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[2].get())->SetLengthWeight(1.0f);
 	}
 
-	player->m_fStamina -= player->m_fTotalStamina * 0.2f;
-	if (player->m_fStamina < 0.f)
-		player->m_fStamina = 0.f;
+	player->m_fStamina -= 20.0f;
+	player->m_fStamina = max(0.0f, player->m_fStamina);
 
 	player->UpdateCombo(0.f);
 }
@@ -1240,6 +1236,9 @@ void Evasion_Player::Enter(CPlayer* player)
 	player->m_pSkinnedAnimationController->m_pAnimationTracks[1].m_nType = ANIMATION_TYPE_ONCE;
 
 	player->m_fInvincibleTime = FLT_MAX;
+
+	player->m_fStamina -= 20.0f;
+	player->m_fStamina = max(0.0f, player->m_fStamina);
 }
 
 void Evasion_Player::Execute(CPlayer* player, float fElapsedTime)
