@@ -70,7 +70,6 @@ private:
 
 	DWORD dwDirection;
 	bool m_bIsSprint = false;
-	bool m_bFullScreenState = false;
 public:
 	CGameFramework();
 	~CGameFramework();
@@ -118,6 +117,6 @@ public:
 	LRESULT CALLBACK OnProcessingWindowMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
 
 	//전체화면 모드 <-> 윈도우 모드의 전환을 구현하는 함수이다.
-	void ChangeSwapChainState(BOOL bFullScreenState);
+	void ChangeSwapChainState();
 	void ExecuteCommandLists();
 };

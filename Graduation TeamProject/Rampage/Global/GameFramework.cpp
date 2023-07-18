@@ -419,8 +419,7 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 		case VK_ESCAPE:
 			break;
 		case VK_F9:
-			m_bFullScreenState != m_bFullScreenState;
-			ChangeSwapChainState(m_bFullScreenState);
+			ChangeSwapChainState();
 			break;
 		default:
 			break;
@@ -438,10 +437,12 @@ LRESULT CALLBACK CGameFramework::OnProcessingWindowMessage(HWND hWnd, UINT nMess
 	{
 	case WM_ACTIVATE:
 		break;
-	case WM_ACTIVATEAPP:
-		break;
 	case WM_SIZE:
+	{
+		m_nWndClientWidth = LOWORD(lParam);
+		m_nWndClientHeight = HIWORD(lParam);
 		break;
+	}
 	case WM_LBUTTONDOWN:
 	case WM_RBUTTONDOWN:
 	case WM_LBUTTONUP:
@@ -518,10 +519,10 @@ void CGameFramework::RenderObjects()
 	HRESULT hResult = m_pd3dCommandAllocator->Reset();
 	CScene* pScene = m_pSceneManager->GetCurrentScene();
 
-	/*if (dynamic_cast<CLobbyScene*>(m_pSceneManager->GetCurrentScene()) && dynamic_cast<CLobbyScene*>(pScene)->GetSceneType() == (UINT)(LobbySceneType::SIMULATOR_Scene))
+	if (dynamic_cast<CLobbyScene*>(m_pSceneManager->GetCurrentScene()) && dynamic_cast<CLobbyScene*>(pScene)->GetSceneType() == (UINT)(LobbySceneType::SIMULATOR_Scene))
 	{
 		PrepareImGui();
-	}*/
+	}
 
 
 	//명령 리스트를 리셋한다.
@@ -529,7 +530,7 @@ void CGameFramework::RenderObjects()
 
 	::SynchronizeResourceTransition(m_pd3dCommandList.Get(), m_ppd3dRenderTargetBuffers[m_nSwapChainBufferIndex].Get(), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
 
-	/*m_pSceneManager->PreRender(m_pd3dCommandList.Get(), m_GameTimer.GetFrameTimeElapsed());
+	m_pSceneManager->PreRender(m_pd3dCommandList.Get(), m_GameTimer.GetFrameTimeElapsed());
 
 	if (dynamic_cast<CMainTMPScene*>(pScene) || ((dynamic_cast<CLobbyScene*>(pScene)) && dynamic_cast<CLobbyScene*>(pScene)->GetSceneType() == (UINT)(LobbySceneType::LOGO_Scene)))
 	{
@@ -537,12 +538,12 @@ void CGameFramework::RenderObjects()
 		m_pSceneManager->OnPrepareRenderTarget(m_pd3dCommandList.Get(), 1, &m_pd3dSwapRTVCPUHandles[m_nSwapChainBufferIndex], m_d3dDsvDescriptorCPUHandle);
 	}
 	else
-		PrepareRenderTarget();*/
+		PrepareRenderTarget();
 
 	m_pd3dCommandList->ClearDepthStencilView(m_d3dDsvDescriptorCPUHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
 	UpdateShaderVariables(m_pd3dCommandList.Get());
 
-	//m_pSceneManager->Render(m_pd3dCommandList.Get(), m_GameTimer.GetFrameTimeElapsed(), m_GameTimer.GetTotalTime(), NULL);
+	m_pSceneManager->Render(m_pd3dCommandList.Get(), m_GameTimer.GetFrameTimeElapsed(), m_GameTimer.GetTotalTime(), NULL);
 
 	::SynchronizeResourceTransition(m_pd3dCommandList.Get(), m_ppd3dRenderTargetBuffers[m_nSwapChainBufferIndex].Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
 
@@ -579,16 +580,24 @@ void CGameFramework::FrameAdvance()
 	m_GameTimer.GetFrameRate(m_pszFrameRate + 34, 15);
 	::SetWindowText(m_hWnd, m_pszFrameRate);
 }
-void CGameFramework::ChangeSwapChainState(BOOL bFullScreenState)
+void CGameFramework::ChangeSwapChainState()
 {
 	::WaitForGpuComplete(m_pd3dCommandQueue.Get(), m_pd3dFence.Get(), ++m_nFenceValues[m_nSwapChainBufferIndex], m_hFenceEvent);
 
-	// 현재 전체화면 상태인지 확인하고 인자로 들어온 상태가 아니면 변경한다
-	BOOL bCurrentFullScreenState;
-	m_pdxgiSwapChain->GetFullscreenState(&bCurrentFullScreenState, NULL);
+	// 현재 전체화면 상태인지 확인하고 ! 연산으로 현재 상태의 반대로 전환한다.
+	BOOL bFullScreenState = FALSE;
+	m_pdxgiSwapChain->GetFullscreenState(&bFullScreenState, NULL);
+	m_pdxgiSwapChain->SetFullscreenState(!bFullScreenState, NULL);
 
-	if (bCurrentFullScreenState != bFullScreenState)
-		m_pdxgiSwapChain->SetFullscreenState(bFullScreenState, NULL);
+	DXGI_MODE_DESC dxgiTargetParameters;
+	dxgiTargetParameters.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+	dxgiTargetParameters.Width = m_nWndClientWidth;
+	dxgiTargetParameters.Height = m_nWndClientHeight;
+	dxgiTargetParameters.RefreshRate.Numerator = 60;
+	dxgiTargetParameters.RefreshRate.Denominator = 1;
+	dxgiTargetParameters.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
+	dxgiTargetParameters.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
+	m_pdxgiSwapChain->ResizeTarget(&dxgiTargetParameters);
 
 	for (int i = 0; i < m_nSwapChainBuffers; i++) if (m_ppd3dRenderTargetBuffers[i]) m_ppd3dRenderTargetBuffers[i].Reset();
 
@@ -597,16 +606,7 @@ void CGameFramework::ChangeSwapChainState(BOOL bFullScreenState)
 	m_pdxgiSwapChain->ResizeBuffers(0, 0, 0, DXGI_FORMAT_UNKNOWN, 0);
 
 	m_nSwapChainBufferIndex = m_pdxgiSwapChain->GetCurrentBackBufferIndex();
-
-	D3D12_CPU_DESCRIPTOR_HANDLE d3dRtvCPUDescriptorHandle = m_pd3dRtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
-
-	for (UINT i = 0; i < m_nSwapChainBuffers; i++)
-	{
-		m_pdxgiSwapChain->GetBuffer(i, __uuidof(ID3D12Resource), (void**)m_ppd3dRenderTargetBuffers[i].GetAddressOf());
-		m_pd3dDevice->CreateRenderTargetView(m_ppd3dRenderTargetBuffers[i].Get(), nullptr, d3dRtvCPUDescriptorHandle);
-		m_pd3dSwapRTVCPUHandles[i] = d3dRtvCPUDescriptorHandle;
-		d3dRtvCPUDescriptorHandle.ptr += ::gnRtvDescriptorIncrementSize;
-	}
+	CreateRenderTargetViews();
 }
 void CGameFramework::ExecuteCommandLists()
 {
