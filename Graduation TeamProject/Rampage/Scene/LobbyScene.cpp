@@ -37,7 +37,7 @@ bool CLobbyScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wP
 
 		if (dynamic_cast<CButtonObject*>(m_pUIObject[5].get())->CheckCollisionMouse(ptCursorPos))
 		{
-			CSoundManager::GetInst()->PlaySound("Sound/UI/Metal Click.wav", 0.6f, 0.f);
+			CSoundManager::GetInst()->PlaySound("Sound/UI/Metal Click.wav", 0.5f, 0.f);
 			m_iSceneType = LobbySceneType::SIMULATOR_Scene;
 			CSoundManager::GetInst()->StopSound("Sound/Background/Logo Bgm.wav");
 			return true;
@@ -45,10 +45,8 @@ bool CLobbyScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wP
 
 		if (dynamic_cast<CButtonObject*>(m_pUIObject[3].get())->CheckCollisionMouse(ptCursorPos))
 		{
-			CSoundManager::GetInst()->PlaySound("Sound/UI/Metal Click.wav", 0.6f, 0.f);
-			//m_iSceneType = LobbySceneType::SIMULATOR_Scene;
-			//CSoundManager::GetInst()->StopSound("Sound/Background/Logo Bgm.wav");
-
+			CSoundManager::GetInst()->PlaySound("Sound/UI/Metal Click.wav", 0.5f, 0.f);
+			m_iSceneType = LobbySceneType::SIMULATOR_Scene;
 			return true;
 		}
 
@@ -240,7 +238,7 @@ void CLobbyScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 
 	m_pCamera->SetUpdatedContext(m_pMap.get());
 
-	CSoundManager::GetInst()->PlaySound("Sound/Background/Logo Bgm.wav", 0.4f, 0.5f);
+	CSoundManager::GetInst()->PlaySound("Sound/Background/Logo Bgm.wav", 0.2f, 0.5f);
 }
 
 void CLobbyScene::Update(float fTimeElapsed)

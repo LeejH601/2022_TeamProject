@@ -52,6 +52,7 @@ public:
 	bool m_bCombo = false;
 
 	UINT m_iPotionN = 5;
+	int m_nRemainPotions;
 
 	bool m_bIsDash = false;
 	bool m_bIsDrinkPotion = false;
@@ -100,8 +101,7 @@ private:
 	XMFLOAT4 m_xmf4TrailControllPoints[2];
 	XMFLOAT3 m_xmf4PrevTrailVertexPoint;
 	bool	m_bMonsterAttack = false;
-public:
-	int m_nRemainPotions;
+
 
 public:
 	CKnightPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks);

@@ -13,6 +13,7 @@ cbuffer cbGameObjectInfo : register(b0)
 	float gfUVScaleY : packoffset(c2.z);
 	float gfEmissiveFactor : packoffset(c2.w);
 	float gfGenericAlpha : packoffset(c3.x);
+	uint gnCrackIndex : packoffset(c3.y);
 }
 
 cbuffer cbCameraInfo : register(b1)
@@ -29,7 +30,7 @@ cbuffer cbCameraInfo : register(b1)
 Texture2D gtxMultiRenderTargetTextures[7] : register(t35);
 SamplerState gSamplerState : register(s0);
 SamplerState gSamplerStateClamp : register(s3);
-Texture2D gtxtTexture[29] : register(t51);
+Texture2D gtxtTexture[40] : register(t51);
 
 #include "Light.hlsl"
 
@@ -128,7 +129,7 @@ PS_MULTIPLE_RENDER_TARGETS_OUTPUT PS_BreakScreen(VS_SCREEN_RECT_TEXTURED_OUTPUT 
 	float NoiseColor2 = snoise(float4(newPos.x, newPos.y + 43, newPos.z, gfCurrentTime * 0.5f), 1.0f, 1.0f);
 	//NoiseColor = NoiseColor * 0.5f + 0.5f;
 
-	float4 CrackColor = gtxtTexture[27].Sample(gSamplerState, input.uv * float2(gfUVScaleX, gfUVScaleY) + float2(gfUVOffsetX + NoiseColor * 0.005f, gfUVOffsetY + NoiseColor2 * 0.005f));
+	float4 CrackColor = gtxtTexture[gnCrackIndex].Sample(gSamplerState, input.uv * float2(gfUVScaleX, gfUVScaleY) + float2(gfUVOffsetX + NoiseColor * 0.005f, gfUVOffsetY + NoiseColor2 * 0.005f));
 
 	NoiseColor = clamp(NoiseColor, 0.0, 0.8);
 	CrackColor = 1.0f - CrackColor;

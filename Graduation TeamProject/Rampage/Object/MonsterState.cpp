@@ -142,7 +142,7 @@ void Damaged_Monster::Execute(CMonster* monster, float fElapsedTime)
 	monster->SetLookAt(Vector3::Add(monster->GetPosition(), XMFLOAT3(-monster->GetHitterVec().x, 0.0f, -monster->GetHitterVec().z)));
 
 	CAnimationSet* pAnimationSet = monster->m_pSkinnedAnimationController->m_pAnimationSets->m_pAnimationSets[monster->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_nAnimationSet];
-	
+
 	float fDamageDistance = monster->m_fDamageAnimationSpeed * fElapsedTime;
 	float fElapsed = monster->m_pSkinnedAnimationController->m_fTime + monster->m_fStunTime;
 
@@ -444,8 +444,8 @@ void Dead_Monster::Enter(CMonster* monster)
 		RegisterArticulationParams Request_params;
 		Request_params.pObject = monster;
 		XMFLOAT3 force = monster->GetHitterVec();
-		XMStoreFloat3(&force, XMVector3Rotate(XMLoadFloat3(&force), XMVECTOR({ 0, 1.0, 0, 1 })));
-		force = Vector3::ScalarProduct(force, 50.0f, false);
+		force = Vector3::Normalize(Vector3::Add(force, XMFLOAT3(0, 0.3f, 0.0f)));
+		force = Vector3::ScalarProduct(force, 20.0f, false);
 		Request_params.m_force = force;
 		CMessageDispatcher::GetInst()->Dispatch_Message<RegisterArticulationParams>(MessageType::REQUEST_REGISTERARTI, &Request_params, nullptr);
 		monster->m_bArticulationOnPxScene = true;
@@ -454,7 +454,8 @@ void Dead_Monster::Enter(CMonster* monster)
 		RegisterArticulationParams Request_params;
 		Request_params.pObject = monster;
 		XMFLOAT3 force = monster->GetHitterVec();
-		force = Vector3::ScalarProduct(force, 50.0f, false);
+		force = Vector3::Normalize(Vector3::Add(force, XMFLOAT3(0, 0.3f, 0.0f)));
+		force = Vector3::ScalarProduct(force, 20.0f, false);
 		Request_params.m_force = force;
 		CMessageDispatcher::GetInst()->Dispatch_Message<RegisterArticulationParams>(MessageType::REQUEST_REGISTERARTI, &Request_params, nullptr);
 		monster->m_bArticulationOnPxScene = true;
@@ -506,7 +507,7 @@ void Global_Monster::Enter(CMonster* monster)
 void Global_Monster::Execute(CMonster* monster, float fElapsedTime)
 {
 	if (monster->m_fHP <= 0.0f) {
-		if(monster->m_pStateMachine->GetCurrentState() != Dead_Monster::GetInst())
+		if (monster->m_pStateMachine->GetCurrentState() != Dead_Monster::GetInst())
 			monster->m_pStateMachine->ChangeState(Dead_Monster::GetInst());
 	}
 	else {

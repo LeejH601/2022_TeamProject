@@ -108,10 +108,12 @@ private:
 	std::unique_ptr<CCamera> m_pFloatingCamera = NULL;
 	std::unique_ptr<CCamera> m_pMainSceneCamera = NULL;
 	std::unique_ptr<CCamera> m_pCinematicSceneCamera = NULL;
+	std::unique_ptr<CCamera> m_pCinematicPlayerCamera = NULL;
 
 	std::vector<std::unique_ptr<CCamera>> m_vCinematicCameraLocations;
 
 	CCamera* m_pCurrentCamera = NULL;
+
 
 	POINT m_ptOldCursorPos;
 
@@ -123,12 +125,16 @@ private:
 	std::list<RegisterArticulationParams> m_lRequestObjects;
 	std::list<RegisterArticulationSleepParams> m_lSleepObjects;
 public:
+	bool m_bPlayCutScene = false;
+
+public:
 	CMainTMPScene();
 	virtual ~CMainTMPScene() {}
 
 	void HandleMonsterDeadMessage();
 	void HandlePlayerDeadMessage();
 	void AdvanceStage();
+	void returnMainCamera();
 	
 	virtual void SetPlayer(CGameObject* pPlayer);
 
