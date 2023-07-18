@@ -222,7 +222,7 @@ void CThirdPersonCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
 		}
 
 		xmmtxRotate = XMMatrixMultiply(xmmtxRotateZ, XMMatrixMultiply(xmmtxRotateX, xmmtxRotateY));
-		XMStoreFloat4(&m_xmf4RotationQuaternion, XMQuaternionRotationRollPitchYaw(m_fPitch, m_fYaw, m_fRoll));
+		//XMStoreFloat4(&m_xmf4RotationQuaternion, XMQuaternionRotationRollPitchYaw(m_fPitch, m_fYaw, m_fRoll));
 
 
 		XMFLOAT3 xmf3Offset = Vector3::TransformNormal(m_xmf3Offset, xmmtxRotate);

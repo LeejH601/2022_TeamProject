@@ -77,6 +77,7 @@ public:
 	CGameObject* pBodyBoundingBoxMesh;
 	CGameObject* pWeaponBoundingBoxMesh;
 
+	bool m_bShieldStateBuf = false;
 
 	ParticleCompParams m_ParticleCompParam;
 	ShieldHitComponent m_ParticleComponent;
@@ -103,8 +104,9 @@ public:
 	void SetElite(bool flag);
 	void HandleDamage(CPlayer* pPlayer, float fDamage);
 	void HandleAllyDamagedMessage(CGameObject* pPlayer);
-	bool GetHasShield() { return m_fCurrShield > 0.0f; };
+	bool GetHasShield() { m_bShieldStateBuf = m_fCurrShield > 0.0f; return m_bShieldStateBuf; };
 	virtual void PlayMonsterEffectSound();
+	virtual void PlayMonsterShieldHitSound();
 
 	virtual void UpdateMatrix();
 	virtual void SetScale(float x, float y, float z);

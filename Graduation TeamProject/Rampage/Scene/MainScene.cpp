@@ -1020,6 +1020,9 @@ SCENE_RETURN_TYPE CMainTMPScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMe
 			{
 				if (!((CPlayer*)m_pPlayer)->m_bCharged)
 				{
+					if (!(((CPlayer*)m_pPlayer)->m_pStateMachine->GetCurrentState() == Idle_Player::GetInst()) &&
+						!(((CPlayer*)m_pPlayer)->m_pStateMachine->GetCurrentState() == Run_Player::GetInst()))
+						break;
 					((CPlayer*)m_pPlayer)->m_bCharged = true;
 					m_bPlayCutScene = true;
 
@@ -1028,7 +1031,7 @@ SCENE_RETURN_TYPE CMainTMPScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMe
 						dynamic_cast<CDollyCamera*>(m_pCinematicPlayerCamera.get())->CaculateCubicPolyData();
 					((CCinematicCamera*)(m_pCinematicPlayerCamera.get()))->PlayCinematicCamera();
 					m_pCurrentCamera = m_pCinematicPlayerCamera.get();
-					//m_curSceneProcessType = SCENE_PROCESS_TYPE::CINEMATIC;
+					m_curSceneProcessType = SCENE_PROCESS_TYPE::CINEMATIC;
 					/*m_pVertexPointParticleObject->SetTextureIndex(CSimulatorScene::GetInst()->GetTextureManager()->GetTextureOffset(TextureType::ParticleTexture));
 					m_pVertexPointParticleObject->SetFieldSpeed(0.0f);
 					m_pVertexPointParticleObject->SetColor(XMFLOAT3(0.4745, 0.9254, 1.0));
@@ -2138,9 +2141,9 @@ void CMainTMPScene::LoadTextureObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 	m_pTextureManager->LoadTexture(TextureType::BillBoardTexture, pd3dDevice, pd3dCommandList, L"Image/BillBoardImages/Explode_8x8.dds", 8, 8);
 	m_pTextureManager->LoadTexture(TextureType::BillBoardTexture, pd3dDevice, pd3dCommandList, L"Image/BillBoardImages/Fire_Effect.dds", 5, 6);
 	m_pTextureManager->LoadTexture(TextureType::BillBoardTexture, pd3dDevice, pd3dCommandList, L"Image/BillBoardImages/Circle1.dds", 1, 1);
-	m_pTextureManager->LoadTexture(TextureType::BillBoardTexture, pd3dDevice, pd3dCommandList, L"Image/BillBoardImages/HIE_Hit_02_Flash_4x2_01.dds", 4, 2);
-	m_pTextureManager->LoadTexture(TextureType::BillBoardTexture, pd3dDevice, pd3dCommandList, L"Image/BillBoardImages/HIE_Hit_03_Flash_2x2_01.dds", 2, 2);
-	m_pTextureManager->LoadTexture(TextureType::BillBoardTexture, pd3dDevice, pd3dCommandList, L"Image/BillBoardImages/HIE_Hit_03_Shockwave_2x2_01.dds", 2, 2);
+	m_pTextureManager->LoadTexture(TextureType::BillBoardTexture, pd3dDevice, pd3dCommandList, L"Image/BillBoardImages/Impact01_8x8.dds", 8, 8);
+	m_pTextureManager->LoadTexture(TextureType::BillBoardTexture, pd3dDevice, pd3dCommandList, L"Image/BillBoardImages/Impact02_8x8.dds", 8, 8);
+	m_pTextureManager->LoadTexture(TextureType::BillBoardTexture, pd3dDevice, pd3dCommandList, L"Image/BillBoardImages/Impact03_8x8.dds", 8, 8);
 
 	m_pTextureManager->LoadTexture(TextureType::ParticleTexture, pd3dDevice, pd3dCommandList, L"Image/ParticleImages/TextureFlash2.dds", 0, 0);
 	m_pTextureManager->LoadTexture(TextureType::ParticleTexture, pd3dDevice, pd3dCommandList, L"Image/ParticleImages/Meteor.dds", 0, 0);

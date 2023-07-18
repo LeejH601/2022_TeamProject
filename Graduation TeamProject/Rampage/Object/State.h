@@ -196,7 +196,7 @@ class ChargeAttack_Player : public Atk_Player
     bool m_bEnableSpecialMove = false;
     bool m_bPlayingMoveRunning = false;
     XMFLOAT3 m_xmf3PlayerCameraOffsetCache;
-    float m_fPlayerCameraOffset;
+    float m_fPlayerCameraOffset = 0.0f;
 
     virtual void SetPlayerRootVel(CPlayer* player);
 

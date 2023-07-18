@@ -1680,11 +1680,11 @@ ChargeAttack_Player::ChargeAttack_Player()
 	ImpactEffect->SetEnable(true);
 	ImpactEffect->SetColorR(1);
 	ImpactEffect->SetColorG(1);
-	ImpactEffect->SetColorB(0.4);
-	ImpactEffect->SetEmissive(5.0f);
-	ImpactEffect->SetLifeTime(0.25);
-	ImpactEffect->SetSize(XMFLOAT2(7, 7));
-	ImpactEffect->SetTotalRowColumn(4, 2);
+	ImpactEffect->SetColorB(1);
+	ImpactEffect->SetEmissive(3.0f);
+	ImpactEffect->SetLifeTime(1.0);
+	ImpactEffect->SetSize(XMFLOAT2(20, 20));
+	ImpactEffect->SetTotalRowColumn(8, 8);
 	ImpactEffect->SetTextureIndex(3);
 
 	ParticleComponent* particleComp = dynamic_cast<ParticleComponent*>(GetParticleComponent());

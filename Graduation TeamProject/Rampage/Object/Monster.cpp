@@ -59,7 +59,7 @@ CMonster::CMonster()
 	m_ParticleComponent.SetEmitParticleNumber(50);
 	m_ParticleComponent.SetSpeed(10.0f);
 	m_ParticleComponent.SetLifeTime(0.4f);
-	m_ParticleComponent.SetTextureIndex(8);
+	m_ParticleComponent.SetTextureIndex(3);
 	m_ParticleComponent.SetParticleType(9);
 	m_ParticleComponent.SetRotateFacotr(true);
 }
@@ -190,6 +190,7 @@ void CMonster::HandleDamage(CPlayer* pPlayer, float fDamage)
 
 		if (m_bElite) {
 			ApplyDamage(damage / 2);
+			PlayMonsterShieldHitSound();
 			if (!GetHasShield()) {
 				ApplyDamage(damage / 2);
 				m_pStateMachine->ChangeState(Idle_Monster::GetInst());
@@ -331,6 +332,17 @@ void CMonster::UpdateTransform(XMFLOAT4X4* pxmf4x4Parent)
 
 void CMonster::PlayMonsterEffectSound()
 {
+}
+void CMonster::PlayMonsterShieldHitSound()
+{
+	bool bPrevShieldState = m_bShieldStateBuf;
+	if(GetHasShield())
+		CSoundManager::GetInst()->PlaySound("Sound/effect/shield-guard-6963.mp3", 1.0, 0.0);
+	else {
+		if (GetHasShield() == false && bPrevShieldState == true) {
+			CSoundManager::GetInst()->PlaySound("Sound/effect/Destruction_Sound_Effect_2.wav", 1.0, 0.0);
+		}
+	}
 }
 bool CMonster::CheckCollision(CGameObject* pTargetObject)
 {

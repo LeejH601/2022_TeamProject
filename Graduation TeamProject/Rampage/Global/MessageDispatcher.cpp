@@ -601,6 +601,7 @@ ShieldHitComponent::ShieldHitComponent()
 	m_fLengthScale = 1.0f;
 
 	m_bSimulateRotate = false;
+
 }
 
 void ShieldHitComponent::HandleMessage(const Message& message, const ParticleCompParams& params)
@@ -627,7 +628,7 @@ void ShieldHitComponent::HandleMessage(const Message& message, const ParticleCom
 		pParticle->SetFieldMainDirection(m_xmf3FieldMainDirection);
 		pParticle->SetProgressionRate(m_fProgressionRate);
 		pParticle->SetLengthScale(m_fLengthScale);*/
-		pParticle->SetTextureIndex(m_iTextureIndex + m_iTextureOffset);
+		pParticle->SetTextureIndex(m_iTextureIndex + CSimulatorScene::GetInst()->GetTextureManager()->GetTextureOffset(TextureType::ParticleTexture));
 		pParticle->SetEmissive(m_fEmissive);
 		pParticle->SetRotateFactor(m_bSimulateRotate);
 		pParticle->SetScaleFactor(m_bSimulateRotate);
@@ -669,7 +670,9 @@ void SpecialMoveDamageListener::HandleMessage(const Message& message, const Play
 		CMonster* pMonster = dynamic_cast<CMonster*>(obj.get());
 
 		if (pMonster->m_bEnable) {
+			pMonster->m_xmf3HitterVec = Vector3::Normalize(Vector3::Subtract(pMonster->GetPosition(), pPlayer->GetPosition()));
 			pMonster->HandleDamage(pPlayer, 1000.0f);
+			pPlayer->m_iCombo++;
 
 			//pMonster->UpdateTransform(NULL);
 			BoundingOrientedBox* TargetBoundingBox = pMonster->GetBoundingBox();
