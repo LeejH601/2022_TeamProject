@@ -214,6 +214,7 @@ void CMonster::HandleDamage(CPlayer* pPlayer, float fDamage)
 
 		m_iPlayerAtkId = pPlayer->GetAtkId();
 		m_pChasingTargetObject = pPlayer;
+		pPlayer->UpdateCombo();
 
 		PlayerParams playerParams;
 		playerParams.pPlayer = pPlayer;

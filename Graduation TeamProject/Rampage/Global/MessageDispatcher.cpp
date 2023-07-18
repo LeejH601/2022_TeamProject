@@ -24,7 +24,7 @@ void PlayerAttackListener::HandleMessage(const Message& message, const PlayerPar
 	if (message.getType() == MessageType::PLAYER_ATTACK) {
 		if (params.pPlayer->CheckCollision(m_pObject))
 		{
-
+			
 		}
 	}
 }
