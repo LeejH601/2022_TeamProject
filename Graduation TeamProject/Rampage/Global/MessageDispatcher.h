@@ -588,6 +588,8 @@ public:
 	int& GetNoiseTextureIndex() { return m_nNoiseTextureIndex; };
 	void SetMainTextureOffset(int iOffset) { m_nMainTextureOffset = iOffset; }
 	void SetNoiseTextureOffset(int iOffset) { m_nNoiseTextureOffset = iOffset; }
+	void SetMainTextureIndex(int index) { m_nMainTextureIndex = index; }
+	void SetNoiseTextureIndex(int index) { m_nNoiseTextureIndex = index; }
 	virtual void HandleMessage(const Message& message, const TrailUpdateParams& params);
 };
 
