@@ -691,9 +691,9 @@ bool CButtonObject::CheckCollisionMouse(POINT ptCursorPo)
 	}
 	m_bCollision = false;
 	//m_xmfColor = 1.f;
-	TCHAR pstrDebug[256] = { 0 };
+	/*TCHAR pstrDebug[256] = { 0 };
 	_stprintf_s(pstrDebug, 256, _T("현재 마우스 위치 = %d %d\n"), ptCursorPo.x, ptCursorPo.y);
-	OutputDebugString(pstrDebug);
+	OutputDebugString(pstrDebug);*/
 	return false;
 }
 
