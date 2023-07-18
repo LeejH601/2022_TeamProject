@@ -530,6 +530,7 @@ CComboNumberObject::~CComboNumberObject()
 {
 }
 
+
 void CComboNumberObject::UpdateNumberTexture(UINT N, UINT ORDER)
 {
 	if (m_bEnable) {
@@ -1069,9 +1070,16 @@ void CSquareBar::Update(float fTimeElapsed)
 	CUIObject::Update(fTimeElapsed);
 	m_fTime += fTimeElapsed;
 
-	if (m_fTime >= 90.f) // 0 ~ 0.8f
+	if (m_fTime >= m_fMaxTime) // 0 ~ 0.8f
 	{
-		m_pChildUI[2]->SetColor(XMFLOAT3(5.f, 2.f, 2.f)); // 250
+		//m_bOnGlow = true;
+		m_fGlowDurationTime += fTimeElapsed;
+
+		XMFLOAT3 color = XMFLOAT3(5.f, 2.f, 2.f);
+		if (m_bOnGlow) {
+			color = Vector3::ScalarProduct(color, m_fEmissive + max((m_fGlowValue - (m_fGlowValue * (m_fGlowDurationAcculate / m_fGlowDurationTime))), 0.0f), false);
+		}
+		m_pChildUI[2]->SetColor(color); // 250
 		m_pChildUI[1]->SetEnable(true);
 	}
 	else
@@ -1153,8 +1161,10 @@ void CSquareBar::CurBarUpdate(float fTimeElapsed)
 void CSquareBar::ResetSkill()
 {
 	m_fTime = 0.f;
+	m_fGlowDurationAcculate = 0.0f;
 	m_pChildUI[2]->SetColor(XMFLOAT3(1.f, 1.f, 1.f)); // 250
 	m_pChildUI[1]->SetEnable(false);
+	m_bOnGlow = false;
 }
 
 CGradationObject::CGradationObject(int iTextureIndex, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fSize) : CUIObject(pd3dDevice, pd3dCommandList, fSize)

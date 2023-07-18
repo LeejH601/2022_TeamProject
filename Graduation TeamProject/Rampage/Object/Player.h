@@ -50,6 +50,8 @@ public:
 	float m_fComboFullTime = 10.f;
 	float m_fComboTime = m_fComboFullTime;
 	bool m_bCombo = false;
+	bool m_bIsComboUpdate = false;
+	UINT m_nMaxComboCount = 0;
 
 	UINT m_iPotionN = 5;
 	int m_nRemainPotions;

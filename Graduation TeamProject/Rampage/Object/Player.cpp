@@ -151,6 +151,17 @@ bool CPlayer::CheckCollision(CGameObject* pTargetObject)
 
 void CPlayer::Update(float fTimeElapsed)
 {
+	if (m_bIsComboUpdate) {
+		m_fComboTime = m_fComboFullTime;
+		m_bIsComboUpdate = false;
+	}
+	m_fComboTime -= fTimeElapsed;
+	if (m_fComboTime < 0.f)
+	{
+		m_fComboTime = m_fComboFullTime;
+		m_iCombo = 0;
+	}
+
 	m_fSkillGauge += fTimeElapsed * 10.f;
 	m_fTime += fTimeElapsed;
 	m_fInvincibleTime > 0.0f ? m_fInvincibleTime -= fTimeElapsed : m_fInvincibleTime = 0.0f;
@@ -247,6 +258,10 @@ void CPlayer::Tmp()
 void CPlayer::UpdateCombo(float fTimeElapsed)
 {
 	m_iCombo++;
+	m_bIsComboUpdate = true;
+
+	if (m_nMaxComboCount < m_iCombo)
+		m_nMaxComboCount = m_iCombo;
 	//m_fComboTime -= fTimeElapsed;
 	//if (m_fComboTime < 0.f)
 	//{

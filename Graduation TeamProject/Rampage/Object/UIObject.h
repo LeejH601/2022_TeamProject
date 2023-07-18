@@ -141,6 +141,7 @@ protected:
 
 class CComboNumberObject : public CNumberObject
 {
+	
 public:
 	CComboNumberObject(int iOffsetTextureIndex, int Number, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fSize);
 	virtual ~CComboNumberObject();
@@ -235,6 +236,14 @@ public:
 
 
 	void ResetSkill();
+	bool IsProgressFull() { return m_fTime >= m_fMaxTime; };
 private:
+	bool m_bOnGlow = false;
+	float m_fEmissive = 1.0f;
+	float m_fGlowValue = 5.0f;
+	float m_fGlowDurationTime = 1.0f;
+	float m_fGlowDurationAcculate = 0.0f;
+
 	float m_fTime = 0.f;
+	float m_fMaxTime = 90.0f;
 };

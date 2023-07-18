@@ -108,7 +108,7 @@ void CMainTMPScene::HandlePlayerDeadMessage()
 
 	// 결과창 띄우기
 	m_pUIObject[13]->SetEnable(true);
-	dynamic_cast<CResultFrame*>(m_pUIObject[13].get())->SetResultData(((CPlayer*)m_pPlayer)->m_iCombo, fTotalGameTime, ((CPlayer*)m_pPlayer)->m_nRemainPotions);
+	dynamic_cast<CResultFrame*>(m_pUIObject[13].get())->SetResultData(((CPlayer*)m_pPlayer)->m_nMaxComboCount, fTotalGameTime, ((CPlayer*)m_pPlayer)->m_nRemainPotions);
 }
 
 void CMainTMPScene::AdvanceStage()
@@ -967,7 +967,7 @@ SCENE_RETURN_TYPE CMainTMPScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMe
 		}
 		break;
 		case '3':
-			dynamic_cast<CSquareBar*>(m_pUIObject[14].get())->ResetSkill();
+			dynamic_cast<CSquareBar*>(m_pUIObject[14].get())->Update(90.0f);
 			break;
 		case 'f':
 		case 'F':
@@ -1026,6 +1026,14 @@ SCENE_RETURN_TYPE CMainTMPScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMe
 					if (!(((CPlayer*)m_pPlayer)->m_pStateMachine->GetCurrentState() == Idle_Player::GetInst()) &&
 						!(((CPlayer*)m_pPlayer)->m_pStateMachine->GetCurrentState() == Run_Player::GetInst()))
 						break;
+					if (dynamic_cast<CSquareBar*>(m_pUIObject[14].get())) {
+						if (dynamic_cast<CSquareBar*>(m_pUIObject[14].get())->IsProgressFull() == false)
+							break;
+						dynamic_cast<CSquareBar*>(m_pUIObject[14].get())->ResetSkill();
+					}
+					else
+						break;
+
 					((CPlayer*)m_pPlayer)->m_bCharged = true;
 					m_bPlayCutScene = true;
 

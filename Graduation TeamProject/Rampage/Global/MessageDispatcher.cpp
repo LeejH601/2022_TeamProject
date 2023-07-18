@@ -672,7 +672,7 @@ void SpecialMoveDamageListener::HandleMessage(const Message& message, const Play
 		if (pMonster->m_bEnable) {
 			pMonster->m_xmf3HitterVec = Vector3::Normalize(Vector3::Subtract(pMonster->GetPosition(), pPlayer->GetPosition()));
 			pMonster->HandleDamage(pPlayer, 1000.0f);
-			pPlayer->m_iCombo++;
+			pPlayer->UpdateCombo(0.0f);
 
 			//pMonster->UpdateTransform(NULL);
 			BoundingOrientedBox* TargetBoundingBox = pMonster->GetBoundingBox();
