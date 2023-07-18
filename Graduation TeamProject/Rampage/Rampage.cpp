@@ -88,7 +88,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
 	ImPlot::CreateContext();
 
-	gGameFramework.ChangeSwapChainState();
+	//gGameFramework.ChangeSwapChainState(TRUE);
 
 	// 메세지 루프 입니다.
 	while (1)
@@ -189,6 +189,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	switch (message)
 	{
 	case WM_ACTIVATE:
+	case WM_ACTIVATEAPP:
 	case WM_SIZE:
 	case WM_LBUTTONDOWN:
 	case WM_LBUTTONUP:
