@@ -54,7 +54,7 @@ BOOL                InitInstance(HINSTANCE, int);
 LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
 
-#define DEBUG_FIX
+//#define DEBUG_FIX
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	_In_opt_ HINSTANCE hPrevInstance,
@@ -87,8 +87,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	MSG msg;
 
 	ImPlot::CreateContext();
-
-	gGameFramework.ChangeSwapChainState();
 
 	// 메세지 루프 입니다.
 	while (1)

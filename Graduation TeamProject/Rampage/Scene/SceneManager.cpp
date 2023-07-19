@@ -62,7 +62,7 @@ bool CSceneManager::ProcessInput(HWND hWnd, DWORD dwDirection, float fTimeElapse
 	return false;
 }
 
-bool CSceneManager::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
+SCENE_STATE CSceneManager::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
 {
 	m_pCurrentScene->OnProcessingMouseMessage(hWnd, nMessageID, wParam, lParam);
 
@@ -73,10 +73,11 @@ bool CSceneManager::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM 
 			dynamic_cast<CLobbyScene*>(m_pCurrentScene)->SetSceneType((UINT)LobbySceneType::SIMULATOR_Scene);
 			m_pCurrentScene = m_pMainScene.get();
 			m_pMainScene->Enter(hWnd);
+			return SCENE_STATE::TURN_TO_MAINSCENE;
 		}
 	}
 
-	return 0;
+	return SCENE_STATE::NONE;
 }
 
 bool CSceneManager::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam, DWORD& dwDirection)
