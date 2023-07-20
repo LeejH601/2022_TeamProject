@@ -2419,16 +2419,16 @@ void CImGuiManager::ShowDamageMoanSoundManager(CState<CPlayer>* pCurrentAnimatio
 void CImGuiManager::ShowCreationMenu()
 {
 
-	if (serverConnected == false)
-		ShowWorkshopLoginMenu();
+	/*if (serverConnected == false)
+		ShowWorkshopLoginMenu();*/
 
-	if (serverConnected == false)
-		return;
+	/*if (serverConnected == false)
+		return;*/
 
 	ImGuiWindowFlags my_window_flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_MenuBar;
 	bool* p_open = NULL;
 
-	ImGui::SetNextWindowSize(ImVec2(m_lDesktopWidth * 0.6f, 0.0f), ImGuiCond_Always);
+	ImGui::SetNextWindowSize(ImVec2(m_lDesktopWidth * 0.33f, 0.0f), ImGuiCond_Always);
 	ImGui::Begin(U8STR("창작 마당"), p_open, my_window_flags);
 
 	if (ImGui::BeginMenuBar())
@@ -2444,7 +2444,7 @@ void CImGuiManager::ShowCreationMenu()
 	}
 
 	{
-		ImGui::BeginChild("ChildL", ImVec2(ImGui::GetContentRegionAvail().x * 0.66f, 0.15f * m_lDesktopWidth), false);
+		ImGui::BeginChild("ChildL", ImVec2(ImGui::GetContentRegionAvail().x /** 0.66f*/, 0.15f * m_lDesktopWidth), false);
 
 		struct CreationItem {
 			CTexture* preview;
@@ -2483,12 +2483,19 @@ void CImGuiManager::ShowCreationMenu()
 				std::u8string id(reinterpret_cast<const char8_t*>(sId.c_str()));
 				std::u8string title(reinterpret_cast<const char8_t*>(stitle.c_str()));
 
-				vCreationItems[index++] = CreationItem{ nullptr,  id, title, record.nLike, record.nHate };
+				vCreationItems[index++] = CreationItem{ nullptr,  u8"창작자1", u8"프리셋1", record.nLike, record.nHate };
 			}
 		};
 
+		records.clear();
+		records.push_back(WorkShop_Record{ 0, 0, 0 });
+		records.push_back(WorkShop_Record{ 0, 0, 0 });
+		records.push_back(WorkShop_Record{ 0, 0, 0 });
+		records.push_back(WorkShop_Record{ 0, 0, 0 });
+		records.push_back(WorkShop_Record{ 0, 0, 0 });
+
 		if (vCreationItems.size() == 0) {
-			ProcessWorkshop(eSERVICE_TYPE::UPDATE_TABLE);
+			//ProcessWorkshop(eSERVICE_TYPE::UPDATE_TABLE);
 			UpdateTable();
 		}
 
@@ -2546,15 +2553,16 @@ void CImGuiManager::ShowCreationMenu()
 		}
 
 		// Sample 1
-		ImGui::Columns(8, "Creation Column", false);
+		ImGui::Columns(4, "Creation Column", false);
 		ImGui::Separator();
 		//ImGui::Text(U8STR("이미지")); ImGui::NextColumn();
 		ImGui::Text(U8STR("ID")); ImGui::NextColumn();
 		ImGui::Text(U8STR("이름")); ImGui::NextColumn();
-		ImGui::Text(U8STR("좋아요")); ImGui::NextColumn();
+		ImGui::Text(U8STR("")); ImGui::NextColumn();
+		/*ImGui::Text(U8STR("좋아요")); ImGui::NextColumn();
 		ImGui::Text(U8STR("싫어요")); ImGui::NextColumn();
 		ImGui::Text(U8STR("신고")); ImGui::NextColumn();
-		ImGui::Text(U8STR("불러오기")); ImGui::NextColumn();
+		ImGui::Text(U8STR("불러오기")); ImGui::NextColumn();*/
 		ImGui::Text(U8STR("다운로드")); ImGui::NextColumn();
 		ImGui::Separator();
 
@@ -2568,13 +2576,14 @@ void CImGuiManager::ShowCreationMenu()
 
 			/*ImGui::Image((ImTextureID)m_pRTTexture->m_pd3dSrvGpuDescriptorHandles[0].ptr,
 				ImVec2((float)my_image_width, (float)my_image_height));*/
-			ImGui::NextColumn();
+			//ImGui::NextColumn();
 			ImGui::Text(reinterpret_cast<const char*>(vCreationItems[index].id.c_str())); ImGui::NextColumn();
 			ImGui::Text(reinterpret_cast<const char*>(vCreationItems[index].name.c_str())); ImGui::NextColumn();
-			ImGui::Text(std::to_string(vCreationItems[index].nGoodSign).c_str()); ImGui::NextColumn();
+			ImGui::Text(""); ImGui::NextColumn();
+			/*ImGui::Text(std::to_string(vCreationItems[index].nGoodSign).c_str()); ImGui::NextColumn();
 			ImGui::Text(std::to_string(vCreationItems[index].nBadSign).c_str()); ImGui::NextColumn();
 			ImGui::Button(U8STR("신고하기"), ImVec2(-FLT_MIN, 0.0f)); ImGui::NextColumn();
-			ImGui::Button(U8STR("불러오기"), ImVec2(-FLT_MIN, 0.0f)); ImGui::NextColumn();
+			ImGui::Button(U8STR("불러오기"), ImVec2(-FLT_MIN, 0.0f)); ImGui::NextColumn();*/
 
 			std::u8string downloadTag = u8"다운로드##download";
 			downloadTag += std::u8string(reinterpret_cast<const char8_t*>(std::to_string(i).c_str()));
@@ -2651,7 +2660,8 @@ void CImGuiManager::ShowCreationMenu()
 		ImGui::EndChild();
 	}
 
-	ImGui::SameLine(0.0f, 0.01f * m_lDesktopWidth);
+	// Search ImGUI
+	/*ImGui::SameLine(0.0f, 0.01f * m_lDesktopWidth);
 
 	{
 		static std::u8string searchText;
@@ -2675,7 +2685,7 @@ void CImGuiManager::ShowCreationMenu()
 		}
 		ImGui::EndChild();
 		ImGui::PopStyleVar();
-	}
+	}*/
 	ImGui::End();
 }
 void CImGuiManager::ShowWorkshopLoginMenu()

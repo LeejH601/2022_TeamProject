@@ -401,7 +401,6 @@ bool CNetworkDevice::RecvDataTable(std::vector<WorkShop_Record>& records)
 	memcpy(records.data(), Data, len);
 
 	delete[] Data;
-	system("puase");
 	return false;
 }
 
