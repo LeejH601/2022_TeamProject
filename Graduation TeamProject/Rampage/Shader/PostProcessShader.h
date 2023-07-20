@@ -74,6 +74,7 @@ class CBreakScreenEffectShader : public CPostProcessShader
 	XMFLOAT2 m_xmf2UVScale;
 	float m_fCrackEmissive = 1.0f;
 	float m_fGenericAlpha = 1.0f;
+	UINT m_nCrackIndex = 0;
 
 	CPlayer* m_pPlayer = nullptr;
 
@@ -93,4 +94,5 @@ public:
 	void SetEnable(bool value) { m_bEnable = value; };
 	void SetPlayer(CPlayer* pPlayer) { m_pPlayer = pPlayer; };
 	CPlayer* GetPlayer() { return m_pPlayer; };
+	void SetCrackIndex(UINT index) { m_nCrackIndex = index; };
 };

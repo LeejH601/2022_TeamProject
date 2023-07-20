@@ -25,6 +25,7 @@ CVertexPointParticleObject::CVertexPointParticleObject(int iTextureIndex, ID3D12
 	this->SetParticleType(5);
 	this->SetEmissive(20.0f);
 
+
 	m_fFieldSpeed = 5.0f;
 	m_fNoiseStrength = 1.2;
 	m_xmf3FieldMainDirection = XMFLOAT3(0.0f, 1.0f, 0.0f);
@@ -46,10 +47,11 @@ void CVertexPointParticleObject::EmitParticle(int emitType)
 	ParticleEmitPositionlistParam param;
 	switch (emitType)
 	{
+	case 0:
 	case 5:
 		param.m_fLifeTime = m_fLifeTime;
 		param.m_fEmitedSpeed = m_fSpeed;
-		param.m_iTextureIndex = CSimulatorScene::GetInst()->GetTextureManager()->GetTextureOffset(TextureType::ParticleTexture);
+		param.m_iTextureIndex = m_iTextureIndex;
 		param.m_iTextureCoord[0] = m_iTotalRow; param.m_iTextureCoord[1] = m_iTotalCol;
 
 		/*	param.m_fLifeTime = m_fLifeTime;

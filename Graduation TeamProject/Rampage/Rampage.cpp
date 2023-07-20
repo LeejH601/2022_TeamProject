@@ -88,6 +88,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
 	ImPlot::CreateContext();
 
+	gGameFramework.ChangeSwapChainState();
+
 	// 메세지 루프 입니다.
 	while (1)
 	{

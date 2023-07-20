@@ -1328,6 +1328,7 @@ CParticleMesh::CParticleMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 {
 	CreateVertexBuffer(pd3dDevice, pd3dCommandList, xmf3Position, xmf3Velocity, fLifetime, xmf3Acceleration, xmf3Color, xmf2Size);
 	CreateStreamOutputBuffer(pd3dDevice, pd3dCommandList, nMaxParticles);
+	createdParticleBuffer.resize(MAX_PARTICLES);
 }
 
 CParticleMesh::~CParticleMesh()
@@ -1538,7 +1539,6 @@ int CParticleMesh::OnPostRender(int nPipelineState)
 
 void CParticleMesh::EmitParticle(int emitType, ParticleEmitDataParam& param)
 {
-	static std::vector<CParticleVertex> createdParticleBuffer(MAX_PARTICLES);
 
 	static std::random_device rd;
 	static std::default_random_engine dre(rd());
@@ -1590,14 +1590,14 @@ void CParticleMesh::EmitParticle(int emitType, ParticleEmitDataParam& param)
 		break;
 	case 10:
 	{
-		XMFLOAT3 R = Vector3::CrossProduct(XMFLOAT3(0, 1, 0), Vector3::Normalize( param.m_xmf3EmitAxes));
+		XMFLOAT3 R = Vector3::CrossProduct(XMFLOAT3(0, 1, 0), Vector3::Normalize(param.m_xmf3EmitAxes));
 		R = Vector3::ScalarProduct(R, -1);
 		float C = Vector3::DotProduct(XMFLOAT3(0, 1, 0), Vector3::Normalize(param.m_xmf3EmitAxes));
 		//XMMATRIX rotation = XMMatrixRotationX(C);
 		//rotation = XMMatrixMultiply(rotation, XMMatrixRotationY())
 
 		XMMATRIX rotateMatrix = XMMatrixRotationNormal(XMLoadFloat3(&R), acos(C) * PI / 180.0f);
-		float angle =  acos(C);
+		float angle = acos(C);
 		XMVECTOR q = XMQuaternionRotationNormal(XMLoadFloat3(&R), angle);
 		/*XMFLOAT3 testN = XMFLOAT3(1.0f, 0.0f, 0.0f);
 		rotateMatrix = XMMatrixRotationAxis(XMLoadFloat3(&testN), C);*/
@@ -1608,7 +1608,7 @@ void CParticleMesh::EmitParticle(int emitType, ParticleEmitDataParam& param)
 
 			float ceta = urd(dre) * max_ceta;
 			float pi = 1.0f * PI * urd(dre);
-			createdParticleBuffer[i].m_xmf3Velocity.x = 1.0f * sin(ceta) * cos(pi);  
+			createdParticleBuffer[i].m_xmf3Velocity.x = 1.0f * sin(ceta) * cos(pi);
 			createdParticleBuffer[i].m_xmf3Velocity.y = 1.0f * cos(ceta);
 			createdParticleBuffer[i].m_xmf3Velocity.z = 1.0f * sin(ceta) * sin(pi);
 			XMStoreFloat3(&createdParticleBuffer[i].m_xmf3Velocity, XMVector3Rotate(XMLoadFloat3(&createdParticleBuffer[i].m_xmf3Velocity), q));
@@ -1628,7 +1628,7 @@ void CParticleMesh::EmitParticle(int emitType, ParticleEmitDataParam& param)
 			memcpy(createdParticleBuffer[i].m_iTextureCoord, param.m_iTextureCoord, sizeof(UINT) * 2);
 		}
 	}
-		break;
+	break;
 	case 3:
 	{
 		XMFLOAT3 R = Vector3::CrossProduct(XMFLOAT3(0, 1, 0), Vector3::Normalize(param.m_xmf3EmitAxes));
@@ -1666,7 +1666,7 @@ void CParticleMesh::EmitParticle(int emitType, ParticleEmitDataParam& param)
 			memcpy(createdParticleBuffer[i].m_iTextureCoord, param.m_iTextureCoord, sizeof(UINT) * 2);
 		}
 	}
-		break;
+	break;
 	case 2:
 		for (int i = m_ncreatedParticleNum; i < nCreateParticleNum; ++i) {
 			createdParticleBuffer[i].m_xmf4Color = param.m_xmf4Color;
@@ -1688,8 +1688,8 @@ void CParticleMesh::EmitParticle(int emitType, ParticleEmitDataParam& param)
 		for (int i = m_ncreatedParticleNum; i < nCreateParticleNum; ++i) {
 			createdParticleBuffer[i].m_xmf4Color = param.m_xmf4Color;
 			createdParticleBuffer[i].m_xmf3Position = param.m_xmf3EmitedPosition; /*XMFLOAT3(45 + offset.x, 60, 50 + offset.z)*/
-			
-			createdParticleBuffer[i].m_xmf3Velocity =Vector3::Add(param.m_xmf3EmitAxes, XMFLOAT3(urd(dre) / 5.0f, urd(dre) / 5.0f, urd(dre) / 5.0f));
+
+			createdParticleBuffer[i].m_xmf3Velocity = Vector3::Add(param.m_xmf3EmitAxes, XMFLOAT3(urd(dre) / 5.0f, urd(dre) / 5.0f, urd(dre) / 5.0f));
 			createdParticleBuffer[i].m_xmf3Velocity = Vector3::ScalarProduct(Vector3::Normalize(createdParticleBuffer[i].m_xmf3Velocity), param.m_fEmitedSpeed, false);
 			createdParticleBuffer[i].m_iType = emitType;
 			createdParticleBuffer[i].m_fLifetime = param.m_fLifeTime;
@@ -1712,30 +1712,57 @@ void CParticleMesh::EmitParticle(int emitType, ParticleEmitDataParam& param)
 
 void CParticleMesh::EmitParticleForVertexData(int emitType, ParticleEmitPositionlistParam& param)
 {
-	static std::vector<CParticleVertex> createdParticleBuffer2(MAX_PARTICLES);
+	//static std::vector<CParticleVertex> createdParticleBuffer2(MAX_PARTICLES);
+
+	static std::random_device rd;
+	static std::default_random_engine dre(rd());
+	static std::uniform_real_distribution<float> urd(-1, 1);
 
 	int nCreateParticleNum = m_ncreatedParticleNum + param.m_nEmitNum;
 
 	switch (emitType)
 	{
+	case 0:
+	{
+		int index = 0;
+		for (int i = m_ncreatedParticleNum; i < nCreateParticleNum; ++i) {
+			createdParticleBuffer[i].m_xmf4Color = param.m_xmf4Color;
+			createdParticleBuffer[i].m_xmf3Position = param.m_xmf3EmiedPositions[index];
+			createdParticleBuffer[i].m_xmf3Velocity = XMFLOAT3(urd(dre), urd(dre), urd(dre));
+			createdParticleBuffer[i].m_xmf3Velocity = Vector3::ScalarProduct(Vector3::Normalize(createdParticleBuffer[i].m_xmf3Velocity), param.m_fEmitedSpeed, false);
+			createdParticleBuffer[i].m_iType = emitType;
+			createdParticleBuffer[i].m_fLifetime = param.m_fLifeTime;
+			createdParticleBuffer[i].m_fEmitTime = Locator.GetTimer()->GetTotalTime();
+			createdParticleBuffer[i].m_iTextureIndex = param.m_iTextureIndex;
+			createdParticleBuffer[i].m_xmf2Size = param.m_xmf2Size;
+			createdParticleBuffer[i].m_xmf2Size = Vector2::ScalarProduct(createdParticleBuffer[i].m_xmf2Size, 1.5f + (urd(dre)), false);
+			createdParticleBuffer[i].m_fEmissive = param.m_fEmissive;
+			createdParticleBuffer[i].m_bSimulateRotate = (int)param.m_bSimulateRotate;
+			createdParticleBuffer[i].m_bScaleFlag = (int)param.m_bScaleFlag;
+
+			memcpy(createdParticleBuffer[i].m_iTextureCoord, param.m_iTextureCoord, sizeof(UINT) * 2);
+			index++;
+		}
+	}
+	break;
 	case 5:
 	{
 		int index = 0;
 		for (int i = m_ncreatedParticleNum; i < nCreateParticleNum; ++i) {
-			createdParticleBuffer2[i].m_xmf4Color = param.m_xmf4Color;
-			createdParticleBuffer2[i].m_xmf3Position = param.m_xmf3EmiedPositions[index];
-			createdParticleBuffer2[i].m_xmf3Velocity = param.m_xmf3Velocitys[index];
-			createdParticleBuffer2[i].m_xmf3Velocity = Vector3::ScalarProduct(Vector3::Normalize(createdParticleBuffer2[i].m_xmf3Velocity), param.m_fEmitedSpeed, false);
-			createdParticleBuffer2[i].m_iType = emitType;
-			createdParticleBuffer2[i].m_fLifetime = param.m_fLifeTime;
-			createdParticleBuffer2[i].m_fEmitTime = Locator.GetTimer()->GetTotalTime();
-			createdParticleBuffer2[i].m_iTextureIndex = param.m_iTextureIndex;
-			createdParticleBuffer2[i].m_xmf2Size = param.m_xmf2Size;
-			createdParticleBuffer2[i].m_fEmissive = param.m_fEmissive;
-			createdParticleBuffer2[i].m_bSimulateRotate = (int)param.m_bSimulateRotate;
-			createdParticleBuffer2[i].m_bScaleFlag = (int)param.m_bScaleFlag;
+			createdParticleBuffer[i].m_xmf4Color = param.m_xmf4Color;
+			createdParticleBuffer[i].m_xmf3Position = param.m_xmf3EmiedPositions[index];
+			createdParticleBuffer[i].m_xmf3Velocity = param.m_xmf3Velocitys[index];
+			createdParticleBuffer[i].m_xmf3Velocity = Vector3::ScalarProduct(Vector3::Normalize(createdParticleBuffer[i].m_xmf3Velocity), param.m_fEmitedSpeed, false);
+			createdParticleBuffer[i].m_iType = emitType;
+			createdParticleBuffer[i].m_fLifetime = param.m_fLifeTime;
+			createdParticleBuffer[i].m_fEmitTime = Locator.GetTimer()->GetTotalTime();
+			createdParticleBuffer[i].m_iTextureIndex = param.m_iTextureIndex;
+			createdParticleBuffer[i].m_xmf2Size = param.m_xmf2Size;
+			createdParticleBuffer[i].m_fEmissive = param.m_fEmissive;
+			createdParticleBuffer[i].m_bSimulateRotate = (int)param.m_bSimulateRotate;
+			createdParticleBuffer[i].m_bScaleFlag = (int)param.m_bScaleFlag;
 
-			memcpy(createdParticleBuffer2[i].m_iTextureCoord, param.m_iTextureCoord, sizeof(UINT) * 2);
+			memcpy(createdParticleBuffer[i].m_iTextureCoord, param.m_iTextureCoord, sizeof(UINT) * 2);
 			index++;
 		}
 		/*TCHAR pstrDebug[256] = { 0 };
@@ -1748,7 +1775,7 @@ void CParticleMesh::EmitParticleForVertexData(int emitType, ParticleEmitPosition
 	}
 
 	m_ncreatedParticleNum = nCreateParticleNum;
-	memcpy(m_pBufferDataBegin, createdParticleBuffer2.data(), m_ncreatedParticleNum * m_nStride);
+	memcpy(m_pBufferDataBegin, createdParticleBuffer.data(), m_ncreatedParticleNum * m_nStride);
 }
 
 CSkyBoxMesh::CSkyBoxMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fWidth, float fHeight, float fDepth)
@@ -1858,7 +1885,7 @@ CUIRectMesh::CUIRectMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd
 	m_nStride = sizeof(CUIVertex);
 	CUIVertex pVertices[6];
 	m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
-	float fx = 1.f, fy = 0.5f , fz = 0.f;
+	float fx = 1.f, fy = 0.5f, fz = 0.f;
 
 	pVertices[0] = CUIVertex(XMFLOAT3(-fx, +fy, fz), XMFLOAT2(1.0f, 0.0f));
 	pVertices[1] = CUIVertex(XMFLOAT3(-fx, -fy, fz), XMFLOAT2(1.0f, 1.0f));

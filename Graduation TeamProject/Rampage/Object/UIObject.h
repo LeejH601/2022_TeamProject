@@ -11,6 +11,7 @@ public:
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, bool b_UseTexture, CCamera* pCamera = NULL);
 	virtual void SetEnable(bool bEnable);
 	virtual bool& GetEnable();
+	virtual bool Reset() { return true; };
 public:
 	void SetSize(XMFLOAT2 xmf2Size);
 	void SetScreenPosition(XMFLOAT2 xmf2ScreenPosition);
@@ -134,7 +135,7 @@ protected:
 	bool m_bAnimation = false;
 	float m_fMaxAlpha = 1.5f;
 	float m_fAlphaSpeed = 0.05f;
-
+	bool m_bRotation = false;
 
 
 };
@@ -213,7 +214,7 @@ public:
 	virtual void Update(float fTimeElapsed);
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, bool b_UseTexture, CCamera* pCamera = NULL);
 	void SetResultData(UINT iTotalComboN, float fPlayTime, UINT iPotionN);
-
+	virtual bool Reset();
 private:
 	UINT CalculatePlaytimeScore(float fPlayTime);
 
@@ -234,7 +235,8 @@ public:
 	virtual void CurBarUpdate(float fTimeElapsed);
 
 
-	void ResetSkill();
+	virtual bool Reset();
+	bool IsFullGauge();
 private:
 	float m_fTime = 0.f;
 };

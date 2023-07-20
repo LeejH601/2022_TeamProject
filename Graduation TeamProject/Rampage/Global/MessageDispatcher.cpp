@@ -236,7 +236,7 @@ void ParticleComponent::HandleMessage(const Message& message, const ParticleComp
 		pParticle->SetFieldMainDirection(m_xmf3FieldMainDirection);
 		pParticle->SetProgressionRate(m_fProgressionRate);
 		pParticle->SetLengthScale(m_fLengthScale);
-		pParticle->SetTextureIndex(m_iTextureIndex + m_iTextureOffset);
+		pParticle->SetTextureIndex(m_iTextureIndex + CSimulatorScene::GetInst()->GetTextureManager()->GetTextureOffset(TextureType::ParticleTexture));
 		pParticle->SetEmissive(m_fEmissive);
 		pParticle->SetRotateFactor(m_bSimulateRotate);
 		pParticle->SetScaleFactor(m_bSimulateRotate);
@@ -601,6 +601,7 @@ ShieldHitComponent::ShieldHitComponent()
 	m_fLengthScale = 1.0f;
 
 	m_bSimulateRotate = false;
+
 }
 
 void ShieldHitComponent::HandleMessage(const Message& message, const ParticleCompParams& params)
@@ -627,7 +628,7 @@ void ShieldHitComponent::HandleMessage(const Message& message, const ParticleCom
 		pParticle->SetFieldMainDirection(m_xmf3FieldMainDirection);
 		pParticle->SetProgressionRate(m_fProgressionRate);
 		pParticle->SetLengthScale(m_fLengthScale);*/
-		pParticle->SetTextureIndex(m_iTextureIndex + m_iTextureOffset);
+		pParticle->SetTextureIndex(m_iTextureIndex + CSimulatorScene::GetInst()->GetTextureManager()->GetTextureOffset(TextureType::ParticleTexture));
 		pParticle->SetEmissive(m_fEmissive);
 		pParticle->SetRotateFactor(m_bSimulateRotate);
 		pParticle->SetScaleFactor(m_bSimulateRotate);
@@ -659,13 +660,52 @@ void SpecialMoveListener::HandleMessage(const Message& message, const SpecialMov
 
 void SpecialMoveDamageListener::HandleMessage(const Message& message, const PlayerParams& params)
 {
+	static std::random_device rd;
+	static std::default_random_engine dre(rd());
+	static std::uniform_real_distribution<float> urd(-1, 1);
+
+	CKnightPlayer* pPlayer = dynamic_cast<CKnightPlayer*>(params.pPlayer);
+
 	for (std::unique_ptr<CGameObject>& obj : *m_ppMonsters) {
-		CKnightPlayer* pPlayer = dynamic_cast<CKnightPlayer*>(params.pPlayer);
 		CMonster* pMonster = dynamic_cast<CMonster*>(obj.get());
 
-		if (pMonster->m_bEnable)
+		if (pMonster->m_bEnable) {
+			pMonster->m_xmf3HitterVec = Vector3::Normalize(Vector3::Subtract(pMonster->GetPosition(), pPlayer->GetPosition()));
 			pMonster->HandleDamage(pPlayer, 1000.0f);
+			pPlayer->m_iCombo++;
 
-		pPlayer->SetMonsterAttack(true);
+			//pMonster->UpdateTransform(NULL);
+			BoundingOrientedBox* TargetBoundingBox = pMonster->GetBoundingBox();
+			//pPlayer->SetTargetPosition(*TargetBoundingBox);
+			pPlayer->m_xmf3AtkDirection = Vector3::Normalize(XMFLOAT3(urd(dre), urd(dre), urd(dre)));
+
+			CollideParams colParam;
+			colParam.xmf3CollidePosition = TargetBoundingBox->Center;
+			CMessageDispatcher::GetInst()->Dispatch_Message(MessageType::COLLISION, &colParam, nullptr);
+
+			/*ParticleCompParams particle_comp_params;
+			particle_comp_params.pObject = dynamic_cast<CParticleObject*>(m_pParticleObj);
+			particle_comp_params.xmf3Position = colParam.xmf3CollidePosition;
+			dynamic_cast<CParticleObject*>(particle_comp_params.pObject)->SetEmitAxis(((CPlayer*)pPlayer)->m_xmf3AtkDirection);
+			CMessageDispatcher::GetInst()->Dispatch_Message<ParticleCompParams>(MessageType::UPDATE_PARTICLE, &particle_comp_params, ((CPlayer*)pPlayer)->m_pStateMachine->GetCurrentState());
+			CMessageDispatcher::GetInst()->Dispatch_Message<ParticleCompParams>(MessageType::UPDATE_SLASHHITPARTICLE, &particle_comp_params, ((CPlayer*)pPlayer)->m_pStateMachine->GetCurrentState());
+			
+			ImpactCompParams impact_comp_params;
+			impact_comp_params.pObject = m_pImpactObj;
+			impact_comp_params.xmf3Position = colParam.xmf3CollidePosition;
+			CMessageDispatcher::GetInst()->Dispatch_Message<ImpactCompParams>(MessageType::UPDATE_BILLBOARD, &impact_comp_params, ((CPlayer*)pPlayer)->m_pStateMachine->GetCurrentState());
+*/
+
+			SoundPlayParams SoundPlayParam;
+			SoundPlayParam.sound_category = SOUND_CATEGORY::SOUND_SHOCK;
+			CMessageDispatcher::GetInst()->Dispatch_Message<SoundPlayParams>(MessageType::PLAY_SOUND, &SoundPlayParam, pPlayer->m_pStateMachine->GetCurrentState());
+
+
+		}
+
+
 	}
+	pPlayer->SetMonsterAttack(true);
+	dynamic_cast<CMainTMPScene*>(m_pScene)->m_bPlayCutScene = false;
+	dynamic_cast<CMainTMPScene*>(m_pScene)->returnMainCamera();
 }

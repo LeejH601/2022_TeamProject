@@ -203,6 +203,18 @@ XMFLOAT3 CPhysicsObject::GetVelocity()
 	return m_xmf3Velocity;
 }
 
+XMFLOAT4X4 CPhysicsObject::GetWorldMatrixNonScale()
+{
+	XMFLOAT4X4 xmf4x4World = {
+		m_xmf3Right.x, m_xmf3Right.y,m_xmf3Right.z, 0.0,
+		m_xmf3Up.x, m_xmf3Up.y,m_xmf3Up.z, 0.0,
+		m_xmf3Look.x, m_xmf3Look.y,m_xmf3Look.z, 0.0,
+		m_xmf3Position.x, m_xmf3Position.y,m_xmf3Position.z, 1.0,
+	};
+
+	return xmf4x4World;
+}
+
 bool CPhysicsObject::GetOnGround()
 {
 	return m_bOnGround;

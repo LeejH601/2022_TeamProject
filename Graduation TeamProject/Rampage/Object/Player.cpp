@@ -12,6 +12,7 @@
 #include "..\Object\ModelManager.h"
 #include "..\Shader\BoundingBoxShader.h"
 #include "..\Global\Logger.h"
+#include "..\Scene\SimulatorScene.h"
 #include <stdio.h>
 
 CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks)
@@ -190,7 +191,10 @@ void CPlayer::Update(float fTimeElapsed)
 void CPlayer::UpdateStamina(float fTimeElapsed)
 {
 	if ((m_pStateMachine->GetCurrentState() == Idle_Player::GetInst()) || (m_pStateMachine->GetCurrentState() == Run_Player::GetInst()))
-		m_fStamina += 2.f * m_fSpeedUperS * fTimeElapsed * ((m_fTotalStamina - m_fStamina) / m_fTotalStamina);
+	{
+		m_fStamina += m_fTotalStamina * 2.0f / 3.0f * fTimeElapsed;
+		m_fStamina = min(m_fTotalStamina, m_fStamina);
+	}
 }
 
 void CPlayer::ProcessInput(DWORD dwDirection, float cxDelta, float cyDelta, float fTimeElapsed, CCamera* pCamera)
@@ -257,6 +261,16 @@ void CPlayer::UpdateCombo(float fTimeElapsed)
 	//	m_iCombo++;
 	//	m_bCombo = false;
 	//}
+}
+
+void CPlayer::Reset()
+{
+	m_iPotionN = 5; m_iCombo = 0; m_fStamina = 0.f; m_fHP = m_fTotalHP; m_fStamina = m_fTotalStamina;
+	m_pStateMachine->ChangeState(Idle_Player::GetInst());
+	//m_pStateMachine->SetPreviousState(Idle_Player::GetInst());
+	SetPosition(XMFLOAT3(57.0f, 3.5f, 225.0f));
+	//Rotate(0.0f, 165.0f, 0.0f);
+
 }
 
 #define KNIGHT_ROOT_MOTION
@@ -665,8 +679,14 @@ void CDrinkPotionCallbackHandler::HandleCallback(void* pCallbackData, float fTra
 	}
 	if (abs(fTrackPosition - 1.5f) < ANIMATION_CALLBACK_EPSILON && m_bEmitedParticle == false) {
 		if (m_pVertexPointParticleObject) {
-			
-			m_pVertexPointParticleObject->EmitParticle(5);
+			m_pVertexPointParticleObject->SetTextureIndex(CSimulatorScene::GetInst()->GetTextureManager()->GetTextureOffset(TextureType::ParticleTexture));
+			m_pVertexPointParticleObject->SetFieldSpeed(1.0f);
+			m_pVertexPointParticleObject->SetColor(XMFLOAT3(0.3803, 0.9372, 0.1098));
+			m_pVertexPointParticleObject->SetLifeTime(0.5f);
+			m_pVertexPointParticleObject->SetSpeed(15.0f);
+			m_pVertexPointParticleObject->SetRotateFactor(false);
+			m_pVertexPointParticleObject->SetSize(XMFLOAT2(0.2, 0.2));
+			m_pVertexPointParticleObject->EmitParticle(0);
 			m_pVertexPointParticleObject->SetEmit(true);
 			m_bEmitedParticle = true;
 			if (m_pPlayer) {

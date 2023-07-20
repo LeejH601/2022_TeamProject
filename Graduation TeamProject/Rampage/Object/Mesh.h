@@ -449,6 +449,8 @@ struct ParticleEmitPositionlistParam
 
 class CParticleMesh : public CMesh
 {
+	std::vector<CParticleVertex> createdParticleBuffer;
+
 public:
 	CParticleMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, XMFLOAT3 xmf3Position, XMFLOAT3 xmf3Velocity, float fLifetime, XMFLOAT3 xmf3Acceleration, XMFLOAT3 xmf3Color, XMFLOAT2 xmf2Size, UINT nMaxParticles);
 	virtual ~CParticleMesh();

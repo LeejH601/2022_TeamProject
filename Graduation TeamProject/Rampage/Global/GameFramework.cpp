@@ -436,7 +436,6 @@ LRESULT CALLBACK CGameFramework::OnProcessingWindowMessage(HWND hWnd, UINT nMess
 	switch (nMessageID)
 	{
 	case WM_ACTIVATE:
-
 		break;
 	case WM_SIZE:
 	{

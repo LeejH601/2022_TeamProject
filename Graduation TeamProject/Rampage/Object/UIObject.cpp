@@ -231,7 +231,11 @@ void CHPObject::PreBarUpdate(float fTimeElapsed)
 {
 	if (m_bEnable) {
 		if (m_fPreValue && (m_fPreValue > m_fCurrentValue))
+		{
 			m_fPreValue -= (m_fTotalValue - m_fCurrentValue) * 0.1f;
+			if (m_fPreValue < 0.f)
+				m_fPreValue = 0.f;
+		}
 		//m_xmf2ScreenPosition5 = XMFLOAT2()
 		// 화면 크기를 기준으로 Size 설정 최대 크기 (MAX WIDTH: FRAME_BUFFER_WIDTH, MAX_HEIGHT: FRAME_BUFFER_HEIGHT)
 		m_xmf4x4World._11 = ((m_fPreValue / m_fTotalValue) * m_xmf2Size.x) / (FRAME_BUFFER_WIDTH);
@@ -568,7 +572,7 @@ void CComboNumberObject::UpdateNumberTexture(UINT N, UINT ORDER)
 		//1, 023x((정규 좌표) + 1.0)x0.5
 
 		// -1 ~ 1
-		m_xmf4x4World._41 = (m_xmf2ScreenPosition.x / FRAME_BUFFER_WIDTH) + ((m_xmf2Size.x) / (FRAME_BUFFER_WIDTH) * (0.725f - (1.f - m_fAnimationTime)) * ORDER);
+		m_xmf4x4World._41 = ((m_xmf2ScreenPosition.x / FRAME_BUFFER_WIDTH) + ((m_xmf2Size.x) / (FRAME_BUFFER_WIDTH) * (0.725f - (1.f - m_fAnimationTime)) * ORDER));
 		m_xmf4x4World._42 = (m_xmf2ScreenPosition.y / FRAME_BUFFER_HEIGHT) + (1.f - m_fAnimationTime) * 0.01f;
 		//(m_xmf2ScreenPosition.y * 2.f) / (FRAME_BUFFER_HEIGHT); // -1 ~ 1
 		m_xmf4x4World._43 = 0.f;
@@ -1008,6 +1012,23 @@ void CResultFrame::SetResultData(UINT iTotalComboN, float fPlayTime, UINT iPotio
 	//dynamic_cast<CUIObject*>(m_pChildUI[13].get())->SetScreenPosition(XMFLOAT2(FRAME_BUFFER_WIDTH * 0.85f + 160.f + (dynamic_cast<CNumberObject*>(m_pChildUI[3].get()))->GetNumSize() * 25.f, FRAME_BUFFER_HEIGHT * 0.5f - 9.f));
 }
 
+bool CResultFrame::Reset()
+{
+	for (int i = 3; i < m_pChildUI.size(); i++)
+	{
+		if (!m_pChildUI[i]->GetEnable())
+			return false;
+	}
+
+	for (int i = 3; i < m_pChildUI.size(); i++)
+	{
+		if (m_pChildUI[i]->GetEnable())
+			m_pChildUI[i]->SetEnable(false);
+	}
+
+	SetEnable(false);
+}
+
 UINT CResultFrame::CalculatePlaytimeScore(float fPlayTime)
 {
 	UINT IMinute = ((UINT)fPlayTime) / 60;
@@ -1150,11 +1171,19 @@ void CSquareBar::CurBarUpdate(float fTimeElapsed)
 	}
 }
 
-void CSquareBar::ResetSkill()
+bool CSquareBar::Reset()
 {
 	m_fTime = 0.f;
 	m_pChildUI[2]->SetColor(XMFLOAT3(1.f, 1.f, 1.f)); // 250
 	m_pChildUI[1]->SetEnable(false);
+	return true;
+}
+
+bool CSquareBar::IsFullGauge()
+{
+	if (m_fTime >= 90.f)
+		return true;
+	return false;
 }
 
 CGradationObject::CGradationObject(int iTextureIndex, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fSize) : CUIObject(pd3dDevice, pd3dCommandList, fSize)

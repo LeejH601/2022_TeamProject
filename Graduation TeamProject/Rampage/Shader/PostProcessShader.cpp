@@ -1,6 +1,7 @@
 #include "PostProcessShader.h"
 #include "..\Object\State.h"
 #include "..\Sound\SoundManager.h"
+#include "..\Scene\SimulatorScene.h"
 
 CPostProcessShader::~CPostProcessShader()
 {
@@ -211,6 +212,7 @@ void CBreakScreenEffectShader::UpdateShaderVariables(ID3D12GraphicsCommandList* 
 	pd3dCommandList->SetGraphicsRoot32BitConstants(0, 1, &m_xmf2UVScale.y, 10);
 	pd3dCommandList->SetGraphicsRoot32BitConstants(0, 1, &m_fCrackEmissive, 11);
 	pd3dCommandList->SetGraphicsRoot32BitConstants(0, 1, &m_fGenericAlpha, 12);
+	pd3dCommandList->SetGraphicsRoot32BitConstants(0, 1, &m_nCrackIndex, 13);
 }
 
 void CBreakScreenEffectShader::AnimateObjects(float fTimeElapsed)
@@ -340,6 +342,17 @@ void CBreakScreenEffectShader::AnimateObjects(float fTimeElapsed)
 				PlayerParams param;
 				param.pPlayer = (CGameObject*)(m_pPlayer);
 				CMessageDispatcher::GetInst()->Dispatch_Message(MessageType::SPECIALMOVE_DAMAGED, &param, nullptr);
+
+				if (m_pPlayer->m_pCamera)
+				{
+					if (m_pPlayer->m_pStateMachine->GetCurrentState()->GetCameraShakeComponent()->GetEnable())
+						m_pPlayer->m_pCamera->m_bCameraShaking = true;
+					if (m_pPlayer->m_pStateMachine->GetCurrentState()->GetCameraZoomerComponent()->GetEnable())
+						m_pPlayer->m_pCamera->m_bCameraZooming = true;
+					if (m_pPlayer->m_pStateMachine->GetCurrentState()->GetCameraMoveComponent()->GetEnable())
+						m_pPlayer->m_pCamera->m_bCameraMoving = true;
+				}
+
 			}
 		}
 	}

@@ -145,7 +145,7 @@ void DataLoader::LoadComponentSets(std::wstring wFolderName)
 {
 	FILE* pInFile;
 
-	for (int i = 0; i < 4; ++i)
+	for (int i = 0; i < 3; ++i)
 	{
 		CState<CPlayer>* pCurrentAnimation = Atk1_Player::GetInst();
 
@@ -419,6 +419,10 @@ void DataLoader::SaveComponentSet(FILE* pInFile, CState<CPlayer>* pState)
 	WriteStringFromFile(pInFile, std::string("<Timecurves>:"));
 	for (int i = 0; i < MAX_COLORCURVES; ++i)
 		WriteFloatFromFile(pInFile, pTrailComponent->m_fColorCurveTimes_R[i]);
+	WriteStringFromFile(pInFile, std::string("<MainTextureIndex>:"));
+	WriteIntegerFromFile(pInFile, pTrailComponent->GetMainTextureIndex());
+	WriteStringFromFile(pInFile, std::string("<NoiseTextureIndex>:"));
+	WriteIntegerFromFile(pInFile, pTrailComponent->GetNoiseTextureIndex());
 	WriteStringFromFile(pInFile, std::string("</TrailComponent>:"));
 
 	WriteStringFromFile(pInFile, std::string("<SlashHitComponent>:"));
@@ -1054,6 +1058,14 @@ void DataLoader::LoadComponentSet(FILE* pInFile, CState<CPlayer>* pState)
 					for (int i = 0; i < MAX_COLORCURVES; ++i)
 						pTrailComponent->m_fColorCurveTimes_R[i] = ReadFloatFromFile(pInFile);
 				}
+				else if (!strcmp(buf, "<MainTextureIndex>:"))
+				{
+					pTrailComponent->SetMainTextureIndex(ReadIntegerFromFile(pInFile));
+				}
+				else if (!strcmp(buf, "<NoiseTextureIndex>:"))
+				{
+					pTrailComponent->SetNoiseTextureIndex(ReadIntegerFromFile(pInFile));
+				}
 				else if (!strcmp(buf, "</TrailComponent>:"))
 				{
 					break;
@@ -1428,7 +1440,7 @@ void CImGuiManager::SetUI()
 			ImVec2 itemSize = ImVec2(100, 50);
 			if (ImGui::Button(U8STR("넘어가기"), itemSize))
 				change_after = true;
-				
+
 			if (ImGui::Button(U8STR("되돌아가기"), itemSize))
 				change_before = true;
 
@@ -1437,7 +1449,7 @@ void CImGuiManager::SetUI()
 
 		// 시뮬레이터 씬 보여주기 여부 설정 ImGui
 		ImGui::Checkbox(U8STR("시뮬레이터"), &show_simulator_scene);
-		 ;
+		;
 		// 플레이어 애니메이션 출력 버튼
 		if (ImGui::Button(U8STR("공격1")))
 		{
@@ -2488,9 +2500,9 @@ void CImGuiManager::ShowCreationMenu()
 		static SortOrder sortOrder;
 
 		// 기준에 따라 정렬
-		
 
-		
+
+
 
 		ImGui::Text(U8STR("정렬기준: ")); ImGui::SameLine();
 
@@ -2595,7 +2607,7 @@ void CImGuiManager::ShowCreationMenu()
 		if (ImGui::Button(U8STR("업로드"))) {
 			UploadWindowFlag = !UploadWindowFlag;
 		}
-		if(UploadWindowFlag){
+		if (UploadWindowFlag) {
 			ImGuiWindowFlags upload_window_flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_MenuBar;
 			bool* p_Upload_open = NULL;
 
@@ -2881,7 +2893,7 @@ void CImGuiManager::ProcessWorkshop(eSERVICE_TYPE serviceType, void* pData)
 			return;
 	}
 
-	
+
 
 	switch (serviceType)
 	{
@@ -2899,7 +2911,7 @@ void CImGuiManager::ProcessWorkshop(eSERVICE_TYPE serviceType, void* pData)
 			m_pNetworkDevice->UploadWorkShop(uploadData);
 		}
 	}
-		break;
+	break;
 	case eSERVICE_TYPE::DOWNLOAD_RECORD:
 	{
 		m_pNetworkDevice->SendServiceType(serviceType);

@@ -59,7 +59,7 @@ CMonster::CMonster()
 	m_ParticleComponent.SetEmitParticleNumber(50);
 	m_ParticleComponent.SetSpeed(10.0f);
 	m_ParticleComponent.SetLifeTime(0.4f);
-	m_ParticleComponent.SetTextureIndex(8);
+	m_ParticleComponent.SetTextureIndex(3);
 	m_ParticleComponent.SetParticleType(9);
 	m_ParticleComponent.SetRotateFacotr(true);
 }
@@ -190,6 +190,7 @@ void CMonster::HandleDamage(CPlayer* pPlayer, float fDamage)
 
 		if (m_bElite) {
 			ApplyDamage(damage / 2);
+			PlayMonsterShieldHitSound();
 			if (!GetHasShield()) {
 				ApplyDamage(damage / 2);
 				m_pStateMachine->ChangeState(Idle_Monster::GetInst());
@@ -332,6 +333,17 @@ void CMonster::UpdateTransform(XMFLOAT4X4* pxmf4x4Parent)
 void CMonster::PlayMonsterEffectSound()
 {
 }
+void CMonster::PlayMonsterShieldHitSound()
+{
+	bool bPrevShieldState = m_bShieldStateBuf;
+	if(GetHasShield())
+		CSoundManager::GetInst()->PlaySound("Sound/effect/shield-guard-6963.mp3", 1.0, 0.0);
+	else {
+		if (GetHasShield() == false && bPrevShieldState == true) {
+			CSoundManager::GetInst()->PlaySound("Sound/effect/Destruction_Sound_Effect_2.wav", 1.0, 0.0);
+		}
+	}
+}
 bool CMonster::CheckCollision(CGameObject* pTargetObject)
 {
 	if (pTargetObject)
@@ -386,8 +398,8 @@ COrcObject::COrcObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3d
 {
 	m_fHP = 200.0f;
 	m_fTotalHP = 200.0f;
-	m_fStrikingPower = 27.0f;
-	m_fSpeedKperH = 11.5;
+	m_fStrikingPower = 27.0f + RandomFloatInRange(-1.5f, 1.5f);;
+	m_fSpeedKperH = 11.5f + RandomFloatInRange(-1.5f, 1.5f);
 	m_fSpeedUperS = MeterToUnit(m_fSpeedKperH * 1000.0f) / 3600.0f;
 	m_fAttackRange = MeterToUnit(1.25f);
 
@@ -437,8 +449,8 @@ CGoblinObject::CGoblinObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 {
 	m_fHP = 75.0f;
 	m_fTotalHP = 75.0f;
-	m_fStrikingPower = 10.0f;
-	m_fSpeedKperH = 15.0f;
+	m_fStrikingPower = 10.0f + RandomFloatInRange(-1.5f, 1.5f);;
+	m_fSpeedKperH = 15.0f + RandomFloatInRange(-1.5f, 1.5f);
 	m_fSpeedUperS = MeterToUnit(m_fSpeedKperH * 1000.0f) / 3600.0f;
 	m_fAttackRange = MeterToUnit(0.8f);
 
@@ -492,8 +504,8 @@ CSkeletonObject::CSkeletonObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 {
 	m_fHP = 135.0f;
 	m_fTotalHP = 135.0f;
-	m_fStrikingPower = 18.0f;
-	m_fSpeedKperH = 8.0f;
+	m_fStrikingPower = 18.0f + RandomFloatInRange(-1.5f, 1.5f);
+	m_fSpeedKperH = 8.0f + RandomFloatInRange(-1.5f, 1.5f);
 	m_fSpeedUperS = MeterToUnit(m_fSpeedKperH * 1000.0f) / 3600.0f;
 	m_fAttackRange = MeterToUnit(1.1f);
 

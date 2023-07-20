@@ -10,6 +10,7 @@
 #include "..\Object\PlayerParticleObject.h"
 #include "SwordTrailObject.h"
 #include "..\Global\Logger.h"
+#include "..\Scene\SimulatorScene.h"
 
 #define ANGLE_MARGIN 22.5f
 
@@ -48,9 +49,8 @@ void Idle_Player::Execute(CPlayer* player, float fElapsedTime)
 {
 	if (player->m_bEvasioned)
 		player->m_pStateMachine->ChangeState(Evasion_Player::GetInst());
-
 	// 사용자가 좌클릭을 했으면 Atk1_Player로 상태 변경
-	else if (player->m_bAttack)
+	else if (player->m_bAttack && player->m_fStamina >= 5.0f)
 		player->m_pStateMachine->ChangeState(Atk1_Player::GetInst());
 	else if (player->m_bCharged)
 		player->m_pStateMachine->ChangeState(ChargeStart_Player::GetInst());
@@ -210,7 +210,7 @@ void Atk_Player::InitAtkPlayer()
 	pTrailParticlenComponent->SetEnable(true);
 	pTrailParticlenComponent->SetTextureOffset(5);
 	pTrailParticlenComponent->SetSpeed(15.0f);
-	pTrailParticlenComponent->SetSize(XMFLOAT2(0.2,0.2));
+	pTrailParticlenComponent->SetSize(XMFLOAT2(0.2, 0.2));
 	pTrailParticlenComponent->SetEmitParticleNumber(50);
 	pTrailParticlenComponent->SetEmissive(20.0f);
 	pTrailParticlenComponent->SetLifeTime(0.4f);
@@ -288,7 +288,7 @@ void Atk1_Player::CheckComboAttack(CPlayer* player)
 	if (0.7 < player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition) {
 		if (player->m_pSwordTrailReference)
 			dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[0].get())->m_eTrailUpdateMethod = TRAIL_UPDATE_METHOD::DELETE_CONTROL_POINT;
-		if (player->m_bAttack) {
+		if (player->m_bAttack && player->m_fStamina >= 5.0f) {
 			CAnimationController* pPlayerController = player->m_pSkinnedAnimationController.get();
 			player->m_pStateMachine->ChangeState(Atk2_Player::GetInst());
 		}
@@ -389,11 +389,10 @@ void Atk1_Player::Enter(CPlayer* player)
 		dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[0].get())->SetLengthWeight(1.0f);
 	}
 
-	player->m_fStamina -= player->m_fTotalStamina * 0.2f;
-	if (player->m_fStamina < 0.f)
-		player->m_fStamina = 0.f;
-	player->UpdateCombo(0.f);
+	player->m_fStamina -= 5.0f;
+	player->m_fStamina = max(0.0f, player->m_fStamina);
 
+	player->UpdateCombo(0.f);
 }
 
 void Atk1_Player::Execute(CPlayer* player, float fElapsedTime)
@@ -418,7 +417,7 @@ void Atk1_Player::Execute(CPlayer* player, float fElapsedTime)
 		player->m_pStateMachine->ChangeState(Idle_Player::GetInst());
 	}
 
-	if(m_pTrailComponent->GetEnable())
+	if (m_pTrailComponent->GetEnable())
 		SpawnTrailParticle(player);
 
 }
@@ -466,7 +465,7 @@ void Atk2_Player::CheckComboAttack(CPlayer* player)
 	if (0.7 < player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition) {
 		if (player->m_pSwordTrailReference)
 			dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[1].get())->m_eTrailUpdateMethod = TRAIL_UPDATE_METHOD::DELETE_CONTROL_POINT;
-		if (player->m_bAttack)
+		if (player->m_bAttack && player->m_fStamina >= 10.0f)
 		{
 			CAnimationController* pPlayerController = player->m_pSkinnedAnimationController.get();
 			player->m_pStateMachine->ChangeState(Atk3_Player::GetInst());
@@ -525,9 +524,8 @@ void Atk2_Player::Enter(CPlayer* player)
 		dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[1].get())->SetLengthWeight(1.0f);
 	}
 
-	player->m_fStamina -= player->m_fTotalStamina * 0.2f;
-	if (player->m_fStamina < 0.f)
-		player->m_fStamina = 0.f;
+	player->m_fStamina -= 10.0f;
+	player->m_fStamina = max(0.0f, player->m_fStamina);
 
 	player->UpdateCombo(0.f);
 }
@@ -618,7 +616,7 @@ void Atk2_Player::SpawnTrailParticle(CPlayer* player)
 			center = Vector3::Add(center, Vector3::Add(Vector3::ScalarProduct(player->GetLook(), 4.0f), player->GetRight(), 1.f), 1.0f);
 
 			ParticleTrail_comp_params.pObject = CPlayerParticleObject::GetInst()->GetTrailParticleObjects();
-			dynamic_cast<CParticleObject*>(ParticleTrail_comp_params.pObject)->SetEmitAxis(Vector3::ScalarProduct(xmf3Direction, -1.0f,false));
+			dynamic_cast<CParticleObject*>(ParticleTrail_comp_params.pObject)->SetEmitAxis(Vector3::ScalarProduct(xmf3Direction, -1.0f, false));
 			ParticleTrail_comp_params.xmf3Position = center;
 			ParticleTrail_comp_params.iPlayerAttack = 0;
 			ParticleTrail_comp_params.m_fTime = player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition;
@@ -695,9 +693,8 @@ void Atk3_Player::Enter(CPlayer* player)
 		dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[2].get())->SetLengthWeight(1.0f);
 	}
 
-	player->m_fStamina -= player->m_fTotalStamina * 0.2f;
-	if (player->m_fStamina < 0.f)
-		player->m_fStamina = 0.f;
+	player->m_fStamina -= 20.0f;
+	player->m_fStamina = max(0.0f, player->m_fStamina);
 
 	player->UpdateCombo(0.f);
 }
@@ -1239,6 +1236,9 @@ void Evasion_Player::Enter(CPlayer* player)
 	player->m_pSkinnedAnimationController->m_pAnimationTracks[1].m_nType = ANIMATION_TYPE_ONCE;
 
 	player->m_fInvincibleTime = FLT_MAX;
+
+	player->m_fStamina -= 20.0f;
+	player->m_fStamina = max(0.0f, player->m_fStamina);
 }
 
 void Evasion_Player::Execute(CPlayer* player, float fElapsedTime)
@@ -1398,7 +1398,7 @@ void Damaged_Player::Enter(CPlayer* player)
 	player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition = 0.0f;
 	player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fSequenceWeight = 0.0f;
 	player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_nType = ANIMATION_TYPE_ONCE;
-	
+
 	player->m_xmf3RootTransfromPreviousPos = XMFLOAT3{ 0.f, 0.f , 0.f };
 	player->m_bAttack = false; // 사용자가 좌클릭시 true가 되는 변수
 }
@@ -1408,7 +1408,7 @@ void Damaged_Player::Execute(CPlayer* player, float fElapsedTime)
 	player->SetLookAt(Vector3::Add(player->GetPosition(), Vector3::Normalize(player->m_xmf3ToHitterVec)));
 
 	CAnimationSet* pAnimationSet = player->m_pSkinnedAnimationController->m_pAnimationSets->m_pAnimationSets[player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_nAnimationSet];
-	
+
 	if (player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition == pAnimationSet->m_fLength)
 		player->m_pStateMachine->ChangeState(Idle_Player::GetInst());
 }
@@ -1501,6 +1501,25 @@ void ChargeStart_Player::Execute(CPlayer* player, float fElapsedTime)
 	CAnimationSet* pAnimationSet = player->m_pSkinnedAnimationController->m_pAnimationSets->m_pAnimationSets[player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_nAnimationSet];
 	if (player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition == pAnimationSet->m_fLength) {
 		player->m_pStateMachine->ChangeState(Charge_Player::GetInst());
+	}
+
+	static float fAcculateTime = 0.0f;
+	static float fSpawnVPParticleTime = 0.032f;
+	CVertexPointParticleObject* vpObj = dynamic_cast<CVertexPointParticleObject*>(CPlayerParticleObject::GetInst()->GetVertexPointParticleObject());
+	if (vpObj) {
+		fAcculateTime += fElapsedTime;
+		if (fAcculateTime >= fSpawnVPParticleTime) {
+			fAcculateTime = 0.0f;
+			vpObj->SetTextureIndex(CSimulatorScene::GetInst()->GetTextureManager()->GetTextureOffset(TextureType::SmokeTexture));
+			vpObj->SetFieldSpeed(0.3f);
+			vpObj->SetColor(XMFLOAT3(0.4745, 0.9254, 1.0));
+			vpObj->SetSpeed(6.0f);
+			vpObj->SetLifeTime(0.5f);
+			vpObj->SetRotateFactor(true);
+			vpObj->SetSize(XMFLOAT2(0.2, 0.2));
+			vpObj->EmitParticle(5);
+			vpObj->SetEmit(true);
+		}
 	}
 }
 
@@ -1635,7 +1654,77 @@ ChargeAttack_Player::ChargeAttack_Player()
 		pTrailComponent->SetEnable(true);
 		pTrailComponent->m_fEmissiveFactor = 100.0f;
 	}
-	m_fPlayerCameraOffset = MeterToUnit(2.0f);
+
+	CameraShakeComponent* pCameraShake = dynamic_cast<CameraShakeComponent*>(GetCameraShakeComponent());
+	pCameraShake->SetEnable(true);
+	pCameraShake->SetMagnitude(0.2f);
+	pCameraShake->SetDuration(2.0f);
+	pCameraShake->SetFrequency(0.001f);
+
+	HitLagComponent* pHitLag = dynamic_cast<HitLagComponent*>(GetHitLagComponent());
+	pHitLag->SetEnable(true);
+	pHitLag->SetDuration(0.8);
+	pHitLag->SetLagScale(0.1f);
+	pHitLag->SetMinTimeScale(0.001f); 
+
+	SlashHitComponent* pSlashHit = dynamic_cast<SlashHitComponent*>(GetSlashHitComponent());
+	pSlashHit->SetColor(XMFLOAT3(1, 1, 0.4));
+	pSlashHit->SetEmissive(30.0f);
+	pSlashHit->SetEnable(true);
+	pSlashHit->SetLifeTime(0.8f);
+	pSlashHit->SetSize(XMFLOAT2(1.0f, 50.0f));
+	pSlashHit->SetTextureIndex(0); // 파티클 첫번째 텍스쳐
+
+	ImpactEffectComponent* ImpactEffect = dynamic_cast<ImpactEffectComponent*>(GetImpactComponent());
+	ImpactEffect->SetEnable(true);
+	ImpactEffect->SetColorR(1);
+	ImpactEffect->SetColorG(1);
+	ImpactEffect->SetColorB(1);
+	ImpactEffect->SetEmissive(3.0f);
+	ImpactEffect->SetLifeTime(1.0);
+	ImpactEffect->SetSize(XMFLOAT2(20, 20));
+	ImpactEffect->SetTotalRowColumn(8, 8);
+	ImpactEffect->SetTextureIndex(3);
+
+	ParticleComponent* particleComp = dynamic_cast<ParticleComponent*>(GetParticleComponent());
+	particleComp->SetEnable(true);
+	particleComp->SetColor(XMFLOAT3(0.9882, 0.4313, 0.1333));
+	particleComp->SetEmissive(20.0f);
+	particleComp->SetEmitParticleNumber(100);
+	//particleComp->SetParticleNumber(150);
+	particleComp->SetLifeTime(1.0f);
+	particleComp->SetSize(XMFLOAT2(0.8, 0.8));
+	particleComp->SetTextureIndex(0);
+	particleComp->SetSpeed(100.0f);
+
+
+	// ATK SOUND
+	SoundPlayComponent* pAtkSoundComponent = dynamic_cast<SoundPlayComponent*>(GetShootSoundComponent());
+	pAtkSoundComponent->SetEnable(true);
+	pAtkSoundComponent->SetSoundNumber(6);
+	pAtkSoundComponent->SetDelay(0.63f);
+
+	// DAMAGE SOUND
+	SoundPlayComponent* pShockSoundComponent = dynamic_cast<SoundPlayComponent*>(GetShockSoundComponent());
+	pShockSoundComponent->SetEnable(true);
+	pShockSoundComponent->SetSoundNumber(9);
+
+	// GOBLIN MOAN SOUND
+	SoundPlayComponent* pGobSoundComponent = dynamic_cast<SoundPlayComponent*>(GetGoblinMoanComponent());
+	pGobSoundComponent->SetEnable(true);
+	pGobSoundComponent->SetSoundNumber(2);
+
+	// ORC MOAN SOUND
+	SoundPlayComponent* pOrcSoundComponent = dynamic_cast<SoundPlayComponent*>(GetOrcMoanComponent());
+	pOrcSoundComponent->SetEnable(true);
+	pOrcSoundComponent->SetSoundNumber(2);
+
+	// SKELETON MOAN SOUND
+	SoundPlayComponent* pSkelSoundComponent = dynamic_cast<SoundPlayComponent*>(GetSkeletonMoanComponent());
+	pSkelSoundComponent->SetEnable(true);
+	pSkelSoundComponent->SetSoundNumber(0);
+
+	//m_fPlayerCameraOffset = MeterToUnit(2.0f);
 }
 
 void ChargeAttack_Player::SetPlayerRootVel(CPlayer* player)
@@ -1667,6 +1756,10 @@ void ChargeAttack_Player::Enter(CPlayer* player)
 	player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_nType = ANIMATION_TYPE_ONCE;
 
 	player->m_pSkinnedAnimationController->SetTrackEnable(1, false);
+
+	SoundPlayParams SoundPlayParam;
+	SoundPlayParam.sound_category = SOUND_CATEGORY::SOUND_SHOOT;
+	CMessageDispatcher::GetInst()->Dispatch_Message<SoundPlayParams>(MessageType::PLAY_SOUND, &SoundPlayParam, this);
 
 	TrailUpdateParams trailParam;
 	trailParam.pObject = player->m_pSwordTrailReference[3].get();
@@ -1731,7 +1824,7 @@ void ChargeAttack_Player::Execute(CPlayer* player, float fElapsedTime)
 
 void ChargeAttack_Player::Animate(CPlayer* player, float fElapsedTime)
 {
-	if(!m_bPlayingMoveRunning)
+	if (!m_bPlayingMoveRunning)
 		player->Animate(fElapsedTime);
 }
 
@@ -1758,7 +1851,7 @@ void ChargeAttack_Player::Exit(CPlayer* player)
 {
 	if (player->m_pSwordTrailReference)
 		dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[3].get())->m_eTrailUpdateMethod = TRAIL_UPDATE_METHOD::DELETE_CONTROL_POINT;
-	player->m_pCamera->SetOffset(m_xmf3PlayerCameraOffsetCache);
+	//player->m_pCamera->SetOffset(m_xmf3PlayerCameraOffsetCache);
 }
 
 Dead_Player::Dead_Player()
@@ -1772,14 +1865,14 @@ Dead_Player::~Dead_Player()
 void Dead_Player::Enter(CPlayer* player)
 {
 	player->SetLookAt(Vector3::Add(player->GetPosition(), Vector3::Normalize(player->m_xmf3ToHitterVec)));
-	
+
 	player->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 31);
 	player->m_pSkinnedAnimationController->SetTrackWeight(0, 1.0f);
 	player->m_pSkinnedAnimationController->SetTrackWeight(1, 0.0f);
 	player->m_pSkinnedAnimationController->m_fTime = 0.0f;
 	player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition = 0.0f;
 	player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_nType = ANIMATION_TYPE_ONCE;
-	
+
 
 	player->m_xmf3RootTransfromPreviousPos = XMFLOAT3{ 0.f, 0.f , 0.f };
 	player->m_fHP = 0.0f;

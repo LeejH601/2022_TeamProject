@@ -60,6 +60,7 @@ public:
 	virtual XMFLOAT3 GetScale() { return m_xmf3Scale; };
 	virtual XMFLOAT3 GetVelocity();
 	float GetCurrSpeed() { return m_fCurrentSpeedUperS; };
+	XMFLOAT4X4 GetWorldMatrixNonScale();
 
 	bool GetOnGround();
 
