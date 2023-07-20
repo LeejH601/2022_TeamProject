@@ -1447,8 +1447,20 @@ void CImGuiManager::SetUI()
 			ImGui::End();
 		}
 
+		static bool autoResetMonster = false;
+
 		// 시뮬레이터 씬 보여주기 여부 설정 ImGui
 		ImGui::Checkbox(U8STR("시뮬레이터"), &show_simulator_scene);
+
+		ImGui::SameLine(m_lDesktopWidth * 0.1f);
+
+		// 몬스터 자동 리셋
+		if (ImGui::Checkbox(U8STR("몬스터 자동 리셋"), &autoResetMonster))
+		{
+			OutputDebugString(L"몬스터 자동 리셋: ");
+			autoResetMonster ? OutputDebugString(L"TRUE\n") : OutputDebugString(L"FALSE\n");
+		}
+
 
 		static int selectedMonsterType = 0;
 
@@ -1459,10 +1471,13 @@ void CImGuiManager::SetUI()
 			switch (selectedMonsterType)
 			{
 			case 0:
+				OutputDebugString(L"몬스터 종족 선택: 고블린\n");
 				break;
 			case 1:
+				OutputDebugString(L"몬스터 종족 선택: 오크\n");
 				break;
 			case 2:
+				OutputDebugString(L"몬스터 종족 선택: 스켈레톤\n");
 				break;
 			default:
 				break;
@@ -1471,8 +1486,16 @@ void CImGuiManager::SetUI()
 
 		static int selectedMonsterNum = 0;
 		ImGui::Text(U8STR("몬스터 숫자:")); ImGui::SameLine();
-		ImGui::RadioButton("1##monsterNum", &selectedMonsterNum, 0); ImGui::SameLine();
-		ImGui::RadioButton("3##monsterNum", &selectedMonsterNum, 1);
+		
+		if (ImGui::RadioButton("1##monsterNum", &selectedMonsterNum, 0))
+		{
+			OutputDebugString(L"몬스터 숫자 선택: 1\n");
+		}
+		ImGui::SameLine();
+		if (ImGui::RadioButton("3##monsterNum", &selectedMonsterNum, 1))
+		{
+			OutputDebugString(L"몬스터 숫자 선택: 3\n");
+		}
 
 		// 플레이어 애니메이션 출력 버튼
 		if (ImGui::Button(U8STR("공격1")))
