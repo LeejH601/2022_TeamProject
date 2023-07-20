@@ -2483,19 +2483,14 @@ void CImGuiManager::ShowCreationMenu()
 				std::u8string id(reinterpret_cast<const char8_t*>(sId.c_str()));
 				std::u8string title(reinterpret_cast<const char8_t*>(stitle.c_str()));
 
-				vCreationItems[index++] = CreationItem{ nullptr,  u8"창작자1", u8"프리셋1", record.nLike, record.nHate };
+				vCreationItems[index++] = CreationItem{ nullptr, id, title, record.nLike, record.nHate };
 			}
 		};
 
 		records.clear();
-		records.push_back(WorkShop_Record{ 0, 0, 0 });
-		records.push_back(WorkShop_Record{ 0, 0, 0 });
-		records.push_back(WorkShop_Record{ 0, 0, 0 });
-		records.push_back(WorkShop_Record{ 0, 0, 0 });
-		records.push_back(WorkShop_Record{ 0, 0, 0 });
 
 		if (vCreationItems.size() == 0) {
-			//ProcessWorkshop(eSERVICE_TYPE::UPDATE_TABLE);
+			ProcessWorkshop(eSERVICE_TYPE::UPDATE_TABLE);
 			UpdateTable();
 		}
 
