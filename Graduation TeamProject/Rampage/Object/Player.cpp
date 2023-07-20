@@ -180,7 +180,7 @@ void CPlayer::Update(float fTimeElapsed)
 	CPhysicsObject::Move(xmf3NewVelocity, false);
 
 	// 플레이어가 터레인보다 아래에 있지 않도록 하는 코드
-	if (m_pUpdatedContext) OnUpdateCallback(fTimeElapsed);
+	OnUpdateCallback(fTimeElapsed);
 
 	CPhysicsObject::Apply_Friction(fTimeElapsed);
 
@@ -459,6 +459,7 @@ void CKnightPlayer::Animate(float fTimeElapsed)
 //#define SHOW_COLLIDE_MESH_NAME
 void CKnightPlayer::OnUpdateCallback(float fTimeElapsed)
 {
+	XMFLOAT3 xmf3ResultPlayerPos;
 	if (m_pUpdatedContext)
 	{
 		CMap* pMap = (CMap*)m_pUpdatedContext;
@@ -470,7 +471,7 @@ void CKnightPlayer::OnUpdateCallback(float fTimeElapsed)
 			m_pSkinnedAnimationController->m_pRootMotionObject->GetWorld()._43
 		};
 
-		XMFLOAT3 xmf3ResultPlayerPos = GetPosition();
+		xmf3ResultPlayerPos = GetPosition();
 
 		xmf3ResultPlayerPos.x = std::clamp(xmf3ResultPlayerPos.x, xmf3TerrainPos.x + TERRAIN_SPAN, xmf3TerrainPos.x + pTerrain->GetWidth() - TERRAIN_SPAN);
 		xmf3ResultPlayerPos.z = std::clamp(xmf3ResultPlayerPos.z, xmf3TerrainPos.z + TERRAIN_SPAN, xmf3TerrainPos.z + pTerrain->GetLength() - TERRAIN_SPAN);
@@ -498,10 +499,16 @@ void CKnightPlayer::OnUpdateCallback(float fTimeElapsed)
 			}
 		}
 		
-		SetPosition(xmf3ResultPlayerPos);
-
-		UpdateTransform(NULL);
+		
 	}
+	else {
+		xmf3ResultPlayerPos = GetPosition();
+		xmf3ResultPlayerPos.y = (xmf3ResultPlayerPos.y > 0.0f) ? xmf3ResultPlayerPos.y : 0.0f;
+	}
+
+	SetPosition(xmf3ResultPlayerPos);
+
+	UpdateTransform(NULL);
 }
 void CKnightPlayer::UpdateTransform(XMFLOAT4X4* pxmf4x4Parent)
 {

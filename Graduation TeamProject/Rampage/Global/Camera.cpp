@@ -247,20 +247,26 @@ void CThirdPersonCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
 
 void CThirdPersonCamera::OnUpdateCallback(float fTimeElapsed)
 {
-	if (m_pUpdatedContext)
+	XMFLOAT3 xmf3CameraPosition;
+
+	if (m_pUpdatedContext != NULL)
 	{
 		CMap* pMap = (CMap*)m_pUpdatedContext;
 		CSplatTerrain* pTerrain = (CSplatTerrain*)(pMap->GetTerrain().get());
 		XMFLOAT3 xmf3TerrainPos = pTerrain->GetPosition();
 
-		XMFLOAT3 xmf3CameraPosition = GetPosition();
+		xmf3CameraPosition = GetPosition();
+
 		float fTerrainY = pTerrain->GetHeight(xmf3CameraPosition.x - (xmf3TerrainPos.x), xmf3CameraPosition.z - (xmf3TerrainPos.z));
 
 		if (xmf3CameraPosition.y < fTerrainY + xmf3TerrainPos.y)
 			xmf3CameraPosition.y = fTerrainY + xmf3TerrainPos.y;
-
-		SetPosition(xmf3CameraPosition);
 	}
+	else {
+		xmf3CameraPosition = GetPosition();
+	}
+
+	SetPosition(xmf3CameraPosition);
 }
 
 CFloatingCamera::CFloatingCamera() : CCamera()
@@ -885,4 +891,9 @@ void CDollyCamera::CaculateCubicPolyData()
 			InitCentripetalCR(m_vDollyTracks[i].xmf3Position, m_vDollyTracks[i + 1].xmf3Position, m_vDollyTracks[min(i + 2, nTrack)].xmf3Position, m_vDollyTracks[min(i + 3, nTrack)].xmf3Position, m_vCubicPolys[i]);
 		}
 	}
+}
+
+void CSimulatorThirdPersonCamera::ProcessInput(DWORD dwDirection, float cxDelta, float cyDelta, float fTimeElapsed)
+{
+	CThirdPersonCamera::ProcessInput(dwDirection, cxDelta, cyDelta, fTimeElapsed);
 }

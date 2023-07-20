@@ -21,7 +21,7 @@ void CPhysicsObject::UpdateTransform(XMFLOAT4X4* pxmf4x4Parent)
 {
 	if (m_bSimulateArticulate) {
 		UpdateTransformFromArticulation(NULL, m_pArtiLinkNames, m_AritculatCacheMatrixs, m_xmf3Scale.x);
-		
+
 	}
 	else {
 		UpdateMatrix();
@@ -32,37 +32,45 @@ void CPhysicsObject::UpdateTransform(XMFLOAT4X4* pxmf4x4Parent)
 void CPhysicsObject::OnUpdateCallback(float fTimeElapsed)
 {
 	m_bOnGround = false;
-	if (m_pUpdatedContext)
+	float fTerrainY;
+	XMFLOAT3 xmf3ResultPos;
+
+	if (m_pUpdatedContext != NULL)
 	{
 		CMap* pMap = (CMap*)m_pUpdatedContext;
 		CSplatTerrain* pTerrain = (CSplatTerrain*)(pMap->GetTerrain().get());
 		XMFLOAT3 xmf3TerrainPos = pTerrain->GetPosition();
 
-		XMFLOAT3 xmf3ResultPos = GetPosition();
+		xmf3ResultPos = GetPosition();
 
 		xmf3ResultPos.x = std::clamp(xmf3ResultPos.x, xmf3TerrainPos.x + TERRAIN_SPAN, xmf3TerrainPos.x + pTerrain->GetWidth() - TERRAIN_SPAN);
 		xmf3ResultPos.z = std::clamp(xmf3ResultPos.z, xmf3TerrainPos.z + TERRAIN_SPAN, xmf3TerrainPos.z + pTerrain->GetLength() - TERRAIN_SPAN);
 
-		float fTerrainY = pTerrain->GetHeight(xmf3ResultPos.x - (xmf3TerrainPos.x), xmf3ResultPos.z - (xmf3TerrainPos.z));
+		fTerrainY = pTerrain->GetHeight(xmf3ResultPos.x - (xmf3TerrainPos.x), xmf3ResultPos.z - (xmf3TerrainPos.z));
 
 		if (xmf3ResultPos.y < fTerrainY + xmf3TerrainPos.y)
 		{
 			xmf3ResultPos.y = fTerrainY + xmf3TerrainPos.y;
 			m_bOnGround = true;
 		}
-		
-		fDistortionDegree = 0.0f;
-		
+
 		for (int i = 0; i < pMap->GetMapObjects().size(); ++i) {
-			if (pMap->GetMapObjects()[i]->CheckCollision(this))
-			{
+			if (pMap->GetMapObjects()[i]->CheckCollision(this)) {
 				DistortLookVec(pMap->GetMapObjects()[i].get());
 				break;
 			}
 		}
-
-		SetPosition(xmf3ResultPos);
 	}
+	else {
+		xmf3ResultPos = GetPosition();
+
+		xmf3ResultPos.y = (xmf3ResultPos.y > 0.0f) ? xmf3ResultPos.y : 0.0f;
+		m_bOnGround = true;
+	}
+
+	fDistortionDegree = 0.0f;
+
+	SetPosition(xmf3ResultPos);
 }
 
 void CPhysicsObject::Update(float fTimeElapsed)
@@ -264,7 +272,7 @@ void CPhysicsObject::DistortLookVec(CGameObject* pObject)
 
 	if (XMVectorGetY(cross) > 0.0f)
 		degrees = 360.0f - degrees;
-	
+
 	if (degrees < 90.0f || degrees > 270.0f)
 	{
 		resultDegree = 360.0f - degrees;

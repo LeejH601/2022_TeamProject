@@ -1689,13 +1689,13 @@ void CImGuiManager::ShowParticleManager(CState<CPlayer>* pCurrentAnimation)
 		pParticleComponent->GetEmissive() = std::clamp(pParticleComponent->GetEmissive(), IMPACT_EMISSIVE_MIN, IMPACT_EMISSIVE_MAX);
 
 	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
-	ImGui::Checkbox("VelocityRotate##ParticleEffect", &pParticleComponent->GetRotateFactor());
+	ImGui::Checkbox(U8STR("진행 방향으로회전 On/Off##ParticleEffect"), &pParticleComponent->GetRotateFactor());
 
 	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
-	if (ImGui::DragFloat("FieldSpeed##ParticleEffect", &pParticleComponent->GetFieldSpeed(), DRAG_FLOAT_UNIT, 0.0f, FLT_MAX, "%.2f", 0))
+	if (ImGui::DragFloat(U8STR("노이즈 세기##ParticleEffect"), &pParticleComponent->GetFieldSpeed(), DRAG_FLOAT_UNIT, 0.0f, FLT_MAX, "%.2f", 0))
 		pParticleComponent->GetFieldSpeed() = std::clamp(pParticleComponent->GetFieldSpeed(), FLT_MIN, FLT_MAX);
 
-	ImGui::SetNextItemWidth(190.f);
+	/*ImGui::SetNextItemWidth(190.f);
 	if (ImGui::DragFloat("NoiseStrength##ParticleEffect", &pParticleComponent->GetNoiseStrength(), DRAG_FLOAT_UNIT, 0.0f, FLT_MAX, "%.2f", 0))
 		pParticleComponent->GetNoiseStrength() = std::clamp(pParticleComponent->GetNoiseStrength(), FLT_MIN, FLT_MAX);
 
@@ -1709,7 +1709,7 @@ void CImGuiManager::ShowParticleManager(CState<CPlayer>* pCurrentAnimation)
 
 	ImGui::SetNextItemWidth(190.f);
 	float* DirectionData = (float*)(&pParticleComponent->GetFieldMainDirection());
-	ImGui::InputFloat3("FieldMainDirection##ParticleEffect", DirectionData, "%.2f", 0);
+	ImGui::InputFloat3("FieldMainDirection##ParticleEffect", DirectionData, "%.2f", 0);*/
 
 	ImGui::End();
 }
@@ -2615,7 +2615,7 @@ void CImGuiManager::ShowCreationMenu()
 			ImGui::Begin(U8STR("창작마당 업로드"), p_Upload_open, upload_window_flags);
 
 			ImGui::Text(U8STR("프리셋 이름")); ImGui::SameLine();
-			static char presetName[45] = " ";
+			static char presetName[45] = "";
 
 			ImGui::InputText(U8STR(" ##Upload"), presetName, sizeof(presetName));
 

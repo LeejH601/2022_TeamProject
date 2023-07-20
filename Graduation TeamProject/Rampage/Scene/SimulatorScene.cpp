@@ -342,11 +342,12 @@ void CSimulatorScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 
 	XMFLOAT3 offset{ 86.4804 , 0.0f, -183.7856 };
 
-	m_pSimulaterCamera = std::make_unique<CSimulatorCamera>();
+	m_pSimulaterCamera = std::make_unique<CSimulatorThirdPersonCamera>();
 	m_pSimulaterCamera->Init(pd3dDevice, pd3dCommandList);
 	m_pSimulaterCamera->SetPosition(XMFLOAT3(43 + offset.x, 15, 46 + offset.z));
 	m_pSimulaterCamera->SetLookAt(XMFLOAT3(75 + offset.x, 0, 75 + offset.z));
 	m_pSimulaterCamera->RegenerateViewMatrix();
+	
 
 	CModelShader::GetInst()->CreateShader(pd3dDevice, GetGraphicsRootSignature(), 7, pdxgiObjectRtvFormats, DXGI_FORMAT_D32_FLOAT, 1);
 
@@ -383,19 +384,26 @@ void CSimulatorScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 	m_pMainCharacter->m_pSkinnedAnimationController->m_bRootMotion = false;
 	m_pMainCharacter->m_pStateMachine->ChangeState(Idle_Player::GetInst());
 
-	m_pMap = std::make_unique<CMap>();
+	if (dynamic_cast<CSimulatorThirdPersonCamera*>(m_pSimulaterCamera.get())) {
+		dynamic_cast<CSimulatorThirdPersonCamera*>(m_pSimulaterCamera.get())->SetPlayer(m_pMainCharacter.get());
+	}
+
+
+	/*m_pMap = std::make_unique<CMap>();
 	m_pMap->Init(pd3dDevice, pd3dCommandList, GetGraphicsRootSignature());
 	m_pMap->GetTerrain()->SetPosition(XMFLOAT3(offset.x, 0, offset.z));
 
+	
+	((CDepthRenderShader*)m_pDepthRenderShader.get())->SetTerrain(m_pMap->GetTerrain().get());
+	m_pMainCharacter->SetUpdatedContext(m_pMap.get());*/
+
 	((CDepthRenderShader*)m_pDepthRenderShader.get())->RegisterObject(m_pMainCharacter.get());
 	((CDepthRenderShader*)m_pDepthRenderShader.get())->SetLight(m_pLight->GetLights());
-	((CDepthRenderShader*)m_pDepthRenderShader.get())->SetTerrain(m_pMap->GetTerrain().get());
-	m_pMainCharacter->SetUpdatedContext(m_pMap.get());
 
 	for (int i = 0; i < m_pEnemys.size(); ++i)
 	{
 		((CDepthRenderShader*)m_pDepthRenderShader.get())->RegisterObject(m_pEnemys[i].get());
-		((CMonster*)m_pEnemys[i].get())->SetUpdatedContext(m_pMap.get());
+		//((CMonster*)m_pEnemys[i].get())->SetUpdatedContext(m_pMap.get());
 	}
 
 	m_pTextureManager = std::make_unique<CTextureManager>();
@@ -517,13 +525,29 @@ void CSimulatorScene::UpdateObjects(float fTimeElapsed)
 	m_pMainCharacter->Update(fTimeElapsed);
 
 
-	m_pSimulaterCamera->Update(XMFLOAT3{ 0.0f, 0.0f, 0.0f }, fTimeElapsed);
+	if (dynamic_cast<CSimulatorThirdPersonCamera*>(m_pSimulaterCamera.get())) {
+		XMFLOAT3 xmf3PlayerPos = XMFLOAT3{
+		((CKnightPlayer*)m_pMainCharacter.get())->m_pSkinnedAnimationController->m_pRootMotionObject->GetWorld()._41,
+		 m_pMainCharacter->GetPosition().y,
+		((CKnightPlayer*)m_pMainCharacter.get())->m_pSkinnedAnimationController->m_pRootMotionObject->GetWorld()._43 };
+		xmf3PlayerPos.y += MeterToUnit(0.9f);
+
+		m_pSimulaterCamera->Update(xmf3PlayerPos, fTimeElapsed);
+	}
+	else {
+		m_pSimulaterCamera->Update(XMFLOAT3{ 0.0f, 0.0f, 0.0f }, fTimeElapsed);
+	}
 
 	CameraUpdateParams camera_update_params;
 	camera_update_params.pCamera = m_pSimulaterCamera.get();
 	camera_update_params.pPlayer = m_pMainCharacter.get();
 	camera_update_params.fElapsedTime = fTimeElapsed;
 	CMessageDispatcher::GetInst()->Dispatch_Message<CameraUpdateParams>(MessageType::UPDATE_CAMERA, &camera_update_params, m_pMainCharacter->m_pStateMachine->GetCurrentState());
+
+	TCHAR buf[256];
+	XMFLOAT3 pos = m_pMainCharacter->GetPosition();
+	_stprintf_s(buf, 256, _T("%f %f %f\n"),pos.x,pos.y,pos.z);
+	OutputDebugString(buf);
 }
 
 void CSimulatorScene::OnPrepareRenderTarget(ID3D12GraphicsCommandList* pd3dCommandList, int nRenderTargets, D3D12_CPU_DESCRIPTOR_HANDLE* pd3dRtvCPUHandles, D3D12_CPU_DESCRIPTOR_HANDLE d3dDepthStencilBufferDSVCPUHandle)
@@ -538,7 +562,8 @@ void CSimulatorScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float f
 
 	m_pLight->Render(pd3dCommandList);
 
-	m_pMap->RenderTerrain(pd3dCommandList);
+	if(m_pMap)
+		m_pMap->RenderTerrain(pd3dCommandList);
 	
 	CModelShader::GetInst()->Render(pd3dCommandList, 1);
 
