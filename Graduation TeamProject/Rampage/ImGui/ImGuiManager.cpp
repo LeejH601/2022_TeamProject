@@ -2894,10 +2894,6 @@ bool CImGuiManager::ConnectServer(eSERVICE_TYPE serviceType, SineUp_Info& info)
 
 		m_pNetworkDevice->SendRequestLogin(loginInfo);
 		bool bApprove = m_pNetworkDevice->RecvApproveLogin();
-		if (bApprove)
-			std::cout << "Login Success!" << std::endl;
-		else
-			std::cout << "Login Failed!" << std::endl;
 
 		/*if (bApprove) {
 			m_pNetworkDevice->AccountInfo.UserID = result->getInt("User_ID");
@@ -2917,11 +2913,6 @@ bool CImGuiManager::ConnectServer(eSERVICE_TYPE serviceType, SineUp_Info& info)
 		int ret = 0;
 		m_pNetworkDevice->RecvApproveSineUp(ret);
 
-		if (ret == 0)
-			std::cout << "Failed Sine Up" << std::endl;
-		else
-			std::cout << "Success Sine Up" << std::endl;
-
 		return ret;
 	}
 	break;
@@ -2934,10 +2925,6 @@ bool CImGuiManager::ConnectServer(eSERVICE_TYPE serviceType, SineUp_Info& info)
 
 void CImGuiManager::ProcessWorkshop(eSERVICE_TYPE serviceType, void* pData)
 {
-	/*int input;
-	std::cout << "Upload : 0, DownLoad : 1, UpdateTable : 2, Next : 3, Prev : 4, Like : 5, Hate : 6" << std::endl;
-	std::cin >> input;
-	serviceType = (eSERVICE_TYPE)input;*/
 
 	if (serviceType == eSERVICE_TYPE::DOWNLOAD_RECORD ||
 		serviceType == eSERVICE_TYPE::INCREASE_LIKE ||
