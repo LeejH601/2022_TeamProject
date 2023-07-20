@@ -1449,7 +1449,31 @@ void CImGuiManager::SetUI()
 
 		// 시뮬레이터 씬 보여주기 여부 설정 ImGui
 		ImGui::Checkbox(U8STR("시뮬레이터"), &show_simulator_scene);
-		;
+
+		static int selectedMonsterType = 0;
+
+		const char* monsterTypes[] = { U8STR("고블린"), U8STR("오크"),  U8STR("스켈레톤") };
+		ImGui::Text(U8STR("몬스터 종족:")); ImGui::SameLine();
+
+		if (ImGui::Combo(U8STR("##monsterTypes"), &selectedMonsterType, monsterTypes, IM_ARRAYSIZE(monsterTypes))) {
+			switch (selectedMonsterType)
+			{
+			case 0:
+				break;
+			case 1:
+				break;
+			case 2:
+				break;
+			default:
+				break;
+			}
+		};
+
+		static int selectedMonsterNum = 0;
+		ImGui::Text(U8STR("몬스터 숫자:")); ImGui::SameLine();
+		ImGui::RadioButton("1##monsterNum", &selectedMonsterNum, 0); ImGui::SameLine();
+		ImGui::RadioButton("3##monsterNum", &selectedMonsterNum, 1);
+
 		// 플레이어 애니메이션 출력 버튼
 		if (ImGui::Button(U8STR("공격1")))
 		{
@@ -1471,6 +1495,8 @@ void CImGuiManager::SetUI()
 				CSimulatorScene::GetInst()->SetPlayerAnimationSet(2);
 			Player_Animation_Number = 2;
 		}
+
+		ImGui::Separator();
 
 		if (ImGui::CollapsingHeader(U8STR("특수 효과")))
 		{
@@ -2419,11 +2445,11 @@ void CImGuiManager::ShowDamageMoanSoundManager(CState<CPlayer>* pCurrentAnimatio
 void CImGuiManager::ShowCreationMenu()
 {
 
-	/*if (serverConnected == false)
-		ShowWorkshopLoginMenu();*/
+	if (serverConnected == false)
+		ShowWorkshopLoginMenu();
 
-	/*if (serverConnected == false)
-		return;*/
+	if (serverConnected == false)
+		return;
 
 	ImGuiWindowFlags my_window_flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_MenuBar;
 	bool* p_open = NULL;
