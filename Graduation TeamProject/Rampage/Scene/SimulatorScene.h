@@ -19,6 +19,9 @@ struct DissolveDummyParams {
 class CSimulatorScene : public CScene
 {
 private:
+	int m_CurrentMonsterNum;
+	MONSTER_TYPE m_CurrentMonsterType;
+
 	std::vector<std::unique_ptr<CGameObject>> m_pEnemys;
 	std::unique_ptr<CPlayer> m_pMainCharacter;
 	std::unique_ptr<CLight> m_pLight;

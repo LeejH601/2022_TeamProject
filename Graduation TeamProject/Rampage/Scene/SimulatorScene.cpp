@@ -365,12 +365,14 @@ void CSimulatorScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 	// 4->HIT
 	// 5->IDLE
 
+	m_CurrentMonsterNum = 1;
+	m_CurrentMonsterType = MONSTER_TYPE::GOBLIN;
+
 	std::unique_ptr<CMonster> m_pDummyEnemy = std::make_unique<CGoblinObject>(pd3dDevice, pd3dCommandList, 1);
 	m_pDummyEnemy->SetPosition(XMFLOAT3(47.5 + offset.x, 100, 50 + offset.z));
 	m_pDummyEnemy->SetScale(2.0f, 2.0f, 2.0f);
 	m_pDummyEnemy->Rotate(0.0f, -90.0f, 0.0f);
 	m_pDummyEnemy->m_fHP = FLT_MAX;
-	m_pDummyEnemy->m_bEnable = false;
 	m_pDummyEnemy->m_bIsDummy = true;
 	m_pDummyEnemy->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
 	m_pEnemys.push_back(std::move(m_pDummyEnemy));
@@ -737,8 +739,15 @@ void CSimulatorScene::SetPlayerAnimationSet(int nSet)
 
 void CSimulatorScene::SelectMonsterType(MONSTER_TYPE monster_type)
 {
+	if (m_CurrentMonsterType == monster_type)
+		return;
+	
 	for (int i = 0; i < m_pEnemys.size(); ++i)
 		m_pEnemys[i]->m_bEnable = false;
+
+	int m_iEnabledMonsterNum = 0;
+
+	m_CurrentMonsterType = monster_type;
 
 	switch (monster_type)
 	{
@@ -749,9 +758,12 @@ void CSimulatorScene::SelectMonsterType(MONSTER_TYPE monster_type)
 
 			if (pGoblin)
 			{
+				++m_iEnabledMonsterNum;
 				pGoblin->m_bEnable = true;
 				ResetMonster(i);
-				break;
+
+				if (m_iEnabledMonsterNum == m_CurrentMonsterNum)
+					break;
 			}
 		}
 		break;
@@ -762,9 +774,12 @@ void CSimulatorScene::SelectMonsterType(MONSTER_TYPE monster_type)
 
 			if (pOrc)
 			{
+				++m_iEnabledMonsterNum;
 				pOrc->m_bEnable = true;
 				ResetMonster(i);
-				break;
+
+				if (m_iEnabledMonsterNum == m_CurrentMonsterNum)
+					break;
 			}
 		}
 		break;
@@ -775,9 +790,12 @@ void CSimulatorScene::SelectMonsterType(MONSTER_TYPE monster_type)
 
 			if (pSkeleton)
 			{
+				++m_iEnabledMonsterNum;
 				pSkeleton->m_bEnable = true;
 				ResetMonster(i);
-				break;
+
+				if (m_iEnabledMonsterNum == m_CurrentMonsterNum)
+					break;
 			}
 		}
 		break;
