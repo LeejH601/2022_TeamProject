@@ -15,6 +15,8 @@
 #include "..\Object\UIObject.h"
 #include "..\Shader\UIObjectShader.h"
 #include "..\Object\PlayerParticleObject.h"
+#include "..\ImGui\imgui_internal.h"
+#include "..\ImGui\ImGuiManager.h"
 void CSimulatorScene::OnPreRender(ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed)
 {
 	if (m_pDepthRenderShader)

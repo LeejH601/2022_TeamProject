@@ -2698,9 +2698,32 @@ void CImGuiManager::ShowWorkshopLoginMenu()
 	ImGui::Text(U8STR("PASSWORD")); ImGui::SameLine();
 	ImGui::InputText(U8STR(" ##Password"), LoginInfo.Password, sizeof(LoginInfo.Password));
 
+	static bool bSuccessLoginMenu = false;
+
 	if (ImGui::Button(U8STR("로그인##SineUp"))) {
 		serverConnected = ConnectServer(eSERVICE_TYPE::SINE_IN, LoginInfo);
+		bSuccessLoginMenu = true;
 	}
+
+	if (bSuccessLoginMenu) {
+		if (serverConnected) {
+			ImGui::SetNextWindowSize(ImVec2(m_lDesktopWidth * 0.2f, 0.0f), ImGuiCond_Always);
+			ImGui::Begin(U8STR("로그인 성공"), p_open, my_window_flags);
+			if (ImGui::Button(U8STR("확인##SineUpMessage"))) {
+				bSuccessLoginMenu = false;
+			}
+			ImGui::End();
+		}
+		else {
+			ImGui::SetNextWindowSize(ImVec2(m_lDesktopWidth * 0.2f, 0.0f), ImGuiCond_Always);
+			ImGui::Begin(U8STR("로그인 실패"), p_open, my_window_flags);
+			if (ImGui::Button(U8STR("확인##SineUpMessage"))) {
+				bSuccessLoginMenu = false;
+			}
+			ImGui::End();
+		}
+	}
+
 
 	static bool flag = false;
 	if (ImGui::Button(U8STR("회원가입##Login"))) {
