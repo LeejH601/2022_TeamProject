@@ -3,6 +3,7 @@
 #include "..\Global\Component.h"
 #include "..\Global\MessageDispatcher.h"
 #include "..\Object\State.h"
+#include <deque>
 
 class DataLoader
 {
@@ -40,6 +41,26 @@ private:
 		TYPE_TRAILNOISE,
 		TYPE_SLASHHIT,
 	};
+
+	static enum class SELECT_WINDOW_TYPE
+	{
+		TYPE_IMPACT,
+		TYPE_PARTICLE,
+		TYPE_SLASHHIT,
+		TYPE_TRAIL,
+		TYPE_DAMAGE_ANIMATION,
+		TYPE_SHAKE_ANIMATION,
+		TYPE_STUN_ANIMATION,
+		TYPE_HIT_LAG_ANIMATION,
+		TYPE_CAMERA_MOVE,
+		TYPE_CAMERA_SHAKE,
+		TYPE_CAMERA_ZOOMIN,
+		TYPE_SHOCK_SOUND,
+		TYPE_SHOOT_SOUND,
+		TYPE_DAMAGE_MOON_SOUND,
+		SELECT_WINDOW_TYPE_END
+	};
+
 	// Component Sets
 	std::unique_ptr<DataLoader> m_pDataLoader = NULL;
 
@@ -75,6 +96,8 @@ private:
 
 	bool serverConnected = false;
 
+	SELECT_WINDOW_TYPE m_WindowType = SELECT_WINDOW_TYPE::SELECT_WINDOW_TYPE_END;
+
 	CCamera* m_pCamera = NULL;
 	ImVec2 dearImGuiSize;
 
@@ -98,6 +121,8 @@ private:
 	std::unique_ptr<CNetworkDevice> m_pNetworkDevice = nullptr;
 	std::vector<WorkShop_Record> records;
 
+	std::vector<IMessageListener*> CopyDatas;
+	SELECT_WINDOW_TYPE	m_CopyWindowType = SELECT_WINDOW_TYPE::SELECT_WINDOW_TYPE_END;
 
 public:
 	DECLARE_SINGLE(CImGuiManager);
@@ -156,4 +181,7 @@ public:
 
 	bool ConnectServer(eSERVICE_TYPE serviceType, SineUp_Info& info);
 	void ProcessWorkshop(eSERVICE_TYPE serviceType, void* pData = nullptr);
+
+	bool CopyComponentData(CState<CPlayer>* pCurrentAnimation);
+	bool PasteComponentData(CState<CPlayer>* pCurrentAnimation);
 };
