@@ -2144,7 +2144,7 @@ void CMainTMPScene::UIUpdate(CPlayer* pPlayer)
 	dynamic_cast<CBarObject*>(m_pUIObject[3].get())->Set_Value(((CPhysicsObject*)m_pPlayer)->m_fHP, ((CPhysicsObject*)m_pPlayer)->m_fTotalHP);
 	dynamic_cast<CBarObject*>(m_pUIObject[5].get())->Set_Value(((CPlayer*)m_pPlayer)->m_fStamina, ((CPlayer*)m_pPlayer)->m_fTotalStamina);
 	dynamic_cast<CBarObject*>(m_pUIObject[14].get())->Set_Value(((CPlayer*)m_pPlayer)->m_fSkillGauge, 100.f);
-	dynamic_cast<CNumberObject*>(m_pUIObject[10].get())->UpdateNumber(100);
+	dynamic_cast<CNumberObject*>(m_pUIObject[10].get())->UpdateNumber(((CPlayer*)m_pPlayer)->m_iCombo);
 	
 	dynamic_cast<CNumberObject*>(m_pUIObject[10].get())->SetScreenPosition(XMFLOAT2(FRAME_BUFFER_WIDTH * 0.88f - 40.f * (dynamic_cast<CNumberObject*>(m_pUIObject[10].get())->GetNumSize() - 1), FRAME_BUFFER_HEIGHT * 0.5f));
 	OutputDebugString(std::to_wstring(((CPlayer*)m_pPlayer)->m_fStamina).c_str());
@@ -2221,6 +2221,7 @@ void CMainTMPScene::LoadTextureObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/SkillGauge.dds", 0, 0);
 	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/Gradation.dds", 0, 0);
 	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/SkillFrame.dds", 0, 0);
+
 
 	m_pTextureManager->LoadTexture(TextureType::UniformTexture, pd3dDevice, pd3dCommandList, L"Image/UnifromImages/Cracks 3.dds", 0, 0);
 
