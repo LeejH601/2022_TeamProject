@@ -364,11 +364,33 @@ void CSimulatorScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 
 	// 4->HIT
 	// 5->IDLE
+
 	std::unique_ptr<CMonster> m_pDummyEnemy = std::make_unique<CGoblinObject>(pd3dDevice, pd3dCommandList, 1);
 	m_pDummyEnemy->SetPosition(XMFLOAT3(47.5 + offset.x, 100, 50 + offset.z));
 	m_pDummyEnemy->SetScale(2.0f, 2.0f, 2.0f);
 	m_pDummyEnemy->Rotate(0.0f, -90.0f, 0.0f);
 	m_pDummyEnemy->m_fHP = FLT_MAX;
+	m_pDummyEnemy->m_bEnable = false;
+	m_pDummyEnemy->m_bIsDummy = true;
+	m_pDummyEnemy->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
+	m_pEnemys.push_back(std::move(m_pDummyEnemy));
+
+	m_pDummyEnemy = std::make_unique<COrcObject>(pd3dDevice, pd3dCommandList, 1);
+	m_pDummyEnemy->SetPosition(XMFLOAT3(47.5 + offset.x, 100, 50 + offset.z));
+	m_pDummyEnemy->SetScale(2.0f, 2.0f, 2.0f);
+	m_pDummyEnemy->Rotate(0.0f, -90.0f, 0.0f);
+	m_pDummyEnemy->m_fHP = FLT_MAX;
+	m_pDummyEnemy->m_bEnable = false;
+	m_pDummyEnemy->m_bIsDummy = true;
+	m_pDummyEnemy->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
+	m_pEnemys.push_back(std::move(m_pDummyEnemy));
+
+	m_pDummyEnemy = std::make_unique<CSkeletonObject>(pd3dDevice, pd3dCommandList, 1);
+	m_pDummyEnemy->SetPosition(XMFLOAT3(47.5 + offset.x, 100, 50 + offset.z));
+	m_pDummyEnemy->SetScale(2.0f, 2.0f, 2.0f);
+	m_pDummyEnemy->Rotate(0.0f, -90.0f, 0.0f);
+	m_pDummyEnemy->m_fHP = FLT_MAX;
+	m_pDummyEnemy->m_bEnable = false;
 	m_pDummyEnemy->m_bIsDummy = true;
 	m_pDummyEnemy->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
 	m_pEnemys.push_back(std::move(m_pDummyEnemy));
@@ -678,15 +700,15 @@ void CSimulatorScene::OnPostRender()
 	((CParticleObject*)m_pTrailParticleObjects.get())->OnPostRender();
 }
 
-void CSimulatorScene::ResetMonster()
+void CSimulatorScene::ResetMonster(int index)
 {
 	XMFLOAT3 offset{ 86.4804 , 0.0f, -183.7856 };
-	XMFLOAT3 xmf3LookAt{ m_pMainCharacter->GetPosition().x, m_pEnemys[0]->GetPosition().y, m_pMainCharacter->GetPosition().z};
+	XMFLOAT3 xmf3LookAt{ m_pMainCharacter->GetPosition().x, m_pEnemys[index]->GetPosition().y, m_pMainCharacter->GetPosition().z};
 	
-	m_pEnemys[0]->SetPosition(XMFLOAT3(47.5 + offset.x, 100, 50 + offset.z));
-	m_pEnemys[0]->SetScale(2.0,2.0,2.0);
-	m_pEnemys[0]->SetLookAt(xmf3LookAt);
-	(dynamic_cast<CMonster*>(m_pEnemys[0].get()))->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
+	m_pEnemys[index]->SetPosition(XMFLOAT3(47.5 + offset.x, 0.0f, 50 + offset.z));
+	m_pEnemys[index]->SetScale(2.0,2.0,2.0);
+	m_pEnemys[index]->SetLookAt(xmf3LookAt);
+	(dynamic_cast<CMonster*>(m_pEnemys[index].get()))->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
 }
 
 void CSimulatorScene::SetPlayerAnimationSet(int nSet)
@@ -711,6 +733,60 @@ void CSimulatorScene::SetPlayerAnimationSet(int nSet)
 	m_pMainCharacter->m_pSkinnedAnimationController->SetTrackAnimationSet(0, nSet);
 	m_pMainCharacter->m_pSkinnedAnimationController->m_fTime = 0.0f;
 	m_pMainCharacter->Animate(0.0f);
+}
+
+void CSimulatorScene::SelectMonsterType(MONSTER_TYPE monster_type)
+{
+	for (int i = 0; i < m_pEnemys.size(); ++i)
+		m_pEnemys[i]->m_bEnable = false;
+
+	switch (monster_type)
+	{
+	case MONSTER_TYPE::GOBLIN:
+		for (int i = 0; i < m_pEnemys.size(); ++i)
+		{
+			CGoblinObject* pGoblin = dynamic_cast<CGoblinObject*>(m_pEnemys[i].get());
+
+			if (pGoblin)
+			{
+				pGoblin->m_bEnable = true;
+				ResetMonster(i);
+				break;
+			}
+		}
+		break;
+	case MONSTER_TYPE::ORC:
+		for (int i = 0; i < m_pEnemys.size(); ++i)
+		{
+			COrcObject* pOrc = dynamic_cast<COrcObject*>(m_pEnemys[i].get());
+
+			if (pOrc)
+			{
+				pOrc->m_bEnable = true;
+				ResetMonster(i);
+				break;
+			}
+		}
+		break;
+	case MONSTER_TYPE::SKELETON:
+		for (int i = 0; i < m_pEnemys.size(); ++i)
+		{
+			CSkeletonObject* pSkeleton = dynamic_cast<CSkeletonObject*>(m_pEnemys[i].get());
+
+			if (pSkeleton)
+			{
+				pSkeleton->m_bEnable = true;
+				ResetMonster(i);
+				break;
+			}
+		}
+		break;
+	case MONSTER_TYPE::NONE:
+		break;
+	default:
+		break;
+	}
+	
 }
 
 void CSimulatorScene::HandleCollision(const CollideParams& params)

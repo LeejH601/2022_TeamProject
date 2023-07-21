@@ -1472,12 +1472,15 @@ void CImGuiManager::SetUI()
 			{
 			case 0:
 				OutputDebugString(L"몬스터 종족 선택: 고블린\n");
+				CSimulatorScene::GetInst()->SelectMonsterType(MONSTER_TYPE::GOBLIN);
 				break;
 			case 1:
 				OutputDebugString(L"몬스터 종족 선택: 오크\n");
+				CSimulatorScene::GetInst()->SelectMonsterType(MONSTER_TYPE::ORC);
 				break;
 			case 2:
 				OutputDebugString(L"몬스터 종족 선택: 스켈레톤\n");
+				CSimulatorScene::GetInst()->SelectMonsterType(MONSTER_TYPE::SKELETON);
 				break;
 			default:
 				break;
