@@ -115,7 +115,6 @@ private:
 	CCamera* m_pCurrentCamera = NULL;
 
 
-	POINT m_ptOldCursorPos;
 
 	MOUSE_CUROSR_MODE m_CurrentMouseCursorMode = MOUSE_CUROSR_MODE::THIRD_FERSON_MODE;
 

@@ -26,6 +26,12 @@ void CLobbyScene::CreateGraphicsRootSignature(ID3D12Device* pd3dDevice)
 
 bool CLobbyScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
 {
+
+	if (m_iSceneType == LobbySceneType::SIMULATOR_Scene) {
+		CSimulatorScene::GetInst()->OnProcessingMouseMessage(hWnd, nMessageID, wParam, lParam);
+		return true;
+	}
+
 	POINT ptCursorPos;
 	float cxDelta, cyDelta;
 	GetCursorPos(&ptCursorPos);
@@ -52,7 +58,6 @@ bool CLobbyScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wP
 			return true;
 		}
 
-		
 		break;
 	case WM_RBUTTONDOWN:
 
@@ -329,6 +334,14 @@ void CLobbyScene::OnPostRender()
 
 bool CLobbyScene::ProcessInput(HWND hWnd, DWORD dwDirection, float fTimeElapsed)
 {
+	switch (m_iSceneType)
+	{
+	case LobbySceneType::LOGO_Scene:
+		return true;
+	case LobbySceneType::SIMULATOR_Scene:
+		CSimulatorScene::GetInst()->ProcessInput(hWnd, dwDirection, fTimeElapsed);
+		return true;
+	}
 
 	return false;
 }

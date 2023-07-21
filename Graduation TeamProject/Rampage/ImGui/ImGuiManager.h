@@ -75,6 +75,7 @@ private:
 
 	bool serverConnected = false;
 
+
 	CCamera* m_pCamera = NULL;
 	ImVec2 dearImGuiSize;
 
@@ -98,6 +99,8 @@ private:
 	std::unique_ptr<CNetworkDevice> m_pNetworkDevice = nullptr;
 	std::vector<WorkShop_Record> records;
 
+public:
+	ImGuiID m_idMainSimulater;
 
 public:
 	DECLARE_SINGLE(CImGuiManager);

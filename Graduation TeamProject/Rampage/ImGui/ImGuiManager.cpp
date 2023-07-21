@@ -1315,6 +1315,8 @@ void CImGuiManager::SetUI()
 		ImGuiWindowFlags my_window_flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize;
 		ImGui::Begin(U8STR("½Ã¹Ä·¹ÀÌÅÍ"), &show_simulator_scene, my_window_flags);
 
+		m_idMainSimulater = ImGui::GetID(U8STR("½Ã¹Ä·¹ÀÌÅÍ"));
+
 		int my_image_width = 0.55f * m_lDesktopWidth;
 		int my_image_height = 0.55f * m_lDesktopHeight;
 		ImGui::Image((ImTextureID)m_pRTTexture->m_pd3dSrvGpuDescriptorHandles[0].ptr, ImVec2((float)my_image_width, (float)my_image_height));
