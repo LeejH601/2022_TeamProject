@@ -1459,6 +1459,7 @@ void CImGuiManager::SetUI()
 		{
 			OutputDebugString(L"몬스터 자동 리셋: ");
 			autoResetMonster ? OutputDebugString(L"TRUE\n") : OutputDebugString(L"FALSE\n");
+			CSimulatorScene::GetInst()->SetAutoReset(autoResetMonster);
 		}
 
 

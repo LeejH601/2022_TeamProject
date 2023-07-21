@@ -709,3 +709,10 @@ void SpecialMoveDamageListener::HandleMessage(const Message& message, const Play
 	dynamic_cast<CMainTMPScene*>(m_pScene)->m_bPlayCutScene = false;
 	dynamic_cast<CMainTMPScene*>(m_pScene)->returnMainCamera();
 }
+void AutoResetListener::HandleMessage(const Message& message, const MonsterParams& params)
+{
+	if (message.getType() == MessageType::AUTO_RESET) {
+		if (((CSimulatorScene*)m_pSimulatorScene)->GetAutoReset())
+			((CSimulatorScene*)m_pSimulatorScene)->SpawnAndSetMonster();
+	}
+}

@@ -518,6 +518,12 @@ void CSimulatorScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 	}
 
 	m_pMainCharacter->m_pSwordTrailReference = m_pSwordTrailObjects.data();
+
+	std::unique_ptr<AutoResetListener> pAutoResetlistener = std::make_unique<AutoResetListener>();
+	pAutoResetlistener->SetScene(this);
+	m_pListeners.push_back(std::move(pAutoResetlistener));
+	CMessageDispatcher::GetInst()->RegisterListener(MessageType::AUTO_RESET, m_pListeners.back().get(), nullptr);
+
 	SpawnAndSetMonster();
 }
 void CSimulatorScene::Enter(HWND hWnd)

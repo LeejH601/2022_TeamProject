@@ -19,7 +19,9 @@ struct DissolveDummyParams {
 class CSimulatorScene : public CScene
 {
 private:
+	bool m_bAutoReset;
 	int m_CurrentMonsterNum;
+	int m_AutoResetCount;
 	MONSTER_TYPE m_CurrentMonsterType;
 
 	std::vector<std::unique_ptr<CGameObject>> m_pEnemys;
@@ -77,9 +79,11 @@ public:
 	void ResetMonster(int index = 0, XMFLOAT3 xmf3Position = XMFLOAT3{ 47.5f, 0.0f, 50.0f });
 	void SetPlayerAnimationSet(int nSet);
 	void SetMonsterNum(int nMonsterNum);
+	void SetAutoReset(bool bAutoReset) { m_bAutoReset = bAutoReset; }
 	void SelectMonsterType(MONSTER_TYPE monster_type);
 	void SpawnAndSetMonster();
 
 	CTextureManager* GetTextureManager() { return m_pTextureManager.get(); }
 	CCamera* GetCamera() { return m_pSimulaterCamera.get(); }
+	bool GetAutoReset() { return m_bAutoReset; }
 };
