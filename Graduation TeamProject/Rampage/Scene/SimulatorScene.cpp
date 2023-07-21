@@ -368,34 +368,44 @@ void CSimulatorScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 	m_CurrentMonsterNum = 1;
 	m_CurrentMonsterType = MONSTER_TYPE::GOBLIN;
 
-	std::unique_ptr<CMonster> m_pDummyEnemy = std::make_unique<CGoblinObject>(pd3dDevice, pd3dCommandList, 1);
-	m_pDummyEnemy->SetPosition(XMFLOAT3(47.5 + offset.x, 100, 50 + offset.z));
-	m_pDummyEnemy->SetScale(2.0f, 2.0f, 2.0f);
-	m_pDummyEnemy->Rotate(0.0f, -90.0f, 0.0f);
-	m_pDummyEnemy->m_fHP = FLT_MAX;
-	m_pDummyEnemy->m_bIsDummy = true;
-	m_pDummyEnemy->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
-	m_pEnemys.push_back(std::move(m_pDummyEnemy));
+	for (int i = 0; i < 3; ++i)
+	{
+		std::unique_ptr<CMonster> m_pDummyEnemy = std::make_unique<CGoblinObject>(pd3dDevice, pd3dCommandList, 1);
+		m_pDummyEnemy->SetPosition(XMFLOAT3(47.5 + offset.x, 100, 50 + offset.z));
+		m_pDummyEnemy->SetScale(2.0f, 2.0f, 2.0f);
+		m_pDummyEnemy->Rotate(0.0f, -90.0f, 0.0f);
+		m_pDummyEnemy->m_fHP = FLT_MAX;
+		m_pDummyEnemy->m_bEnable = false;
+		m_pDummyEnemy->m_bIsDummy = true;
+		m_pDummyEnemy->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
+		m_pEnemys.push_back(std::move(m_pDummyEnemy));
+	}
 
-	m_pDummyEnemy = std::make_unique<COrcObject>(pd3dDevice, pd3dCommandList, 1);
-	m_pDummyEnemy->SetPosition(XMFLOAT3(47.5 + offset.x, 100, 50 + offset.z));
-	m_pDummyEnemy->SetScale(2.0f, 2.0f, 2.0f);
-	m_pDummyEnemy->Rotate(0.0f, -90.0f, 0.0f);
-	m_pDummyEnemy->m_fHP = FLT_MAX;
-	m_pDummyEnemy->m_bEnable = false;
-	m_pDummyEnemy->m_bIsDummy = true;
-	m_pDummyEnemy->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
-	m_pEnemys.push_back(std::move(m_pDummyEnemy));
+	for (int i = 0; i < 3; ++i)
+	{
+		std::unique_ptr<CMonster> m_pDummyEnemy = std::make_unique<COrcObject>(pd3dDevice, pd3dCommandList, 1);
+		m_pDummyEnemy->SetPosition(XMFLOAT3(47.5 + offset.x, 100, 50 + offset.z));
+		m_pDummyEnemy->SetScale(2.0f, 2.0f, 2.0f);
+		m_pDummyEnemy->Rotate(0.0f, -90.0f, 0.0f);
+		m_pDummyEnemy->m_fHP = FLT_MAX;
+		m_pDummyEnemy->m_bEnable = false;
+		m_pDummyEnemy->m_bIsDummy = true;
+		m_pDummyEnemy->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
+		m_pEnemys.push_back(std::move(m_pDummyEnemy));
+	}
 
-	m_pDummyEnemy = std::make_unique<CSkeletonObject>(pd3dDevice, pd3dCommandList, 1);
-	m_pDummyEnemy->SetPosition(XMFLOAT3(47.5 + offset.x, 100, 50 + offset.z));
-	m_pDummyEnemy->SetScale(2.0f, 2.0f, 2.0f);
-	m_pDummyEnemy->Rotate(0.0f, -90.0f, 0.0f);
-	m_pDummyEnemy->m_fHP = FLT_MAX;
-	m_pDummyEnemy->m_bEnable = false;
-	m_pDummyEnemy->m_bIsDummy = true;
-	m_pDummyEnemy->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
-	m_pEnemys.push_back(std::move(m_pDummyEnemy));
+	for (int i = 0; i < 3; ++i)
+	{
+		std::unique_ptr<CMonster> m_pDummyEnemy = std::make_unique<CSkeletonObject>(pd3dDevice, pd3dCommandList, 1);
+		m_pDummyEnemy->SetPosition(XMFLOAT3(47.5 + offset.x, 100, 50 + offset.z));
+		m_pDummyEnemy->SetScale(2.0f, 2.0f, 2.0f);
+		m_pDummyEnemy->Rotate(0.0f, -90.0f, 0.0f);
+		m_pDummyEnemy->m_fHP = FLT_MAX;
+		m_pDummyEnemy->m_bEnable = false;
+		m_pDummyEnemy->m_bIsDummy = true;
+		m_pDummyEnemy->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
+		m_pEnemys.push_back(std::move(m_pDummyEnemy));
+	}
 
 	// 3->IDLE
 	// 28->Attack
@@ -508,6 +518,7 @@ void CSimulatorScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 	}
 
 	m_pMainCharacter->m_pSwordTrailReference = m_pSwordTrailObjects.data();
+	SpawnAndSetMonster();
 }
 void CSimulatorScene::Enter(HWND hWnd)
 {
@@ -702,12 +713,12 @@ void CSimulatorScene::OnPostRender()
 	((CParticleObject*)m_pTrailParticleObjects.get())->OnPostRender();
 }
 
-void CSimulatorScene::ResetMonster(int index)
+void CSimulatorScene::ResetMonster(int index, XMFLOAT3 xmf3Position)
 {
 	XMFLOAT3 offset{ 86.4804 , 0.0f, -183.7856 };
 	XMFLOAT3 xmf3LookAt{ m_pMainCharacter->GetPosition().x, m_pEnemys[index]->GetPosition().y, m_pMainCharacter->GetPosition().z};
 	
-	m_pEnemys[index]->SetPosition(XMFLOAT3(47.5 + offset.x, 0.0f, 50 + offset.z));
+	m_pEnemys[index]->SetPosition(XMFLOAT3(xmf3Position.x + offset.x, 0.0f, xmf3Position.z + offset.z));
 	m_pEnemys[index]->SetScale(2.0,2.0,2.0);
 	m_pEnemys[index]->SetLookAt(xmf3LookAt);
 	(dynamic_cast<CMonster*>(m_pEnemys[index].get()))->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
@@ -737,6 +748,19 @@ void CSimulatorScene::SetPlayerAnimationSet(int nSet)
 	m_pMainCharacter->Animate(0.0f);
 }
 
+void CSimulatorScene::SetMonsterNum(int nMonsterNum)
+{
+	if(m_CurrentMonsterNum == nMonsterNum)
+		return;
+
+	for (int i = 0; i < m_pEnemys.size(); ++i)
+		m_pEnemys[i]->m_bEnable = false;
+
+	m_CurrentMonsterNum = nMonsterNum;
+
+	SpawnAndSetMonster();
+}
+
 void CSimulatorScene::SelectMonsterType(MONSTER_TYPE monster_type)
 {
 	if (m_CurrentMonsterType == monster_type)
@@ -745,11 +769,26 @@ void CSimulatorScene::SelectMonsterType(MONSTER_TYPE monster_type)
 	for (int i = 0; i < m_pEnemys.size(); ++i)
 		m_pEnemys[i]->m_bEnable = false;
 
-	int m_iEnabledMonsterNum = 0;
-
 	m_CurrentMonsterType = monster_type;
 
-	switch (monster_type)
+	SpawnAndSetMonster();
+}
+
+void CSimulatorScene::SpawnAndSetMonster()
+{
+	for (int i = 0; i < m_pEnemys.size(); ++i)
+		m_pEnemys[i]->m_bEnable = false;
+
+	int m_iEnabledMonsterNum = 0;
+
+	XMFLOAT3 xmf3SpawnPosition = XMFLOAT3{ 0.0f, 0.0f, 0.0f };
+
+	if (m_CurrentMonsterNum == 1)
+		xmf3SpawnPosition = XMFLOAT3{ 47.5f, 0.0f, 50.0f };
+	else
+		xmf3SpawnPosition = XMFLOAT3{ 47.5f, 0.0f, 48.5f };
+
+	switch (m_CurrentMonsterType)
 	{
 	case MONSTER_TYPE::GOBLIN:
 		for (int i = 0; i < m_pEnemys.size(); ++i)
@@ -760,8 +799,10 @@ void CSimulatorScene::SelectMonsterType(MONSTER_TYPE monster_type)
 			{
 				++m_iEnabledMonsterNum;
 				pGoblin->m_bEnable = true;
-				ResetMonster(i);
+				ResetMonster(i, xmf3SpawnPosition);
 
+				xmf3SpawnPosition.z += 1.5f;
+				
 				if (m_iEnabledMonsterNum == m_CurrentMonsterNum)
 					break;
 			}
@@ -776,7 +817,9 @@ void CSimulatorScene::SelectMonsterType(MONSTER_TYPE monster_type)
 			{
 				++m_iEnabledMonsterNum;
 				pOrc->m_bEnable = true;
-				ResetMonster(i);
+				ResetMonster(i, xmf3SpawnPosition);
+
+				xmf3SpawnPosition.z += 1.5f;
 
 				if (m_iEnabledMonsterNum == m_CurrentMonsterNum)
 					break;
@@ -792,7 +835,9 @@ void CSimulatorScene::SelectMonsterType(MONSTER_TYPE monster_type)
 			{
 				++m_iEnabledMonsterNum;
 				pSkeleton->m_bEnable = true;
-				ResetMonster(i);
+				ResetMonster(i, xmf3SpawnPosition);
+
+				xmf3SpawnPosition.z += 1.5f;
 
 				if (m_iEnabledMonsterNum == m_CurrentMonsterNum)
 					break;
@@ -804,7 +849,6 @@ void CSimulatorScene::SelectMonsterType(MONSTER_TYPE monster_type)
 	default:
 		break;
 	}
-	
 }
 
 void CSimulatorScene::HandleCollision(const CollideParams& params)

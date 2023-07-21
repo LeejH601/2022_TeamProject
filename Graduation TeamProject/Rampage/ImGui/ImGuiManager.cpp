@@ -1471,15 +1471,12 @@ void CImGuiManager::SetUI()
 			switch (selectedMonsterType)
 			{
 			case 0:
-				OutputDebugString(L"몬스터 종족 선택: 고블린\n");
 				CSimulatorScene::GetInst()->SelectMonsterType(MONSTER_TYPE::GOBLIN);
 				break;
 			case 1:
-				OutputDebugString(L"몬스터 종족 선택: 오크\n");
 				CSimulatorScene::GetInst()->SelectMonsterType(MONSTER_TYPE::ORC);
 				break;
 			case 2:
-				OutputDebugString(L"몬스터 종족 선택: 스켈레톤\n");
 				CSimulatorScene::GetInst()->SelectMonsterType(MONSTER_TYPE::SKELETON);
 				break;
 			default:
@@ -1493,11 +1490,13 @@ void CImGuiManager::SetUI()
 		if (ImGui::RadioButton("1##monsterNum", &selectedMonsterNum, 0))
 		{
 			OutputDebugString(L"몬스터 숫자 선택: 1\n");
+			CSimulatorScene::GetInst()->SetMonsterNum(1);
 		}
 		ImGui::SameLine();
 		if (ImGui::RadioButton("3##monsterNum", &selectedMonsterNum, 1))
 		{
 			OutputDebugString(L"몬스터 숫자 선택: 3\n");
+			CSimulatorScene::GetInst()->SetMonsterNum(3);
 		}
 
 		// 플레이어 애니메이션 출력 버튼
