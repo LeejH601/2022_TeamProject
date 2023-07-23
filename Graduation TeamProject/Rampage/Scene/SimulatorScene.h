@@ -21,7 +21,7 @@ class CSimulatorScene : public CScene
 private:
 	bool m_bAutoReset;
 	int m_CurrentMonsterNum;
-	int m_AutoResetCount;
+
 	MONSTER_TYPE m_CurrentMonsterType;
 
 	std::vector<std::unique_ptr<CGameObject>> m_pEnemys;

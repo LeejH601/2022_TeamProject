@@ -1500,28 +1500,16 @@ void CImGuiManager::SetUI()
 			CSimulatorScene::GetInst()->SetMonsterNum(3);
 		}
 
-		// 플레이어 애니메이션 출력 버튼
-		if (ImGui::Button(U8STR("공격1")))
-		{
-			if (show_simulator_scene)
-				CSimulatorScene::GetInst()->SetPlayerAnimationSet(0);
-			Player_Animation_Number = 0;
-		}
-		ImGui::SameLine();
-		if (ImGui::Button(U8STR("공격2")))
-		{
-			if (show_simulator_scene)
-				CSimulatorScene::GetInst()->SetPlayerAnimationSet(1);
-			Player_Animation_Number = 1;
-		}
-		ImGui::SameLine();
-		if (ImGui::Button(U8STR("공격3")))
-		{
-			if (show_simulator_scene)
-				CSimulatorScene::GetInst()->SetPlayerAnimationSet(2);
-			Player_Animation_Number = 2;
-		}
+		ImGui::RadioButton(U8STR("공격1##AttackNumber"), &Player_Animation_Number, 0); ImGui::SameLine();
+		ImGui::RadioButton(U8STR("공격2##AttackNumber"), &Player_Animation_Number, 1); ImGui::SameLine();
+		ImGui::RadioButton(U8STR("공격3##AttackNumber"), &Player_Animation_Number, 2); ImGui::SameLine();
 
+		if (ImGui::Button(U8STR("공격")))
+		{
+			if (show_simulator_scene)
+				CSimulatorScene::GetInst()->SetPlayerAnimationSet(Player_Animation_Number);
+			OutputDebugString(L"공격\n");
+		}
 		ImGui::Separator();
 
 		if (ImGui::CollapsingHeader(U8STR("특수 효과")))
