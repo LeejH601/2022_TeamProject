@@ -1491,25 +1491,25 @@ void CImGuiManager::SetUI()
 			if (ImGui::TreeNode(U8STR("충격 이펙트")))
 			{
 				ShowImpactManager(pCurrentAnimation);
-				m_WindowType = SELECT_WINDOW_TYPE::TYPE_IMPACT;
+				//m_WindowType = SELECT_WINDOW_TYPE::TYPE_IMPACT;
 				ImGui::TreePop();
 			}
 			if (ImGui::TreeNode(U8STR("파티클 이펙트")))
 			{
 				ShowParticleManager(pCurrentAnimation);
-				m_WindowType = SELECT_WINDOW_TYPE::TYPE_PARTICLE;
+				//m_WindowType = SELECT_WINDOW_TYPE::TYPE_PARTICLE;
 				ImGui::TreePop();
 			}
 			if (ImGui::TreeNode(U8STR("창상 이펙트")))
 			{
 				ShowSlashHitManager(pCurrentAnimation);
-				m_WindowType = SELECT_WINDOW_TYPE::TYPE_SLASHHIT;
+				//m_WindowType = SELECT_WINDOW_TYPE::TYPE_SLASHHIT;
 				ImGui::TreePop();
 			}
 			if (ImGui::TreeNode(U8STR("잔상 이펙트")))
 			{
 				ShowTrailManager(pCurrentAnimation);
-				m_WindowType = SELECT_WINDOW_TYPE::TYPE_TRAIL;
+				//m_WindowType = SELECT_WINDOW_TYPE::TYPE_TRAIL;
 				ImGui::TreePop();
 			}
 		}
@@ -1519,25 +1519,25 @@ void CImGuiManager::SetUI()
 			if (ImGui::TreeNode(U8STR("대미지 애니메이션")))
 			{
 				ShowDamageAnimationManager(pCurrentAnimation);
-				m_WindowType = SELECT_WINDOW_TYPE::TYPE_DAMAGE_ANIMATION;
+				//m_WindowType = SELECT_WINDOW_TYPE::TYPE_DAMAGE_ANIMATION;
 				ImGui::TreePop();
 			}
 			if (ImGui::TreeNode(U8STR("흔들림 애니메이션")))
 			{
 				ShowShakeAnimationManager(pCurrentAnimation);
-				m_WindowType = SELECT_WINDOW_TYPE::TYPE_SHAKE_ANIMATION;
+				//m_WindowType = SELECT_WINDOW_TYPE::TYPE_SHAKE_ANIMATION;
 				ImGui::TreePop();
 			}
 			if (ImGui::TreeNode(U8STR("경직 애니메이션")))
 			{
 				ShowStunAnimationManager(pCurrentAnimation);
-				m_WindowType = SELECT_WINDOW_TYPE::TYPE_STUN_ANIMATION;
+				//m_WindowType = SELECT_WINDOW_TYPE::TYPE_STUN_ANIMATION;
 				ImGui::TreePop();
 			}
 			if (ImGui::TreeNode(U8STR("역경직 애니메이션")))
 			{
 				ShowHitLagManager(pCurrentAnimation);
-				m_WindowType = SELECT_WINDOW_TYPE::TYPE_HIT_LAG_ANIMATION;
+				//m_WindowType = SELECT_WINDOW_TYPE::TYPE_HIT_LAG_ANIMATION;
 				ImGui::TreePop();
 			}
 		}
@@ -1547,19 +1547,19 @@ void CImGuiManager::SetUI()
 			if (ImGui::TreeNode(U8STR("카메라 이동")))
 			{
 				ShowCameraMoveManager(pCurrentAnimation);
-				m_WindowType = SELECT_WINDOW_TYPE::TYPE_CAMERA_MOVE;
+				//m_WindowType = SELECT_WINDOW_TYPE::TYPE_CAMERA_MOVE;
 				ImGui::TreePop();
 			}
 			if (ImGui::TreeNode(U8STR("카메라 흔들림")))
 			{
 				ShowCameraShakeManager(pCurrentAnimation);
-				m_WindowType = SELECT_WINDOW_TYPE::TYPE_SHAKE_ANIMATION;
+				//m_WindowType = SELECT_WINDOW_TYPE::TYPE_SHAKE_ANIMATION;
 				ImGui::TreePop();
 			}
 			if (ImGui::TreeNode(U8STR("카메라 줌인")))
 			{
 				ShowCameraZoomManager(pCurrentAnimation);
-				m_WindowType = SELECT_WINDOW_TYPE::TYPE_CAMERA_ZOOMIN;
+				//m_WindowType = SELECT_WINDOW_TYPE::TYPE_CAMERA_ZOOMIN;
 				ImGui::TreePop();
 			}
 		}
@@ -1569,19 +1569,19 @@ void CImGuiManager::SetUI()
 			if (ImGui::TreeNode(U8STR("충격 효과음")))
 			{
 				ShowShockSoundManager(pCurrentAnimation);
-				m_WindowType = SELECT_WINDOW_TYPE::TYPE_SHOCK_SOUND;
+				//m_WindowType = SELECT_WINDOW_TYPE::TYPE_SHOCK_SOUND;
 				ImGui::TreePop();
 			}
 			if (ImGui::TreeNode(U8STR("발사 효과음")))
 			{
 				ShowShootSoundManager(pCurrentAnimation);
-				m_WindowType = SELECT_WINDOW_TYPE::TYPE_SHOOT_SOUND;
+				//m_WindowType = SELECT_WINDOW_TYPE::TYPE_SHOOT_SOUND;
 				ImGui::TreePop();
 			}
 			if (ImGui::TreeNode(U8STR("대미지 음성")))
 			{
 				ShowDamageMoanSoundManager(pCurrentAnimation);
-				m_WindowType = SELECT_WINDOW_TYPE::TYPE_DAMAGE_MOON_SOUND;
+				//m_WindowType = SELECT_WINDOW_TYPE::TYPE_DAMAGE_MOON_SOUND;
 				ImGui::TreePop();
 			}
 		}
@@ -1598,8 +1598,9 @@ void CImGuiManager::ShowImpactManager(CState<CPlayer>* pCurrentAnimation)
 {
 	ImGuiWindowFlags my_window_flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize;
 	bool* b_open = nullptr;
-
-	ImGui::Begin(U8STR("충격 이펙트 관리자"), b_open, my_window_flags);
+	
+	if (ImGui::Begin(U8STR("충격 이펙트 관리자"), b_open, my_window_flags) && ImGui::IsWindowHovered() && !ImGui::IsWindowFocused())
+		m_WindowType = SELECT_WINDOW_TYPE::TYPE_IMPACT;
 	ImpactEffectComponent* pImpactEffectComponent = dynamic_cast<ImpactEffectComponent*>(pCurrentAnimation->GetImpactComponent());
 	ImGui::Checkbox(U8STR("켜기/끄기##ImpactEffect"), &pImpactEffectComponent->GetEnable());
 
@@ -1658,8 +1659,8 @@ void CImGuiManager::ShowParticleManager(CState<CPlayer>* pCurrentAnimation)
 	ImGuiWindowFlags my_window_flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize;
 	bool* b_open = nullptr;
 
-	ImGui::Begin(U8STR("파티클 이펙트 관리자"), b_open, my_window_flags);
-
+	if(ImGui::Begin(U8STR("파티클 이펙트 관리자"), b_open, my_window_flags) && ImGui::IsWindowHovered() && !ImGui::IsWindowFocused())
+		m_WindowType = SELECT_WINDOW_TYPE::TYPE_PARTICLE;
 	ParticleComponent* pParticleComponent = dynamic_cast<ParticleComponent*>(pCurrentAnimation->GetParticleComponent());
 
 	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
@@ -1748,7 +1749,8 @@ void CImGuiManager::ShowSlashHitManager(CState<CPlayer>* pCurrentAnimation)
 	ImGuiWindowFlags my_window_flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize;
 	bool* b_open = nullptr;
 
-	ImGui::Begin(U8STR("창상 이펙트 관리자\0"), b_open, my_window_flags);
+	if (ImGui::Begin(U8STR("창상 이펙트 관리자\0"), b_open, my_window_flags) && ImGui::IsWindowHovered() && !ImGui::IsWindowFocused())
+		m_WindowType = SELECT_WINDOW_TYPE::TYPE_SLASHHIT;
 
 	SlashHitComponent* pSlashHitComponent = dynamic_cast<SlashHitComponent*>(pCurrentAnimation->GetSlashHitComponent());
 
@@ -1808,7 +1810,8 @@ void CImGuiManager::ShowTrailManager(CState<CPlayer>* pCurrentAnimation)
 	ImGuiWindowFlags my_window_flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize;
 	bool* b_open = nullptr;
 
-	ImGui::Begin(U8STR("잔상 이펙트 관리자"), b_open, my_window_flags);
+	if (ImGui::Begin(U8STR("잔상 이펙트 관리자"), b_open, my_window_flags) && ImGui::IsWindowHovered() && !ImGui::IsWindowFocused())
+		m_WindowType = SELECT_WINDOW_TYPE::TYPE_TRAIL;
 
 	TrailComponent* pTrailComponent = dynamic_cast<TrailComponent*>(pCurrentAnimation->GetTrailComponent());
 
@@ -2161,7 +2164,8 @@ void CImGuiManager::ShowDamageAnimationManager(CState<CPlayer>* pCurrentAnimatio
 	ImGuiWindowFlags my_window_flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize;
 	bool* b_open = nullptr;
 
-	ImGui::Begin(U8STR("대미지 애니메이션 관리자"), b_open, my_window_flags);
+	if(ImGui::Begin(U8STR("대미지 애니메이션 관리자"), b_open, my_window_flags) && ImGui::IsWindowHovered() && !ImGui::IsWindowFocused())
+		m_WindowType = SELECT_WINDOW_TYPE::TYPE_DAMAGE_ANIMATION;
 	DamageAnimationComponent* pDamageAnimationComponent = dynamic_cast<DamageAnimationComponent*>(pCurrentAnimation->GetDamageAnimationComponent());
 
 	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
@@ -2182,7 +2186,8 @@ void CImGuiManager::ShowShakeAnimationManager(CState<CPlayer>* pCurrentAnimation
 	ImGuiWindowFlags my_window_flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize;
 	bool* b_open = nullptr;
 
-	ImGui::Begin(U8STR("흔들림 애니메이션 관리자"), b_open, my_window_flags);
+	if(ImGui::Begin(U8STR("흔들림 애니메이션 관리자"), b_open, my_window_flags) && ImGui::IsWindowHovered() && !ImGui::IsWindowFocused())
+		m_WindowType = SELECT_WINDOW_TYPE::TYPE_SHAKE_ANIMATION;
 	ShakeAnimationComponent* pShakeAnimationComponent = dynamic_cast<ShakeAnimationComponent*>(pCurrentAnimation->GetShakeAnimationComponent());
 
 	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
@@ -2207,7 +2212,8 @@ void CImGuiManager::ShowStunAnimationManager(CState<CPlayer>* pCurrentAnimation)
 	ImGuiWindowFlags my_window_flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize;
 	bool* b_open = nullptr;
 
-	ImGui::Begin(U8STR("경직 애니메이션 관리자"), b_open, my_window_flags);
+	if(ImGui::Begin(U8STR("경직 애니메이션 관리자"), b_open, my_window_flags) && ImGui::IsWindowHovered() && !ImGui::IsWindowFocused())
+		m_WindowType = SELECT_WINDOW_TYPE::TYPE_STUN_ANIMATION;
 	StunAnimationComponent* pStunAnimationComponent = dynamic_cast<StunAnimationComponent*>(pCurrentAnimation->GetStunAnimationComponent());
 
 	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
@@ -2223,7 +2229,8 @@ void CImGuiManager::ShowHitLagManager(CState<CPlayer>* pCurrentAnimation)
 {
 	ImGuiWindowFlags my_window_flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize;
 	bool* b_open = nullptr;
-	ImGui::Begin(U8STR("역경직 관리자"), b_open, my_window_flags);
+	if(ImGui::Begin(U8STR("역경직 관리자"), b_open, my_window_flags) && ImGui::IsWindowHovered() && !ImGui::IsWindowFocused())
+		m_WindowType = SELECT_WINDOW_TYPE::TYPE_HIT_LAG_ANIMATION;
 	HitLagComponent* pHitLagComponent = dynamic_cast<HitLagComponent*>(pCurrentAnimation->GetHitLagComponent());
 
 	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
@@ -2247,7 +2254,8 @@ void CImGuiManager::ShowCameraMoveManager(CState<CPlayer>* pCurrentAnimation)
 	ImGuiWindowFlags my_window_flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize;
 	bool* b_open = nullptr;
 
-	ImGui::Begin(U8STR("카메라 이동 관리자"), b_open, my_window_flags);
+	if(ImGui::Begin(U8STR("카메라 이동 관리자"), b_open, my_window_flags) && ImGui::IsWindowHovered() && !ImGui::IsWindowFocused())
+		m_WindowType = SELECT_WINDOW_TYPE::TYPE_CAMERA_MOVE;
 	CameraMoveComponent* pCameraMoveComponent = dynamic_cast<CameraMoveComponent*>(pCurrentAnimation->GetCameraMoveComponent());
 
 	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
@@ -2272,7 +2280,8 @@ void CImGuiManager::ShowCameraShakeManager(CState<CPlayer>* pCurrentAnimation)
 	ImGuiWindowFlags my_window_flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize;
 	bool* b_open = nullptr;
 
-	ImGui::Begin(U8STR("카메라 흔들림 관리자"), b_open, my_window_flags);
+	if(ImGui::Begin(U8STR("카메라 흔들림 관리자"), b_open, my_window_flags) && ImGui::IsWindowHovered() && !ImGui::IsWindowFocused())
+		m_WindowType = SELECT_WINDOW_TYPE::TYPE_CAMERA_SHAKE;
 	CameraShakeComponent* pCameraShakerComponent = dynamic_cast<CameraShakeComponent*>(pCurrentAnimation->GetCameraShakeComponent());
 
 	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
@@ -2297,7 +2306,8 @@ void CImGuiManager::ShowCameraZoomManager(CState<CPlayer>* pCurrentAnimation)
 	ImGuiWindowFlags my_window_flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize;
 	bool* b_open = nullptr;
 
-	ImGui::Begin(U8STR("카메라 줌 관리자"), b_open, my_window_flags);
+	if(ImGui::Begin(U8STR("카메라 줌 관리자"), b_open, my_window_flags) && ImGui::IsWindowHovered() && !ImGui::IsWindowFocused())
+		m_WindowType = SELECT_WINDOW_TYPE::TYPE_CAMERA_ZOOMIN;
 	CameraZoomerComponent* pCameraZoomerComponent = dynamic_cast<CameraZoomerComponent*>(pCurrentAnimation->GetCameraZoomerComponent());
 
 	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
@@ -2326,7 +2336,8 @@ void CImGuiManager::ShowShockSoundManager(CState<CPlayer>* pCurrentAnimation)
 	ImGuiWindowFlags my_window_flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize;
 	bool* b_open = nullptr;
 
-	ImGui::Begin(U8STR("충격 사운드 관리자"), b_open, my_window_flags);
+	if(ImGui::Begin(U8STR("충격 사운드 관리자"), b_open, my_window_flags) && ImGui::IsWindowHovered() && !ImGui::IsWindowFocused())
+		m_WindowType = SELECT_WINDOW_TYPE::TYPE_SHOCK_SOUND;
 	std::vector<std::string> paths = CSoundManager::GetInst()->getSoundPathsByCategory(SOUND_CATEGORY::SOUND_SHOCK);
 
 	SoundPlayComponent* pShockSoundComponent = dynamic_cast<SoundPlayComponent*>(pCurrentAnimation->GetShockSoundComponent());
@@ -2357,7 +2368,8 @@ void CImGuiManager::ShowShootSoundManager(CState<CPlayer>* pCurrentAnimation)
 	ImGuiWindowFlags my_window_flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize;
 	bool* b_open = nullptr;
 
-	ImGui::Begin(U8STR("발사 사운드 관리자"), b_open, my_window_flags);
+	if(ImGui::Begin(U8STR("발사 사운드 관리자"), b_open, my_window_flags) && ImGui::IsWindowHovered() && !ImGui::IsWindowFocused())
+		m_WindowType = SELECT_WINDOW_TYPE::TYPE_SHOOT_SOUND;
 	std::vector<std::string> paths = CSoundManager::GetInst()->getSoundPathsByCategory(SOUND_CATEGORY::SOUND_SHOOT);
 
 	SoundPlayComponent* pShootSoundComponent = dynamic_cast<SoundPlayComponent*>(pCurrentAnimation->GetShootSoundComponent());
@@ -2388,7 +2400,8 @@ void CImGuiManager::ShowDamageMoanSoundManager(CState<CPlayer>* pCurrentAnimatio
 	ImGuiWindowFlags my_window_flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize;
 	bool* b_open = nullptr;
 
-	ImGui::Begin(U8STR("대미지 신음 사운드 관리자"), b_open, my_window_flags);
+	if(ImGui::Begin(U8STR("대미지 신음 사운드 관리자"), b_open, my_window_flags) && ImGui::IsWindowHovered() && !ImGui::IsWindowFocused())
+		m_WindowType = SELECT_WINDOW_TYPE::TYPE_DAMAGE_MOON_SOUND;
 	std::vector<std::string> paths = CSoundManager::GetInst()->getSoundPathsByCategory(SOUND_CATEGORY::SOUND_VOICE);
 
 	SoundPlayComponent* pGoblinMoanComponent = dynamic_cast<SoundPlayComponent*>(pCurrentAnimation->GetGoblinMoanComponent());
