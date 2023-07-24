@@ -115,6 +115,7 @@ private:
 	CCamera* m_pCurrentCamera = NULL;
 
 
+	POINT m_ptOldCursorPos;
 
 	MOUSE_CUROSR_MODE m_CurrentMouseCursorMode = MOUSE_CUROSR_MODE::THIRD_FERSON_MODE;
 
@@ -168,4 +169,5 @@ public:
 	virtual void HandleCollision(const CollideParams& params);
 	virtual void HandleOnGround(const OnGroundParams& params);
 
+	void UIReset();
 };

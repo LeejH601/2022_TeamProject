@@ -4,6 +4,8 @@
 #include "SimulatorScene.h"
 #include "LobbyScene.h"
 #include "..\Global\Locator.h"
+#include "..\Sound\SoundManager.h"
+#include "..\ImGui\ImGuiManager.h"
 
 CSceneManager::CSceneManager()
 {
@@ -114,6 +116,18 @@ bool CSceneManager::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPAR
 				dynamic_cast<CLobbyScene*>(m_pCurrentScene)->SetSceneType((UINT)LobbySceneType::LOGO_Scene);
 		}
 		break;
+	case SCENE_RETURN_TYPE::SWITCH_LOGOSCENE:
+		if (m_pCurrentScene == m_pMainScene.get())
+		{
+			m_pCurrentScene = m_pLobbyScene.get();
+			Locator.SetMouseCursorMode(MOUSE_CUROSR_MODE::FLOATING_MODE);
+			PostMessage(hWnd, WM_ACTIVATE, 0, 0);
+			dynamic_cast<CLobbyScene*>(m_pCurrentScene)->SetSceneType((UINT)LobbySceneType::LOGO_Scene);
+			CSoundManager::GetInst()->PlaySound("Sound/Background/Logo Bgm.wav", 0.4f, 0.5f);
+			CImGuiManager::GetInst()->GetChangeBeforeScene() = false;
+		}
+		break;
+		
 	default:
 		break;
 	}

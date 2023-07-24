@@ -1291,6 +1291,8 @@ void CImGuiManager::SetUI()
 	ImGui_ImplWin32_NewFrame();
 	ImGui::NewFrame();
 
+	UINT selectedWindow = 0;
+
 	CState<CPlayer>* pCurrentAnimation = Atk1_Player::GetInst();
 
 	// State 선택 로직 생각 필요
@@ -1473,27 +1475,41 @@ void CImGuiManager::SetUI()
 				CSimulatorScene::GetInst()->SetPlayerAnimationSet(2);
 			Player_Animation_Number = 2;
 		}
+		ImGui::SameLine();
+		if (ImGui::Button(U8STR("복사")))
+		{
+			CopyComponentData(pCurrentAnimation);
+		}
+		ImGui::SameLine();
+		if (ImGui::Button(U8STR("붙여넣기")))
+		{
+			PasteComponentData(pCurrentAnimation);
+		}
 
 		if (ImGui::CollapsingHeader(U8STR("특수 효과")))
 		{
 			if (ImGui::TreeNode(U8STR("충격 이펙트")))
 			{
 				ShowImpactManager(pCurrentAnimation);
+				m_WindowType = SELECT_WINDOW_TYPE::TYPE_IMPACT;
 				ImGui::TreePop();
 			}
 			if (ImGui::TreeNode(U8STR("파티클 이펙트")))
 			{
 				ShowParticleManager(pCurrentAnimation);
+				m_WindowType = SELECT_WINDOW_TYPE::TYPE_PARTICLE;
 				ImGui::TreePop();
 			}
 			if (ImGui::TreeNode(U8STR("창상 이펙트")))
 			{
 				ShowSlashHitManager(pCurrentAnimation);
+				m_WindowType = SELECT_WINDOW_TYPE::TYPE_SLASHHIT;
 				ImGui::TreePop();
 			}
 			if (ImGui::TreeNode(U8STR("잔상 이펙트")))
 			{
 				ShowTrailManager(pCurrentAnimation);
+				m_WindowType = SELECT_WINDOW_TYPE::TYPE_TRAIL;
 				ImGui::TreePop();
 			}
 		}
@@ -1503,22 +1519,25 @@ void CImGuiManager::SetUI()
 			if (ImGui::TreeNode(U8STR("대미지 애니메이션")))
 			{
 				ShowDamageAnimationManager(pCurrentAnimation);
-
+				m_WindowType = SELECT_WINDOW_TYPE::TYPE_DAMAGE_ANIMATION;
 				ImGui::TreePop();
 			}
 			if (ImGui::TreeNode(U8STR("흔들림 애니메이션")))
 			{
 				ShowShakeAnimationManager(pCurrentAnimation);
+				m_WindowType = SELECT_WINDOW_TYPE::TYPE_SHAKE_ANIMATION;
 				ImGui::TreePop();
 			}
 			if (ImGui::TreeNode(U8STR("경직 애니메이션")))
 			{
 				ShowStunAnimationManager(pCurrentAnimation);
+				m_WindowType = SELECT_WINDOW_TYPE::TYPE_STUN_ANIMATION;
 				ImGui::TreePop();
 			}
 			if (ImGui::TreeNode(U8STR("역경직 애니메이션")))
 			{
 				ShowHitLagManager(pCurrentAnimation);
+				m_WindowType = SELECT_WINDOW_TYPE::TYPE_HIT_LAG_ANIMATION;
 				ImGui::TreePop();
 			}
 		}
@@ -1528,16 +1547,19 @@ void CImGuiManager::SetUI()
 			if (ImGui::TreeNode(U8STR("카메라 이동")))
 			{
 				ShowCameraMoveManager(pCurrentAnimation);
+				m_WindowType = SELECT_WINDOW_TYPE::TYPE_CAMERA_MOVE;
 				ImGui::TreePop();
 			}
 			if (ImGui::TreeNode(U8STR("카메라 흔들림")))
 			{
 				ShowCameraShakeManager(pCurrentAnimation);
+				m_WindowType = SELECT_WINDOW_TYPE::TYPE_SHAKE_ANIMATION;
 				ImGui::TreePop();
 			}
 			if (ImGui::TreeNode(U8STR("카메라 줌인")))
 			{
 				ShowCameraZoomManager(pCurrentAnimation);
+				m_WindowType = SELECT_WINDOW_TYPE::TYPE_CAMERA_ZOOMIN;
 				ImGui::TreePop();
 			}
 		}
@@ -1547,22 +1569,28 @@ void CImGuiManager::SetUI()
 			if (ImGui::TreeNode(U8STR("충격 효과음")))
 			{
 				ShowShockSoundManager(pCurrentAnimation);
+				m_WindowType = SELECT_WINDOW_TYPE::TYPE_SHOCK_SOUND;
 				ImGui::TreePop();
 			}
 			if (ImGui::TreeNode(U8STR("발사 효과음")))
 			{
 				ShowShootSoundManager(pCurrentAnimation);
+				m_WindowType = SELECT_WINDOW_TYPE::TYPE_SHOOT_SOUND;
 				ImGui::TreePop();
 			}
 			if (ImGui::TreeNode(U8STR("대미지 음성")))
 			{
 				ShowDamageMoanSoundManager(pCurrentAnimation);
+				m_WindowType = SELECT_WINDOW_TYPE::TYPE_DAMAGE_MOON_SOUND;
 				ImGui::TreePop();
 			}
 		}
 		ImGui::End();
 	}
 
+	TCHAR pstrDebug[256] = { 0 };
+	_stprintf_s(pstrDebug, 256, _T("현재 창 연 것 번호 = %d\n"), m_WindowType);
+	OutputDebugString(pstrDebug);
 	// 창작마당
 	ShowCreationMenu();
 }
@@ -2993,6 +3021,307 @@ void CImGuiManager::ProcessWorkshop(eSERVICE_TYPE serviceType, void* pData)
 	break;
 	default:
 		break;
+	}
+}
+
+bool CImGuiManager::CopyComponentData(CState<CPlayer>* pCurrentAnimation)
+{
+	if ((UINT)m_WindowType >= (UINT)(SELECT_WINDOW_TYPE::SELECT_WINDOW_TYPE_END) || (UINT)m_WindowType < 0)
+	{
+		if (ImGui::Begin("Warning")) {
+			ImGui::Text(U8STR("현재 선택된 컴포넌트가 없습니다."));
+			ImGui::End();
+		}
+		return false;
+	}
+
+
+	for (int i = 0; i < CopyDatas.size(); i++)
+	{
+		if(CopyDatas[i])
+			delete CopyDatas[i];
+	}
+	CopyDatas.clear();
+
+	IMessageListener* pCopyData;
+	switch (m_WindowType)
+	{
+	case CImGuiManager::SELECT_WINDOW_TYPE::TYPE_IMPACT:
+	{
+		ImpactEffectComponent* pImpactEffectComponent = dynamic_cast<ImpactEffectComponent*>(pCurrentAnimation->GetImpactComponent());
+
+		pCopyData = new ImpactEffectComponent();
+		memcpy(pCopyData, pImpactEffectComponent, sizeof(*pImpactEffectComponent));
+		CopyDatas.push_back(pCopyData);
+		break;
+	}
+	case CImGuiManager::SELECT_WINDOW_TYPE::TYPE_PARTICLE:
+	{
+		ParticleComponent* pParticleComponent = dynamic_cast<ParticleComponent*>(pCurrentAnimation->GetParticleComponent());
+
+		pCopyData = new ParticleComponent();
+		memcpy(pCopyData, pParticleComponent, sizeof(*pParticleComponent));
+		CopyDatas.push_back(pCopyData);
+		break;
+	}
+	case CImGuiManager::SELECT_WINDOW_TYPE::TYPE_SLASHHIT:
+	{
+		SlashHitComponent* pSlashHitComponent = dynamic_cast<SlashHitComponent*>(pCurrentAnimation->GetSlashHitComponent());
+
+		pCopyData = new SlashHitComponent();
+		memcpy(pCopyData, pSlashHitComponent, sizeof(*pSlashHitComponent));
+		CopyDatas.push_back(pCopyData);
+		break;
+	}
+	case CImGuiManager::SELECT_WINDOW_TYPE::TYPE_TRAIL:
+	{
+		TrailComponent* pTrailComponent = dynamic_cast<TrailComponent*>(pCurrentAnimation->GetTrailComponent());
+
+		pCopyData = new TrailComponent();
+		memcpy(pCopyData, pTrailComponent, sizeof(*pTrailComponent));
+		CopyDatas.push_back(pCopyData);
+		break;
+	}
+	case CImGuiManager::SELECT_WINDOW_TYPE::TYPE_DAMAGE_ANIMATION:
+	{
+		pCopyData = new DamageAnimationComponent();
+		DamageAnimationComponent* pDamageAnimationComponent = dynamic_cast<DamageAnimationComponent*>(pCurrentAnimation->GetDamageAnimationComponent());
+
+		pCopyData = new DamageAnimationComponent();
+		memcpy(pCopyData, pDamageAnimationComponent, sizeof(*pDamageAnimationComponent));
+		CopyDatas.push_back(pCopyData);
+		break;
+	}
+	case CImGuiManager::SELECT_WINDOW_TYPE::TYPE_SHAKE_ANIMATION:
+	{
+		ShakeAnimationComponent* pShakeAnimationComponent = dynamic_cast<ShakeAnimationComponent*>(pCurrentAnimation->GetShakeAnimationComponent());
+
+		pCopyData = new ShakeAnimationComponent();
+		memcpy(pCopyData, pShakeAnimationComponent, sizeof(*pShakeAnimationComponent));
+		CopyDatas.push_back(pCopyData);
+		break;
+	}
+	case CImGuiManager::SELECT_WINDOW_TYPE::TYPE_STUN_ANIMATION:
+	{
+		StunAnimationComponent* pStunAnimationComponent = dynamic_cast<StunAnimationComponent*>(pCurrentAnimation->GetStunAnimationComponent());
+
+		pCopyData = new StunAnimationComponent();
+		memcpy(pCopyData, pStunAnimationComponent, sizeof(*pStunAnimationComponent));
+		CopyDatas.push_back(pCopyData);
+		break;
+	}
+	case CImGuiManager::SELECT_WINDOW_TYPE::TYPE_HIT_LAG_ANIMATION:
+	{
+		HitLagComponent* pHitLagComponent = dynamic_cast<HitLagComponent*>(pCurrentAnimation->GetHitLagComponent());
+
+		pCopyData = new HitLagComponent();
+		memcpy(pCopyData, pHitLagComponent, sizeof(*pHitLagComponent));
+		CopyDatas.push_back(pCopyData);
+		break;
+	}
+	case CImGuiManager::SELECT_WINDOW_TYPE::TYPE_CAMERA_MOVE:
+	{
+		CameraMoveComponent* pCameraMoveComponent = dynamic_cast<CameraMoveComponent*>(pCurrentAnimation->GetCameraMoveComponent());
+
+		pCopyData = new CameraMoveComponent();
+		memcpy(pCopyData, pCameraMoveComponent, sizeof(*pCameraMoveComponent));
+		CopyDatas.push_back(pCopyData);
+		break;
+	}
+	case CImGuiManager::SELECT_WINDOW_TYPE::TYPE_CAMERA_SHAKE:
+	{
+		CameraShakeComponent* pCameraShakeComponent = dynamic_cast<CameraShakeComponent*>(pCurrentAnimation->GetCameraShakeComponent());
+
+		pCopyData = new CameraShakeComponent();
+		memcpy(pCopyData, pCameraShakeComponent, sizeof(*pCameraShakeComponent));
+		CopyDatas.push_back(pCopyData);
+		break;
+	}
+	case CImGuiManager::SELECT_WINDOW_TYPE::TYPE_CAMERA_ZOOMIN:
+	{
+		CameraZoomerComponent* pCameraZoomerComponent = dynamic_cast<CameraZoomerComponent*>(pCurrentAnimation->GetCameraZoomerComponent());
+
+		pCopyData = new CameraZoomerComponent();
+		memcpy(pCopyData, pCameraZoomerComponent, sizeof(*pCameraZoomerComponent));
+		CopyDatas.push_back(pCopyData);
+		break;
+	}
+	case CImGuiManager::SELECT_WINDOW_TYPE::TYPE_SHOCK_SOUND:
+	{
+		SoundPlayComponent* pShockSoundComponent = dynamic_cast<SoundPlayComponent*>(pCurrentAnimation->GetShockSoundComponent());
+
+		pCopyData = new SoundPlayComponent();
+		memcpy(pCopyData, pShockSoundComponent, sizeof(*pShockSoundComponent));
+		CopyDatas.push_back(pCopyData);
+		break;
+	}
+	case CImGuiManager::SELECT_WINDOW_TYPE::TYPE_SHOOT_SOUND:
+	{
+		SoundPlayComponent* pShootSoundComponent = dynamic_cast<SoundPlayComponent*>(pCurrentAnimation->GetShootSoundComponent());
+
+		pCopyData = new SoundPlayComponent();
+		memcpy(pCopyData, pShootSoundComponent, sizeof(*pShootSoundComponent));
+		CopyDatas.push_back(pCopyData);
+		break;
+	}
+	case CImGuiManager::SELECT_WINDOW_TYPE::TYPE_DAMAGE_MOON_SOUND:
+	{
+		SoundPlayComponent* pGoblinMoanComponent = dynamic_cast<SoundPlayComponent*>(pCurrentAnimation->GetGoblinMoanComponent());
+		SoundPlayComponent* pOrcMoanComponent = dynamic_cast<SoundPlayComponent*>(pCurrentAnimation->GetOrcMoanComponent());
+		SoundPlayComponent* pSkeletonMoanComponent = dynamic_cast<SoundPlayComponent*>(pCurrentAnimation->GetSkeletonMoanComponent());
+
+		pCopyData = new SoundPlayComponent();
+		memcpy(pCopyData, pGoblinMoanComponent, sizeof(*pGoblinMoanComponent));
+		CopyDatas.push_back(pCopyData);
+
+		pCopyData = new SoundPlayComponent();
+		memcpy(pCopyData, pOrcMoanComponent, sizeof(*pOrcMoanComponent));
+		CopyDatas.push_back(pCopyData);
+
+		pCopyData = new SoundPlayComponent();
+		memcpy(pCopyData, pSkeletonMoanComponent, sizeof(*pSkeletonMoanComponent));
+		CopyDatas.push_back(pCopyData);
+		break;
+	}
+	case CImGuiManager::SELECT_WINDOW_TYPE::SELECT_WINDOW_TYPE_END:
+		return false;
+	default:
+		return false;
+	}
+	m_CopyWindowType = m_WindowType;
+
+	TCHAR pstrDebug[256] = { 0 };
+	_stprintf_s(pstrDebug, 256, _T("현재 카피한 창 타입 = %d\n"), m_CopyWindowType);
+	OutputDebugString(pstrDebug);
+	return true;
+}
+
+bool CImGuiManager::PasteComponentData(CState<CPlayer>* pCurrentAnimation)
+{
+	if ((m_CopyWindowType != m_WindowType)) // 이전 데이터 저장 타입과 현재 데이터와 타입이 다르면 넘어가기
+	{
+		if (ImGui::Begin("Warning")) {
+			ImGui::Text(U8STR("복사된 데이터가 없거나 형식이 다릅니다."));
+			ImGui::End();
+		}
+		return false;
+	}
+
+	IMessageListener* pCopyData;
+
+	switch (m_WindowType)
+	{
+	case CImGuiManager::SELECT_WINDOW_TYPE::TYPE_IMPACT:
+	{
+		ImpactEffectComponent* pImpactEffectComponent = dynamic_cast<ImpactEffectComponent*>(pCurrentAnimation->GetImpactComponent());
+
+		memcpy(pImpactEffectComponent, CopyDatas[0], sizeof(*pImpactEffectComponent));
+		break;
+	}
+	case CImGuiManager::SELECT_WINDOW_TYPE::TYPE_PARTICLE:
+	{
+		ParticleComponent* pParticleComponent = dynamic_cast<ParticleComponent*>(pCurrentAnimation->GetParticleComponent());
+
+		memcpy(pParticleComponent, CopyDatas[0], sizeof(*pParticleComponent));
+		break;
+	}
+	case CImGuiManager::SELECT_WINDOW_TYPE::TYPE_SLASHHIT:
+	{
+		SlashHitComponent* pSlashHitComponent = dynamic_cast<SlashHitComponent*>(pCurrentAnimation->GetSlashHitComponent());
+
+		memcpy(pSlashHitComponent, CopyDatas[0], sizeof(*pSlashHitComponent));
+		break;
+	}
+	case CImGuiManager::SELECT_WINDOW_TYPE::TYPE_TRAIL:
+	{
+		TrailComponent* pTrailComponent = dynamic_cast<TrailComponent*>(pCurrentAnimation->GetTrailComponent());
+
+		memcpy(pTrailComponent, CopyDatas[0], sizeof(*pTrailComponent));
+		break;
+	}
+	case CImGuiManager::SELECT_WINDOW_TYPE::TYPE_DAMAGE_ANIMATION:
+	{
+		pCopyData = new DamageAnimationComponent();
+		DamageAnimationComponent* pDamageAnimationComponent = dynamic_cast<DamageAnimationComponent*>(pCurrentAnimation->GetDamageAnimationComponent());
+
+		memcpy(pDamageAnimationComponent, CopyDatas[0], sizeof(*pDamageAnimationComponent));
+		break;
+	}
+	case CImGuiManager::SELECT_WINDOW_TYPE::TYPE_SHAKE_ANIMATION:
+	{
+		ShakeAnimationComponent* pShakeAnimationComponent = dynamic_cast<ShakeAnimationComponent*>(pCurrentAnimation->GetShakeAnimationComponent());
+
+		memcpy(pShakeAnimationComponent, CopyDatas[0], sizeof(*pShakeAnimationComponent));
+		break;
+	}
+	case CImGuiManager::SELECT_WINDOW_TYPE::TYPE_STUN_ANIMATION:
+	{
+		StunAnimationComponent* pStunAnimationComponent = dynamic_cast<StunAnimationComponent*>(pCurrentAnimation->GetStunAnimationComponent());
+
+		memcpy(pStunAnimationComponent, CopyDatas[0], sizeof(*pStunAnimationComponent));
+		break;
+	}
+	case CImGuiManager::SELECT_WINDOW_TYPE::TYPE_HIT_LAG_ANIMATION:
+	{
+		HitLagComponent* pHitLagComponent = dynamic_cast<HitLagComponent*>(pCurrentAnimation->GetHitLagComponent());
+
+		memcpy(pHitLagComponent, CopyDatas[0], sizeof(*pHitLagComponent));
+		break;
+	}
+	case CImGuiManager::SELECT_WINDOW_TYPE::TYPE_CAMERA_MOVE:
+	{
+		CameraMoveComponent* pCameraMoveComponent = dynamic_cast<CameraMoveComponent*>(pCurrentAnimation->GetCameraMoveComponent());
+
+		memcpy(pCameraMoveComponent, CopyDatas[0], sizeof(*pCameraMoveComponent));
+		break;
+	}
+	case CImGuiManager::SELECT_WINDOW_TYPE::TYPE_CAMERA_SHAKE:
+	{
+		CameraShakeComponent* pCameraShakeComponent = dynamic_cast<CameraShakeComponent*>(pCurrentAnimation->GetCameraShakeComponent());
+
+		memcpy(pCameraShakeComponent, CopyDatas[0], sizeof(*pCameraShakeComponent));
+		break;
+	}
+	case CImGuiManager::SELECT_WINDOW_TYPE::TYPE_CAMERA_ZOOMIN:
+	{
+		CameraZoomerComponent* pCameraZoomerComponent = dynamic_cast<CameraZoomerComponent*>(pCurrentAnimation->GetCameraZoomerComponent());
+
+		memcpy(pCameraZoomerComponent, CopyDatas[0], sizeof(*pCameraZoomerComponent));
+		break;
+	}
+	case CImGuiManager::SELECT_WINDOW_TYPE::TYPE_SHOCK_SOUND:
+	{
+		SoundPlayComponent* pShockSoundComponent = dynamic_cast<SoundPlayComponent*>(pCurrentAnimation->GetShockSoundComponent());
+
+		memcpy(pShockSoundComponent, CopyDatas[0], sizeof(*pShockSoundComponent));
+		break;
+	}
+	case CImGuiManager::SELECT_WINDOW_TYPE::TYPE_SHOOT_SOUND:
+	{
+		SoundPlayComponent* pShootSoundComponent = dynamic_cast<SoundPlayComponent*>(pCurrentAnimation->GetShootSoundComponent());
+
+		memcpy(pShootSoundComponent, CopyDatas[0], sizeof(*pShootSoundComponent));
+		break;
+	}
+	case CImGuiManager::SELECT_WINDOW_TYPE::TYPE_DAMAGE_MOON_SOUND:
+	{
+		SoundPlayComponent* pGoblinMoanComponent = dynamic_cast<SoundPlayComponent*>(pCurrentAnimation->GetGoblinMoanComponent());
+		SoundPlayComponent* pOrcMoanComponent = dynamic_cast<SoundPlayComponent*>(pCurrentAnimation->GetOrcMoanComponent());
+		SoundPlayComponent* pSkeletonMoanComponent = dynamic_cast<SoundPlayComponent*>(pCurrentAnimation->GetSkeletonMoanComponent());
+
+		memcpy(pGoblinMoanComponent, CopyDatas[0], sizeof(*pGoblinMoanComponent));
+
+		memcpy(pOrcMoanComponent, CopyDatas[1], sizeof(*pOrcMoanComponent));
+
+		memcpy(pSkeletonMoanComponent, CopyDatas[2], sizeof(*pSkeletonMoanComponent));
+		break;
+	}
+	case CImGuiManager::SELECT_WINDOW_TYPE::SELECT_WINDOW_TYPE_END:
+		return false;
+	default:
+		return false;
+
+
 	}
 }
 

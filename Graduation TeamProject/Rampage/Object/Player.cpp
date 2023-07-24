@@ -278,6 +278,16 @@ void CPlayer::UpdateCombo(float fTimeElapsed)
 	//}
 }
 
+void CPlayer::Reset()
+{
+	m_iPotionN = 5; m_iCombo = 0; m_fStamina = 0.f; m_fHP = m_fTotalHP; m_fStamina = m_fTotalStamina;
+	m_pStateMachine->ChangeState(Idle_Player::GetInst());
+	//m_pStateMachine->SetPreviousState(Idle_Player::GetInst());
+	SetPosition(XMFLOAT3(57.0f, 3.5f, 225.0f));
+	//Rotate(0.0f, 165.0f, 0.0f);
+
+}
+
 #define KNIGHT_ROOT_MOTION
 CKnightPlayer::CKnightPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks) : CPlayer(pd3dDevice, pd3dCommandList, nAnimationTracks)
 {

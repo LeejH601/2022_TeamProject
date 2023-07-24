@@ -88,6 +88,8 @@ public:
 	virtual void Move(const XMFLOAT3& xmf3Shift, bool bUpdateVelocity);
 	virtual void Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity, CCamera* pCamera);
 	virtual XMFLOAT4& GetTrailControllPoint(int n) { return XMFLOAT4{}; }
+
+	void Reset();
 };
 
 class CKnightPlayer : public CPlayer

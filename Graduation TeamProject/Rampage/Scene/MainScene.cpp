@@ -108,7 +108,7 @@ void CMainTMPScene::HandlePlayerDeadMessage()
 
 	// 결과창 띄우기
 	m_pUIObject[13]->SetEnable(true);
-	dynamic_cast<CResultFrame*>(m_pUIObject[13].get())->SetResultData(((CPlayer*)m_pPlayer)->m_nMaxComboCount, fTotalGameTime, ((CPlayer*)m_pPlayer)->m_nRemainPotions);
+	dynamic_cast<CResultFrame*>(m_pUIObject[13].get())->SetResultData(((CPlayer*)m_pPlayer)->m_iCombo, fTotalGameTime, ((CPlayer*)m_pPlayer)->m_nRemainPotions);
 }
 
 void CMainTMPScene::AdvanceStage()
@@ -242,6 +242,87 @@ void CMainTMPScene::AdvanceStage()
 
 void CMainTMPScene::returnMainCamera()
 {
+
+	/*m_pMainSceneCamera->SetPosition(m_pCinematicPlayerCamera->GetPosition());
+	m_pMainSceneCamera->SetLookVector(m_pCinematicPlayerCamera->GetLookVector());
+	m_pMainSceneCamera->SetUpVector(m_pCinematicPlayerCamera->GetUpVector());
+	m_pMainSceneCamera->SetRightVector(m_pCinematicPlayerCamera->GetRightVector());*/
+
+	XMFLOAT3 xmf3PlayerPos = XMFLOAT3{
+		((CKnightPlayer*)m_pPlayer)->m_pSkinnedAnimationController->m_pRootMotionObject->GetWorld()._41,
+		 m_pPlayer->GetPosition().y,
+		((CKnightPlayer*)m_pPlayer)->m_pSkinnedAnimationController->m_pRootMotionObject->GetWorld()._43 };
+	xmf3PlayerPos.y += MeterToUnit(0.9f);
+
+
+	XMFLOAT3 CinematicPos = m_pCinematicPlayerCamera->GetPosition();
+	XMFLOAT3 distanceOffset = Vector3::Subtract(CinematicPos, xmf3PlayerPos);
+	distanceOffset = XMFLOAT3(distanceOffset.x, 0, distanceOffset.z);
+	distanceOffset = Vector3::Normalize(distanceOffset);
+	XMFLOAT3 seekOffset = XMFLOAT3(0, 0, 1);
+
+	//XMFLOAT3 normal = Vector3::CrossProduct(distanceOffset, seekOffset);
+	//float angle = Vector3::Angle(distanceOffset, seekOffset); // eular
+	//XMVECTOR qua = XMQuaternionRotationAxis(XMLoadFloat3(&normal), XMConvertToRadians(angle));
+
+	//auto euler_from_quaternion = [](float x, float y, float z, float w) {
+	//	float t0 = +2.0 * (w * x + y * z);
+	//	float t1 = +1.0 - 2.0 * (x * x + y * y);
+	//	float roll_x = std::atan2(t0, t1);
+
+	//	float t2 = +2.0 * (w * y - z * x);
+	//	t2 = (t2 > +1.0) ? 1.0 : t2;
+	//	t2 = (t2 < -1.0) ? -1.0 : t2;
+	//	float pitch_y = std::asin(t2);
+
+	//	float t3 = +2.0 * (w * z + x * y);
+	//	float t4 = +1.0 - 2.0 * (y * y + z * z);
+	//	float yaw_z = std::atan2(t3, t4);
+
+	//	return XMFLOAT3(roll_x, pitch_y, yaw_z);
+	//};
+
+	/*XMFLOAT3 rpy = euler_from_quaternion(qua.m128_f32[0], qua.m128_f32[1], qua.m128_f32[2], qua.m128_f32[3]);
+	rpy = Vector3::ScalarProduct(rpy, 180 / PI, false);
+	float roll = 0.0f;
+	float yaw = rpy.z;
+	float pitch = rpy.y;
+
+	m_pMainSceneCamera->SetPitch(0.0f);
+	m_pMainSceneCamera->SetYaw(0.0f);
+
+	m_pMainSceneCamera->Rotate(pitch, yaw);
+	m_pMainSceneCamera->Update(xmf3PlayerPos, 0.0f);*/
+
+	//if (m_fPitch != 0.0f)
+	/*{
+		xmmtxRotateX = XMMatrixRotationAxis(XMLoadFloat3(&xmf3XAxis), XMConvertToRadians(m_fPitch));
+	}
+	if (m_fYaw != 0.0f)
+	{
+		xmmtxRotateY = XMMatrixRotationAxis(XMLoadFloat3(&xmf3YAxis), XMConvertToRadians(m_fYaw));
+	}
+	if (m_fRoll != 0.0f)
+	{
+		xmmtxRotateY = XMMatrixRotationAxis(XMLoadFloat3(&xmf3ZAxis), XMConvertToRadians(m_fRoll));
+	}
+
+	xmmtxRotate = XMMatrixMultiply(xmmtxRotateZ, XMMatrixMultiply(xmmtxRotateX, xmmtxRotateY));*/
+
+
+
+
+	XMFLOAT3 look = m_pCinematicPlayerCamera->GetLookVector();
+	XMFLOAT3 right = m_pCinematicPlayerCamera->GetRightVector();
+	XMFLOAT3 up = m_pCinematicPlayerCamera->GetUpVector();
+
+	float pitch = Vector3::Angle(XMFLOAT3(0, 1, 0), up);
+
+	/*float angle = XMVector3AngleBetweenVectors(XMLoadFloat3(&seekOffset), XMLoadFloat3(&distanceOffset)).m128_f32[0];
+	XMFLOAT3 cross = Vector3::CrossProduct(seekOffset, distanceOffset);
+	float CaculateAngle;
+	CaculateAngle = (Vector3::DotProduct(XMFLOAT3(0, 1, 0), cross) < 0.0f) ? angle + PI: angle;
+	CaculateAngle = XMConvertToDegrees(CaculateAngle);*/
 
 	/*m_pMainSceneCamera->SetPosition(m_pCinematicPlayerCamera->GetPosition());
 	m_pMainSceneCamera->SetLookVector(m_pCinematicPlayerCamera->GetLookVector());
@@ -967,7 +1048,36 @@ SCENE_RETURN_TYPE CMainTMPScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMe
 		}
 		break;
 		case '3':
-			dynamic_cast<CSquareBar*>(m_pUIObject[14].get())->Update(90.0f);
+			//if (dynamic_cast<CUIObject*>(m_pUIObject[13].get())->Reset())
+			//{
+			dynamic_cast<CUIObject*>(m_pUIObject[13].get())->Reset();
+				if (m_CurrentMouseCursorMode == MOUSE_CUROSR_MODE::THIRD_FERSON_MODE)
+				{
+					m_pCurrentCamera = m_pFloatingCamera.get();
+					Locator.SetMouseCursorMode(MOUSE_CUROSR_MODE::FLOATING_MODE);
+					m_CurrentMouseCursorMode = MOUSE_CUROSR_MODE::FLOATING_MODE;
+					PostMessage(hWnd, WM_ACTIVATE, 0, 0);
+
+					while (m_iCursorHideCount > 0)
+					{
+						m_iCursorHideCount--;
+						ShowCursor(true);
+					}
+					ClipCursor(NULL);
+				}
+				UIReset();
+				((CPlayer*)m_pPlayer)->Reset();
+				((CCinematicCamera*)(m_pCinematicSceneCamera.get()))->ClearCameraInfo();
+				m_iStageNum = 0;
+				for (int i = 0; i < m_pEnemys.size(); i++)
+				{
+					CMonster* pMonster = dynamic_cast<CMonster*>(m_pEnemys[i].get());
+					CMonsterPool::GetInst()->SetNonActiveMonster(pMonster->GetMonsterType(), pMonster);
+				}
+				m_iTotalMonsterNum = 0;
+
+				return SCENE_RETURN_TYPE::SWITCH_LOGOSCENE;
+			//}
 			break;
 		case 'f':
 		case 'F':
@@ -1021,19 +1131,12 @@ SCENE_RETURN_TYPE CMainTMPScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMe
 		case 'Z':
 			if (m_pPlayer)
 			{
-				if (!((CPlayer*)m_pPlayer)->m_bCharged)
+				if (!((CPlayer*)m_pPlayer)->m_bCharged && dynamic_cast<CSquareBar*>(m_pUIObject[14].get())->IsFullGauge())
 				{
 					if (!(((CPlayer*)m_pPlayer)->m_pStateMachine->GetCurrentState() == Idle_Player::GetInst()) &&
 						!(((CPlayer*)m_pPlayer)->m_pStateMachine->GetCurrentState() == Run_Player::GetInst()))
 						break;
-					if (dynamic_cast<CSquareBar*>(m_pUIObject[14].get())) {
-						if (dynamic_cast<CSquareBar*>(m_pUIObject[14].get())->IsProgressFull() == false)
-							break;
-						dynamic_cast<CSquareBar*>(m_pUIObject[14].get())->ResetSkill();
-					}
-					else
-						break;
-
+					dynamic_cast<CSquareBar*>(m_pUIObject[14].get())->Reset();
 					((CPlayer*)m_pPlayer)->m_bCharged = true;
 					m_bPlayCutScene = true;
 
@@ -1396,6 +1499,19 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pListeners.push_back(std::move(SPDlistener));
 	CMessageDispatcher::GetInst()->RegisterListener(MessageType::SPECIALMOVE_DAMAGED, m_pListeners.back().get(), nullptr);
 
+	/*dynamic_cast<ImpactEffectComponent*>(ChargeAttack_Player::GetInst()->GetImpactComponent())->SetTextureIndex(m_pTextureManager->GetTextureOffset(TextureType::BillBoardTexture) + 3);
+	dynamic_cast<ParticleComponent*>(ChargeAttack_Player::GetInst()->GetParticleComponent())->SetTextureIndex(m_pTextureManager->GetTextureOffset(TextureType::ParticleTexture));
+	dynamic_cast<SlashHitComponent*>(ChargeAttack_Player::GetInst()->GetSlashHitComponent())->SetTextureIndex(m_pTextureManager->GetTextureOffset(TextureType::ParticleTexture));*/
+
+	std::unique_ptr<SpecialMoveDamageListener> SPDlistener = std::make_unique<SpecialMoveDamageListener>();
+	SPDlistener->SetEnable(true);
+	SPDlistener->SetObjects(&m_pEnemys);
+	SPDlistener->SetParticleObject(m_pParticleObjects.front().get());
+	SPDlistener->SetImpactObject(m_pSpriteAttackObjects.front().get());
+	SPDlistener->SetScene(this);
+	m_pListeners.push_back(std::move(SPDlistener));
+	CMessageDispatcher::GetInst()->RegisterListener(MessageType::SPECIALMOVE_DAMAGED, m_pListeners.back().get(), nullptr);
+
 	std::unique_ptr<SpecialMoveListener> splistener = std::make_unique<SpecialMoveListener>();
 	splistener->SetShader(m_pBreakScreenShader.get());
 	splistener->SetEnable(true);
@@ -1438,7 +1554,7 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	pUIObject = std::make_unique<CHPObject>(2, pd3dDevice, pd3dCommandList, 10.f);
 	pUIObject->SetSize(XMFLOAT2(1024.f * 0.44f, 64.f * 0.6f));
 	pUIObject->SetScreenPosition(XMFLOAT2(FRAME_BUFFER_WIDTH * 0.2f - 7.f, FRAME_BUFFER_HEIGHT * 0.878f + 70.f));
-	pUIObject->SetTextureIndex(m_pTextureManager->LoadTotalTextureIndex(TextureType::UITexture, L"Image/UiImages/MonsterHP.dds")); // HP
+	pUIObject->SetTextureIndex(m_pTextureManager->LoadTotalTextureIndex(TextureType::UITexture, L"Image/UiImages/MonsterHP.dds")); // HP // 3
 	m_pUIObject.push_back(std::move(pUIObject));
 
 	// Monster UI
@@ -1452,7 +1568,7 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	pUIObject = std::make_unique<CSTAMINAObject>(2, pd3dDevice, pd3dCommandList, 10.f);
 	pUIObject->SetSize(XMFLOAT2(1024.f * 0.34f, 64.f * 0.6f));
 	pUIObject->SetScreenPosition(XMFLOAT2(FRAME_BUFFER_WIDTH * 0.17f, FRAME_BUFFER_HEIGHT * 0.85995f + 70.f));
-	pUIObject->SetTextureIndex(m_pTextureManager->LoadTotalTextureIndex(TextureType::UITexture, L"Image/UiImages/Stamina.dds")); // STAMINA
+	pUIObject->SetTextureIndex(m_pTextureManager->LoadTotalTextureIndex(TextureType::UITexture, L"Image/UiImages/Stamina.dds")); // STAMINA 
 	m_pUIObject.push_back(std::move(pUIObject));
 
 
@@ -1522,13 +1638,12 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pUIObject.push_back(std::move(pUIObject));
 
 
-	pUIObject = std::make_unique<CResultFrame>(2, pd3dDevice, pd3dCommandList, 10.f, m_pTextureManager.get());
+	pUIObject = std::make_unique<CResultFrame>(2, pd3dDevice, pd3dCommandList, 10.f, m_pTextureManager.get()); // 13
 	pUIObject->SetEnable(false);
 	m_pUIObject.push_back(std::move(pUIObject));
 
 	//ChargeIcon
-	pUIObject = std::make_unique<CSquareBar>(2, pd3dDevice, pd3dCommandList, 10.f, m_pTextureManager.get());
-	dynamic_cast<CBarObject*>(pUIObject.get())->Set_Value(50.f, 100.f);
+	pUIObject = std::make_unique<CSquareBar>(2, pd3dDevice, pd3dCommandList, 10.f, m_pTextureManager.get()); // 14
 	m_pUIObject.push_back(std::move(pUIObject));
 
 
@@ -2124,7 +2239,8 @@ void CMainTMPScene::UIUpdate(CPlayer* pPlayer)
 	dynamic_cast<CBarObject*>(m_pUIObject[5].get())->Set_Value(((CPlayer*)m_pPlayer)->m_fStamina, ((CPlayer*)m_pPlayer)->m_fTotalStamina);
 	dynamic_cast<CBarObject*>(m_pUIObject[14].get())->Set_Value(((CPlayer*)m_pPlayer)->m_fSkillGauge, 100.f);
 	dynamic_cast<CNumberObject*>(m_pUIObject[10].get())->UpdateNumber(((CPlayer*)m_pPlayer)->m_iCombo);
-
+	
+	dynamic_cast<CNumberObject*>(m_pUIObject[10].get())->SetScreenPosition(XMFLOAT2(FRAME_BUFFER_WIDTH * 0.88f - 40.f * (dynamic_cast<CNumberObject*>(m_pUIObject[10].get())->GetNumSize() - 1), FRAME_BUFFER_HEIGHT * 0.5f));
 	OutputDebugString(std::to_wstring(((CPlayer*)m_pPlayer)->m_fStamina).c_str());
 	OutputDebugString(L"\n");
 
@@ -2204,6 +2320,7 @@ void CMainTMPScene::LoadTextureObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/SkillGauge.dds", 0, 0);
 	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/Gradation.dds", 0, 0);
 	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/SkillFrame.dds", 0, 0);
+
 
 	m_pTextureManager->LoadTexture(TextureType::UniformTexture, pd3dDevice, pd3dCommandList, L"Image/UnifromImages/Cracks 3.dds", 0, 0);
 
@@ -2290,4 +2407,9 @@ void CMainTMPScene::HandleOnGround(const OnGroundParams& params)
 		_stprintf_s(pstrDebug, 256, _T("No바닥 충격 출력 %f, %f, %f\n"), params.xmf3OnGroundPosition.x, params.xmf3OnGroundPosition.y, params.xmf3OnGroundPosition.z);
 		OutputDebugString(pstrDebug);
 	}
+}
+
+void CMainTMPScene::UIReset()
+{
+	dynamic_cast<CUIObject*>(m_pUIObject[14].get())->Reset();
 }
