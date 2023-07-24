@@ -1473,15 +1473,17 @@ void CImGuiManager::SetUI()
 				CSimulatorScene::GetInst()->SetPlayerAnimationSet(2);
 			Player_Animation_Number = 2;
 		}
-		ImGui::SameLine();
-		if (ImGui::Button(U8STR("복사")))
+		//ImGui::SameLine();
+		if (CopyComponent)
 		{
 			CopyComponentData(pCurrentAnimation);
+			CopyComponent = false;
 		}
-		ImGui::SameLine();
-		if (ImGui::Button(U8STR("붙여넣기")))
+		//ImGui::SameLine();
+		if (PasteComponent)
 		{
 			PasteComponentData(pCurrentAnimation);
+			PasteComponent = false;
 		}
 
 		if (ImGui::CollapsingHeader(U8STR("특수 효과")))
@@ -3011,12 +3013,7 @@ bool CImGuiManager::CopyComponentData(CState<CPlayer>* pCurrentAnimation)
 	}
 
 
-	for (int i = 0; i < CopyDatas.size(); i++)
-	{
-		if(CopyDatas[i])
-			delete CopyDatas[i];
-	}
-	CopyDatas.clear();
+	ClearCopyComponentData();
 
 	IMessageListener* pCopyData;
 	switch (m_WindowType)
@@ -3182,6 +3179,7 @@ bool CImGuiManager::PasteComponentData(CState<CPlayer>* pCurrentAnimation)
 		return false;
 	}
 
+
 	IMessageListener* pCopyData;
 
 	switch (m_WindowType)
@@ -3300,3 +3298,12 @@ bool CImGuiManager::PasteComponentData(CState<CPlayer>* pCurrentAnimation)
 	}
 }
 
+void CImGuiManager::ClearCopyComponentData()
+{
+	for (int i = 0; i < CopyDatas.size(); i++)
+	{
+		if (CopyDatas[i])
+			delete CopyDatas[i];
+	}
+	CopyDatas.clear();
+}

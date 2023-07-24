@@ -96,6 +96,9 @@ private:
 
 	bool serverConnected = false;
 
+	bool CopyComponent = false;
+	bool PasteComponent = false;
+
 	SELECT_WINDOW_TYPE m_WindowType = SELECT_WINDOW_TYPE::SELECT_WINDOW_TYPE_END;
 
 	CCamera* m_pCamera = NULL;
@@ -176,6 +179,13 @@ public:
 	int GetTerrainMappingMode() { return Terrain_Mapping_mode; };
 	bool& GetChangeAfterScene() { return change_after; };
 	bool& GetChangeBeforeScene() { return change_before; };
+
+	void SetCopyComponent(bool copyComponent) { CopyComponent = copyComponent; };
+	bool GetCopyComponent() { return CopyComponent; };
+
+	void SetPasteComponent(bool paseComponent) { PasteComponent = paseComponent; };
+	bool GetPasteComponent() { return PasteComponent; };
+
 	void SetShowSettingMenu(bool bSetting) { show_setting_menu = bSetting; };
 	bool GetShowSettingMenu() { return show_setting_menu; };
 
@@ -184,4 +194,7 @@ public:
 
 	bool CopyComponentData(CState<CPlayer>* pCurrentAnimation);
 	bool PasteComponentData(CState<CPlayer>* pCurrentAnimation);
+
+	void ClearCopyComponentData();
+	//if (ImGui::IsWindowHovered())
 };

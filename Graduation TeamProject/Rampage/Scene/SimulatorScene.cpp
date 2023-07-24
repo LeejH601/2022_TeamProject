@@ -328,6 +328,55 @@ void CSimulatorScene::CreateComputeRootSignature(ID3D12Device* pd3dDevice)
 	if (pd3dErrorBlob) pd3dErrorBlob->Release();
 }
 
+SCENE_RETURN_TYPE CSimulatorScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam, DWORD& dwDirection)
+{
+	MOUSE_CUROSR_MODE eMouseMode = Locator.GetMouseCursorMode();
+
+	//static bool bcontrol = false;
+
+
+	switch (nMessageID)
+	{
+	case WM_KEYDOWN:
+		switch (wParam)
+		{
+		case 'c':
+		case 'C':
+
+			break;
+
+		case VK_CONTROL:
+			if (GetAsyncKeyState('C') & 0x8000)
+			{
+				int a = 0;
+				// 복사 기능
+			}
+			break;
+		default:
+			break;
+		}
+		break;
+	case WM_KEYUP:
+		switch (wParam)
+		{
+		case VK_CONTROL:
+			if (m_pPlayer)
+			{
+				if (((CPlayer*)m_pPlayer)->m_bIsDash)
+				{
+					((CPlayer*)m_pPlayer)->m_bIsDash = false;
+					((CPlayer*)m_pPlayer)->SetSpeedUperS(((CPlayer*)m_pPlayer)->GetSpeedUperS() / 2.0f);
+				}
+			}
+			break;
+		
+		}
+	default:
+		break;
+	}
+	return SCENE_RETURN_TYPE::NONE;
+}
+
 void CSimulatorScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	CreateGraphicsRootSignature(pd3dDevice);

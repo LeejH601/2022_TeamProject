@@ -85,6 +85,22 @@ SCENE_RETURN_TYPE CLobbyScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMess
 	case WM_KEYDOWN:
 		switch (wParam)
 		{
+		case 'c':
+		case 'C':
+			if (GetAsyncKeyState(VK_CONTROL) & 0x8000) // 동시 체크
+			{
+				CImGuiManager::GetInst()->SetCopyComponent(true);
+				// 복사 기능
+			}
+			break;
+		case 'v':
+		case 'V':
+			if (GetAsyncKeyState(VK_CONTROL) & 0x8000) // 동시 체크
+			{
+				CImGuiManager::GetInst()->SetPasteComponent(true);
+				// 복사 기능
+			}
+			break;
 		case VK_ESCAPE:
 			if (m_iSceneType == LobbySceneType::SIMULATOR_Scene)
 				CImGuiManager::GetInst()->SetShowSettingMenu(!CImGuiManager::GetInst()->GetShowSettingMenu());

@@ -967,9 +967,8 @@ SCENE_RETURN_TYPE CMainTMPScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMe
 		}
 		break;
 		case '3':
-			//if (dynamic_cast<CUIObject*>(m_pUIObject[13].get())->Reset())
-			//{
-			dynamic_cast<CUIObject*>(m_pUIObject[13].get())->Reset();
+			if (dynamic_cast<CUIObject*>(m_pUIObject[13].get())->Reset())
+			{
 				if (m_CurrentMouseCursorMode == MOUSE_CUROSR_MODE::THIRD_FERSON_MODE)
 				{
 					m_pCurrentCamera = m_pFloatingCamera.get();
@@ -996,7 +995,7 @@ SCENE_RETURN_TYPE CMainTMPScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMe
 				m_iTotalMonsterNum = 0;
 
 				return SCENE_RETURN_TYPE::SWITCH_LOGOSCENE;
-			//}
+			}
 			break;
 		case 'f':
 		case 'F':
