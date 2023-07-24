@@ -83,7 +83,7 @@ public:
 	void Tmp();
 
 	void UpdateStamina(float fTimeElapsed);
-	void UpdateCombo(float fTimeElapsed);
+	void UpdateCombo();
 	void HandleDamage(CMonster* pMonster, float fDamage);
 	virtual void Move(const XMFLOAT3& xmf3Shift, bool bUpdateVelocity);
 	virtual void Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity, CCamera* pCamera);

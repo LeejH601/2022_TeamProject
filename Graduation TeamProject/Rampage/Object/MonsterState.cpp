@@ -175,7 +175,17 @@ void Damaged_Monster::Execute(CMonster* monster, float fElapsedTime)
 		monster->m_pStateMachine->ChangeState(Stun_Monster::GetInst());
 
 	if (monster->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition == pAnimationSet->m_fLength)
+	{
+		if (monster->m_fMaxDamageDistance > 0.0f)
+		{
+			MonsterParams monsterParams;
+			monsterParams.pMonster = monster;
+
+			CMessageDispatcher::GetInst()->Dispatch_Message<MonsterParams>(MessageType::AUTO_RESET, &monsterParams, nullptr);
+		}
+
 		monster->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
+	}
 }
 
 void Damaged_Monster::Animate(CMonster* monster, float fElapsedTime)

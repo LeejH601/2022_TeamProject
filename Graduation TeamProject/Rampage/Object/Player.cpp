@@ -255,7 +255,7 @@ void CPlayer::Tmp()
 	m_pSkinnedAnimationController->SetTrackAnimationSet(0, m_nAnimationNum++);
 }
 // ui ±¸ÇÏ±â, 
-void CPlayer::UpdateCombo(float fTimeElapsed)
+void CPlayer::UpdateCombo()
 {
 	m_iCombo++;
 	m_bIsComboUpdate = true;
