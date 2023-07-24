@@ -143,12 +143,8 @@ bool CNetworkDevice::RecvUploadData(UploadData& uploadData)
 	if (retval == 0)
 		return false;
 
-	std::cout << DataSize << std::endl;
-
 	int dataLocations[5];
 	retval = recv(m_client_sock, (char*)dataLocations, sizeof(int) * 5, MSG_WAITALL);
-
-	std::cout << dataLocations[0] << std::endl;
 
 	if (retval == 0)
 		return false;
@@ -182,68 +178,6 @@ bool CNetworkDevice::RecvUploadData(UploadData& uploadData)
 		offset += dataLocations[i + 2];
 	}
 
-	std::cout << uploadData.RecordTitle << " " << uploadData.UserName << std::endl;
-	//std::vector<char>& bytes = uploadData.ComponentBlobs[0];
-
-	/*std::stringstream ss;
-	ss.write(bytes.data(), bytes.size());
-	ss.setf(std::ios_base::binary);
-
-	std::string str;
-	str.resize(256);
-	BYTE length;
-	ss.read((char*)&length, sizeof(BYTE));
-	ss.read(str.data(), length);
-	while (!ss.eof())
-	{
-		ss.read((char*)&length, sizeof(BYTE));
-		ss.read(str.data(), length);
-		str.data()[length] = '\0';
-		if (!strcmp(str.c_str(), "<CCameraMover>:")) {
-			std::cout << str << std::endl;
-			while (true)
-			{
-				ss.read((char*)&length, sizeof(BYTE));
-				ss.read(str.data(), length);
-				str.data()[length] = '\0';
-				float param;
-				int param_int;
-				if (!strcmp(str.c_str(), "<MaxDistance>:"))
-				{
-					std::cout << str;
-					ss.read((char*)&param, sizeof(float));
-					std::cout << param << std::endl;
-				}
-				else if (!strcmp(str.c_str(), "<MovingTime>:"))
-				{
-					std::cout << str;
-					ss.read((char*)&param, sizeof(float));
-					std::cout << param << std::endl;
-				}
-				else if (!strcmp(str.c_str(), "<RollBackTime>:"))
-				{
-					std::cout << str;
-					ss.read((char*)&param, sizeof(float));
-					std::cout << param << std::endl;
-				}
-				else if (!strcmp(str.c_str(), "<Enable>:"))
-				{
-					std::cout << str;
-					ss.read((char*)&param_int, sizeof(int));
-					std::cout << param_int << std::endl;
-				}
-				else if (!strcmp(str.c_str(), "</CCameraMover>:"))
-				{
-					break;
-				}
-			}
-		}
-	}*/
-	//for (std::vector<char>& bytes : uploadData.ComponentBlobs) {
-	//	std::cout << "dataSize : " << bytes.size() << std::endl;
-	//	std::cout << bytes.data() << std::endl;
-	//}
-
 	delete[] Data;
 	return true;
 }
@@ -274,8 +208,6 @@ bool CNetworkDevice::RequestDataTable(SORT_BY sortBy, SEARCH_METHOD searchMethod
 
 	return true;
 }
-
-#define DEBUG_SHOW_SEARCH_DATA
 
 bool CNetworkDevice::ReturnDataTable(std::vector<WorkShop_Record>& records)
 {
@@ -349,10 +281,6 @@ bool CNetworkDevice::ReceiveRequest(SearchData& searchData)
 
 	searchData = builder.Build();
 
-#ifdef DEBUG_SHOW_SEARCH_DATA
-	std::cout << searchData.GetWord() << " " << (int)(searchData.GetSortinMethod()) << " " << (int)(searchData.GetSortBy()) << std::endl;
-#endif // DEBUG_SHOW_SEARCH_DATA
-
 	return true;
 }
 
@@ -401,7 +329,6 @@ bool CNetworkDevice::RecvDataTable(std::vector<WorkShop_Record>& records)
 	memcpy(records.data(), Data, len);
 
 	delete[] Data;
-	system("puase");
 	return false;
 }
 
