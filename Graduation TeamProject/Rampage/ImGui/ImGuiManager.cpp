@@ -1502,9 +1502,9 @@ void CImGuiManager::SetUI()
 
 		ImGui::RadioButton(U8STR("공격1##AttackNumber"), &Player_Animation_Number, 0); ImGui::SameLine();
 		ImGui::RadioButton(U8STR("공격2##AttackNumber"), &Player_Animation_Number, 1); ImGui::SameLine();
-		ImGui::RadioButton(U8STR("공격3##AttackNumber"), &Player_Animation_Number, 2); ImGui::SameLine();
+		ImGui::RadioButton(U8STR("공격3##AttackNumber"), &Player_Animation_Number, 2); ImGui::SameLine(0.0f, m_lDesktopWidth * 0.0355f);
 
-		if (ImGui::Button(U8STR("공격")))
+		if (ImGui::Button(U8STR("공격"), ImVec2{ m_lDesktopWidth * 0.1f, 0.0f }))
 		{
 			if (show_simulator_scene)
 				CSimulatorScene::GetInst()->SetPlayerAnimationSet(Player_Animation_Number);
