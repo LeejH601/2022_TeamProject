@@ -1028,33 +1028,12 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pMainSceneCamera->Init(pd3dDevice, pd3dCommandList);
 
 	std::unique_ptr<CCamera> FirstCinematicCamera = std::make_unique<CCamera>();
-	FirstCinematicCamera->SetPosition(XMFLOAT3{ 124.899033, 17.034166, 156.040268 });
-	FirstCinematicCamera->SetLookVector(XMFLOAT3{ -0.097144, -0.369207, -0.924256 });
-	FirstCinematicCamera->SetUpVector(XMFLOAT3{ -0.038593, 0.929347, -0.367184 });
-	FirstCinematicCamera->SetRightVector(XMFLOAT3{ -0.994522, -0.000000, 0.104529 });
-
-	std::unique_ptr<CCamera> SecondCinematicCamera = std::make_unique<CCamera>();
-	SecondCinematicCamera->SetPosition(XMFLOAT3{ 166.397644, 33.010002, 49.103397 });
-	SecondCinematicCamera->SetLookVector(XMFLOAT3{ 0.778753, -0.578334, -0.243052 });
-	SecondCinematicCamera->SetUpVector(XMFLOAT3{ 0.552070, 0.815800, -0.172304 });
-	SecondCinematicCamera->SetRightVector(XMFLOAT3{ -0.297931, -0.000001, -0.954587 });
-
-	std::unique_ptr<CCamera> ThirdCinematicCamera = std::make_unique<CCamera>();
-	ThirdCinematicCamera->SetPosition(XMFLOAT3{ 85.300034, 32.215328, 131.137573 });
-	ThirdCinematicCamera->SetLookVector(XMFLOAT3{ -0.553928, -0.474600, -0.684046 });
-	ThirdCinematicCamera->SetUpVector(XMFLOAT3{ -0.298675, 0.880201, -0.368834 });
-	ThirdCinematicCamera->SetRightVector(XMFLOAT3{ -0.777147, 0.000000, 0.629319 });
-
-	std::unique_ptr<CCamera> FourthCinematicCamera = std::make_unique<CCamera>();
-	FourthCinematicCamera->SetPosition(XMFLOAT3{ 102.987801, 21.768602, 90.960884 });
-	FourthCinematicCamera->SetLookVector(XMFLOAT3{ 0.404516, -0.433136, 0.805457 });
-	FourthCinematicCamera->SetUpVector(XMFLOAT3{ 0.194392, 0.901329, 0.387064 });
-	FourthCinematicCamera->SetRightVector(XMFLOAT3{ 0.893632, -0.000001, -0.448800 });
+	FirstCinematicCamera->SetPosition(XMFLOAT3{ 129.561584, 15.859521, 146.650757 });
+	FirstCinematicCamera->SetLookVector(XMFLOAT3{ -0.403303, -0.459168, -0.791525 });
+	FirstCinematicCamera->SetUpVector(XMFLOAT3{ -0.208458, 0.888349, -0.409121 });
+	FirstCinematicCamera->SetRightVector(XMFLOAT3{ -0.891006, -0.000000, 0.453991 });
 
 	m_vCinematicCameraLocations.push_back(std::move(FirstCinematicCamera));
-	m_vCinematicCameraLocations.push_back(std::move(SecondCinematicCamera));
-	m_vCinematicCameraLocations.push_back(std::move(ThirdCinematicCamera));
-	m_vCinematicCameraLocations.push_back(std::move(FourthCinematicCamera));
 
 	m_pCinematicSceneCamera = std::make_unique<CCinematicCamera>();
 	m_pCinematicSceneCamera->Init(pd3dDevice, pd3dCommandList);
@@ -1436,7 +1415,7 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 			0, 0,
 			3, 0,
 			0, 0,
-			XMFLOAT3{ 189.830246f, 3.016271f, 47.559467f },
+			XMFLOAT3{ 113.664360f, 3.016271f, 123.066483f },
 			12.5f}} }));
 	m_StageInfoMap.emplace(std::pair<int, StageInfo>(2,
 		StageInfo{
@@ -1444,7 +1423,7 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 			0, 0,
 			0, 0,
 			3, 0,
-			XMFLOAT3{ 53.192234f, 3.016271f, 99.847107f },
+			XMFLOAT3{ 113.664360f, 3.016271f, 123.066483f },
 			12.5f}} }));
 	m_StageInfoMap.emplace(std::pair<int, StageInfo>(3,
 		StageInfo{
