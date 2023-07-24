@@ -284,8 +284,12 @@ void CPlayer::Reset()
 	m_pStateMachine->ChangeState(Idle_Player::GetInst());
 	//m_pStateMachine->SetPreviousState(Idle_Player::GetInst());
 	SetPosition(XMFLOAT3(57.0f, 3.5f, 225.0f));
-	//Rotate(0.0f, 165.0f, 0.0f);
 
+	m_xmf3Up = XMFLOAT3(0.0f, 1.0f, 0.0f);
+	m_xmf3Look = XMFLOAT3(0.0f, 0.0f, 1.0f);
+	m_xmf3Scale = XMFLOAT3(1.0f, 1.0f, 1.0f);
+
+	Rotate(0.0f, 165.0f, 0.0f);
 }
 
 #define KNIGHT_ROOT_MOTION
