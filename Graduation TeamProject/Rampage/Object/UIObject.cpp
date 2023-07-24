@@ -534,6 +534,7 @@ CComboNumberObject::~CComboNumberObject()
 {
 }
 
+
 void CComboNumberObject::UpdateNumberTexture(UINT N, UINT ORDER)
 {
 	if (m_bEnable) {
@@ -695,9 +696,9 @@ bool CButtonObject::CheckCollisionMouse(POINT ptCursorPo)
 	}
 	m_bCollision = false;
 	//m_xmfColor = 1.f;
-	TCHAR pstrDebug[256] = { 0 };
+	/*TCHAR pstrDebug[256] = { 0 };
 	_stprintf_s(pstrDebug, 256, _T("현재 마우스 위치 = %d %d\n"), ptCursorPo.x, ptCursorPo.y);
-	OutputDebugString(pstrDebug);
+	OutputDebugString(pstrDebug);*/
 	return false;
 }
 
@@ -1090,9 +1091,16 @@ void CSquareBar::Update(float fTimeElapsed)
 	CUIObject::Update(fTimeElapsed);
 	m_fTime += fTimeElapsed;
 
-	if (m_fTime >= 90.f) // 0 ~ 0.8f
+	if (m_fTime >= m_fMaxTime) // 0 ~ 0.8f
 	{
-		m_pChildUI[2]->SetColor(XMFLOAT3(5.f, 2.f, 2.f)); // 250
+		//m_bOnGlow = true;
+		m_fGlowDurationTime += fTimeElapsed;
+
+		XMFLOAT3 color = XMFLOAT3(5.f, 2.f, 2.f);
+		if (m_bOnGlow) {
+			color = Vector3::ScalarProduct(color, m_fEmissive + max((m_fGlowValue - (m_fGlowValue * (m_fGlowDurationAcculate / m_fGlowDurationTime))), 0.0f), false);
+		}
+		m_pChildUI[2]->SetColor(color); // 250
 		m_pChildUI[1]->SetEnable(true);
 	}
 	else
@@ -1174,8 +1182,11 @@ void CSquareBar::CurBarUpdate(float fTimeElapsed)
 bool CSquareBar::Reset()
 {
 	m_fTime = 0.f;
+	m_fGlowDurationAcculate = 0.0f;
 	m_pChildUI[2]->SetColor(XMFLOAT3(1.f, 1.f, 1.f)); // 250
 	m_pChildUI[1]->SetEnable(false);
+
+	m_bOnGlow = false;
 	return true;
 }
 

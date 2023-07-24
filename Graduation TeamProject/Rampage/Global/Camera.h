@@ -104,6 +104,7 @@ public:
 
 	XMFLOAT3& GetPosition() { return(m_xmf3Position); }
 	void SetPosition(XMFLOAT3 xmf3Position) { m_xmf3Position = xmf3Position; }
+	const XMFLOAT3& GetCalculatedPosition() { return(m_xmf3CalculatedPosition); }
 
 	XMFLOAT3& GetLookAtPosition() { return(m_xmf3LookAtWorld); }
 	void SetLookAtPosition(XMFLOAT3 xmf3LookAtWorld) { m_xmf3LookAtWorld = xmf3LookAtWorld; }
@@ -353,4 +354,10 @@ class CSimulatorCamera : public CCamera
 public:
 	CSimulatorCamera();
 	virtual ~CSimulatorCamera() { }
+};
+
+class CSimulatorThirdPersonCamera : public CThirdPersonCamera
+{
+public:
+	virtual void ProcessInput(DWORD dwDirection, float cxDelta, float cyDelta, float fTimeElapsed);
 };

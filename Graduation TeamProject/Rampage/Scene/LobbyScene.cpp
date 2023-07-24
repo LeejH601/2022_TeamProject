@@ -26,6 +26,12 @@ void CLobbyScene::CreateGraphicsRootSignature(ID3D12Device* pd3dDevice)
 
 bool CLobbyScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
 {
+
+	if (m_iSceneType == LobbySceneType::SIMULATOR_Scene) {
+		CSimulatorScene::GetInst()->OnProcessingMouseMessage(hWnd, nMessageID, wParam, lParam);
+		return true;
+	}
+
 	POINT ptCursorPos;
 	float cxDelta, cyDelta;
 	GetCursorPos(&ptCursorPos);
@@ -35,7 +41,8 @@ bool CLobbyScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wP
 	case WM_LBUTTONDOWN:
 		// 좌클릭시 사용자가 좌클릭 했음을 표현하는 변수를 true로 바꿔줌
 
-		if (dynamic_cast<CButtonObject*>(m_pUIObject[3].get())->CheckCollisionMouse(ptCursorPos))
+		if (m_iSceneType == LobbySceneType::LOGO_Scene &&
+			dynamic_cast<CButtonObject*>(m_pUIObject[3].get())->CheckCollisionMouse(ptCursorPos))
 		{
 			CSoundManager::GetInst()->PlaySound("Sound/UI/Metal Click.wav", 0.5f, 0.f);
 			m_iSceneType = LobbySceneType::SIMULATOR_Scene;
@@ -43,7 +50,8 @@ bool CLobbyScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wP
 			return true;
 		}
 
-		if (dynamic_cast<CButtonObject*>(m_pUIObject[5].get())->CheckCollisionMouse(ptCursorPos))
+		if (m_iSceneType == LobbySceneType::LOGO_Scene && 
+			dynamic_cast<CButtonObject*>(m_pUIObject[5].get())->CheckCollisionMouse(ptCursorPos))
 		{
 			CSoundManager::GetInst()->PlaySound("Sound/UI/Metal Click.wav", 0.5f, 0.f);
 			m_iSceneType = LobbySceneType::Main_Scene;
@@ -59,7 +67,6 @@ bool CLobbyScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wP
 			::PostQuitMessage(0);
 			return true;
 		}
-
 
 		break;
 	case WM_RBUTTONDOWN:
@@ -375,6 +382,14 @@ void CLobbyScene::OnPostRender()
 
 bool CLobbyScene::ProcessInput(HWND hWnd, DWORD dwDirection, float fTimeElapsed)
 {
+	switch (m_iSceneType)
+	{
+	case LobbySceneType::LOGO_Scene:
+		return true;
+	case LobbySceneType::SIMULATOR_Scene:
+		CSimulatorScene::GetInst()->ProcessInput(hWnd, dwDirection, fTimeElapsed);
+		return true;
+	}
 
 	return false;
 }

@@ -126,6 +126,8 @@ private:
 
 	std::vector<IMessageListener*> CopyDatas;
 	SELECT_WINDOW_TYPE	m_CopyWindowType = SELECT_WINDOW_TYPE::SELECT_WINDOW_TYPE_END;
+public:
+	ImGuiID m_idMainSimulater;
 
 public:
 	DECLARE_SINGLE(CImGuiManager);

@@ -164,6 +164,14 @@ public:
 	virtual void HandleMessage(const Message& message, const SpecialMoveUpdateParams& params) {}
 };
 
+class AutoResetListener : public IMessageListener {
+	CScene* m_pSimulatorScene = nullptr;
+public:
+	virtual void HandleMessage(const Message& message, const MonsterParams& params);
+
+	void SetScene(CScene* pScene) { m_pSimulatorScene = pScene; };
+};
+
 class SpecialMoveListener : public IMessageListener {
 	CShader* m_pBreakScreenShader = nullptr;
 public:

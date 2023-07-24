@@ -15,6 +15,8 @@
 #include "..\Object\UIObject.h"
 #include "..\Shader\UIObjectShader.h"
 #include "..\Object\PlayerParticleObject.h"
+#include "..\ImGui\imgui_internal.h"
+#include "..\ImGui\ImGuiManager.h"
 void CSimulatorScene::OnPreRender(ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed)
 {
 	if (m_pDepthRenderShader)
@@ -124,7 +126,7 @@ void CSimulatorScene::CreateGraphicsRootSignature(ID3D12Device* pd3dDevice)
 	pd3dRootParameters[11].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 
 	pd3dRootParameters[12].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
-	pd3dRootParameters[12].Descriptor.ShaderRegister = 9; 
+	pd3dRootParameters[12].Descriptor.ShaderRegister = 9;
 	pd3dRootParameters[12].Descriptor.RegisterSpace = 0;
 	pd3dRootParameters[12].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 
@@ -328,53 +330,49 @@ void CSimulatorScene::CreateComputeRootSignature(ID3D12Device* pd3dDevice)
 	if (pd3dErrorBlob) pd3dErrorBlob->Release();
 }
 
-SCENE_RETURN_TYPE CSimulatorScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam, DWORD& dwDirection)
+bool CSimulatorScene::ProcessInput(HWND hWnd, DWORD dwDirection, float fTimeElapsed)
 {
-	MOUSE_CUROSR_MODE eMouseMode = Locator.GetMouseCursorMode();
+	POINT ptCursorPos;
+	float cxDelta, cyDelta;
 
-	//static bool bcontrol = false;
+
+	if (GetCapture() == hWnd && m_bIsPressedRB)
+	{
+		SetCursor(NULL);
+		GetCursorPos(&ptCursorPos);
+		cxDelta = (float)(ptCursorPos.x - m_ptOldCursorPos.x) / 100.0f;
+		cyDelta = (float)(ptCursorPos.y - m_ptOldCursorPos.y) / 100.0f;
+		SetCursorPos(ptCursorPos.x, ptCursorPos.y);
+
+		m_pSimulaterCamera->ProcessInput(dwDirection, cxDelta, cyDelta, fTimeElapsed);
+	}
 
 
+	return true;
+}
+
+bool CSimulatorScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
+{
 	switch (nMessageID)
 	{
-	case WM_KEYDOWN:
-		switch (wParam)
-		{
-		case 'c':
-		case 'C':
-
-			break;
-
-		case VK_CONTROL:
-			if (GetAsyncKeyState('C') & 0x8000)
-			{
-				int a = 0;
-				// 복사 기능
-			}
-			break;
-		default:
-			break;
-		}
+	case WM_RBUTTONDOWN:
+		m_bIsPressedRB = true;
+		::SetCapture(hWnd);
+		::GetCursorPos(&m_ptOldCursorPos);
 		break;
-	case WM_KEYUP:
-		switch (wParam)
-		{
-		case VK_CONTROL:
-			if (m_pPlayer)
-			{
-				if (((CPlayer*)m_pPlayer)->m_bIsDash)
-				{
-					((CPlayer*)m_pPlayer)->m_bIsDash = false;
-					((CPlayer*)m_pPlayer)->SetSpeedUperS(((CPlayer*)m_pPlayer)->GetSpeedUperS() / 2.0f);
-				}
-			}
-			break;
-		
-		}
+	case WM_LBUTTONUP:
+		break;
+	case WM_RBUTTONUP:
+		m_bIsPressedRB = false;
+		::ReleaseCapture();
+		break;
+	case WM_MOUSEMOVE:
+		break;
 	default:
 		break;
 	}
-	return SCENE_RETURN_TYPE::NONE;
+
+	return 0;
 }
 
 void CSimulatorScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
@@ -391,11 +389,12 @@ void CSimulatorScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 
 	XMFLOAT3 offset{ 86.4804 , 0.0f, -183.7856 };
 
-	m_pSimulaterCamera = std::make_unique<CSimulatorCamera>();
+	m_pSimulaterCamera = std::make_unique<CSimulatorThirdPersonCamera>();
 	m_pSimulaterCamera->Init(pd3dDevice, pd3dCommandList);
 	m_pSimulaterCamera->SetPosition(XMFLOAT3(43 + offset.x, 15, 46 + offset.z));
 	m_pSimulaterCamera->SetLookAt(XMFLOAT3(75 + offset.x, 0, 75 + offset.z));
 	m_pSimulaterCamera->RegenerateViewMatrix();
+
 
 	CModelShader::GetInst()->CreateShader(pd3dDevice, GetGraphicsRootSignature(), 7, pdxgiObjectRtvFormats, DXGI_FORMAT_D32_FLOAT, 1);
 
@@ -413,14 +412,48 @@ void CSimulatorScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 
 	// 4->HIT
 	// 5->IDLE
-	std::unique_ptr<CMonster> m_pDummyEnemy = std::make_unique<CGoblinObject>(pd3dDevice, pd3dCommandList, 1);
-	m_pDummyEnemy->SetPosition(XMFLOAT3(47.5 + offset.x, 100, 50 + offset.z));
-	m_pDummyEnemy->SetScale(2.0f, 2.0f, 2.0f);
-	m_pDummyEnemy->Rotate(0.0f, -90.0f, 0.0f);
-	m_pDummyEnemy->m_fHP = FLT_MAX;
-	m_pDummyEnemy->m_bIsDummy = true;
-	m_pDummyEnemy->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
-	m_pEnemys.push_back(std::move(m_pDummyEnemy));
+
+	m_CurrentMonsterNum = 1;
+	m_CurrentMonsterType = MONSTER_TYPE::GOBLIN;
+
+	for (int i = 0; i < 3; ++i)
+	{
+		std::unique_ptr<CMonster> m_pDummyEnemy = std::make_unique<CGoblinObject>(pd3dDevice, pd3dCommandList, 1);
+		m_pDummyEnemy->SetPosition(XMFLOAT3(47.5 + offset.x, 100, 50 + offset.z));
+		m_pDummyEnemy->SetScale(2.0f, 2.0f, 2.0f);
+		m_pDummyEnemy->Rotate(0.0f, -90.0f, 0.0f);
+		m_pDummyEnemy->m_fHP = FLT_MAX;
+		m_pDummyEnemy->m_bEnable = false;
+		m_pDummyEnemy->m_bIsDummy = true;
+		m_pDummyEnemy->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
+		m_pEnemys.push_back(std::move(m_pDummyEnemy));
+	}
+
+	for (int i = 0; i < 3; ++i)
+	{
+		std::unique_ptr<CMonster> m_pDummyEnemy = std::make_unique<COrcObject>(pd3dDevice, pd3dCommandList, 1);
+		m_pDummyEnemy->SetPosition(XMFLOAT3(47.5 + offset.x, 100, 50 + offset.z));
+		m_pDummyEnemy->SetScale(2.0f, 2.0f, 2.0f);
+		m_pDummyEnemy->Rotate(0.0f, -90.0f, 0.0f);
+		m_pDummyEnemy->m_fHP = FLT_MAX;
+		m_pDummyEnemy->m_bEnable = false;
+		m_pDummyEnemy->m_bIsDummy = true;
+		m_pDummyEnemy->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
+		m_pEnemys.push_back(std::move(m_pDummyEnemy));
+	}
+
+	for (int i = 0; i < 3; ++i)
+	{
+		std::unique_ptr<CMonster> m_pDummyEnemy = std::make_unique<CSkeletonObject>(pd3dDevice, pd3dCommandList, 1);
+		m_pDummyEnemy->SetPosition(XMFLOAT3(47.5 + offset.x, 100, 50 + offset.z));
+		m_pDummyEnemy->SetScale(2.0f, 2.0f, 2.0f);
+		m_pDummyEnemy->Rotate(0.0f, -90.0f, 0.0f);
+		m_pDummyEnemy->m_fHP = FLT_MAX;
+		m_pDummyEnemy->m_bEnable = false;
+		m_pDummyEnemy->m_bIsDummy = true;
+		m_pDummyEnemy->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
+		m_pEnemys.push_back(std::move(m_pDummyEnemy));
+	}
 
 	// 3->IDLE
 	// 28->Attack
@@ -432,19 +465,26 @@ void CSimulatorScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 	m_pMainCharacter->m_pSkinnedAnimationController->m_bRootMotion = false;
 	m_pMainCharacter->m_pStateMachine->ChangeState(Idle_Player::GetInst());
 
-	m_pMap = std::make_unique<CMap>();
+	if (dynamic_cast<CSimulatorThirdPersonCamera*>(m_pSimulaterCamera.get())) {
+		dynamic_cast<CSimulatorThirdPersonCamera*>(m_pSimulaterCamera.get())->SetPlayer(m_pMainCharacter.get());
+	}
+
+
+	/*m_pMap = std::make_unique<CMap>();
 	m_pMap->Init(pd3dDevice, pd3dCommandList, GetGraphicsRootSignature());
 	m_pMap->GetTerrain()->SetPosition(XMFLOAT3(offset.x, 0, offset.z));
 
+
+	((CDepthRenderShader*)m_pDepthRenderShader.get())->SetTerrain(m_pMap->GetTerrain().get());
+	m_pMainCharacter->SetUpdatedContext(m_pMap.get());*/
+
 	((CDepthRenderShader*)m_pDepthRenderShader.get())->RegisterObject(m_pMainCharacter.get());
 	((CDepthRenderShader*)m_pDepthRenderShader.get())->SetLight(m_pLight->GetLights());
-	((CDepthRenderShader*)m_pDepthRenderShader.get())->SetTerrain(m_pMap->GetTerrain().get());
-	m_pMainCharacter->SetUpdatedContext(m_pMap.get());
 
 	for (int i = 0; i < m_pEnemys.size(); ++i)
 	{
 		((CDepthRenderShader*)m_pDepthRenderShader.get())->RegisterObject(m_pEnemys[i].get());
-		((CMonster*)m_pEnemys[i].get())->SetUpdatedContext(m_pMap.get());
+		//((CMonster*)m_pEnemys[i].get())->SetUpdatedContext(m_pMap.get());
 	}
 
 	m_pTextureManager = std::make_unique<CTextureManager>();
@@ -466,8 +506,16 @@ void CSimulatorScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 
 	m_pTextureManager->LoadTexture(TextureType::TrailBaseTexture, pd3dDevice, pd3dCommandList, L"Image/TrailImages/T_Sword_Slash_11.dds", 1, 1);
 	m_pTextureManager->LoadTexture(TextureType::TrailBaseTexture, pd3dDevice, pd3dCommandList, L"Image/TrailImages/T_Sword_Slash_21.dds", 1, 1);
+	m_pTextureManager->LoadTexture(TextureType::TrailBaseTexture, pd3dDevice, pd3dCommandList, L"Image/TrailImages/T_Sword_Slash_20.dds", 1, 1);
+	m_pTextureManager->LoadTexture(TextureType::TrailBaseTexture, pd3dDevice, pd3dCommandList, L"Image/TrailImages/T_Sword_Slash_28.dds", 1, 1);
+
 	m_pTextureManager->LoadTexture(TextureType::TrailNoiseTexture, pd3dDevice, pd3dCommandList, L"Image/TrailImages/VAP1_Noise_4.dds", 1, 1);
 	m_pTextureManager->LoadTexture(TextureType::TrailNoiseTexture, pd3dDevice, pd3dCommandList, L"Image/TrailImages/VAP1_Noise_14.dds", 1, 1);
+	m_pTextureManager->LoadTexture(TextureType::TrailNoiseTexture, pd3dDevice, pd3dCommandList, L"Image/TrailImages/VAP1_Noise_8.dds", 1, 1);
+	m_pTextureManager->LoadTexture(TextureType::TrailNoiseTexture, pd3dDevice, pd3dCommandList, L"Image/TrailImages/VAP1_Noise_17.dds", 1, 1);
+	m_pTextureManager->LoadTexture(TextureType::TrailNoiseTexture, pd3dDevice, pd3dCommandList, L"Image/TrailImages/T_Random_06.dds", 1, 1);
+
+	m_pTextureManager->LoadTexture(TextureType::UniformTexture, pd3dDevice, pd3dCommandList, L"Image/UnifromImages/Cracks 3.dds", 0, 0);
 
 	m_pTextureManager->LoadTexture(TextureType::UniformTexture, pd3dDevice, pd3dCommandList, L"Image/UnifromImages/Cracks 3.dds", 0, 0);
 
@@ -486,7 +534,7 @@ void CSimulatorScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 		std::unique_ptr<CGameObject> m_pSpriteAttackObject = std::make_unique<CParticleObject>(m_pTextureManager->LoadTextureIndex(TextureType::BillBoardTexture, L"Image/BillBoardImages/Explode_8x8.dds"), pd3dDevice, pd3dCommandList, GetGraphicsRootSignature(), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), 2.0f, XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT2(2.0f, 2.0f), MAX_PARTICLES, m_pParticleShader.get(), SPHERE_PARTICLE);
 		m_pSpriteAttackObjects.push_back(std::move(m_pSpriteAttackObject));
 	}
-	
+
 	for (int i = 0; i < 1; ++i)
 	{
 		std::unique_ptr<CGameObject> m_pParticleObject = std::make_unique<CParticleObject>(m_pTextureManager->LoadTextureIndex(TextureType::ParticleTexture, L"Image/ParticleImages/RoundSoftParticle.dds"), pd3dDevice, pd3dCommandList, GetGraphicsRootSignature(), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), 2.0f, XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT2(2.0f, 2.0f), MAX_PARTICLES, m_pParticleShader.get(), SPHERE_PARTICLE);
@@ -533,11 +581,18 @@ void CSimulatorScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 	}
 
 	m_pMainCharacter->m_pSwordTrailReference = m_pSwordTrailObjects.data();
+
+	std::unique_ptr<AutoResetListener> pAutoResetlistener = std::make_unique<AutoResetListener>();
+	pAutoResetlistener->SetScene(this);
+	m_pListeners.push_back(std::move(pAutoResetlistener));
+	CMessageDispatcher::GetInst()->RegisterListener(MessageType::AUTO_RESET, m_pListeners.back().get(), nullptr);
+
+	SpawnAndSetMonster();
 }
 void CSimulatorScene::Enter(HWND hWnd)
 {
-	if(m_pTrailParticleObjects)
-	CPlayerParticleObject::GetInst()->SetTrailParticleObjects(m_pTrailParticleObjects.get());
+	if (m_pTrailParticleObjects)
+		CPlayerParticleObject::GetInst()->SetTrailParticleObjects(m_pTrailParticleObjects.get());
 }
 void CSimulatorScene::Update(float fTimeElapsed)
 {
@@ -555,7 +610,7 @@ void CSimulatorScene::UpdateObjects(float fTimeElapsed)
 	animation_comp_params.pObjects = &m_pEnemys;
 	animation_comp_params.fElapsedTime = fTimeElapsed;
 	CMessageDispatcher::GetInst()->Dispatch_Message<AnimationCompParams>(MessageType::UPDATE_OBJECT, &animation_comp_params, m_pMainCharacter->m_pStateMachine->GetCurrentState());
-	
+
 	for (int i = 0; i < m_pEnemys.size(); ++i)
 		m_pEnemys[i]->Update(fTimeElapsed);
 
@@ -566,29 +621,46 @@ void CSimulatorScene::UpdateObjects(float fTimeElapsed)
 	m_pMainCharacter->Update(fTimeElapsed);
 
 
-	m_pSimulaterCamera->Update(XMFLOAT3{ 0.0f, 0.0f, 0.0f }, fTimeElapsed);
+	if (dynamic_cast<CSimulatorThirdPersonCamera*>(m_pSimulaterCamera.get())) {
+		XMFLOAT3 xmf3PlayerPos = XMFLOAT3{
+		((CKnightPlayer*)m_pMainCharacter.get())->m_pSkinnedAnimationController->m_pRootMotionObject->GetWorld()._41,
+		 m_pMainCharacter->GetPosition().y,
+		((CKnightPlayer*)m_pMainCharacter.get())->m_pSkinnedAnimationController->m_pRootMotionObject->GetWorld()._43 };
+		xmf3PlayerPos.y += MeterToUnit(0.9f);
+
+		m_pSimulaterCamera->Update(xmf3PlayerPos, fTimeElapsed);
+	}
+	else {
+		m_pSimulaterCamera->Update(XMFLOAT3{ 0.0f, 0.0f, 0.0f }, fTimeElapsed);
+	}
 
 	CameraUpdateParams camera_update_params;
 	camera_update_params.pCamera = m_pSimulaterCamera.get();
 	camera_update_params.pPlayer = m_pMainCharacter.get();
 	camera_update_params.fElapsedTime = fTimeElapsed;
 	CMessageDispatcher::GetInst()->Dispatch_Message<CameraUpdateParams>(MessageType::UPDATE_CAMERA, &camera_update_params, m_pMainCharacter->m_pStateMachine->GetCurrentState());
+
+	TCHAR buf[256];
+	XMFLOAT3 pos = m_pMainCharacter->GetPosition();
+	_stprintf_s(buf, 256, _T("%f %f %f\n"), pos.x, pos.y, pos.z);
+	OutputDebugString(buf);
 }
 
 void CSimulatorScene::OnPrepareRenderTarget(ID3D12GraphicsCommandList* pd3dCommandList, int nRenderTargets, D3D12_CPU_DESCRIPTOR_HANDLE* pd3dRtvCPUHandles, D3D12_CPU_DESCRIPTOR_HANDLE d3dDepthStencilBufferDSVCPUHandle)
 {
 	m_pPostProcessShader->OnPrepareRenderTarget(pd3dCommandList, 1, pd3dRtvCPUHandles, d3dDepthStencilBufferDSVCPUHandle);
-	
+
 }
 void CSimulatorScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed, float fCurrentTime, CCamera* pCamera)
-{     
+{
 	m_pSimulaterCamera->RegenerateViewMatrix();
 	m_pSimulaterCamera->OnPrepareRender(pd3dCommandList);
 
 	m_pLight->Render(pd3dCommandList);
 
-	m_pMap->RenderTerrain(pd3dCommandList);
-	
+	if (m_pMap)
+		m_pMap->RenderTerrain(pd3dCommandList);
+
 	CModelShader::GetInst()->Render(pd3dCommandList, 1);
 
 	D3D12_GPU_VIRTUAL_ADDRESS d3dGpuVirtualAddress = m_pd3dcbDisolveParams->GetGPUVirtualAddress();
@@ -631,7 +703,7 @@ void CSimulatorScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float f
 #ifdef PostProcessing
 	m_pPostProcessShader->Render(pd3dCommandList, pCamera);
 #endif // PostProcessing
-	
+
 	m_pTextureManager->SetTextureDescriptorHeap(pd3dCommandList);
 	m_pTextureManager->UpdateShaderVariables(pd3dCommandList);
 
@@ -673,7 +745,7 @@ void CSimulatorScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float f
 	m_pSlashHitObjects->Render(pd3dCommandList, nullptr, m_pSlashHitShader.get());
 
 	//m_pSwordTrailShader->Render(pd3dCommandList, pCamera, 0);
-	
+
 
 	if (m_pd3dComputeRootSignature) pd3dCommandList->SetComputeRootSignature(m_pd3dComputeRootSignature.Get());
 
@@ -727,15 +799,15 @@ void CSimulatorScene::OnPostRender()
 	((CParticleObject*)m_pTrailParticleObjects.get())->OnPostRender();
 }
 
-void CSimulatorScene::ResetMonster()
+void CSimulatorScene::ResetMonster(int index, XMFLOAT3 xmf3Position)
 {
 	XMFLOAT3 offset{ 86.4804 , 0.0f, -183.7856 };
-	XMFLOAT3 xmf3LookAt{ m_pMainCharacter->GetPosition().x, m_pEnemys[0]->GetPosition().y, m_pMainCharacter->GetPosition().z};
+	XMFLOAT3 xmf3LookAt{ m_pMainCharacter->GetPosition().x, m_pEnemys[index]->GetPosition().y, m_pMainCharacter->GetPosition().z};
 	
-	m_pEnemys[0]->SetPosition(XMFLOAT3(47.5 + offset.x, 100, 50 + offset.z));
-	m_pEnemys[0]->SetScale(2.0,2.0,2.0);
-	m_pEnemys[0]->SetLookAt(xmf3LookAt);
-	(dynamic_cast<CMonster*>(m_pEnemys[0].get()))->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
+	m_pEnemys[index]->SetPosition(XMFLOAT3(xmf3Position.x + offset.x, 0.0f, xmf3Position.z + offset.z));
+	m_pEnemys[index]->SetScale(2.0,2.0,2.0);
+	m_pEnemys[index]->SetLookAt(xmf3LookAt);
+	(dynamic_cast<CMonster*>(m_pEnemys[index].get()))->m_pStateMachine->ChangeState(Idle_Monster::GetInst());
 }
 
 void CSimulatorScene::SetPlayerAnimationSet(int nSet)
@@ -760,6 +832,109 @@ void CSimulatorScene::SetPlayerAnimationSet(int nSet)
 	m_pMainCharacter->m_pSkinnedAnimationController->SetTrackAnimationSet(0, nSet);
 	m_pMainCharacter->m_pSkinnedAnimationController->m_fTime = 0.0f;
 	m_pMainCharacter->Animate(0.0f);
+}
+
+void CSimulatorScene::SetMonsterNum(int nMonsterNum)
+{
+	if(m_CurrentMonsterNum == nMonsterNum)
+		return;
+
+	for (int i = 0; i < m_pEnemys.size(); ++i)
+		m_pEnemys[i]->m_bEnable = false;
+
+	m_CurrentMonsterNum = nMonsterNum;
+
+	SpawnAndSetMonster();
+}
+
+void CSimulatorScene::SelectMonsterType(MONSTER_TYPE monster_type)
+{
+	if (m_CurrentMonsterType == monster_type)
+		return;
+	
+	for (int i = 0; i < m_pEnemys.size(); ++i)
+		m_pEnemys[i]->m_bEnable = false;
+
+	m_CurrentMonsterType = monster_type;
+
+	SpawnAndSetMonster();
+}
+
+void CSimulatorScene::SpawnAndSetMonster()
+{
+	for (int i = 0; i < m_pEnemys.size(); ++i)
+		m_pEnemys[i]->m_bEnable = false;
+
+	int m_iEnabledMonsterNum = 0;
+
+	XMFLOAT3 xmf3SpawnPosition = XMFLOAT3{ 0.0f, 0.0f, 0.0f };
+
+	if (m_CurrentMonsterNum == 1)
+		xmf3SpawnPosition = XMFLOAT3{ 47.5f, 0.0f, 50.0f };
+	else
+		xmf3SpawnPosition = XMFLOAT3{ 47.5f, 0.0f, 48.5f };
+
+	switch (m_CurrentMonsterType)
+	{
+	case MONSTER_TYPE::GOBLIN:
+		for (int i = 0; i < m_pEnemys.size(); ++i)
+		{
+			CGoblinObject* pGoblin = dynamic_cast<CGoblinObject*>(m_pEnemys[i].get());
+
+			if (pGoblin)
+			{
+				++m_iEnabledMonsterNum;
+				pGoblin->m_bEnable = true;
+				ResetMonster(i, xmf3SpawnPosition);
+
+				xmf3SpawnPosition.z += 1.5f;
+				
+				if (m_iEnabledMonsterNum == m_CurrentMonsterNum)
+					break;
+			}
+		}
+		break;
+	case MONSTER_TYPE::ORC:
+		for (int i = 0; i < m_pEnemys.size(); ++i)
+		{
+			COrcObject* pOrc = dynamic_cast<COrcObject*>(m_pEnemys[i].get());
+
+			if (pOrc)
+			{
+				++m_iEnabledMonsterNum;
+				pOrc->m_bEnable = true;
+				ResetMonster(i, xmf3SpawnPosition);
+
+				xmf3SpawnPosition.z += 1.5f;
+
+				if (m_iEnabledMonsterNum == m_CurrentMonsterNum)
+					break;
+			}
+		}
+		break;
+	case MONSTER_TYPE::SKELETON:
+		for (int i = 0; i < m_pEnemys.size(); ++i)
+		{
+			CSkeletonObject* pSkeleton = dynamic_cast<CSkeletonObject*>(m_pEnemys[i].get());
+
+			if (pSkeleton)
+			{
+				++m_iEnabledMonsterNum;
+				pSkeleton->m_bEnable = true;
+				ResetMonster(i, xmf3SpawnPosition);
+
+				xmf3SpawnPosition.z += 1.5f;
+
+				if (m_iEnabledMonsterNum == m_CurrentMonsterNum)
+					break;
+			}
+		}
+		break;
+	case MONSTER_TYPE::NONE:
+		break;
+	default:
+		break;
+	}
 }
 
 void CSimulatorScene::HandleCollision(const CollideParams& params)
@@ -797,7 +972,7 @@ void CSimulatorScene::HandleCollision(const CollideParams& params)
 	//	particleUpdown_comp_params.xmf3Position = params.xmf3CollidePosition;
 	//	CMessageDispatcher::GetInst()->Dispatch_Message<ParticleUpDownParams>(MessageType::UPDATE_UPDOWNPARTICLE, &particleUpdown_comp_params, Damaged_Monster::GetInst());
 	//}
-	
+
 	it = std::find_if(m_pSpriteAttackObjects.begin(), m_pSpriteAttackObjects.end(), [](const std::unique_ptr<CGameObject>& pBillBoardObject) {
 		if (((CParticleObject*)pBillBoardObject.get())->CheckCapacity())
 			return true;

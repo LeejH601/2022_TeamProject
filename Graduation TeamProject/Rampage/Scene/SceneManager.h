@@ -26,7 +26,7 @@ public:
 	void Update(float fTimeElapsed);
 
 	bool ProcessInput(HWND hWnd, DWORD dwDirection, float fTimeElapsed);
-	bool OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
+	SCENE_STATE OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
 	bool OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam, DWORD& dwDirection);
 
 	CScene* GetCurrentScene() { return m_pCurrentScene; };

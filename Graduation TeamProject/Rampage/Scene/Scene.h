@@ -15,6 +15,9 @@ protected:
 
 	CGameObject* m_pPlayer = nullptr;
 	std::vector<std::unique_ptr<IMessageListener>> m_pListeners;
+
+	POINT m_ptOldCursorPos;
+
 public:
 	std::shared_ptr<CPostProcessShader> m_pPostProcessShader = NULL;
 	std::shared_ptr<CHDRComputeShader> m_pHDRComputeShader;

@@ -50,6 +50,8 @@ public:
 	float m_fComboFullTime = 10.f;
 	float m_fComboTime = m_fComboFullTime;
 	bool m_bCombo = false;
+	bool m_bIsComboUpdate = false;
+	UINT m_nMaxComboCount = 0;
 
 	UINT m_iPotionN = 5;
 	int m_nRemainPotions;
@@ -81,7 +83,7 @@ public:
 	void Tmp();
 
 	void UpdateStamina(float fTimeElapsed);
-	void UpdateCombo(float fTimeElapsed);
+	void UpdateCombo();
 	void HandleDamage(CMonster* pMonster, float fDamage);
 	virtual void Move(const XMFLOAT3& xmf3Shift, bool bUpdateVelocity);
 	virtual void Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity, CCamera* pCamera);

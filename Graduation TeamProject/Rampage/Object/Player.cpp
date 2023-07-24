@@ -151,6 +151,17 @@ bool CPlayer::CheckCollision(CGameObject* pTargetObject)
 
 void CPlayer::Update(float fTimeElapsed)
 {
+	if (m_bIsComboUpdate) {
+		m_fComboTime = m_fComboFullTime;
+		m_bIsComboUpdate = false;
+	}
+	m_fComboTime -= fTimeElapsed;
+	if (m_fComboTime < 0.f)
+	{
+		m_fComboTime = m_fComboFullTime;
+		m_iCombo = 0;
+	}
+
 	m_fSkillGauge += fTimeElapsed * 10.f;
 	m_fTime += fTimeElapsed;
 	m_fInvincibleTime > 0.0f ? m_fInvincibleTime -= fTimeElapsed : m_fInvincibleTime = 0.0f;
@@ -169,7 +180,7 @@ void CPlayer::Update(float fTimeElapsed)
 	CPhysicsObject::Move(xmf3NewVelocity, false);
 
 	// 플레이어가 터레인보다 아래에 있지 않도록 하는 코드
-	if (m_pUpdatedContext) OnUpdateCallback(fTimeElapsed);
+	OnUpdateCallback(fTimeElapsed);
 
 	CPhysicsObject::Apply_Friction(fTimeElapsed);
 
@@ -244,9 +255,13 @@ void CPlayer::Tmp()
 	m_pSkinnedAnimationController->SetTrackAnimationSet(0, m_nAnimationNum++);
 }
 // ui 구하기, 
-void CPlayer::UpdateCombo(float fTimeElapsed)
+void CPlayer::UpdateCombo()
 {
 	m_iCombo++;
+	m_bIsComboUpdate = true;
+
+	if (m_nMaxComboCount < m_iCombo)
+		m_nMaxComboCount = m_iCombo;
 	//m_fComboTime -= fTimeElapsed;
 	//if (m_fComboTime < 0.f)
 	//{
@@ -269,8 +284,12 @@ void CPlayer::Reset()
 	m_pStateMachine->ChangeState(Idle_Player::GetInst());
 	//m_pStateMachine->SetPreviousState(Idle_Player::GetInst());
 	SetPosition(XMFLOAT3(57.0f, 3.5f, 225.0f));
-	//Rotate(0.0f, 165.0f, 0.0f);
 
+	m_xmf3Up = XMFLOAT3(0.0f, 1.0f, 0.0f);
+	m_xmf3Look = XMFLOAT3(0.0f, 0.0f, 1.0f);
+	m_xmf3Scale = XMFLOAT3(1.0f, 1.0f, 1.0f);
+
+	Rotate(0.0f, 165.0f, 0.0f);
 }
 
 #define KNIGHT_ROOT_MOTION
@@ -454,6 +473,7 @@ void CKnightPlayer::Animate(float fTimeElapsed)
 //#define SHOW_COLLIDE_MESH_NAME
 void CKnightPlayer::OnUpdateCallback(float fTimeElapsed)
 {
+	XMFLOAT3 xmf3ResultPlayerPos;
 	if (m_pUpdatedContext)
 	{
 		CMap* pMap = (CMap*)m_pUpdatedContext;
@@ -465,7 +485,7 @@ void CKnightPlayer::OnUpdateCallback(float fTimeElapsed)
 			m_pSkinnedAnimationController->m_pRootMotionObject->GetWorld()._43
 		};
 
-		XMFLOAT3 xmf3ResultPlayerPos = GetPosition();
+		xmf3ResultPlayerPos = GetPosition();
 
 		xmf3ResultPlayerPos.x = std::clamp(xmf3ResultPlayerPos.x, xmf3TerrainPos.x + TERRAIN_SPAN, xmf3TerrainPos.x + pTerrain->GetWidth() - TERRAIN_SPAN);
 		xmf3ResultPlayerPos.z = std::clamp(xmf3ResultPlayerPos.z, xmf3TerrainPos.z + TERRAIN_SPAN, xmf3TerrainPos.z + pTerrain->GetLength() - TERRAIN_SPAN);
@@ -493,10 +513,16 @@ void CKnightPlayer::OnUpdateCallback(float fTimeElapsed)
 			}
 		}
 		
-		SetPosition(xmf3ResultPlayerPos);
-
-		UpdateTransform(NULL);
+		
 	}
+	else {
+		xmf3ResultPlayerPos = GetPosition();
+		xmf3ResultPlayerPos.y = (xmf3ResultPlayerPos.y > 0.0f) ? xmf3ResultPlayerPos.y : 0.0f;
+	}
+
+	SetPosition(xmf3ResultPlayerPos);
+
+	UpdateTransform(NULL);
 }
 void CKnightPlayer::UpdateTransform(XMFLOAT4X4* pxmf4x4Parent)
 {

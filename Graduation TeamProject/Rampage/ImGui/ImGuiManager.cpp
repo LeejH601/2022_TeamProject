@@ -1317,6 +1317,8 @@ void CImGuiManager::SetUI()
 		ImGuiWindowFlags my_window_flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize;
 		ImGui::Begin(U8STR("시뮬레이터"), &show_simulator_scene, my_window_flags);
 
+		m_idMainSimulater = ImGui::GetID(U8STR("시뮬레이터"));
+
 		int my_image_width = 0.55f * m_lDesktopWidth;
 		int my_image_height = 0.55f * m_lDesktopHeight;
 		ImGui::Image((ImTextureID)m_pRTTexture->m_pd3dSrvGpuDescriptorHandles[0].ptr, ImVec2((float)my_image_width, (float)my_image_height));
@@ -1449,31 +1451,72 @@ void CImGuiManager::SetUI()
 			ImGui::End();
 		}
 
+		static bool autoResetMonster = false;
+
 		// 시뮬레이터 씬 보여주기 여부 설정 ImGui
 		ImGui::Checkbox(U8STR("시뮬레이터"), &show_simulator_scene);
-		;
-		// 플레이어 애니메이션 출력 버튼
-		if (ImGui::Button(U8STR("공격1")))
+
+		ImGui::SameLine(m_lDesktopWidth * 0.1f);
+
+		// 몬스터 자동 리셋
+		if (ImGui::Checkbox(U8STR("몬스터 자동 리셋"), &autoResetMonster))
 		{
-			if (show_simulator_scene)
-				CSimulatorScene::GetInst()->SetPlayerAnimationSet(0);
-			Player_Animation_Number = 0;
+			OutputDebugString(L"몬스터 자동 리셋: ");
+			autoResetMonster ? OutputDebugString(L"TRUE\n") : OutputDebugString(L"FALSE\n");
+			CSimulatorScene::GetInst()->SetAutoReset(autoResetMonster);
+		}
+
+
+		static int selectedMonsterType = 0;
+
+		const char* monsterTypes[] = { U8STR("고블린"), U8STR("오크"),  U8STR("스켈레톤") };
+		ImGui::Text(U8STR("몬스터 종족:")); ImGui::SameLine();
+
+		if (ImGui::Combo(U8STR("##monsterTypes"), &selectedMonsterType, monsterTypes, IM_ARRAYSIZE(monsterTypes))) {
+			switch (selectedMonsterType)
+			{
+			case 0:
+				CSimulatorScene::GetInst()->SelectMonsterType(MONSTER_TYPE::GOBLIN);
+				break;
+			case 1:
+				CSimulatorScene::GetInst()->SelectMonsterType(MONSTER_TYPE::ORC);
+				break;
+			case 2:
+				CSimulatorScene::GetInst()->SelectMonsterType(MONSTER_TYPE::SKELETON);
+				break;
+			default:
+				break;
+			}
+		};
+
+		static int selectedMonsterNum = 0;
+		ImGui::Text(U8STR("몬스터 숫자:")); ImGui::SameLine();
+		
+		if (ImGui::RadioButton("1##monsterNum", &selectedMonsterNum, 0))
+		{
+			OutputDebugString(L"몬스터 숫자 선택: 1\n");
+			CSimulatorScene::GetInst()->SetMonsterNum(1);
 		}
 		ImGui::SameLine();
-		if (ImGui::Button(U8STR("공격2")))
+		if (ImGui::RadioButton("3##monsterNum", &selectedMonsterNum, 1))
 		{
-			if (show_simulator_scene)
-				CSimulatorScene::GetInst()->SetPlayerAnimationSet(1);
-			Player_Animation_Number = 1;
+			OutputDebugString(L"몬스터 숫자 선택: 3\n");
+			CSimulatorScene::GetInst()->SetMonsterNum(3);
 		}
+
+		ImGui::RadioButton(U8STR("공격1##AttackNumber"), &Player_Animation_Number, 0); ImGui::SameLine();
+		ImGui::RadioButton(U8STR("공격2##AttackNumber"), &Player_Animation_Number, 1); ImGui::SameLine();
+		ImGui::RadioButton(U8STR("공격3##AttackNumber"), &Player_Animation_Number, 2); ImGui::SameLine(0.0f, m_lDesktopWidth * 0.0545f);
+
 		ImGui::SameLine();
-		if (ImGui::Button(U8STR("공격3")))
+
+		if (ImGui::Button(U8STR("공격"), ImVec2{ 0.0f, 0.0f }))
 		{
 			if (show_simulator_scene)
-				CSimulatorScene::GetInst()->SetPlayerAnimationSet(2);
-			Player_Animation_Number = 2;
+				CSimulatorScene::GetInst()->SetPlayerAnimationSet(Player_Animation_Number);
+			OutputDebugString(L"공격\n");
 		}
-		//ImGui::SameLine();
+		
 		if (CopyComponent)
 		{
 			CopyComponentData(pCurrentAnimation);
@@ -1485,6 +1528,8 @@ void CImGuiManager::SetUI()
 			PasteComponentData(pCurrentAnimation);
 			PasteComponent = false;
 		}
+
+		ImGui::Separator();
 
 		if (ImGui::CollapsingHeader(U8STR("특수 효과")))
 		{
@@ -1720,13 +1765,13 @@ void CImGuiManager::ShowParticleManager(CState<CPlayer>* pCurrentAnimation)
 		pParticleComponent->GetEmissive() = std::clamp(pParticleComponent->GetEmissive(), IMPACT_EMISSIVE_MIN, IMPACT_EMISSIVE_MAX);
 
 	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
-	ImGui::Checkbox("VelocityRotate##ParticleEffect", &pParticleComponent->GetRotateFactor());
+	ImGui::Checkbox(U8STR("진행 방향으로회전 On/Off##ParticleEffect"), &pParticleComponent->GetRotateFactor());
 
 	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
-	if (ImGui::DragFloat("FieldSpeed##ParticleEffect", &pParticleComponent->GetFieldSpeed(), DRAG_FLOAT_UNIT, 0.0f, FLT_MAX, "%.2f", 0))
+	if (ImGui::DragFloat(U8STR("노이즈 세기##ParticleEffect"), &pParticleComponent->GetFieldSpeed(), DRAG_FLOAT_UNIT, 0.0f, FLT_MAX, "%.2f", 0))
 		pParticleComponent->GetFieldSpeed() = std::clamp(pParticleComponent->GetFieldSpeed(), FLT_MIN, FLT_MAX);
 
-	ImGui::SetNextItemWidth(190.f);
+	/*ImGui::SetNextItemWidth(190.f);
 	if (ImGui::DragFloat("NoiseStrength##ParticleEffect", &pParticleComponent->GetNoiseStrength(), DRAG_FLOAT_UNIT, 0.0f, FLT_MAX, "%.2f", 0))
 		pParticleComponent->GetNoiseStrength() = std::clamp(pParticleComponent->GetNoiseStrength(), FLT_MIN, FLT_MAX);
 
@@ -1740,7 +1785,7 @@ void CImGuiManager::ShowParticleManager(CState<CPlayer>* pCurrentAnimation)
 
 	ImGui::SetNextItemWidth(190.f);
 	float* DirectionData = (float*)(&pParticleComponent->GetFieldMainDirection());
-	ImGui::InputFloat3("FieldMainDirection##ParticleEffect", DirectionData, "%.2f", 0);
+	ImGui::InputFloat3("FieldMainDirection##ParticleEffect", DirectionData, "%.2f", 0);*/
 
 	ImGui::End();
 }
@@ -2462,8 +2507,8 @@ void CImGuiManager::ShowDamageMoanSoundManager(CState<CPlayer>* pCurrentAnimatio
 void CImGuiManager::ShowCreationMenu()
 {
 
-	if (serverConnected == false)
-		ShowWorkshopLoginMenu();
+	/*if (serverConnected == false)
+		*/ShowWorkshopLoginMenu();
 
 	if (serverConnected == false)
 		return;
@@ -2471,7 +2516,7 @@ void CImGuiManager::ShowCreationMenu()
 	ImGuiWindowFlags my_window_flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_MenuBar;
 	bool* p_open = NULL;
 
-	ImGui::SetNextWindowSize(ImVec2(m_lDesktopWidth * 0.6f, 0.0f), ImGuiCond_Always);
+	ImGui::SetNextWindowSize(ImVec2(m_lDesktopWidth * 0.33f, 0.0f), ImGuiCond_Always);
 	ImGui::Begin(U8STR("창작 마당"), p_open, my_window_flags);
 
 	if (ImGui::BeginMenuBar())
@@ -2487,7 +2532,7 @@ void CImGuiManager::ShowCreationMenu()
 	}
 
 	{
-		ImGui::BeginChild("ChildL", ImVec2(ImGui::GetContentRegionAvail().x * 0.66f, 0.15f * m_lDesktopWidth), false);
+		ImGui::BeginChild("ChildL", ImVec2(ImGui::GetContentRegionAvail().x /** 0.66f*/, 0.15f * m_lDesktopWidth), false);
 
 		struct CreationItem {
 			CTexture* preview;
@@ -2526,9 +2571,11 @@ void CImGuiManager::ShowCreationMenu()
 				std::u8string id(reinterpret_cast<const char8_t*>(sId.c_str()));
 				std::u8string title(reinterpret_cast<const char8_t*>(stitle.c_str()));
 
-				vCreationItems[index++] = CreationItem{ nullptr,  id, title, record.nLike, record.nHate };
+				vCreationItems[index++] = CreationItem{ nullptr, id, title, record.nLike, record.nHate };
 			}
 		};
+
+		records.clear();
 
 		if (vCreationItems.size() == 0) {
 			ProcessWorkshop(eSERVICE_TYPE::UPDATE_TABLE);
@@ -2589,15 +2636,16 @@ void CImGuiManager::ShowCreationMenu()
 		}
 
 		// Sample 1
-		ImGui::Columns(8, "Creation Column", false);
+		ImGui::Columns(4, "Creation Column", false);
 		ImGui::Separator();
 		//ImGui::Text(U8STR("이미지")); ImGui::NextColumn();
 		ImGui::Text(U8STR("ID")); ImGui::NextColumn();
 		ImGui::Text(U8STR("이름")); ImGui::NextColumn();
-		ImGui::Text(U8STR("좋아요")); ImGui::NextColumn();
+		ImGui::Text(U8STR("")); ImGui::NextColumn();
+		/*ImGui::Text(U8STR("좋아요")); ImGui::NextColumn();
 		ImGui::Text(U8STR("싫어요")); ImGui::NextColumn();
 		ImGui::Text(U8STR("신고")); ImGui::NextColumn();
-		ImGui::Text(U8STR("불러오기")); ImGui::NextColumn();
+		ImGui::Text(U8STR("불러오기")); ImGui::NextColumn();*/
 		ImGui::Text(U8STR("다운로드")); ImGui::NextColumn();
 		ImGui::Separator();
 
@@ -2611,13 +2659,14 @@ void CImGuiManager::ShowCreationMenu()
 
 			/*ImGui::Image((ImTextureID)m_pRTTexture->m_pd3dSrvGpuDescriptorHandles[0].ptr,
 				ImVec2((float)my_image_width, (float)my_image_height));*/
-			ImGui::NextColumn();
+			//ImGui::NextColumn();
 			ImGui::Text(reinterpret_cast<const char*>(vCreationItems[index].id.c_str())); ImGui::NextColumn();
 			ImGui::Text(reinterpret_cast<const char*>(vCreationItems[index].name.c_str())); ImGui::NextColumn();
-			ImGui::Text(std::to_string(vCreationItems[index].nGoodSign).c_str()); ImGui::NextColumn();
+			ImGui::Text(""); ImGui::NextColumn();
+			/*ImGui::Text(std::to_string(vCreationItems[index].nGoodSign).c_str()); ImGui::NextColumn();
 			ImGui::Text(std::to_string(vCreationItems[index].nBadSign).c_str()); ImGui::NextColumn();
 			ImGui::Button(U8STR("신고하기"), ImVec2(-FLT_MIN, 0.0f)); ImGui::NextColumn();
-			ImGui::Button(U8STR("불러오기"), ImVec2(-FLT_MIN, 0.0f)); ImGui::NextColumn();
+			ImGui::Button(U8STR("불러오기"), ImVec2(-FLT_MIN, 0.0f)); ImGui::NextColumn();*/
 
 			std::u8string downloadTag = u8"다운로드##download";
 			downloadTag += std::u8string(reinterpret_cast<const char8_t*>(std::to_string(i).c_str()));
@@ -2658,7 +2707,7 @@ void CImGuiManager::ShowCreationMenu()
 			ImGui::Begin(U8STR("창작마당 업로드"), p_Upload_open, upload_window_flags);
 
 			ImGui::Text(U8STR("프리셋 이름")); ImGui::SameLine();
-			static char presetName[45] = " ";
+			static char presetName[45] = "";
 
 			ImGui::InputText(U8STR(" ##Upload"), presetName, sizeof(presetName));
 
@@ -2694,7 +2743,8 @@ void CImGuiManager::ShowCreationMenu()
 		ImGui::EndChild();
 	}
 
-	ImGui::SameLine(0.0f, 0.01f * m_lDesktopWidth);
+	// Search ImGUI
+	/*ImGui::SameLine(0.0f, 0.01f * m_lDesktopWidth);
 
 	{
 		static std::u8string searchText;
@@ -2718,7 +2768,7 @@ void CImGuiManager::ShowCreationMenu()
 		}
 		ImGui::EndChild();
 		ImGui::PopStyleVar();
-	}
+	}*/
 	ImGui::End();
 }
 void CImGuiManager::ShowWorkshopLoginMenu()
@@ -2739,9 +2789,32 @@ void CImGuiManager::ShowWorkshopLoginMenu()
 	ImGui::Text(U8STR("PASSWORD")); ImGui::SameLine();
 	ImGui::InputText(U8STR(" ##Password"), LoginInfo.Password, sizeof(LoginInfo.Password));
 
+	static bool bSuccessLoginMenu = false;
+
 	if (ImGui::Button(U8STR("로그인##SineUp"))) {
 		serverConnected = ConnectServer(eSERVICE_TYPE::SINE_IN, LoginInfo);
+		bSuccessLoginMenu = true;
 	}
+
+	if (bSuccessLoginMenu) {
+		if (serverConnected) {
+			ImGui::SetNextWindowSize(ImVec2(m_lDesktopWidth * 0.2f, 0.0f), ImGuiCond_Always);
+			ImGui::Begin(U8STR("로그인 성공"), p_open, my_window_flags);
+			if (ImGui::Button(U8STR("확인##SineUpMessage"))) {
+				bSuccessLoginMenu = false;
+			}
+			ImGui::End();
+		}
+		else {
+			ImGui::SetNextWindowSize(ImVec2(m_lDesktopWidth * 0.2f, 0.0f), ImGuiCond_Always);
+			ImGui::Begin(U8STR("로그인 실패"), p_open, my_window_flags);
+			if (ImGui::Button(U8STR("확인##SineUpMessage"))) {
+				bSuccessLoginMenu = false;
+			}
+			ImGui::End();
+		}
+	}
+
 
 	static bool flag = false;
 	if (ImGui::Button(U8STR("회원가입##Login"))) {
@@ -2883,10 +2956,6 @@ bool CImGuiManager::ConnectServer(eSERVICE_TYPE serviceType, SineUp_Info& info)
 
 		m_pNetworkDevice->SendRequestLogin(loginInfo);
 		bool bApprove = m_pNetworkDevice->RecvApproveLogin();
-		if (bApprove)
-			std::cout << "Login Success!" << std::endl;
-		else
-			std::cout << "Login Failed!" << std::endl;
 
 		/*if (bApprove) {
 			m_pNetworkDevice->AccountInfo.UserID = result->getInt("User_ID");
@@ -2906,11 +2975,6 @@ bool CImGuiManager::ConnectServer(eSERVICE_TYPE serviceType, SineUp_Info& info)
 		int ret = 0;
 		m_pNetworkDevice->RecvApproveSineUp(ret);
 
-		if (ret == 0)
-			std::cout << "Failed Sine Up" << std::endl;
-		else
-			std::cout << "Success Sine Up" << std::endl;
-
 		return ret;
 	}
 	break;
@@ -2923,10 +2987,6 @@ bool CImGuiManager::ConnectServer(eSERVICE_TYPE serviceType, SineUp_Info& info)
 
 void CImGuiManager::ProcessWorkshop(eSERVICE_TYPE serviceType, void* pData)
 {
-	/*int input;
-	std::cout << "Upload : 0, DownLoad : 1, UpdateTable : 2, Next : 3, Prev : 4, Like : 5, Hate : 6" << std::endl;
-	std::cin >> input;
-	serviceType = (eSERVICE_TYPE)input;*/
 
 	if (serviceType == eSERVICE_TYPE::DOWNLOAD_RECORD ||
 		serviceType == eSERVICE_TYPE::INCREASE_LIKE ||

@@ -214,6 +214,7 @@ void CMonster::HandleDamage(CPlayer* pPlayer, float fDamage)
 
 		m_iPlayerAtkId = pPlayer->GetAtkId();
 		m_pChasingTargetObject = pPlayer;
+		pPlayer->UpdateCombo();
 
 		PlayerParams playerParams;
 		playerParams.pPlayer = pPlayer;
@@ -296,7 +297,7 @@ void CMonster::Update(float fTimeElapsed)
 		CPhysicsObject::Move(xmf3NewVelocity, false);
 
 		// 플레이어가 터레인보다 아래에 있지 않도록 하는 코드
-		if (m_pUpdatedContext) CPhysicsObject::OnUpdateCallback(fTimeElapsed);
+		CPhysicsObject::OnUpdateCallback(fTimeElapsed);
 
 		XMFLOAT3 xmf3ShakeVec = Vector3::ScalarProduct(Vector3::Normalize(GetRight()), MeterToUnit(m_fShakeDistance), false);
 		m_xmf3CalPos = Vector3::Add(m_xmf3Position, xmf3ShakeVec);

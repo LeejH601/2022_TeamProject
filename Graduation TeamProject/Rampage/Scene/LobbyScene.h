@@ -32,7 +32,7 @@ private:
 	std::unique_ptr<CSunLightShader> m_pSunLightShader;
 
 	LobbySceneType m_iSceneType = LobbySceneType::LOGO_Scene;
-	POINT m_ptOldCursorPos;
+
 	RECT m_ScreendRect;
 public:
 	DECLARE_SINGLE(CLobbyScene);

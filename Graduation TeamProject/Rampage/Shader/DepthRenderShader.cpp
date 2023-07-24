@@ -252,25 +252,27 @@ void CDepthRenderShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCam
 
 	CShader::Render(pd3dCommandList, 0);
 	if (!m_bisBakedMap) {
-		for (int i = 0; i < m_pMapObjects.size(); ++i)
-		{
-			//m_pObjects[i]->Animate(fTimeElapsed);
-			m_pMapObjects[i]->Render(pd3dCommandList, false);
-		}
-		
-		/*::SynchronizeResourceTransition(pd3dCommandList, m_pDepthTexture.get()->GetResource(4), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_COPY_DEST);
-		::SynchronizeResourceTransition(pd3dCommandList, m_pDepthTexture.get()->GetResource(0), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_COPY_SOURCE);
-		pd3dCommandList->CopyResource(m_pDepthTexture.get()->GetResource(4), m_pDepthTexture.get()->GetResource(0));
-		::SynchronizeResourceTransition(pd3dCommandList, m_pDepthTexture.get()->GetResource(4), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_RENDER_TARGET);
-		::SynchronizeResourceTransition(pd3dCommandList, m_pDepthTexture.get()->GetResource(0), D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_RENDER_TARGET);
-		
-		m_bisBakedMap = true;*/
+		if (m_pMapObjects.size() > 0) {
+			for (int i = 0; i < m_pMapObjects.size(); ++i)
+			{
+				//m_pObjects[i]->Animate(fTimeElapsed);
+				m_pMapObjects[i]->Render(pd3dCommandList, false);
+			}
 
-		::SynchronizeResourceTransition(pd3dCommandList, m_pBakedMapObjectDepthTexture.get()->GetResource(0), D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_COPY_DEST);
-		::SynchronizeResourceTransition(pd3dCommandList, m_pDepthTexture.get()->GetResource(0), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_COPY_SOURCE);
-		pd3dCommandList->CopyResource(m_pBakedMapObjectDepthTexture.get()->GetResource(0), m_pDepthTexture.get()->GetResource(0));
-		::SynchronizeResourceTransition(pd3dCommandList, m_pBakedMapObjectDepthTexture.get()->GetResource(0), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_COMMON);
-		::SynchronizeResourceTransition(pd3dCommandList, m_pDepthTexture.get()->GetResource(0), D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_RENDER_TARGET);
+			/*::SynchronizeResourceTransition(pd3dCommandList, m_pDepthTexture.get()->GetResource(4), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_COPY_DEST);
+			::SynchronizeResourceTransition(pd3dCommandList, m_pDepthTexture.get()->GetResource(0), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_COPY_SOURCE);
+			pd3dCommandList->CopyResource(m_pDepthTexture.get()->GetResource(4), m_pDepthTexture.get()->GetResource(0));
+			::SynchronizeResourceTransition(pd3dCommandList, m_pDepthTexture.get()->GetResource(4), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_RENDER_TARGET);
+			::SynchronizeResourceTransition(pd3dCommandList, m_pDepthTexture.get()->GetResource(0), D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_RENDER_TARGET);
+
+			m_bisBakedMap = true;*/
+
+			::SynchronizeResourceTransition(pd3dCommandList, m_pBakedMapObjectDepthTexture.get()->GetResource(0), D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_COPY_DEST);
+			::SynchronizeResourceTransition(pd3dCommandList, m_pDepthTexture.get()->GetResource(0), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_COPY_SOURCE);
+			pd3dCommandList->CopyResource(m_pBakedMapObjectDepthTexture.get()->GetResource(0), m_pDepthTexture.get()->GetResource(0));
+			::SynchronizeResourceTransition(pd3dCommandList, m_pBakedMapObjectDepthTexture.get()->GetResource(0), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_COMMON);
+			::SynchronizeResourceTransition(pd3dCommandList, m_pDepthTexture.get()->GetResource(0), D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_RENDER_TARGET);
+		}
 		m_bisBakedMap = true;
 	}
 	else {
