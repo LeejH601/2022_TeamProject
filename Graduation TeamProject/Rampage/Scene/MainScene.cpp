@@ -788,11 +788,6 @@ SCENE_RETURN_TYPE CMainTMPScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMe
 		case VK_BACK:
 			if (m_CurrentMouseCursorMode == MOUSE_CUROSR_MODE::THIRD_FERSON_MODE)
 			{
-				m_pCurrentCamera = m_pFloatingCamera.get();
-				Locator.SetMouseCursorMode(MOUSE_CUROSR_MODE::FLOATING_MODE);
-				m_CurrentMouseCursorMode = MOUSE_CUROSR_MODE::FLOATING_MODE;
-				PostMessage(hWnd, WM_ACTIVATE, 0, 0);
-
 				while (m_iCursorHideCount > 0)
 				{
 					m_iCursorHideCount--;
@@ -800,7 +795,6 @@ SCENE_RETURN_TYPE CMainTMPScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMe
 				}
 				ClipCursor(NULL);
 			}
-
 			return SCENE_RETURN_TYPE::RETURN_PREVIOUS_SCENE;
 		case '1':
 		{
@@ -1691,38 +1685,41 @@ void CMainTMPScene::OnPrepareRenderTarget(ID3D12GraphicsCommandList* pd3dCommand
 }
 void CMainTMPScene::Enter(HWND hWnd)
 {
-	m_fGameStartTime = Locator.GetTimer()->GetTotalTime();
+	if (m_fGameStartTime == -FLT_MAX)
+	{
+		m_fGameStartTime = Locator.GetTimer()->GetTotalTime();
 
-	// 씨네마틱 카메라로 게임을 시작하게 설정
-	RECT screenRect;
-	GetWindowRect(hWnd, &screenRect);
-	m_ScreendRect = screenRect;
-	SetCursorPos(screenRect.left + (screenRect.right - screenRect.left) / 2,
-		screenRect.top + (screenRect.bottom - screenRect.top) / 2);
+		// 씨네마틱 카메라로 게임을 시작하게 설정
+	
+		((CCinematicCamera*)(m_pCinematicSceneCamera.get()))->AddPlayerCameraInfo((CPlayer*)m_pPlayer, m_pMainSceneCamera.get());
+		((CCinematicCamera*)(m_pCinematicSceneCamera.get()))->AddCameraInfo(m_vCinematicCameraLocations[0].get());
 
+		if (dynamic_cast<CDollyCamera*>(m_pCinematicSceneCamera.get())) {
+			dynamic_cast<CDollyCamera*>(m_pCinematicSceneCamera.get())->CaculateCubicPolyData();
+		}
 
-	((CCinematicCamera*)(m_pCinematicSceneCamera.get()))->AddPlayerCameraInfo((CPlayer*)m_pPlayer, m_pMainSceneCamera.get());
-	((CCinematicCamera*)(m_pCinematicSceneCamera.get()))->AddCameraInfo(m_vCinematicCameraLocations[0].get());
+		((CCinematicCamera*)(m_pCinematicSceneCamera.get()))->PlayCinematicCamera();
 
-	if (dynamic_cast<CDollyCamera*>(m_pCinematicSceneCamera.get())) {
-		dynamic_cast<CDollyCamera*>(m_pCinematicSceneCamera.get())->CaculateCubicPolyData();
+		// 시작은 씨네마틱 카메라
+		m_pCurrentCamera = m_pCinematicSceneCamera.get();
+		m_curSceneProcessType = SCENE_PROCESS_TYPE::CINEMATIC;
+
+		dynamic_cast<CCinematicCamera*>(m_pCinematicPlayerCamera.get())->SetLocalObject(m_pPlayer);
+
+		if (m_pTrailParticleObjects)
+			CPlayerParticleObject::GetInst()->SetTrailParticleObjects(m_pTrailParticleObjects.get());
 	}
-
-	((CCinematicCamera*)(m_pCinematicSceneCamera.get()))->PlayCinematicCamera();
-
-	// 시작은 씨네마틱 카메라
-	m_pCurrentCamera = m_pCinematicSceneCamera.get();
-	m_curSceneProcessType = SCENE_PROCESS_TYPE::CINEMATIC;
-
+	
 	Locator.SetMouseCursorMode(MOUSE_CUROSR_MODE::THIRD_FERSON_MODE);
 	m_CurrentMouseCursorMode = MOUSE_CUROSR_MODE::THIRD_FERSON_MODE;
 
-	dynamic_cast<CCinematicCamera*>(m_pCinematicPlayerCamera.get())->SetLocalObject(m_pPlayer);
-
-	if (m_pTrailParticleObjects)
-		CPlayerParticleObject::GetInst()->SetTrailParticleObjects(m_pTrailParticleObjects.get());
-
 	if (m_iCursorHideCount < 1) {
+		RECT screenRect;
+		GetWindowRect(hWnd, &screenRect);
+		m_ScreendRect = screenRect;
+		SetCursorPos(screenRect.left + (screenRect.right - screenRect.left) / 2,
+			screenRect.top + (screenRect.bottom - screenRect.top) / 2);
+
 		m_iCursorHideCount++;
 		ShowCursor(false);
 		ClipCursor(&screenRect);

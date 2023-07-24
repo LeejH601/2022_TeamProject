@@ -60,7 +60,7 @@ private:
 	RECT m_ScreendRect;
 
 	bool m_bGameStart = false;
-	float m_fGameStartTime;
+	float m_fGameStartTime = -FLT_MAX;
 
 	int m_iStageNum = 0;
 	int m_iTotalMonsterNum = 0;
