@@ -340,9 +340,11 @@ bool CSimulatorScene::ProcessInput(HWND hWnd, DWORD dwDirection, float fTimeElap
 	{
 		SetCursor(NULL);
 		GetCursorPos(&ptCursorPos);
-		cxDelta = (float)(ptCursorPos.x - m_ptOldCursorPos.x) / 100.0f;
-		cyDelta = (float)(ptCursorPos.y - m_ptOldCursorPos.y) / 100.0f;
-		SetCursorPos(ptCursorPos.x, ptCursorPos.y);
+		cxDelta = (float)(ptCursorPos.x - m_ptOldCursorPos.x) * 0.25f;
+		cyDelta = (float)(ptCursorPos.y - m_ptOldCursorPos.y) * 0.25f;
+
+		m_ptOldCursorPos.x = ptCursorPos.x;
+		m_ptOldCursorPos.y = ptCursorPos.y;
 
 		m_pSimulaterCamera->ProcessInput(dwDirection, cxDelta, cyDelta, fTimeElapsed);
 	}
