@@ -170,4 +170,5 @@ public:
 	virtual void HandleOnGround(const OnGroundParams& params);
 
 	void UIReset();
+	void MainSceneReset(HWND hWnd);
 };

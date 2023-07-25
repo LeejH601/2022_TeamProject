@@ -272,7 +272,7 @@ void CLobbyScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 
 	pUIObject = std::make_unique<CUIObject>(2, pd3dDevice, pd3dCommandList, 10.f);
 	pUIObject->SetSize(XMFLOAT2(5983.f * 0.075f, 1137.f * 0.075f));
-	pUIObject->SetScreenPosition(XMFLOAT2(FRAME_BUFFER_WIDTH * 0.3f, FRAME_BUFFER_HEIGHT * 0.21f));
+	pUIObject->SetScreenPosition(XMFLOAT2(FRAME_BUFFER_WIDTH * 0.3055f, FRAME_BUFFER_HEIGHT * 0.21f));
 	pUIObject->SetTextureIndex(m_pTextureManager->LoadTotalTextureIndex(TextureType::UITexture, L"Image/UiImages/GameExit.dds"));
 	m_pUIObject.push_back(std::move(pUIObject));
 

@@ -945,6 +945,14 @@ CResultFrame::CResultFrame(int iTextureIndex, ID3D12Device* pd3dDevice, ID3D12Gr
 	pUIObject->SetTextureIndex(pTextureManager->LoadTotalTextureIndex(TextureType::UITexture, L"Image/UiImages/Number/Numbers2.dds"));
 	dynamic_cast<CNumberObject*>(pUIObject.get())->UpdateNumber(100);
 	m_pChildUI.push_back(std::move(pUIObject));
+
+
+	pUIObject = std::make_unique<CFlickerObject>(2, pd3dDevice, pd3dCommandList, 10.f);
+	pUIObject->SetColor(XMFLOAT3(1.5f, 1.5f, 1.0f));
+	pUIObject->SetSize(XMFLOAT2(570.f * 0.85f, 87.f * 0.85f));
+	pUIObject->SetScreenPosition(XMFLOAT2(FRAME_BUFFER_WIDTH * 0.5f, FRAME_BUFFER_HEIGHT * 0.1f));
+	pUIObject->SetTextureIndex(pTextureManager->LoadTotalTextureIndex(TextureType::UITexture, L"Image/UiImages/Press.dds"));
+	m_pChildUI.push_back(std::move(pUIObject));
 }
 
 void CResultFrame::SetEnable(bool bEnable)
@@ -1409,4 +1417,95 @@ void CAppearObject::SetEnable(bool bEnable)
 	if (!bEnable)
 		m_fAlpha = 0.f;
 	m_bEnable = bEnable;
+}
+
+CFlickerObject::CFlickerObject(int iTextureIndex, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fSize) : CUIObject(pd3dDevice, pd3dCommandList, fSize)
+{
+}
+
+CFlickerObject::~CFlickerObject()
+{
+}
+
+void CFlickerObject::Flicker(float fTimeElapsed)
+{
+	m_fTime += fTimeElapsed;
+	switch (m_iFlickerType)
+	{
+	case CFlickerObject::INVISIBLE:
+		if (m_fFlickerTime < m_fTime)
+		{
+			m_iFlickerType = CFlickerObject::VISIBLE;
+			m_fTime = 0.f;
+		}
+		break;
+	case CFlickerObject::VISIBLE:
+		if (m_fDrawTime < m_fTime)
+		{
+			m_iFlickerType = CFlickerObject::INVISIBLE;
+			m_fTime = 0.f;
+		}
+		break;
+	default:
+		break;
+	}
+
+}
+
+void CFlickerObject::Update(float fTimeElapsed)
+{
+	Flicker(fTimeElapsed); // 깜빡임시간 체크
+	if (m_bEnable) {
+		//m_xmf2ScreenPosition5 = XMFLOAT2()
+		// 화면 크기를 기준으로 Size 설정 최대 크기 (MAX WIDTH: FRAME_BUFFER_WIDTH, MAX_HEIGHT: FRAME_BUFFER_HEIGHT)
+		m_xmf4x4World._11 = m_xmf2Size.x / (FRAME_BUFFER_WIDTH);
+		m_xmf4x4World._22 = m_xmf2Size.y / (FRAME_BUFFER_HEIGHT);
+		m_xmf4x4World._33 = m_iTextureIndex; // TextureIndex
+		//1, 023x((정규 좌표) + 1.0)x0.5
+
+		m_xmf4x4World._12 = 0.f; // U1
+		m_xmf4x4World._13 = 1.f; // U2
+		m_xmf4x4World._14 = 0.f; // V
+		m_xmf4x4World._24 = 1.f;
+
+		m_xmf4x4World._21 = 1.f;
+		m_xmf4x4World._23 = m_fAlpha; // RGBN // m_xmfColor
+		// -1 ~ 1
+		m_xmf4x4World._41 = (m_xmf2ScreenPosition.x / FRAME_BUFFER_WIDTH);
+		m_xmf4x4World._42 = (m_xmf2ScreenPosition.y / FRAME_BUFFER_HEIGHT);
+		//(m_xmf2ScreenPosition.y * 2.f) / (FRAME_BUFFER_HEIGHT); // -1 ~ 1
+		m_xmf4x4World._43 = 0.f;
+
+		// Color
+		m_xmf4x4World._21 = m_xmf3Color.x;
+		m_xmf4x4World._31 = m_xmf3Color.y;
+		m_xmf4x4World._44 = m_xmf3Color.z;
+
+
+		m_xmf4x4World._34 = 0.f;
+	}
+}
+
+void CFlickerObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, bool b_UseTexture, CCamera* pCamera)
+{
+	if (((m_iFlickerType == CFlickerObject::INVISIBLE) || (!m_bEnable)))
+		return;
+
+	if (m_pMesh)
+	{
+		// UI Size 정보 Update
+		// 
+		// CGameObject의 정보를 넘길 버퍼가 있고, 해당 버퍼에 대한 CPU 포인터가 있으면 UpdateShaderVariables 함수를 호출한다.
+
+		UpdateShaderVariables(pd3dCommandList);
+		// 여기서 메쉬의 렌더를 한다.
+		m_pMesh->OnPreRender(pd3dCommandList);
+
+		//m_tRect[0] = { (LONG)(FRAME_BUFFER_WIDTH * 0.15f), (LONG)(FRAME_BUFFER_HEIGHT * 0.15f) , (LONG)(FRAME_BUFFER_WIDTH * 0.35f) , (LONG)(FRAME_BUFFER_HEIGHT * 0.2f) };
+		//pd3dCommandList->RSSetScissorRects(1, &m_tRect[0]);
+		m_pMesh->Render(pd3dCommandList, 0);
+	}
+
+	if (m_pChild) m_pChild->Render(pd3dCommandList, b_UseTexture, pCamera);
+	if (m_pSibling) m_pSibling->Render(pd3dCommandList, b_UseTexture, pCamera);
 }

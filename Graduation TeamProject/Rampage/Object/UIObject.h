@@ -249,3 +249,25 @@ private:
 	float m_fTime = 0.f;
 	float m_fMaxTime = 90.0f;
 };
+
+class CFlickerObject : public CUIObject
+{
+
+public:
+	enum FlickerType
+	{
+		INVISIBLE,
+		VISIBLE,
+		FlickerType_END
+	};
+	CFlickerObject(int iTextureIndex, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fSize);
+	virtual ~CFlickerObject();
+	virtual void Flicker(float fTimeElapsed);
+	virtual void Update(float fTimeElapsed);
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, bool b_UseTexture, CCamera* pCamera = NULL);
+protected:
+	FlickerType m_iFlickerType = FlickerType::INVISIBLE;
+	float m_fFlickerTime = 0.6f;
+	float m_fDrawTime = 1.4f;
+	float m_fTime = 0.f;
+};

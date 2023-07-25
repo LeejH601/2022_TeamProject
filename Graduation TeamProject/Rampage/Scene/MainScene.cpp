@@ -835,35 +835,6 @@ SCENE_RETURN_TYPE CMainTMPScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMe
 		}
 		break;
 		case '3':
-			if (dynamic_cast<CUIObject*>(m_pUIObject[13].get())->Reset())
-			{
-				if (m_CurrentMouseCursorMode == MOUSE_CUROSR_MODE::THIRD_FERSON_MODE)
-				{
-					m_pCurrentCamera = m_pFloatingCamera.get();
-					Locator.SetMouseCursorMode(MOUSE_CUROSR_MODE::FLOATING_MODE);
-					m_CurrentMouseCursorMode = MOUSE_CUROSR_MODE::FLOATING_MODE;
-					PostMessage(hWnd, WM_ACTIVATE, 0, 0);
-
-					while (m_iCursorHideCount > 0)
-					{
-						m_iCursorHideCount--;
-						ShowCursor(true);
-					}
-					ClipCursor(NULL);
-				}
-				UIReset();
-				((CPlayer*)m_pPlayer)->Reset();
-				((CCinematicCamera*)(m_pCinematicSceneCamera.get()))->ClearCameraInfo();
-				m_iStageNum = 0;
-				for (int i = 0; i < m_pEnemys.size(); i++)
-				{
-					CMonster* pMonster = dynamic_cast<CMonster*>(m_pEnemys[i].get());
-					CMonsterPool::GetInst()->SetNonActiveMonster(pMonster->GetMonsterType(), pMonster);
-				}
-				m_iTotalMonsterNum = 0;
-
-				return SCENE_RETURN_TYPE::SWITCH_LOGOSCENE;
-			}
 			break;
 		case 'f':
 		case 'F':
@@ -986,7 +957,14 @@ SCENE_RETURN_TYPE CMainTMPScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMe
 			break;
 		}
 	default:
+
 		break;
+	}
+
+	if (dynamic_cast<CUIObject*>(m_pUIObject[13].get())->Reset())
+	{
+		MainSceneReset(hWnd);
+		return SCENE_RETURN_TYPE::SWITCH_LOGOSCENE;
 	}
 
 	return SCENE_RETURN_TYPE::NONE;
@@ -1411,6 +1389,8 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pUIObject.push_back(std::move(pUIObject));
 
 
+	
+
 	pUIObject = std::make_unique<CResultFrame>(2, pd3dDevice, pd3dCommandList, 10.f, m_pTextureManager.get()); // 13
 	pUIObject->SetEnable(false);
 	m_pUIObject.push_back(std::move(pUIObject));
@@ -1418,7 +1398,6 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	//ChargeIcon
 	pUIObject = std::make_unique<CSquareBar>(2, pd3dDevice, pd3dCommandList, 10.f, m_pTextureManager.get()); // 14
 	m_pUIObject.push_back(std::move(pUIObject));
-
 
 
 	m_StageInfoMap.emplace(std::pair<int, StageInfo>(0,
@@ -2093,7 +2072,7 @@ void CMainTMPScene::LoadTextureObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/SkillGauge.dds", 0, 0);
 	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/Gradation.dds", 0, 0);
 	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/SkillFrame.dds", 0, 0);
-
+	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/Press.dds", 0, 0);
 
 	m_pTextureManager->LoadTexture(TextureType::UniformTexture, pd3dDevice, pd3dCommandList, L"Image/UnifromImages/Cracks 3.dds", 0, 0);
 
@@ -2182,7 +2161,37 @@ void CMainTMPScene::HandleOnGround(const OnGroundParams& params)
 	}
 }
 
+void CMainTMPScene::MainSceneReset(HWND hWnd)
+{
+
+	if (m_CurrentMouseCursorMode == MOUSE_CUROSR_MODE::THIRD_FERSON_MODE)
+	{
+		m_pCurrentCamera = m_pFloatingCamera.get();
+		Locator.SetMouseCursorMode(MOUSE_CUROSR_MODE::FLOATING_MODE);
+		m_CurrentMouseCursorMode = MOUSE_CUROSR_MODE::FLOATING_MODE;
+		PostMessage(hWnd, WM_ACTIVATE, 0, 0);
+
+		while (m_iCursorHideCount > 0)
+		{
+			m_iCursorHideCount--;
+			ShowCursor(true);
+		}
+		ClipCursor(NULL);
+	}
+	UIReset();
+	((CPlayer*)m_pPlayer)->Reset();
+	((CCinematicCamera*)(m_pCinematicSceneCamera.get()))->ClearCameraInfo();
+	m_iStageNum = 0;
+	for (int i = 0; i < m_pEnemys.size(); i++)
+	{
+		CMonster* pMonster = dynamic_cast<CMonster*>(m_pEnemys[i].get());
+		CMonsterPool::GetInst()->SetNonActiveMonster(pMonster->GetMonsterType(), pMonster);
+	}
+	m_iTotalMonsterNum = 0;
+}
+
 void CMainTMPScene::UIReset()
 {
 	dynamic_cast<CUIObject*>(m_pUIObject[14].get())->Reset();
 }
+
