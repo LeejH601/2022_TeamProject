@@ -287,7 +287,7 @@ void CPlayer::Reset()
 
 	m_xmf3Up = XMFLOAT3(0.0f, 1.0f, 0.0f);
 	m_xmf3Look = XMFLOAT3(0.0f, 0.0f, 1.0f);
-	m_xmf3Scale = XMFLOAT3(1.0f, 1.0f, 1.0f);
+	m_xmf3Scale = XMFLOAT3(2.0f, 2.0f, 2.0f);
 
 	Rotate(0.0f, 165.0f, 0.0f);
 }

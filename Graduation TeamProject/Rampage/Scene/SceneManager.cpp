@@ -106,6 +106,7 @@ bool CSceneManager::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPAR
 	case SCENE_RETURN_TYPE::RETURN_PREVIOUS_SCENE:
 		if (m_pCurrentScene == m_pMainScene.get())
 		{
+			dynamic_cast<CMainTMPScene*>(m_pMainScene.get())->AllBackgroundSoundStop();
 			m_pCurrentScene = m_pLobbyScene.get();
 			Locator.SetMouseCursorMode(MOUSE_CUROSR_MODE::FLOATING_MODE);
 			PostMessage(hWnd, WM_ACTIVATE, 0, 0);
@@ -119,11 +120,12 @@ bool CSceneManager::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPAR
 	case SCENE_RETURN_TYPE::SWITCH_LOGOSCENE:
 		if (m_pCurrentScene == m_pMainScene.get())
 		{
+			dynamic_cast<CMainTMPScene*>(m_pMainScene.get())->AllBackgroundSoundStop();
 			m_pCurrentScene = m_pLobbyScene.get();
 			Locator.SetMouseCursorMode(MOUSE_CUROSR_MODE::FLOATING_MODE);
 			PostMessage(hWnd, WM_ACTIVATE, 0, 0);
 			dynamic_cast<CLobbyScene*>(m_pCurrentScene)->SetSceneType((UINT)LobbySceneType::LOGO_Scene);
-			CSoundManager::GetInst()->PlaySound("Sound/Background/Logo Bgm.wav", 0.4f, 0.5f);
+			CSoundManager::GetInst()->PlaySound("Sound/Background/Ambient 8.wav", 1.0f, 0.5f);
 			CImGuiManager::GetInst()->GetChangeBeforeScene() = false;
 		}
 		break;
