@@ -231,6 +231,9 @@ void CMonster::HandleDamage(CPlayer* pPlayer, float fDamage)
 
 void CMonster::HandleAllyDamagedMessage(CGameObject* pPlayer)
 {
+	if (m_bIsDummy)
+		return;
+
 	if (m_pStateMachine->GetCurrentState() == Idle_Monster::GetInst() ||
 		m_pStateMachine->GetCurrentState() == Wander_Monster::GetInst())
 	{
