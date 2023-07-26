@@ -1987,8 +1987,6 @@ void CMainTMPScene::UIUpdate(CPlayer* pPlayer)
 		for (int i = 0; i < m_pEnemys.size(); i++)
 			if (m_pEnemys[i]->m_bEnable) {
 				CurrentHp += max(0.f, dynamic_cast<CMonster*>(m_pEnemys[i].get())->m_fHP);
-				OutputDebugString(std::to_wstring(dynamic_cast<CMonster*>(m_pEnemys[i].get())->m_fHP).c_str());
-				OutputDebugString(L"\n");
 			}
 
 		dynamic_cast<CBarObject*>(m_pUIObject[7].get())->Set_Value(CurrentHp, stageInfo.m_fTotalHP);
@@ -2165,6 +2163,9 @@ void CMainTMPScene::MainSceneReset(HWND hWnd)
 void CMainTMPScene::UIReset()
 {
 	dynamic_cast<CUIObject*>(m_pUIObject[14].get())->Reset();
+
+	m_pUIObject[6]->m_bEnable = false;
+	m_pUIObject[7]->m_bEnable = false;
 }
 
 void CMainTMPScene::AllBackgroundSoundStop()
