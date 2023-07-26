@@ -739,13 +739,6 @@ SCENE_RETURN_TYPE CMainTMPScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMe
 	case WM_KEYDOWN:
 		switch (wParam)
 		{
-		case 'm':
-		case 'M':
-			m_pBreakScreenShader->SetEnable(true);
-			break;
-		case 'L':
-			((CPlayer*)m_pPlayer)->Tmp();
-			break;
 		case VK_ESCAPE:
 			::PostQuitMessage(0);
 			break;
@@ -1769,6 +1762,8 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 
 
 	CModelShader::GetInst()->Render(pd3dCommandList, 0);
+	D3D12_GPU_VIRTUAL_ADDRESS d3dGpuVirtualAddress = m_pd3dcbDisolveParams->GetGPUVirtualAddress();
+	pd3dCommandList->SetGraphicsRootConstantBufferView(7, d3dGpuVirtualAddress);
 
 	if (m_pPlayer)
 	{
@@ -1777,8 +1772,7 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 
 	m_pMap->RenderMapObjects(pd3dCommandList);
 
-	D3D12_GPU_VIRTUAL_ADDRESS d3dGpuVirtualAddress = m_pd3dcbDisolveParams->GetGPUVirtualAddress();
-	pd3dCommandList->SetGraphicsRootConstantBufferView(7, d3dGpuVirtualAddress);
+	
 
 
 	static float trailUpdateT = 0.0f;

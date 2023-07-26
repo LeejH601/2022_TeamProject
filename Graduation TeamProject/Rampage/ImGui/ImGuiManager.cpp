@@ -2915,13 +2915,13 @@ void CImGuiManager::OnDestroy()
 #define SERVERPORT 9000
 char* address = (char*)"25.34.202.175";
 
-const char* GetAddress() {
+std::string GetAddress() {
 	std::ifstream in{ "config.txt" };
 
 	std::string ipString;
 	in >> ipString;
 
-	return ipString.c_str();
+	return ipString;
 };
 
 bool CImGuiManager::ConnectServer(eSERVICE_TYPE serviceType, SineUp_Info& info)
@@ -2943,7 +2943,8 @@ bool CImGuiManager::ConnectServer(eSERVICE_TYPE serviceType, SineUp_Info& info)
 
 		memset(&serveraddr, 0, sizeof(serveraddr));
 		serveraddr.sin_family = AF_INET;
-		inet_pton(AF_INET, GetAddress(), &serveraddr.sin_addr);
+		std::string ip = GetAddress();
+		inet_pton(AF_INET, ip.c_str(), &serveraddr.sin_addr);
 
 		serveraddr.sin_port = htons(SERVERPORT);
 		retval = connect(sock, (struct sockaddr*)&serveraddr, sizeof(serveraddr));
