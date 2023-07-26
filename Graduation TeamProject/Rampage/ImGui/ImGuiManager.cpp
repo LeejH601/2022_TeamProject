@@ -834,6 +834,9 @@ void DataLoader::LoadComponentSet(FILE* pInFile, CState<CPlayer>* pState)
 				else if (!strcmp(buf, "<ParticleIndex>:"))
 				{
 					pParticleComponent->SetTextureIndex(ReadIntegerFromFile(pInFile));
+					std::shared_ptr<CTexture> pTexture = CSimulatorScene::GetInst()->GetTextureManager()->GetTexture(TextureType::ParticleTexture);
+					int iTextureIndex = pParticleComponent->GetTextureIndex();
+					pParticleComponent->SetTotalRowColumn(pTexture->GetRow(iTextureIndex), pTexture->GetColumn(iTextureIndex));
 				}
 				else if (!strcmp(buf, "<Alpha>:"))
 				{
@@ -1724,7 +1727,10 @@ void CImGuiManager::ShowParticleManager(CState<CPlayer>* pCurrentAnimation)
 	}
 
 	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
-	if (ImGui::Combo(U8STR("텍스쳐##ParticleEffect"), (int*)(&pParticleComponent->GetTextureIndex()), items.data(), items.size()))
+	if (ImGui::Combo(U8STR("텍스쳐##ParticleEffect"), (int*)(&pParticleComponent->GetTextureIndex()), items.data(), items.size())) {
+		int textureIndex = pParticleComponent->GetTextureIndex();
+		pParticleComponent->SetTotalRowColumn(pTexture->GetRow(textureIndex), pTexture->GetColumn(textureIndex));
+	}
 
 		int my_image_width = 0.2f * m_lDesktopHeight;
 	int my_image_height = 0.2f * m_lDesktopHeight;
