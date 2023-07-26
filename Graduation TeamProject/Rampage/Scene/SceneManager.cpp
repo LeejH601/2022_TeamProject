@@ -57,9 +57,9 @@ void CSceneManager::Update(float fTimeElapsed)
 	m_pCurrentScene->Update(fTimeElapsed);
 }
 
-bool CSceneManager::ProcessInput(HWND hWnd, DWORD dwDirection, float fTimeElapsed)
+bool CSceneManager::ProcessInput(HWND hWnd, float fTimeElapsed)
 {
-	m_pCurrentScene->ProcessInput(hWnd, dwDirection, fTimeElapsed);
+	m_pCurrentScene->ProcessInput(hWnd, fTimeElapsed);
 
 	return false;
 }
@@ -82,27 +82,15 @@ SCENE_STATE CSceneManager::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, 
 	return SCENE_STATE::NONE;
 }
 
-bool CSceneManager::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam, DWORD& dwDirection)
+bool CSceneManager::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
 {
-	SCENE_RETURN_TYPE scene_return_type = m_pCurrentScene->OnProcessingKeyboardMessage(hWnd, nMessageID, wParam, lParam, dwDirection);
+	SCENE_RETURN_TYPE scene_return_type = m_pCurrentScene->OnProcessingKeyboardMessage(hWnd, nMessageID, wParam, lParam);
 
 
 	switch (scene_return_type)
 	{
 	case SCENE_RETURN_TYPE::NONE:
 		break;
-	/*case SCENE_RETURN_TYPE::POP_LOGOSCENE:
-		if (m_pCurrentScene == m_pLobbyScene.get()) {
-			if (dynamic_cast<CLobbyScene*>(m_pCurrentScene))
-				dynamic_cast<CLobbyScene*>(m_pCurrentScene)->SetSceneType((UINT)(LobbySceneType::SIMULATOR_Scene));
-		}
-		break;
-	case SCENE_RETURN_TYPE::POP_SIMULATORSCENE:
-		if (m_pCurrentScene == m_pLobbyScene.get()) {
-			m_pMainScene->Enter(hWnd);
-			m_pCurrentScene = m_pMainScene.get();
-		}
-		break;*/
 	case SCENE_RETURN_TYPE::RETURN_PREVIOUS_SCENE:
 		if (m_pCurrentScene == m_pMainScene.get())
 		{
@@ -129,7 +117,6 @@ bool CSceneManager::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPAR
 			CImGuiManager::GetInst()->GetChangeBeforeScene() = false;
 		}
 		break;
-		
 	default:
 		break;
 	}

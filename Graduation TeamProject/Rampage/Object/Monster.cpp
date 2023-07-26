@@ -450,17 +450,14 @@ CGoblinObject::CGoblinObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 {
 	m_fHP = 75.0f;
 	m_fTotalHP = 75.0f;
-	m_fStrikingPower = 10.0f + RandomFloatInRange(-1.5f, 1.5f);;
+	m_fStrikingPower = 10.0f + RandomFloatInRange(-1.5f, 1.5f);
+	m_fStrikingPower = 100.0f;
+
 	m_fSpeedKperH = 15.0f + RandomFloatInRange(-1.5f, 1.5f);
 	m_fSpeedUperS = MeterToUnit(m_fSpeedKperH * 1000.0f) / 3600.0f;
 	m_fAttackRange = MeterToUnit(0.8f);
 
 	m_MonsterType = MONSTER_TYPE::GOBLIN;
-
-	// When Using ATK3
-	/*m_fAtkStartTime = 0.53f;
-	m_fAtkEndTime = 0.69f;*/
-
 	m_fAtkStartTime = 0.66f;
 	m_fAtkEndTime = 0.98f;
 

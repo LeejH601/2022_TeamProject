@@ -90,6 +90,8 @@ public:
 	virtual ~CCamera();
 
 	void Init(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+	void Reset();
+
 	void OnPrepareRender(ID3D12GraphicsCommandList* pd3dCommandList);
 	void OnPostRender();
 

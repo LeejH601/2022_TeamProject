@@ -25,9 +25,9 @@ public:
 	void OnPostRender();
 	void Update(float fTimeElapsed);
 
-	bool ProcessInput(HWND hWnd, DWORD dwDirection, float fTimeElapsed);
+	bool ProcessInput(HWND hWnd, float fTimeElapsed);
 	SCENE_STATE OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
-	bool OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam, DWORD& dwDirection);
+	bool OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
 
 	CScene* GetCurrentScene() { return m_pCurrentScene; };
 	CScene* GetMainScene() { 

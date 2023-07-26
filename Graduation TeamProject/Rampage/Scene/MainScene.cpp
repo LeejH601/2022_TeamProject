@@ -730,7 +730,7 @@ bool CMainTMPScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM 
 
 	return 0;
 }
-SCENE_RETURN_TYPE CMainTMPScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam, DWORD& dwDirection)
+SCENE_RETURN_TYPE CMainTMPScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
 {
 	MOUSE_CUROSR_MODE eMouseMode = Locator.GetMouseCursorMode();
 
@@ -833,7 +833,7 @@ SCENE_RETURN_TYPE CMainTMPScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMe
 			break;
 		case 'f':
 		case 'F':
-			((CPlayer*)m_pPlayer)->Tmp();
+			//((CPlayer*)m_pPlayer)->Tmp();
 			break;
 		case 'w':
 		case 'W':
@@ -952,13 +952,20 @@ SCENE_RETURN_TYPE CMainTMPScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMe
 			break;
 		}
 	default:
-
 		break;
 	}
 
 	if (dynamic_cast<CUIObject*>(m_pUIObject[13].get())->Reset())
 	{
 		MainSceneReset(hWnd);
+
+		while (m_iCursorHideCount > 0)
+		{
+			m_iCursorHideCount--;
+			ShowCursor(true);
+		}
+		ClipCursor(NULL);
+
 		return SCENE_RETURN_TYPE::SWITCH_LOGOSCENE;
 	}
 
@@ -1447,7 +1454,7 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 			XMFLOAT3{ 113.664360f, 3.016271f, 123.066483f },
 			12.5f}} }));
 }
-bool CMainTMPScene::ProcessInput(HWND hWnd, DWORD dwDirection, float fTimeElapsed)
+bool CMainTMPScene::ProcessInput(HWND hWnd, float fTimeElapsed)
 {
 	if (m_curSceneProcessType == SCENE_PROCESS_TYPE::CINEMATIC)
 		return true;
@@ -2143,24 +2150,15 @@ void CMainTMPScene::HandleOnGround(const OnGroundParams& params)
 
 void CMainTMPScene::MainSceneReset(HWND hWnd)
 {
-
-	if (m_CurrentMouseCursorMode == MOUSE_CUROSR_MODE::THIRD_FERSON_MODE)
-	{
-		m_pCurrentCamera = m_pFloatingCamera.get();
-		Locator.SetMouseCursorMode(MOUSE_CUROSR_MODE::FLOATING_MODE);
-		m_CurrentMouseCursorMode = MOUSE_CUROSR_MODE::FLOATING_MODE;
-		PostMessage(hWnd, WM_ACTIVATE, 0, 0);
-
-		while (m_iCursorHideCount > 0)
-		{
-			m_iCursorHideCount--;
-			ShowCursor(true);
-		}
-		ClipCursor(NULL);
-	}
+	m_fGameStartTime = -FLT_MAX;
+	dwDirection = 0;
+	
 	UIReset();
+
 	((CPlayer*)m_pPlayer)->Reset();
 	((CCinematicCamera*)(m_pCinematicSceneCamera.get()))->ClearCameraInfo();
+	m_pMainSceneCamera->Reset();
+
 	m_iStageNum = 0;
 	for (int i = 0; i < m_pEnemys.size(); i++)
 	{

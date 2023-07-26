@@ -68,7 +68,6 @@ private:
 
 	_TCHAR						m_pszFrameRate[50];
 
-	DWORD dwDirection;
 	bool m_bIsSprint = false;
 public:
 	CGameFramework();

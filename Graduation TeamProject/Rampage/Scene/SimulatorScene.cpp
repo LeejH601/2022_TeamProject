@@ -330,7 +330,7 @@ void CSimulatorScene::CreateComputeRootSignature(ID3D12Device* pd3dDevice)
 	if (pd3dErrorBlob) pd3dErrorBlob->Release();
 }
 
-bool CSimulatorScene::ProcessInput(HWND hWnd, DWORD dwDirection, float fTimeElapsed)
+bool CSimulatorScene::ProcessInput(HWND hWnd, float fTimeElapsed)
 {
 	POINT ptCursorPos;
 	float cxDelta, cyDelta;
@@ -346,7 +346,7 @@ bool CSimulatorScene::ProcessInput(HWND hWnd, DWORD dwDirection, float fTimeElap
 		m_ptOldCursorPos.x = ptCursorPos.x;
 		m_ptOldCursorPos.y = ptCursorPos.y;
 
-		m_pSimulaterCamera->ProcessInput(dwDirection, cxDelta, cyDelta, fTimeElapsed);
+		m_pSimulaterCamera->ProcessInput(0, cxDelta, cyDelta, fTimeElapsed);
 	}
 
 

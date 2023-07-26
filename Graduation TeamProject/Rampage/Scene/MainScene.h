@@ -127,6 +127,8 @@ private:
 
 	std::string m_strMainAmbientSoundPath = "Sound/Background/Light Ambient 5 (Loop).wav";
 	std::string m_strMainActionSoundPath = "Sound/Background/Action 3 (Loop).wav";
+
+	DWORD dwDirection;
 public:
 	bool m_bPlayCutScene = false;
 
@@ -154,12 +156,12 @@ public:
 	virtual void SleepArticulations();
 
 	virtual bool OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
-	virtual SCENE_RETURN_TYPE OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam, DWORD& dwDirection);
+	virtual SCENE_RETURN_TYPE OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
 
 	virtual void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	virtual void ReleaseObjects() {}
 
-	virtual bool ProcessInput(HWND hWnd, DWORD dwDirection, float fTimeElapsed);
+	virtual bool ProcessInput(HWND hWnd, float fTimeElapsed);
 	virtual void UpdateObjects(float fTimeElapsed);
 	virtual void OnPrepareRenderTarget(ID3D12GraphicsCommandList* pd3dCommandList, int nRenderTargets, D3D12_CPU_DESCRIPTOR_HANDLE* pd3dRtvCPUHandles, D3D12_CPU_DESCRIPTOR_HANDLE d3dDepthStencilBufferDSVCPUHandle);
 	virtual void Enter(HWND hWnd);

@@ -36,6 +36,15 @@ void CCamera::Init(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComm
 	GenerateViewMatrix(XMFLOAT3(0.0f, 22.5f, -37.5f), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 1.0f, 0.0f));
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
+void CCamera::Reset()
+{
+	m_xmf3Right = XMFLOAT3(1.0f, 0.0f, 0.0f);
+	m_xmf3Look = XMFLOAT3(0.0f, 0.0f, 1.0f);
+	m_xmf3Up = XMFLOAT3(0.0f, 1.0f, 0.0f);
+	m_fPitch = 0.0f;
+	m_fRoll = 0.0f;
+	m_fYaw = 0.0f;
+}
 void CCamera::OnPrepareRender(ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	RegenerateViewMatrix();

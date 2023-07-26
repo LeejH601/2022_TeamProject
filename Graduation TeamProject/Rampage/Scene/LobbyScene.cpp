@@ -85,7 +85,7 @@ bool CLobbyScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wP
 	return 0;
 }
 
-SCENE_RETURN_TYPE CLobbyScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam, DWORD& dwDirection)
+SCENE_RETURN_TYPE CLobbyScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
 {
 	switch (nMessageID)
 	{
@@ -380,14 +380,14 @@ void CLobbyScene::OnPostRender()
 
 }
 
-bool CLobbyScene::ProcessInput(HWND hWnd, DWORD dwDirection, float fTimeElapsed)
+bool CLobbyScene::ProcessInput(HWND hWnd, float fTimeElapsed)
 {
 	switch (m_iSceneType)
 	{
 	case LobbySceneType::LOGO_Scene:
 		return true;
 	case LobbySceneType::SIMULATOR_Scene:
-		CSimulatorScene::GetInst()->ProcessInput(hWnd, dwDirection, fTimeElapsed);
+		CSimulatorScene::GetInst()->ProcessInput(hWnd, fTimeElapsed);
 		return true;
 	}
 

@@ -432,7 +432,7 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 		break;
 	}
 
-	m_pSceneManager->OnProcessingKeyboardMessage(hWnd, nMessageID, wParam, lParam, dwDirection);
+	m_pSceneManager->OnProcessingKeyboardMessage(hWnd, nMessageID, wParam, lParam);
 }
 LRESULT CALLBACK CGameFramework::OnProcessingWindowMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
 {
@@ -465,7 +465,7 @@ void CGameFramework::ProcessInput()
 	float cxDelta = 0.0f, cyDelta = 0.0f;
 	POINT ptCursorPos;
 	
-	m_pSceneManager->ProcessInput(m_hWnd, dwDirection, m_GameTimer.GetFrameTimeElapsed());
+	m_pSceneManager->ProcessInput(m_hWnd, m_GameTimer.GetFrameTimeElapsed());
 }
 void CGameFramework::UpdateObjects()
 {

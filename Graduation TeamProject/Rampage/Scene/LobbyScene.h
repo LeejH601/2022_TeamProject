@@ -44,7 +44,7 @@ public:
 
 	virtual bool OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
 
-	virtual SCENE_RETURN_TYPE OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam, DWORD& dwDirection);
+	virtual SCENE_RETURN_TYPE OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
 
 	virtual void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 
@@ -54,7 +54,7 @@ public:
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed, float fCurrentTime, CCamera* pCamera = NULL);
 	virtual void OnPostRender();
 
-	virtual bool ProcessInput(HWND hWnd, DWORD dwDirection, float fTimeElapsed);
+	virtual bool ProcessInput(HWND hWnd, float fTimeElapsed);
 
 	UINT GetSceneType() { return (UINT)m_iSceneType; };
 	void  SetSceneType(UINT iSceneType) { m_iSceneType = (LobbySceneType)iSceneType; };

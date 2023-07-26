@@ -281,8 +281,10 @@ void CPlayer::UpdateCombo()
 void CPlayer::Reset()
 {
 	m_iPotionN = 5; m_iCombo = 0; m_fStamina = 0.f; m_fHP = m_fTotalHP; m_fStamina = m_fTotalStamina;
+	m_dwDirectionCache = 0;
+	m_xmf3Velocity = XMFLOAT3{ 0.0f,0.0f, 0.0f };
+
 	m_pStateMachine->ChangeState(Idle_Player::GetInst());
-	//m_pStateMachine->SetPreviousState(Idle_Player::GetInst());
 	SetPosition(XMFLOAT3(57.0f, 3.5f, 225.0f));
 
 	m_xmf3Up = XMFLOAT3(0.0f, 1.0f, 0.0f);
