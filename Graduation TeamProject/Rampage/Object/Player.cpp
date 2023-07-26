@@ -426,6 +426,7 @@ bool CKnightPlayer::CheckCollision(CGameObject* pTargetObject)
 		_stprintf_s(pstrDebug, 256, _T("CheckCollision\n"));
 		OutputDebugString(pstrDebug);*/
 
+		m_fSkillGauge += 5.0f;
 
 		m_bMonsterAttack = true;
 		m_bCombo = true;
