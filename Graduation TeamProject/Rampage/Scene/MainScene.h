@@ -124,6 +124,9 @@ private:
 
 	std::list<RegisterArticulationParams> m_lRequestObjects;
 	std::list<RegisterArticulationSleepParams> m_lSleepObjects;
+
+	std::string m_strMainAmbientSoundPath = "Sound/Background/Light Ambient 5 (Loop).wav";
+	std::string m_strMainActionSoundPath = "Sound/Background/Action 3 (Loop).wav";
 public:
 	bool m_bPlayCutScene = false;
 
@@ -171,4 +174,5 @@ public:
 
 	void UIReset();
 	void MainSceneReset(HWND hWnd);
+	void AllBackgroundSoundStop();
 };

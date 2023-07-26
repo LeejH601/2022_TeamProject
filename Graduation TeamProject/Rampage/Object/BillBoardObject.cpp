@@ -385,6 +385,9 @@ CDetailObject::CDetailObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 
 	pShader->CreateShaderResourceViews(pd3dDevice, GrassTexture.get(), 0, 2);
 	SetShader(pShader, GrassTexture);
+
+	delete[] buf;
+	delete[] data;
 }
 
 void CDetailObject::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)

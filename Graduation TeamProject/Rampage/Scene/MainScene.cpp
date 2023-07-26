@@ -16,6 +16,7 @@
 #include "..\Shader\UIObjectShader.h"
 #include "..\Object\UIObject.h"
 #include "SimulatorScene.h"
+#include "..\Sound\SoundManager.h"
 #include <PxForceMode.h>
 
 #define MAX_GOBLIN_NUM		50
@@ -1703,6 +1704,9 @@ void CMainTMPScene::Enter(HWND hWnd)
 		ClipCursor(&screenRect);
 	}
 
+	CSoundManager::GetInst()->PlaySound(m_strMainAmbientSoundPath, 1.0f, 0.0f);
+	CSoundManager::GetInst()->PlaySound(m_strMainActionSoundPath, 1.0f, 0.0f);
+
 	PostMessage(hWnd, WM_ACTIVATE, 0, 0);
 }
 void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed, float fCurrentTime, CCamera* pCamera)
@@ -2171,3 +2175,8 @@ void CMainTMPScene::UIReset()
 	dynamic_cast<CUIObject*>(m_pUIObject[14].get())->Reset();
 }
 
+void CMainTMPScene::AllBackgroundSoundStop()
+{
+	CSoundManager::GetInst()->StopSound(m_strMainAmbientSoundPath);
+	CSoundManager::GetInst()->StopSound(m_strMainActionSoundPath);
+}
