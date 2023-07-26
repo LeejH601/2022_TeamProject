@@ -2507,8 +2507,8 @@ void CImGuiManager::ShowDamageMoanSoundManager(CState<CPlayer>* pCurrentAnimatio
 void CImGuiManager::ShowCreationMenu()
 {
 
-	/*if (serverConnected == false)
-		*/ShowWorkshopLoginMenu();
+	if (serverConnected == false)
+		ShowWorkshopLoginMenu();
 
 	if (serverConnected == false)
 		return;
@@ -2915,6 +2915,15 @@ void CImGuiManager::OnDestroy()
 #define SERVERPORT 9000
 char* address = (char*)"25.34.202.175";
 
+const char* GetAddress() {
+	std::ifstream in{ "config.txt" };
+
+	std::string ipString;
+	in >> ipString;
+
+	return ipString.c_str();
+};
+
 bool CImGuiManager::ConnectServer(eSERVICE_TYPE serviceType, SineUp_Info& info)
 {
 	static SOCKET sock;
@@ -2934,7 +2943,7 @@ bool CImGuiManager::ConnectServer(eSERVICE_TYPE serviceType, SineUp_Info& info)
 
 		memset(&serveraddr, 0, sizeof(serveraddr));
 		serveraddr.sin_family = AF_INET;
-		inet_pton(AF_INET, address, &serveraddr.sin_addr);
+		inet_pton(AF_INET, GetAddress(), &serveraddr.sin_addr);
 
 		serveraddr.sin_port = htons(SERVERPORT);
 		retval = connect(sock, (struct sockaddr*)&serveraddr, sizeof(serveraddr));
