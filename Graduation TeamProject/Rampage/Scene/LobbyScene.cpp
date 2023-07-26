@@ -171,18 +171,16 @@ void CLobbyScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 	m_pTextureManager->CreateCbvSrvUavDescriptorHeaps(pd3dDevice, 0, 100);
 	m_pTextureManager->LoadSphereBuffer(pd3dDevice, pd3dCommandList);
 
-	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/Logo2.dds", 0, 0);
-	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/GameStart.dds", 0, 0);
-	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/GameExit.dds", 0, 0);
+
 	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/LogoName.dds", 0, 0);
 	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/LogoMenuFrame.dds", 0, 0);
 	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/LogoMenuFrame2.dds", 0, 0);
 
 	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/LogoBackGround.dds", 0, 0);
-	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/ResultFrame.dds", 0, 0);
 
+	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/GameStart.dds", 0, 0);
+	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/GameExit.dds", 0, 0);
 	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/Simulator.dds", 0, 0);
-	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/InGame.dds", 0, 0);
 	m_pTextureManager->LoadTexture(TextureType::UITexture, pd3dDevice, pd3dCommandList, L"Image/UiImages/Exit.dds", 0, 0);
 
 	m_pTextureManager->CreateResourceView(pd3dDevice, 0);
@@ -276,12 +274,6 @@ void CLobbyScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 	pUIObject->SetTextureIndex(m_pTextureManager->LoadTotalTextureIndex(TextureType::UITexture, L"Image/UiImages/GameExit.dds"));
 	m_pUIObject.push_back(std::move(pUIObject));
 
-
-	//pUIObject = std::make_unique<CUIObject>(2, pd3dDevice, pd3dCommandList, 10.f);
-	//pUIObject->SetSize(XMFLOAT2(1890.f * 0.34f, 1417.f * 0.34f));
-	//pUIObject->SetScreenPosition(XMFLOAT2(FRAME_BUFFER_WIDTH * 0.3f, FRAME_BUFFER_HEIGHT * 0.8f));
-	//pUIObject->SetTextureIndex(m_pTextureManager->LoadTotalTextureIndex(TextureType::UITexture, L"Image/UiImages/Logo2.dds"));
-	//m_pUIObject.push_back(std::move(pUIObject));
 
 	m_pCamera = std::make_unique<CFloatingCamera>();
 	m_pCamera->Init(pd3dDevice, pd3dCommandList);
