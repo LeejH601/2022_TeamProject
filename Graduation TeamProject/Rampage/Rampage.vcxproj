@@ -879,6 +879,7 @@
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
+    <None Include="ClassDiagram1.cd" />
     <None Include="Shader\Header.hlsli" />
     <None Include="Shader\InputLayouts.hlsli" />
   </ItemGroup>

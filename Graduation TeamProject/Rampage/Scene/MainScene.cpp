@@ -1912,6 +1912,7 @@ void CMainTMPScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float fTi
 	if (m_pd3dComputeRootSignature) pd3dCommandList->SetComputeRootSignature(m_pd3dComputeRootSignature.Get());
 
 
+	if(Locator.GetBloomEffectUse())
 	{
 		m_pBloomComputeShader->Dispatch(pd3dCommandList);
 

@@ -28,6 +28,8 @@ class CLocator
 
 	MOUSE_CUROSR_MODE m_eMouseCursorMode = MOUSE_CUROSR_MODE::FLOATING_MODE;
 
+	bool m_bIsBloomEffectUse = true;
+
 public:
 	CLocator() = default;
 	~CLocator();
@@ -45,6 +47,11 @@ public:
 
 	void SetMouseCursorMode(MOUSE_CUROSR_MODE mode) { m_eMouseCursorMode = mode; };
 	MOUSE_CUROSR_MODE GetMouseCursorMode() { return m_eMouseCursorMode; };
+
+	void SetBloomEffectUse(bool flag) {
+		m_bIsBloomEffectUse = flag;
+	};
+	bool GetBloomEffectUse() { return m_bIsBloomEffectUse; };
 };
 
 extern CLocator Locator;

@@ -522,5 +522,6 @@
     <FxCompile Include="Shader\SkyBoxPixelShader.hlsl" />
     <FxCompile Include="Shader\SkyBoxVertexShader.hlsl" />
     <None Include="Shader\InputLayouts.hlsli" />
+    <None Include="ClassDiagram1.cd" />
   </ItemGroup>
 </Project>

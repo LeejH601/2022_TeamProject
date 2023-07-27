@@ -86,6 +86,18 @@ bool CSceneManager::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPAR
 {
 	SCENE_RETURN_TYPE scene_return_type = m_pCurrentScene->OnProcessingKeyboardMessage(hWnd, nMessageID, wParam, lParam);
 
+	switch (nMessageID)
+	{
+	case WM_KEYDOWN:
+		switch (wParam)
+		{
+		case 'b':
+		case 'B':
+			Locator.SetBloomEffectUse(!Locator.GetBloomEffectUse());
+			break;
+		}
+		break;
+	}
 
 	switch (scene_return_type)
 	{
