@@ -129,6 +129,19 @@ void CGameFramework::InitSound()
 	CSoundManager::GetInst()->RegisterSound("Sound/Voice/Orc/OrcMoan06.mp3", false, SOUND_CATEGORY::SOUND_VOICE);
 
 	CSoundManager::GetInst()->RegisterSound("Sound/Voice/Skeleton/SkeletonMoan01.mp3", false, SOUND_CATEGORY::SOUND_VOICE);
+	CSoundManager::GetInst()->RegisterSound("Sound/Voice/Skeleton/SkeletonMoan02.mp3", false, SOUND_CATEGORY::SOUND_VOICE);
+	CSoundManager::GetInst()->RegisterSound("Sound/Voice/Skeleton/SkeletonMoan03.mp3", false, SOUND_CATEGORY::SOUND_VOICE);
+	CSoundManager::GetInst()->RegisterSound("Sound/Voice/Skeleton/SkeletonMoan04.mp3", false, SOUND_CATEGORY::SOUND_VOICE);
+	CSoundManager::GetInst()->RegisterSound("Sound/Voice/Skeleton/SkeletonMoan05.mp3", false, SOUND_CATEGORY::SOUND_VOICE);
+	CSoundManager::GetInst()->RegisterSound("Sound/Voice/Skeleton/SkeletonMoan06.mp3", false, SOUND_CATEGORY::SOUND_VOICE);
+	CSoundManager::GetInst()->RegisterSound("Sound/Voice/Skeleton/SkeletonMoan07.mp3", false, SOUND_CATEGORY::SOUND_VOICE);
+	CSoundManager::GetInst()->RegisterSound("Sound/Voice/Skeleton/SkeletonMoan08.mp3", false, SOUND_CATEGORY::SOUND_VOICE);
+	CSoundManager::GetInst()->RegisterSound("Sound/Voice/Skeleton/SkeletonMoan09.mp3", false, SOUND_CATEGORY::SOUND_VOICE);
+	CSoundManager::GetInst()->RegisterSound("Sound/Voice/Skeleton/SkeletonMoan10.mp3", false, SOUND_CATEGORY::SOUND_VOICE);
+	CSoundManager::GetInst()->RegisterSound("Sound/Voice/Skeleton/SkeletonMoan11.mp3", false, SOUND_CATEGORY::SOUND_VOICE);
+	CSoundManager::GetInst()->RegisterSound("Sound/Voice/Skeleton/SkeletonMoan12.mp3", false, SOUND_CATEGORY::SOUND_VOICE);
+	CSoundManager::GetInst()->RegisterSound("Sound/Voice/Skeleton/SkeletonMoan13.mp3", false, SOUND_CATEGORY::SOUND_VOICE);
+	CSoundManager::GetInst()->RegisterSound("Sound/Voice/Skeleton/SkeletonMoan14.mp3", false, SOUND_CATEGORY::SOUND_VOICE);
 
 	CSoundManager::GetInst()->RegisterSound("Sound/UI/Menu Selection Click by NenadSimic Id-171697.wav", false, SOUND_CATEGORY::SOUND_UI_BUTTON);
 	CSoundManager::GetInst()->RegisterSound("Sound/UI/Water Click by Mafon2 Id-371274.wav", false, SOUND_CATEGORY::SOUND_UI_BUTTON_CLICK);

@@ -1,7 +1,7 @@
 #pragma once
 #define GOBLIN_MOAN_SOUND_NUM 3
 #define ORC_MOAN_SOUND_NUM 6
-#define SKELETON_MOAN_SOUND_NUM 1
+#define SKELETON_MOAN_SOUND_NUM 14
 
 enum class MessageType {
 	MONSTER_ATTACK,
