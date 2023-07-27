@@ -1097,7 +1097,7 @@ CSquareBar::~CSquareBar()
 void CSquareBar::Update(float fTimeElapsed)
 {
 	CUIObject::Update(fTimeElapsed);
-	m_fSkillGauge += fTimeElapsed;
+	//m_fSkillGauge += fTimeElapsed;
 
 	if (m_fSkillGauge >= m_fMaxSkillGague) // 0 ~ 0.8f
 	{
@@ -1115,7 +1115,7 @@ void CSquareBar::Update(float fTimeElapsed)
 	{
 		//m_pChildUI[2]->SetColor(XMFLOAT3(10.f, 10.f, 10.f));
 	}
-	dynamic_cast<CGradationObject*>(m_pChildUI[3].get())->SetGradationValue(m_fSkillGauge / 100.f);
+	dynamic_cast<CGradationObject*>(m_pChildUI[3].get())->SetGradationValue(m_fSkillGauge / m_fMaxSkillGague);
 }
 
 void CSquareBar::Render(ID3D12GraphicsCommandList* pd3dCommandList, bool b_UseTexture, CCamera* pCamera)

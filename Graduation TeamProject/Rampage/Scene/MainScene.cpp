@@ -823,7 +823,7 @@ SCENE_RETURN_TYPE CMainTMPScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMe
 		}
 		break;
 		case '3':
-			dynamic_cast<CSquareBar*>(m_pUIObject[14].get())->Set_Value(100.f, 100.f); // 현재 게이지값, 총 게이지값 셋팅
+			((CKnightPlayer*)m_pPlayer)->m_fSkillGauge = 90.f;
 			break;
 		case 'f':
 		case 'F':
@@ -1972,8 +1972,8 @@ void CMainTMPScene::UIUpdate(CPlayer* pPlayer)
 	dynamic_cast<CBarObject*>(m_pUIObject[3].get())->Set_Value(((CPhysicsObject*)m_pPlayer)->m_fHP, ((CPhysicsObject*)m_pPlayer)->m_fTotalHP);
 	dynamic_cast<CBarObject*>(m_pUIObject[5].get())->Set_Value(((CPlayer*)m_pPlayer)->m_fStamina, ((CPlayer*)m_pPlayer)->m_fTotalStamina);
 	dynamic_cast<CNumberObject*>(m_pUIObject[10].get())->UpdateNumber(((CPlayer*)m_pPlayer)->m_iCombo);
-	
-	dynamic_cast<CNumberObject*>(m_pUIObject[10].get())->SetScreenPosition(XMFLOAT2(FRAME_BUFFER_WIDTH * 0.88f - 40.f * (dynamic_cast<CNumberObject*>(m_pUIObject[10].get())->GetNumSize() - 1), FRAME_BUFFER_HEIGHT * 0.5f));
+	dynamic_cast<CSquareBar*>(m_pUIObject[14].get())->Set_Value(((CKnightPlayer*)m_pPlayer)->m_fSkillGauge, 90.f); // 현재 게이지값, 총 게이지값 셋팅
+
 	OutputDebugString(std::to_wstring(((CPlayer*)m_pPlayer)->m_fStamina).c_str());
 	OutputDebugString(L"\n");
 
