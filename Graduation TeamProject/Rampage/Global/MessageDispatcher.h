@@ -483,6 +483,9 @@ protected:
 	XMFLOAT2 m_fSize = XMFLOAT2(3.f, 3.f);
 	float m_fAlpha = 1.f;
 
+	int m_iTotalRow = 1;
+	int m_iTotalColumn = 1;
+
 	float m_fFieldSpeed;
 	float m_fNoiseStrength;
 	XMFLOAT3 m_xmf3FieldMainDirection;
@@ -543,6 +546,7 @@ public:
 	void SetEmissive(float fEmissive) { m_fEmissive = fEmissive; };
 	void SetRotateFacotr(bool input) { m_bSimulateRotate = input; };
 	void SetScaleFacotr(bool input) { m_bScaleFlag = input; };
+	void SetTotalRowColumn(int iTotalRow, int iTotalColumn) { m_iTotalColumn = iTotalColumn;  m_iTotalRow = iTotalRow; };
 
 	void SetTextureIndex(int iIndex) { m_iTextureIndex = iIndex; };
 	void SetTextureOffset(int iOffset) { m_iTextureOffset = iOffset; }

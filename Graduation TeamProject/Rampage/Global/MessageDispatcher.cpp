@@ -224,6 +224,7 @@ void ParticleComponent::HandleMessage(const Message& message, const ParticleComp
 		pParticle->SetEmit(true);
 		pParticle->SetSize(m_fSize);
 		pParticle->SetStartAlpha(m_fAlpha);
+		pParticle->SetTotalRowColumn(m_iTotalRow, m_iTotalColumn);
 		pParticle->SetColor(m_xmf3Color);
 		pParticle->SetSpeed(m_fSpeed);
 		pParticle->SetLifeTime(m_fLifeTime);
