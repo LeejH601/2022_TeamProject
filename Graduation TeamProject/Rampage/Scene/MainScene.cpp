@@ -79,9 +79,6 @@ void CMainTMPScene::HandleMonsterDeadMessage()
 {
 	m_iTotalMonsterNum -= 1;
 
-	OutputDebugString(std::to_wstring(m_iTotalMonsterNum).c_str());
-	OutputDebugString(L"\n");
-
 	if (m_iTotalMonsterNum == 0)
 	{
 		if (m_iStageNum < m_vCinematicCameraLocations.size())
@@ -1978,10 +1975,7 @@ void CMainTMPScene::UIUpdate(CPlayer* pPlayer)
 	dynamic_cast<CBarObject*>(m_pUIObject[3].get())->Set_Value(((CPhysicsObject*)m_pPlayer)->m_fHP, ((CPhysicsObject*)m_pPlayer)->m_fTotalHP);
 	dynamic_cast<CBarObject*>(m_pUIObject[5].get())->Set_Value(((CPlayer*)m_pPlayer)->m_fStamina, ((CPlayer*)m_pPlayer)->m_fTotalStamina);
 	dynamic_cast<CNumberObject*>(m_pUIObject[10].get())->UpdateNumber(((CPlayer*)m_pPlayer)->m_iCombo);
-	dynamic_cast<CSquareBar*>(m_pUIObject[14].get())->Set_Value(((CKnightPlayer*)m_pPlayer)->m_fSkillGauge, 90.f); // 현재 게이지값, 총 게이지값 셋팅
-
-	OutputDebugString(std::to_wstring(((CPlayer*)m_pPlayer)->m_fStamina).c_str());
-	OutputDebugString(L"\n");
+	dynamic_cast<CSquareBar*>(m_pUIObject[14].get())->Set_Value(((CKnightPlayer*)m_pPlayer)->m_fSkillGauge, 100.f); // 현재 게이지값, 총 게이지값 셋팅
 
 	// ((CPlayer*)m_pPlayer)->m_iCombo / 10
 

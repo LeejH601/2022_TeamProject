@@ -162,7 +162,8 @@ void CPlayer::Update(float fTimeElapsed)
 		m_iCombo = 0;
 	}
 
-	m_fSkillGauge += fTimeElapsed * 10.f;
+	m_fSkillGauge += fTimeElapsed;
+
 	m_fTime += fTimeElapsed;
 	m_fInvincibleTime > 0.0f ? m_fInvincibleTime -= fTimeElapsed : m_fInvincibleTime = 0.0f;
 
@@ -426,7 +427,7 @@ bool CKnightPlayer::CheckCollision(CGameObject* pTargetObject)
 		_stprintf_s(pstrDebug, 256, _T("CheckCollision\n"));
 		OutputDebugString(pstrDebug);*/
 
-		m_fSkillGauge += 5.0f;
+		m_fSkillGauge += 1.0f;
 
 		m_bMonsterAttack = true;
 		m_bCombo = true;
