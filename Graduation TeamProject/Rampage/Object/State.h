@@ -31,6 +31,7 @@ public:
     virtual IMessageListener* GetImpactComponent();
     virtual IMessageListener* GetSlashHitComponent();
 
+    virtual void ResetComponents() { }
 	virtual void Enter(entity_type*) = 0;
 	virtual void Execute(entity_type*, float) = 0;
     virtual void Animate(entity_type*, float) = 0;
@@ -58,6 +59,7 @@ protected:
     bool m_bEmittedParticle = false;
     TrailComponent* m_pTrailComponent = nullptr;
 public:
+    virtual void ResetComponents();
     virtual void InitAtkPlayer();
     virtual void SetPlayerRootVel(CPlayer* player);
 
@@ -598,4 +600,3 @@ inline IMessageListener* CState<entity_type>::GetSlashHitComponent()
 
     return nullptr;
 }
-
