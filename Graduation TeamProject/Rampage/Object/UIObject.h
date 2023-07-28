@@ -65,7 +65,7 @@ public:
 
 	virtual void Update(float fTimeElapsed);
 
-	void Set_Value(float fCurrentValue, float fTotalValue);
+	virtual void Set_Value(float fCurrentValue, float fTotalValue);
 protected:
 	XMFLOAT2 m_xmf2OffsetPosition = XMFLOAT2(0.f, 0.f);
 	XMFLOAT2 m_xmf2OffsetSize = XMFLOAT2(0.f, 0.f);
@@ -235,10 +235,10 @@ public:
 	virtual void PreBarUpdate(float fTimeElapsed);
 	virtual void CurBarUpdate(float fTimeElapsed);
 
-
+	virtual void Set_Value(float fCurrentValue, float fTotalValue);
 	virtual bool Reset();
 	bool IsFullGauge();
-	bool IsProgressFull() { return m_fTime >= m_fMaxTime; };
+	bool IsProgressFull() { return m_fSkillGauge >= m_fMaxSkillGague; };
 private:
 	bool m_bOnGlow = false;
 	float m_fEmissive = 1.0f;
@@ -246,8 +246,8 @@ private:
 	float m_fGlowDurationTime = 1.0f;
 	float m_fGlowDurationAcculate = 0.0f;
 
-	float m_fTime = 0.f;
-	float m_fMaxTime = 90.0f;
+	float m_fSkillGauge = 0.f;
+	float m_fMaxSkillGague = 100.f;
 };
 
 class CFlickerObject : public CUIObject
