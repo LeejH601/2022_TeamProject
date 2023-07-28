@@ -117,7 +117,13 @@ void CMainTMPScene::AdvanceStage()
 	m_iStageNum += 1;
 
 	if (m_StageInfoMap.size() < m_iStageNum)
-		return;
+	{
+		float fTotalGameTime = Locator.GetTimer()->GetTotalTime() - m_fGameStartTime;
+
+		// 결과창 띄우기
+		m_pUIObject[13]->SetEnable(true);
+		dynamic_cast<CResultFrame*>(m_pUIObject[13].get())->SetResultData(((CPlayer*)m_pPlayer)->m_iCombo, fTotalGameTime, ((CPlayer*)m_pPlayer)->m_nRemainPotions);
+	}
 
 	StageInfo stageInfo = m_StageInfoMap.find(m_iStageNum - 1)->second;
 	float fTotalHP = 0.0f;
