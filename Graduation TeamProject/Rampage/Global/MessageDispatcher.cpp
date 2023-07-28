@@ -245,6 +245,32 @@ void ParticleComponent::HandleMessage(const Message& message, const ParticleComp
 		pParticle->EmitParticle(10);
 	}
 }
+void ParticleComponent::Reset()
+{
+	m_nParticleNumber = MAX_PARTICLES;
+	m_nEmitParticleNumber = 500;
+	m_iParticleType = ParticleType::SPHERE_PARTICLE;
+	m_fSize = XMFLOAT2(3.f, 3.f);
+	m_fAlpha = 1.f;
+
+	m_iTotalRow = 1;
+	m_iTotalColumn = 1;
+
+	m_fFieldSpeed;
+	m_fNoiseStrength;
+	m_xmf3FieldMainDirection;
+	m_fProgressionRate;
+	m_fLengthScale;
+
+	m_fLifeTime = 2.f;
+	m_fSpeed = 20.f;
+	m_xmf3Color = XMFLOAT3(1.f, 1.f, 1.f);
+	m_iTextureIndex = 0;
+	m_iTextureOffset = 0;
+	m_fEmissive = 1.0f;
+	m_bSimulateRotate = false;
+	m_bScaleFlag = false;
+}
 ImpactEffectComponent::ImpactEffectComponent()
 {
 	m_iTextureOffset = CSimulatorScene::GetInst()->GetTextureManager()->GetTextureOffset(TextureType::BillBoardTexture);
@@ -280,6 +306,24 @@ void ImpactEffectComponent::HandleMessage(const Message& message, const ImpactCo
 		pMultiSpriteParticle->EmitParticle(7);
 	}
 	CLogger::GetInst()->Log(std::string("MultiSprite HandleMessge Called"));
+}
+void ImpactEffectComponent::Reset()
+{
+	m_nParticleNumber = MAX_PARTICLES;
+	m_nEmitParticleNumber = 1;
+	m_iParticleType = ParticleType::ATTACK_PARTICLE;
+	m_nParticleIndex = 0;
+	m_fLifeTime = 3.f;
+	m_fSpeed = 1.f;
+	m_fAlpha = 1.f;
+	m_fSize = XMFLOAT2(3.f, 3.f);
+	m_xmf3Color = XMFLOAT3(1.f, 1.f, 1.f);
+	m_xmfPosOffset = XMFLOAT3(0.f, 2.f, 0.f);
+	m_iTextureIndex = 0;
+	m_iTextureOffset = 0;
+	m_iTotalRow, m_iTotalColumn;
+	m_fEmissive = 1.0f;
+	m_bSimulateRotate = false;
 }
 void SceneCollideListener::HandleMessage(const Message& message, const CollideParams& params)
 {
@@ -468,6 +512,19 @@ void TrailComponent::HandleMessage(const Message& message, const TrailUpdatePara
 		pTrail->SetNoiseTextureIndex(m_nNoiseTextureIndex + m_nNoiseTextureOffset);
 	}
 }
+void TrailComponent::Reset()
+{
+	this->m_fR_CurvePoints[0] = 0.0f; this->m_fR_CurvePoints[1] = 0.14; this->m_fR_CurvePoints[2] = 0.459;  this->m_fR_CurvePoints[3] = 1.892;
+	this->m_fG_CurvePoints[0] = 0.0f; this->m_fG_CurvePoints[1] = 0.005; this->m_fG_CurvePoints[2] = 0.067;  this->m_fG_CurvePoints[3] = 0.595;
+	this->m_fB_CurvePoints[0] = 0.0f; this->m_fB_CurvePoints[1] = 0.257; this->m_fB_CurvePoints[2] = 0.26;  this->m_fB_CurvePoints[3] = 0.0f;
+	this->m_fColorCurveTimes_R[0] = 0.0f; this->m_fColorCurveTimes_R[1] = 0.3; this->m_fColorCurveTimes_R[2] = 0.37;  this->m_fColorCurveTimes_R[3] = 1.0;
+	this->m_fColorCurveTimes_G[0] = 0.0f; this->m_fColorCurveTimes_G[1] = 0.3; this->m_fColorCurveTimes_G[2] = 0.37;  this->m_fColorCurveTimes_G[3] = 1.0;
+	this->m_fColorCurveTimes_B[0] = 0.0f; this->m_fColorCurveTimes_B[1] = 0.3; this->m_fColorCurveTimes_B[2] = 0.37;  this->m_fColorCurveTimes_B[3] = 1.0;
+	this->m_nCurves = 4;
+
+	this->SetMainTextureOffset(CSimulatorScene::GetInst()->GetTextureManager()->GetTextureOffset(TextureType::TrailBaseTexture));
+	this->SetNoiseTextureOffset(CSimulatorScene::GetInst()->GetTextureManager()->GetTextureOffset(TextureType::TrailNoiseTexture));
+}
 void SceneOnGroundListener::HandleMessage(const Message& message, const OnGroundParams& params)
 {
 	m_pScene->HandleOnGround(params);
@@ -521,7 +578,18 @@ SlashHitComponent::SlashHitComponent()
 	//m_fProgressionRate = 0.0f;
 	//m_fLengthScale = 0.0f;
 }
-
+void SlashHitComponent::Reset()
+{
+	m_bSimulateRotate = true;
+	m_bScaleFlag = false;
+	m_fSize.x = 1.0f; m_fSize.y = 20.f;
+	m_nEmitParticleNumber = 1;
+	m_iTextureOffset = 5;
+	m_iTextureIndex = 0;
+	m_fLifeTime = 0.5f;
+	m_fEmissive = 2.0f;
+	m_xmf3Color = XMFLOAT3(1.0f, 0.1f, 0.0f);
+}
 void SlashHitComponent::HandleMessage(const Message& message, const ParticleCompParams& params)
 {
 	if (!m_bEnable)

@@ -1436,6 +1436,10 @@ void CImGuiManager::SetUI()
 				{
 					CSimulatorScene::GetInst()->SpawnAndSetMonster();
 				}
+				if (ImGui::MenuItem(U8STR("타격감 리셋"), NULL))
+				{
+					pCurrentAnimation->ResetComponents();
+				}
 				ImGui::EndMenu();
 			}
 			ImGui::EndMenuBar();

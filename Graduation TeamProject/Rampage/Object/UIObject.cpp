@@ -1097,9 +1097,9 @@ CSquareBar::~CSquareBar()
 void CSquareBar::Update(float fTimeElapsed)
 {
 	CUIObject::Update(fTimeElapsed);
-	m_fTime += fTimeElapsed;
+	//m_fSkillGauge += fTimeElapsed;
 
-	if (m_fTime >= m_fMaxTime) // 0 ~ 0.8f
+	if (m_fSkillGauge >= m_fMaxSkillGague) // 0 ~ 0.8f
 	{
 		//m_bOnGlow = true;
 		m_fGlowDurationTime += fTimeElapsed;
@@ -1115,7 +1115,7 @@ void CSquareBar::Update(float fTimeElapsed)
 	{
 		//m_pChildUI[2]->SetColor(XMFLOAT3(10.f, 10.f, 10.f));
 	}
-	dynamic_cast<CGradationObject*>(m_pChildUI[3].get())->SetGradationValue(m_fTime / 90.f); // 250
+	dynamic_cast<CGradationObject*>(m_pChildUI[3].get())->SetGradationValue(m_fSkillGauge / m_fMaxSkillGague);
 }
 
 void CSquareBar::Render(ID3D12GraphicsCommandList* pd3dCommandList, bool b_UseTexture, CCamera* pCamera)
@@ -1187,9 +1187,15 @@ void CSquareBar::CurBarUpdate(float fTimeElapsed)
 	}
 }
 
+void CSquareBar::Set_Value(float fCurrentValue, float fTotalValue)
+{
+	m_fSkillGauge = fCurrentValue;
+	m_fMaxSkillGague = fTotalValue;
+}
+
 bool CSquareBar::Reset()
 {
-	m_fTime = 0.f;
+	m_fSkillGauge = 0.f;
 	m_fGlowDurationAcculate = 0.0f;
 	m_pChildUI[2]->SetColor(XMFLOAT3(1.f, 1.f, 1.f)); // 250
 	m_pChildUI[1]->SetEnable(false);
@@ -1200,7 +1206,7 @@ bool CSquareBar::Reset()
 
 bool CSquareBar::IsFullGauge()
 {
-	if (m_fTime >= 90.f)
+	if (m_fSkillGauge >= 100.f)
 		return true;
 	return false;
 }

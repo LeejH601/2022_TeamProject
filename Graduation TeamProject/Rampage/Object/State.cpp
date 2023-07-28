@@ -351,6 +351,95 @@ void Atk1_Player::SpawnTrailParticle(CPlayer* player)
 	}
 }
 
+void Atk_Player::ResetComponents()
+{
+	SoundPlayComponent* pShootSoundSoundComponent = dynamic_cast<SoundPlayComponent*>(GetShootSoundComponent());
+	pShootSoundSoundComponent->SetEnable(false);
+	pShootSoundSoundComponent->SetSoundNumber(0);
+	pShootSoundSoundComponent->SetDelay(0.0f);
+	pShootSoundSoundComponent->SetVolume(1.25f);
+	pShootSoundSoundComponent->SetMT(MONSTER_TYPE::NONE);
+
+	SoundPlayComponent* pShockSoundSoundComponent = dynamic_cast<SoundPlayComponent*>(GetShockSoundComponent());
+	pShockSoundSoundComponent->SetEnable(false);
+	pShockSoundSoundComponent->SetSoundNumber(0);
+	pShockSoundSoundComponent->SetDelay(0.0f);
+	pShockSoundSoundComponent->SetVolume(0.75f);
+
+	SoundPlayComponent* pGoblinMoanSoundComponent = dynamic_cast<SoundPlayComponent*>(GetGoblinMoanComponent());
+	pGoblinMoanSoundComponent->SetEnable(false);
+	pGoblinMoanSoundComponent->SetSoundNumber(0);
+	pGoblinMoanSoundComponent->SetDelay(0.0f);
+	pGoblinMoanSoundComponent->SetVolume(0.75f);
+
+	SoundPlayComponent* pOrcMoanSoundComponent = dynamic_cast<SoundPlayComponent*>(GetOrcMoanComponent());
+	pOrcMoanSoundComponent->SetEnable(false);
+	pOrcMoanSoundComponent->SetSoundNumber(0);
+	pOrcMoanSoundComponent->SetDelay(0.0f);
+	pOrcMoanSoundComponent->SetVolume(0.75f);
+
+	SoundPlayComponent* pSkeletonMoanSoundComponent = dynamic_cast<SoundPlayComponent*>(GetSkeletonMoanComponent());
+	pSkeletonMoanSoundComponent->SetEnable(false);
+	pSkeletonMoanSoundComponent->SetSoundNumber(0);
+	pSkeletonMoanSoundComponent->SetDelay(0.0f);
+	pSkeletonMoanSoundComponent->SetVolume(0.75f);
+
+	CameraShakeComponent* pCameraShakeComponent = dynamic_cast<CameraShakeComponent*>(GetCameraShakeComponent());
+	pCameraShakeComponent->SetEnable(false);
+	pCameraShakeComponent->SetDuration(1.0f);
+	pCameraShakeComponent->SetMagnitude(0.5f);
+
+	CameraZoomerComponent* pCameraZoomComponent = dynamic_cast<CameraZoomerComponent*>(GetCameraZoomerComponent());
+	pCameraZoomComponent->SetEnable(false);
+	pCameraZoomComponent->SetIsIn(false);
+	pCameraZoomComponent->SetMaxDistance(10.0f);
+	pCameraZoomComponent->SetMovingTime(0.25f);
+	pCameraZoomComponent->SetRollBackTime(0.25f);
+
+	CameraMoveComponent* pCameraMoveComponent = dynamic_cast<CameraMoveComponent*>(GetCameraMoveComponent());
+	pCameraMoveComponent->SetEnable(false);
+	pCameraMoveComponent->SetMaxDistance(5.0f);
+	pCameraMoveComponent->SetMovingTime(0.5f);
+	pCameraMoveComponent->SetRollBackTime(0.5f);
+
+	DamageAnimationComponent* pDamageAnimationComponent = dynamic_cast<DamageAnimationComponent*>(GetDamageAnimationComponent());
+	pDamageAnimationComponent->SetEnable(false);
+	pDamageAnimationComponent->SetMaxDistance(15.0f);
+	pDamageAnimationComponent->SetSpeed(100.0f);
+	
+	ShakeAnimationComponent* pShakeAnimationComponent = dynamic_cast<ShakeAnimationComponent*>(GetShakeAnimationComponent());
+	pShakeAnimationComponent->SetEnable(false);
+	pShakeAnimationComponent->SetDistance(0.25f);
+	pShakeAnimationComponent->SetFrequency(0.01f);
+	
+	StunAnimationComponent* pStunAnimationComponent = dynamic_cast<StunAnimationComponent*>(GetStunAnimationComponent());
+	pStunAnimationComponent->SetEnable(false);
+	pStunAnimationComponent->SetStunTime(0.5f);
+	
+	HitLagComponent* pHitLagComponent = dynamic_cast<HitLagComponent*>(GetHitLagComponent());
+	pHitLagComponent->SetEnable(false);
+	pHitLagComponent->SetLagScale(0.5f);
+	pHitLagComponent->SetDuration(0.5f);
+	pHitLagComponent->SetMinTimeScale(0.5f);
+
+	ParticleComponent* pParticleComponent = dynamic_cast<ParticleComponent*>(GetParticleComponent());
+	pParticleComponent->SetEnable(false);
+	pParticleComponent->Reset();
+
+	ImpactEffectComponent* pImpactComponent = dynamic_cast<ImpactEffectComponent*>(GetImpactComponent());
+	pImpactComponent->SetEnable(false);
+	pImpactComponent->Reset();
+
+	// TRAIL ANIMATION
+	TrailComponent* pTrailComponent = dynamic_cast<TrailComponent*>(GetTrailComponent());
+	pTrailComponent->SetEnable(false);
+	pTrailComponent->Reset();
+
+	SlashHitComponent* pSlashHitComponent = dynamic_cast<SlashHitComponent*>(GetSlashHitComponent());
+	pSlashHitComponent->SetEnable(false);
+	pSlashHitComponent->Reset();
+}
+
 void Atk1_Player::Enter(CPlayer* player)
 {
 	CLogger::GetInst()->Log(std::string("Player Enter Atk1"));
