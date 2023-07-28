@@ -504,7 +504,7 @@ public:
 	ParticleComponent();
 
 public:
-	//int& GetParticleNumber() { return m_nParticleNumber; }
+	virtual void Reset();
 	int& GetEmitParticleNumber() { return m_nEmitParticleNumber; }
 	XMFLOAT2& GetSize() { return m_fSize; }
 	float& GetXSize() { return m_fSize.x; }
@@ -557,6 +557,7 @@ class SlashHitComponent : public ParticleComponent
 {
 public:
 	SlashHitComponent();
+	virtual void Reset();
 	virtual void HandleMessage(const Message& message, const ParticleCompParams& params);
 };
 
@@ -602,6 +603,7 @@ public:
 	void SetNoiseTextureOffset(int iOffset) { m_nNoiseTextureOffset = iOffset; }
 	void SetMainTextureIndex(int index) { m_nMainTextureIndex = index; }
 	void SetNoiseTextureIndex(int index) { m_nNoiseTextureIndex = index; }
+	virtual void Reset();
 	virtual void HandleMessage(const Message& message, const TrailUpdateParams& params);
 };
 
@@ -755,6 +757,7 @@ private:
 	bool m_bSimulateRotate = false;
 
 public:
+	virtual void Reset();
 	int& GetTextureIndex() { return m_iTextureIndex; }
 	int GetTextureOffset() { return m_iTextureOffset; }
 	float& GetSpeed() { return m_fSpeed; }
