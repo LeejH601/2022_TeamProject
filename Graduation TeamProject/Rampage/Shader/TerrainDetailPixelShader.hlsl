@@ -49,53 +49,23 @@ PS_MULTIPLE_RENDER_TARGETS_OUTPUT PS_Detail(GS_DETAIL_OUT input)
 	PS_MULTIPLE_RENDER_TARGETS_OUTPUT output;
 	float2 uv = input.uv;
 	float4 cTexture = gtxMappedTexture[0].Sample(gSamplerState, uv);
-	float4 cColor = cTexture; //  // cIllumination * cTexture;
+	float4 cColor = cTexture;
 	cColor.rgb *= input.color;
 
 	if (cColor.a < 0.01f)
 		discard;
-	//cColor.xyz *= cColor.a;
-
-	float3 Projection = input.posH.xyz;
-	float Depth = Projection.z;
-	////float2 screanUV = mul(float4(Projection, 1.0f), toViewPortMatrix).xy;
-	//float2 screanUV = float2(Projection.x / width, Projection.y / height);
-	////screanUV.y = 1.0f - screanUV.y; 
-	//float4 DepthTexture = gtxMultiRenderTargetTextures[5].Sample(gSamplerState, screanUV.xy);
-
-	/*if (DepthTexture.r < Depth)
-		discard;*/
-
-	/*int DepthValue = int(DepthTexture.r < Depth);
-	cColor *= (1 - DepthValue);*/
 
 	float alpha = cColor.a;
 
 	float3 lightNormal = gLights[0].m_vPosition - input.posW;
 	lightNormal = normalize(lightNormal);
-	//cColor.a = 1.0f;
-	//float4 cColor = float4(1,1,1,1); //  // cIllumination * cTexture;
-	//cColor.rgb *= gfColor * 2.0f;
+	
 	float4 cIllumination = Lighting(input.posW, lightNormal, cColor, true, input.uvs);
 	cIllumination.xyz /= lerp(1.0f, 4.0f, input.uv.y);
 	cIllumination.w = alpha;
-	//cIllumination = saturate(cIllumination);
 
-
-	
-	/*if (0.02 > Depth)
-		discard;*/
-	//cColor.a = Depth;
-
-	//output.f4Scene = cColor;
 	output.f4Color = cIllumination;
-	/*output.f4PositoinW = float4(input.posW, 1.0f);
-	output.f4Normal = float4(lightNormal * 0.5f + 0.5f, Depth);*/
-	//output.f4Scene = DepthTexture;
-	//output.f4Scene = float4(screanUV.x , screanUV.y , Projection.z,1.0f);
-	//output.f4Scene = float4(DepthTexture.r, 0 , Depth,1.0f);
-	//output.f4Color = float4(DepthTexture.r, 0 , 0,1.0f);
-	//output.f4Color = float4(screanUV.x , screanUV.y , Projection.z,1.0f);
+	
 
 	return(output);
 }

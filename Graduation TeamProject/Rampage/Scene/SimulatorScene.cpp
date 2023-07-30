@@ -763,6 +763,7 @@ void CSimulatorScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, float f
 	ID3D12Resource* pd3dSource;
 	ID3D12Resource* pd3dDestination;
 
+	if (Locator.GetBloomEffectUse())
 	{
 		m_pBloomComputeShader->Dispatch(pd3dCommandList);
 

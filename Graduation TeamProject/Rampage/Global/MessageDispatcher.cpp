@@ -352,7 +352,7 @@ void TerrainSpriteComponent::HandleMessage(const Message& message, const Terrain
 		pMultiSpriteParticle->SetEmitParticleN(m_nEmitParticleNumber);
 		pMultiSpriteParticle->SetMaxParticleN(m_nParticleNumber);
 		pMultiSpriteParticle->SetPosition(params.xmf3Position);
-		pMultiSpriteParticle->SetTextureIndex(3);
+		//pMultiSpriteParticle->SetTextureIndex(CSimulatorScene::GetInst()->GetTextureManager()->GetTextureOffset(TextureType::UniformTexture) + 1);
 		pMultiSpriteParticle->SetEmissive(10.0f);
 		pMultiSpriteParticle->EmitParticle(8);
 	}
@@ -602,6 +602,7 @@ void SlashHitComponent::HandleMessage(const Message& message, const ParticleComp
 		pParticle->SetEmit(true);
 		pParticle->SetSize(m_fSize);
 		pParticle->SetStartAlpha(m_fAlpha);
+		pParticle->SetTotalRowColumn(m_iTotalRow, m_iTotalColumn);
 		pParticle->SetColor(m_xmf3Color);
 		pParticle->SetSpeed(m_fSpeed);
 		pParticle->SetLifeTime(m_fLifeTime);
