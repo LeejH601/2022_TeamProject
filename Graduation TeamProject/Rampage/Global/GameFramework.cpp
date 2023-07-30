@@ -120,6 +120,9 @@ void CGameFramework::InitSound()
 	CSoundManager::GetInst()->RegisterSound("Sound/Voice/Goblin/GoblinMoan01.mp3", false, SOUND_CATEGORY::SOUND_VOICE);
 	CSoundManager::GetInst()->RegisterSound("Sound/Voice/Goblin/GoblinMoan02.mp3", false, SOUND_CATEGORY::SOUND_VOICE);
 	CSoundManager::GetInst()->RegisterSound("Sound/Voice/Goblin/GoblinMoan03.mp3", false, SOUND_CATEGORY::SOUND_VOICE);
+	CSoundManager::GetInst()->RegisterSound("Sound/Voice/Goblin/GoblinMoan04.mp3", false, SOUND_CATEGORY::SOUND_VOICE);
+	CSoundManager::GetInst()->RegisterSound("Sound/Voice/Goblin/GoblinMoan05.mp3", false, SOUND_CATEGORY::SOUND_VOICE);
+	CSoundManager::GetInst()->RegisterSound("Sound/Voice/Goblin/GoblinMoan06.mp3", false, SOUND_CATEGORY::SOUND_VOICE);
 
 	CSoundManager::GetInst()->RegisterSound("Sound/Voice/Orc/OrcMoan01.mp3", false, SOUND_CATEGORY::SOUND_VOICE);
 	CSoundManager::GetInst()->RegisterSound("Sound/Voice/Orc/OrcMoan02.mp3", false, SOUND_CATEGORY::SOUND_VOICE);

@@ -43,7 +43,7 @@ public:
 	virtual void PreBarUpdate(float fTimeElapsed);
 	virtual void CurBarUpdate(float fTimeElapsed);
 
-	void SetGradationValue(float fGradationValue) { m_fGradationValue = fGradationValue * 0.7f + 0.1f; } // 0.1 ~ 0.8f
+	void SetGradationValue(float fGradationValue) { m_fGradationValue =/* fGradationValue * 0.7f + 0.1f*/fGradationValue; } // 0.1 ~ 0.8f -> 0.f ~ 1.f
 protected:
 	XMFLOAT2 m_xmf2OffsetPosition = XMFLOAT2(0.f, 0.f);
 	XMFLOAT2 m_xmf2OffsetSize = XMFLOAT2(0.f, 0.f);

@@ -162,7 +162,7 @@ void CPlayer::Update(float fTimeElapsed)
 		m_iCombo = 0;
 	}
 
-	m_fSkillGauge += fTimeElapsed * 10.f;
+	m_fSkillGauge += fTimeElapsed;
 	m_fTime += fTimeElapsed;
 	m_fInvincibleTime > 0.0f ? m_fInvincibleTime -= fTimeElapsed : m_fInvincibleTime = 0.0f;
 
