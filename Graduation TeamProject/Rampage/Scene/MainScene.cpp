@@ -106,7 +106,7 @@ void CMainTMPScene::HandlePlayerDeadMessage()
 
 	// °á°úÃ¢ ¶ç¿ì±â
 	m_pUIObject[13]->SetEnable(true);
-	dynamic_cast<CResultFrame*>(m_pUIObject[13].get())->SetResultData(((CPlayer*)m_pPlayer)->m_iCombo, fTotalGameTime, ((CPlayer*)m_pPlayer)->m_nRemainPotions);
+	dynamic_cast<CResultFrame*>(m_pUIObject[13].get())->SetResultData(((CPlayer*)m_pPlayer)->m_nMaxComboCount, fTotalGameTime, ((CPlayer*)m_pPlayer)->m_nRemainPotions);
 }
 
 void CMainTMPScene::AdvanceStage()
@@ -119,7 +119,7 @@ void CMainTMPScene::AdvanceStage()
 
 		// °á°úÃ¢ ¶ç¿ì±â
 		m_pUIObject[13]->SetEnable(true);
-		dynamic_cast<CResultFrame*>(m_pUIObject[13].get())->SetResultData(((CPlayer*)m_pPlayer)->m_iCombo, fTotalGameTime, ((CPlayer*)m_pPlayer)->m_nRemainPotions);
+		dynamic_cast<CResultFrame*>(m_pUIObject[13].get())->SetResultData(((CPlayer*)m_pPlayer)->m_nMaxComboCount, fTotalGameTime, ((CPlayer*)m_pPlayer)->m_nRemainPotions);
 	}
 
 	StageInfo stageInfo = m_StageInfoMap.find(m_iStageNum - 1)->second;
@@ -1382,7 +1382,7 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_StageInfoMap.emplace(std::pair<int, StageInfo>(0,
 		StageInfo{
 			std::vector<SpawnInfo>{SpawnInfo{
-			3, 0,
+			10, 0,
 			0, 0,
 			0, 0,
 			XMFLOAT3{ 113.664360f, 3.016271f, 123.066483f },
@@ -1391,7 +1391,7 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 		StageInfo{
 			std::vector<SpawnInfo>{SpawnInfo{
 			0, 0,
-			3, 0,
+			10, 0,
 			0, 0,
 			XMFLOAT3{ 113.664360f, 3.016271f, 123.066483f },
 			12.5f}} }));
@@ -1400,7 +1400,7 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 			std::vector<SpawnInfo>{SpawnInfo{
 			0, 0,
 			0, 0,
-			3, 0,
+			10, 0,
 			XMFLOAT3{ 113.664360f, 3.016271f, 123.066483f },
 			12.5f}} }));
 	m_StageInfoMap.emplace(std::pair<int, StageInfo>(3,
@@ -1414,7 +1414,7 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_StageInfoMap.emplace(std::pair<int, StageInfo>(4,
 		StageInfo{
 			std::vector<SpawnInfo>{SpawnInfo{
-			5, 1,
+			10, 2,
 			0, 0,
 			0, 0,
 			XMFLOAT3{ 113.664360f, 3.016271f, 123.066483f },
@@ -1422,7 +1422,7 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_StageInfoMap.emplace(std::pair<int, StageInfo>(5,
 		StageInfo{
 			std::vector<SpawnInfo>{SpawnInfo{
-			2, 0,
+			5, 1,
 			5, 1,
 			0, 0,
 			XMFLOAT3{ 113.664360f, 3.016271f, 123.066483f },
@@ -1430,17 +1430,17 @@ void CMainTMPScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_StageInfoMap.emplace(std::pair<int, StageInfo>(6,
 		StageInfo{
 			std::vector<SpawnInfo>{SpawnInfo{
-			4, 2,
-			4, 2,
+			8, 2,
+			8, 2,
 			0, 0,
 			XMFLOAT3{ 113.664360f, 3.016271f, 123.066483f },
 			12.5f}} }));
 	m_StageInfoMap.emplace(std::pair<int, StageInfo>(7,
 		StageInfo{
 			std::vector<SpawnInfo>{SpawnInfo{
-			7, 0,
-			7, 0,
-			7, 0,
+			7, 1,
+			7, 1,
+			7, 1,
 			XMFLOAT3{ 113.664360f, 3.016271f, 123.066483f },
 			12.5f}} }));
 	m_StageInfoMap.emplace(std::pair<int, StageInfo>(8,

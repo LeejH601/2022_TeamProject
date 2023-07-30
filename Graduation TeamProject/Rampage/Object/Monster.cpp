@@ -355,7 +355,7 @@ bool CMonster::CheckCollision(CGameObject* pTargetObject)
 		BoundingOrientedBox* TargetBoundingBox = pTargetObject->GetBoundingBox();
 		if (m_TransformedWeaponBoundingBox.Intersects(*TargetBoundingBox)) {
 			DamageParams damageParam;
-			damageParam.fDamage = m_fStrikingPower;
+			m_bElite ? damageParam.fDamage = m_fStrikingPower * 1.5f : damageParam.fDamage = m_fStrikingPower;
 			damageParam.pAttacker = this;
 
 			CMessageDispatcher::GetInst()->Dispatch_Message<DamageParams>(MessageType::APPLY_DAMAGE, &damageParam, pTargetObject);

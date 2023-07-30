@@ -282,6 +282,8 @@ void CPlayer::UpdateCombo()
 void CPlayer::Reset()
 {
 	m_iPotionN = 5; m_iCombo = 0; m_fStamina = 0.f; m_fHP = m_fTotalHP; m_fStamina = m_fTotalStamina;
+	m_fSkillGauge = 0.0f;
+
 	m_dwDirectionCache = 0;
 	m_xmf3Velocity = XMFLOAT3{ 0.0f,0.0f, 0.0f };
 
