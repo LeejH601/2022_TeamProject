@@ -887,6 +887,7 @@ SCENE_RETURN_TYPE CMainTMPScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMe
 						break;
 					dynamic_cast<CSquareBar*>(m_pUIObject[14].get())->Reset();
 					((CPlayer*)m_pPlayer)->m_bCharged = true;
+					((CPlayer*)m_pPlayer)->m_fSkillGauge = 0.0f;
 					m_bPlayCutScene = true;
 
 					((CCinematicCamera*)(m_pCinematicPlayerCamera.get()))->SetFocusPoint(m_pPlayer->GetPosition());
