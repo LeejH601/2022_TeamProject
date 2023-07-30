@@ -88,32 +88,18 @@ void GS_Detail(
 	output.color = input[0].color;
 	output.uvs = input[0].uvs;
 
-	float4 projCenter =  mul(mul(float4(centerW, 1.0f), gmtxView), gmtxProjection);
-	float LengthW = projCenter.z / projCenter.w;
-	float sizeLODValue = min(1.0, (1.0 - LengthW) * 30.0f);
-	sizeLODValue = 1.0f;
-
-	/*gf3Positions[0] = float4(center.x + input[0].size.x, center.y, center.z - input[0].size.y, 1.0f);
-	gf3Positions[1] = float4(center.x + input[0].size.x, center.y, center.z + input[0].size.y, 1.0f);
-	gf3Positions[2] = float4(center.x - input[0].size.x, center.y, center.z - input[0].size.y, 1.0f);
-	gf3Positions[3] = float4(center.x - input[0].size.x, center.y, center.z + input[0].size.y, 1.0f);*/
-
-	float3 textDir = float3(1.0f, 0.0f, 0.0f) * input[0].size.z;
+	float3 WindDir = float3(1.0f, 0.0f, 0.0f) * input[0].size.z;
 	float value = 0.1f;
 
-	textDir = mul(float4(textDir, 0.0f), gmtxView);
+	WindDir = mul(float4(WindDir, 0.0f), gmtxView);
 
 	for (int i = 0; i < 4; i++)
 	{
-		gf3Positions[i].x = gf3Positions[i].x * fHalfW  * sizeLODValue;
-		gf3Positions[i].y = gf3Positions[i].y * fHalfH * sizeLODValue;
-		
-		vWorldOffsets[i].x = vWorldOffsets[i].x * fHalfW  * sizeLODValue;
-		vWorldOffsets[i].y = vWorldOffsets[i].y * fHalfH * sizeLODValue;
+		vWorldOffsets[i].x = vWorldOffsets[i].x * fHalfW;
+		vWorldOffsets[i].y = vWorldOffsets[i].y * fHalfH;
 
-		//output.posH = mul(float4(centerW, 1.0f), gmtxView);
 		output.posH = float4(centerW, 1.0f);
-		output.posH.xyz += textDir * sin(gfCurrentTime) * value * (1-pUVs[i].y);
+		output.posH.xyz += WindDir * sin(gfCurrentTime) * value * (1-pUVs[i].y);
 		output.posH.xyz += vWorldOffsets[i];
 		output.posH = mul(float4(output.posH.xyz, 1.0f), gmtxView);
 		output.posW = centerW.xyz;
@@ -123,7 +109,6 @@ void GS_Detail(
 
 		output.normalW = input[0].normal;
 		output.uv = pUVs[i];
-		//output.uv = mul(float3(gf2QuadUVs[i], 1.0f), (float3x3)(xmf4x4Coord)).xy;
 		outputStream.Append(output);
 	}
 

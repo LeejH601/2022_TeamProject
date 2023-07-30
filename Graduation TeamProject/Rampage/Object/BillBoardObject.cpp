@@ -317,7 +317,6 @@ CDetailObject::CDetailObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 	std::shared_ptr<CTexture> GrassTexture = std::make_shared<CTexture>(1, RESOURCE_TEXTURE2D, 0, 1);
 	GrassTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/BillBoardImages/Grass_02.dds", RESOURCE_TEXTURE2D, 0);
 
-	char* buf = new char[1024 * 1024];
 	int* data = new int[1024 * 1024];
 	std::ifstream in{ "Terrain/DetailMap1.bin", std::ios_base::binary };
 
@@ -331,7 +330,6 @@ CDetailObject::CDetailObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 
 	in.read((char*)data, sizeof(int) * 1024 * 1024);
 	for (int i = 0; i < 1024 * 1024; ++i) {
-		//data[i] = atoi(&buf[i]);
 		nDetails += data[i];
 	}
 
@@ -386,7 +384,6 @@ CDetailObject::CDetailObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 	pShader->CreateShaderResourceViews(pd3dDevice, GrassTexture.get(), 0, 2);
 	SetShader(pShader, GrassTexture);
 
-	delete[] buf;
 	delete[] data;
 }
 
