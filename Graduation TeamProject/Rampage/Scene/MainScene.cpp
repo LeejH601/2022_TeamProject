@@ -745,7 +745,7 @@ SCENE_RETURN_TYPE CMainTMPScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMe
 		case VK_ESCAPE:
 			::PostQuitMessage(0);
 			break;
-		case VK_SHIFT:
+		case VK_SPACE:
 			if (m_pPlayer)
 			{
 				if (!((CPlayer*)m_pPlayer)->m_bEvasioned && ((CPlayer*)m_pPlayer)->m_fStamina >= 20.0f)
@@ -754,7 +754,7 @@ SCENE_RETURN_TYPE CMainTMPScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMe
 				}
 			}
 			break;
-		case VK_CONTROL:
+		case VK_SHIFT:
 			if (m_pPlayer)
 			{
 				if (!((CPlayer*)m_pPlayer)->m_bIsDash)
@@ -914,7 +914,7 @@ SCENE_RETURN_TYPE CMainTMPScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMe
 	case WM_KEYUP:
 		switch (wParam)
 		{
-		case VK_CONTROL:
+		case VK_SHIFT:
 			if (m_pPlayer)
 			{
 				if (((CPlayer*)m_pPlayer)->m_bIsDash)
@@ -1984,6 +1984,9 @@ void CMainTMPScene::UIUpdate(CPlayer* pPlayer)
 	if (((CKnightPlayer*)(m_pPlayer))->GetMonsterAttack())
 	{
 		float CurrentHp = 0.f;
+		if (m_iStageNum < 1)
+			return;
+
 		StageInfo stageInfo = m_StageInfoMap.find(m_iStageNum - 1)->second;
 
 		for (int i = 0; i < m_pEnemys.size(); i++)

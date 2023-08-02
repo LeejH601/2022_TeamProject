@@ -1206,7 +1206,7 @@ bool CSquareBar::Reset()
 
 bool CSquareBar::IsFullGauge()
 {
-	if (m_fSkillGauge >= 100.f)
+	if (m_fSkillGauge >= 90.f)
 		return true;
 	return false;
 }
