@@ -1463,6 +1463,7 @@ void CImGuiManager::SetUI()
 
 		static bool autoResetMonster = false;
 		static bool autoPlayerAttack = false;
+		static bool autoPlayerChainAttack = false;
 
 		// 시뮬레이터 씬 보여주기 여부 설정 ImGui
 		ImGui::Checkbox(U8STR("시뮬레이터"), &show_simulator_scene);
@@ -1480,7 +1481,7 @@ void CImGuiManager::SetUI()
 		// 플레이어 자동 공겨
 		if (ImGui::Checkbox(U8STR("플레이어 자동 공격"), &autoPlayerAttack))
 		{
-			CSimulatorScene::GetInst()->SetAutoPlayerAttack(autoPlayerAttack);
+			autoPlayerAttack = CSimulatorScene::GetInst()->SetAutoPlayerAttack(autoPlayerAttack);
 		}
 
 		static int selectedMonsterType = 0;
@@ -1522,15 +1523,25 @@ void CImGuiManager::SetUI()
 
 		ImGui::RadioButton(U8STR("공격1##AttackNumber"), &Player_Animation_Number, 0); ImGui::SameLine();
 		ImGui::RadioButton(U8STR("공격2##AttackNumber"), &Player_Animation_Number, 1); ImGui::SameLine();
-		ImGui::RadioButton(U8STR("공격3##AttackNumber"), &Player_Animation_Number, 2); ImGui::SameLine(0.0f, m_lDesktopWidth * 0.0545f);
+		ImGui::RadioButton(U8STR("공격3##AttackNumber"), &Player_Animation_Number, 2); ImGui::SameLine();
 
+		//ImGui::SameLine(0.0f, m_lDesktopWidth * 0.08f);
 		ImGui::SameLine();
 
 		if (ImGui::Button(U8STR("공격"), ImVec2{ 0.0f, 0.0f }))
 		{
 			if (show_simulator_scene)
 				CSimulatorScene::GetInst()->SetPlayerAnimationSet(Player_Animation_Number);
-			OutputDebugString(L"공격\n");
+		}
+
+		ImGui::SameLine();
+
+		if (ImGui::Button(U8STR("연속 공격"), ImVec2{ 0.0f, 0.0f }))
+		{
+			autoPlayerAttack = false;
+
+			if (show_simulator_scene)
+				CSimulatorScene::GetInst()->SetAutoPlayerChainAttack();
 		}
 		
 		if (CopyComponent)

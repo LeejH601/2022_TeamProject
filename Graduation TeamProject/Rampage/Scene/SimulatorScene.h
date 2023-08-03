@@ -84,7 +84,8 @@ public:
 	void SetPlayerAnimationSet(int nSet);
 	void SetMonsterNum(int nMonsterNum);
 	void SetAutoReset(bool bAutoReset) { m_bAutoReset = bAutoReset; }
-	void SetAutoPlayerAttack(bool bAutoPlayerAttack);
+	bool SetAutoPlayerAttack(bool bAutoPlayerAttack);
+	void SetAutoPlayerChainAttack();
 	void SelectMonsterType(MONSTER_TYPE monster_type);
 	void SpawnAndSetMonster();
 

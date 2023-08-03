@@ -503,6 +503,8 @@ void Atk1_Player::Execute(CPlayer* player, float fElapsedTime)
 	{
 		if (player->m_bAutoAttack)
 			player->m_pStateMachine->ChangeState(Atk1_Player::GetInst());
+		else if (player->m_bAutoChainAttack)
+			player->m_pStateMachine->ChangeState(Atk2_Player::GetInst());
 		else
 			player->m_pStateMachine->ChangeState(Idle_Player::GetInst());
 	}
@@ -646,6 +648,8 @@ void Atk2_Player::Execute(CPlayer* player, float fElapsedTime)
 	{
 		if (player->m_bAutoAttack)
 			player->m_pStateMachine->ChangeState(Atk2_Player::GetInst());
+		else if (player->m_bAutoChainAttack)
+			player->m_pStateMachine->ChangeState(Atk3_Player::GetInst());
 		else
 			player->m_pStateMachine->ChangeState(Idle_Player::GetInst());
 	}
@@ -849,6 +853,8 @@ void Atk3_Player::Exit(CPlayer* player)
 
 	if (player->m_pSwordTrailReference)
 		dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[2].get())->m_eTrailUpdateMethod = TRAIL_UPDATE_METHOD::DELETE_CONTROL_POINT;
+
+	player->m_bAutoChainAttack = false;
 
 	Atk_Player::Exit(player);
 }

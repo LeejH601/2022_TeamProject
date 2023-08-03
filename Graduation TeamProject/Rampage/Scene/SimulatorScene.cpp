@@ -858,10 +858,27 @@ void CSimulatorScene::SetMonsterNum(int nMonsterNum)
 	SpawnAndSetMonster();
 }
 
-void CSimulatorScene::SetAutoPlayerAttack(bool bAutoPlayerAttack)
+bool CSimulatorScene::SetAutoPlayerAttack(bool bAutoPlayerAttack)
 {
 	if (m_pMainCharacter)
+	{
+		if (m_pMainCharacter->m_bAutoChainAttack)
+			return false;
+
 		m_pMainCharacter->m_bAutoAttack = bAutoPlayerAttack;
+	}
+
+	return true;
+}
+
+void CSimulatorScene::SetAutoPlayerChainAttack()
+{
+	if (m_pMainCharacter)
+	{
+		m_pMainCharacter->m_bAutoChainAttack = true;
+		m_pMainCharacter->m_bAutoAttack = false;
+		SetPlayerAnimationSet(0);
+	}
 }
 
 void CSimulatorScene::SelectMonsterType(MONSTER_TYPE monster_type)
