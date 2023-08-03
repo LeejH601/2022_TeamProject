@@ -1462,20 +1462,26 @@ void CImGuiManager::SetUI()
 		}
 
 		static bool autoResetMonster = false;
+		static bool autoPlayerAttack = false;
 
 		// 시뮬레이터 씬 보여주기 여부 설정 ImGui
 		ImGui::Checkbox(U8STR("시뮬레이터"), &show_simulator_scene);
 
-		ImGui::SameLine(m_lDesktopWidth * 0.1f);
+		ImGui::SameLine();
 
 		// 몬스터 자동 리셋
 		if (ImGui::Checkbox(U8STR("몬스터 자동 리셋"), &autoResetMonster))
 		{
-			OutputDebugString(L"몬스터 자동 리셋: ");
-			autoResetMonster ? OutputDebugString(L"TRUE\n") : OutputDebugString(L"FALSE\n");
 			CSimulatorScene::GetInst()->SetAutoReset(autoResetMonster);
 		}
 
+		ImGui::SameLine();
+
+		// 플레이어 자동 공겨
+		if (ImGui::Checkbox(U8STR("플레이어 자동 공격"), &autoPlayerAttack))
+		{
+			CSimulatorScene::GetInst()->SetAutoPlayerAttack(autoPlayerAttack);
+		}
 
 		static int selectedMonsterType = 0;
 

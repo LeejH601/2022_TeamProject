@@ -20,6 +20,7 @@ class CSimulatorScene : public CScene
 {
 private:
 	bool m_bAutoReset;
+	bool m_bAutoPlayerAttack;
 	int m_CurrentMonsterNum;
 
 	MONSTER_TYPE m_CurrentMonsterType;
@@ -83,6 +84,7 @@ public:
 	void SetPlayerAnimationSet(int nSet);
 	void SetMonsterNum(int nMonsterNum);
 	void SetAutoReset(bool bAutoReset) { m_bAutoReset = bAutoReset; }
+	void SetAutoPlayerAttack(bool bAutoPlayerAttack);
 	void SelectMonsterType(MONSTER_TYPE monster_type);
 	void SpawnAndSetMonster();
 

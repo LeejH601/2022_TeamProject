@@ -501,7 +501,10 @@ void Atk1_Player::Execute(CPlayer* player, float fElapsedTime)
 
 	if (player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition == pAnimationSet->m_fLength)
 	{
-		player->m_pStateMachine->ChangeState(Idle_Player::GetInst());
+		if (player->m_bAutoAttack)
+			player->m_pStateMachine->ChangeState(Atk1_Player::GetInst());
+		else
+			player->m_pStateMachine->ChangeState(Idle_Player::GetInst());
 	}
 
 	if (m_pTrailComponent->GetEnable())
@@ -641,7 +644,10 @@ void Atk2_Player::Execute(CPlayer* player, float fElapsedTime)
 
 	if (player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition == pAnimationSet->m_fLength)
 	{
-		player->m_pStateMachine->ChangeState(Idle_Player::GetInst());
+		if (player->m_bAutoAttack)
+			player->m_pStateMachine->ChangeState(Atk2_Player::GetInst());
+		else
+			player->m_pStateMachine->ChangeState(Idle_Player::GetInst());
 	}
 
 	if (m_pTrailComponent->GetEnable())
@@ -810,7 +816,10 @@ void Atk3_Player::Execute(CPlayer* player, float fElapsedTime)
 
 	if (player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition == pAnimationSet->m_fLength)
 	{
-		player->m_pStateMachine->ChangeState(Idle_Player::GetInst());
+		if (player->m_bAutoAttack)
+			player->m_pStateMachine->ChangeState(Atk3_Player::GetInst());
+		else
+			player->m_pStateMachine->ChangeState(Idle_Player::GetInst());
 	}
 
 	else if (player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition == pAnimationSet->m_fLength)

@@ -20,6 +20,8 @@ public:
 	int m_nAnimationNum = 0;
 
 	unsigned int m_iAttackId = 0;
+	bool m_bAutoAttack = false;
+	bool m_bAutoChainAttack = false;
 	bool m_bAttack = false;
 	bool m_bEvasioned = false;
 	bool m_bCharged = false;

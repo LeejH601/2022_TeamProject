@@ -631,7 +631,6 @@ void CSimulatorScene::UpdateObjects(float fTimeElapsed)
 
 	m_pMainCharacter->Update(fTimeElapsed);
 
-
 	if (dynamic_cast<CSimulatorThirdPersonCamera*>(m_pSimulaterCamera.get())) {
 		XMFLOAT3 xmf3PlayerPos = XMFLOAT3{
 		((CKnightPlayer*)m_pMainCharacter.get())->m_pSkinnedAnimationController->m_pRootMotionObject->GetWorld()._41,
@@ -857,6 +856,12 @@ void CSimulatorScene::SetMonsterNum(int nMonsterNum)
 	m_CurrentMonsterNum = nMonsterNum;
 
 	SpawnAndSetMonster();
+}
+
+void CSimulatorScene::SetAutoPlayerAttack(bool bAutoPlayerAttack)
+{
+	if (m_pMainCharacter)
+		m_pMainCharacter->m_bAutoAttack = bAutoPlayerAttack;
 }
 
 void CSimulatorScene::SelectMonsterType(MONSTER_TYPE monster_type)
