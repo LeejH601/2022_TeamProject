@@ -708,7 +708,7 @@ void CDrinkPotionCallbackHandler::HandleCallback(void* pCallbackData, float fTra
 	}
 	if (abs(fTrackPosition - 1.5f) < ANIMATION_CALLBACK_EPSILON && m_bEmitedParticle == false) {
 		if (m_pVertexPointParticleObject) {
-			m_pVertexPointParticleObject->SetTextureIndex(CSimulatorScene::GetInst()->GetTextureManager()->GetTextureOffset(TextureType::ParticleTexture));
+			m_pVertexPointParticleObject->SetTextureIndex(0, CSimulatorScene::GetInst()->GetTextureManager()->GetTextureOffset(TextureType::ParticleTexture));
 			m_pVertexPointParticleObject->SetFieldSpeed(1.0f);
 			m_pVertexPointParticleObject->SetColor(XMFLOAT3(0.3803, 0.9372, 0.1098));
 			m_pVertexPointParticleObject->SetLifeTime(0.5f);

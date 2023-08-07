@@ -35,7 +35,9 @@ class CImGuiManager
 private:
 	static enum class PREVIEW_TEXTURE_TYPE
 	{
-		TYPE_IMPACT,
+		TYPE_IMPACT1,
+		TYPE_IMPACT2,
+		TYPE_IMPACT3,
 		TYPE_PARTICLE,
 		TYPE_TRAILBASE,
 		TYPE_TRAILNOISE,
@@ -115,7 +117,7 @@ private:
 	D3D12_CPU_DESCRIPTOR_HANDLE	m_d3dSrvCPUDescriptorNextHandle;
 	D3D12_GPU_DESCRIPTOR_HANDLE	m_d3dSrvGPUDescriptorNextHandle;
 
-	D3D12_GPU_DESCRIPTOR_HANDLE m_d3dSrvGPUDescriptorHandle_ImpactTexture;
+	D3D12_GPU_DESCRIPTOR_HANDLE m_d3dSrvGPUDescriptorHandle_ImpactTexture[3];
 	D3D12_GPU_DESCRIPTOR_HANDLE m_d3dSrvGPUDescriptorHandle_ParticleTexture;
 	D3D12_GPU_DESCRIPTOR_HANDLE m_d3dSrvGPUDescriptorHandle_TrailMainTexture;
 	D3D12_GPU_DESCRIPTOR_HANDLE m_d3dSrvGPUDescriptorHandle_TrailNoiseTexture;

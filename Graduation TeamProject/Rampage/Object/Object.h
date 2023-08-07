@@ -88,7 +88,9 @@ public:
 
 	UINT m_bRimLightEnable = 0;
 
-	int m_iTextureIndex = 0; // BillBoard, Particle »ç¿ëÁß
+	std::vector<UINT> m_iTextureIndex;
+	UINT m_iTextureN = 1;
+
 	std::vector<std::unique_ptr<IMessageListener>> m_pListeners;
 protected:
 	/*float m_fRimLightFactor;
@@ -125,7 +127,7 @@ public:
 	void SetShader(std::shared_ptr<CShader> pShader, std::shared_ptr<CTexture> pTexture = NULL);
 	void SetMaterial(int nMaterial, std::shared_ptr<CMaterial> pMaterial);
 	void SetTexture(std::shared_ptr<CTexture> pTexture);
-	void SetTextureIndex(int iIndex);
+	void SetTextureIndex(int iOrderIndex, int iIndex);
 	void ChangeTexture(std::shared_ptr<CTexture> pTexture);
 	void SetMesh(std::shared_ptr<CMesh> pMesh) { m_pMesh = pMesh; }
 	

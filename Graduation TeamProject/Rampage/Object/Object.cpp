@@ -15,10 +15,13 @@ CGameObject::CGameObject()
 	m_xmf4x4Transform = Matrix4x4::Identity();
 	m_xmf4x4Texture = Matrix4x4::Identity();
 
+	m_iTextureIndex.resize(4);
 	//m_fDissolveThrethHold = 1.0f;
 }
 CGameObject::CGameObject(int nMaterials)
 {
+	m_iTextureIndex.resize(4);
+
 	m_nMaterials = nMaterials;
 	if (m_nMaterials > 0)
 	{
@@ -101,9 +104,11 @@ void CGameObject::SetTexture(std::shared_ptr<CTexture> pTexture)
 		m_ppMaterials[0] = pMaterial;
 	}
 }
-void CGameObject::SetTextureIndex(int iIndex)
+void CGameObject::SetTextureIndex(int iOrderIndex, int iIndex)
 {
-	m_iTextureIndex = iIndex;
+	m_iTextureIndex[iOrderIndex] = iIndex;
+	if (m_iTextureN < iOrderIndex)
+		m_iTextureN = iOrderIndex;
 }
 void CGameObject::ChangeTexture(std::shared_ptr<CTexture> pTexture)
 {

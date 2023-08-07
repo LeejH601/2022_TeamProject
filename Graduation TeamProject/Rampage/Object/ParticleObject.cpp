@@ -26,7 +26,7 @@ CParticleObject::CParticleObject(int iTextureIndex, ID3D12Device* pd3dDevice, ID
 	m_fProgressionRate = 1.0f;
 	m_fLengthScale = 1.0f;
 	
-	m_iTextureIndex = iTextureIndex;
+	m_iTextureIndex[0] = iTextureIndex;
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
@@ -63,7 +63,7 @@ void CParticleObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dComma
 	m_pcbMappedFrameworkInfo->m_nFlareParticlesToEmit = m_iEmitParticleN;
 	m_pcbMappedFrameworkInfo->m_xmf3Gravity = m_xmf3Direction; // 임시로 방향
 	m_pcbMappedFrameworkInfo->m_xmf3Color = m_f3Color;
-	m_pcbMappedFrameworkInfo->m_iTextureIndex = m_iTextureIndex;
+	m_pcbMappedFrameworkInfo->m_iTextureIndex = m_iTextureIndex[0];
 	m_pcbMappedFrameworkInfo->m_nParticleType = m_iParticleType;
 	m_pcbMappedFrameworkInfo->m_fLifeTime = m_fLifeTime;
 	m_pcbMappedFrameworkInfo->m_fSize = XMFLOAT2(MeterToUnit(m_fSize.x), MeterToUnit(m_fSize.y));
@@ -228,7 +228,7 @@ void CParticleObject::EmitParticle(int emitType)
 		param.m_xmf3EmitedPosition.y = m_xmf4x4Transform._42;
 		param.m_xmf3EmitedPosition.z = m_xmf4x4Transform._43;
 		param.m_fEmitTime = Locator.GetTimer()->GetTotalTime();
-		param.m_iTextureIndex = m_iTextureIndex;
+		param.m_iTextureIndex = m_iTextureIndex[0];
 		param.m_iTextureCoord[0] = m_iTotalRow; param.m_iTextureCoord[1] = m_iTotalCol;
 		param.m_xmf2Size = m_fSize;
 		param.m_fEmissive = m_fEmissive;
@@ -304,7 +304,7 @@ CSmokeParticleObject::CSmokeParticleObject(int iTextureIndex, ID3D12Device* pd3d
 
 	m_iParticleType = iParticleType;
 
-	m_iTextureIndex = iTextureIndex;
+	m_iTextureIndex[0] = iTextureIndex;
 
 
 	srand((unsigned)time(NULL));
@@ -327,7 +327,7 @@ CTerrainParticleObject::CTerrainParticleObject(int iTextureIndex, ID3D12Device* 
 	SetMesh(pParticleMesh);
 
 	m_iParticleType = iParticleType;
-	m_iTextureIndex = iTextureIndex;
+	m_iTextureIndex[0] = iTextureIndex;
 	srand((unsigned)time(NULL));
 
 

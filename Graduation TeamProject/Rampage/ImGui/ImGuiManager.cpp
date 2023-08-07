@@ -380,8 +380,14 @@ void DataLoader::SaveComponentSet(FILE* pInFile, CState<CPlayer>* pState)
 	WriteStringFromFile(pInFile, std::string("<ImpactComponent>:"));
 	WriteStringFromFile(pInFile, std::string("<Enable>:"));
 	WriteIntegerFromFile(pInFile, pImpactComponent->GetEnable());
-	WriteStringFromFile(pInFile, std::string("<TextureIndex>:"));
-	WriteIntegerFromFile(pInFile, pImpactComponent->GetTextureIndex());
+	WriteStringFromFile(pInFile, std::string("<TextureN>:"));
+	WriteIntegerFromFile(pInFile, pImpactComponent->GetTextureN());
+	WriteStringFromFile(pInFile, std::string("<TextureIndex0>:"));
+	WriteIntegerFromFile(pInFile, pImpactComponent->GetTextureIndex(0));
+	WriteStringFromFile(pInFile, std::string("<TextureIndex1>:"));
+	WriteIntegerFromFile(pInFile, pImpactComponent->GetTextureIndex(1));
+	WriteStringFromFile(pInFile, std::string("<TextureIndex2>:"));
+	WriteIntegerFromFile(pInFile, pImpactComponent->GetTextureIndex(2));
 	WriteStringFromFile(pInFile, std::string("<Size_X>:"));
 	WriteFloatFromFile(pInFile, pImpactComponent->GetSize().x);
 	WriteStringFromFile(pInFile, std::string("<Size_Y>:"));
@@ -978,11 +984,29 @@ void DataLoader::LoadComponentSet(FILE* pInFile, CState<CPlayer>* pState)
 				{
 					pImpactComponent->SetEnable(ReadIntegerFromFile(pInFile));
 				}
-				else if (!strcmp(buf, "<TextureIndex>:"))
+				else if (!strcmp(buf, "<TextureN>:"))
 				{
-					pImpactComponent->SetTextureIndex(ReadIntegerFromFile(pInFile));
+					pImpactComponent->SetTextureN(ReadIntegerFromFile(pInFile));
+				}
+				else if (!strcmp(buf, "<TextureIndex0>:"))
+				{
+					pImpactComponent->SetTextureIndex(0, ReadIntegerFromFile(pInFile));
 					std::shared_ptr<CTexture> pTexture = CSimulatorScene::GetInst()->GetTextureManager()->GetTexture(TextureType::BillBoardTexture);
-					int iTextureIndex = pImpactComponent->GetTextureIndex();
+					int iTextureIndex = pImpactComponent->GetTextureIndex(0);
+					pImpactComponent->SetTotalRowColumn(pTexture->GetRow(iTextureIndex), pTexture->GetColumn(iTextureIndex));
+				}
+				else if (!strcmp(buf, "<TextureIndex1>:"))
+				{
+					pImpactComponent->SetTextureIndex(1, ReadIntegerFromFile(pInFile));
+					std::shared_ptr<CTexture> pTexture = CSimulatorScene::GetInst()->GetTextureManager()->GetTexture(TextureType::BillBoardTexture);
+					int iTextureIndex = pImpactComponent->GetTextureIndex(1);
+					pImpactComponent->SetTotalRowColumn(pTexture->GetRow(iTextureIndex), pTexture->GetColumn(iTextureIndex));
+				}
+				else if (!strcmp(buf, "<TextureIndex2>:"))
+				{
+					pImpactComponent->SetTextureIndex(2, ReadIntegerFromFile(pInFile));
+					std::shared_ptr<CTexture> pTexture = CSimulatorScene::GetInst()->GetTextureManager()->GetTexture(TextureType::BillBoardTexture);
+					int iTextureIndex = pImpactComponent->GetTextureIndex(2);
 					pImpactComponent->SetTotalRowColumn(pTexture->GetRow(iTextureIndex), pTexture->GetColumn(iTextureIndex));
 				}
 				else if (!strcmp(buf, "<Size_X>:"))
@@ -1164,8 +1188,14 @@ void CImGuiManager::SetPreviewTexture(ID3D12Device* pd3dDevice, CTexture* pTextu
 	d3dSrvCPUDescriptorHandle.ptr += ::gnCbvSrvDescriptorIncrementSize;
 	switch (type)
 	{
-	case PREVIEW_TEXTURE_TYPE::TYPE_IMPACT: // impact
-		m_d3dSrvGPUDescriptorHandle_ImpactTexture = d3dSrvGPUDescriptorHandle;
+	case PREVIEW_TEXTURE_TYPE::TYPE_IMPACT1: // impact
+		m_d3dSrvGPUDescriptorHandle_ImpactTexture[0] = d3dSrvGPUDescriptorHandle;
+		break;
+	case PREVIEW_TEXTURE_TYPE::TYPE_IMPACT2: // impact
+		m_d3dSrvGPUDescriptorHandle_ImpactTexture[1] = d3dSrvGPUDescriptorHandle;
+		break;
+	case PREVIEW_TEXTURE_TYPE::TYPE_IMPACT3: // impact
+		m_d3dSrvGPUDescriptorHandle_ImpactTexture[2] = d3dSrvGPUDescriptorHandle;
 		break;
 	case PREVIEW_TEXTURE_TYPE::TYPE_PARTICLE: // particle
 		m_d3dSrvGPUDescriptorHandle_ParticleTexture = d3dSrvGPUDescriptorHandle;
@@ -1657,6 +1687,15 @@ void CImGuiManager::ShowImpactManager(CState<CPlayer>* pCurrentAnimation)
 	ImpactEffectComponent* pImpactEffectComponent = dynamic_cast<ImpactEffectComponent*>(pCurrentAnimation->GetImpactComponent());
 	ImGui::Checkbox(U8STR("켜기/끄기##ImpactEffect"), &pImpactEffectComponent->GetEnable());
 
+	ImGui::Text(U8STR("텍스쳐 개수:")); ImGui::SameLine();
+
+	ImGui::RadioButton("1##TextureNum", &pImpactEffectComponent->GetTextureN(), 1);
+	ImGui::SameLine();
+	ImGui::RadioButton("2##TextureNum", &pImpactEffectComponent->GetTextureN(), 2);
+	ImGui::SameLine();
+	ImGui::RadioButton("3##TextureNum", &pImpactEffectComponent->GetTextureN(), 3);
+
+	UINT Offset = CSimulatorScene::GetInst()->GetTextureManager()->GetTextureOffset(TextureType::BillBoardTexture);
 	pImpactEffectComponent->SetTextureOffset(CSimulatorScene::GetInst()->GetTextureManager()->GetTextureOffset(TextureType::BillBoardTexture));
 	UINT m_iBillboardTextureN = CSimulatorScene::GetInst()->GetTextureManager()->GetTextureListIndex(TextureType::BillBoardTexture);
 
@@ -1669,18 +1708,45 @@ void CImGuiManager::ShowImpactManager(CState<CPlayer>* pCurrentAnimation)
 		str[i].assign(wstr.begin(), wstr.end());
 		items.emplace_back(str[i].c_str());
 	}
-
-	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
-	if (ImGui::Combo(U8STR("텍스쳐##ImpactEffect"), (int*)(&pImpactEffectComponent->GetTextureIndex()), items.data(), items.size()));
+	for (int i = 0; i < pImpactEffectComponent->GetTextureN(); i++)
 	{
-		int iTextureIndex = pImpactEffectComponent->GetTextureIndex();
-		pImpactEffectComponent->SetTotalRowColumn(pTexture->GetRow(iTextureIndex), pTexture->GetColumn(iTextureIndex));
+		ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
+		char Name[50] = "Texture";
+		std::string Num = std::to_string(i + 1);
 
-		int my_image_width = 0.2f * m_lDesktopHeight;
-		int my_image_height = 0.2f * m_lDesktopHeight;
-		SetPreviewTexture(Locator.GetDevice(), pTexture.get(), pImpactEffectComponent->GetTextureIndex(), 2, PREVIEW_TEXTURE_TYPE::TYPE_IMPACT);
-		ImGui::Image((ImTextureID)(m_d3dSrvGPUDescriptorHandle_ImpactTexture.ptr), ImVec2((float)my_image_width, (float)my_image_height));
+		strcat_s(Name, 50, Num.c_str());
+		if (ImGui::Combo(Name, (int*)(&pImpactEffectComponent->GetTextureIndex(i)), items.data(), items.size()));
+		{
+			pImpactEffectComponent->SetTotalRowColumn(pTexture->GetRow(pImpactEffectComponent->GetTextureIndex(i)), pTexture->GetColumn(pImpactEffectComponent->GetTextureIndex(i)));
+
+			int my_image_width = 0.2f * m_lDesktopHeight;
+			int my_image_height = 0.2f * m_lDesktopHeight;
+			SetPreviewTexture(Locator.GetDevice(), pTexture.get(), pImpactEffectComponent->GetTextureIndex(i), 2 + i,(PREVIEW_TEXTURE_TYPE)(i));
+			ImGui::Image((ImTextureID)(m_d3dSrvGPUDescriptorHandle_ImpactTexture[i].ptr), ImVec2((float)my_image_width, (float)my_image_height));
+		}
 	}
+	//ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
+	//if (ImGui::Combo(U8STR("텍스쳐2##ImpactEffect"), (int*)(&pImpactEffectComponent->GetTextureIndex(1)), items.data(), items.size()));
+	//{
+	//	pImpactEffectComponent->SetTextureIndex(1, pImpactEffectComponent->GetTextureIndex(1));
+	//	pImpactEffectComponent->SetTotalRowColumn(pTexture->GetRow(pImpactEffectComponent->GetTextureIndex(1)), pTexture->GetColumn(pImpactEffectComponent->GetTextureIndex(1)));
+
+	//	int my_image_width = 0.2f * m_lDesktopHeight;
+	//	int my_image_height = 0.2f * m_lDesktopHeight;
+	//	SetPreviewTexture(Locator.GetDevice(), pTexture.get(), pImpactEffectComponent->GetTextureIndex(1), 3, PREVIEW_TEXTURE_TYPE::TYPE_IMPACT2);
+	//	ImGui::Image((ImTextureID)(m_d3dSrvGPUDescriptorHandle_ImpactTexture[1].ptr), ImVec2((float)my_image_width, (float)my_image_height));
+	//}
+	//ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
+	//if (ImGui::Combo(U8STR("텍스쳐3##ImpactEffect"), (int*)(&pImpactEffectComponent->GetTextureIndex(2)), items.data(), items.size()));
+	//{
+	//	pImpactEffectComponent->SetTextureIndex(2, pImpactEffectComponent->GetTextureIndex(2));
+	//	pImpactEffectComponent->SetTotalRowColumn(pTexture->GetRow(pImpactEffectComponent->GetTextureIndex(2)), pTexture->GetColumn(pImpactEffectComponent->GetTextureIndex(2)));
+
+	//	int my_image_width = 0.2f * m_lDesktopHeight;
+	//	int my_image_height = 0.2f * m_lDesktopHeight;
+	//	SetPreviewTexture(Locator.GetDevice(), pTexture.get(), pImpactEffectComponent->GetTextureIndex(2), 4, PREVIEW_TEXTURE_TYPE::TYPE_IMPACT3);
+	//	ImGui::Image((ImTextureID)(m_d3dSrvGPUDescriptorHandle_ImpactTexture[2].ptr), ImVec2((float)my_image_width, (float)my_image_height));
+	//}
 
 	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
 	if (ImGui::DragFloat(U8STR("수명(초)##ImpactEffect"), &pImpactEffectComponent->GetLifetime(), DRAG_FLOAT_UNIT, IMPACT_LIFETIME_MIN, IMPACT_LIFETIME_MAX, "%.2f", 0))
@@ -1741,7 +1807,7 @@ void CImGuiManager::ShowParticleManager(CState<CPlayer>* pCurrentAnimation)
 	int my_image_height = 0.2f * m_lDesktopHeight;
 
 
-	SetPreviewTexture(Locator.GetDevice(), pTexture.get(), pParticleComponent->GetTextureIndex(), 3, PREVIEW_TEXTURE_TYPE::TYPE_PARTICLE);
+	SetPreviewTexture(Locator.GetDevice(), pTexture.get(), pParticleComponent->GetTextureIndex(), 5, PREVIEW_TEXTURE_TYPE::TYPE_PARTICLE);
 	ImGui::Image((ImTextureID)(m_d3dSrvGPUDescriptorHandle_ParticleTexture.ptr), ImVec2((float)my_image_height, (float)my_image_height));
 
 	ImGui::SetNextItemWidth(190.f);
@@ -1832,7 +1898,7 @@ void CImGuiManager::ShowSlashHitManager(CState<CPlayer>* pCurrentAnimation)
 	int my_image_height = 0.2f * m_lDesktopHeight;
 
 
-	SetPreviewTexture(Locator.GetDevice(), pTexture.get(), pSlashHitComponent->GetTextureIndex(), 6, PREVIEW_TEXTURE_TYPE::TYPE_SLASHHIT);
+	SetPreviewTexture(Locator.GetDevice(), pTexture.get(), pSlashHitComponent->GetTextureIndex(), 8, PREVIEW_TEXTURE_TYPE::TYPE_SLASHHIT);
 	ImGui::Image((ImTextureID)(m_d3dSrvGPUDescriptorHandle_SlashHitTexture.ptr), ImVec2((float)my_image_height, (float)my_image_height));
 
 	ImGui::SetNextItemWidth(190.f);
@@ -1903,7 +1969,7 @@ void CImGuiManager::ShowTrailManager(CState<CPlayer>* pCurrentAnimation)
 	int my_image_height = 0.2f * m_lDesktopHeight;
 
 
-	SetPreviewTexture(Locator.GetDevice(), pTexture.get(), pTrailComponent->GetMainTextureIndex(), 4, PREVIEW_TEXTURE_TYPE::TYPE_TRAILBASE);
+	SetPreviewTexture(Locator.GetDevice(), pTexture.get(), pTrailComponent->GetMainTextureIndex(), 6, PREVIEW_TEXTURE_TYPE::TYPE_TRAILBASE);
 	ImGui::Image((ImTextureID)(m_d3dSrvGPUDescriptorHandle_TrailMainTexture.ptr), ImVec2((float)my_image_height, (float)my_image_height));
 
 	ImGui::DragFloat("Emissve##TrailEffect", &pTrailComponent->m_fEmissiveFactor);
@@ -2193,7 +2259,7 @@ void CImGuiManager::ShowTrailManager(CState<CPlayer>* pCurrentAnimation)
 	my_image_width = 0.2f * m_lDesktopHeight;
 	my_image_height = 0.2f * m_lDesktopHeight;
 
-	SetPreviewTexture(Locator.GetDevice(), pNoiseTexture.get(), pTrailComponent->GetNoiseTextureIndex(), 5, PREVIEW_TEXTURE_TYPE::TYPE_TRAILNOISE);
+	SetPreviewTexture(Locator.GetDevice(), pNoiseTexture.get(), pTrailComponent->GetNoiseTextureIndex(), 7, PREVIEW_TEXTURE_TYPE::TYPE_TRAILNOISE);
 	ImGui::Image((ImTextureID)(m_d3dSrvGPUDescriptorHandle_TrailNoiseTexture.ptr), ImVec2((float)my_image_height, (float)my_image_height));
 
 	/*ImGui::SetNextItemWidth(190.f);

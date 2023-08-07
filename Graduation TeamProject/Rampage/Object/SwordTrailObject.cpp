@@ -69,7 +69,7 @@ void CSwordTrailObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCom
 	m_pcbMappedTrail->m_nCurves = m_nCurves;
 	m_pcbMappedTrail->m_fNoiseConstants = m_fNoiseConstants;
 	m_pcbMappedTrail->m_fEmissiveFactor = m_fEmissiveFactor;
-	m_pcbMappedTrail->gnBaseTextureIndex = m_iTextureIndex;
+	m_pcbMappedTrail->gnBaseTextureIndex = m_iTextureIndex[0];
 	m_pcbMappedTrail->gnNoiseTextureIndex = m_iNoiseTextureIndex;
 	m_pcbMappedTrail->gnScale = m_fLengthWeight;
 

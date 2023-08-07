@@ -77,7 +77,11 @@ void CBillBoardObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dComm
 	int m_nType = 100;
 	pd3dCommandList->SetGraphicsRoot32BitConstants(0, 1, &m_nType, 32); // 16
 
-	m_xmf4x4Texture._11 = m_iTextureIndex;
+	m_xmf4x4Texture._11 = m_iTextureIndex[0];
+	m_xmf4x4Texture._12 = m_iTextureIndex[1];
+	m_xmf4x4Texture._13 = m_iTextureIndex[2];
+	m_xmf4x4Texture._14 = m_iTextureN;
+
 	XMFLOAT4X4 xmfTexture;
 	XMStoreFloat4x4(&xmfTexture, XMMatrixTranspose(XMLoadFloat4x4(&m_xmf4x4Texture)));
 	pd3dCommandList->SetGraphicsRoot32BitConstants(0, 16, &m_xmf4x4Texture, 16);

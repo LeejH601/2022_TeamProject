@@ -237,7 +237,7 @@ void ParticleComponent::HandleMessage(const Message& message, const ParticleComp
 		pParticle->SetFieldMainDirection(m_xmf3FieldMainDirection);
 		pParticle->SetProgressionRate(m_fProgressionRate);
 		pParticle->SetLengthScale(m_fLengthScale);
-		pParticle->SetTextureIndex(m_iTextureIndex + CSimulatorScene::GetInst()->GetTextureManager()->GetTextureOffset(TextureType::ParticleTexture));
+		pParticle->SetTextureIndex(0, m_iTextureIndex + CSimulatorScene::GetInst()->GetTextureManager()->GetTextureOffset(TextureType::ParticleTexture));
 		pParticle->SetEmissive(m_fEmissive);
 		pParticle->SetRotateFactor(m_bSimulateRotate);
 		pParticle->SetScaleFactor(m_bSimulateRotate);
@@ -247,6 +247,7 @@ void ParticleComponent::HandleMessage(const Message& message, const ParticleComp
 }
 ImpactEffectComponent::ImpactEffectComponent()
 {
+	m_iTextureIndex.resize(3);
 	m_iTextureOffset = CSimulatorScene::GetInst()->GetTextureManager()->GetTextureOffset(TextureType::BillBoardTexture);
 }
 void ImpactEffectComponent::SetTotalRowColumn(int iTotalRow, int iTotalColumn)
@@ -265,7 +266,8 @@ void ImpactEffectComponent::HandleMessage(const Message& message, const ImpactCo
 	{
 		pMultiSpriteParticle->SetParticleType(m_iParticleType);
 		pMultiSpriteParticle->SetEmit(true);
-		pMultiSpriteParticle->SetTotalRowColumn(m_iTotalRow, m_iTotalColumn);
+		for(int i = 0; i < m_iTextureN; i++)
+			pMultiSpriteParticle->SetTotalRowColumn(m_iTotalRow, m_iTotalColumn);
 		pMultiSpriteParticle->SetSize(m_fSize);
 		pMultiSpriteParticle->SetDirection(XMFLOAT3(0.f, 0.f, 0.f));
 		pMultiSpriteParticle->SetStartAlpha(m_fAlpha);
@@ -275,7 +277,7 @@ void ImpactEffectComponent::HandleMessage(const Message& message, const ImpactCo
 		pMultiSpriteParticle->SetEmitParticleN(m_nEmitParticleNumber);
 		pMultiSpriteParticle->SetMaxParticleN(m_nParticleNumber);
 		pMultiSpriteParticle->SetPosition(params.xmf3Position);
-		pMultiSpriteParticle->SetTextureIndex(m_iTextureIndex + m_iTextureOffset);
+		pMultiSpriteParticle->SetTextureIndex(0, m_iTextureIndex[0] + m_iTextureOffset);
 		pMultiSpriteParticle->SetEmissive(m_fEmissive);
 		pMultiSpriteParticle->EmitParticle(7);
 	}
@@ -308,7 +310,7 @@ void TerrainSpriteComponent::HandleMessage(const Message& message, const Terrain
 		pMultiSpriteParticle->SetEmitParticleN(m_nEmitParticleNumber);
 		pMultiSpriteParticle->SetMaxParticleN(m_nParticleNumber);
 		pMultiSpriteParticle->SetPosition(params.xmf3Position);
-		pMultiSpriteParticle->SetTextureIndex(3);
+		pMultiSpriteParticle->SetTextureIndex(0, 3);
 		pMultiSpriteParticle->SetEmissive(10.0f);
 		pMultiSpriteParticle->EmitParticle(8);
 	}
@@ -405,7 +407,7 @@ void TrailParticleComponent::HandleMessage(const Message& message, const Particl
 		pParticle->SetEmitParticleN(m_nEmitParticleNumber);
 		pParticle->SetPosition(params.xmf3Position);
 		pParticle->SetParticleType(m_iParticleType);
-		pParticle->SetTextureIndex(m_iTextureIndex + CSimulatorScene::GetInst()->GetTextureManager()->GetTextureOffset(TextureType::ParticleTexture));
+		pParticle->SetTextureIndex(0, m_iTextureIndex + CSimulatorScene::GetInst()->GetTextureManager()->GetTextureOffset(TextureType::ParticleTexture));
 		pParticle->SetEmissive(m_fEmissive);
 		pParticle->SetRotateFactor(m_bSimulateRotate);
 		pParticle->SetScaleFactor(m_bSimulateRotate);
@@ -464,7 +466,7 @@ void TrailComponent::HandleMessage(const Message& message, const TrailUpdatePara
 		pTrail->m_fEmissiveFactor = this->m_fEmissiveFactor;
 		pTrail->m_eTrailUpdateMethod = GetEnable() ? TRAIL_UPDATE_METHOD::UPDATE_NEW_CONTROL_POINT : TRAIL_UPDATE_METHOD::NON_UPDATE_NEW_CONTROL_POINT;
 
-		pTrail->SetTextureIndex(m_nMainTextureIndex + m_nMainTextureOffset);
+		pTrail->SetTextureIndex(0, m_nMainTextureIndex + m_nMainTextureOffset);
 		pTrail->SetNoiseTextureIndex(m_nNoiseTextureIndex + m_nNoiseTextureOffset);
 	}
 }
@@ -546,7 +548,7 @@ void SlashHitComponent::HandleMessage(const Message& message, const ParticleComp
 		pParticle->SetFieldMainDirection(m_xmf3FieldMainDirection);
 		pParticle->SetProgressionRate(m_fProgressionRate);
 		pParticle->SetLengthScale(m_fLengthScale);*/
-		pParticle->SetTextureIndex(m_iTextureIndex + CSimulatorScene::GetInst()->GetTextureManager()->GetTextureOffset(TextureType::ParticleTexture));
+		pParticle->SetTextureIndex(0, m_iTextureIndex + CSimulatorScene::GetInst()->GetTextureManager()->GetTextureOffset(TextureType::ParticleTexture));
 		pParticle->SetEmissive(m_fEmissive);
 		pParticle->SetRotateFactor(m_bSimulateRotate);
 		pParticle->SetScaleFactor(m_bScaleFlag);
@@ -629,7 +631,7 @@ void ShieldHitComponent::HandleMessage(const Message& message, const ParticleCom
 		pParticle->SetFieldMainDirection(m_xmf3FieldMainDirection);
 		pParticle->SetProgressionRate(m_fProgressionRate);
 		pParticle->SetLengthScale(m_fLengthScale);*/
-		pParticle->SetTextureIndex(m_iTextureIndex + CSimulatorScene::GetInst()->GetTextureManager()->GetTextureOffset(TextureType::ParticleTexture));
+		pParticle->SetTextureIndex(0, m_iTextureIndex + CSimulatorScene::GetInst()->GetTextureManager()->GetTextureOffset(TextureType::ParticleTexture));
 		pParticle->SetEmissive(m_fEmissive);
 		pParticle->SetRotateFactor(m_bSimulateRotate);
 		pParticle->SetScaleFactor(m_bSimulateRotate);

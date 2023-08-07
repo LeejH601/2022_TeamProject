@@ -1500,7 +1500,7 @@ void ChargeStart_Player::Execute(CPlayer* player, float fElapsedTime)
 		fAcculateTime += fElapsedTime;
 		if (fAcculateTime >= fSpawnVPParticleTime) {
 			fAcculateTime = 0.0f;
-			vpObj->SetTextureIndex(CSimulatorScene::GetInst()->GetTextureManager()->GetTextureOffset(TextureType::SmokeTexture));
+			vpObj->SetTextureIndex(0, CSimulatorScene::GetInst()->GetTextureManager()->GetTextureOffset(TextureType::SmokeTexture));
 			vpObj->SetFieldSpeed(0.3f);
 			vpObj->SetColor(XMFLOAT3(0.4745, 0.9254, 1.0));
 			vpObj->SetSpeed(6.0f);
@@ -1674,7 +1674,7 @@ ChargeAttack_Player::ChargeAttack_Player()
 	ImpactEffect->SetLifeTime(1.0);
 	ImpactEffect->SetSize(XMFLOAT2(20, 20));
 	ImpactEffect->SetTotalRowColumn(8, 8);
-	ImpactEffect->SetTextureIndex(3);
+	ImpactEffect->SetTextureIndex(0, 3);
 
 	ParticleComponent* particleComp = dynamic_cast<ParticleComponent*>(GetParticleComponent());
 	particleComp->SetEnable(true);

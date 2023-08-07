@@ -748,15 +748,17 @@ private:
 	XMFLOAT2 m_fSize = XMFLOAT2(3.f, 3.f);
 	XMFLOAT3 m_xmf3Color = XMFLOAT3(1.f, 1.f, 1.f);
 	XMFLOAT3 m_xmfPosOffset = XMFLOAT3(0.f, 2.f, 0.f);
-	int m_iTextureIndex = 0;
+	std::vector<UINT> m_iTextureIndex;
 	int m_iTextureOffset = 0;
-	int m_iTotalRow, m_iTotalColumn;
+	UINT m_iTotalRow, m_iTotalColumn;
 	float m_fEmissive = 1.0f;
 	bool m_bSimulateRotate = false;
-
+	int m_iTextureN = 1;
 public:
-	int& GetTextureIndex() { return m_iTextureIndex; }
+	UINT& GetTextureIndex(int iIndex) { return m_iTextureIndex[iIndex]; }
 	int GetTextureOffset() { return m_iTextureOffset; }
+	void SetTextureN(int iTextureN) { m_iTextureN = iTextureN; }
+	int& GetTextureN() { return m_iTextureN; }
 	float& GetSpeed() { return m_fSpeed; }
 	float& GetAlpha() { return m_fAlpha; }
 	float& GetLifetime() { return m_fLifeTime; }
@@ -768,7 +770,7 @@ public:
 	float& GetEmissive() { return m_fEmissive; };
 	bool& GetRotateFactor() { return m_bSimulateRotate; };
 
-	void SetTextureIndex(int nTextureIndex) { m_iTextureIndex = nTextureIndex; }
+	void SetTextureIndex(int iTextureOrder, int iTextureIndex) { m_iTextureIndex[iTextureOrder] = iTextureIndex; }
 	void SetSize(XMFLOAT2 fSize) { m_fSize = fSize; }
 	void SetSizeX(float fSize) { m_fSize.x = fSize; }
 	void SetSizeY(float fSize) { m_fSize.y = fSize; }
