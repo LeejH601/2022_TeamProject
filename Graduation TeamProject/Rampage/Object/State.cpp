@@ -288,10 +288,14 @@ void Atk1_Player::CheckComboAttack(CPlayer* player)
 	if (0.7 < player->m_pSkinnedAnimationController->m_pAnimationTracks[0].m_fPosition) {
 		if (player->m_pSwordTrailReference)
 			dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[0].get())->m_eTrailUpdateMethod = TRAIL_UPDATE_METHOD::DELETE_CONTROL_POINT;
+		
 		if (player->m_bAttack && player->m_fStamina >= 5.0f) {
 			CAnimationController* pPlayerController = player->m_pSkinnedAnimationController.get();
 			player->m_pStateMachine->ChangeState(Atk2_Player::GetInst());
 		}
+
+		else if (player->m_bAutoChainAttack)
+			player->m_pStateMachine->ChangeState(Atk2_Player::GetInst());
 	}
 }
 
@@ -503,8 +507,6 @@ void Atk1_Player::Execute(CPlayer* player, float fElapsedTime)
 	{
 		if (player->m_bAutoAttack)
 			player->m_pStateMachine->ChangeState(Atk1_Player::GetInst());
-		else if (player->m_bAutoChainAttack)
-			player->m_pStateMachine->ChangeState(Atk2_Player::GetInst());
 		else
 			player->m_pStateMachine->ChangeState(Idle_Player::GetInst());
 	}
@@ -562,6 +564,8 @@ void Atk2_Player::CheckComboAttack(CPlayer* player)
 			CAnimationController* pPlayerController = player->m_pSkinnedAnimationController.get();
 			player->m_pStateMachine->ChangeState(Atk3_Player::GetInst());
 		}
+		else if (player->m_bAutoChainAttack)
+			player->m_pStateMachine->ChangeState(Atk3_Player::GetInst());
 	}
 }
 
@@ -648,8 +652,6 @@ void Atk2_Player::Execute(CPlayer* player, float fElapsedTime)
 	{
 		if (player->m_bAutoAttack)
 			player->m_pStateMachine->ChangeState(Atk2_Player::GetInst());
-		else if (player->m_bAutoChainAttack)
-			player->m_pStateMachine->ChangeState(Atk3_Player::GetInst());
 		else
 			player->m_pStateMachine->ChangeState(Idle_Player::GetInst());
 	}
