@@ -84,6 +84,7 @@ private:
 	bool show_preset_menu = false;
 	bool show_save_menu = false;
 	bool show_creation_menu = false;
+	bool show_survey_menu = false;
 
 	bool show_demo_window = false;
 	bool show_another_window = false;

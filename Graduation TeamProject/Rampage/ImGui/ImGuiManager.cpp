@@ -1332,6 +1332,19 @@ void CImGuiManager::SetUI()
 		ImGui::End();
 	}
 
+	if (show_survey_menu)
+	{
+		ImGuiWindowFlags my_window_flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize;
+		ImGui::Begin(U8STR("설문조사 메뉴"), &show_survey_menu, my_window_flags);
+
+		ImGui::Button(U8STR("2-1"));
+		ImGui::Button(U8STR("2-2"));
+		ImGui::Button(U8STR("2-3"));
+		ImGui::Button(U8STR("2-4"));
+
+		ImGui::End();
+	}
+	
 	if (show_preset_menu)
 	{
 		ImGuiWindowFlags my_window_flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize;
@@ -1428,6 +1441,10 @@ void CImGuiManager::SetUI()
 					show_save_menu = true;
 				}
 				ImGui::Separator();
+				if (ImGui::MenuItem(U8STR("설문조사 메뉴"), NULL))
+				{
+					show_survey_menu = true;
+				}
 				if (ImGui::MenuItem(U8STR("타격감 프리셋 메뉴"), NULL))
 				{
 					show_preset_menu = true;
