@@ -1337,10 +1337,45 @@ void CImGuiManager::SetUI()
 		ImGuiWindowFlags my_window_flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize;
 		ImGui::Begin(U8STR("설문조사 메뉴"), &show_survey_menu, my_window_flags);
 
-		ImGui::Button(U8STR("2-1"));
-		ImGui::Button(U8STR("2-2"));
-		ImGui::Button(U8STR("2-3"));
+		if (ImGui::Button(U8STR("2-1")))
+		{
+			// 공격 1, 공격 2, 공격 3 충격 이펙트를 제외한 나머지 OFF 충격 이펙트 ON
+
+			// 타격감 리셋 1, 2, 3, 후 충격 이펙트만 ON;
+		}
+		ImGui::SameLine(); ImGui::Button(U8STR("2-2"));
+		ImGui::SameLine(); ImGui::Button(U8STR("2-3"));
 		ImGui::Button(U8STR("2-4"));
+		ImGui::SameLine(); ImGui::Button(U8STR("2-5"));
+		ImGui::SameLine(); ImGui::Button(U8STR("2-6"));
+		ImGui::Button(U8STR("2-7"));
+		ImGui::SameLine(); ImGui::Button(U8STR("2-8"));
+		ImGui::SameLine(); ImGui::Button(U8STR("2-9"));
+		ImGui::Button(U8STR("2-10"));
+		ImGui::SameLine(); ImGui::Button(U8STR("2-11"));
+		ImGui::SameLine(); ImGui::Button(U8STR("2-12"));
+		ImGui::SameLine(); ImGui::Button(U8STR("2-13"));
+
+		ImGui::Separator();
+
+		ImGui::Button(U8STR("3-1"));
+		ImGui::SameLine(); ImGui::Button(U8STR("3-2"));
+		ImGui::SameLine(); ImGui::Button(U8STR("3-3"));
+		ImGui::Button(U8STR("3-4"));
+		ImGui::SameLine(); ImGui::Button(U8STR("3-5"));
+		ImGui::SameLine(); ImGui::Button(U8STR("3-6"));
+		ImGui::Button(U8STR("3-7"));
+		ImGui::SameLine(); ImGui::Button(U8STR("3-8"));
+		ImGui::SameLine(); ImGui::Button(U8STR("3-9"));
+		ImGui::Button(U8STR("3-10"));
+		ImGui::SameLine(); ImGui::Button(U8STR("3-11"));
+		ImGui::SameLine(); ImGui::Button(U8STR("3-12"));
+		ImGui::SameLine(); ImGui::Button(U8STR("3-13"));
+
+		ImGui::Separator();
+
+		ImGui::Button(U8STR("4-1"));
+		ImGui::SameLine(); ImGui::Button(U8STR("4-2"));
 
 		ImGui::End();
 	}
