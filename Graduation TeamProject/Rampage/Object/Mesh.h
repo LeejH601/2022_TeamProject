@@ -397,7 +397,7 @@ public:
 	UINT							m_iType = 0;
 	float							m_fEmitTime = 0.0f;
 	UINT							m_iTextureIndex = 0;
-	UINT							m_iTextureCoord[2];
+	UINT							m_iTextureCoord[6];
 	XMFLOAT2						m_xmf2Size = XMFLOAT2(1.0f, 1.0f);
 	float							m_fEmissive = 1.0f;
 	UINT							m_bSimulateRotate = 0;
@@ -417,7 +417,7 @@ struct ParticleEmitDataParam
 	float m_fLifeTime;
 	float							m_fEmitTime = 0.0f;
 	UINT							m_iTextureIndex = 0;
-	UINT							m_iTextureCoord[2];
+	UINT							m_iTextureCoord[6];
 	XMFLOAT2						m_xmf2Size = XMFLOAT2(1.0f, 1.0f);
 	float m_fEmissive;
 	bool							m_bSimulateRotate = false;

@@ -27,7 +27,8 @@ CParticleObject::CParticleObject(int iTextureIndex, ID3D12Device* pd3dDevice, ID
 	m_fLengthScale = 1.0f;
 	
 	m_iTextureIndex[0] = iTextureIndex;
-
+	m_iTotalRow.resize(3);
+	m_iTotalCol.resize(3);
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
 
@@ -68,7 +69,7 @@ void CParticleObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dComma
 	m_pcbMappedFrameworkInfo->m_fLifeTime = m_fLifeTime;
 	m_pcbMappedFrameworkInfo->m_fSize = XMFLOAT2(MeterToUnit(m_fSize.x), MeterToUnit(m_fSize.y));
 	m_pcbMappedFrameworkInfo->m_bEmitter = dynamic_cast<CParticleMesh*>(m_pMesh.get())->m_bEmit;
-	m_pcbMappedFrameworkInfo->m_iTextureCoord = XMUINT2(m_iTotalRow, m_iTotalCol);
+	//m_pcbMappedFrameworkInfo->m_iTextureCoord = XMUINT2(m_iTotalRow, m_iTotalCol);
 
 	D3D12_GPU_VIRTUAL_ADDRESS d3dGpuVirtualAddress = m_pd3dcbFrameworkInfo->GetGPUVirtualAddress();
 	pd3dCommandList->SetGraphicsRootConstantBufferView(11, d3dGpuVirtualAddress);
@@ -147,10 +148,10 @@ void CParticleObject::SetEnable(bool bEnable)
 	m_bEnable = bEnable;
 }
 
-void CParticleObject::SetTotalRowColumn(int iTotalRow, int iTotalColumn)
+void CParticleObject::SetTotalRowColumn(int iIndex, int iTotalRow, int iTotalColumn)
 {
-	m_iTotalRow = iTotalRow;
-	m_iTotalCol = iTotalColumn;
+	m_iTotalRow[iIndex] = iTotalRow;
+	m_iTotalCol[iIndex] = iTotalColumn;
 }
 
 void CParticleObject::SetSize(XMFLOAT2 fSize)
@@ -229,7 +230,8 @@ void CParticleObject::EmitParticle(int emitType)
 		param.m_xmf3EmitedPosition.z = m_xmf4x4Transform._43;
 		param.m_fEmitTime = Locator.GetTimer()->GetTotalTime();
 		param.m_iTextureIndex = m_iTextureIndex[0];
-		param.m_iTextureCoord[0] = m_iTotalRow; param.m_iTextureCoord[1] = m_iTotalCol;
+		for(int i = 0; i < 3; i++)
+			param.m_iTextureCoord[i * 2] = m_iTotalRow[i], param.m_iTextureCoord[i * 2 - 1] = m_iTotalCol[i];
 		param.m_xmf2Size = m_fSize;
 		param.m_fEmissive = m_fEmissive;
 		param.m_bSimulateRotate = m_bSimulateRotate;
@@ -268,29 +270,32 @@ void CParticleObject::SetAnimation(bool bAnimation)
 
 void CParticleObject::AnimateRowColumn(float fTimeElapsed)
 {
-	if (fTimeElapsed >= 0.0f)
+	for (int i = 0; i < m_iTextureN; i++)
 	{
-		m_fAccumulatedTime += fTimeElapsed;
-
-		float fraction = std::fmodf(m_fAccumulatedTime / m_fLifeTime, 1.0f);
-		interval = 1.0f / (m_iTotalRow * m_iTotalCol);
-
-		m_iCurrentCol = (int)(fraction / (interval * m_iTotalRow));
-		float remainvalue = (fraction / (interval * m_iTotalRow)) - m_iCurrentCol;
-		m_iCurrentRow = (int)(remainvalue * m_iTotalRow);
-
-		if (m_fAccumulatedTime > m_fLifeTime)
+		if (fTimeElapsed >= 0.0f)
 		{
-			m_iCurrentRow = 0;
-			m_iCurrentCol = 0;
-			m_fAccumulatedTime = 0.0f;
-			m_bAnimation = false;
+			m_fAccumulatedTime += fTimeElapsed;
+
+			float fraction = std::fmodf(m_fAccumulatedTime / m_fLifeTime, 1.0f);
+			interval = 1.0f / (m_iTotalRow[i] * m_iTotalCol[i]);
+
+			m_iCurrentCol[i] = (int)(fraction / (interval * m_iTotalRow[i]));
+			float remainvalue = (fraction / (interval * m_iTotalRow[i])) - m_iCurrentCol[i];
+			m_iCurrentRow[i] = (int)(remainvalue * m_iTotalRow[i]);
+
+			if (m_fAccumulatedTime > m_fLifeTime)
+			{
+				m_iCurrentRow[i] = 0;
+				m_iCurrentCol[i] = 0;
+				m_fAccumulatedTime = 0.0f;
+				m_bAnimation = false;
+			}
 		}
+		m_xmf4x4World._11 = 1.0f / float(m_iTotalRow[i]);
+		m_xmf4x4World._22 = 1.0f / float(m_iTotalCol[i]);
+		m_xmf4x4World._31 = float(m_iCurrentRow[i]) / float(m_iTotalRow[i]);
+		m_xmf4x4World._32 = float(m_iCurrentCol[i]) / float(m_iTotalCol[i]);
 	}
-	m_xmf4x4World._11 = 1.0f / float(m_iTotalRow);
-	m_xmf4x4World._22 = 1.0f / float(m_iTotalCol);
-	m_xmf4x4World._31 = float(m_iCurrentRow) / float(m_iTotalRow);
-	m_xmf4x4World._32 = float(m_iCurrentCol) / float(m_iTotalCol);
 }
 
 CSmokeParticleObject::CSmokeParticleObject(int iTextureIndex, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, XMFLOAT3 xmf3Position, XMFLOAT3 xmf3Velocity, float fLifetime, XMFLOAT3 xmf3Acceleration, XMFLOAT3 xmf3Color, XMFLOAT2 xmf2Size, UINT nMaxParticles, CParticleShader* pShader, int iParticleType) : CParticleObject()

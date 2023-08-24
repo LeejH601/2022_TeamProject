@@ -10,8 +10,9 @@ struct VS_PARTICLE_DRAW_OUTPUT
 	float2 size : SCALE;
 	float alpha : ALPHA;
 	uint TextureIndex :TEXTUREINDEX;
-	uint2 SpriteTotalCoord : TEXTURECOORD;
-	uint2 SpriteCurrentCoord : TEXTURECOORD1;
+	uint4 SpriteCoord : TEXTURECOORD; // TOTAL, CURRENT
+	uint4 SpriteCoord1 : TEXTURECOORD1; // TOTAL, CURRENT
+	uint4 SpriteCoord2 : TEXTURECOORD2; // TOTAL, CURRENT
 	float lifetime : LIFETIME;
 	float EmitTime : EMITTIME; // 방출 시작 시간 
 	float emissive : EMISSIVE;
@@ -75,8 +76,10 @@ VS_PARTICLE_DRAW_OUTPUT VSParticleDraw(VS_PARTICLE_INPUT input)
 	output.size = input.size;
 	output.alpha = 1.f;
 	output.TextureIndex = input.TextureIndex;
-	output.SpriteTotalCoord = input.SpriteTotalCoord;
-	output.SpriteCurrentCoord = SpriteAnimtaion(input, gfCurrentTime - input.EmitTime, input.lifetime, input.SpriteTotalCoord.x, input.SpriteTotalCoord.y);
+	output.SpriteCoord.xy = int4(input.SpriteTotalCoord, SpriteAnimtaion(input, gfCurrentTime - input.EmitTime, input.lifetime, input.SpriteTotalCoord.x, input.SpriteTotalCoord.y));
+	output.SpriteCoord1.xy = int4(input.SpriteTotalCoord1, SpriteAnimtaion(input, gfCurrentTime - input.EmitTime, input.lifetime, input.SpriteTotalCoord1.x, input.SpriteTotalCoord1.y));
+	output.SpriteCoord2.xy = int4(input.SpriteTotalCoord2, SpriteAnimtaion(input, gfCurrentTime - input.EmitTime, input.lifetime, input.SpriteTotalCoord2.x, input.SpriteTotalCoord2.y));
+	//output.SpriteCurrentCoord = ;
 	output.lifetime = input.lifetime;
 	output.EmitTime = input.EmitTime;
 	output.emissive = input.emissive;

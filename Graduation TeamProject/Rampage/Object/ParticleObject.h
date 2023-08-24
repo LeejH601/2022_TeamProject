@@ -52,7 +52,7 @@ public:
 	virtual void OnPostRender();
 	virtual void SetEnable(bool bEnable);
 
-	void SetTotalRowColumn(int iTotalRow, int iTotalColumn);
+	void SetTotalRowColumn(int iIndex, int iTotalRow, int iTotalColumn);
 	void SetSize(XMFLOAT2 fSize);
 	void SetLifeTime(float fLifeTime);
 	void SetStartAlpha(float fAlpha);
@@ -106,11 +106,11 @@ protected:
 	float m_fProgressionRate;
 	float m_fLengthScale;
 
-	int								m_iTotalRow = 1;
-	int								m_iTotalCol = 1;
+	std::vector<int>				m_iTotalRow;
+	std::vector<int>				m_iTotalCol;
 
-	int 							m_iCurrentRow = 0;
-	int 							m_iCurrentCol = 0;
+	std::vector<int>				m_iCurrentRow;
+	std::vector<int>				m_iCurrentCol;
 
 	float m_fAccumulatedTime = 0.0f;
 	float interval;

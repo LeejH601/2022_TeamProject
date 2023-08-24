@@ -7,6 +7,8 @@ struct VS_PARTICLE_INPUT
 	float EmitTime : EMITTIME;
 	uint TextureIndex :TEXTUREINDEX;
 	uint2 SpriteTotalCoord : TEXTURECOORD;
+	uint2 SpriteTotalCoord1 : TEXTURECOORD1;
+	uint2 SpriteTotalCoord2 : TEXTURECOORD2;
 	float2 size : SIZE;
 	float emissive : EMISSIVE;
 	uint rotateFlag : ROTATEFLAG;

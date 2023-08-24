@@ -842,7 +842,7 @@ void DataLoader::LoadComponentSet(FILE* pInFile, CState<CPlayer>* pState)
 					pParticleComponent->SetTextureIndex(ReadIntegerFromFile(pInFile));
 					std::shared_ptr<CTexture> pTexture = CSimulatorScene::GetInst()->GetTextureManager()->GetTexture(TextureType::ParticleTexture);
 					int iTextureIndex = pParticleComponent->GetTextureIndex();
-					pParticleComponent->SetTotalRowColumn(pTexture->GetRow(iTextureIndex), pTexture->GetColumn(iTextureIndex));
+					pParticleComponent->SetTotalRowColumn(pParticleComponent->GetTextureIndex(), pTexture->GetRow(iTextureIndex), pTexture->GetColumn(iTextureIndex));
 				}
 				else if (!strcmp(buf, "<Alpha>:"))
 				{
@@ -993,21 +993,21 @@ void DataLoader::LoadComponentSet(FILE* pInFile, CState<CPlayer>* pState)
 					pImpactComponent->SetTextureIndex(0, ReadIntegerFromFile(pInFile));
 					std::shared_ptr<CTexture> pTexture = CSimulatorScene::GetInst()->GetTextureManager()->GetTexture(TextureType::BillBoardTexture);
 					int iTextureIndex = pImpactComponent->GetTextureIndex(0);
-					pImpactComponent->SetTotalRowColumn(pTexture->GetRow(iTextureIndex), pTexture->GetColumn(iTextureIndex));
+					pImpactComponent->SetTotalRowColumn(0, pTexture->GetRow(iTextureIndex), pTexture->GetColumn(iTextureIndex));
 				}
 				else if (!strcmp(buf, "<TextureIndex1>:"))
 				{
 					pImpactComponent->SetTextureIndex(1, ReadIntegerFromFile(pInFile));
 					std::shared_ptr<CTexture> pTexture = CSimulatorScene::GetInst()->GetTextureManager()->GetTexture(TextureType::BillBoardTexture);
 					int iTextureIndex = pImpactComponent->GetTextureIndex(1);
-					pImpactComponent->SetTotalRowColumn(pTexture->GetRow(iTextureIndex), pTexture->GetColumn(iTextureIndex));
+					pImpactComponent->SetTotalRowColumn(1, pTexture->GetRow(iTextureIndex), pTexture->GetColumn(iTextureIndex));
 				}
 				else if (!strcmp(buf, "<TextureIndex2>:"))
 				{
 					pImpactComponent->SetTextureIndex(2, ReadIntegerFromFile(pInFile));
 					std::shared_ptr<CTexture> pTexture = CSimulatorScene::GetInst()->GetTextureManager()->GetTexture(TextureType::BillBoardTexture);
 					int iTextureIndex = pImpactComponent->GetTextureIndex(2);
-					pImpactComponent->SetTotalRowColumn(pTexture->GetRow(iTextureIndex), pTexture->GetColumn(iTextureIndex));
+					pImpactComponent->SetTotalRowColumn(2, pTexture->GetRow(iTextureIndex), pTexture->GetColumn(iTextureIndex));
 				}
 				else if (!strcmp(buf, "<Size_X>:"))
 				{
@@ -1717,7 +1717,7 @@ void CImGuiManager::ShowImpactManager(CState<CPlayer>* pCurrentAnimation)
 		strcat_s(Name, 50, Num.c_str());
 		if (ImGui::Combo(Name, (int*)(&pImpactEffectComponent->GetTextureIndex(i)), items.data(), items.size()));
 		{
-			pImpactEffectComponent->SetTotalRowColumn(pTexture->GetRow(pImpactEffectComponent->GetTextureIndex(i)), pTexture->GetColumn(pImpactEffectComponent->GetTextureIndex(i)));
+			pImpactEffectComponent->SetTotalRowColumn(i, pTexture->GetRow(pImpactEffectComponent->GetTextureIndex(i)), pTexture->GetColumn(pImpactEffectComponent->GetTextureIndex(i)));
 
 			int my_image_width = 0.2f * m_lDesktopHeight;
 			int my_image_height = 0.2f * m_lDesktopHeight;
@@ -1800,7 +1800,7 @@ void CImGuiManager::ShowParticleManager(CState<CPlayer>* pCurrentAnimation)
 	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
 	if (ImGui::Combo(U8STR("ÅØ½ºÃÄ##ParticleEffect"), (int*)(&pParticleComponent->GetTextureIndex()), items.data(), items.size())) {
 		int textureIndex = pParticleComponent->GetTextureIndex();
-		pParticleComponent->SetTotalRowColumn(pTexture->GetRow(textureIndex), pTexture->GetColumn(textureIndex));
+		pParticleComponent->SetTotalRowColumn(textureIndex, pTexture->GetRow(textureIndex), pTexture->GetColumn(textureIndex));
 	}
 
 		int my_image_width = 0.2f * m_lDesktopHeight;

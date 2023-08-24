@@ -1673,7 +1673,7 @@ ChargeAttack_Player::ChargeAttack_Player()
 	ImpactEffect->SetEmissive(3.0f);
 	ImpactEffect->SetLifeTime(1.0);
 	ImpactEffect->SetSize(XMFLOAT2(20, 20));
-	ImpactEffect->SetTotalRowColumn(8, 8);
+	ImpactEffect->SetTotalRowColumn(0, 8, 8);
 	ImpactEffect->SetTextureIndex(0, 3);
 
 	ParticleComponent* particleComp = dynamic_cast<ParticleComponent*>(GetParticleComponent());

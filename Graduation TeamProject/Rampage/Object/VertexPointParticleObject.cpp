@@ -52,7 +52,8 @@ void CVertexPointParticleObject::EmitParticle(int emitType)
 		param.m_fLifeTime = m_fLifeTime;
 		param.m_fEmitedSpeed = m_fSpeed;
 		param.m_iTextureIndex = m_iTextureIndex[0];
-		param.m_iTextureCoord[0] = m_iTotalRow; param.m_iTextureCoord[1] = m_iTotalCol;
+		for(int i = 0; i < 3; i++)
+		param.m_iTextureCoord[i * 2] = m_iTotalRow[i], param.m_iTextureCoord[i * 2 - 1] = m_iTotalCol[i];
 
 		/*	param.m_fLifeTime = m_fLifeTime;
 			param.m_fEmitedSpeed = m_fSpeed;

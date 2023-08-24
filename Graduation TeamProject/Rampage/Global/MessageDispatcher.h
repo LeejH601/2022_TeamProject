@@ -483,8 +483,8 @@ protected:
 	XMFLOAT2 m_fSize = XMFLOAT2(3.f, 3.f);
 	float m_fAlpha = 1.f;
 
-	int m_iTotalRow = 1;
-	int m_iTotalColumn = 1;
+	std::vector<int> m_iTotalRow;
+	std::vector<int> m_iTotalColumn;
 
 	float m_fFieldSpeed;
 	float m_fNoiseStrength;
@@ -500,6 +500,7 @@ protected:
 	float m_fEmissive = 1.0f;
 	bool m_bSimulateRotate = false;
 	bool m_bScaleFlag = false;
+	int m_iTextureN = 1;
 public:
 	ParticleComponent();
 
@@ -546,7 +547,7 @@ public:
 	void SetEmissive(float fEmissive) { m_fEmissive = fEmissive; };
 	void SetRotateFacotr(bool input) { m_bSimulateRotate = input; };
 	void SetScaleFacotr(bool input) { m_bScaleFlag = input; };
-	void SetTotalRowColumn(int iTotalRow, int iTotalColumn) { m_iTotalColumn = iTotalColumn;  m_iTotalRow = iTotalRow; };
+	void SetTotalRowColumn(int iIndex, int iTotalRow, int iTotalColumn) { m_iTotalColumn[iIndex] = iTotalColumn;  m_iTotalRow[iIndex] = iTotalRow; };
 
 	void SetTextureIndex(int iIndex) { m_iTextureIndex = iIndex; };
 	void SetTextureOffset(int iOffset) { m_iTextureOffset = iOffset; }
@@ -750,7 +751,8 @@ private:
 	XMFLOAT3 m_xmfPosOffset = XMFLOAT3(0.f, 2.f, 0.f);
 	std::vector<UINT> m_iTextureIndex;
 	int m_iTextureOffset = 0;
-	UINT m_iTotalRow, m_iTotalColumn;
+	std::vector<UINT> m_iTotalRow;
+	std::vector<UINT> m_iTotalColumn;
 	float m_fEmissive = 1.0f;
 	bool m_bSimulateRotate = false;
 	int m_iTextureN = 1;
@@ -780,7 +782,7 @@ public:
 	void SetColorG(float g) { m_xmf3Color.y = g; }
 	void SetColorB(float b) { m_xmf3Color.z = b; }
 	void SetTextureOffset(int iOffset) { m_iTextureOffset = iOffset; }
-	void SetTotalRowColumn(int iTotalRow, int iTotalColumn);
+	void SetTotalRowColumn(int iIndex, int iTotalRow, int iTotalColumn);
 	void SetEmissive(float fEmissive) { m_fEmissive = fEmissive; };
 	void SetRotateFactor(bool input) { m_bSimulateRotate = input; };
 	void SetLifeTime(float fLifeTime) { m_fLifeTime = fLifeTime; };

@@ -205,6 +205,9 @@ ParticleComponent::ParticleComponent()
 	//m_iTextureOffset = CSimulatorScene::GetInst()->GetTextureManager()->GetTextureOffset(TextureType::ParticleTexture);
 	//std::shared_ptr<CTexture> pTexture = CSimulatorScene::GetInst()->GetTextureManager()->GetTexture(TextureType::ParticleTexture);
 
+	m_iTotalRow.resize(3);
+	m_iTotalColumn.resize(3);
+
 	m_fFieldSpeed = 1.0f;
 	m_fNoiseStrength = 1.0f;;
 	m_xmf3FieldMainDirection = XMFLOAT3(0.0f, 1.0f, 0.0f);
@@ -224,7 +227,8 @@ void ParticleComponent::HandleMessage(const Message& message, const ParticleComp
 		pParticle->SetEmit(true);
 		pParticle->SetSize(m_fSize);
 		pParticle->SetStartAlpha(m_fAlpha);
-		pParticle->SetTotalRowColumn(m_iTotalRow, m_iTotalColumn);
+		for (int i = 0; i < m_iTextureN; i++)
+			pParticle->SetTotalRowColumn(i, m_iTotalRow[i], m_iTotalColumn[i]);
 		pParticle->SetColor(m_xmf3Color);
 		pParticle->SetSpeed(m_fSpeed);
 		pParticle->SetLifeTime(m_fLifeTime);
@@ -247,13 +251,16 @@ void ParticleComponent::HandleMessage(const Message& message, const ParticleComp
 }
 ImpactEffectComponent::ImpactEffectComponent()
 {
+	m_iTotalRow.resize(3);
+	m_iTotalColumn.resize(3);
+
 	m_iTextureIndex.resize(3);
 	m_iTextureOffset = CSimulatorScene::GetInst()->GetTextureManager()->GetTextureOffset(TextureType::BillBoardTexture);
 }
-void ImpactEffectComponent::SetTotalRowColumn(int iTotalRow, int iTotalColumn)
+void ImpactEffectComponent::SetTotalRowColumn(int iIndex, int iTotalRow, int iTotalColumn)
 {
-	m_iTotalRow = iTotalRow;
-	m_iTotalColumn = iTotalColumn;
+	m_iTotalRow[iIndex] = iTotalRow;
+	m_iTotalColumn[iIndex] = iTotalColumn;
 }
 void ImpactEffectComponent::HandleMessage(const Message& message, const ImpactCompParams& params)
 {
@@ -267,7 +274,7 @@ void ImpactEffectComponent::HandleMessage(const Message& message, const ImpactCo
 		pMultiSpriteParticle->SetParticleType(m_iParticleType);
 		pMultiSpriteParticle->SetEmit(true);
 		for(int i = 0; i < m_iTextureN; i++)
-			pMultiSpriteParticle->SetTotalRowColumn(m_iTotalRow, m_iTotalColumn);
+			pMultiSpriteParticle->SetTotalRowColumn(i, m_iTotalRow[i], m_iTotalColumn[i]);
 		pMultiSpriteParticle->SetSize(m_fSize);
 		pMultiSpriteParticle->SetDirection(XMFLOAT3(0.f, 0.f, 0.f));
 		pMultiSpriteParticle->SetStartAlpha(m_fAlpha);
@@ -300,7 +307,7 @@ void TerrainSpriteComponent::HandleMessage(const Message& message, const Terrain
 	{
 		pMultiSpriteParticle->SetParticleType(m_iParticleType);
 		pMultiSpriteParticle->SetEmit(true);
-		pMultiSpriteParticle->SetTotalRowColumn(1, 1);
+		pMultiSpriteParticle->SetTotalRowColumn(0, 1, 1);
 		pMultiSpriteParticle->SetSize(m_fSize);
 		pMultiSpriteParticle->SetDirection(XMFLOAT3(0.f, 0.f, 0.f));
 		pMultiSpriteParticle->SetStartAlpha(m_fAlpha);
