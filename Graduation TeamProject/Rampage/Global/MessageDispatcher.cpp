@@ -554,34 +554,21 @@ void UpdateDynamicTimeScaleListener::HandleMessage(const Message& message, const
 
 SlashHitComponent::SlashHitComponent()
 {
-	m_bSimulateRotate = true;
-	m_bScaleFlag = false;
-	m_fSize.x = 1.0f; m_fSize.y = 20.f;
-	m_nEmitParticleNumber = 1;
-	//m_bEnable = true;
-	m_iTextureOffset = 5;
-	m_iTextureIndex = 0;
-	m_fLifeTime = 0.5f;
-	m_fEmissive = 2.0f;
-	m_xmf3Color = XMFLOAT3(1.0f, 0.1f, 0.0f);
-
-	//m_fFieldSpeed = 0.0f;
-	//m_fNoiseStrength = 0.0f;;
-	//m_xmf3FieldMainDirection = XMFLOAT3(0.0f, 1.0f, 0.0f);
-	//m_fProgressionRate = 0.0f;
-	//m_fLengthScale = 0.0f;
+	Reset();
 }
 void SlashHitComponent::Reset()
 {
+	m_iTextureOffset = 5;
 	m_bSimulateRotate = true;
 	m_bScaleFlag = false;
-	m_fSize.x = 1.0f; m_fSize.y = 20.f;
 	m_nEmitParticleNumber = 1;
-	m_iTextureOffset = 5;
-	m_iTextureIndex = 0;
-	m_fLifeTime = 0.5f;
-	m_fEmissive = 2.0f;
-	m_xmf3Color = XMFLOAT3(1.0f, 0.1f, 0.0f);
+
+	m_iTextureIndex = SLASH_TEXTURE_INDEX_DEFAULT;
+	m_fSize.x = SLASH_SIZEX_DEFAULT; m_fSize.y = SLASH_SIZEY_DEFAULT;
+	m_fAlpha = SLASH_ALPHA_DEFAULT;
+	m_fLifeTime = SLASH_LIFETIME_DEFAULT;
+	m_xmf3Color = XMFLOAT3(SLASH_COLOR_R_DEFAULT, SLASH_COLOR_G_DEFAULT, SLASH_COLOR_B_DEFAULT);
+	m_fEmissive = SLASH_EMISSIVE_DEFAULT;
 }
 void SlashHitComponent::HandleMessage(const Message& message, const ParticleCompParams& params)
 {
