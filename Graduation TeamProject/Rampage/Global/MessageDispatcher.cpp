@@ -201,16 +201,7 @@ void StunAnimationComponent::HandleMessage(const Message& message, const Animati
 }
 ParticleComponent::ParticleComponent()
 {
-	if (CSimulatorScene::GetInst()->GetTextureManager())
-		m_iTextureOffset = CSimulatorScene::GetInst()->GetTextureManager()->GetTextureOffset(TextureType::ParticleTexture);
-	//m_iTextureOffset = CSimulatorScene::GetInst()->GetTextureManager()->GetTextureOffset(TextureType::ParticleTexture);
-	//std::shared_ptr<CTexture> pTexture = CSimulatorScene::GetInst()->GetTextureManager()->GetTexture(TextureType::ParticleTexture);
-
-	m_fFieldSpeed = 1.0f;
-	m_fNoiseStrength = 1.0f;;
-	m_xmf3FieldMainDirection = XMFLOAT3(0.0f, 1.0f, 0.0f);
-	m_fProgressionRate = 1.0f;
-	m_fLengthScale = 1.0f;
+	Reset();
 }
 
 void ParticleComponent::HandleMessage(const Message& message, const ParticleCompParams& params)
@@ -249,28 +240,27 @@ void ParticleComponent::HandleMessage(const Message& message, const ParticleComp
 void ParticleComponent::Reset()
 {
 	m_nParticleNumber = MAX_PARTICLES;
-	m_nEmitParticleNumber = 500;
 	m_iParticleType = ParticleType::SPHERE_PARTICLE;
-	m_fSize = XMFLOAT2(3.f, 3.f);
-	m_fAlpha = 1.f;
-
+	m_fFieldSpeed = 1.0f;
+	m_xmf3FieldMainDirection = XMFLOAT3(0.0f, 1.0f, 0.0f);
+	m_fProgressionRate = 1.0f;
+	m_fLengthScale = 1.0f;
+	m_bScaleFlag = false;
 	m_iTotalRow = 1;
 	m_iTotalColumn = 1;
 
-	m_fFieldSpeed;
-	m_fNoiseStrength;
-	m_xmf3FieldMainDirection;
-	m_fProgressionRate;
-	m_fLengthScale;
+	if (CSimulatorScene::GetInst()->GetTextureManager()) m_iTextureOffset = CSimulatorScene::GetInst()->GetTextureManager()->GetTextureOffset(TextureType::ParticleTexture);
 
-	m_fLifeTime = 2.f;
-	m_fSpeed = 20.f;
-	m_xmf3Color = XMFLOAT3(1.f, 1.f, 1.f);
-	m_iTextureIndex = 0;
-	m_iTextureOffset = 0;
-	m_fEmissive = 1.0f;
-	m_bSimulateRotate = false;
-	m_bScaleFlag = false;
+	m_iTextureIndex = PARTICLE_TEXTURE_INDEX_DEFAULT;
+	m_fSize = XMFLOAT2(PARTICLE_SIZEX_DEFAULT, PARTICLE_SIZEY_DEFAULT);
+	m_fAlpha = PARTICLE_ALPHA_DEFAULT;
+	m_fLifeTime = PARTICLE_LIFETIME_DEFAULT;
+	m_nEmitParticleNumber = PARTICLE_COUNT_DEFAULT;
+	m_fSpeed = PARTICLE_SPEED_DEFAULT;
+	m_xmf3Color = XMFLOAT3(PARTICLE_COLOR_R_DEFAULT, PARTICLE_COLOR_G_DEFAULT, PARTICLE_COLOR_B_DEFAULT);
+	m_fEmissive = PARTICLE_EMISSIVE_DEFAULT;
+	m_bSimulateRotate = PARTICLE_SIMULATEROTATE_DEFAULT;
+	m_fNoiseStrength = PARTICLE_NOISESTRENGTH_DEFAULT;
 }
 ImpactEffectComponent::ImpactEffectComponent()
 {
