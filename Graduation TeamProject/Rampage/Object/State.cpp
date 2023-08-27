@@ -154,8 +154,6 @@ void Atk_Player::InitAtkPlayer()
 
 	// DAMAGE ANIMATION
 	std::unique_ptr<DamageAnimationComponent> pDamageAnimationComponent = std::make_unique<DamageAnimationComponent>();
-	pDamageAnimationComponent->SetMaxDistance(15.0f);
-	pDamageAnimationComponent->SetSpeed(100.0f);
 	m_pListeners.push_back(std::move(pDamageAnimationComponent));
 	CMessageDispatcher::GetInst()->RegisterListener(MessageType::UPDATE_OBJECT, m_pListeners.back().get(), this);
 
@@ -407,9 +405,7 @@ void Atk_Player::ResetComponents()
 	pCameraMoveComponent->SetRollBackTime(0.5f);
 
 	DamageAnimationComponent* pDamageAnimationComponent = dynamic_cast<DamageAnimationComponent*>(GetDamageAnimationComponent());
-	pDamageAnimationComponent->SetEnable(false);
-	pDamageAnimationComponent->SetMaxDistance(15.0f);
-	pDamageAnimationComponent->SetSpeed(100.0f);
+	pDamageAnimationComponent->Reset();
 	
 	ShakeAnimationComponent* pShakeAnimationComponent = dynamic_cast<ShakeAnimationComponent*>(GetShakeAnimationComponent());
 	pShakeAnimationComponent->SetEnable(false);

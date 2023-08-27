@@ -410,12 +410,15 @@ class DamageAnimationComponent : public IMessageListener {
 	float m_fMaxDistance = 5.0f;
 	float m_fSpeed = 100.0f;
 public:
+	DamageAnimationComponent();
+
 	float& GetMaxDistance() { return m_fMaxDistance; }
 	float& GetSpeed() { return m_fSpeed; }
 
 	void SetMaxDistance(float max_distance) { m_fMaxDistance = max_distance; }
 	void SetSpeed(float speed) { m_fSpeed = speed; }
 
+	virtual void Reset();
 	virtual void HandleMessage(const Message& message, const AnimationCompParams& params);
 };
 

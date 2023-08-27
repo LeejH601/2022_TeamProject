@@ -190,9 +190,20 @@ void CameraMoveComponent::HandleMessage(const Message& message, const CameraUpda
 
 	Update(params.pCamera, params.fElapsedTime, params);
 }
+DamageAnimationComponent::DamageAnimationComponent()
+{
+	Reset();
+}
+void DamageAnimationComponent::Reset()
+{
+	m_bEnable = false;
+	m_fMaxDistance = DAMAGE_ANIMATION_DISTANCE_DEFAULT;
+	m_fSpeed = DAMAGE_ANIMATION_SPEED_DEFAULT;
+}
 void DamageAnimationComponent::HandleMessage(const Message& message, const AnimationCompParams& params)
 {
 }
+
 void ShakeAnimationComponent::HandleMessage(const Message& message, const AnimationCompParams& params)
 {
 }
