@@ -237,6 +237,7 @@
     <ClInclude Include="Global\DDSTextureLoader12.h" />
     <ClInclude Include="Global\GameFramework.h" />
     <ClInclude Include="Global\Global.h" />
+    <ClInclude Include="Global\InitialValue.h" />
     <ClInclude Include="Global\Locator.h" />
     <ClInclude Include="Global\Logger.h" />
     <ClInclude Include="Global\MessageDispatcher.h" />

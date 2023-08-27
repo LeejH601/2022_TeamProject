@@ -468,6 +468,9 @@
       <Filter>Object</Filter>
     </ClInclude>
     <ClInclude Include="..\common\inc\NetworkDevice.h" />
+    <ClInclude Include="Global\InitialValue.h">
+      <Filter>Global</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shader\PlayerPixelShader.hlsl" />
