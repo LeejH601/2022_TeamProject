@@ -1,6 +1,7 @@
 #include "MessageDispatcher.h"
 #include "Camera.h"
 #include "Timer.h"
+#include "InitialValue.h"
 #include "..\Scene\Scene.h"
 #include "..\Object\Object.h"
 #include "..\Object\Player.h"
@@ -273,7 +274,7 @@ void ParticleComponent::Reset()
 }
 ImpactEffectComponent::ImpactEffectComponent()
 {
-	m_iTextureOffset = CSimulatorScene::GetInst()->GetTextureManager()->GetTextureOffset(TextureType::BillBoardTexture);
+	Reset();
 }
 void ImpactEffectComponent::SetTotalRowColumn(int iTotalRow, int iTotalColumn)
 {
@@ -312,17 +313,19 @@ void ImpactEffectComponent::Reset()
 	m_nParticleNumber = MAX_PARTICLES;
 	m_nEmitParticleNumber = 1;
 	m_iParticleType = ParticleType::ATTACK_PARTICLE;
-	m_nParticleIndex = 0;
-	m_fLifeTime = 3.f;
 	m_fSpeed = 1.f;
-	m_fAlpha = 1.f;
-	m_fSize = XMFLOAT2(3.f, 3.f);
-	m_xmf3Color = XMFLOAT3(1.f, 1.f, 1.f);
+	m_nParticleIndex = 0;
 	m_xmfPosOffset = XMFLOAT3(0.f, 2.f, 0.f);
-	m_iTextureIndex = 0;
-	m_iTextureOffset = 0;
-	m_iTotalRow, m_iTotalColumn;
-	m_fEmissive = 1.0f;
+
+	m_iTextureOffset = CSimulatorScene::GetInst()->GetTextureManager()->GetTextureOffset(TextureType::BillBoardTexture);
+
+	m_iTextureIndex = IMPACT_TEXTURE_INDEX_DEFAULT;
+	m_fLifeTime = IMPACT_LIFETIME_DEFAULT;
+	m_fAlpha = IMPACT_ALPHA_DEFAULT;
+	m_fSize = XMFLOAT2(IMPACT_SIZEX_DEFAULT, IMPACT_SIZEY_DEFAULT);
+	m_xmf3Color = XMFLOAT3(IMPACT_COLOR_R_DEFAULT, IMPACT_COLOR_G_DEFAULT, IMPACT_COLOR_B_DEFAULT);
+	m_fEmissive = IMPACT_EMISSIVE_DEFAULT;
+
 	m_bSimulateRotate = false;
 }
 void SceneCollideListener::HandleMessage(const Message& message, const CollideParams& params)
