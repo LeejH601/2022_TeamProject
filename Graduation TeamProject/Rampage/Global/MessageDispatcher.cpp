@@ -471,18 +471,7 @@ void HitLagComponent::HandleMessage(const Message& message, const PlayerParams& 
 }
 TrailComponent::TrailComponent()
 {
-	this->m_fR_CurvePoints[0] = 0.0f; this->m_fR_CurvePoints[1] = 0.14; this->m_fR_CurvePoints[2] = 0.459;  this->m_fR_CurvePoints[3] = 1.892;
-	this->m_fG_CurvePoints[0] = 0.0f; this->m_fG_CurvePoints[1] = 0.005; this->m_fG_CurvePoints[2] = 0.067;  this->m_fG_CurvePoints[3] = 0.595;
-	this->m_fB_CurvePoints[0] = 0.0f; this->m_fB_CurvePoints[1] = 0.257; this->m_fB_CurvePoints[2] = 0.26;  this->m_fB_CurvePoints[3] = 0.0f;
-	this->m_fColorCurveTimes_R[0] = 0.0f; this->m_fColorCurveTimes_R[1] = 0.3; this->m_fColorCurveTimes_R[2] = 0.37;  this->m_fColorCurveTimes_R[3] = 1.0;
-	this->m_fColorCurveTimes_G[0] = 0.0f; this->m_fColorCurveTimes_G[1] = 0.3; this->m_fColorCurveTimes_G[2] = 0.37;  this->m_fColorCurveTimes_G[3] = 1.0;
-	this->m_fColorCurveTimes_B[0] = 0.0f; this->m_fColorCurveTimes_B[1] = 0.3; this->m_fColorCurveTimes_B[2] = 0.37;  this->m_fColorCurveTimes_B[3] = 1.0;
-	this->m_nCurves = 4;
-
-	this->SetMainTextureOffset(CSimulatorScene::GetInst()->GetTextureManager()->GetTextureOffset(TextureType::TrailBaseTexture));
-	this->SetNoiseTextureOffset(CSimulatorScene::GetInst()->GetTextureManager()->GetTextureOffset(TextureType::TrailNoiseTexture));
-	/*m_nMainTextureIndex = m_nMainTextureOffset;
-	m_nNoiseTextureIndex = m_nNoiseTextureOffset;*/
+	Reset();
 }
 
 void TrailComponent::HandleMessage(const Message& message, const TrailUpdateParams& params)
@@ -507,13 +496,16 @@ void TrailComponent::HandleMessage(const Message& message, const TrailUpdatePara
 }
 void TrailComponent::Reset()
 {
+	m_nMainTextureIndex = TRAIL_TEXTURE_INDEX_DEFAULT;
+	m_fEmissiveFactor = TRAIL_EMISSIVE_DEFAULT;
 	this->m_fR_CurvePoints[0] = 0.0f; this->m_fR_CurvePoints[1] = 0.14; this->m_fR_CurvePoints[2] = 0.459;  this->m_fR_CurvePoints[3] = 1.892;
 	this->m_fG_CurvePoints[0] = 0.0f; this->m_fG_CurvePoints[1] = 0.005; this->m_fG_CurvePoints[2] = 0.067;  this->m_fG_CurvePoints[3] = 0.595;
 	this->m_fB_CurvePoints[0] = 0.0f; this->m_fB_CurvePoints[1] = 0.257; this->m_fB_CurvePoints[2] = 0.26;  this->m_fB_CurvePoints[3] = 0.0f;
 	this->m_fColorCurveTimes_R[0] = 0.0f; this->m_fColorCurveTimes_R[1] = 0.3; this->m_fColorCurveTimes_R[2] = 0.37;  this->m_fColorCurveTimes_R[3] = 1.0;
 	this->m_fColorCurveTimes_G[0] = 0.0f; this->m_fColorCurveTimes_G[1] = 0.3; this->m_fColorCurveTimes_G[2] = 0.37;  this->m_fColorCurveTimes_G[3] = 1.0;
 	this->m_fColorCurveTimes_B[0] = 0.0f; this->m_fColorCurveTimes_B[1] = 0.3; this->m_fColorCurveTimes_B[2] = 0.37;  this->m_fColorCurveTimes_B[3] = 1.0;
-	this->m_nCurves = 4;
+	this->m_nCurves = TRAIL_CURVES_DEFAULT;
+	m_nNoiseTextureIndex = TRAIL_NOISETEXTURE_INDEX_DEFAULT;
 
 	this->SetMainTextureOffset(CSimulatorScene::GetInst()->GetTextureManager()->GetTextureOffset(TextureType::TrailBaseTexture));
 	this->SetNoiseTextureOffset(CSimulatorScene::GetInst()->GetTextureManager()->GetTextureOffset(TextureType::TrailNoiseTexture));
