@@ -60,6 +60,10 @@ void SoundPlayComponent::HandleMessage(const Message& message, const SoundPlayPa
 		CSoundManager::GetInst()->PlaySound(pSound->GetPath(), m_fVolume, m_fDelay);
 	}
 }
+CameraShakeComponent::CameraShakeComponent()
+{
+	Reset();
+}
 void CameraShakeComponent::Update(CCamera* pCamera, float fElapsedTime)
 {
 	if (pCamera->m_bCameraShaking && m_fDuration > m_ft) {
@@ -86,6 +90,9 @@ void CameraShakeComponent::Update(CCamera* pCamera, float fElapsedTime)
 void CameraShakeComponent::Reset()
 {
 	m_ft = 0.0f;
+	m_fMagnitude = CAMERA_SHAKE_MAGNITUDE_DEFAULT;
+	m_fDuration = CAMERA_SHAKE_DURATION_DEFAULT;
+	m_fFrequency = CAMERA_SHAKE_FREQUENCY_DEFAULT;
 }
 void CameraShakeComponent::HandleMessage(const Message& message, const CameraUpdateParams& params)
 {
@@ -93,6 +100,10 @@ void CameraShakeComponent::HandleMessage(const Message& message, const CameraUpd
 		return;
 
 	Update(params.pCamera, params.fElapsedTime);
+}
+CameraZoomerComponent::CameraZoomerComponent()
+{
+	Reset();
 }
 void CameraZoomerComponent::Update(CCamera* pCamera, float fElapsedTime, const CameraUpdateParams& params)
 {
@@ -136,12 +147,21 @@ void CameraZoomerComponent::Reset()
 	offset.x = 0.0f;
 	offset.y = 0.0f;
 	offset.z = 0.0f;
+
+	m_fMaxDistance = CAMERA_ZOOMOUT_DISTANCE_DEFAULT;
+	m_fMovingTime = CAMERA_ZOOMOUT_TIME_DEFAULT;
+	m_fRollBackTime = CAMERA_ZOOMOUT_ROLLBACKTIME_DEFAULT;
+	m_bIsIN = CAMERA_ZOOMOUT_ISIN_DEFAULT;
 }
 void CameraZoomerComponent::HandleMessage(const Message& message, const CameraUpdateParams& params)
 {
 	if (!m_bEnable)
 		return;
 	Update(params.pCamera, params.fElapsedTime, params);
+}
+CameraMoveComponent::CameraMoveComponent()
+{
+	Reset();
 }
 void CameraMoveComponent::Update(CCamera* pCamera, float fElapsedTime, const CameraUpdateParams& params)
 {
@@ -178,7 +198,10 @@ void CameraMoveComponent::Update(CCamera* pCamera, float fElapsedTime, const Cam
 }
 void CameraMoveComponent::Reset()
 {
-	m_fCurrDistance = 0.f;
+	m_fMaxDistance = CAMERA_MOVE_DISTANCE_DEFAULT;
+	m_fMovingTime = CAMERA_MOVE_TIME_DEFAULT;
+	m_fRollBackTime = CAMERA_MOVE_ROLLBACKTIME_DEFAULT;
+
 	offset.x = 0.0f;
 	offset.y = 0.0f;
 	offset.z = 0.0f;

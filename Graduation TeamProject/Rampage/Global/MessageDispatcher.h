@@ -338,6 +338,8 @@ class CameraShakeComponent : public IMessageListener {
 	float m_fMagnitude = 0.5f;
 	float m_fFrequency = 0.015f;
 public:
+	CameraShakeComponent();
+
 	float& GetDuration() { return m_fDuration; }
 	float& GetMagnitude() { return m_fMagnitude; }
 	float& GetFrequency() { return m_fFrequency; }
@@ -363,6 +365,8 @@ class CameraMoveComponent : public IMessageListener {
 
 	XMFLOAT3 offset = XMFLOAT3(0.0f, 0.0f, 0.0f);;
 public:
+	CameraMoveComponent();
+
 	float& GetMaxDistance() { return m_fMaxDistance; }
 	float& GetMovingTime() { return m_fMovingTime; }
 	float& GetRollBackTime() { return m_fRollBackTime; }
@@ -390,6 +394,8 @@ class CameraZoomerComponent : public IMessageListener {
 
 	XMFLOAT3 offset = XMFLOAT3(0.0f, 0.0f, 0.0f);
 public:
+	CameraZoomerComponent();
+
 	float& GetMaxDistance() { return m_fMaxDistance; }
 	float& GetMovingTime() { return m_fMovingTime; }
 	float& GetRollBackTime() { return m_fRollBackTime; }
