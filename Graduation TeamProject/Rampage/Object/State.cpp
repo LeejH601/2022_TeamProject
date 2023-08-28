@@ -169,9 +169,6 @@ void Atk_Player::InitAtkPlayer()
 
 	// HitLag ANIMATION
 	std::unique_ptr<HitLagComponent> pHitLagComponent = std::make_unique<HitLagComponent>();
-	pHitLagComponent->SetLagScale(0.5f);
-	pHitLagComponent->SetDuration(0.5f);
-	pHitLagComponent->SetMinTimeScale(0.5f);
 	m_pListeners.push_back(std::move(pHitLagComponent));
 	CMessageDispatcher::GetInst()->RegisterListener(MessageType::UPDATE_HITLAG, m_pListeners.back().get(), this);
 
@@ -411,10 +408,7 @@ void Atk_Player::ResetComponents()
 	pStunAnimationComponent->Reset();
 	
 	HitLagComponent* pHitLagComponent = dynamic_cast<HitLagComponent*>(GetHitLagComponent());
-	pHitLagComponent->SetEnable(false);
-	pHitLagComponent->SetLagScale(0.5f);
-	pHitLagComponent->SetDuration(0.5f);
-	pHitLagComponent->SetMinTimeScale(0.5f);
+	pHitLagComponent->Reset();
 
 	ParticleComponent* pParticleComponent = dynamic_cast<ParticleComponent*>(GetParticleComponent());
 	pParticleComponent->SetEnable(false);

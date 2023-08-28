@@ -493,7 +493,16 @@ void PlayerLocationListener::HandleMessage(const Message& message, const PlayerP
 		pMonster->CheckIsPlayerInFrontOfThis(params.pPlayer);
 	}
 }
-
+HitLagComponent::HitLagComponent()
+{
+	Reset();
+}
+void HitLagComponent::Reset()
+{
+	m_fMinTimeScale = HIT_LAG_MAXTIME_DEFAULT;
+	m_fLagScale = HIT_LAG_SCALEWEIGHT_DEFAULT;
+	m_fDuration = HIT_LAG_DURATION_DEFAULT;
+}
 void HitLagComponent::HandleMessage(const Message& message, const PlayerParams& params)
 {
 	if (!m_bEnable)

@@ -462,6 +462,8 @@ class HitLagComponent : public IMessageListener {
     float m_fDuration = 0.5f;
 	float m_fMinTimeScale = 0.1f;
 public:
+	HitLagComponent();
+
     float& GetDuration() { return m_fDuration; }
     float& GetLagScale() { return m_fLagScale; }
 	float& GetMinTimeScale () { return m_fMinTimeScale; }
@@ -470,6 +472,7 @@ public:
     void SetLagScale(float lagScale) { m_fLagScale = lagScale; }
 	void SetMinTimeScale(float fMinTimeScale) { m_fMinTimeScale = fMinTimeScale; }
 
+	virtual void Reset();
 	virtual void HandleMessage(const Message& message, const PlayerParams& params);
 };
 
