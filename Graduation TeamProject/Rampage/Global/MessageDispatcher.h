@@ -428,6 +428,8 @@ class ShakeAnimationComponent : public IMessageListener {
 	float m_fDistance = 0.15f;
 	float m_fFrequency = 0.05f;
 public:
+	ShakeAnimationComponent();
+
 	float& GetDuration() { return m_fDuration; }
 	float& GetDistance() { return m_fDistance; }
 	float& GetFrequency() { return m_fFrequency; }
@@ -436,6 +438,7 @@ public:
 	void SetDistance(float distance) { m_fDistance = distance; }
 	void SetFrequency(float frequency) { m_fFrequency = frequency; }
 
+	virtual void Reset();
 	virtual void HandleMessage(const Message& message, const AnimationCompParams& params);
 };
 

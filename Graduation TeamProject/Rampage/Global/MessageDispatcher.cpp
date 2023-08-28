@@ -203,7 +203,17 @@ void DamageAnimationComponent::Reset()
 void DamageAnimationComponent::HandleMessage(const Message& message, const AnimationCompParams& params)
 {
 }
-
+ShakeAnimationComponent::ShakeAnimationComponent()
+{
+	Reset();
+}
+void ShakeAnimationComponent::Reset()
+{
+	m_bEnable = false;
+	m_fDuration = SHAKE_ANIMATION_DURATION_DEFAULT;
+	m_fDistance = SHAKE_ANIMATION_DISTANCE_DEFAULT;
+	m_fFrequency = SHAKE_ANIMATION_FREQUENCY_DEFAULT;
+}
 void ShakeAnimationComponent::HandleMessage(const Message& message, const AnimationCompParams& params)
 {
 }

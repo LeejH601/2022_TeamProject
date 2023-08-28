@@ -159,8 +159,6 @@ void Atk_Player::InitAtkPlayer()
 
 	// SHAKE ANIMATION
 	std::unique_ptr<ShakeAnimationComponent> pShakeAnimationComponent = std::make_unique<ShakeAnimationComponent>();
-	pShakeAnimationComponent->SetDistance(0.25f);
-	pShakeAnimationComponent->SetFrequency(0.01f);
 	m_pListeners.push_back(std::move(pShakeAnimationComponent));
 	CMessageDispatcher::GetInst()->RegisterListener(MessageType::UPDATE_OBJECT, m_pListeners.back().get(), this);
 
@@ -408,9 +406,7 @@ void Atk_Player::ResetComponents()
 	pDamageAnimationComponent->Reset();
 	
 	ShakeAnimationComponent* pShakeAnimationComponent = dynamic_cast<ShakeAnimationComponent*>(GetShakeAnimationComponent());
-	pShakeAnimationComponent->SetEnable(false);
-	pShakeAnimationComponent->SetDistance(0.25f);
-	pShakeAnimationComponent->SetFrequency(0.01f);
+	pShakeAnimationComponent->Reset();
 	
 	StunAnimationComponent* pStunAnimationComponent = dynamic_cast<StunAnimationComponent*>(GetStunAnimationComponent());
 	pStunAnimationComponent->SetEnable(false);
