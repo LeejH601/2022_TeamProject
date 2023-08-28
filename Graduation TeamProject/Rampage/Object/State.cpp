@@ -1,6 +1,7 @@
 #include "State.h"
 #include "Animation.h"
 #include "Player.h"
+#include "..\Global\InitialValue.h"
 #include "..\Global\Locator.h"
 #include "..\Global\Global.h"
 #include "..\Global\MessageDispatcher.h"
@@ -80,9 +81,9 @@ void Atk_Player::InitAtkPlayer()
 {
 	// ATK SOUND
 	std::unique_ptr<SoundPlayComponent> pSoundComponent = std::make_unique<SoundPlayComponent>();
-	pSoundComponent->SetSoundNumber(0);
-	pSoundComponent->SetDelay(0.0f);
-	pSoundComponent->SetVolume(1.25f);
+	pSoundComponent->SetSoundNumber(SHOOTING_SOUND_SOUNDNUMBER_DEFAULT);
+	pSoundComponent->SetDelay(SHOOTING_SOUND_DELAY_DEFAULT);
+	pSoundComponent->SetVolume(SHOOTING_SOUND_VOLUME_DEFAULT);
 	pSoundComponent->SetMT(MONSTER_TYPE::NONE);
 	pSoundComponent->SetSC(SOUND_CATEGORY::SOUND_SHOOT);
 	m_pListeners.push_back(std::move(pSoundComponent));
@@ -90,9 +91,9 @@ void Atk_Player::InitAtkPlayer()
 
 	// DAMAGE SOUND
 	pSoundComponent = std::make_unique<SoundPlayComponent>();
-	pSoundComponent->SetSoundNumber(0);
-	pSoundComponent->SetDelay(0.0f);
-	pSoundComponent->SetVolume(0.75f);
+	pSoundComponent->SetSoundNumber(SHOCK_SOUND_SOUNDNUMBER_DEFAULT);
+	pSoundComponent->SetDelay(SHOCK_SOUND_DELAY_DEFAULT);
+	pSoundComponent->SetVolume(SHOCK_SOUND_VOLUME_DEFAULT);
 	pSoundComponent->SetMT(MONSTER_TYPE::NONE);
 	pSoundComponent->SetSC(SOUND_CATEGORY::SOUND_SHOCK);
 	m_pListeners.push_back(std::move(pSoundComponent));
@@ -100,9 +101,9 @@ void Atk_Player::InitAtkPlayer()
 
 	// GOBLIN MOAN SOUND
 	pSoundComponent = std::make_unique<SoundPlayComponent>();
-	pSoundComponent->SetSoundNumber(0);
-	pSoundComponent->SetDelay(0.0f);
-	pSoundComponent->SetVolume(0.75f);
+	pSoundComponent->SetSoundNumber(GOBLIN_MOAN_SOUND_SOUNDNUMBER_DEFAULT);
+	pSoundComponent->SetDelay(GOBLIN_MOAN_SOUND_DELAY_DEFAULT);
+	pSoundComponent->SetVolume(GOBLIN_MOAN_SOUND_VOLUME_DEFAULT);
 	pSoundComponent->SetMT(MONSTER_TYPE::GOBLIN);
 	pSoundComponent->SetSC(SOUND_CATEGORY::SOUND_VOICE);
 	m_pListeners.push_back(std::move(pSoundComponent));
@@ -110,9 +111,9 @@ void Atk_Player::InitAtkPlayer()
 
 	// ORC MOAN SOUND
 	pSoundComponent = std::make_unique<SoundPlayComponent>();
-	pSoundComponent->SetSoundNumber(0);
-	pSoundComponent->SetDelay(0.0f);
-	pSoundComponent->SetVolume(0.75f);
+	pSoundComponent->SetSoundNumber(ORC_MOAN_SOUND_SOUNDNUMBER_DEFAULT);
+	pSoundComponent->SetDelay(ORC_MOAN_SOUND_DELAY_DEFAULT);
+	pSoundComponent->SetVolume(ORC_MOAN_SOUND_VOLUME_DEFAULT);
 	pSoundComponent->SetMT(MONSTER_TYPE::ORC);
 	pSoundComponent->SetSC(SOUND_CATEGORY::SOUND_VOICE);
 	m_pListeners.push_back(std::move(pSoundComponent));
@@ -120,9 +121,9 @@ void Atk_Player::InitAtkPlayer()
 
 	// SKELETON MOAN SOUND
 	pSoundComponent = std::make_unique<SoundPlayComponent>();
-	pSoundComponent->SetSoundNumber(0);
-	pSoundComponent->SetDelay(0.0f);
-	pSoundComponent->SetVolume(0.75f);
+	pSoundComponent->SetSoundNumber(SKELETON_MOAN_SOUND_SOUNDNUMBER_DEFAULT);
+	pSoundComponent->SetDelay(SKELETON_MOAN_SOUND_DELAY_DEFAULT);
+	pSoundComponent->SetVolume(SKELETON_MOAN_SOUND_VOLUME_DEFAULT);
 	pSoundComponent->SetMT(MONSTER_TYPE::SKELETON);
 	pSoundComponent->SetSC(SOUND_CATEGORY::SOUND_VOICE);
 	m_pListeners.push_back(std::move(pSoundComponent));
@@ -342,34 +343,34 @@ void Atk_Player::ResetComponents()
 {
 	SoundPlayComponent* pShootSoundSoundComponent = dynamic_cast<SoundPlayComponent*>(GetShootSoundComponent());
 	pShootSoundSoundComponent->SetEnable(false);
-	pShootSoundSoundComponent->SetSoundNumber(0);
-	pShootSoundSoundComponent->SetDelay(0.0f);
-	pShootSoundSoundComponent->SetVolume(1.25f);
+	pShootSoundSoundComponent->SetSoundNumber(SHOOTING_SOUND_SOUNDNUMBER_DEFAULT);
+	pShootSoundSoundComponent->SetDelay(SHOOTING_SOUND_DELAY_DEFAULT);
+	pShootSoundSoundComponent->SetVolume(SHOOTING_SOUND_VOLUME_DEFAULT);
 	pShootSoundSoundComponent->SetMT(MONSTER_TYPE::NONE);
 
 	SoundPlayComponent* pShockSoundSoundComponent = dynamic_cast<SoundPlayComponent*>(GetShockSoundComponent());
 	pShockSoundSoundComponent->SetEnable(false);
-	pShockSoundSoundComponent->SetSoundNumber(0);
-	pShockSoundSoundComponent->SetDelay(0.0f);
-	pShockSoundSoundComponent->SetVolume(0.75f);
+	pShockSoundSoundComponent->SetSoundNumber(SHOCK_SOUND_SOUNDNUMBER_DEFAULT);
+	pShockSoundSoundComponent->SetDelay(SHOCK_SOUND_DELAY_DEFAULT);
+	pShockSoundSoundComponent->SetVolume(SHOCK_SOUND_VOLUME_DEFAULT);
 
 	SoundPlayComponent* pGoblinMoanSoundComponent = dynamic_cast<SoundPlayComponent*>(GetGoblinMoanComponent());
 	pGoblinMoanSoundComponent->SetEnable(false);
-	pGoblinMoanSoundComponent->SetSoundNumber(0);
-	pGoblinMoanSoundComponent->SetDelay(0.0f);
-	pGoblinMoanSoundComponent->SetVolume(0.75f);
+	pGoblinMoanSoundComponent->SetSoundNumber(GOBLIN_MOAN_SOUND_SOUNDNUMBER_DEFAULT);
+	pGoblinMoanSoundComponent->SetDelay(GOBLIN_MOAN_SOUND_DELAY_DEFAULT);
+	pGoblinMoanSoundComponent->SetVolume(GOBLIN_MOAN_SOUND_VOLUME_DEFAULT);
 
 	SoundPlayComponent* pOrcMoanSoundComponent = dynamic_cast<SoundPlayComponent*>(GetOrcMoanComponent());
 	pOrcMoanSoundComponent->SetEnable(false);
-	pOrcMoanSoundComponent->SetSoundNumber(0);
-	pOrcMoanSoundComponent->SetDelay(0.0f);
-	pOrcMoanSoundComponent->SetVolume(0.75f);
+	pOrcMoanSoundComponent->SetSoundNumber(ORC_MOAN_SOUND_SOUNDNUMBER_DEFAULT);
+	pOrcMoanSoundComponent->SetDelay(ORC_MOAN_SOUND_DELAY_DEFAULT);
+	pOrcMoanSoundComponent->SetVolume(ORC_MOAN_SOUND_VOLUME_DEFAULT);
 
 	SoundPlayComponent* pSkeletonMoanSoundComponent = dynamic_cast<SoundPlayComponent*>(GetSkeletonMoanComponent());
 	pSkeletonMoanSoundComponent->SetEnable(false);
-	pSkeletonMoanSoundComponent->SetSoundNumber(0);
-	pSkeletonMoanSoundComponent->SetDelay(0.0f);
-	pSkeletonMoanSoundComponent->SetVolume(0.75f);
+	pSkeletonMoanSoundComponent->SetSoundNumber(SKELETON_MOAN_SOUND_SOUNDNUMBER_DEFAULT);
+	pSkeletonMoanSoundComponent->SetDelay(SKELETON_MOAN_SOUND_DELAY_DEFAULT);
+	pSkeletonMoanSoundComponent->SetVolume(SKELETON_MOAN_SOUND_VOLUME_DEFAULT);
 
 	CameraShakeComponent* pCameraShakeComponent = dynamic_cast<CameraShakeComponent*>(GetCameraShakeComponent());
 	pCameraShakeComponent->Reset();
