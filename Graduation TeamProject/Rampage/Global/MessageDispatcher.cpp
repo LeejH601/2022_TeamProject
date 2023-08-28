@@ -217,6 +217,15 @@ void ShakeAnimationComponent::Reset()
 void ShakeAnimationComponent::HandleMessage(const Message& message, const AnimationCompParams& params)
 {
 }
+StunAnimationComponent::StunAnimationComponent()
+{
+	Reset();
+}
+void StunAnimationComponent::Reset()
+{
+	m_bEnable = false;
+	m_fStunTime = STUN_ANIMATION_STUNTIME_DEFAULT;
+}
 void StunAnimationComponent::HandleMessage(const Message& message, const AnimationCompParams& params)
 {
 }

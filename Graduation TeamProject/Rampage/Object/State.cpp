@@ -164,7 +164,6 @@ void Atk_Player::InitAtkPlayer()
 
 	// STUN ANIMATION
 	std::unique_ptr<StunAnimationComponent> pStunAnimationComponent = std::make_unique<StunAnimationComponent>();
-	pStunAnimationComponent->SetStunTime(0.5f);
 	m_pListeners.push_back(std::move(pStunAnimationComponent));
 	CMessageDispatcher::GetInst()->RegisterListener(MessageType::UPDATE_OBJECT, m_pListeners.back().get(), this);
 
@@ -409,8 +408,7 @@ void Atk_Player::ResetComponents()
 	pShakeAnimationComponent->Reset();
 	
 	StunAnimationComponent* pStunAnimationComponent = dynamic_cast<StunAnimationComponent*>(GetStunAnimationComponent());
-	pStunAnimationComponent->SetEnable(false);
-	pStunAnimationComponent->SetStunTime(0.5f);
+	pStunAnimationComponent->Reset();
 	
 	HitLagComponent* pHitLagComponent = dynamic_cast<HitLagComponent*>(GetHitLagComponent());
 	pHitLagComponent->SetEnable(false);

@@ -446,10 +446,13 @@ public:
 class StunAnimationComponent : public IMessageListener {
 	float m_fStunTime = 0.5f;
 public:
+	StunAnimationComponent();
+
 	float& GetStunTime() { return m_fStunTime; }
 
 	void SetStunTime(float stun_time) { m_fStunTime = stun_time; }
 
+	virtual void Reset();
 	virtual void HandleMessage(const Message& message, const AnimationCompParams& params);
 };
 
