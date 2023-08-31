@@ -1467,8 +1467,37 @@ void CImGuiManager::SetUI()
 
 		ImGui::Separator();
 
-		ImGui::Button(U8STR("4-1"));
-		ImGui::SameLine(); ImGui::Button(U8STR("4-2"));
+		if (ImGui::Button(U8STR("4-1"))) {
+			AllAttackReset(false);
+			Atk1_Player::GetInst()->GetCameraShakeComponent()->Reset(true);
+
+			Atk1_Player::GetInst()->GetDamageAnimationComponent()->Reset(true);
+
+			Atk1_Player::GetInst()->GetShockSoundComponent()->Reset(true);
+
+			Atk1_Player::GetInst()->GetGoblinMoanComponent()->Reset(true);
+			Atk1_Player::GetInst()->GetOrcMoanComponent()->Reset(true);
+			Atk1_Player::GetInst()->GetSkeletonMoanComponent()->Reset(true);
+
+			Atk1_Player::GetInst()->GetShakeAnimationComponent()->Reset(true);
+
+			Atk1_Player::GetInst()->GetShootSoundComponent()->Reset(true);
+
+		}
+		ImGui::SameLine(); if (ImGui::Button(U8STR("4-2"))) {
+			AllAttackReset(false);
+			Atk1_Player::GetInst()->GetCameraZoomerComponent()->Reset(true);
+
+			Atk1_Player::GetInst()->GetTrailComponent()->Reset(true);
+
+			Atk1_Player::GetInst()->GetImpactComponent()->Reset(true);
+
+			Atk1_Player::GetInst()->GetParticleComponent()->Reset(true);
+
+			Atk1_Player::GetInst()->GetCameraMoveComponent()->Reset(true);
+
+			Atk1_Player::GetInst()->GetStunAnimationComponent()->Reset(true);
+		}
 
 		ImGui::End();
 	}
