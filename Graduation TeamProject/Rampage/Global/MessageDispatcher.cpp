@@ -378,6 +378,9 @@ void ImpactEffectComponent::Reset(bool bEnable)
 	m_fEmissive = IMPACT_EMISSIVE_DEFAULT;
 
 	m_bSimulateRotate = false;
+
+	std::shared_ptr<CTexture> pTexture = CSimulatorScene::GetInst()->GetTextureManager()->GetTexture(TextureType::BillBoardTexture);
+	SetTotalRowColumn(pTexture->GetRow(IMPACT_TEXTURE_INDEX_DEFAULT), pTexture->GetColumn(IMPACT_TEXTURE_INDEX_DEFAULT));
 }
 void SceneCollideListener::HandleMessage(const Message& message, const CollideParams& params)
 {
