@@ -339,76 +339,72 @@ void Atk1_Player::SpawnTrailParticle(CPlayer* player)
 	}
 }
 
-void Atk_Player::ResetComponents()
+void Atk_Player::ResetComponents(bool bEnable)
 {
 	SoundPlayComponent* pShootSoundSoundComponent = dynamic_cast<SoundPlayComponent*>(GetShootSoundComponent());
-	pShootSoundSoundComponent->SetEnable(false);
+	pShootSoundSoundComponent->SetEnable(bEnable);
 	pShootSoundSoundComponent->SetSoundNumber(SHOOTING_SOUND_SOUNDNUMBER_DEFAULT);
 	pShootSoundSoundComponent->SetDelay(SHOOTING_SOUND_DELAY_DEFAULT);
 	pShootSoundSoundComponent->SetVolume(SHOOTING_SOUND_VOLUME_DEFAULT);
 	pShootSoundSoundComponent->SetMT(MONSTER_TYPE::NONE);
 
 	SoundPlayComponent* pShockSoundSoundComponent = dynamic_cast<SoundPlayComponent*>(GetShockSoundComponent());
-	pShockSoundSoundComponent->SetEnable(false);
+	pShockSoundSoundComponent->SetEnable(bEnable);
 	pShockSoundSoundComponent->SetSoundNumber(SHOCK_SOUND_SOUNDNUMBER_DEFAULT);
 	pShockSoundSoundComponent->SetDelay(SHOCK_SOUND_DELAY_DEFAULT);
 	pShockSoundSoundComponent->SetVolume(SHOCK_SOUND_VOLUME_DEFAULT);
 
 	SoundPlayComponent* pGoblinMoanSoundComponent = dynamic_cast<SoundPlayComponent*>(GetGoblinMoanComponent());
-	pGoblinMoanSoundComponent->SetEnable(false);
+	pGoblinMoanSoundComponent->SetEnable(bEnable);
 	pGoblinMoanSoundComponent->SetSoundNumber(GOBLIN_MOAN_SOUND_SOUNDNUMBER_DEFAULT);
 	pGoblinMoanSoundComponent->SetDelay(GOBLIN_MOAN_SOUND_DELAY_DEFAULT);
 	pGoblinMoanSoundComponent->SetVolume(GOBLIN_MOAN_SOUND_VOLUME_DEFAULT);
 
 	SoundPlayComponent* pOrcMoanSoundComponent = dynamic_cast<SoundPlayComponent*>(GetOrcMoanComponent());
-	pOrcMoanSoundComponent->SetEnable(false);
+	pOrcMoanSoundComponent->SetEnable(bEnable);
 	pOrcMoanSoundComponent->SetSoundNumber(ORC_MOAN_SOUND_SOUNDNUMBER_DEFAULT);
 	pOrcMoanSoundComponent->SetDelay(ORC_MOAN_SOUND_DELAY_DEFAULT);
 	pOrcMoanSoundComponent->SetVolume(ORC_MOAN_SOUND_VOLUME_DEFAULT);
 
 	SoundPlayComponent* pSkeletonMoanSoundComponent = dynamic_cast<SoundPlayComponent*>(GetSkeletonMoanComponent());
-	pSkeletonMoanSoundComponent->SetEnable(false);
+	pSkeletonMoanSoundComponent->SetEnable(bEnable);
 	pSkeletonMoanSoundComponent->SetSoundNumber(SKELETON_MOAN_SOUND_SOUNDNUMBER_DEFAULT);
 	pSkeletonMoanSoundComponent->SetDelay(SKELETON_MOAN_SOUND_DELAY_DEFAULT);
 	pSkeletonMoanSoundComponent->SetVolume(SKELETON_MOAN_SOUND_VOLUME_DEFAULT);
 
 	CameraShakeComponent* pCameraShakeComponent = dynamic_cast<CameraShakeComponent*>(GetCameraShakeComponent());
-	pCameraShakeComponent->Reset();
+	pCameraShakeComponent->Reset(bEnable);
 
 	CameraZoomerComponent* pCameraZoomComponent = dynamic_cast<CameraZoomerComponent*>(GetCameraZoomerComponent());
-	pCameraZoomComponent->Reset();
+	pCameraZoomComponent->Reset(bEnable);
 
 	CameraMoveComponent* pCameraMoveComponent = dynamic_cast<CameraMoveComponent*>(GetCameraMoveComponent());
-	pCameraMoveComponent->Reset();
+	pCameraMoveComponent->Reset(bEnable);
 
 	DamageAnimationComponent* pDamageAnimationComponent = dynamic_cast<DamageAnimationComponent*>(GetDamageAnimationComponent());
-	pDamageAnimationComponent->Reset();
+	pDamageAnimationComponent->Reset(bEnable);
 	
 	ShakeAnimationComponent* pShakeAnimationComponent = dynamic_cast<ShakeAnimationComponent*>(GetShakeAnimationComponent());
-	pShakeAnimationComponent->Reset();
+	pShakeAnimationComponent->Reset(bEnable);
 	
 	StunAnimationComponent* pStunAnimationComponent = dynamic_cast<StunAnimationComponent*>(GetStunAnimationComponent());
-	pStunAnimationComponent->Reset();
+	pStunAnimationComponent->Reset(bEnable);
 	
 	HitLagComponent* pHitLagComponent = dynamic_cast<HitLagComponent*>(GetHitLagComponent());
-	pHitLagComponent->Reset();
+	pHitLagComponent->Reset(bEnable);
 
 	ParticleComponent* pParticleComponent = dynamic_cast<ParticleComponent*>(GetParticleComponent());
-	pParticleComponent->SetEnable(false);
-	pParticleComponent->Reset();
+	pParticleComponent->Reset(bEnable);
 
 	ImpactEffectComponent* pImpactComponent = dynamic_cast<ImpactEffectComponent*>(GetImpactComponent());
-	pImpactComponent->SetEnable(false);
-	pImpactComponent->Reset();
+	pImpactComponent->Reset(bEnable);
 
 	// TRAIL ANIMATION
 	TrailComponent* pTrailComponent = dynamic_cast<TrailComponent*>(GetTrailComponent());
-	pTrailComponent->SetEnable(false);
-	pTrailComponent->Reset();
+	pTrailComponent->Reset(bEnable);
 
 	SlashHitComponent* pSlashHitComponent = dynamic_cast<SlashHitComponent*>(GetSlashHitComponent());
-	pSlashHitComponent->SetEnable(false);
-	pSlashHitComponent->Reset();
+	pSlashHitComponent->Reset(bEnable);
 }
 
 void Atk1_Player::Enter(CPlayer* player)
@@ -495,11 +491,11 @@ void Atk1_Player::Exit(CPlayer* player)
 	if (player->m_pCamera)
 	{
 		player->m_pCamera->m_bCameraShaking = false;
-		GetShakeAnimationComponent()->Reset();
+		GetShakeAnimationComponent()->Reset(GetShakeAnimationComponent()->GetEnable());
 		player->m_pCamera->m_bCameraZooming = false;
-		GetCameraZoomerComponent()->Reset();
+		GetCameraZoomerComponent()->Reset(GetCameraZoomerComponent()->GetEnable());
 		player->m_pCamera->m_bCameraMoving = false;
-		GetCameraMoveComponent()->Reset();
+		GetCameraMoveComponent()->Reset(GetCameraMoveComponent()->GetEnable());
 	}
 	if (player->m_pSwordTrailReference)
 		dynamic_cast<CSwordTrailObject*>(player->m_pSwordTrailReference[0].get())->m_eTrailUpdateMethod = TRAIL_UPDATE_METHOD::DELETE_CONTROL_POINT;
@@ -637,11 +633,11 @@ void Atk2_Player::Exit(CPlayer* player)
 	if (player->m_pCamera)
 	{
 		player->m_pCamera->m_bCameraShaking = false;
-		GetShakeAnimationComponent()->Reset();
+		GetShakeAnimationComponent()->Reset(GetShakeAnimationComponent()->GetEnable());
 		player->m_pCamera->m_bCameraZooming = false;
-		GetCameraZoomerComponent()->Reset();
+		GetCameraZoomerComponent()->Reset(GetCameraZoomerComponent()->GetEnable());
 		player->m_pCamera->m_bCameraMoving = false;
-		GetCameraMoveComponent()->Reset();
+		GetCameraMoveComponent()->Reset(GetCameraMoveComponent()->GetEnable());
 	}
 
 	if (player->m_pSwordTrailReference)
@@ -813,11 +809,11 @@ void Atk3_Player::Exit(CPlayer* player)
 	if (player->m_pCamera)
 	{
 		player->m_pCamera->m_bCameraShaking = false;
-		GetShakeAnimationComponent()->Reset();
+		GetShakeAnimationComponent()->Reset(GetShakeAnimationComponent()->GetEnable());
 		player->m_pCamera->m_bCameraZooming = false;
-		GetCameraZoomerComponent()->Reset();
+		GetCameraZoomerComponent()->Reset(GetCameraZoomerComponent()->GetEnable());
 		player->m_pCamera->m_bCameraMoving = false;
-		GetCameraMoveComponent()->Reset();
+		GetCameraMoveComponent()->Reset(GetCameraMoveComponent()->GetEnable());
 	}
 
 	if (player->m_pSwordTrailReference)

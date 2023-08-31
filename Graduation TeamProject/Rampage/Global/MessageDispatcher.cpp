@@ -62,7 +62,7 @@ void SoundPlayComponent::HandleMessage(const Message& message, const SoundPlayPa
 }
 CameraShakeComponent::CameraShakeComponent()
 {
-	Reset();
+	Reset(false);
 }
 void CameraShakeComponent::Update(CCamera* pCamera, float fElapsedTime)
 {
@@ -87,8 +87,10 @@ void CameraShakeComponent::Update(CCamera* pCamera, float fElapsedTime)
 		pCamera->m_bCameraShaking = false;
 	}
 }
-void CameraShakeComponent::Reset()
+void CameraShakeComponent::Reset(bool bEnable)
 {
+	m_bEnable = bEnable;
+
 	m_ft = 0.0f;
 	m_fMagnitude = CAMERA_SHAKE_MAGNITUDE_DEFAULT;
 	m_fDuration = CAMERA_SHAKE_DURATION_DEFAULT;
@@ -103,7 +105,7 @@ void CameraShakeComponent::HandleMessage(const Message& message, const CameraUpd
 }
 CameraZoomerComponent::CameraZoomerComponent()
 {
-	Reset();
+	Reset(false);
 }
 void CameraZoomerComponent::Update(CCamera* pCamera, float fElapsedTime, const CameraUpdateParams& params)
 {
@@ -141,8 +143,10 @@ void CameraZoomerComponent::Update(CCamera* pCamera, float fElapsedTime, const C
 		pCamera->m_xmf3CalculatedPosition = Vector3::Add(pCamera->m_xmf3CalculatedPosition, offset);
 	}
 }
-void CameraZoomerComponent::Reset()
+void CameraZoomerComponent::Reset(bool bEnable)
 {
+	m_bEnable = bEnable;
+
 	m_fCurrDistance = 0.f;
 	offset.x = 0.0f;
 	offset.y = 0.0f;
@@ -161,7 +165,7 @@ void CameraZoomerComponent::HandleMessage(const Message& message, const CameraUp
 }
 CameraMoveComponent::CameraMoveComponent()
 {
-	Reset();
+	Reset(false);
 }
 void CameraMoveComponent::Update(CCamera* pCamera, float fElapsedTime, const CameraUpdateParams& params)
 {
@@ -196,7 +200,7 @@ void CameraMoveComponent::Update(CCamera* pCamera, float fElapsedTime, const Cam
 		pCamera->m_xmf3CalculatedPosition = Vector3::Add(pCamera->m_xmf3CalculatedPosition, offset);
 	}
 }
-void CameraMoveComponent::Reset()
+void CameraMoveComponent::Reset(bool bEnable)
 {
 	m_fMaxDistance = CAMERA_MOVE_DISTANCE_DEFAULT;
 	m_fMovingTime = CAMERA_MOVE_TIME_DEFAULT;
@@ -215,11 +219,11 @@ void CameraMoveComponent::HandleMessage(const Message& message, const CameraUpda
 }
 DamageAnimationComponent::DamageAnimationComponent()
 {
-	Reset();
+	Reset(false);
 }
-void DamageAnimationComponent::Reset()
+void DamageAnimationComponent::Reset(bool bEnable)
 {
-	m_bEnable = false;
+	m_bEnable = bEnable;
 	m_fMaxDistance = DAMAGE_ANIMATION_DISTANCE_DEFAULT;
 	m_fSpeed = DAMAGE_ANIMATION_SPEED_DEFAULT;
 }
@@ -228,11 +232,11 @@ void DamageAnimationComponent::HandleMessage(const Message& message, const Anima
 }
 ShakeAnimationComponent::ShakeAnimationComponent()
 {
-	Reset();
+	Reset(false);
 }
-void ShakeAnimationComponent::Reset()
+void ShakeAnimationComponent::Reset(bool bEnable)
 {
-	m_bEnable = false;
+	m_bEnable = bEnable;
 	m_fDuration = SHAKE_ANIMATION_DURATION_DEFAULT;
 	m_fDistance = SHAKE_ANIMATION_DISTANCE_DEFAULT;
 	m_fFrequency = SHAKE_ANIMATION_FREQUENCY_DEFAULT;
@@ -242,11 +246,11 @@ void ShakeAnimationComponent::HandleMessage(const Message& message, const Animat
 }
 StunAnimationComponent::StunAnimationComponent()
 {
-	Reset();
+	Reset(false);
 }
-void StunAnimationComponent::Reset()
+void StunAnimationComponent::Reset(bool bEnable)
 {
-	m_bEnable = false;
+	m_bEnable = bEnable;
 	m_fStunTime = STUN_ANIMATION_STUNTIME_DEFAULT;
 }
 void StunAnimationComponent::HandleMessage(const Message& message, const AnimationCompParams& params)
@@ -254,7 +258,7 @@ void StunAnimationComponent::HandleMessage(const Message& message, const Animati
 }
 ParticleComponent::ParticleComponent()
 {
-	Reset();
+	Reset(false);
 }
 
 void ParticleComponent::HandleMessage(const Message& message, const ParticleCompParams& params)
@@ -290,8 +294,10 @@ void ParticleComponent::HandleMessage(const Message& message, const ParticleComp
 		pParticle->EmitParticle(10);
 	}
 }
-void ParticleComponent::Reset()
+void ParticleComponent::Reset(bool bEnable)
 {
+	m_bEnable = bEnable;
+
 	m_nParticleNumber = MAX_PARTICLES;
 	m_iParticleType = ParticleType::SPHERE_PARTICLE;
 	m_fFieldSpeed = 1.0f;
@@ -317,7 +323,7 @@ void ParticleComponent::Reset()
 }
 ImpactEffectComponent::ImpactEffectComponent()
 {
-	Reset();
+	Reset(false);
 }
 void ImpactEffectComponent::SetTotalRowColumn(int iTotalRow, int iTotalColumn)
 {
@@ -351,8 +357,9 @@ void ImpactEffectComponent::HandleMessage(const Message& message, const ImpactCo
 	}
 	CLogger::GetInst()->Log(std::string("MultiSprite HandleMessge Called"));
 }
-void ImpactEffectComponent::Reset()
+void ImpactEffectComponent::Reset(bool bEnable)
 {
+	m_bEnable = bEnable;
 	m_nParticleNumber = MAX_PARTICLES;
 	m_nEmitParticleNumber = 1;
 	m_iParticleType = ParticleType::ATTACK_PARTICLE;
@@ -518,10 +525,11 @@ void PlayerLocationListener::HandleMessage(const Message& message, const PlayerP
 }
 HitLagComponent::HitLagComponent()
 {
-	Reset();
+	Reset(false);
 }
-void HitLagComponent::Reset()
+void HitLagComponent::Reset(bool bEnable)
 {
+	m_bEnable = bEnable;
 	m_fMinTimeScale = HIT_LAG_MAXTIME_DEFAULT;
 	m_fLagScale = HIT_LAG_SCALEWEIGHT_DEFAULT;
 	m_fDuration = HIT_LAG_DURATION_DEFAULT;
@@ -533,7 +541,7 @@ void HitLagComponent::HandleMessage(const Message& message, const PlayerParams& 
 }
 TrailComponent::TrailComponent()
 {
-	Reset();
+	Reset(false);
 }
 
 void TrailComponent::HandleMessage(const Message& message, const TrailUpdateParams& params)
@@ -556,8 +564,9 @@ void TrailComponent::HandleMessage(const Message& message, const TrailUpdatePara
 		pTrail->SetNoiseTextureIndex(m_nNoiseTextureIndex + m_nNoiseTextureOffset);
 	}
 }
-void TrailComponent::Reset()
+void TrailComponent::Reset(bool bEnable)
 {
+	m_bEnable = bEnable;
 	m_nMainTextureIndex = TRAIL_TEXTURE_INDEX_DEFAULT;
 	m_fEmissiveFactor = TRAIL_EMISSIVE_DEFAULT;
 	this->m_fR_CurvePoints[0] = 0.0f; this->m_fR_CurvePoints[1] = 0.14; this->m_fR_CurvePoints[2] = 0.459;  this->m_fR_CurvePoints[3] = 1.892;
@@ -608,10 +617,11 @@ void UpdateDynamicTimeScaleListener::HandleMessage(const Message& message, const
 
 SlashHitComponent::SlashHitComponent()
 {
-	Reset();
+	Reset(false);
 }
-void SlashHitComponent::Reset()
+void SlashHitComponent::Reset(bool bEnable)
 {
+	m_bEnable = bEnable;
 	m_iTextureOffset = 5;
 	m_bSimulateRotate = true;
 	m_bScaleFlag = false;

@@ -138,7 +138,7 @@ protected:
 public:
 	bool& GetEnable() { return m_bEnable; }
 	void SetEnable(bool bEnable) { m_bEnable = bEnable; }
-	virtual void Reset() { }
+	virtual void Reset(bool bEnable) { }
 
 	virtual void HandleMessage(const Message& message, const MonsterParams& params) {}
 	virtual void HandleMessage(const Message& message, const CollideParams& params) {}
@@ -349,7 +349,7 @@ public:
 	void SetFrequency(float frequency) { m_fFrequency = frequency; }
 
 	void Update(CCamera* pCamera, float fElapsedTime);
-	virtual void Reset();
+	virtual void Reset(bool bEnable);
 	virtual void HandleMessage(const Message& message, const CameraUpdateParams& params);
 };
 
@@ -376,7 +376,7 @@ public:
 	void SetRollBackTime(float rollback_time) { m_fRollBackTime = rollback_time; }
 
 	void Update(CCamera* pCamera, float fElapsedTime, const CameraUpdateParams& params);
-	virtual void Reset();
+	virtual void Reset(bool bEnable);
 	virtual void HandleMessage(const Message& message, const CameraUpdateParams& params);
 };
 
@@ -407,7 +407,7 @@ public:
 	void SetIsIn(bool is_in) { m_bIsIN = is_in; }
 
 	void Update(CCamera* pCamera, float fElapsedTime, const CameraUpdateParams& params);
-	virtual void Reset();
+	virtual void Reset(bool bEnable);
 	virtual void HandleMessage(const Message& message, const CameraUpdateParams& params);
 };
 
@@ -424,7 +424,7 @@ public:
 	void SetMaxDistance(float max_distance) { m_fMaxDistance = max_distance; }
 	void SetSpeed(float speed) { m_fSpeed = speed; }
 
-	virtual void Reset();
+	virtual void Reset(bool bEnable);
 	virtual void HandleMessage(const Message& message, const AnimationCompParams& params);
 };
 
@@ -444,7 +444,7 @@ public:
 	void SetDistance(float distance) { m_fDistance = distance; }
 	void SetFrequency(float frequency) { m_fFrequency = frequency; }
 
-	virtual void Reset();
+	virtual void Reset(bool bEnable);
 	virtual void HandleMessage(const Message& message, const AnimationCompParams& params);
 };
 
@@ -458,7 +458,7 @@ public:
 
 	void SetStunTime(float stun_time) { m_fStunTime = stun_time; }
 
-	virtual void Reset();
+	virtual void Reset(bool bEnable);
 	virtual void HandleMessage(const Message& message, const AnimationCompParams& params);
 };
 
@@ -478,7 +478,7 @@ public:
     void SetLagScale(float lagScale) { m_fLagScale = lagScale; }
 	void SetMinTimeScale(float fMinTimeScale) { m_fMinTimeScale = fMinTimeScale; }
 
-	virtual void Reset();
+	virtual void Reset(bool bEnable);
 	virtual void HandleMessage(const Message& message, const PlayerParams& params);
 };
 
@@ -522,7 +522,7 @@ public:
 	ParticleComponent();
 
 public:
-	virtual void Reset();
+	virtual void Reset(bool bEnable);
 	int& GetEmitParticleNumber() { return m_nEmitParticleNumber; }
 	XMFLOAT2& GetSize() { return m_fSize; }
 	float& GetXSize() { return m_fSize.x; }
@@ -575,7 +575,7 @@ class SlashHitComponent : public ParticleComponent
 {
 public:
 	SlashHitComponent();
-	virtual void Reset();
+	virtual void Reset(bool bEnable);
 	virtual void HandleMessage(const Message& message, const ParticleCompParams& params);
 };
 
@@ -621,7 +621,7 @@ public:
 	void SetNoiseTextureOffset(int iOffset) { m_nNoiseTextureOffset = iOffset; }
 	void SetMainTextureIndex(int index) { m_nMainTextureIndex = index; }
 	void SetNoiseTextureIndex(int index) { m_nNoiseTextureIndex = index; }
-	virtual void Reset();
+	virtual void Reset(bool bEnable);
 	virtual void HandleMessage(const Message& message, const TrailUpdateParams& params);
 };
 
@@ -745,7 +745,7 @@ private:
 	bool m_bSimulateRotate = false;
 
 public:
-	virtual void Reset();
+	virtual void Reset(bool bEnable);
 	int& GetTextureIndex() { return m_iTextureIndex; }
 	int GetTextureOffset() { return m_iTextureOffset; }
 	float& GetSpeed() { return m_fSpeed; }
