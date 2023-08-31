@@ -202,6 +202,7 @@ void CameraMoveComponent::Update(CCamera* pCamera, float fElapsedTime, const Cam
 }
 void CameraMoveComponent::Reset(bool bEnable)
 {
+	m_bEnable = bEnable;
 	m_fMaxDistance = CAMERA_MOVE_DISTANCE_DEFAULT;
 	m_fMovingTime = CAMERA_MOVE_TIME_DEFAULT;
 	m_fRollBackTime = CAMERA_MOVE_ROLLBACKTIME_DEFAULT;
@@ -546,7 +547,6 @@ TrailComponent::TrailComponent()
 
 void TrailComponent::HandleMessage(const Message& message, const TrailUpdateParams& params)
 {
-
 	if (message.getType() == MessageType::UPDATE_SWORDTRAIL) {
 		CSwordTrailObject* pTrail = dynamic_cast<CSwordTrailObject*>(params.pObject);
 
@@ -569,9 +569,9 @@ void TrailComponent::Reset(bool bEnable)
 	m_bEnable = bEnable;
 	m_nMainTextureIndex = TRAIL_TEXTURE_INDEX_DEFAULT;
 	m_fEmissiveFactor = TRAIL_EMISSIVE_DEFAULT;
-	this->m_fR_CurvePoints[0] = 0.0f; this->m_fR_CurvePoints[1] = 0.14; this->m_fR_CurvePoints[2] = 0.459;  this->m_fR_CurvePoints[3] = 1.892;
-	this->m_fG_CurvePoints[0] = 0.0f; this->m_fG_CurvePoints[1] = 0.005; this->m_fG_CurvePoints[2] = 0.067;  this->m_fG_CurvePoints[3] = 0.595;
-	this->m_fB_CurvePoints[0] = 0.0f; this->m_fB_CurvePoints[1] = 0.257; this->m_fB_CurvePoints[2] = 0.26;  this->m_fB_CurvePoints[3] = 0.0f;
+	this->m_fR_CurvePoints[0] = 0.0f; this->m_fR_CurvePoints[1] = 0.329105049f; this->m_fR_CurvePoints[2] = 0.345385194f;  this->m_fR_CurvePoints[3] = 1.89199996;
+	this->m_fG_CurvePoints[0] = 0.0f; this->m_fG_CurvePoints[1] = 0.459346294f; this->m_fG_CurvePoints[2] = 0.198863804f;  this->m_fG_CurvePoints[3] = 0.595000029f;
+	this->m_fB_CurvePoints[0] = 0.0f; this->m_fB_CurvePoints[1] = 0.256999999f; this->m_fB_CurvePoints[2] = 0.679128408f;  this->m_fB_CurvePoints[3] = 0.f;
 	this->m_fColorCurveTimes_R[0] = 0.0f; this->m_fColorCurveTimes_R[1] = 0.3; this->m_fColorCurveTimes_R[2] = 0.37;  this->m_fColorCurveTimes_R[3] = 1.0;
 	this->m_fColorCurveTimes_G[0] = 0.0f; this->m_fColorCurveTimes_G[1] = 0.3; this->m_fColorCurveTimes_G[2] = 0.37;  this->m_fColorCurveTimes_G[3] = 1.0;
 	this->m_fColorCurveTimes_B[0] = 0.0f; this->m_fColorCurveTimes_B[1] = 0.3; this->m_fColorCurveTimes_B[2] = 0.37;  this->m_fColorCurveTimes_B[3] = 1.0;
@@ -654,11 +654,6 @@ void SlashHitComponent::HandleMessage(const Message& message, const ParticleComp
 		pParticle->SetEmitParticleN(m_nEmitParticleNumber);
 		pParticle->SetPosition(params.xmf3Position);
 		pParticle->SetParticleType(m_iParticleType);
-		/*pParticle->SetFieldSpeed(m_fFieldSpeed);
-		pParticle->SetNoiseStrength(m_fNoiseStrength);
-		pParticle->SetFieldMainDirection(m_xmf3FieldMainDirection);
-		pParticle->SetProgressionRate(m_fProgressionRate);
-		pParticle->SetLengthScale(m_fLengthScale);*/
 		pParticle->SetTextureIndex(m_iTextureIndex + CSimulatorScene::GetInst()->GetTextureManager()->GetTextureOffset(TextureType::ParticleTexture));
 		pParticle->SetEmissive(m_fEmissive);
 		pParticle->SetRotateFactor(m_bSimulateRotate);

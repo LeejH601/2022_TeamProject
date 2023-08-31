@@ -1336,6 +1336,10 @@ void CImGuiManager::SetUI()
 		Atk1_Player::GetInst()->ResetComponents(flag);
 	};
 
+	static bool autoResetMonster = false;
+	static bool autoPlayerAttack = false;
+	static bool autoPlayerChainAttack = false;
+
 	if (show_survey_menu)
 	{
 		ImGuiWindowFlags my_window_flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize;
@@ -1383,23 +1387,23 @@ void CImGuiManager::SetUI()
 		}
 		if (ImGui::Button(U8STR("2-10"))) {
 			AllAttackReset(false);
-			Atk1_Player::GetInst()->GetCameraZoomerComponent()->Reset(true);
+			Atk1_Player::GetInst()->GetCameraZoomerComponent()->SetEnable(true);
 		}
 		ImGui::SameLine();  if (ImGui::Button(U8STR("2-11"))) {
 			AllAttackReset(false);
-			Atk1_Player::GetInst()->GetShockSoundComponent()->Reset(true);
+			Atk1_Player::GetInst()->GetShockSoundComponent()->SetEnable(true);
 		}
 		ImGui::SameLine();  if (ImGui::Button(U8STR("2-12"))) {
 			AllAttackReset(false);
-			Atk1_Player::GetInst()->GetShootSoundComponent()->Reset(true);
+			Atk1_Player::GetInst()->GetShootSoundComponent()->SetEnable(true);
 		}
 		ImGui::SameLine();  if (ImGui::Button(U8STR("2-13"))) {
 			AllAttackReset(false);
-			Atk1_Player::GetInst()->GetGoblinMoanComponent()->Reset(true);
+			Atk1_Player::GetInst()->GetGoblinMoanComponent()->SetEnable(true);
 
-			Atk1_Player::GetInst()->GetOrcMoanComponent()->Reset(true);
+			Atk1_Player::GetInst()->GetOrcMoanComponent()->SetEnable(true);
 
-			Atk1_Player::GetInst()->GetSkeletonMoanComponent()->Reset(true);
+			Atk1_Player::GetInst()->GetSkeletonMoanComponent()->SetEnable(true);
 		}
 
 		ImGui::Separator();
@@ -1450,19 +1454,19 @@ void CImGuiManager::SetUI()
 		}
 		ImGui::SameLine();  if (ImGui::Button(U8STR("3-11"))) {
 			AllAttackReset(true);
-			Atk1_Player::GetInst()->GetShockSoundComponent()->Reset(false);
+			Atk1_Player::GetInst()->GetShockSoundComponent()->SetEnable(false);
 		}
 		ImGui::SameLine();  if (ImGui::Button(U8STR("3-12"))) {
 			AllAttackReset(true);
-			Atk1_Player::GetInst()->GetShootSoundComponent()->Reset(false);
+			Atk1_Player::GetInst()->GetShootSoundComponent()->SetEnable(false);
 		}
 		ImGui::SameLine();  if (ImGui::Button(U8STR("3-13"))) {
 			AllAttackReset(true);
-			Atk1_Player::GetInst()->GetGoblinMoanComponent()->Reset(false);
+			Atk1_Player::GetInst()->GetGoblinMoanComponent()->SetEnable(false);
 
-			Atk1_Player::GetInst()->GetOrcMoanComponent()->Reset(false);
+			Atk1_Player::GetInst()->GetOrcMoanComponent()->SetEnable(false);
 
-			Atk1_Player::GetInst()->GetSkeletonMoanComponent()->Reset(false);
+			Atk1_Player::GetInst()->GetSkeletonMoanComponent()->SetEnable(false);
 		}
 
 		ImGui::Separator();
@@ -1473,15 +1477,17 @@ void CImGuiManager::SetUI()
 
 			Atk1_Player::GetInst()->GetDamageAnimationComponent()->Reset(true);
 
-			Atk1_Player::GetInst()->GetShockSoundComponent()->Reset(true);
+			Atk1_Player::GetInst()->GetShockSoundComponent()->SetEnable(true);
 
-			Atk1_Player::GetInst()->GetGoblinMoanComponent()->Reset(true);
-			Atk1_Player::GetInst()->GetOrcMoanComponent()->Reset(true);
-			Atk1_Player::GetInst()->GetSkeletonMoanComponent()->Reset(true);
+			Atk1_Player::GetInst()->GetGoblinMoanComponent()->SetEnable(true);
+
+			Atk1_Player::GetInst()->GetOrcMoanComponent()->SetEnable(true);
+
+			Atk1_Player::GetInst()->GetSkeletonMoanComponent()->SetEnable(true);
 
 			Atk1_Player::GetInst()->GetShakeAnimationComponent()->Reset(true);
 
-			Atk1_Player::GetInst()->GetShootSoundComponent()->Reset(true);
+			Atk1_Player::GetInst()->GetShootSoundComponent()->SetEnable(true);
 
 		}
 		ImGui::SameLine(); if (ImGui::Button(U8STR("4-2"))) {
@@ -1601,6 +1607,8 @@ void CImGuiManager::SetUI()
 				if (ImGui::MenuItem(U8STR("설문조사 메뉴"), NULL))
 				{
 					show_survey_menu = true;
+					autoResetMonster = true;
+					CSimulatorScene::GetInst()->SetAutoReset(autoResetMonster);
 				}
 				if (ImGui::MenuItem(U8STR("타격감 프리셋 메뉴"), NULL))
 				{
@@ -1634,10 +1642,6 @@ void CImGuiManager::SetUI()
 
 			ImGui::End();
 		}
-
-		static bool autoResetMonster = false;
-		static bool autoPlayerAttack = false;
-		static bool autoPlayerChainAttack = false;
 
 		// 시뮬레이터 씬 보여주기 여부 설정 ImGui
 		ImGui::Checkbox(U8STR("시뮬레이터"), &show_simulator_scene);
