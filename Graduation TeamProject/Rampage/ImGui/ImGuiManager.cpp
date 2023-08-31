@@ -1332,6 +1332,10 @@ void CImGuiManager::SetUI()
 		ImGui::End();
 	}
 
+	auto AllAttackReset = [](bool flag) {
+		Atk1_Player::GetInst()->ResetComponents(flag);
+	};
+
 	if (show_survey_menu)
 	{
 		ImGuiWindowFlags my_window_flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize;
@@ -1342,44 +1346,162 @@ void CImGuiManager::SetUI()
 			// 공격 1, 공격 2, 공격 3 충격 이펙트를 제외한 나머지 OFF 충격 이펙트 ON
 
 			// 타격감 리셋 1, 2, 3, 후 충격 이펙트만 ON;
+			AllAttackReset(false);
+			Atk1_Player::GetInst()->GetImpactComponent()->Reset(true);
 		}
-		ImGui::SameLine(); ImGui::Button(U8STR("2-2"));
-		ImGui::SameLine(); ImGui::Button(U8STR("2-3"));
-		ImGui::Button(U8STR("2-4"));
-		ImGui::SameLine(); ImGui::Button(U8STR("2-5"));
-		ImGui::SameLine(); ImGui::Button(U8STR("2-6"));
-		ImGui::Button(U8STR("2-7"));
-		ImGui::SameLine(); ImGui::Button(U8STR("2-8"));
-		ImGui::SameLine(); ImGui::Button(U8STR("2-9"));
-		ImGui::Button(U8STR("2-10"));
-		ImGui::SameLine(); ImGui::Button(U8STR("2-11"));
-		ImGui::SameLine(); ImGui::Button(U8STR("2-12"));
-		ImGui::SameLine(); ImGui::Button(U8STR("2-13"));
+		ImGui::SameLine();	if (ImGui::Button(U8STR("2-2"))) {
+			AllAttackReset(false);
+			Atk1_Player::GetInst()->GetParticleComponent()->Reset(true);
+		}
+		ImGui::SameLine();	if (ImGui::Button(U8STR("2-3"))) {
+			AllAttackReset(false);
+			Atk1_Player::GetInst()->GetTrailComponent()->Reset(true);
+		}
+		if (ImGui::Button(U8STR("2-4"))) {
+			AllAttackReset(false);
+			Atk1_Player::GetInst()->GetDamageAnimationComponent()->Reset(true);
+		}
+		ImGui::SameLine();  if (ImGui::Button(U8STR("2-5"))) {
+			AllAttackReset(false);
+			Atk1_Player::GetInst()->GetShakeAnimationComponent()->Reset(true);
+		}
+		ImGui::SameLine();  if (ImGui::Button(U8STR("2-6"))) {
+			AllAttackReset(false);
+			Atk1_Player::GetInst()->GetStunAnimationComponent()->Reset(true);
+		}
+		if (ImGui::Button(U8STR("2-7"))) {
+			AllAttackReset(false);
+			Atk1_Player::GetInst()->GetHitLagComponent()->Reset(true);
+		}
+		ImGui::SameLine();  if (ImGui::Button(U8STR("2-8"))) {
+			AllAttackReset(false);
+			Atk1_Player::GetInst()->GetCameraMoveComponent()->Reset(true);
+		}
+		ImGui::SameLine();  if (ImGui::Button(U8STR("2-9"))) {
+			AllAttackReset(false);
+			Atk1_Player::GetInst()->GetCameraShakeComponent()->Reset(true);
+		}
+		if (ImGui::Button(U8STR("2-10"))) {
+			AllAttackReset(false);
+			Atk1_Player::GetInst()->GetCameraZoomerComponent()->Reset(true);
+		}
+		ImGui::SameLine();  if (ImGui::Button(U8STR("2-11"))) {
+			AllAttackReset(false);
+			Atk1_Player::GetInst()->GetShockSoundComponent()->Reset(true);
+		}
+		ImGui::SameLine();  if (ImGui::Button(U8STR("2-12"))) {
+			AllAttackReset(false);
+			Atk1_Player::GetInst()->GetShootSoundComponent()->Reset(true);
+		}
+		ImGui::SameLine();  if (ImGui::Button(U8STR("2-13"))) {
+			AllAttackReset(false);
+			Atk1_Player::GetInst()->GetGoblinMoanComponent()->Reset(true);
+
+			Atk1_Player::GetInst()->GetOrcMoanComponent()->Reset(true);
+
+			Atk1_Player::GetInst()->GetSkeletonMoanComponent()->Reset(true);
+		}
 
 		ImGui::Separator();
 
-		ImGui::Button(U8STR("3-1"));
-		ImGui::SameLine(); ImGui::Button(U8STR("3-2"));
-		ImGui::SameLine(); ImGui::Button(U8STR("3-3"));
-		ImGui::Button(U8STR("3-4"));
-		ImGui::SameLine(); ImGui::Button(U8STR("3-5"));
-		ImGui::SameLine(); ImGui::Button(U8STR("3-6"));
-		ImGui::Button(U8STR("3-7"));
-		ImGui::SameLine(); ImGui::Button(U8STR("3-8"));
-		ImGui::SameLine(); ImGui::Button(U8STR("3-9"));
-		ImGui::Button(U8STR("3-10"));
-		ImGui::SameLine(); ImGui::Button(U8STR("3-11"));
-		ImGui::SameLine(); ImGui::Button(U8STR("3-12"));
-		ImGui::SameLine(); ImGui::Button(U8STR("3-13"));
+		if (ImGui::Button(U8STR("3-1")))
+		{
+			// 공격 1, 공격 2, 공격 3 충격 이펙트를 제외한 나머지 OFF 충격 이펙트 ON
+
+			// 타격감 리셋 1, 2, 3, 후 충격 이펙트만 ON;
+			AllAttackReset(true);
+			Atk1_Player::GetInst()->GetImpactComponent()->Reset(false);
+		}
+		ImGui::SameLine();	if (ImGui::Button(U8STR("3-2"))) {
+			AllAttackReset(true);
+			Atk1_Player::GetInst()->GetParticleComponent()->Reset(false);
+		}
+		ImGui::SameLine();	if (ImGui::Button(U8STR("3-3"))) {
+			AllAttackReset(true);
+			Atk1_Player::GetInst()->GetTrailComponent()->Reset(false);
+		}
+		if (ImGui::Button(U8STR("3-4"))) {
+			AllAttackReset(true);
+			Atk1_Player::GetInst()->GetDamageAnimationComponent()->Reset(false);
+		}
+		ImGui::SameLine();  if (ImGui::Button(U8STR("3-5"))) {
+			AllAttackReset(true);
+			Atk1_Player::GetInst()->GetShakeAnimationComponent()->Reset(false);
+		}
+		ImGui::SameLine();  if (ImGui::Button(U8STR("3-6"))) {
+			AllAttackReset(true);
+			Atk1_Player::GetInst()->GetStunAnimationComponent()->Reset(false);
+		}
+		if (ImGui::Button(U8STR("3-7"))) {
+			AllAttackReset(true);
+			Atk1_Player::GetInst()->GetHitLagComponent()->Reset(false);
+		}
+		ImGui::SameLine();  if (ImGui::Button(U8STR("3-8"))) {
+			AllAttackReset(true);
+			Atk1_Player::GetInst()->GetCameraMoveComponent()->Reset(false);
+		}
+		ImGui::SameLine();  if (ImGui::Button(U8STR("3-9"))) {
+			AllAttackReset(true);
+			Atk1_Player::GetInst()->GetCameraShakeComponent()->Reset(false);
+		}
+		if (ImGui::Button(U8STR("3-10"))) {
+			AllAttackReset(true);
+			Atk1_Player::GetInst()->GetCameraZoomerComponent()->Reset(false);
+		}
+		ImGui::SameLine();  if (ImGui::Button(U8STR("3-11"))) {
+			AllAttackReset(true);
+			Atk1_Player::GetInst()->GetShockSoundComponent()->Reset(false);
+		}
+		ImGui::SameLine();  if (ImGui::Button(U8STR("3-12"))) {
+			AllAttackReset(true);
+			Atk1_Player::GetInst()->GetShootSoundComponent()->Reset(false);
+		}
+		ImGui::SameLine();  if (ImGui::Button(U8STR("3-13"))) {
+			AllAttackReset(true);
+			Atk1_Player::GetInst()->GetGoblinMoanComponent()->Reset(false);
+
+			Atk1_Player::GetInst()->GetOrcMoanComponent()->Reset(false);
+
+			Atk1_Player::GetInst()->GetSkeletonMoanComponent()->Reset(false);
+		}
 
 		ImGui::Separator();
 
-		ImGui::Button(U8STR("4-1"));
-		ImGui::SameLine(); ImGui::Button(U8STR("4-2"));
+		if (ImGui::Button(U8STR("4-1"))) {
+			AllAttackReset(false);
+			Atk1_Player::GetInst()->GetCameraShakeComponent()->Reset(true);
+
+			Atk1_Player::GetInst()->GetDamageAnimationComponent()->Reset(true);
+
+			Atk1_Player::GetInst()->GetShockSoundComponent()->Reset(true);
+
+			Atk1_Player::GetInst()->GetGoblinMoanComponent()->Reset(true);
+			Atk1_Player::GetInst()->GetOrcMoanComponent()->Reset(true);
+			Atk1_Player::GetInst()->GetSkeletonMoanComponent()->Reset(true);
+
+			Atk1_Player::GetInst()->GetShakeAnimationComponent()->Reset(true);
+
+			Atk1_Player::GetInst()->GetShootSoundComponent()->Reset(true);
+
+		}
+		ImGui::SameLine(); if (ImGui::Button(U8STR("4-2"))) {
+			AllAttackReset(false);
+			Atk1_Player::GetInst()->GetCameraZoomerComponent()->Reset(true);
+
+			Atk1_Player::GetInst()->GetTrailComponent()->Reset(true);
+
+			Atk1_Player::GetInst()->GetImpactComponent()->Reset(true);
+
+			Atk1_Player::GetInst()->GetParticleComponent()->Reset(true);
+
+			Atk1_Player::GetInst()->GetCameraMoveComponent()->Reset(true);
+
+			Atk1_Player::GetInst()->GetStunAnimationComponent()->Reset(true);
+		}
 
 		ImGui::End();
 	}
-	
+
 	if (show_preset_menu)
 	{
 		ImGuiWindowFlags my_window_flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize;
@@ -1560,7 +1682,7 @@ void CImGuiManager::SetUI()
 
 		static int selectedMonsterNum = 0;
 		ImGui::Text(U8STR("몬스터 숫자:")); ImGui::SameLine();
-		
+
 		if (ImGui::RadioButton("1##monsterNum", &selectedMonsterNum, 0))
 		{
 			OutputDebugString(L"몬스터 숫자 선택: 1\n");
@@ -1595,7 +1717,7 @@ void CImGuiManager::SetUI()
 			if (show_simulator_scene)
 				CSimulatorScene::GetInst()->SetAutoPlayerChainAttack();
 		}
-		
+
 		if (CopyComponent)
 		{
 			CopyComponentData(pCurrentAnimation);
@@ -1722,7 +1844,7 @@ void CImGuiManager::ShowImpactManager(CState<CPlayer>* pCurrentAnimation)
 {
 	ImGuiWindowFlags my_window_flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize;
 	bool* b_open = nullptr;
-	
+
 	if (ImGui::Begin(U8STR("충격 이펙트 관리자"), b_open, my_window_flags) && (ImGui::IsWindowHovered()) && ImGui::IsMouseClicked(ImGuiMouseButton_Left)) //  
 	{
 		m_WindowType = SELECT_WINDOW_TYPE::TYPE_IMPACT;
@@ -1788,7 +1910,7 @@ void CImGuiManager::ShowParticleManager(CState<CPlayer>* pCurrentAnimation)
 	ImGuiWindowFlags my_window_flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize;
 	bool* b_open = nullptr;
 
-	if(ImGui::Begin(U8STR("파티클 이펙트 관리자"), b_open, my_window_flags) && ImGui::IsWindowHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Left))
+	if (ImGui::Begin(U8STR("파티클 이펙트 관리자"), b_open, my_window_flags) && ImGui::IsWindowHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Left))
 		m_WindowType = SELECT_WINDOW_TYPE::TYPE_PARTICLE;
 	ParticleComponent* pParticleComponent = dynamic_cast<ParticleComponent*>(pCurrentAnimation->GetParticleComponent());
 
@@ -1813,7 +1935,7 @@ void CImGuiManager::ShowParticleManager(CState<CPlayer>* pCurrentAnimation)
 		pParticleComponent->SetTotalRowColumn(pTexture->GetRow(textureIndex), pTexture->GetColumn(textureIndex));
 	}
 
-		int my_image_width = 0.2f * m_lDesktopHeight;
+	int my_image_width = 0.2f * m_lDesktopHeight;
 	int my_image_height = 0.2f * m_lDesktopHeight;
 
 
@@ -1907,7 +2029,7 @@ void CImGuiManager::ShowSlashHitManager(CState<CPlayer>* pCurrentAnimation)
 		pSlashHitComponent->SetTotalRowColumn(pTexture->GetRow(textureIndex), pTexture->GetColumn(textureIndex));
 	}
 
-		int my_image_width = 0.2f * m_lDesktopHeight;
+	int my_image_width = 0.2f * m_lDesktopHeight;
 	int my_image_height = 0.2f * m_lDesktopHeight;
 
 
@@ -2299,7 +2421,7 @@ void CImGuiManager::ShowDamageAnimationManager(CState<CPlayer>* pCurrentAnimatio
 	ImGuiWindowFlags my_window_flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize;
 	bool* b_open = nullptr;
 
-	if(ImGui::Begin(U8STR("대미지 애니메이션 관리자"), b_open, my_window_flags) && ImGui::IsWindowHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Left))
+	if (ImGui::Begin(U8STR("대미지 애니메이션 관리자"), b_open, my_window_flags) && ImGui::IsWindowHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Left))
 		m_WindowType = SELECT_WINDOW_TYPE::TYPE_DAMAGE_ANIMATION;
 	DamageAnimationComponent* pDamageAnimationComponent = dynamic_cast<DamageAnimationComponent*>(pCurrentAnimation->GetDamageAnimationComponent());
 
@@ -2321,7 +2443,7 @@ void CImGuiManager::ShowShakeAnimationManager(CState<CPlayer>* pCurrentAnimation
 	ImGuiWindowFlags my_window_flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize;
 	bool* b_open = nullptr;
 
-	if(ImGui::Begin(U8STR("흔들림 애니메이션 관리자"), b_open, my_window_flags) && ImGui::IsWindowHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Left))
+	if (ImGui::Begin(U8STR("흔들림 애니메이션 관리자"), b_open, my_window_flags) && ImGui::IsWindowHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Left))
 		m_WindowType = SELECT_WINDOW_TYPE::TYPE_SHAKE_ANIMATION;
 	ShakeAnimationComponent* pShakeAnimationComponent = dynamic_cast<ShakeAnimationComponent*>(pCurrentAnimation->GetShakeAnimationComponent());
 
@@ -2347,7 +2469,7 @@ void CImGuiManager::ShowStunAnimationManager(CState<CPlayer>* pCurrentAnimation)
 	ImGuiWindowFlags my_window_flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize;
 	bool* b_open = nullptr;
 
-	if(ImGui::Begin(U8STR("경직 애니메이션 관리자"), b_open, my_window_flags) && ImGui::IsWindowHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Left))
+	if (ImGui::Begin(U8STR("경직 애니메이션 관리자"), b_open, my_window_flags) && ImGui::IsWindowHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Left))
 		m_WindowType = SELECT_WINDOW_TYPE::TYPE_STUN_ANIMATION;
 	StunAnimationComponent* pStunAnimationComponent = dynamic_cast<StunAnimationComponent*>(pCurrentAnimation->GetStunAnimationComponent());
 
@@ -2364,7 +2486,7 @@ void CImGuiManager::ShowHitLagManager(CState<CPlayer>* pCurrentAnimation)
 {
 	ImGuiWindowFlags my_window_flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize;
 	bool* b_open = nullptr;
-	if(ImGui::Begin(U8STR("역경직 관리자"), b_open, my_window_flags) && ImGui::IsWindowHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Left))
+	if (ImGui::Begin(U8STR("역경직 관리자"), b_open, my_window_flags) && ImGui::IsWindowHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Left))
 		m_WindowType = SELECT_WINDOW_TYPE::TYPE_HIT_LAG_ANIMATION;
 	HitLagComponent* pHitLagComponent = dynamic_cast<HitLagComponent*>(pCurrentAnimation->GetHitLagComponent());
 
@@ -2389,7 +2511,7 @@ void CImGuiManager::ShowCameraMoveManager(CState<CPlayer>* pCurrentAnimation)
 	ImGuiWindowFlags my_window_flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize;
 	bool* b_open = nullptr;
 
-	if(ImGui::Begin(U8STR("카메라 이동 관리자"), b_open, my_window_flags) && ImGui::IsWindowHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Left))
+	if (ImGui::Begin(U8STR("카메라 이동 관리자"), b_open, my_window_flags) && ImGui::IsWindowHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Left))
 		m_WindowType = SELECT_WINDOW_TYPE::TYPE_CAMERA_MOVE;
 	CameraMoveComponent* pCameraMoveComponent = dynamic_cast<CameraMoveComponent*>(pCurrentAnimation->GetCameraMoveComponent());
 
@@ -2415,7 +2537,7 @@ void CImGuiManager::ShowCameraShakeManager(CState<CPlayer>* pCurrentAnimation)
 	ImGuiWindowFlags my_window_flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize;
 	bool* b_open = nullptr;
 
-	if(ImGui::Begin(U8STR("카메라 흔들림 관리자"), b_open, my_window_flags) && ImGui::IsWindowHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Left))
+	if (ImGui::Begin(U8STR("카메라 흔들림 관리자"), b_open, my_window_flags) && ImGui::IsWindowHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Left))
 		m_WindowType = SELECT_WINDOW_TYPE::TYPE_CAMERA_SHAKE;
 	CameraShakeComponent* pCameraShakerComponent = dynamic_cast<CameraShakeComponent*>(pCurrentAnimation->GetCameraShakeComponent());
 
@@ -2441,7 +2563,7 @@ void CImGuiManager::ShowCameraZoomManager(CState<CPlayer>* pCurrentAnimation)
 	ImGuiWindowFlags my_window_flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize;
 	bool* b_open = nullptr;
 
-	if(ImGui::Begin(U8STR("카메라 줌 관리자"), b_open, my_window_flags) && ImGui::IsWindowHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Left))
+	if (ImGui::Begin(U8STR("카메라 줌 관리자"), b_open, my_window_flags) && ImGui::IsWindowHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Left))
 		m_WindowType = SELECT_WINDOW_TYPE::TYPE_CAMERA_ZOOMIN;
 	CameraZoomerComponent* pCameraZoomerComponent = dynamic_cast<CameraZoomerComponent*>(pCurrentAnimation->GetCameraZoomerComponent());
 
@@ -2471,7 +2593,7 @@ void CImGuiManager::ShowShockSoundManager(CState<CPlayer>* pCurrentAnimation)
 	ImGuiWindowFlags my_window_flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize;
 	bool* b_open = nullptr;
 
-	if(ImGui::Begin(U8STR("충격 사운드 관리자"), b_open, my_window_flags) && ImGui::IsWindowHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Left))
+	if (ImGui::Begin(U8STR("충격 사운드 관리자"), b_open, my_window_flags) && ImGui::IsWindowHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Left))
 		m_WindowType = SELECT_WINDOW_TYPE::TYPE_SHOCK_SOUND;
 	std::vector<std::string> paths = CSoundManager::GetInst()->getSoundPathsByCategory(SOUND_CATEGORY::SOUND_SHOCK);
 
@@ -2503,7 +2625,7 @@ void CImGuiManager::ShowShootSoundManager(CState<CPlayer>* pCurrentAnimation)
 	ImGuiWindowFlags my_window_flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize;
 	bool* b_open = nullptr;
 
-	if(ImGui::Begin(U8STR("발사 사운드 관리자"), b_open, my_window_flags) && ImGui::IsWindowHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Left))
+	if (ImGui::Begin(U8STR("발사 사운드 관리자"), b_open, my_window_flags) && ImGui::IsWindowHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Left))
 		m_WindowType = SELECT_WINDOW_TYPE::TYPE_SHOOT_SOUND;
 	std::vector<std::string> paths = CSoundManager::GetInst()->getSoundPathsByCategory(SOUND_CATEGORY::SOUND_SHOOT);
 
@@ -2535,7 +2657,7 @@ void CImGuiManager::ShowDamageMoanSoundManager(CState<CPlayer>* pCurrentAnimatio
 	ImGuiWindowFlags my_window_flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize;
 	bool* b_open = nullptr;
 
-	if(ImGui::Begin(U8STR("대미지 신음 사운드 관리자"), b_open, my_window_flags) && ImGui::IsWindowHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Left))
+	if (ImGui::Begin(U8STR("대미지 신음 사운드 관리자"), b_open, my_window_flags) && ImGui::IsWindowHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Left))
 		m_WindowType = SELECT_WINDOW_TYPE::TYPE_DAMAGE_MOON_SOUND;
 	std::vector<std::string> paths = CSoundManager::GetInst()->getSoundPathsByCategory(SOUND_CATEGORY::SOUND_VOICE);
 
@@ -2749,7 +2871,7 @@ void CImGuiManager::ShowCreationMenu()
 
 			/*ImGui::Image((ImTextureID)m_pRTTexture->m_pd3dSrvGpuDescriptorHandles[0].ptr,
 				ImVec2((float)my_image_width, (float)my_image_height));*/
-			//ImGui::NextColumn();
+				//ImGui::NextColumn();
 			ImGui::Text(reinterpret_cast<const char*>(vCreationItems[index].id.c_str())); ImGui::NextColumn();
 			ImGui::Text(reinterpret_cast<const char*>(vCreationItems[index].name.c_str())); ImGui::NextColumn();
 			ImGui::Text(""); ImGui::NextColumn();
