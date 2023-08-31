@@ -31,7 +31,7 @@ public:
     virtual IMessageListener* GetImpactComponent();
     virtual IMessageListener* GetSlashHitComponent();
 
-    virtual void ResetComponents() { }
+    virtual void ResetComponents(bool bEnable) { }
 	virtual void Enter(entity_type*) = 0;
 	virtual void Execute(entity_type*, float) = 0;
     virtual void Animate(entity_type*, float) = 0;

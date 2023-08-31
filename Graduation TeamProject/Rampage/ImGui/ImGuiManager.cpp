@@ -1620,7 +1620,7 @@ void CImGuiManager::SetUI()
 				}
 				if (ImGui::MenuItem(U8STR("타격감 리셋"), NULL))
 				{
-					pCurrentAnimation->ResetComponents();
+					pCurrentAnimation->ResetComponents(false);
 				}
 				ImGui::EndMenu();
 			}

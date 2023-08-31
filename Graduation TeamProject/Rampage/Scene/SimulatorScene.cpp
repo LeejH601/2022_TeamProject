@@ -868,7 +868,7 @@ bool CSimulatorScene::SetAutoPlayerAttack(bool bAutoPlayerAttack)
 		m_pMainCharacter->m_bAutoAttack = bAutoPlayerAttack;
 	}
 
-	return true;
+	return bAutoPlayerAttack;
 }
 
 void CSimulatorScene::SetAutoPlayerChainAttack()
