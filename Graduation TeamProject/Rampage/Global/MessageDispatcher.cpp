@@ -1,6 +1,7 @@
 #include "MessageDispatcher.h"
 #include "Camera.h"
 #include "Timer.h"
+#include "InitialValue.h"
 #include "..\Scene\Scene.h"
 #include "..\Object\Object.h"
 #include "..\Object\Player.h"
@@ -59,6 +60,10 @@ void SoundPlayComponent::HandleMessage(const Message& message, const SoundPlayPa
 		CSoundManager::GetInst()->PlaySound(pSound->GetPath(), m_fVolume, m_fDelay);
 	}
 }
+CameraShakeComponent::CameraShakeComponent()
+{
+	Reset();
+}
 void CameraShakeComponent::Update(CCamera* pCamera, float fElapsedTime)
 {
 	if (pCamera->m_bCameraShaking && m_fDuration > m_ft) {
@@ -85,6 +90,9 @@ void CameraShakeComponent::Update(CCamera* pCamera, float fElapsedTime)
 void CameraShakeComponent::Reset()
 {
 	m_ft = 0.0f;
+	m_fMagnitude = CAMERA_SHAKE_MAGNITUDE_DEFAULT;
+	m_fDuration = CAMERA_SHAKE_DURATION_DEFAULT;
+	m_fFrequency = CAMERA_SHAKE_FREQUENCY_DEFAULT;
 }
 void CameraShakeComponent::HandleMessage(const Message& message, const CameraUpdateParams& params)
 {
@@ -92,6 +100,10 @@ void CameraShakeComponent::HandleMessage(const Message& message, const CameraUpd
 		return;
 
 	Update(params.pCamera, params.fElapsedTime);
+}
+CameraZoomerComponent::CameraZoomerComponent()
+{
+	Reset();
 }
 void CameraZoomerComponent::Update(CCamera* pCamera, float fElapsedTime, const CameraUpdateParams& params)
 {
@@ -135,12 +147,21 @@ void CameraZoomerComponent::Reset()
 	offset.x = 0.0f;
 	offset.y = 0.0f;
 	offset.z = 0.0f;
+
+	m_fMaxDistance = CAMERA_ZOOMOUT_DISTANCE_DEFAULT;
+	m_fMovingTime = CAMERA_ZOOMOUT_TIME_DEFAULT;
+	m_fRollBackTime = CAMERA_ZOOMOUT_ROLLBACKTIME_DEFAULT;
+	m_bIsIN = CAMERA_ZOOMOUT_ISIN_DEFAULT;
 }
 void CameraZoomerComponent::HandleMessage(const Message& message, const CameraUpdateParams& params)
 {
 	if (!m_bEnable)
 		return;
 	Update(params.pCamera, params.fElapsedTime, params);
+}
+CameraMoveComponent::CameraMoveComponent()
+{
+	Reset();
 }
 void CameraMoveComponent::Update(CCamera* pCamera, float fElapsedTime, const CameraUpdateParams& params)
 {
@@ -177,7 +198,10 @@ void CameraMoveComponent::Update(CCamera* pCamera, float fElapsedTime, const Cam
 }
 void CameraMoveComponent::Reset()
 {
-	m_fCurrDistance = 0.f;
+	m_fMaxDistance = CAMERA_MOVE_DISTANCE_DEFAULT;
+	m_fMovingTime = CAMERA_MOVE_TIME_DEFAULT;
+	m_fRollBackTime = CAMERA_MOVE_ROLLBACKTIME_DEFAULT;
+
 	offset.x = 0.0f;
 	offset.y = 0.0f;
 	offset.z = 0.0f;
@@ -189,27 +213,48 @@ void CameraMoveComponent::HandleMessage(const Message& message, const CameraUpda
 
 	Update(params.pCamera, params.fElapsedTime, params);
 }
+DamageAnimationComponent::DamageAnimationComponent()
+{
+	Reset();
+}
+void DamageAnimationComponent::Reset()
+{
+	m_bEnable = false;
+	m_fMaxDistance = DAMAGE_ANIMATION_DISTANCE_DEFAULT;
+	m_fSpeed = DAMAGE_ANIMATION_SPEED_DEFAULT;
+}
 void DamageAnimationComponent::HandleMessage(const Message& message, const AnimationCompParams& params)
 {
 }
+ShakeAnimationComponent::ShakeAnimationComponent()
+{
+	Reset();
+}
+void ShakeAnimationComponent::Reset()
+{
+	m_bEnable = false;
+	m_fDuration = SHAKE_ANIMATION_DURATION_DEFAULT;
+	m_fDistance = SHAKE_ANIMATION_DISTANCE_DEFAULT;
+	m_fFrequency = SHAKE_ANIMATION_FREQUENCY_DEFAULT;
+}
 void ShakeAnimationComponent::HandleMessage(const Message& message, const AnimationCompParams& params)
 {
+}
+StunAnimationComponent::StunAnimationComponent()
+{
+	Reset();
+}
+void StunAnimationComponent::Reset()
+{
+	m_bEnable = false;
+	m_fStunTime = STUN_ANIMATION_STUNTIME_DEFAULT;
 }
 void StunAnimationComponent::HandleMessage(const Message& message, const AnimationCompParams& params)
 {
 }
 ParticleComponent::ParticleComponent()
 {
-	if (CSimulatorScene::GetInst()->GetTextureManager())
-		m_iTextureOffset = CSimulatorScene::GetInst()->GetTextureManager()->GetTextureOffset(TextureType::ParticleTexture);
-	//m_iTextureOffset = CSimulatorScene::GetInst()->GetTextureManager()->GetTextureOffset(TextureType::ParticleTexture);
-	//std::shared_ptr<CTexture> pTexture = CSimulatorScene::GetInst()->GetTextureManager()->GetTexture(TextureType::ParticleTexture);
-
-	m_fFieldSpeed = 1.0f;
-	m_fNoiseStrength = 1.0f;;
-	m_xmf3FieldMainDirection = XMFLOAT3(0.0f, 1.0f, 0.0f);
-	m_fProgressionRate = 1.0f;
-	m_fLengthScale = 1.0f;
+	Reset();
 }
 
 void ParticleComponent::HandleMessage(const Message& message, const ParticleCompParams& params)
@@ -248,32 +293,31 @@ void ParticleComponent::HandleMessage(const Message& message, const ParticleComp
 void ParticleComponent::Reset()
 {
 	m_nParticleNumber = MAX_PARTICLES;
-	m_nEmitParticleNumber = 500;
 	m_iParticleType = ParticleType::SPHERE_PARTICLE;
-	m_fSize = XMFLOAT2(3.f, 3.f);
-	m_fAlpha = 1.f;
-
+	m_fFieldSpeed = 1.0f;
+	m_xmf3FieldMainDirection = XMFLOAT3(0.0f, 1.0f, 0.0f);
+	m_fProgressionRate = 1.0f;
+	m_fLengthScale = 1.0f;
+	m_bScaleFlag = false;
 	m_iTotalRow = 1;
 	m_iTotalColumn = 1;
 
-	m_fFieldSpeed;
-	m_fNoiseStrength;
-	m_xmf3FieldMainDirection;
-	m_fProgressionRate;
-	m_fLengthScale;
+	if (CSimulatorScene::GetInst()->GetTextureManager()) m_iTextureOffset = CSimulatorScene::GetInst()->GetTextureManager()->GetTextureOffset(TextureType::ParticleTexture);
 
-	m_fLifeTime = 2.f;
-	m_fSpeed = 20.f;
-	m_xmf3Color = XMFLOAT3(1.f, 1.f, 1.f);
-	m_iTextureIndex = 0;
-	m_iTextureOffset = 0;
-	m_fEmissive = 1.0f;
-	m_bSimulateRotate = false;
-	m_bScaleFlag = false;
+	m_iTextureIndex = PARTICLE_TEXTURE_INDEX_DEFAULT;
+	m_fSize = XMFLOAT2(PARTICLE_SIZEX_DEFAULT, PARTICLE_SIZEY_DEFAULT);
+	m_fAlpha = PARTICLE_ALPHA_DEFAULT;
+	m_fLifeTime = PARTICLE_LIFETIME_DEFAULT;
+	m_nEmitParticleNumber = PARTICLE_COUNT_DEFAULT;
+	m_fSpeed = PARTICLE_SPEED_DEFAULT;
+	m_xmf3Color = XMFLOAT3(PARTICLE_COLOR_R_DEFAULT, PARTICLE_COLOR_G_DEFAULT, PARTICLE_COLOR_B_DEFAULT);
+	m_fEmissive = PARTICLE_EMISSIVE_DEFAULT;
+	m_bSimulateRotate = PARTICLE_SIMULATEROTATE_DEFAULT;
+	m_fNoiseStrength = PARTICLE_NOISESTRENGTH_DEFAULT;
 }
 ImpactEffectComponent::ImpactEffectComponent()
 {
-	m_iTextureOffset = CSimulatorScene::GetInst()->GetTextureManager()->GetTextureOffset(TextureType::BillBoardTexture);
+	Reset();
 }
 void ImpactEffectComponent::SetTotalRowColumn(int iTotalRow, int iTotalColumn)
 {
@@ -312,17 +356,19 @@ void ImpactEffectComponent::Reset()
 	m_nParticleNumber = MAX_PARTICLES;
 	m_nEmitParticleNumber = 1;
 	m_iParticleType = ParticleType::ATTACK_PARTICLE;
-	m_nParticleIndex = 0;
-	m_fLifeTime = 3.f;
 	m_fSpeed = 1.f;
-	m_fAlpha = 1.f;
-	m_fSize = XMFLOAT2(3.f, 3.f);
-	m_xmf3Color = XMFLOAT3(1.f, 1.f, 1.f);
+	m_nParticleIndex = 0;
 	m_xmfPosOffset = XMFLOAT3(0.f, 2.f, 0.f);
-	m_iTextureIndex = 0;
-	m_iTextureOffset = 0;
-	m_iTotalRow, m_iTotalColumn;
-	m_fEmissive = 1.0f;
+
+	m_iTextureOffset = CSimulatorScene::GetInst()->GetTextureManager()->GetTextureOffset(TextureType::BillBoardTexture);
+
+	m_iTextureIndex = IMPACT_TEXTURE_INDEX_DEFAULT;
+	m_fLifeTime = IMPACT_LIFETIME_DEFAULT;
+	m_fAlpha = IMPACT_ALPHA_DEFAULT;
+	m_fSize = XMFLOAT2(IMPACT_SIZEX_DEFAULT, IMPACT_SIZEY_DEFAULT);
+	m_xmf3Color = XMFLOAT3(IMPACT_COLOR_R_DEFAULT, IMPACT_COLOR_G_DEFAULT, IMPACT_COLOR_B_DEFAULT);
+	m_fEmissive = IMPACT_EMISSIVE_DEFAULT;
+
 	m_bSimulateRotate = false;
 }
 void SceneCollideListener::HandleMessage(const Message& message, const CollideParams& params)
@@ -470,7 +516,16 @@ void PlayerLocationListener::HandleMessage(const Message& message, const PlayerP
 		pMonster->CheckIsPlayerInFrontOfThis(params.pPlayer);
 	}
 }
-
+HitLagComponent::HitLagComponent()
+{
+	Reset();
+}
+void HitLagComponent::Reset()
+{
+	m_fMinTimeScale = HIT_LAG_MAXTIME_DEFAULT;
+	m_fLagScale = HIT_LAG_SCALEWEIGHT_DEFAULT;
+	m_fDuration = HIT_LAG_DURATION_DEFAULT;
+}
 void HitLagComponent::HandleMessage(const Message& message, const PlayerParams& params)
 {
 	if (!m_bEnable)
@@ -478,18 +533,7 @@ void HitLagComponent::HandleMessage(const Message& message, const PlayerParams& 
 }
 TrailComponent::TrailComponent()
 {
-	this->m_fR_CurvePoints[0] = 0.0f; this->m_fR_CurvePoints[1] = 0.14; this->m_fR_CurvePoints[2] = 0.459;  this->m_fR_CurvePoints[3] = 1.892;
-	this->m_fG_CurvePoints[0] = 0.0f; this->m_fG_CurvePoints[1] = 0.005; this->m_fG_CurvePoints[2] = 0.067;  this->m_fG_CurvePoints[3] = 0.595;
-	this->m_fB_CurvePoints[0] = 0.0f; this->m_fB_CurvePoints[1] = 0.257; this->m_fB_CurvePoints[2] = 0.26;  this->m_fB_CurvePoints[3] = 0.0f;
-	this->m_fColorCurveTimes_R[0] = 0.0f; this->m_fColorCurveTimes_R[1] = 0.3; this->m_fColorCurveTimes_R[2] = 0.37;  this->m_fColorCurveTimes_R[3] = 1.0;
-	this->m_fColorCurveTimes_G[0] = 0.0f; this->m_fColorCurveTimes_G[1] = 0.3; this->m_fColorCurveTimes_G[2] = 0.37;  this->m_fColorCurveTimes_G[3] = 1.0;
-	this->m_fColorCurveTimes_B[0] = 0.0f; this->m_fColorCurveTimes_B[1] = 0.3; this->m_fColorCurveTimes_B[2] = 0.37;  this->m_fColorCurveTimes_B[3] = 1.0;
-	this->m_nCurves = 4;
-
-	this->SetMainTextureOffset(CSimulatorScene::GetInst()->GetTextureManager()->GetTextureOffset(TextureType::TrailBaseTexture));
-	this->SetNoiseTextureOffset(CSimulatorScene::GetInst()->GetTextureManager()->GetTextureOffset(TextureType::TrailNoiseTexture));
-	/*m_nMainTextureIndex = m_nMainTextureOffset;
-	m_nNoiseTextureIndex = m_nNoiseTextureOffset;*/
+	Reset();
 }
 
 void TrailComponent::HandleMessage(const Message& message, const TrailUpdateParams& params)
@@ -514,13 +558,16 @@ void TrailComponent::HandleMessage(const Message& message, const TrailUpdatePara
 }
 void TrailComponent::Reset()
 {
+	m_nMainTextureIndex = TRAIL_TEXTURE_INDEX_DEFAULT;
+	m_fEmissiveFactor = TRAIL_EMISSIVE_DEFAULT;
 	this->m_fR_CurvePoints[0] = 0.0f; this->m_fR_CurvePoints[1] = 0.14; this->m_fR_CurvePoints[2] = 0.459;  this->m_fR_CurvePoints[3] = 1.892;
 	this->m_fG_CurvePoints[0] = 0.0f; this->m_fG_CurvePoints[1] = 0.005; this->m_fG_CurvePoints[2] = 0.067;  this->m_fG_CurvePoints[3] = 0.595;
 	this->m_fB_CurvePoints[0] = 0.0f; this->m_fB_CurvePoints[1] = 0.257; this->m_fB_CurvePoints[2] = 0.26;  this->m_fB_CurvePoints[3] = 0.0f;
 	this->m_fColorCurveTimes_R[0] = 0.0f; this->m_fColorCurveTimes_R[1] = 0.3; this->m_fColorCurveTimes_R[2] = 0.37;  this->m_fColorCurveTimes_R[3] = 1.0;
 	this->m_fColorCurveTimes_G[0] = 0.0f; this->m_fColorCurveTimes_G[1] = 0.3; this->m_fColorCurveTimes_G[2] = 0.37;  this->m_fColorCurveTimes_G[3] = 1.0;
 	this->m_fColorCurveTimes_B[0] = 0.0f; this->m_fColorCurveTimes_B[1] = 0.3; this->m_fColorCurveTimes_B[2] = 0.37;  this->m_fColorCurveTimes_B[3] = 1.0;
-	this->m_nCurves = 4;
+	this->m_nCurves = TRAIL_CURVES_DEFAULT;
+	m_nNoiseTextureIndex = TRAIL_NOISETEXTURE_INDEX_DEFAULT;
 
 	this->SetMainTextureOffset(CSimulatorScene::GetInst()->GetTextureManager()->GetTextureOffset(TextureType::TrailBaseTexture));
 	this->SetNoiseTextureOffset(CSimulatorScene::GetInst()->GetTextureManager()->GetTextureOffset(TextureType::TrailNoiseTexture));
@@ -561,34 +608,21 @@ void UpdateDynamicTimeScaleListener::HandleMessage(const Message& message, const
 
 SlashHitComponent::SlashHitComponent()
 {
-	m_bSimulateRotate = true;
-	m_bScaleFlag = false;
-	m_fSize.x = 1.0f; m_fSize.y = 20.f;
-	m_nEmitParticleNumber = 1;
-	//m_bEnable = true;
-	m_iTextureOffset = 5;
-	m_iTextureIndex = 0;
-	m_fLifeTime = 0.5f;
-	m_fEmissive = 2.0f;
-	m_xmf3Color = XMFLOAT3(1.0f, 0.1f, 0.0f);
-
-	//m_fFieldSpeed = 0.0f;
-	//m_fNoiseStrength = 0.0f;;
-	//m_xmf3FieldMainDirection = XMFLOAT3(0.0f, 1.0f, 0.0f);
-	//m_fProgressionRate = 0.0f;
-	//m_fLengthScale = 0.0f;
+	Reset();
 }
 void SlashHitComponent::Reset()
 {
+	m_iTextureOffset = 5;
 	m_bSimulateRotate = true;
 	m_bScaleFlag = false;
-	m_fSize.x = 1.0f; m_fSize.y = 20.f;
 	m_nEmitParticleNumber = 1;
-	m_iTextureOffset = 5;
-	m_iTextureIndex = 0;
-	m_fLifeTime = 0.5f;
-	m_fEmissive = 2.0f;
-	m_xmf3Color = XMFLOAT3(1.0f, 0.1f, 0.0f);
+
+	m_iTextureIndex = SLASH_TEXTURE_INDEX_DEFAULT;
+	m_fSize.x = SLASH_SIZEX_DEFAULT; m_fSize.y = SLASH_SIZEY_DEFAULT;
+	m_fAlpha = SLASH_ALPHA_DEFAULT;
+	m_fLifeTime = SLASH_LIFETIME_DEFAULT;
+	m_xmf3Color = XMFLOAT3(SLASH_COLOR_R_DEFAULT, SLASH_COLOR_G_DEFAULT, SLASH_COLOR_B_DEFAULT);
+	m_fEmissive = SLASH_EMISSIVE_DEFAULT;
 }
 void SlashHitComponent::HandleMessage(const Message& message, const ParticleCompParams& params)
 {

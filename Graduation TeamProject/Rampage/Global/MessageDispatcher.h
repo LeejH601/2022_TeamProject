@@ -338,6 +338,8 @@ class CameraShakeComponent : public IMessageListener {
 	float m_fMagnitude = 0.5f;
 	float m_fFrequency = 0.015f;
 public:
+	CameraShakeComponent();
+
 	float& GetDuration() { return m_fDuration; }
 	float& GetMagnitude() { return m_fMagnitude; }
 	float& GetFrequency() { return m_fFrequency; }
@@ -363,6 +365,8 @@ class CameraMoveComponent : public IMessageListener {
 
 	XMFLOAT3 offset = XMFLOAT3(0.0f, 0.0f, 0.0f);;
 public:
+	CameraMoveComponent();
+
 	float& GetMaxDistance() { return m_fMaxDistance; }
 	float& GetMovingTime() { return m_fMovingTime; }
 	float& GetRollBackTime() { return m_fRollBackTime; }
@@ -390,6 +394,8 @@ class CameraZoomerComponent : public IMessageListener {
 
 	XMFLOAT3 offset = XMFLOAT3(0.0f, 0.0f, 0.0f);
 public:
+	CameraZoomerComponent();
+
 	float& GetMaxDistance() { return m_fMaxDistance; }
 	float& GetMovingTime() { return m_fMovingTime; }
 	float& GetRollBackTime() { return m_fRollBackTime; }
@@ -410,12 +416,15 @@ class DamageAnimationComponent : public IMessageListener {
 	float m_fMaxDistance = 5.0f;
 	float m_fSpeed = 100.0f;
 public:
+	DamageAnimationComponent();
+
 	float& GetMaxDistance() { return m_fMaxDistance; }
 	float& GetSpeed() { return m_fSpeed; }
 
 	void SetMaxDistance(float max_distance) { m_fMaxDistance = max_distance; }
 	void SetSpeed(float speed) { m_fSpeed = speed; }
 
+	virtual void Reset();
 	virtual void HandleMessage(const Message& message, const AnimationCompParams& params);
 };
 
@@ -425,6 +434,8 @@ class ShakeAnimationComponent : public IMessageListener {
 	float m_fDistance = 0.15f;
 	float m_fFrequency = 0.05f;
 public:
+	ShakeAnimationComponent();
+
 	float& GetDuration() { return m_fDuration; }
 	float& GetDistance() { return m_fDistance; }
 	float& GetFrequency() { return m_fFrequency; }
@@ -433,6 +444,7 @@ public:
 	void SetDistance(float distance) { m_fDistance = distance; }
 	void SetFrequency(float frequency) { m_fFrequency = frequency; }
 
+	virtual void Reset();
 	virtual void HandleMessage(const Message& message, const AnimationCompParams& params);
 };
 
@@ -440,10 +452,13 @@ public:
 class StunAnimationComponent : public IMessageListener {
 	float m_fStunTime = 0.5f;
 public:
+	StunAnimationComponent();
+
 	float& GetStunTime() { return m_fStunTime; }
 
 	void SetStunTime(float stun_time) { m_fStunTime = stun_time; }
 
+	virtual void Reset();
 	virtual void HandleMessage(const Message& message, const AnimationCompParams& params);
 };
 
@@ -453,6 +468,8 @@ class HitLagComponent : public IMessageListener {
     float m_fDuration = 0.5f;
 	float m_fMinTimeScale = 0.1f;
 public:
+	HitLagComponent();
+
     float& GetDuration() { return m_fDuration; }
     float& GetLagScale() { return m_fLagScale; }
 	float& GetMinTimeScale () { return m_fMinTimeScale; }
@@ -461,6 +478,7 @@ public:
     void SetLagScale(float lagScale) { m_fLagScale = lagScale; }
 	void SetMinTimeScale(float fMinTimeScale) { m_fMinTimeScale = fMinTimeScale; }
 
+	virtual void Reset();
 	virtual void HandleMessage(const Message& message, const PlayerParams& params);
 };
 
@@ -679,37 +697,7 @@ public:
 class TrailParticleComponent : public ParticleComponent {
 public:
 	TrailParticleComponent();
-	//int m_nParticleNumber = MAX_PARTICLES;
-	//int m_nEmitMinParticleNumber = 2;
-	//int m_nEmitMaxParticleNumber = 3;
-	//int m_iParticleType = ParticleType::SPHERE_PARTICLE;
-	//XMFLOAT2   m_fSize = XMFLOAT2(1.f, 1.f);
-	//float m_fAlpha = 1.f;
-	//float m_fLifeTime = 1.f;
-	//float m_fSpeed = 2.f;
-	//XMFLOAT3 m_xmf3Color = XMFLOAT3(10.f, 10.f, 10.f);
-	//int m_iPlayerAttack = 0;
-	//XMFLOAT3 m_xm3Position = XMFLOAT3(0.f, 0.f, 0.f);
-
 public:
-	/*int& GetParticleNumber() { return m_nParticleNumber; }
-	XMFLOAT2& GetSize() { return m_fSize; }
-	float& GetAlpha() { return m_fAlpha; }
-	float& GetLifeTime() { return m_fLifeTime; }
-	float& GetSpeed() { return m_fSpeed; }
-	XMFLOAT3& GetColor() { return m_xmf3Color; }
-
-	float& GetXSize() { return m_fSize.x; }
-	float& GetYSize() { return m_fSize.y; }
-
-	void SetParticleNumber(int nParticleNumber) { m_nParticleNumber = nParticleNumber; }
-	void SetParticleType(int iParticleType) { m_iParticleType = iParticleType; }
-	void SetSize(XMFLOAT2 fSize) { m_fSize = fSize; }
-	void SetAlpha(float fAlpha) { m_fAlpha = fAlpha; }
-	void SetLifeTime(float fLifeTime) { m_fLifeTime = fLifeTime; }
-	void SetSpeed(float fSpeed) { m_fSpeed = fSpeed; }
-	void SetColor(XMFLOAT3 xmf3Color) { m_xmf3Color = xmf3Color; }*/
-
 	virtual void HandleMessage(const Message& message, const ParticleTrailParams& params);
 };
 
