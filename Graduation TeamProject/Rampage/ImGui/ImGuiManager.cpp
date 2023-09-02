@@ -1608,6 +1608,7 @@ void CImGuiManager::SetUI()
 				{
 					show_survey_menu = true;
 					autoResetMonster = true;
+					CSimulatorScene::GetInst()->SelectMonsterType(MONSTER_TYPE::ORC);
 					CSimulatorScene::GetInst()->SetAutoReset(autoResetMonster);
 				}
 				if (ImGui::MenuItem(U8STR("타격감 프리셋 메뉴"), NULL))
