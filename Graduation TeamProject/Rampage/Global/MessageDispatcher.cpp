@@ -572,12 +572,12 @@ void TrailComponent::Reset(bool bEnable)
 	m_bEnable = bEnable;
 	m_nMainTextureIndex = TRAIL_TEXTURE_INDEX_DEFAULT;
 	m_fEmissiveFactor = TRAIL_EMISSIVE_DEFAULT;
-	this->m_fR_CurvePoints[0] = 0.0f; this->m_fR_CurvePoints[1] = 0.329105049f; this->m_fR_CurvePoints[2] = 0.345385194f;  this->m_fR_CurvePoints[3] = 1.89199996;
-	this->m_fG_CurvePoints[0] = 0.0f; this->m_fG_CurvePoints[1] = 0.459346294f; this->m_fG_CurvePoints[2] = 0.198863804f;  this->m_fG_CurvePoints[3] = 0.595000029f;
-	this->m_fB_CurvePoints[0] = 0.0f; this->m_fB_CurvePoints[1] = 0.256999999f; this->m_fB_CurvePoints[2] = 0.679128408f;  this->m_fB_CurvePoints[3] = 0.f;
-	this->m_fColorCurveTimes_R[0] = 0.0f; this->m_fColorCurveTimes_R[1] = 0.3; this->m_fColorCurveTimes_R[2] = 0.37;  this->m_fColorCurveTimes_R[3] = 1.0;
-	this->m_fColorCurveTimes_G[0] = 0.0f; this->m_fColorCurveTimes_G[1] = 0.3; this->m_fColorCurveTimes_G[2] = 0.37;  this->m_fColorCurveTimes_G[3] = 1.0;
-	this->m_fColorCurveTimes_B[0] = 0.0f; this->m_fColorCurveTimes_B[1] = 0.3; this->m_fColorCurveTimes_B[2] = 0.37;  this->m_fColorCurveTimes_B[3] = 1.0;
+	this->m_fR_CurvePoints[0] = 0.0f; this->m_fR_CurvePoints[1] = 0.340425342f; this->m_fR_CurvePoints[2] = 1.29270828f;  this->m_fR_CurvePoints[3] = 0.958143294f;
+	this->m_fG_CurvePoints[0] = 0.0f; this->m_fG_CurvePoints[1] = 0.643865764f; this->m_fG_CurvePoints[2] = 0.719725847f;  this->m_fG_CurvePoints[3] = 1.26158369f;
+	this->m_fB_CurvePoints[0] = 0.0f; this->m_fB_CurvePoints[1] = 0.481308401f; this->m_fB_CurvePoints[2] = 0.470471233f;  this->m_fB_CurvePoints[3] = 0.340425342f;
+	this->m_fColorCurveTimes_R[0] = 0.0f; this->m_fColorCurveTimes_R[1] = 0.4986765f; this->m_fColorCurveTimes_R[2] = 0.695168f;  this->m_fColorCurveTimes_R[3] = 1.0f;
+	this->m_fColorCurveTimes_G[0] = 0.0f; this->m_fColorCurveTimes_G[1] = 0.3f; this->m_fColorCurveTimes_G[2] = 0.37f;  this->m_fColorCurveTimes_G[3] = 1.0f;
+	this->m_fColorCurveTimes_B[0] = 0.0f; this->m_fColorCurveTimes_B[1] = 0.3f; this->m_fColorCurveTimes_B[2] = 0.37f;  this->m_fColorCurveTimes_B[3] = 1.0f;
 	this->m_nCurves = TRAIL_CURVES_DEFAULT;
 	m_nNoiseTextureIndex = TRAIL_NOISETEXTURE_INDEX_DEFAULT;
 

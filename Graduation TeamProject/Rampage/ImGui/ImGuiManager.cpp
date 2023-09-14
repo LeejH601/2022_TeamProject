@@ -1798,19 +1798,16 @@ void CImGuiManager::SetUI()
 			if (ImGui::TreeNode(U8STR("카메라 이동")))
 			{
 				ShowCameraMoveManager(pCurrentAnimation);
-				//m_WindowType = SELECT_WINDOW_TYPE::TYPE_CAMERA_MOVE;
 				ImGui::TreePop();
 			}
 			if (ImGui::TreeNode(U8STR("카메라 흔들림")))
 			{
 				ShowCameraShakeManager(pCurrentAnimation);
-				//m_WindowType = SELECT_WINDOW_TYPE::TYPE_SHAKE_ANIMATION;
 				ImGui::TreePop();
 			}
 			if (ImGui::TreeNode(U8STR("카메라 줌인")))
 			{
 				ShowCameraZoomManager(pCurrentAnimation);
-				//m_WindowType = SELECT_WINDOW_TYPE::TYPE_CAMERA_ZOOMIN;
 				ImGui::TreePop();
 			}
 		}
@@ -2544,22 +2541,29 @@ void CImGuiManager::ShowCameraShakeManager(CState<CPlayer>* pCurrentAnimation)
 
 	if (ImGui::Begin(U8STR("카메라 흔들림 관리자"), b_open, my_window_flags) && ImGui::IsWindowHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Left))
 		m_WindowType = SELECT_WINDOW_TYPE::TYPE_CAMERA_SHAKE;
-	CameraShakeComponent* pCameraShakerComponent = dynamic_cast<CameraShakeComponent*>(pCurrentAnimation->GetCameraShakeComponent());
+	CameraShakeComponent* pCameraShakerComponent = 
+		dynamic_cast<CameraShakeComponent*>(pCurrentAnimation->GetCameraShakeComponent());
 
 	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
 	ImGui::Checkbox(U8STR("켜기/끄기##Shake"), &pCameraShakerComponent->GetEnable());
 
 	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
-	if (ImGui::DragFloat(U8STR("흔들림 규모(미터)##Shake"), &pCameraShakerComponent->GetMagnitude(), DRAG_FLOAT_UNIT, CAMERA_SHAKE_MAGNITUDE_MIN, CAMERA_SHAKE_MAGNITUDE_MAX, "%.2f", 0))
-		pCameraShakerComponent->GetMagnitude() = std::clamp(pCameraShakerComponent->GetMagnitude(), CAMERA_SHAKE_MAGNITUDE_MIN, CAMERA_SHAKE_MAGNITUDE_MAX);
+	if (ImGui::DragFloat(U8STR("흔들림 규모(미터)##Shake"), &pCameraShakerComponent->GetMagnitude(), 
+		DRAG_FLOAT_UNIT, CAMERA_SHAKE_MAGNITUDE_MIN, CAMERA_SHAKE_MAGNITUDE_MAX, "%.2f", 0))
+		pCameraShakerComponent->GetMagnitude() = std::clamp(pCameraShakerComponent->GetMagnitude(), 
+			CAMERA_SHAKE_MAGNITUDE_MIN, CAMERA_SHAKE_MAGNITUDE_MAX);
 
 	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
-	if (ImGui::DragFloat(U8STR("지속 시간(초)##Shake"), &pCameraShakerComponent->GetDuration(), DRAG_FLOAT_UNIT, CAMERA_SHAKE_DURATION_MIN, CAMERA_SHAKE_DURATION_MAX, "%.2f", 0))
-		pCameraShakerComponent->GetDuration() = std::clamp(pCameraShakerComponent->GetDuration(), CAMERA_SHAKE_DURATION_MIN, CAMERA_SHAKE_DURATION_MAX);
+	if (ImGui::DragFloat(U8STR("지속 시간(초)##Shake"), &pCameraShakerComponent->GetDuration(), 
+		DRAG_FLOAT_UNIT, CAMERA_SHAKE_DURATION_MIN, CAMERA_SHAKE_DURATION_MAX, "%.2f", 0))
+		pCameraShakerComponent->GetDuration() = std::clamp(pCameraShakerComponent->GetDuration(), 
+			CAMERA_SHAKE_DURATION_MIN, CAMERA_SHAKE_DURATION_MAX);
 
 	ImGui::SetNextItemWidth(0.1f * m_lDesktopWidth);
-	if (ImGui::DragFloat(U8STR("빈도##Shake"), &pCameraShakerComponent->GetFrequency(), DRAG_FLOAT_UNIT, CAMERA_SHAKE_FREQUENCY_MIN, CAMERA_SHAKE_FREQUENCY_MAX, "%.3f", 0))
-		pCameraShakerComponent->GetFrequency() = std::clamp(pCameraShakerComponent->GetFrequency(), CAMERA_SHAKE_FREQUENCY_MIN, CAMERA_SHAKE_FREQUENCY_MAX);
+	if (ImGui::DragFloat(U8STR("빈도##Shake"), &pCameraShakerComponent->GetFrequency(), 
+		DRAG_FLOAT_UNIT, CAMERA_SHAKE_FREQUENCY_MIN, CAMERA_SHAKE_FREQUENCY_MAX, "%.3f", 0))
+		pCameraShakerComponent->GetFrequency() = std::clamp(pCameraShakerComponent->GetFrequency(), 
+			CAMERA_SHAKE_FREQUENCY_MIN, CAMERA_SHAKE_FREQUENCY_MAX);
 
 	ImGui::End();
 }
