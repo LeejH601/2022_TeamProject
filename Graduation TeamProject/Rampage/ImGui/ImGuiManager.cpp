@@ -1408,6 +1408,10 @@ void CImGuiManager::SetUI()
 
 		ImGui::Separator();
 
+		if (ImGui::Button(U8STR("3-0")))
+		{
+			AllAttackReset(true);
+		}
 		if (ImGui::Button(U8STR("3-1")))
 		{
 			// 공격 1, 공격 2, 공격 3 충격 이펙트를 제외한 나머지 OFF 충격 이펙트 ON
