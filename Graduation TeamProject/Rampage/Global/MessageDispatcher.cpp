@@ -301,7 +301,7 @@ void ParticleComponent::Reset(bool bEnable)
 
 	m_nParticleNumber = MAX_PARTICLES;
 	m_iParticleType = ParticleType::SPHERE_PARTICLE;
-	m_fFieldSpeed = 1.0f;
+	m_fFieldSpeed = 0.05;
 	m_xmf3FieldMainDirection = XMFLOAT3(0.0f, 1.0f, 0.0f);
 	m_fProgressionRate = 1.0f;
 	m_fLengthScale = 1.0f;
